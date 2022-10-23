@@ -7,6 +7,27 @@ var tap_jump := [true, true] # # can set so that up does not jump, index is the 
 var dt_fastfall := [false, false]
 
 const DEFAULT_PRESETS = {
+		"Alphanumeric" : {
+			"up" : KEY_W,
+			"down" : KEY_S,
+			"left" : KEY_A,
+			"right" : KEY_D,
+			"jump" : KEY_SPACE,
+			"light" : KEY_U,
+			"fierce" : KEY_I,
+			"dash" : KEY_O,
+			"unique" : KEY_K,
+			"block" : KEY_J,
+			"assist" : KEY_L,
+			"special" : KEY_SHIFT,
+			"EX" : KEY_CONTROL,
+			"pause" : KEY_ESCAPE,
+			"tapjump" : 1,
+			"dt_fastfall" : 0,
+			"buffer" : 5,
+			"deadzone" : 3,
+			"extra_buttons" : [],
+		},
 		"NavKeys" : {
 			"up" : KEY_W,
 			"down" : KEY_S,
@@ -321,7 +342,7 @@ func load_input_map():
 			return input_map
 
 	# default controls	
-	set_input_preset(input_map, 0, DEFAULT_PRESETS.NavKeys)
+	set_input_preset(input_map, 0, DEFAULT_PRESETS.Alphanumeric)
 	set_input_preset(input_map, 1, DEFAULT_PRESETS.Test_P2)
 		
 	return input_map
