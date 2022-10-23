@@ -1,0 +1,23 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/blast1.wav-cfb775b8506cf4c1714d97a2ed5d3572.sample"
+
+[deps]
+
+source_file="res://Assets/Audio/Common/blast1.wav"
+dest_files=[ "res://.import/blast1.wav-cfb775b8506cf4c1714d97a2ed5d3572.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/Physics/DetectBox.gd" type="Script" id=1]
+
+[node name="DetectBox" type="ColorRect"]
+modulate = Color( 1, 1, 1, 0.0980392 )
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 1 )

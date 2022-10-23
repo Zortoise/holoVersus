@@ -1,0 +1,2675 @@
+[gd_scene load_steps=123 format=2]
+
+[ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://Scenes/GameViewport.gd" type="Script" id=4]
+[ext_resource path="res://Assets/UI/portrait_frame.png" type="Texture" id=5]
+[ext_resource path="res://Scenes/FrameViewer.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Assets/UI/gauges_under.png" type="Texture" id=7]
+[ext_resource path="res://Assets/UI/guard_gauge2.png" type="Texture" id=8]
+[ext_resource path="res://Assets/UI/EX_gauge.png" type="Texture" id=9]
+[ext_resource path="res://Assets/UI/guard_gauge1.png" type="Texture" id=10]
+[ext_resource path="res://Characters/Gura/UI/portrait.png" type="Texture" id=11]
+[ext_resource path="res://Assets/UI/gauges_frame.png" type="Texture" id=12]
+[ext_resource path="res://Assets/Fonts/BLKCHCRY.TTF" type="DynamicFontData" id=13]
+[ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=14]
+[ext_resource path="res://Scenes/Menus/MenuTheme.tres" type="Theme" id=15]
+[ext_resource path="res://Assets/UI/cursor.png" type="Texture" id=16]
+[ext_resource path="res://Scenes/Menus/ButtonTypeB.tscn" type="PackedScene" id=17]
+[ext_resource path="res://Scenes/Menus/PauseMenu.gd" type="Script" id=18]
+[ext_resource path="res://Scenes/Menus/AltInputs.tscn" type="PackedScene" id=19]
+[ext_resource path="res://Assets/UI/timeframe.png" type="Texture" id=20]
+[ext_resource path="res://Assets/UI/kronii_hands.png" type="Texture" id=21]
+[ext_resource path="res://Assets/Fonts/roboto.black.ttf" type="DynamicFontData" id=22]
+[ext_resource path="res://Assets/UI/inputs/input_right.png" type="Texture" id=23]
+[ext_resource path="res://Assets/UI/inputs/input_fierce.png" type="Texture" id=24]
+[ext_resource path="res://Assets/UI/inputs/input_frame.png" type="Texture" id=25]
+[ext_resource path="res://Assets/UI/inputs/input_up.png" type="Texture" id=26]
+[ext_resource path="res://Assets/UI/inputs/input_light.png" type="Texture" id=27]
+[ext_resource path="res://Assets/UI/inputs/input_dash.png" type="Texture" id=28]
+[ext_resource path="res://Assets/UI/inputs/input_jump.png" type="Texture" id=29]
+[ext_resource path="res://Assets/UI/inputs/input_unique.png" type="Texture" id=30]
+[ext_resource path="res://Assets/UI/inputs/input_block.png" type="Texture" id=31]
+[ext_resource path="res://Assets/UI/inputs/input_assist.png" type="Texture" id=32]
+[ext_resource path="res://Assets/UI/inputs/input_special.png" type="Texture" id=33]
+[ext_resource path="res://Assets/UI/inputs/input_down.png" type="Texture" id=34]
+[ext_resource path="res://Assets/UI/inputs/input_left.png" type="Texture" id=35]
+[ext_resource path="res://Assets/UI/inputs/input_extra.png" type="Texture" id=36]
+[ext_resource path="res://Scenes/Shaders/Monochrome.gdshader" type="Shader" id=37]
+
+[sub_resource type="Animation" id=5]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=14]
+resource_name = "start_transit_in"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0, 0, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=36]
+resource_name = "transit_to_char_select"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "set_fade_sound"
+}, {
+"args": [ "res://Scenes/Menus/CharacterSelect.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="Animation" id=8]
+resource_name = "transit_to_main"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "set_fade_sound"
+}, {
+"args": [ "res://Scenes/Menus/MainMenu.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="Animation" id=67]
+resource_name = "transit_to_netplay"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "set_fade_sound"
+}, {
+"args": [ "res://Scenes/Menus/NetplayMenu.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="Animation" id=101]
+resource_name = "transit_to_replays"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "set_fade_sound"
+}, {
+"args": [ "res://Scenes/Menus/ReplaysMenu.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="Animation" id=37]
+resource_name = "transit_to_victory"
+length = 0.15
+step = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "set_fade_sound"
+}, {
+"args": [ "res://Scenes/Menus/VictoryScreen.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="ShaderMaterial" id=106]
+shader = ExtResource( 37 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 60
+outline_size = 7
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 3 )
+
+[sub_resource type="Animation" id=56]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 87, -7 ) ]
+}
+
+[sub_resource type="Animation" id=57]
+resource_name = "damage"
+length = 0.15
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.05, 0.1, 0.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Vector2( 87, 6 ), Vector2( 87, -10 ), Vector2( 87, 6 ), Vector2( 87, -2 ) ]
+}
+
+[sub_resource type="Animation" id=70]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=87]
+resource_name = "flashing"
+length = 0.15
+loop = true
+step = 0.075
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.001, 0.075, 0.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Color( 0.8, 0, 0, 1 ), Color( 0.8, 0, 0, 1 ), Color( 1.2, 0.5, 0, 1 ), Color( 0.8, 0, 0, 1 ) ]
+}
+
+[sub_resource type="DynamicFont" id=3]
+size = 36
+outline_size = 5
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=50]
+size = 40
+outline_size = 4
+outline_color = Color( 0.890196, 0.219608, 0.219608, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="Animation" id=51]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 115, 0 ) ]
+}
+
+[sub_resource type="Animation" id=52]
+resource_name = "stock_loss"
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.05, 0.1, 0.15, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Vector2( 115, 0 ), Vector2( 123, 0 ), Vector2( 115, 0 ), Vector2( 123, 0 ), Vector2( 115, 0 ) ]
+}
+
+[sub_resource type="DynamicFont" id=7]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxEmpty" id=96]
+
+[sub_resource type="DynamicFont" id=93]
+size = 25
+outline_size = 3
+outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+use_filter = true
+font_data = ExtResource( 22 )
+
+[sub_resource type="Theme" id=94]
+default_font = SubResource( 93 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 7 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 96 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=98]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxEmpty" id=48]
+
+[sub_resource type="DynamicFont" id=102]
+size = 60
+outline_size = 2
+use_filter = true
+extra_spacing_bottom = 7
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=103]
+default_font = SubResource( 102 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 98 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 48 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=104]
+resource_name = "flash"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 2, 2, 2, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=72]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=73]
+resource_name = "rainbow"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.7, 0.7, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 0.7, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 0.7, 1 ) ]
+}
+
+[sub_resource type="DynamicFont" id=4]
+size = 60
+use_filter = true
+font_data = ExtResource( 3 )
+
+[sub_resource type="Animation" id=86]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.5, 0.5, 0.5, 1 ) ]
+}
+
+[sub_resource type="Animation" id=74]
+resource_name = "flash1"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0.6, 1, 1 ), Color( 0.7, 0.9, 1, 1 ), Color( 0, 0.6, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=75]
+resource_name = "flash2"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0.6, 1, 1 ), Color( 0.7, 0.9, 1, 1 ), Color( 0, 0.6, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=77]
+resource_name = "rainbow"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.7, 0.7, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 0.7, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 0.7, 1 ) ]
+}
+
+[sub_resource type="ShaderMaterial" id=107]
+shader = ExtResource( 37 )
+
+[sub_resource type="Animation" id=58]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 87, -7 ) ]
+}
+
+[sub_resource type="Animation" id=59]
+resource_name = "damage"
+length = 0.15
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.05, 0.1, 0.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Vector2( 87, 6 ), Vector2( 87, -10 ), Vector2( 87, 6 ), Vector2( 87, -2 ) ]
+}
+
+[sub_resource type="Animation" id=88]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=89]
+resource_name = "flashing"
+length = 0.15
+loop = true
+step = 0.075
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.001, 0.075, 0.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Color( 0.8, 0, 0, 1 ), Color( 0.8, 0, 0, 1 ), Color( 1.2, 0.5, 0, 1 ), Color( 0.8, 0, 0, 1 ) ]
+}
+
+[sub_resource type="DynamicFont" id=53]
+size = 38
+outline_size = 4
+outline_color = Color( 0.219608, 0.513726, 0.890196, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="Animation" id=54]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 115, 0 ) ]
+}
+
+[sub_resource type="Animation" id=55]
+resource_name = "stock_loss"
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.05, 0.1, 0.15, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Vector2( 115, 0 ), Vector2( 123, 0 ), Vector2( 115, 0 ), Vector2( 123, 0 ), Vector2( 115, 0 ) ]
+}
+
+[sub_resource type="Animation" id=105]
+resource_name = "flash"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 2, 2, 2, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=80]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=81]
+resource_name = "rainbow"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.7, 0.7, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 0.7, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 0.7, 1 ) ]
+}
+
+[sub_resource type="Animation" id=97]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.5, 0.5, 0.5, 1 ) ]
+}
+
+[sub_resource type="Animation" id=82]
+resource_name = "flash1"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0.6, 1, 1 ), Color( 0.7, 0.9, 1, 1 ), Color( 0, 0.6, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=83]
+resource_name = "flash2"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0.6, 1, 1 ), Color( 0.7, 0.9, 1, 1 ), Color( 0, 0.6, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=85]
+resource_name = "rainbow"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.7, 0.7, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 0.7, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 0.7, 1 ) ]
+}
+
+[sub_resource type="DynamicFont" id=17]
+size = 200
+outline_size = 10
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxEmpty" id=47]
+
+[sub_resource type="Theme" id=65]
+default_font = SubResource( 17 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 17 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 47 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=19]
+size = 200
+outline_size = 10
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+font_data = ExtResource( 3 )
+
+[sub_resource type="Theme" id=20]
+default_font = SubResource( 19 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 19 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 47 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=15]
+size = 300
+outline_size = 10
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=16]
+default_font = SubResource( 15 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 15 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 47 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=23]
+size = 250
+outline_size = 10
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=24]
+default_font = SubResource( 23 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 23 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 47 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=25]
+size = 250
+outline_size = 10
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=26]
+default_font = SubResource( 25 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 25 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 47 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=62]
+size = 270
+outline_size = 10
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+font_data = ExtResource( 13 )
+
+[sub_resource type="Theme" id=63]
+default_font = SubResource( 62 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 62 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 47 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=21]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath("Get:rect_position:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath("Ready:rect_position:x")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Get:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Ready:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Begin:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Begin:rect_position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -64, 364 ) ]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Game:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Set:modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/8/type = "bezier"
+tracks/8/path = NodePath("Game:rect_position:x")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"points": PoolRealArray( -192, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/9/type = "bezier"
+tracks/9/path = NodePath("Game:rect_position:y")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/keys = {
+"points": PoolRealArray( 241, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/10/type = "bezier"
+tracks/10/path = NodePath("Set:rect_position:x")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/keys = {
+"points": PoolRealArray( 192, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/11/type = "bezier"
+tracks/11/path = NodePath("Set:rect_position:y")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/keys = {
+"points": PoolRealArray( 496, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/12/type = "value"
+tracks/12/path = NodePath("Get:custom_colors/font_outline_modulate")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 1 ) ]
+}
+tracks/13/type = "value"
+tracks/13/path = NodePath("Ready:custom_colors/font_outline_modulate")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 1 ) ]
+}
+tracks/14/type = "value"
+tracks/14/path = NodePath("Begin:custom_colors/font_outline_modulate")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 1 ) ]
+}
+tracks/15/type = "value"
+tracks/15/path = NodePath("Game:custom_colors/font_outline_modulate")
+tracks/15/interp = 1
+tracks/15/loop_wrap = true
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 1 ) ]
+}
+tracks/16/type = "value"
+tracks/16/path = NodePath("Set:custom_colors/font_outline_modulate")
+tracks/16/interp = 1
+tracks/16/loop_wrap = true
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 1 ) ]
+}
+tracks/17/type = "value"
+tracks/17/path = NodePath("TimeOver:modulate")
+tracks/17/interp = 1
+tracks/17/loop_wrap = true
+tracks/17/imported = false
+tracks/17/enabled = true
+tracks/17/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/18/type = "value"
+tracks/18/path = NodePath("TimeOver:custom_colors/font_outline_modulate")
+tracks/18/interp = 1
+tracks/18/loop_wrap = true
+tracks/18/imported = false
+tracks/18/enabled = true
+tracks/18/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 1 ) ]
+}
+tracks/19/type = "value"
+tracks/19/path = NodePath("TimeOver:rect_position")
+tracks/19/interp = 1
+tracks/19/loop_wrap = true
+tracks/19/imported = false
+tracks/19/enabled = true
+tracks/19/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 0, 344 ) ]
+}
+tracks/20/type = "value"
+tracks/20/path = NodePath("TimeOver/KroniiHands:modulate")
+tracks/20/interp = 1
+tracks/20/loop_wrap = true
+tracks/20/imported = false
+tracks/20/enabled = true
+tracks/20/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0, 0, 0, 1 ) ]
+}
+
+[sub_resource type="Animation" id=27]
+resource_name = "game_set"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/path = NodePath("Game:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 1, 1.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Set:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 1, 1.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath("Game:rect_position:x")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( -256, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.3 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath("Set:rect_position:x")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 256, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.3 )
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Game:custom_colors/font_outline_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.1, 1, 1.1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0.941176, 0.941176, 0.941176, 0 ) ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Set:custom_colors/font_outline_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0, 0.1, 1, 1.1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.941176, 0.941176, 0.941176, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0.941176, 0.941176, 0.941176, 0 ) ]
+}
+tracks/6/type = "animation"
+tracks/6/path = NodePath("../../Transition")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"clips": PoolStringArray( "transit_to_victory" ),
+"times": PoolRealArray( 2 )
+}
+
+[sub_resource type="Animation" id=22]
+resource_name = "start_battle"
+length = 1.5
+tracks/0/type = "bezier"
+tracks/0/path = NodePath("Get:rect_position:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.1, -195.701, -256, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.5 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath("Ready:rect_position:x")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.1, 145.043, 192, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.5 )
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Get:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Ready:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Begin:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Begin:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 1.3, 1.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Begin:rect_position")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"times": PoolRealArray( 0.8, 0.85, 0.9, 0.95, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -64, 364 ), Vector2( 64, 364 ), Vector2( -64, 364 ), Vector2( 64, 364 ), Vector2( 0, 364 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Get:custom_colors/font_outline_modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0.941176, 0.941176, 0.941176, 0 ) ]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("Ready:custom_colors/font_outline_modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0.941176, 0.941176, 0.941176, 0 ) ]
+}
+tracks/9/type = "value"
+tracks/9/path = NodePath("Begin:custom_colors/font_outline_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/keys = {
+"times": PoolRealArray( 0, 1.3, 1.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0.941176, 0.941176, 0.941176, 0 ) ]
+}
+
+[sub_resource type="Animation" id=64]
+resource_name = "time_over"
+length = 2.0
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath("TimeOver:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 1, 1.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("TimeOver:custom_colors/font_outline_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 1, 1.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0, 0, 0 ), Color( 0.941176, 0.941176, 0.941176, 1 ), Color( 0.941176, 0.941176, 0.941176, 1 ), Color( 0.941176, 0.941176, 0.941176, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("TimeOver:rect_position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 0.189465, 1 ),
+"update": 0,
+"values": [ Vector2( 0, 624 ), Vector2( 0, 344 ) ]
+}
+tracks/3/type = "animation"
+tracks/3/path = NodePath("../../Transition")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"clips": PoolStringArray( "transit_to_victory" ),
+"times": PoolRealArray( 1.9 )
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("TimeOver/KroniiHands:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.05, 0.2, 1, 1.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0, 0, 0 ), Color( 0, 0, 0, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 0 ) ]
+}
+
+[sub_resource type="DynamicFont" id=49]
+size = 45
+outline_size = 5
+outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+use_filter = true
+extra_spacing_top = 7
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxEmpty" id=95]
+
+[sub_resource type="Theme" id=29]
+default_font = SubResource( 49 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 49 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 95 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=30]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=31]
+resource_name = "hold"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4, 0.6, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 3.13834 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0.501961 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0.5 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath("../../PauseMenu")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 1 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "open"
+} ]
+}
+
+[sub_resource type="DynamicFont" id=60]
+size = 80
+outline_size = 4
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+extra_spacing_top = 7
+font_data = ExtResource( 13 )
+
+[sub_resource type="StyleBoxEmpty" id=6]
+
+[sub_resource type="Theme" id=61]
+default_font = SubResource( 60 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 60 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 6 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=92]
+resource_name = "RESET"
+length = 0.001
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=91]
+resource_name = "flashing"
+length = 0.2
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0.8, -0.25, 0, 0.25, 0, 1.2, -0.25, 0, 0.25, 0, 0.8, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 0.5, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+
+[sub_resource type="Animation" id=32]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 10, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=33]
+resource_name = "default"
+length = 0.8
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 15, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.4, 0.8 )
+}
+
+[sub_resource type="Animation" id=34]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=35]
+resource_name = "default"
+length = 1.6
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0.75, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 0.75, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 0.75, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 0.75, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+
+[sub_resource type="DynamicFont" id=1]
+size = 15
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=66]
+size = 30
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=99]
+size = 22
+use_filter = true
+extra_spacing_top = 8
+font_data = ExtResource( 3 )
+
+[sub_resource type="Theme" id=100]
+default_font = SubResource( 99 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 98 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 48 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=68]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=69]
+resource_name = "flashing"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0.5 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[node name="GameViewport" type="Node2D"]
+script = ExtResource( 4 )
+
+[node name="Transition" type="AnimationPlayer" parent="."]
+autoplay = "start_transit_in"
+playback_process_mode = 0
+anims/RESET = SubResource( 5 )
+anims/start_transit_in = SubResource( 14 )
+anims/transit_to_char_select = SubResource( 36 )
+anims/transit_to_main = SubResource( 8 )
+anims/transit_to_netplay = SubResource( 67 )
+anims/transit_to_replays = SubResource( 101 )
+anims/transit_to_victory = SubResource( 37 )
+
+[node name="ViewportContainer" type="ViewportContainer" parent="."]
+margin_right = 640.0
+margin_bottom = 360.0
+rect_scale = Vector2( 3, 3 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Viewport" type="Viewport" parent="ViewportContainer"]
+size = Vector2( 640, 360 )
+handle_input_locally = false
+hdr = false
+disable_3d = true
+usage = 0
+render_target_update_mode = 3
+
+[node name="Game" parent="ViewportContainer/Viewport" instance=ExtResource( 1 )]
+
+[node name="HUD" type="Control" parent="."]
+
+[node name="P1_HUDRect" type="ReferenceRect" parent="HUD"]
+margin_left = 240.0
+margin_right = 720.0
+margin_bottom = 1080.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Portrait" type="Sprite" parent="HUD/P1_HUDRect"]
+material = SubResource( 106 )
+position = Vector2( 153, 106 )
+texture = ExtResource( 11 )
+
+[node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
+modulate = Color( 0.584314, 0, 0, 1 )
+self_modulate = Color( 0, 0, 0, 1 )
+texture = ExtResource( 5 )
+
+[node name="DamageValue" type="Label" parent="HUD/P1_HUDRect/Portrait"]
+margin_left = 87.0
+margin_top = -7.0
+margin_right = 319.0
+margin_bottom = 65.0
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "8888"
+valign = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/DamageValue"]
+autoplay = "RESET"
+anims/RESET = SubResource( 56 )
+anims/damage = SubResource( 57 )
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/DamageValue"]
+autoplay = "RESET"
+anims/RESET = SubResource( 70 )
+anims/flashing = SubResource( 87 )
+
+[node name="StockPoints" type="Label" parent="HUD/P1_HUDRect/Portrait"]
+margin_left = 92.0
+margin_top = -58.0
+margin_right = 247.0
+margin_bottom = -11.0
+custom_colors/font_color = Color( 0.890196, 0.219608, 0.219608, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "8888"
+valign = 2
+
+[node name="StockLoss" type="Label" parent="HUD/P1_HUDRect/Portrait/StockPoints"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 115.0
+margin_right = 270.0
+margin_bottom = 48.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 50 )
+text = "-8888"
+valign = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/StockPoints/StockLoss"]
+autoplay = "RESET"
+anims/RESET = SubResource( 51 )
+anims/stock_loss = SubResource( 52 )
+
+[node name="ProfileName" type="Label" parent="HUD/P1_HUDRect/Portrait"]
+visible = false
+margin_left = -153.0
+margin_top = -98.0
+margin_right = 327.0
+margin_bottom = -67.0
+theme = SubResource( 94 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "TestPlayer"
+align = 1
+valign = 1
+
+[node name="BurstToken" type="Label" parent="HUD/P1_HUDRect/Portrait"]
+margin_left = -71.0
+margin_top = 14.0
+margin_right = -27.0
+margin_bottom = 81.0
+theme = SubResource( 103 )
+custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
+text = "B"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/BurstToken"]
+autoplay = "flash"
+anims/flash = SubResource( 104 )
+
+[node name="GaugesUnder" type="Sprite" parent="HUD/P1_HUDRect"]
+position = Vector2( 240, 966 )
+texture = ExtResource( 7 )
+
+[node name="EXGauge" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
+margin_left = -66.0
+margin_top = -30.0
+margin_right = 132.0
+margin_bottom = -9.0
+step = 0.1
+value = 100.0
+texture_progress = ExtResource( 9 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/GaugesUnder/EXGauge"]
+autoplay = "RESET"
+anims/RESET = SubResource( 72 )
+anims/rainbow = SubResource( 73 )
+
+[node name="GuardGauge1" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
+margin_left = -54.0
+margin_top = 10.0
+margin_right = 131.0
+margin_bottom = 28.0
+step = 0.1
+value = 100.0
+texture_progress = ExtResource( 10 )
+
+[node name="GuardGauge2" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
+margin_left = -54.0
+margin_top = 10.0
+margin_right = 131.0
+margin_bottom = 50.0
+step = 0.1
+texture_progress = ExtResource( 8 )
+
+[node name="GaugesFrame" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
+texture = ExtResource( 12 )
+
+[node name="EXLevel" type="Label" parent="HUD/P1_HUDRect/GaugesUnder"]
+modulate = Color( 0.5, 0.5, 0.5, 1 )
+margin_left = -160.0
+margin_top = -70.0
+margin_right = -45.0
+margin_bottom = 81.0
+custom_fonts/font = SubResource( 4 )
+text = "1"
+align = 1
+valign = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/GaugesUnder/EXLevel"]
+autoplay = "RESET"
+anims/RESET = SubResource( 86 )
+anims/flash1 = SubResource( 74 )
+anims/flash2 = SubResource( 75 )
+anims/rainbow = SubResource( 77 )
+
+[node name="Inputs" type="Node2D" parent="HUD/P1_HUDRect"]
+position = Vector2( 240, 896 )
+
+[node name="InputFrame" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+modulate = Color( 1, 1, 1, 0.5 )
+texture = ExtResource( 25 )
+
+[node name="InputUp" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( -63, -11 )
+texture = ExtResource( 26 )
+
+[node name="InputDown" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( -63, 11 )
+texture = ExtResource( 34 )
+
+[node name="InputLeft" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( -85, 11 )
+texture = ExtResource( 35 )
+
+[node name="InputRight" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( -41, 11 )
+texture = ExtResource( 23 )
+
+[node name="InputJump" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 0, 11 )
+texture = ExtResource( 29 )
+
+[node name="InputEX" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( -15, -11 )
+texture = ExtResource( 36 )
+
+[node name="InputSpecial" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 15, -11 )
+texture = ExtResource( 33 )
+
+[node name="InputLight" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 41, 11 )
+texture = ExtResource( 27 )
+
+[node name="InputFierce" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 63, 11 )
+texture = ExtResource( 24 )
+
+[node name="InputDash" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 85, 11 )
+texture = ExtResource( 28 )
+
+[node name="InputUnique" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 41, -11 )
+texture = ExtResource( 30 )
+
+[node name="InputBlock" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 63, -11 )
+texture = ExtResource( 31 )
+
+[node name="InputAssist" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
+visible = false
+position = Vector2( 85, -11 )
+texture = ExtResource( 32 )
+
+[node name="P2_HUDRect" type="ReferenceRect" parent="HUD"]
+margin_left = 1200.0
+margin_right = 1680.0
+margin_bottom = 1080.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Portrait" type="Sprite" parent="HUD/P2_HUDRect"]
+material = SubResource( 107 )
+position = Vector2( 153, 106 )
+texture = ExtResource( 11 )
+
+[node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
+modulate = Color( 0, 0.211765, 0.65098, 1 )
+self_modulate = Color( 0, 0, 0, 1 )
+texture = ExtResource( 5 )
+
+[node name="DamageValue" type="Label" parent="HUD/P2_HUDRect/Portrait"]
+margin_left = 87.0
+margin_top = -7.0
+margin_right = 319.0
+margin_bottom = 65.0
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "8888"
+valign = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/DamageValue"]
+autoplay = "RESET"
+anims/RESET = SubResource( 58 )
+anims/damage = SubResource( 59 )
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/DamageValue"]
+autoplay = "RESET"
+anims/RESET = SubResource( 88 )
+anims/flashing = SubResource( 89 )
+
+[node name="StockPoints" type="Label" parent="HUD/P2_HUDRect/Portrait"]
+margin_left = 92.0
+margin_top = -58.0
+margin_right = 247.0
+margin_bottom = -11.0
+custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "8888"
+valign = 2
+
+[node name="StockLoss" type="Label" parent="HUD/P2_HUDRect/Portrait/StockPoints"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 115.0
+margin_right = 270.0
+margin_bottom = 49.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 53 )
+text = "-8888"
+valign = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/StockPoints/StockLoss"]
+autoplay = "RESET"
+anims/RESET = SubResource( 54 )
+anims/stock_loss = SubResource( 55 )
+
+[node name="ProfileName" type="Label" parent="HUD/P2_HUDRect/Portrait"]
+visible = false
+margin_left = -153.0
+margin_top = -98.0
+margin_right = 327.0
+margin_bottom = -67.0
+theme = SubResource( 94 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "TestPlayer"
+align = 1
+valign = 1
+
+[node name="BurstToken" type="Label" parent="HUD/P2_HUDRect/Portrait"]
+modulate = Color( 1.44467, 1.44467, 1.44467, 1 )
+margin_left = -71.0
+margin_top = 14.0
+margin_right = -27.0
+margin_bottom = 81.0
+theme = SubResource( 103 )
+custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
+text = "B"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/BurstToken"]
+autoplay = "flash"
+anims/flash = SubResource( 105 )
+
+[node name="GaugesUnder" type="Sprite" parent="HUD/P2_HUDRect"]
+position = Vector2( 240, 966 )
+texture = ExtResource( 7 )
+
+[node name="EXGauge" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
+margin_left = -66.0
+margin_top = -30.0
+margin_right = 132.0
+margin_bottom = -9.0
+step = 0.1
+value = 100.0
+texture_progress = ExtResource( 9 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/GaugesUnder/EXGauge"]
+autoplay = "RESET"
+anims/RESET = SubResource( 80 )
+anims/rainbow = SubResource( 81 )
+
+[node name="GuardGauge1" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
+margin_left = -54.0
+margin_top = 10.0
+margin_right = 131.0
+margin_bottom = 50.0
+step = 0.1
+value = 100.0
+texture_progress = ExtResource( 10 )
+
+[node name="GuardGauge2" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
+margin_left = -54.0
+margin_top = 10.0
+margin_right = 131.0
+margin_bottom = 28.0
+step = 0.1
+texture_progress = ExtResource( 8 )
+
+[node name="GaugesFrame" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
+texture = ExtResource( 12 )
+
+[node name="EXLevel" type="Label" parent="HUD/P2_HUDRect/GaugesUnder"]
+modulate = Color( 0.5, 0.5, 0.5, 1 )
+margin_left = -160.0
+margin_top = -70.0
+margin_right = -45.0
+margin_bottom = 81.0
+custom_fonts/font = SubResource( 4 )
+text = "1"
+align = 1
+valign = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/GaugesUnder/EXLevel"]
+autoplay = "RESET"
+anims/RESET = SubResource( 97 )
+anims/flash1 = SubResource( 82 )
+anims/flash2 = SubResource( 83 )
+anims/rainbow = SubResource( 85 )
+
+[node name="Inputs" type="Node2D" parent="HUD/P2_HUDRect"]
+position = Vector2( 240, 896 )
+
+[node name="InputFrame" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+modulate = Color( 1, 1, 1, 0.5 )
+texture = ExtResource( 25 )
+
+[node name="InputUp" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( -63, -11 )
+texture = ExtResource( 26 )
+
+[node name="InputDown" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( -63, 11 )
+texture = ExtResource( 34 )
+
+[node name="InputLeft" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( -85, 11 )
+texture = ExtResource( 35 )
+
+[node name="InputRight" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( -41, 11 )
+texture = ExtResource( 23 )
+
+[node name="InputJump" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 0, 11 )
+texture = ExtResource( 29 )
+
+[node name="InputExtra" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( -15, -11 )
+texture = ExtResource( 36 )
+
+[node name="InputSpecial" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 15, -11 )
+texture = ExtResource( 33 )
+
+[node name="InputLight" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 41, 11 )
+texture = ExtResource( 27 )
+
+[node name="InputFierce" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 63, 11 )
+texture = ExtResource( 24 )
+
+[node name="InputDash" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 85, 11 )
+texture = ExtResource( 28 )
+
+[node name="InputUnique" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 41, -11 )
+texture = ExtResource( 30 )
+
+[node name="InputBlock" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 63, -11 )
+texture = ExtResource( 31 )
+
+[node name="InputAssist" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
+visible = false
+position = Vector2( 85, -11 )
+texture = ExtResource( 32 )
+
+[node name="P3_HUDRect" type="ReferenceRect" parent="HUD"]
+visible = false
+margin_left = 960.0
+margin_right = 1440.0
+margin_bottom = 1080.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="P4_HUDRect" type="ReferenceRect" parent="HUD"]
+visible = false
+margin_left = 1440.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="FrameViewer" parent="HUD" instance=ExtResource( 6 )]
+position = Vector2( 48, 910 )
+scale = Vector2( 0.7, 0.7 )
+
+[node name="Announcer" type="Control" parent="HUD"]
+__meta__ = {
+"_edit_group_": true,
+"_edit_lock_": true
+}
+
+[node name="Get" type="Label" parent="HUD/Announcer"]
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_top = 236.0
+margin_right = 1920.0
+margin_bottom = 556.0
+theme = SubResource( 65 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "Get"
+align = 1
+valign = 1
+
+[node name="Ready" type="Label" parent="HUD/Announcer"]
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_top = 444.0
+margin_right = 1920.0
+margin_bottom = 764.0
+theme = SubResource( 20 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "Ready"
+align = 1
+valign = 1
+
+[node name="Begin" type="Label" parent="HUD/Announcer"]
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -64.0
+margin_top = 364.0
+margin_right = 1856.0
+margin_bottom = 684.0
+theme = SubResource( 16 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "BEGIN!"
+align = 1
+valign = 1
+
+[node name="Game" type="Label" parent="HUD/Announcer"]
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -192.0
+margin_top = 241.0
+margin_right = 1728.0
+margin_bottom = 561.0
+theme = SubResource( 24 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "GAME"
+align = 1
+valign = 1
+
+[node name="Set" type="Label" parent="HUD/Announcer"]
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = 192.0
+margin_top = 496.0
+margin_right = 2112.02
+margin_bottom = 816.0
+theme = SubResource( 26 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "SET"
+align = 1
+valign = 1
+
+[node name="TimeOver" type="Label" parent="HUD/Announcer"]
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_top = 344.0
+margin_right = 1920.0
+margin_bottom = 682.004
+theme = SubResource( 63 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "Time Over"
+align = 1
+valign = 1
+
+[node name="KroniiHands" type="Sprite" parent="HUD/Announcer/TimeOver"]
+modulate = Color( 0, 0, 0, 1 )
+position = Vector2( 816, 164.784 )
+texture = ExtResource( 21 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/Announcer"]
+autoplay = "RESET"
+playback_process_mode = 0
+anims/RESET = SubResource( 21 )
+anims/game_set = SubResource( 27 )
+anims/start_battle = SubResource( 22 )
+anims/time_over = SubResource( 64 )
+
+[node name="HoldToPause" type="Label" parent="HUD"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 720.0
+margin_top = 848.0
+margin_right = 1200.0
+margin_bottom = 901.0
+theme = SubResource( 29 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "Hold to pause"
+align = 1
+valign = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/HoldToPause"]
+autoplay = "RESET"
+anims/RESET = SubResource( 30 )
+anims/hold = SubResource( 31 )
+
+[node name="TimeFrame" type="Sprite" parent="HUD"]
+position = Vector2( 960, 1000 )
+texture = ExtResource( 20 )
+
+[node name="MatchTime" type="Label" parent="HUD"]
+margin_left = 720.0
+margin_top = 904.0
+margin_right = 1200.0
+margin_bottom = 1069.0
+theme = SubResource( 61 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "1234567890"
+align = 1
+valign = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/MatchTime"]
+autoplay = "RESET"
+anims/RESET = SubResource( 92 )
+anims/flashing = SubResource( 91 )
+
+[node name="PauseMenu" type="CanvasModulate" parent="."]
+pause_mode = 2
+visible = false
+color = Color( 0.5, 0.5, 0.5, 1 )
+script = ExtResource( 18 )
+
+[node name="AltInputs" parent="PauseMenu" instance=ExtResource( 19 )]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="PauseMenu"]
+
+[node name="Control" type="Control" parent="PauseMenu/CanvasLayer"]
+visible = false
+margin_left = 632.0
+margin_top = 352.0
+margin_right = 632.0
+margin_bottom = 352.0
+
+[node name="ColorRect" type="ColorRect" parent="PauseMenu/CanvasLayer/Control"]
+margin_right = 656.0
+margin_bottom = 352.0
+color = Color( 0.941176, 0.941176, 0.941176, 1 )
+
+[node name="ColorRect2" type="ColorRect" parent="PauseMenu/CanvasLayer/Control"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 648.0
+margin_bottom = 344.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+
+[node name="Header" type="Label" parent="PauseMenu/CanvasLayer/Control"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 648.0
+margin_bottom = 104.0
+theme = ExtResource( 15 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "Game Paused"
+align = 1
+valign = 1
+
+[node name="ColorRect" type="ColorRect" parent="PauseMenu/CanvasLayer/Control/Header"]
+margin_left = 152.0
+margin_top = 80.0
+margin_right = 488.0
+margin_bottom = 88.0
+color = Color( 0.941176, 0.941176, 0.941176, 1 )
+
+[node name="PauseList" type="VBoxContainer" parent="PauseMenu/CanvasLayer/Control"]
+margin_left = 97.0
+margin_top = 128.0
+margin_right = 595.0
+margin_bottom = 544.0
+
+[node name="Resume" parent="PauseMenu/CanvasLayer/Control/PauseList" instance=ExtResource( 17 )]
+margin_right = 498.0
+focus_neighbour_top = NodePath("../ReturnToMainMenu")
+text = "Resume"
+
+[node name="ReturnToCharSelect" parent="PauseMenu/CanvasLayer/Control/PauseList" instance=ExtResource( 17 )]
+margin_top = 60.0
+margin_right = 498.0
+margin_bottom = 116.0
+text = "Return to character select"
+
+[node name="ReturnToMainMenu" parent="PauseMenu/CanvasLayer/Control/PauseList" instance=ExtResource( 17 )]
+margin_top = 120.0
+margin_right = 498.0
+margin_bottom = 176.0
+focus_neighbour_bottom = NodePath("../Resume")
+text = "return to main menu"
+
+[node name="Cursor" type="Sprite" parent="PauseMenu/CanvasLayer/Control"]
+position = Vector2( 55.5, 156 )
+scale = Vector2( 0.75, 0.75 )
+texture = ExtResource( 16 )
+offset = Vector2( 10, 0 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="PauseMenu/CanvasLayer/Control/Cursor"]
+autoplay = "default"
+anims/RESET = SubResource( 32 )
+anims/default = SubResource( 33 )
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="PauseMenu/CanvasLayer/Control/Cursor"]
+autoplay = "default"
+anims/RESET = SubResource( 34 )
+anims/default = SubResource( 35 )
+
+[node name="Test" type="CanvasLayer" parent="."]
+
+[node name="Frametime" type="Label" parent="Test"]
+visible = false
+margin_left = 8.0
+margin_top = 1032.0
+margin_right = 189.0
+margin_bottom = 1054.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "test"
+
+[node name="TrueFrametime" type="Label" parent="Test"]
+visible = false
+margin_left = 8.0
+margin_top = 1056.0
+margin_right = 189.0
+margin_bottom = 1078.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "test"
+
+[node name="Playspeed" type="Label" parent="Test"]
+visible = false
+margin_left = 768.0
+margin_top = 168.0
+margin_right = 1152.0
+margin_bottom = 212.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 66 )
+text = "test"
+align = 1
+
+[node name="SaveLoad" type="Label" parent="Test"]
+visible = false
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 768.0
+margin_top = 104.0
+margin_right = 1152.0
+margin_bottom = 148.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 66 )
+text = "test"
+align = 1
+
+[node name="Timer" type="Timer" parent="Test/SaveLoad"]
+one_shot = true
+
+[node name="Playback" type="Label" parent="Test"]
+visible = false
+margin_left = 768.0
+margin_top = 40.0
+margin_right = 1152.0
+margin_bottom = 84.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 66 )
+text = "PLAYBACK MODE"
+align = 1
+
+[node name="ReplayControls" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="ReplayControls"]
+margin_left = 1168.0
+margin_top = 256.0
+margin_right = 1680.0
+margin_bottom = 824.0
+color = Color( 0.12, 0.12, 0.12, 0.6 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReplayControls"]
+margin_left = 1200.0
+margin_top = 280.0
+margin_right = 1648.0
+margin_bottom = 821.0
+
+[node name="Label" type="Label" parent="ReplayControls/HBoxContainer"]
+margin_right = 212.0
+margin_bottom = 541.0
+theme = SubResource( 100 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+text = "Replay Controls
+
+Increase Speed:
+Decrease Speed:
+Normal Speed:
+Freeze Frame:
+Frame Advance:
+Frame Reverse:
+
+Save State:
+Load State:
+View Hitboxes:
+View Inputs:
+
+Stop watching:
+"
+
+[node name="Label2" type="Label" parent="ReplayControls/HBoxContainer"]
+margin_left = 216.0
+margin_right = 448.0
+margin_bottom = 541.0
+size_flags_horizontal = 3
+theme = SubResource( 100 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+text = "
+
+Up
+Down
+Jump
+Light
+Right
+Left
+
+Fierce
+Dash
+Block
+Unique
+
+Pause
+"
+align = 2
+
+[node name="Synchro" type="CanvasLayer" parent="."]
+pause_mode = 2
+visible = false
+
+[node name="Label" type="Label" parent="Synchro"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -488.0
+margin_top = -104.0
+margin_right = -66.0
+margin_bottom = -52.0
+theme = ExtResource( 15 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "Synchronizing..."
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Synchro"]
+root_node = NodePath("../Label")
+autoplay = "flashing"
+anims/RESET = SubResource( 68 )
+anims/flashing = SubResource( 69 )
+
+[connection signal="game_set" from="ViewportContainer/Viewport/Game" to="." method="_on_Game_game_set"]
+[connection signal="loaded_state" from="ViewportContainer/Viewport/Game" to="." method="_on_Game_loaded_state"]
+[connection signal="record_ended" from="ViewportContainer/Viewport/Game" to="." method="_on_Game_record_ended"]
+[connection signal="saved_state" from="ViewportContainer/Viewport/Game" to="." method="_on_Game_saved_state"]
+[connection signal="time_over" from="ViewportContainer/Viewport/Game" to="." method="_on_Game_time_over"]

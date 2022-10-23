@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/impact25.wav-73199c4b03cd5512b3567ec9c558203f.sample"
+
+[deps]
+
+source_file="res://Assets/Audio/Common/impact25.wav"
+dest_files=[ "res://.import/impact25.wav-73199c4b03cd5512b3567ec9c558203f.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

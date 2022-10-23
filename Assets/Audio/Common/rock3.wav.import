@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/rock3.wav-077a0c0fbba3e92c609319533d9bc4ec.sample"
+
+[deps]
+
+source_file="res://Assets/Audio/Common/rock3.wav"
+dest_files=[ "res://.import/rock3.wav-077a0c0fbba3e92c609319533d9bc4ec.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

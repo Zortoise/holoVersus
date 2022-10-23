@@ -1,0 +1,72 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 30,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BurstSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -22, -44 ), Vector2( -44, -44 ), Vector2( -44, -22 ), Vector2( -56, -22 ), Vector2( -56, 22 ), Vector2( -44, 22 ), Vector2( -44, 44 ), Vector2( -22, 44 ), Vector2( -22, 56 ), Vector2( 22, 56 ), Vector2( 22, 44 ), Vector2( 44, 44 ), Vector2( 44, 22 ), Vector2( 56, 22 ), Vector2( 56, -22 ), Vector2( 44, -22 ), Vector2( 44, -44 ), Vector2( 22, -44 ), Vector2( 22, -56 ), Vector2( -22, -56 ) ],
+"kborigin": Vector2( 0, 0 )
+},
+3: {
+"frame": 1,
+"hitbox": [ Vector2( -22, -44 ), Vector2( -44, -44 ), Vector2( -44, -22 ), Vector2( -56, -22 ), Vector2( -56, 22 ), Vector2( -44, 22 ), Vector2( -44, 44 ), Vector2( -22, 44 ), Vector2( -22, 56 ), Vector2( 22, 56 ), Vector2( 22, 44 ), Vector2( 44, 44 ), Vector2( 44, 22 ), Vector2( 56, 22 ), Vector2( 56, -22 ), Vector2( 44, -22 ), Vector2( 44, -44 ), Vector2( 22, -44 ), Vector2( 22, -56 ), Vector2( -22, -56 ) ],
+"kborigin": Vector2( 0, 0 )
+},
+6: {
+"frame": 2,
+"hitbox": [ Vector2( -22, -44 ), Vector2( -44, -44 ), Vector2( -44, -22 ), Vector2( -56, -22 ), Vector2( -56, 22 ), Vector2( -44, 22 ), Vector2( -44, 44 ), Vector2( -22, 44 ), Vector2( -22, 56 ), Vector2( 22, 56 ), Vector2( 22, 44 ), Vector2( 44, 44 ), Vector2( 44, 22 ), Vector2( 56, 22 ), Vector2( 56, -22 ), Vector2( 44, -22 ), Vector2( 44, -44 ), Vector2( 22, -44 ), Vector2( 22, -56 ), Vector2( -22, -56 ) ],
+"kborigin": Vector2( 0, 0 )
+},
+8: {
+"frame": 3,
+"hitbox": [  ],
+"kborigin": null
+},
+10: {
+"frame": 4,
+"hitbox": [  ],
+"kborigin": null
+},
+12: {
+"frame": 5,
+"hitbox": [  ],
+"kborigin": null
+},
+15: {
+"frame": 6,
+"hitbox": [  ],
+"kborigin": null
+},
+18: {
+"frame": 7,
+"hitbox": [  ],
+"kborigin": null
+},
+21: {
+"frame": 8,
+"hitbox": [  ],
+"kborigin": null
+},
+24: {
+"frame": 9,
+"hitbox": [  ],
+"kborigin": null
+},
+27: {
+"frame": 10,
+"hitbox": [  ],
+"kborigin": null
+}
+},
+"vframes": 2
+}
+}

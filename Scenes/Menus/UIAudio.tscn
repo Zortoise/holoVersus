@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/Menus/UIAudio.gd" type="Script" id=1]
+
+[node name="UIAudio" type="AudioStreamPlayer"]
+pause_mode = 2
+bus = "UI"
+script = ExtResource( 1 )
+
+[connection signal="finished" from="." to="." method="_on_UIAudio_finished"]

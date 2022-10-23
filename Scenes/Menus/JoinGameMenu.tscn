@@ -1,0 +1,937 @@
+[gd_scene load_steps=44 format=2]
+
+[ext_resource path="res://Scenes/Menus/AltInputs.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/Menus/ButtonTypeB.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/Menus/ButtonTypeF.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/Menus/JoinGameMenu.gd" type="Script" id=4]
+[ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=5]
+[ext_resource path="res://Assets/Fonts/roboto.black.ttf" type="DynamicFontData" id=6]
+[ext_resource path="res://Assets/UI/cursor.png" type="Texture" id=7]
+[ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=8]
+[ext_resource path="res://Scenes/Menus/ButtonTypeC.tscn" type="PackedScene" id=9]
+
+[sub_resource type="Animation" id=49]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=50]
+resource_name = "transit_in"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0, 0, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=51]
+resource_name = "transit_to_char_select_net"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.2 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ "res://Scenes/Menus/CharacterSelectNet.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="Animation" id=84]
+resource_name = "transit_to_search"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.15 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ "res://Scenes/Menus/SearchGameMenu.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="DynamicFont" id=53]
+size = 100
+use_filter = true
+font_data = ExtResource( 5 )
+
+[sub_resource type="Animation" id=55]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 10, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=56]
+resource_name = "default"
+length = 0.8
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 15, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.4, 0.8 )
+}
+
+[sub_resource type="Animation" id=57]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=58]
+resource_name = "default"
+length = 1.6
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0.75, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 0.75, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 0.75, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 0.75, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+
+[sub_resource type="DynamicFont" id=30]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="StyleBoxEmpty" id=19]
+
+[sub_resource type="Theme" id=62]
+default_font = SubResource( 30 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 30 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 19 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=61]
+size = 28
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=18]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="StyleBoxEmpty" id=17]
+
+[sub_resource type="Theme" id=59]
+default_font = SubResource( 18 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 18 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 17 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=74]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="StyleBoxEmpty" id=75]
+
+[sub_resource type="DynamicFont" id=76]
+size = 30
+use_filter = true
+extra_spacing_top = 7
+extra_spacing_bottom = 12
+font_data = ExtResource( 5 )
+
+[sub_resource type="Theme" id=85]
+default_font = SubResource( 76 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 74 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 75 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=78]
+size = 30
+outline_size = 10
+outline_color = Color( 0.8, 0.8, 0.8, 1 )
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="StyleBoxEmpty" id=79]
+
+[sub_resource type="DynamicFont" id=80]
+size = 45
+use_filter = true
+extra_spacing_top = 7
+extra_spacing_bottom = -4
+font_data = ExtResource( 8 )
+
+[sub_resource type="Theme" id=86]
+default_font = SubResource( 80 )
+Button/colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.219608, 0.513726, 0.890196, 1 )
+Button/colors/font_color_hover = Color( 0.219608, 0.513726, 0.890196, 1 )
+Button/colors/font_color_pressed = Color( 0.219608, 0.513726, 0.890196, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 78 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 79 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=87]
+resource_name = "fade"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.5, 0.5, 0.5, 0.3 ) ]
+}
+
+[sub_resource type="Animation" id=88]
+resource_name = "flashing"
+length = 0.2
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 1.0 ]
+}
+
+[sub_resource type="DynamicFont" id=81]
+size = 35
+outline_size = 9
+outline_color = Color( 0.8, 0.8, 0.8, 1 )
+use_filter = true
+font_data = ExtResource( 6 )
+
+[sub_resource type="Theme" id=89]
+default_font = SubResource( 81 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 78 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 79 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=82]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="StyleBoxEmpty" id=83]
+
+[sub_resource type="DynamicFont" id=90]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="Theme" id=91]
+default_font = SubResource( 90 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 82 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 83 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=92]
+resource_name = "fade"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.5, 0.5, 0.5, 0.3 ) ]
+}
+
+[sub_resource type="Animation" id=93]
+resource_name = "flashing"
+length = 0.2
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.1, 0.2 )
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 1.0 ]
+}
+
+[node name="LobbyMenu" type="Node2D"]
+script = ExtResource( 4 )
+
+[node name="AltInputs" parent="." instance=ExtResource( 1 )]
+
+[node name="Transition" type="AnimationPlayer" parent="."]
+autoplay = "transit_in"
+anims/RESET = SubResource( 49 )
+anims/transit_in = SubResource( 50 )
+anims/transit_to_char_select_net = SubResource( 51 )
+anims/transit_to_search = SubResource( 84 )
+
+[node name="Background" type="ColorRect" parent="."]
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0.8, 0.8, 0.8, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Header" type="Label" parent="Background"]
+margin_left = 128.0
+margin_top = 88.0
+margin_right = 623.0
+margin_bottom = 192.0
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_fonts/font = SubResource( 53 )
+text = "Game Lobby"
+
+[node name="ColorRect" type="ColorRect" parent="Background"]
+margin_top = 192.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="ColorRect2" type="ColorRect" parent="Background"]
+margin_left = 960.0
+margin_top = 256.0
+margin_right = 968.0
+margin_bottom = 984.0
+color = Color( 0.356863, 0.356863, 0.356863, 1 )
+
+[node name="Cursor" type="Sprite" parent="."]
+position = Vector2( 152, 539 )
+scale = Vector2( 0.75, 0.75 )
+texture = ExtResource( 7 )
+offset = Vector2( 10, 0 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor"]
+autoplay = "default"
+anims/RESET = SubResource( 55 )
+anims/default = SubResource( 56 )
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="Cursor"]
+autoplay = "default"
+anims/RESET = SubResource( 57 )
+anims/default = SubResource( 58 )
+
+[node name="JoinList" type="VBoxContainer" parent="."]
+margin_left = 192.0
+margin_top = 512.0
+margin_right = 896.0
+margin_bottom = 1274.0
+theme = SubResource( 62 )
+
+[node name="CustomPlaylist" parent="JoinList" instance=ExtResource( 9 )]
+margin_right = 704.0
+focus_neighbour_top = NodePath("../Return")
+
+[node name="Blank3" type="Label" parent="JoinList"]
+margin_top = 60.0
+margin_right = 704.0
+margin_bottom = 89.0
+custom_fonts/font = SubResource( 61 )
+text = " "
+
+[node name="Ready" parent="JoinList" instance=ExtResource( 3 )]
+margin_top = 93.0
+margin_right = 704.0
+margin_bottom = 156.0
+text = "Ready"
+
+[node name="Return" parent="JoinList" instance=ExtResource( 2 )]
+margin_top = 160.0
+margin_right = 704.0
+margin_bottom = 216.0
+focus_neighbour_bottom = NodePath("../CustomPlaylist")
+text = "Leave Game"
+
+[node name="MatchList" type="VBoxContainer" parent="."]
+margin_left = 1088.0
+margin_top = 256.0
+margin_right = 1528.0
+margin_bottom = 645.0
+theme = SubResource( 59 )
+
+[node name="HostSide" type="Button" parent="MatchList"]
+margin_right = 440.0
+margin_bottom = 56.0
+rect_pivot_offset = Vector2( -896, -264 )
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "Host's Side"
+flat = true
+align = 0
+
+[node name="InputDelay" type="Button" parent="MatchList"]
+margin_top = 60.0
+margin_right = 440.0
+margin_bottom = 116.0
+rect_pivot_offset = Vector2( -432, 188 )
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "Input Delay"
+flat = true
+align = 0
+
+[node name="MaxRollback" type="Button" parent="MatchList"]
+margin_top = 120.0
+margin_right = 440.0
+margin_bottom = 176.0
+rect_pivot_offset = Vector2( -432, 188 )
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "Max Rollback"
+flat = true
+align = 0
+
+[node name="Blank3" type="Label" parent="MatchList"]
+margin_top = 180.0
+margin_right = 440.0
+margin_bottom = 209.0
+custom_fonts/font = SubResource( 61 )
+text = " "
+
+[node name="StockPoints" type="Button" parent="MatchList"]
+margin_top = 213.0
+margin_right = 440.0
+margin_bottom = 269.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "Stock Points"
+flat = true
+align = 0
+
+[node name="TimeLimit" type="Button" parent="MatchList"]
+margin_top = 273.0
+margin_right = 440.0
+margin_bottom = 329.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "Time Limit"
+flat = true
+align = 0
+
+[node name="StaticStage" type="Button" parent="MatchList"]
+margin_top = 333.0
+margin_right = 440.0
+margin_bottom = 389.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "Static Stage"
+flat = true
+align = 0
+
+[node name="Assists" type="Button" parent="MatchList"]
+margin_top = 393.0
+margin_right = 440.0
+margin_bottom = 449.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "Assists"
+flat = true
+align = 0
+
+[node name="MatchList2" type="VBoxContainer" parent="."]
+margin_left = 1495.0
+margin_top = 256.0
+margin_right = 1796.0
+margin_bottom = 645.0
+theme = SubResource( 59 )
+
+[node name="HostSide" type="Button" parent="MatchList2"]
+margin_right = 301.0
+margin_bottom = 56.0
+rect_pivot_offset = Vector2( -896, -264 )
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "P1"
+flat = true
+
+[node name="InputDelay" type="Button" parent="MatchList2"]
+margin_top = 60.0
+margin_right = 301.0
+margin_bottom = 116.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "3 Frames"
+flat = true
+
+[node name="MaxRollback" type="Button" parent="MatchList2"]
+margin_top = 120.0
+margin_right = 301.0
+margin_bottom = 176.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "3 Frames"
+flat = true
+
+[node name="Blank3" type="Label" parent="MatchList2"]
+margin_top = 180.0
+margin_right = 301.0
+margin_bottom = 209.0
+custom_fonts/font = SubResource( 61 )
+text = " "
+
+[node name="StockPoints" type="Button" parent="MatchList2"]
+margin_top = 213.0
+margin_right = 301.0
+margin_bottom = 269.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "3000"
+flat = true
+
+[node name="TimeLimit" type="Button" parent="MatchList2"]
+margin_top = 273.0
+margin_right = 301.0
+margin_bottom = 329.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "none"
+flat = true
+
+[node name="StaticStage" type="Button" parent="MatchList2"]
+margin_top = 333.0
+margin_right = 301.0
+margin_bottom = 389.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "off"
+flat = true
+
+[node name="Assists" type="Button" parent="MatchList2"]
+margin_top = 393.0
+margin_right = 301.0
+margin_bottom = 449.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 0.376471, 0.376471, 0.376471, 1 )
+custom_constants/hseparation = 10
+disabled = true
+action_mode = 0
+text = "off"
+flat = true
+
+[node name="PlayerList" type="ColorRect" parent="."]
+margin_left = 168.0
+margin_top = 264.0
+margin_right = 808.0
+margin_bottom = 448.0
+color = Color( 0.8, 0.8, 0.8, 1 )
+
+[node name="PlayersList" type="VBoxContainer" parent="PlayerList"]
+margin_left = 24.0
+margin_top = 16.0
+margin_right = 616.0
+margin_bottom = 173.0
+custom_constants/separation = -1
+
+[node name="PlayersListHeader" type="HSplitContainer" parent="PlayerList/PlayersList"]
+margin_right = 592.0
+margin_bottom = 49.0
+split_offset = 290
+
+[node name="Players" type="Label" parent="PlayerList/PlayersList/PlayersListHeader"]
+margin_right = 437.0
+margin_bottom = 49.0
+theme = SubResource( 85 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = "Players:"
+
+[node name="Ping" type="Label" parent="PlayerList/PlayersList/PlayersListHeader"]
+margin_left = 449.0
+margin_right = 592.0
+margin_bottom = 49.0
+theme = SubResource( 85 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = "Ping:"
+
+[node name="Player1" type="HBoxContainer" parent="PlayerList/PlayersList"]
+margin_top = 48.0
+margin_right = 592.0
+margin_bottom = 98.0
+
+[node name="Ready" type="Label" parent="PlayerList/PlayersList/Player1"]
+modulate = Color( 0.5, 0.5, 0.5, 0.3 )
+margin_right = 35.0
+margin_bottom = 49.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+theme = SubResource( 86 )
+custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
+text = "R"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="PlayerList/PlayersList/Player1/Ready"]
+autoplay = "fade"
+anims/fade = SubResource( 87 )
+anims/flashing = SubResource( 88 )
+
+[node name="Name" type="Label" parent="PlayerList/PlayersList/Player1"]
+margin_left = 39.0
+margin_top = 4.0
+margin_right = 381.0
+margin_bottom = 46.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 7.77
+theme = SubResource( 89 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+custom_colors/font_outline_modulate = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = " Test"
+clip_text = true
+
+[node name="Ping" type="Label" parent="PlayerList/PlayersList/Player1"]
+margin_left = 385.0
+margin_right = 592.0
+margin_bottom = 50.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 4.7
+theme = SubResource( 91 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = "-"
+align = 1
+
+[node name="Player2" type="HBoxContainer" parent="PlayerList/PlayersList"]
+margin_top = 97.0
+margin_right = 592.0
+margin_bottom = 147.0
+
+[node name="Ready" type="Label" parent="PlayerList/PlayersList/Player2"]
+modulate = Color( 0.5, 0.5, 0.5, 0.3 )
+margin_right = 35.0
+margin_bottom = 49.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+theme = SubResource( 86 )
+custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
+text = "R"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="PlayerList/PlayersList/Player2/Ready"]
+autoplay = "fade"
+anims/fade = SubResource( 92 )
+anims/flashing = SubResource( 93 )
+
+[node name="Name" type="Label" parent="PlayerList/PlayersList/Player2"]
+margin_left = 39.0
+margin_top = 4.0
+margin_right = 381.0
+margin_bottom = 46.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 7.77
+theme = SubResource( 89 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+custom_colors/font_outline_modulate = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = " Guest"
+clip_text = true
+
+[node name="Ping" type="Label" parent="PlayerList/PlayersList/Player2"]
+margin_left = 385.0
+margin_right = 592.0
+margin_bottom = 50.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 4.7
+theme = SubResource( 91 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = "20ms (1f)"
+align = 1

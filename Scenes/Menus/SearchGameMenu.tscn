@@ -1,0 +1,527 @@
+[gd_scene load_steps=31 format=2]
+
+[ext_resource path="res://Scenes/Menus/AltInputs.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/Menus/ButtonTypeB.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/Menus/ButtonTypeF.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/Menus/ButtonTypeB2.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=5]
+[ext_resource path="res://Assets/UI/cursor.png" type="Texture" id=7]
+[ext_resource path="res://Scenes/Menus/SearchGameMenu.gd" type="Script" id=8]
+[ext_resource path="res://Scenes/Menus/ButtonTypeG.tscn" type="PackedScene" id=9]
+
+[sub_resource type="Animation" id=49]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=50]
+resource_name = "transit_in"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0, 0, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=76]
+resource_name = "transit_to_join"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.15 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ "res://Scenes/Menus/JoinGameMenu.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="Animation" id=75]
+resource_name = "transit_to_netplay"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.15 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ "res://Scenes/Menus/NetplayMenu.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="DynamicFont" id=53]
+size = 100
+use_filter = true
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=7]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="StyleBoxEmpty" id=48]
+
+[sub_resource type="DynamicFont" id=96]
+size = 23
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="Theme" id=97]
+default_font = SubResource( 96 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 7 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 48 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=55]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 10, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=56]
+resource_name = "default"
+length = 0.8
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 15, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.4, 0.8 )
+}
+
+[sub_resource type="Animation" id=57]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=58]
+resource_name = "default"
+length = 1.6
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0.75, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 0.75, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 0.75, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 0.75, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath(".:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 1.6 )
+}
+
+[sub_resource type="DynamicFont" id=71]
+size = 40
+use_filter = true
+extra_spacing_bottom = -6
+font_data = ExtResource( 5 )
+
+[sub_resource type="Animation" id=69]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=70]
+resource_name = "fading"
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 0.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.5, 1 )
+}
+
+[sub_resource type="DynamicFont" id=30]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="StyleBoxEmpty" id=19]
+
+[sub_resource type="Theme" id=62]
+default_font = SubResource( 30 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 30 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 19 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=74]
+size = 20
+use_filter = true
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=73]
+size = 20
+use_filter = true
+extra_spacing_bottom = 7
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=61]
+size = 28
+font_data = ExtResource( 5 )
+
+[node name="SearchGameMenu" type="Node2D"]
+script = ExtResource( 8 )
+
+[node name="AltInputs" parent="." instance=ExtResource( 1 )]
+
+[node name="Transition" type="AnimationPlayer" parent="."]
+autoplay = "transit_in"
+anims/RESET = SubResource( 49 )
+anims/transit_in = SubResource( 50 )
+anims/transit_to_join = SubResource( 76 )
+anims/transit_to_netplay = SubResource( 75 )
+
+[node name="Background" type="ColorRect" parent="."]
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0.8, 0.8, 0.8, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Header" type="Label" parent="Background"]
+margin_left = 128.0
+margin_top = 88.0
+margin_right = 623.0
+margin_bottom = 192.0
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_fonts/font = SubResource( 53 )
+text = "Search Game"
+
+[node name="ColorRect" type="ColorRect" parent="Background"]
+margin_top = 192.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Grid" type="GridContainer" parent="Background"]
+margin_left = 1088.0
+margin_top = 72.0
+margin_right = 1608.0
+margin_bottom = 184.0
+custom_constants/vseparation = -10
+custom_constants/hseparation = 0
+columns = 2
+
+[node name="Blank" type="Label" parent="Background/Grid"]
+margin_right = 184.0
+margin_bottom = 44.0
+theme = SubResource( 97 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+
+[node name="Blank2" type="Label" parent="Background/Grid"]
+margin_left = 184.0
+margin_right = 520.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+theme = SubResource( 97 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+align = 2
+
+[node name="Blank3" type="Label" parent="Background/Grid"]
+margin_top = 34.0
+margin_right = 184.0
+margin_bottom = 78.0
+theme = SubResource( 97 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+
+[node name="Blank4" type="Label" parent="Background/Grid"]
+margin_left = 184.0
+margin_top = 34.0
+margin_right = 520.0
+margin_bottom = 78.0
+size_flags_horizontal = 3
+theme = SubResource( 97 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+align = 2
+
+[node name="Port" type="Label" parent="Background/Grid"]
+margin_top = 68.0
+margin_right = 184.0
+margin_bottom = 112.0
+theme = SubResource( 97 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = "Port Number: "
+
+[node name="Port2" type="Label" parent="Background/Grid"]
+margin_left = 184.0
+margin_top = 68.0
+margin_right = 520.0
+margin_bottom = 112.0
+size_flags_horizontal = 3
+theme = SubResource( 97 )
+custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+text = "Test"
+align = 2
+
+[node name="Cursor" type="Sprite" parent="."]
+position = Vector2( 152, 283 )
+scale = Vector2( 0.75, 0.75 )
+texture = ExtResource( 7 )
+offset = Vector2( 10, 0 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor"]
+autoplay = "default"
+anims/RESET = SubResource( 55 )
+anims/default = SubResource( 56 )
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="Cursor"]
+autoplay = "default"
+anims/RESET = SubResource( 57 )
+anims/default = SubResource( 58 )
+
+[node name="Searching" type="Label" parent="."]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 704.0
+margin_top = 539.0
+margin_right = 1456.0
+margin_bottom = 590.0
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+custom_fonts/font = SubResource( 71 )
+text = "Searching for game..."
+valign = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Searching"]
+autoplay = "RESET"
+anims/RESET = SubResource( 69 )
+anims/fading = SubResource( 70 )
+
+[node name="SearchList" type="VBoxContainer" parent="."]
+margin_left = 192.0
+margin_top = 256.0
+margin_right = 944.0
+margin_bottom = 954.0
+theme = SubResource( 62 )
+
+[node name="IPOfHost" parent="SearchList" instance=ExtResource( 9 )]
+margin_right = 752.0
+
+[node name="IPRequired" type="HSplitContainer" parent="SearchList"]
+margin_top = 60.0
+margin_right = 752.0
+margin_bottom = 87.0
+split_offset = 250
+
+[node name="Blank2" type="Label" parent="SearchList/IPRequired"]
+margin_right = 250.0
+margin_bottom = 27.0
+rect_pivot_offset = Vector2( -902, -124 )
+custom_colors/font_color = Color( 0.933333, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 74 )
+align = 1
+
+[node name="Label" type="Label" parent="SearchList/IPRequired"]
+margin_left = 262.0
+margin_right = 752.0
+margin_bottom = 27.0
+size_flags_horizontal = 3
+custom_colors/font_color = Color( 0.933333, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 73 )
+text = "IP ADDRESS Required"
+align = 1
+
+[node name="Paste" parent="SearchList" instance=ExtResource( 2 )]
+margin_top = 91.0
+margin_bottom = 147.0
+text = "Paste Copied IP Address"
+
+[node name="ShowIP" parent="SearchList" instance=ExtResource( 4 )]
+margin_top = 151.0
+margin_bottom = 207.0
+disabled = true
+text = "Show IP"
+
+[node name="Blank3" type="Label" parent="SearchList"]
+margin_top = 211.0
+margin_right = 752.0
+margin_bottom = 240.0
+custom_fonts/font = SubResource( 61 )
+text = " "
+
+[node name="Blank4" type="Label" parent="SearchList"]
+margin_top = 244.0
+margin_right = 752.0
+margin_bottom = 273.0
+custom_fonts/font = SubResource( 61 )
+text = " "
+
+[node name="Search" parent="SearchList" instance=ExtResource( 3 )]
+margin_top = 277.0
+margin_bottom = 340.0
+text = "Start Search"
+
+[node name="Return" parent="SearchList" instance=ExtResource( 2 )]
+margin_top = 344.0
+margin_bottom = 400.0
+text = "Return"

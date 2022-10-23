@@ -1,0 +1,56 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"KillBlast": {
+"duration": 38,
+"hframes": 6,
+"loop": false,
+"spritesheet": "KillBlastSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+4: {
+"frame": 1
+},
+6: {
+"frame": 2
+},
+8: {
+"frame": 3
+},
+11: {
+"frame": 4
+},
+14: {
+"frame": 5
+},
+17: {
+"frame": 6
+},
+20: {
+"frame": 7
+},
+23: {
+"frame": 8
+},
+26: {
+"frame": 9
+},
+29: {
+"frame": 10
+},
+32: {
+"frame": 11
+},
+35: {
+"frame": 12
+}
+},
+"vframes": 3
+}
+}

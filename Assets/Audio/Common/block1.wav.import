@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/block1.wav-19d92032528d3daa0d0e7bdbe83a0038.sample"
+
+[deps]
+
+source_file="res://Assets/Audio/Common/block1.wav"
+dest_files=[ "res://.import/block1.wav-19d92032528d3daa0d0e7bdbe83a0038.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

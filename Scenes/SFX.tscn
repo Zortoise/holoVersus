@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scenes/SpritePlayer.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/SFX.gd" type="Script" id=2]
+[ext_resource path="res://Scenes/Physics/DetectBox.tscn" type="PackedScene" id=3]
+
+[node name="SFX" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="Sprite" type="Sprite" parent="."]
+
+[node name="SpritePlayer" parent="." instance=ExtResource( 1 )]
+
+[node name="GroundedBox" parent="." instance=ExtResource( 3 )]
+margin_left = -8.0
+margin_top = -8.0
+margin_right = 8.0
+margin_bottom = 0.0
+
+[connection signal="anim_finished" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_finished"]

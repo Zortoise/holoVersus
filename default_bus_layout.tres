@@ -1,0 +1,111 @@
+[gd_resource type="AudioBusLayout" load_steps=8 format=2]
+
+[sub_resource type="AudioEffectPitchShift" id=7]
+resource_name = "PitchShift"
+pitch_scale = 0.4
+
+[sub_resource type="AudioEffectReverb" id=9]
+resource_name = "Reverb"
+room_size = 0.7
+damping = 1.0
+wet = 0.05
+
+[sub_resource type="AudioEffectHighPassFilter" id=2]
+resource_name = "HighPassFilter"
+
+[sub_resource type="AudioEffectLowPassFilter" id=3]
+resource_name = "LowPassFilter"
+
+[sub_resource type="AudioEffectPitchShift" id=4]
+resource_name = "PitchShift"
+pitch_scale = 1.3
+
+[sub_resource type="AudioEffectPitchShift" id=6]
+resource_name = "PitchShift"
+pitch_scale = 1.6
+
+[sub_resource type="AudioEffectPitchShift" id=5]
+resource_name = "PitchShift"
+pitch_scale = 0.7
+
+[resource]
+bus/1/name = "UI"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = -5.93075
+bus/1/send = "Reverb"
+bus/2/name = "Music"
+bus/2/solo = false
+bus/2/mute = false
+bus/2/bypass_fx = false
+bus/2/volume_db = -5.93425
+bus/2/send = "Reverb"
+bus/3/name = "GameFade"
+bus/3/solo = false
+bus/3/mute = false
+bus/3/bypass_fx = false
+bus/3/volume_db = 0.0
+bus/3/send = "Master"
+bus/4/name = "Game"
+bus/4/solo = false
+bus/4/mute = false
+bus/4/bypass_fx = false
+bus/4/volume_db = -5.93075
+bus/4/send = "GameFade"
+bus/5/name = "HighPass"
+bus/5/solo = false
+bus/5/mute = false
+bus/5/bypass_fx = false
+bus/5/volume_db = 0.0
+bus/5/send = "Game"
+bus/5/effect/0/effect = SubResource( 2 )
+bus/5/effect/0/enabled = true
+bus/6/name = "LowPass"
+bus/6/solo = false
+bus/6/mute = false
+bus/6/bypass_fx = false
+bus/6/volume_db = 0.0
+bus/6/send = "Game"
+bus/6/effect/0/effect = SubResource( 3 )
+bus/6/effect/0/enabled = true
+bus/7/name = "PitchUp"
+bus/7/solo = false
+bus/7/mute = false
+bus/7/bypass_fx = false
+bus/7/volume_db = 0.0
+bus/7/send = "Game"
+bus/7/effect/0/effect = SubResource( 4 )
+bus/7/effect/0/enabled = true
+bus/8/name = "PitchUp2"
+bus/8/solo = false
+bus/8/mute = false
+bus/8/bypass_fx = false
+bus/8/volume_db = 0.0
+bus/8/send = "Game"
+bus/8/effect/0/effect = SubResource( 6 )
+bus/8/effect/0/enabled = true
+bus/9/name = "PitchDown"
+bus/9/solo = false
+bus/9/mute = false
+bus/9/bypass_fx = false
+bus/9/volume_db = 0.0
+bus/9/send = "Game"
+bus/9/effect/0/effect = SubResource( 5 )
+bus/9/effect/0/enabled = true
+bus/10/name = "PitchDown2"
+bus/10/solo = false
+bus/10/mute = false
+bus/10/bypass_fx = false
+bus/10/volume_db = 0.0
+bus/10/send = "Game"
+bus/10/effect/0/effect = SubResource( 7 )
+bus/10/effect/0/enabled = true
+bus/11/name = "Reverb"
+bus/11/solo = false
+bus/11/mute = false
+bus/11/bypass_fx = false
+bus/11/volume_db = -0.00162125
+bus/11/send = "Game"
+bus/11/effect/0/effect = SubResource( 9 )
+bus/11/effect/0/enabled = true

@@ -1,0 +1,50 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"HitsparkD": {
+"duration": 18,
+"hframes": 6,
+"loop": false,
+"spritesheet": "HitsparkDSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+3: {
+"frame": 1
+},
+4: {
+"frame": 2
+},
+5: {
+"frame": 3
+},
+6: {
+"frame": 4
+},
+7: {
+"frame": 5
+},
+8: {
+"frame": 6
+},
+10: {
+"frame": 7
+},
+12: {
+"frame": 8
+},
+14: {
+"frame": 9
+},
+16: {
+"frame": 10
+}
+},
+"vframes": 2
+}
+}

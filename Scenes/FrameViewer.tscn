@@ -1,0 +1,669 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Scenes/FrameViewer.gd" type="Script" id=1]
+[ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=2]
+
+[sub_resource type="DynamicFont" id=49]
+size = 50
+outline_size = 5
+outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 2 )
+
+[sub_resource type="StyleBoxEmpty" id=48]
+
+[sub_resource type="Theme" id=50]
+default_font = SubResource( 49 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 49 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 48 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[node name="FrameViewer" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Back" type="ColorRect" parent="."]
+margin_top = -1208.0
+margin_right = 88.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="P1" type="Node2D" parent="."]
+position = Vector2( 7, -8 )
+
+[node name="ColorRect" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -16.0
+margin_right = 32.0
+
+[node name="ColorRect2" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -40.0
+margin_right = 32.0
+margin_bottom = -24.0
+
+[node name="ColorRect3" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -64.0
+margin_right = 32.0
+margin_bottom = -48.0
+
+[node name="ColorRect4" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -88.0
+margin_right = 32.0
+margin_bottom = -72.0
+
+[node name="ColorRect5" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -112.0
+margin_right = 32.0
+margin_bottom = -96.0
+
+[node name="ColorRect6" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -136.0
+margin_right = 32.0
+margin_bottom = -120.0
+
+[node name="ColorRect7" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -160.0
+margin_right = 32.0
+margin_bottom = -144.0
+
+[node name="ColorRect8" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -184.0
+margin_right = 32.0
+margin_bottom = -168.0
+
+[node name="ColorRect9" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -208.0
+margin_right = 32.0
+margin_bottom = -192.0
+
+[node name="ColorRect10" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -232.0
+margin_right = 32.0
+margin_bottom = -216.0
+
+[node name="ColorRect11" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -256.0
+margin_right = 32.0
+margin_bottom = -240.0
+
+[node name="ColorRect12" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -280.0
+margin_right = 32.0
+margin_bottom = -264.0
+
+[node name="ColorRect13" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -304.0
+margin_right = 32.0
+margin_bottom = -288.0
+
+[node name="ColorRect14" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -328.0
+margin_right = 32.0
+margin_bottom = -312.0
+
+[node name="ColorRect15" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -352.0
+margin_right = 32.0
+margin_bottom = -336.0
+
+[node name="ColorRect16" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -376.0
+margin_right = 32.0
+margin_bottom = -360.0
+
+[node name="ColorRect17" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -400.0
+margin_right = 32.0
+margin_bottom = -384.0
+
+[node name="ColorRect18" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -424.0
+margin_right = 32.0
+margin_bottom = -408.0
+
+[node name="ColorRect19" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -448.0
+margin_right = 32.0
+margin_bottom = -432.0
+
+[node name="ColorRect20" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -472.0
+margin_right = 32.0
+margin_bottom = -456.0
+
+[node name="ColorRect21" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -496.0
+margin_right = 32.0
+margin_bottom = -480.0
+
+[node name="ColorRect22" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -520.0
+margin_right = 32.0
+margin_bottom = -504.0
+
+[node name="ColorRect23" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -544.0
+margin_right = 32.0
+margin_bottom = -528.0
+
+[node name="ColorRect24" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -568.0
+margin_right = 32.0
+margin_bottom = -552.0
+
+[node name="ColorRect25" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -592.0
+margin_right = 32.0
+margin_bottom = -576.0
+
+[node name="ColorRect26" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -616.0
+margin_right = 32.0
+margin_bottom = -600.0
+
+[node name="ColorRect27" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -640.0
+margin_right = 32.0
+margin_bottom = -624.0
+
+[node name="ColorRect28" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -664.0
+margin_right = 32.0
+margin_bottom = -648.0
+
+[node name="ColorRect29" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -688.0
+margin_right = 32.0
+margin_bottom = -672.0
+
+[node name="ColorRect30" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -712.0
+margin_right = 32.0
+margin_bottom = -696.0
+
+[node name="ColorRect31" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -736.0
+margin_right = 32.0
+margin_bottom = -720.0
+
+[node name="ColorRect32" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -760.0
+margin_right = 32.0
+margin_bottom = -744.0
+
+[node name="ColorRect33" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -784.0
+margin_right = 32.0
+margin_bottom = -768.0
+
+[node name="ColorRect34" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -808.0
+margin_right = 32.0
+margin_bottom = -792.0
+
+[node name="ColorRect35" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -832.0
+margin_right = 32.0
+margin_bottom = -816.0
+
+[node name="ColorRect36" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -856.0
+margin_right = 32.0
+margin_bottom = -840.0
+
+[node name="ColorRect37" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -880.0
+margin_right = 32.0
+margin_bottom = -864.0
+
+[node name="ColorRect38" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -904.0
+margin_right = 32.0
+margin_bottom = -888.0
+
+[node name="ColorRect39" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -928.0
+margin_right = 32.0
+margin_bottom = -912.0
+
+[node name="ColorRect40" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -952.0
+margin_right = 32.0
+margin_bottom = -936.0
+
+[node name="ColorRect41" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -976.0
+margin_right = 32.0
+margin_bottom = -960.0
+
+[node name="ColorRect42" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1000.0
+margin_right = 32.0
+margin_bottom = -984.0
+
+[node name="ColorRect43" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1024.0
+margin_right = 32.0
+margin_bottom = -1008.0
+
+[node name="ColorRect44" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1048.0
+margin_right = 32.0
+margin_bottom = -1032.0
+
+[node name="ColorRect45" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1072.0
+margin_right = 32.0
+margin_bottom = -1056.0
+
+[node name="ColorRect46" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1096.0
+margin_right = 32.0
+margin_bottom = -1080.0
+
+[node name="ColorRect47" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1120.0
+margin_right = 32.0
+margin_bottom = -1104.0
+
+[node name="ColorRect48" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1144.0
+margin_right = 32.0
+margin_bottom = -1128.0
+
+[node name="ColorRect49" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1168.0
+margin_right = 32.0
+margin_bottom = -1152.0
+
+[node name="ColorRect50" type="ColorRect" parent="P1"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1192.0
+margin_right = 32.0
+margin_bottom = -1176.0
+
+[node name="P2" type="Node2D" parent="."]
+position = Vector2( 47, -8 )
+
+[node name="ColorRect" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -16.0
+margin_right = 32.0
+
+[node name="ColorRect2" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -40.0
+margin_right = 32.0
+margin_bottom = -24.0
+
+[node name="ColorRect3" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -64.0
+margin_right = 32.0
+margin_bottom = -48.0
+
+[node name="ColorRect4" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -88.0
+margin_right = 32.0
+margin_bottom = -72.0
+
+[node name="ColorRect5" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -112.0
+margin_right = 32.0
+margin_bottom = -96.0
+
+[node name="ColorRect6" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -136.0
+margin_right = 32.0
+margin_bottom = -120.0
+
+[node name="ColorRect7" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -160.0
+margin_right = 32.0
+margin_bottom = -144.0
+
+[node name="ColorRect8" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -184.0
+margin_right = 32.0
+margin_bottom = -168.0
+
+[node name="ColorRect9" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -208.0
+margin_right = 32.0
+margin_bottom = -192.0
+
+[node name="ColorRect10" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -232.0
+margin_right = 32.0
+margin_bottom = -216.0
+
+[node name="ColorRect11" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -256.0
+margin_right = 32.0
+margin_bottom = -240.0
+
+[node name="ColorRect12" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -280.0
+margin_right = 32.0
+margin_bottom = -264.0
+
+[node name="ColorRect13" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -304.0
+margin_right = 32.0
+margin_bottom = -288.0
+
+[node name="ColorRect14" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -328.0
+margin_right = 32.0
+margin_bottom = -312.0
+
+[node name="ColorRect15" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -352.0
+margin_right = 32.0
+margin_bottom = -336.0
+
+[node name="ColorRect16" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -376.0
+margin_right = 32.0
+margin_bottom = -360.0
+
+[node name="ColorRect17" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -400.0
+margin_right = 32.0
+margin_bottom = -384.0
+
+[node name="ColorRect18" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -424.0
+margin_right = 32.0
+margin_bottom = -408.0
+
+[node name="ColorRect19" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -448.0
+margin_right = 32.0
+margin_bottom = -432.0
+
+[node name="ColorRect20" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -472.0
+margin_right = 32.0
+margin_bottom = -456.0
+
+[node name="ColorRect21" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -496.0
+margin_right = 32.0
+margin_bottom = -480.0
+
+[node name="ColorRect22" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -520.0
+margin_right = 32.0
+margin_bottom = -504.0
+
+[node name="ColorRect23" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -544.0
+margin_right = 32.0
+margin_bottom = -528.0
+
+[node name="ColorRect24" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -568.0
+margin_right = 32.0
+margin_bottom = -552.0
+
+[node name="ColorRect25" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -592.0
+margin_right = 32.0
+margin_bottom = -576.0
+
+[node name="ColorRect26" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -616.0
+margin_right = 32.0
+margin_bottom = -600.0
+
+[node name="ColorRect27" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -640.0
+margin_right = 32.0
+margin_bottom = -624.0
+
+[node name="ColorRect28" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -664.0
+margin_right = 32.0
+margin_bottom = -648.0
+
+[node name="ColorRect29" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -688.0
+margin_right = 32.0
+margin_bottom = -672.0
+
+[node name="ColorRect30" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -712.0
+margin_right = 32.0
+margin_bottom = -696.0
+
+[node name="ColorRect31" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -736.0
+margin_right = 32.0
+margin_bottom = -720.0
+
+[node name="ColorRect32" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -760.0
+margin_right = 32.0
+margin_bottom = -744.0
+
+[node name="ColorRect33" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -784.0
+margin_right = 32.0
+margin_bottom = -768.0
+
+[node name="ColorRect34" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -808.0
+margin_right = 32.0
+margin_bottom = -792.0
+
+[node name="ColorRect35" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -832.0
+margin_right = 32.0
+margin_bottom = -816.0
+
+[node name="ColorRect36" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -856.0
+margin_right = 32.0
+margin_bottom = -840.0
+
+[node name="ColorRect37" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -880.0
+margin_right = 32.0
+margin_bottom = -864.0
+
+[node name="ColorRect38" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -904.0
+margin_right = 32.0
+margin_bottom = -888.0
+
+[node name="ColorRect39" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -928.0
+margin_right = 32.0
+margin_bottom = -912.0
+
+[node name="ColorRect40" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -952.0
+margin_right = 32.0
+margin_bottom = -936.0
+
+[node name="ColorRect41" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -976.0
+margin_right = 32.0
+margin_bottom = -960.0
+
+[node name="ColorRect42" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1000.0
+margin_right = 32.0
+margin_bottom = -984.0
+
+[node name="ColorRect43" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1024.0
+margin_right = 32.0
+margin_bottom = -1008.0
+
+[node name="ColorRect44" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1048.0
+margin_right = 32.0
+margin_bottom = -1032.0
+
+[node name="ColorRect45" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1072.0
+margin_right = 32.0
+margin_bottom = -1056.0
+
+[node name="ColorRect46" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1096.0
+margin_right = 32.0
+margin_bottom = -1080.0
+
+[node name="ColorRect47" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1120.0
+margin_right = 32.0
+margin_bottom = -1104.0
+
+[node name="ColorRect48" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1144.0
+margin_right = 32.0
+margin_bottom = -1128.0
+
+[node name="ColorRect49" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1168.0
+margin_right = 32.0
+margin_bottom = -1152.0
+
+[node name="ColorRect50" type="ColorRect" parent="P2"]
+modulate = Color( 0.2, 0.2, 0.2, 1 )
+margin_top = -1192.0
+margin_right = 32.0
+margin_bottom = -1176.0
+
+[node name="Startup" type="Label" parent="."]
+margin_left = -64.0
+margin_top = -5.0
+margin_right = 152.0
+margin_bottom = 66.0
+theme = SubResource( 50 )
+text = "S: 10"
+align = 1
+
+[node name="Advantage" type="Label" parent="."]
+margin_left = -64.0
+margin_top = 48.0
+margin_right = 152.0
+margin_bottom = 119.0
+theme = SubResource( 50 )
+text = "+ 10"
+align = 1
+
+[node name="Startup2" type="Label" parent="."]
+margin_left = -64.0
+margin_top = 102.0
+margin_right = 152.0
+margin_bottom = 173.0
+theme = SubResource( 50 )
+text = "S: 10"
+align = 1

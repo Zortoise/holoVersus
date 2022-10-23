@@ -1,0 +1,449 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/Debugger.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+logs = {
+"rollback_check": [  ]
+}
+save_stateA = {
+"NPE_back_data": [  ],
+"NPE_front_data": [  ],
+"SFX_back_data": [  ],
+"SFX_front_data": [ {
+"SpritePlayer_data": {
+"current_animation": "HitsparkB",
+"looped_back": false,
+"playing": true,
+"time": 6,
+"to_play_animation": "HitsparkB"
+},
+"free": false,
+"loaded_sfx_ref": "HitsparkB",
+"palette_ref": null,
+"position": Vector2( 32, 77 ),
+"rotation": 3.82689,
+"scale": Vector2( 1, 1 )
+} ],
+"audio_data": [ {
+"audio_ref": "water8",
+"bus": "Game",
+"free": false,
+"time": 95,
+"unique_path": NodePath("/root/GameViewport/ViewportContainer/Viewport/Game/Players/@Character@46"),
+"volume_target": -10
+}, {
+"audio_ref": "impact12",
+"bus": "Game",
+"free": false,
+"time": 5,
+"unique_path": null,
+"volume_target": -15
+}, {
+"audio_ref": "whoosh14",
+"bus": "PitchDown",
+"free": false,
+"time": 5,
+"unique_path": null,
+"volume_target": -9
+} ],
+"match_data": {
+"captured_input_state": {
+"old_pressed": [ 3 ],
+"pressed": [ 3 ]
+},
+"frametime": 460,
+"matchtime": 10466,
+"player_input_state": {
+"just_pressed": [  ],
+"just_released": [  ],
+"pressed": [ 3 ]
+}
+},
+"player_data": {
+0: {
+"BlockStunTimer_time": 0,
+"EXTimer_time": 0,
+"FadePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 0,
+"to_play_animation": ""
+},
+"HitStopTimer_time": 1,
+"HitStunTimer_time": 0,
+"ModulatePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 0,
+"to_play_animation": ""
+},
+"MovMemClearTimer_time": 0,
+"PBlockCDTimer_time": 0,
+"PBlockTimer_time": 0,
+"RespawnTimer_time": 0,
+"SpecialTimer_time": 0,
+"SpritePlayer_data": {
+"current_animation": "aF1Active",
+"looped_back": false,
+"playing": true,
+"time": 1,
+"to_play_animation": "aF1Active"
+},
+"Sprites_visible": true,
+"SuperTimer_time": 0,
+"VarJumpTimer_time": 0,
+"aerial_memory": [  ],
+"air_dash": 1,
+"air_jump": 2,
+"chain_combo": 1,
+"chaining": false,
+"current_damage_value": 0.0,
+"current_ex_gauge": 100.25,
+"current_guard_gauge": 0.0,
+"dash_cancel": false,
+"facing": 1,
+"hitcount_record": [ [ 1, 1 ] ],
+"ignore_list": [  ],
+"input_buffer": [  ],
+"jump_cancel": true,
+"launch_starting_rot": 0.0,
+"move_memory": [  ],
+"new_state": 19,
+"null_friction": false,
+"null_gravity": false,
+"orig_hitstun": 0,
+"perfect_chain": false,
+"position": Vector2( 11, 74 ),
+"sfx_over_visible": true,
+"sfx_under_visible": false,
+"shadow_timer": 0,
+"sprite_rotation": 0.0,
+"sprite_scale": Vector2( 1, 1 ),
+"state": 19,
+"status_effects": [  ],
+"stock_points_left": 4000,
+"to_clear_mov_mem": false,
+"unique_data": {
+},
+"velocity": Vector2( 41.8, 0 ),
+"velocity_limiter": {
+"down": 1.0,
+"up": null,
+"x": 0.75,
+"x_slow": null,
+"y_slow": null
+},
+"velocity_previous_frame": Vector2( 44, 0 ),
+"wall_jump": 5
+},
+1: {
+"BlockStunTimer_time": 0,
+"EXTimer_time": 0,
+"FadePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 0,
+"to_play_animation": ""
+},
+"HitStopTimer_time": 1,
+"HitStunTimer_time": 35,
+"ModulatePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 4,
+"to_play_animation": "tech_flash"
+},
+"MovMemClearTimer_time": 0,
+"PBlockCDTimer_time": 0,
+"PBlockTimer_time": 0,
+"RespawnTimer_time": 0,
+"SpecialTimer_time": 0,
+"SpritePlayer_data": {
+"current_animation": "FlinchAStop",
+"looped_back": false,
+"playing": true,
+"time": 0,
+"to_play_animation": "FlinchA"
+},
+"Sprites_visible": true,
+"SuperTimer_time": 0,
+"VarJumpTimer_time": 0,
+"aerial_memory": [  ],
+"air_dash": 1,
+"air_jump": 2,
+"chain_combo": 0,
+"chaining": false,
+"current_damage_value": 270.0,
+"current_ex_gauge": 31.125,
+"current_guard_gauge": -14.0,
+"dash_cancel": false,
+"facing": -1,
+"hitcount_record": [  ],
+"ignore_list": [  ],
+"input_buffer": [  ],
+"jump_cancel": false,
+"launch_starting_rot": 1.5708,
+"move_memory": [ [ 0, "aF1" ] ],
+"new_state": 12,
+"null_friction": false,
+"null_gravity": false,
+"orig_hitstun": 35,
+"perfect_chain": false,
+"position": Vector2( 31, 74 ),
+"sfx_over_visible": false,
+"sfx_under_visible": false,
+"shadow_timer": 0,
+"sprite_rotation": 0.0,
+"sprite_scale": Vector2( -1, 1 ),
+"state": 12,
+"status_effects": [  ],
+"stock_points_left": 4000,
+"to_clear_mov_mem": false,
+"unique_data": {
+},
+"velocity": Vector2( 278.723, 227.846 ),
+"velocity_limiter": {
+"down": null,
+"up": null,
+"x": null,
+"x_slow": null,
+"y_slow": null
+},
+"velocity_previous_frame": Vector2( 0, 0 ),
+"wall_jump": 5
+}
+},
+"shadow_data": [  ],
+"stage_data": {
+}
+}
+save_stateB = {
+"NPE_back_data": [  ],
+"NPE_front_data": [  ],
+"SFX_back_data": [  ],
+"SFX_front_data": [ {
+"SpritePlayer_data": {
+"current_animation": "HitsparkB",
+"looped_back": false,
+"playing": true,
+"time": 6,
+"to_play_animation": "HitsparkB"
+},
+"free": false,
+"loaded_sfx_ref": "HitsparkB",
+"palette_ref": null,
+"position": Vector2( 32, 77 ),
+"rotation": 3.82689,
+"scale": Vector2( 1, 1 )
+} ],
+"audio_data": [ {
+"audio_ref": "water8",
+"bus": "Game",
+"free": false,
+"time": 95,
+"unique_path": NodePath("/root/GameViewport/ViewportContainer/Viewport/Game/Players/@Character@32"),
+"volume_target": -10
+}, {
+"audio_ref": "impact12",
+"bus": "Game",
+"free": false,
+"time": 5,
+"unique_path": null,
+"volume_target": -15
+}, {
+"audio_ref": "whoosh14",
+"bus": "PitchDown",
+"free": false,
+"time": 5,
+"unique_path": null,
+"volume_target": -9
+} ],
+"match_data": {
+"captured_input_state": {
+"old_pressed": [ 3 ],
+"pressed": [ 3 ]
+},
+"frametime": 460,
+"matchtime": 10466,
+"player_input_state": {
+"just_pressed": [  ],
+"just_released": [  ],
+"pressed": [ 3 ]
+}
+},
+"player_data": {
+0: {
+"BlockStunTimer_time": 0,
+"EXTimer_time": 0,
+"FadePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 0,
+"to_play_animation": ""
+},
+"HitStopTimer_time": 1,
+"HitStunTimer_time": 0,
+"ModulatePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 0,
+"to_play_animation": ""
+},
+"MovMemClearTimer_time": 0,
+"PBlockCDTimer_time": 0,
+"PBlockTimer_time": 0,
+"RespawnTimer_time": 0,
+"SpecialTimer_time": 0,
+"SpritePlayer_data": {
+"current_animation": "aF1Active",
+"looped_back": false,
+"playing": true,
+"time": 1,
+"to_play_animation": "aF1Active"
+},
+"Sprites_visible": true,
+"SuperTimer_time": 0,
+"VarJumpTimer_time": 0,
+"aerial_memory": [  ],
+"air_dash": 1,
+"air_jump": 2,
+"chain_combo": 1,
+"chaining": false,
+"current_damage_value": 0.0,
+"current_ex_gauge": 100.25,
+"current_guard_gauge": 0.0,
+"dash_cancel": false,
+"facing": 1,
+"hitcount_record": [ [ 1, 1 ] ],
+"ignore_list": [  ],
+"input_buffer": [  ],
+"jump_cancel": true,
+"launch_starting_rot": 0.0,
+"move_memory": [  ],
+"new_state": 19,
+"null_friction": false,
+"null_gravity": false,
+"orig_hitstun": 0,
+"perfect_chain": false,
+"position": Vector2( 11, 74 ),
+"sfx_over_visible": true,
+"sfx_under_visible": false,
+"shadow_timer": 0,
+"sprite_rotation": 0.0,
+"sprite_scale": Vector2( 1, 1 ),
+"state": 19,
+"status_effects": [  ],
+"stock_points_left": 4000,
+"to_clear_mov_mem": false,
+"unique_data": {
+},
+"velocity": Vector2( 41.8, 0 ),
+"velocity_limiter": {
+"down": 1.0,
+"up": null,
+"x": 0.75,
+"x_slow": null,
+"y_slow": null
+},
+"velocity_previous_frame": Vector2( 44, 0 ),
+"wall_jump": 5
+},
+1: {
+"BlockStunTimer_time": 0,
+"EXTimer_time": 0,
+"FadePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 0,
+"to_play_animation": ""
+},
+"HitStopTimer_time": 1,
+"HitStunTimer_time": 35,
+"ModulatePlayer_data": {
+"current_animation": "",
+"looped_back": false,
+"playing": false,
+"time": 4,
+"to_play_animation": "tech_flash"
+},
+"MovMemClearTimer_time": 0,
+"PBlockCDTimer_time": 0,
+"PBlockTimer_time": 0,
+"RespawnTimer_time": 0,
+"SpecialTimer_time": 0,
+"SpritePlayer_data": {
+"current_animation": "FlinchAStop",
+"looped_back": false,
+"playing": true,
+"time": 0,
+"to_play_animation": "FlinchA"
+},
+"Sprites_visible": true,
+"SuperTimer_time": 0,
+"VarJumpTimer_time": 0,
+"aerial_memory": [  ],
+"air_dash": 1,
+"air_jump": 2,
+"chain_combo": 0,
+"chaining": false,
+"current_damage_value": 270.0,
+"current_ex_gauge": 31.125,
+"current_guard_gauge": -14.0,
+"dash_cancel": false,
+"facing": -1,
+"hitcount_record": [  ],
+"ignore_list": [  ],
+"input_buffer": [  ],
+"jump_cancel": false,
+"launch_starting_rot": 1.5708,
+"move_memory": [ [ 0, "aF1" ] ],
+"new_state": 12,
+"null_friction": false,
+"null_gravity": false,
+"orig_hitstun": 35,
+"perfect_chain": false,
+"position": Vector2( 31, 74 ),
+"sfx_over_visible": false,
+"sfx_under_visible": false,
+"shadow_timer": 0,
+"sprite_rotation": 0.0,
+"sprite_scale": Vector2( -1, 1 ),
+"state": 12,
+"status_effects": [  ],
+"stock_points_left": 4000,
+"to_clear_mov_mem": false,
+"unique_data": {
+},
+"velocity": Vector2( 278.723, 227.846 ),
+"velocity_limiter": {
+"down": null,
+"up": null,
+"x": null,
+"x_slow": null,
+"y_slow": null
+},
+"velocity_previous_frame": Vector2( 0, 0 ),
+"wall_jump": 5
+}
+},
+"shadow_data": [  ],
+"stage_data": {
+}
+}
+physics_logs = {
+}
+damage_logs = {
+}
+gg_logs = {
+}
+mm_logs = {
+}

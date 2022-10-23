@@ -1,0 +1,287 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"AirDashDust": {
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 20
+},
+4: {
+"frame": 21
+},
+8: {
+"frame": 22
+},
+12: {
+"frame": 23
+}
+},
+"vframes": 11
+},
+"AirJumpDust": {
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 12
+},
+4: {
+"frame": 13
+},
+8: {
+"frame": 14
+},
+12: {
+"frame": 15
+}
+},
+"vframes": 11
+},
+"BounceDust": {
+"duration": 20,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 46
+},
+4: {
+"frame": 47
+},
+8: {
+"frame": 48
+},
+12: {
+"frame": 49
+},
+16: {
+"frame": 50
+}
+},
+"vframes": 11
+},
+"DragRocks": {
+"duration": 46,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 51
+},
+3: {
+"frame": 52
+},
+6: {
+"frame": 53
+},
+10: {
+"frame": 54
+},
+14: {
+"frame": 55
+},
+18: {
+"frame": 56
+},
+22: {
+"frame": 57
+},
+26: {
+"frame": 58
+},
+30: {
+"frame": 59
+},
+34: {
+"frame": 60
+},
+38: {
+"frame": 61
+},
+42: {
+"frame": 62
+}
+},
+"vframes": 11
+},
+"GroundDashDust": {
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 16
+},
+4: {
+"frame": 17
+},
+8: {
+"frame": 18
+},
+12: {
+"frame": 19
+}
+},
+"vframes": 11
+},
+"JumpDust": {
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 4
+},
+4: {
+"frame": 5
+},
+8: {
+"frame": 6
+},
+12: {
+"frame": 7
+}
+},
+"vframes": 11
+},
+"LandDust": {
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 8
+},
+4: {
+"frame": 9
+},
+8: {
+"frame": 10
+},
+12: {
+"frame": 11
+}
+},
+"vframes": 11
+},
+"LaunchDust": {
+"duration": 26,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 24
+},
+2: {
+"frame": 25
+},
+4: {
+"frame": 26
+},
+6: {
+"frame": 27
+},
+8: {
+"frame": 28
+},
+10: {
+"frame": 29
+},
+12: {
+"frame": 30
+},
+14: {
+"frame": 31
+},
+16: {
+"frame": 32
+},
+18: {
+"frame": 33
+},
+20: {
+"frame": 34
+},
+22: {
+"frame": 35
+},
+24: {
+"frame": 36
+}
+},
+"vframes": 11
+},
+"RunDust": {
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+4: {
+"frame": 1
+},
+8: {
+"frame": 2
+},
+12: {
+"frame": 3
+}
+},
+"vframes": 11
+},
+"SpecialDust": {
+"duration": 36,
+"hframes": 6,
+"loop": false,
+"spritesheet": "DustCloudsSprite",
+"timestamps": {
+0: {
+"frame": 37
+},
+4: {
+"frame": 38
+},
+8: {
+"frame": 39
+},
+12: {
+"frame": 40
+},
+16: {
+"frame": 41
+},
+20: {
+"frame": 42
+},
+24: {
+"frame": 43
+},
+28: {
+"frame": 44
+},
+32: {
+"frame": 45
+}
+},
+"vframes": 11
+}
+}

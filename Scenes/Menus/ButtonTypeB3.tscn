@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Scenes/Menus/ButtonTypeA.gd" type="Script" id=2]
+
+[sub_resource type="DynamicFont" id=52]
+size = 25
+use_filter = true
+extra_spacing_top = 8
+extra_spacing_bottom = 4
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxEmpty" id=48]
+
+[sub_resource type="DynamicFont" id=50]
+size = 30
+use_filter = true
+extra_spacing_top = 13
+extra_spacing_bottom = 7
+font_data = ExtResource( 1 )
+
+[sub_resource type="Theme" id=51]
+default_font = SubResource( 50 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 52 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 48 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[node name="ButtonTypeB3" type="Button"]
+margin_right = 752.0
+margin_bottom = 43.0
+theme = SubResource( 51 )
+custom_constants/hseparation = 10
+action_mode = 0
+text = "Test"
+flat = true
+align = 0
+script = ExtResource( 2 )
+
+[connection signal="focus_entered" from="." to="." method="_on_focus_entered"]
+[connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="pressed" from="." to="." method="_on_pressed"]
