@@ -36,7 +36,7 @@ const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing whe
 # const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
 const PERFECTCHAIN_GGG_MOD = 0.5 # Guard Gain on hitstunned defender is reduced on perfect chains
 const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on repeat_penalty
-const DMG_REDUCTION_AT_MAX_GG = 0.3 # max reduction in damage when defender's Guard Gauge is at 200%
+const DMG_REDUCTION_AT_MAX_GG = 0.4 # max reduction in damage when defender's Guard Gauge is at 200%
 const HITSTUN_REDUCTION_AT_MAX_GG = 0.2 # max reduction in hitstun when defender's Guard Gauge is at 200%
 const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POSTIVE_FLOW_REGEN_MOD = 6.0 # increased Guard Guard Regen during Postive Flow
@@ -2682,6 +2682,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker.reset_jumps()
 			defender.reset_jumps()
 		elif hit_data.move_name == "BurstExtend":
+			attacker.reset_jumps()
+			defender.reset_jumps()
 			defender.current_guard_gauge = 0
 			Globals.Game.guard_gauge_update(defender)
 			defender.move_memory = []

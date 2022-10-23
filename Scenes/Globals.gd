@@ -82,7 +82,7 @@ var P2_input_style = 0
 var starting_stock_pts = 4450
 var time_limit = 445
 var assists = 0
-var static_stage = 0 # 0 is false, 1 is true
+var static_stage = 1 # 0 is false, 1 is true
 var music = "" # WIP
 
 var match_input_log = load("res://Scenes/InputLog.gd").new() # save here, for easier saving to replays
