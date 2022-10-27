@@ -99,48 +99,50 @@ func stimulate():
 				Character.animate("AirBlockStartup")
 		
 		if Character.dir != 0:
-			if Animator.query(["L1Startup"]):
+			if Animator.query(["L1Startup"]) and Character.test_qc_chain_combo("F1"):
 				Character.animate("F1Startup")
-			elif Animator.query(["aL1Startup"]):
+			elif Animator.query(["aL1Startup"]) and Character.test_qc_chain_combo("aF1"):
 				Character.animate("aF1Startup")
 		else:
-			if Animator.query(["F1Startup"]):
+			if Animator.query(["F1Startup"]) and Character.test_qc_chain_combo("L1"):
 				Character.animate("L1Startup")
-			elif Animator.query(["aF1Startup"]):
+			elif Animator.query(["aF1Startup"]) and Character.test_qc_chain_combo("aL1"):
 				Character.animate("aL1Startup")
 		
 		if Character.button_up in Character.input_state.just_pressed:
-			if Animator.query(["L1Startup", "F1Startup"]):
+			if Animator.query(["L1Startup", "F1Startup"]) and Character.test_qc_chain_combo("F3"):
 				Character.animate("F3Startup")
-			elif Animator.query(["aL1Startup", "aF1Startup"]):
+			elif Animator.query(["aL1Startup", "aF1Startup"]) and Character.test_qc_chain_combo("aF3"):
 				Character.animate("aF3Startup")
 				
 		if Character.button_up in Character.input_state.just_released:
 			if Animator.query(["aF3Startup"]):
-				if Character.dir == 0:
+				if Character.dir == 0 and Character.test_qc_chain_combo("aL1"):
 					Character.animate("aL1Startup")
-				else:
+				elif Character.test_qc_chain_combo("aF1"):
 					Character.animate("aF1Startup")
 				
 		if Character.button_down in Character.input_state.just_pressed:
-			if Animator.query(["L1Startup", "F1Startup"]):
+			if Animator.query(["L1Startup", "F1Startup"]) and Character.test_qc_chain_combo("L2"):
 				Character.animate("L2Startup")
-			elif Animator.query(["aL1Startup", "aF1Startup"]):
+			elif Animator.query(["aL1Startup", "aF1Startup"]) and Character.test_qc_chain_combo("aL2"):
 				Character.animate("aL2Startup")
-			elif Animator.query(["HStartup"]):
+			elif Animator.query(["HStartup"]) and Character.test_qc_chain_combo("F2"):
 				Character.animate("F2Startup")
 				
 		if Character.button_down in Character.input_state.just_released:
 			if Animator.query(["aL2Startup"]):
-				if Character.dir == 0:
+				if Character.dir == 0 and Character.test_qc_chain_combo("aL1"):
 					Character.animate("aL1Startup")
-				else:
+				elif Character.test_qc_chain_combo("aF1"):
 					Character.animate("aF1Startup")
 			elif Animator.query(["L2Startup"]):
-				if Character.dir == 0:
+				if Character.dir == 0 and Character.test_qc_chain_combo("L1"):
 					Character.animate("L1Startup")
-				else:
+				elif Character.test_qc_chain_combo("F1"):
 					Character.animate("F1Startup")
+			elif Animator.query(["F2Startup"]) and Character.test_qc_chain_combo("H"):
+				Character.animate("HStartup")
 				
 #		if Character.button_fierce in Character.input_state.just_pressed:
 #			if Animator.query(["L1Startup", "L2Startup"]):

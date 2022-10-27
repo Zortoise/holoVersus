@@ -79,43 +79,43 @@ func stimulate():
 	if Character.check_quick_cancel():
 		
 		if Character.button_up in Character.input_state.just_pressed:
-			if Animator.query(["F1Startup"]):
+			if Animator.query(["F1Startup"]) and Character.test_qc_chain_combo("F3"):
 				Character.animate("F3Startup")
-			elif Animator.query(["aF1Startup"]):
+			elif Animator.query(["aF1Startup"]) and Character.test_qc_chain_combo("aF3"):
 				Character.animate("aF3Startup")
 				
 		if Character.button_up in Character.input_state.just_released:
-			if Animator.query(["F3Startup"]):
+			if Animator.query(["F3Startup"]) and Character.test_qc_chain_combo("F1"):
 				Character.animate("F1Startup")
-			elif Animator.query(["aF3Startup"]):
+			elif Animator.query(["aF3Startup"]) and Character.test_qc_chain_combo("aF1"):
 				Character.animate("aF1Startup")
 				
 		if Character.button_down in Character.input_state.just_pressed:
-			if Animator.query(["F1Startup"]):
+			if Animator.query(["F1Startup"]) and Character.test_qc_chain_combo("F2"):
 				Character.animate("F2Startup")
-			elif Animator.query(["L1Startup"]):
+			elif Animator.query(["L1Startup"]) and Character.test_qc_chain_combo("L2"):
 				Character.animate("L2Startup")
-			elif Animator.query(["aL1Startup"]):
+			elif Animator.query(["aL1Startup"]) and Character.test_qc_chain_combo("aL2"):
 				Character.animate("aL2Startup")
 				
 		if Character.button_down in Character.input_state.just_released:
-			if Animator.query(["F2Startup"]):
+			if Animator.query(["F2Startup"]) and Character.test_qc_chain_combo("F1"):
 				Character.animate("F1Startup")
-			elif Animator.query(["L2Startup"]):
+			elif Animator.query(["L2Startup"]) and Character.test_qc_chain_combo("L1"):
 				Character.animate("L1Startup")
-			elif Animator.query(["aL2Startup"]):
+			elif Animator.query(["aL2Startup"]) and Character.test_qc_chain_combo("aL1"):
 				Character.animate("aL1Startup")				
 				
 		if Character.button_fierce in Character.input_state.just_pressed:
-			if Animator.query(["L1Startup", "L2Startup"]):
+			if Animator.query(["L1Startup", "L2Startup"]) and Character.test_qc_chain_combo("H"):
 				Character.animate("HStartup")
-			elif Animator.query(["aL1Startup", "aL2Startup"]):
+			elif Animator.query(["aL1Startup", "aL2Startup"]) and Character.test_qc_chain_combo("aH"):
 				Character.animate("aHStartup")
 		
 		if Character.button_light in Character.input_state.just_pressed:
-			if Animator.query(["F1Startup", "F2Startup", "F3Startup"]):
+			if Animator.query(["F1Startup", "F2Startup", "F3Startup"]) and Character.test_qc_chain_combo("H"):
 				Character.animate("HStartup")
-			elif Animator.query(["aF1Startup", "aF3Startup"]):
+			elif Animator.query(["aF1Startup", "aF3Startup"]) and Character.test_qc_chain_combo("aH"):
 				Character.animate("aHStartup")
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------

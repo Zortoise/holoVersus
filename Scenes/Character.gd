@@ -2116,6 +2116,11 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	return true
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
 	
+func test_qc_chain_combo(attack_ref):
+	if chain_combo == 2: # on blocking opponent, can only qc into moves of higher strength
+		if get_atk_strength(chain_memory.back()) >= get_atk_strength(attack_ref):
+			return false
+	else: return true
 	
 func get_atk_strength(move):
 	if !move in UniqueCharacter.MOVE_DATABASE:
@@ -3244,6 +3249,9 @@ func generate_blockspark(hit_data):
 # universal actions
 func _on_SpritePlayer_anim_finished(anim_name):
 	
+	if is_atk_active():
+		reset_cancels()
+	
 	match anim_name:
 		"RunTransit":
 			animate("Run")
@@ -3331,14 +3339,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("FallTransit")
 
 	UniqueCharacter._on_SpritePlayer_anim_finished(anim_name)
-			
+
 
 func _on_SpritePlayer_anim_started(anim_name):
 	
 	state = state_detect(Animator.current_animation) # update state
 	
 	if is_atk_startup(): #add to aerial memory if needed
-		reset_cancels()
 		var move_name = anim_name.trim_suffix("Startup")
 		if move_name in UniqueCharacter.MOVE_DATABASE and Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
 			aerial_memory.append(move_name)
