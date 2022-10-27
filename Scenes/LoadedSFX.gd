@@ -602,7 +602,7 @@ var burst_extend_move_data = {
 		"priority": 9,
 		"fixed_proj_hitstop" : 0,
 		"fixed_hitstop" : 15,
-		"fixed_hitstun" : 40,
+		"fixed_hitstun" : 50,
 		"fixed_blockstun" : 5,
 		"guard_drain": 0,
 		"guard_gain_on_combo" : 0,

@@ -85,18 +85,24 @@ func stimulate():
 				Character.animate("aF3Startup")
 				
 		if Character.button_up in Character.input_state.just_released:
-			if Animator.query(["aF3Startup"]):
+			if Animator.query(["F3Startup"]):
+				Character.animate("F1Startup")
+			elif Animator.query(["aF3Startup"]):
 				Character.animate("aF1Startup")
 				
 		if Character.button_down in Character.input_state.just_pressed:
 			if Animator.query(["F1Startup"]):
 				Character.animate("F2Startup")
+			elif Animator.query(["L1Startup"]):
+				Character.animate("L2Startup")
 			elif Animator.query(["aL1Startup"]):
 				Character.animate("aL2Startup")
 				
 		if Character.button_down in Character.input_state.just_released:
 			if Animator.query(["F2Startup"]):
 				Character.animate("F1Startup")
+			elif Animator.query(["L2Startup"]):
+				Character.animate("L1Startup")
 			elif Animator.query(["aL2Startup"]):
 				Character.animate("aL1Startup")				
 				

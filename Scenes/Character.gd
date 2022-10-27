@@ -433,7 +433,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 			"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity) + "  grounded: " + str(grounded) + \
-			"\ntap_memory: " + str(tap_memory) + "\n" + str(input_state) + "\n" + str(current_guard_gauge) + " " + \
+			"\nchain_memory: " + str(chain_memory) + "\n" + str(input_state) + "\n" + str(current_guard_gauge) + " " + \
 			str(current_ex_gauge)
 			
 			
@@ -1482,6 +1482,7 @@ func respawn():
 			
 	current_damage_value = 0
 	current_guard_gauge = 0
+	change_burst_token(true) # gain Burst on death
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
@@ -1707,7 +1708,7 @@ func shadow_trail(starting_modulate_a = 0.5, lifetime = 10.0): # one shadow ever
 func launch_trail():
 	var frequency: int
 	if velocity.length() <= LAUNCH_DUST_THRESHOLD * 0.5:
-		frequency = 4
+		frequency = 5
 	elif velocity.length() <= LAUNCH_DUST_THRESHOLD: # the faster you go the more frequent the launch dust
 		frequency = 3
 	elif velocity.length() <= LAUNCH_DUST_THRESHOLD * 2:
@@ -2317,15 +2318,15 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
 	match hit_data.block_state:
 		Globals.block_state.UNBLOCKED:
-			if !hit_data.repeat_penalty:
+			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain)
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-			if !hit_data.repeat_penalty:
+			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain)
 		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 			defender.change_ex_gauge(hit_data.move_data.EX_gain)
 		_:  # normal block
-			if !hit_data.repeat_penalty:
+			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
 			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
 	
@@ -2351,7 +2352,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		chain_combo = 0 # no chain combo if a move with NO_CHAIN_ON_BLOCK is blocked, unless it's wrongblocked
 		# NO_CHAIN_ON_BLOCK is for moves like anti-air to become punishable on block, not for Heavy attacks
 		
-	elif !hit_data.repeat_penalty and hit_data.block_state != Globals.block_state.AIR_PERFECT and \
+	elif !hit_data.double_repeat and hit_data.block_state != Globals.block_state.AIR_PERFECT and \
 			hit_data.block_state != Globals.block_state.GROUND_PERFECT:
 				
 		match hit_data.move_data.atk_type:
@@ -2420,7 +2421,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		var volume_change = 0
 		if hit_data.lethal_hit or hit_data.break_hit or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
-		elif hit_data.move_data.attack_level <= 1 or hit_data.repeat_penalty or hit_data.semi_disjoint: # last for VULN_LIMBS
+		elif hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
 		
 		if !hit_data.move_data.hit_sound is Array:
@@ -2476,6 +2477,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data["break_hit"] = false
 	hit_data["block_state"] = Globals.block_state.UNBLOCKED # WIP
 	hit_data["repeat_penalty"] = false
+	hit_data["double_repeat"] = false
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -2492,7 +2494,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# for projectiles, use the attacker's ID
 	
 	var weak_hit
-	if hit_data.move_data.attack_level <= 1 or hit_data.repeat_penalty or hit_data.semi_disjoint or \
+	if hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
 			!attacker_or_entity.is_hitcount_last_hit(defender.player_ID, hit_data.move_data): # multi-hit moves cannot cause lethal/break/sweetspot/punish outside of last hit
 		weak_hit = true
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
@@ -2633,7 +2635,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Globals.atk_attr.AUTOCHAIN in attacker.query_atk_attr(hit_data.move_name):
 		hit_data.lethal_hit = false
 	
-	if hit_data.repeat_penalty:
+	if hit_data.double_repeat:
 		add_status_effect(Globals.status_effect.REPEAT, 10)
 		
 	elif hit_data.break_hit:
@@ -2860,7 +2862,7 @@ func calculate_damage(hit_data):
 			damage *= Globals.trait_lookup(Globals.trait.VULN_LIMBS) # VULN_LIMBS trait cause SD hits to do more damage
 		else:
 			damage = 0
-	elif hit_data.repeat_penalty:
+	elif hit_data.double_repeat:
 		damage *= REPEAT_DMG_MOD
 	else:
 		if hit_data.break_hit:
@@ -2911,8 +2913,8 @@ func calculate_guard_gauge_change(hit_data):
 	if (defender.move_memory.size() > 0 or defender.get_node("HitStunTimer").is_running()):
 		# defender in hitstun or a little after, guard_gauge_change is positive
 		guard_gauge_change = hit_data.move_data.guard_gain_on_combo
-		if hit_data.repeat_penalty:
-			guard_gauge_change *= REPEAT_GGG_MOD # Guard Gain on hitstunned defender is increased on repeat_penalty
+		if hit_data.double_repeat:
+			guard_gauge_change *= REPEAT_GGG_MOD # Guard Gain on hitstunned defender is increased on double_repeat
 		if hit_data.sweetspotted:
 			guard_gauge_change *= SWEETSPOT_GGG_MOD # Guard Gain on hitstunned defender is reduced on sweetspotted hit
 		if !"entity_nodepath" in hit_data and attacker_or_entity.perfect_chain:
@@ -2924,7 +2926,7 @@ func calculate_guard_gauge_change(hit_data):
 		guard_gauge_change = -hit_data.move_data.guard_drain
 		if hit_data.semi_disjoint:
 			guard_gauge_change *= 1.0 # may lower it, or let whiff punishes drain GG?
-		elif hit_data.repeat_penalty:
+		elif hit_data.double_repeat:
 			guard_gauge_change *= 0.0 # on blockstunned target
 		else:
 			if hit_data.sweetspotted:
@@ -3057,12 +3059,8 @@ func adjusted_atk_level(hit_data): # mostly for hitstun and blockstun
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
 		attack_level -= 1 # atk lvl 2 become weak hit
 		attack_level = clamp(attack_level, 1, 2)
-	elif hit_data.repeat_penalty: # lower hitstun on repeat_penalty
-		if "double_repeat" in hit_data:
-			return 1 # double repeat is forced attack level 1
-		else:
-			attack_level -= 1
-			attack_level = clamp(attack_level, 1, 8)
+	elif hit_data.double_repeat:
+		return 1 # double repeat is forced attack level 1
 	else:
 		if hit_data.sweetspotted: # sweetspotted and Punish Hits give more hitstun
 			attack_level += 2
@@ -3191,8 +3189,8 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		
 		if hit_data.sweetspotted or hit_data.punish_hit: # if sweetspotted/punish hit, hitspark level increased by 1
 			hitspark_level = clamp(hitspark_level + 1, 1, 5) # max is 5
-		elif hit_data.repeat_penalty: # reduce by 1 if repeat
-			hitspark_level = clamp(hitspark_level - 1, 1, 5) # min is 5
+#		elif hit_data.repeat_penalty: # reduce by 1 if repeat
+#			hitspark_level = clamp(hitspark_level - 1, 1, 5) # min is 5
 		
 	var hitspark = ""
 		
