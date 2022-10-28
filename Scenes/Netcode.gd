@@ -6,6 +6,7 @@ var max_rollback := 5
 var game_ongoing := false
 
 var opponent_payload = null
+var opponent_latest_correct_time := 0
 var rollback_starttime = null # tells the game to frame to load and start stimulating
 var time_diff := 0 # number of frames to speed up for, set to non-zero if behind in time
 
@@ -95,10 +96,14 @@ func lag_freezer():
 func retrieve_inputs(): # every frame, send the last [Netcode.max_rollback] frames of your inputs, along with the time range
 	var payload = [ # no strings, minimize size of payload
 		Globals.Game.frametime + input_delay, # latest time
-		{} # timestamps
+		{}, # timestamps
+		Globals.Game.match_input_log.latest_correct_time
 		]
 
-	for frame in range(payload[0] - Netcode.max_rollback, payload[0] + 1): # for each frame in the last [Netcode.max_rollback] frames
+	var starting_time = max(opponent_latest_correct_time - 1, payload[0] - Netcode.max_rollback)
+	# start retrieving from start of opponent's latest_correct_time
+
+	for frame in range(starting_time, payload[0] + 1): # for each frame in the last [Netcode.max_rollback] frames
 		if frame in Globals.Game.match_input_log.input_log: # check if this frametime is recorded in input log as a timestamp
 			for key in Globals.Game.match_input_log.input_log[frame]: # for each key within this timestamp
 				if key in INPUTS_PACKET_CHECKER[Netplay.my_player_id()]: # if this key belongs to you
@@ -134,8 +139,38 @@ remote func desync_retrieve_inputs(starting_time):
 	
 	
 remote func receive_payload(in_opponent_payload): # receive payload from opponent
-	if game_ongoing and opponent_payload == null:
-		opponent_payload = in_opponent_payload.duplicate(true)
+	if game_ongoing:
+		if opponent_latest_correct_time < in_opponent_payload[2]: # update opponent_latest_correct_time
+			opponent_latest_correct_time = in_opponent_payload[2]
+			
+		if !in_opponent_payload[0] is Array:
+			# set up time range
+			in_opponent_payload[0] = [in_opponent_payload[0] - Netcode.max_rollback, in_opponent_payload[0]]
+		
+		if opponent_payload == null:
+			opponent_payload = in_opponent_payload.duplicate(true)
+		else: # special case where you receive 2 payloads in 1 frame
+			opponent_payload = merge_payloads(opponent_payload, in_opponent_payload)
+			
+			
+func merge_payloads(payload_A, payload_B):
+	var merged_payload = [[null, null], null] # no more need for opponent_latest_correct_time
+	if payload_A[0][0] < payload_B[0][0]: # set start of time range to be the earliest one
+		merged_payload[0][0] = payload_A[0][0]
+	else:
+		merged_payload[0][0] = payload_B[0][0]
+	if payload_A[0][1] < payload_B[0][1]: # set end of time range to be the latest one
+		merged_payload[0][1] = payload_B[0][1]
+	else:
+		merged_payload[0][1] = payload_A[0][1]
+		
+	merged_payload[1] = payload_A[1].duplicate(true) # merge timestamps
+	for timestamp in payload_B[1].keys():
+		if !timestamp in merged_payload[1]:
+			merged_payload[1][timestamp] = payload_B[1][timestamp].duplicate(true)
+			
+	return merged_payload
+			
 		
 remote func desync_receive_payload(in_opponent_payload): # receive payload from opponent
 	if game_ongoing:
@@ -148,7 +183,7 @@ remote func desync_receive_payload(in_opponent_payload): # receive payload from 
 func process_payload():
 
 	if !opponent_payload[0] is Array:
-		# set up time range
+		# set up time range, just in case
 		opponent_payload[0] = [opponent_payload[0] - Netcode.max_rollback, opponent_payload[0]]
 
 	if !lag_freeze:
