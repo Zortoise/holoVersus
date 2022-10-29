@@ -37,7 +37,7 @@ func _ready():
 func _process(_delta):
 	if Input.is_action_just_pressed("ui_cancel"):
 		if $SettingsList2.get_focus_owner().get_parent().name == "SettingsList2":
-			Settings.load_settings()
+#			Settings.load_settings()
 			play_audio("ui_back", {})
 			$Transition.play("transit_to_main")
 		else:
@@ -71,12 +71,12 @@ func triggered(triggered_node):
 				play_audio("ui_accept", {"vol":-8})
 				$Transition.play("transit_to_main")
 			"Replays":
-				Settings.load_settings() # return to saved settings
+#				Settings.load_settings() # return to saved settings
 				play_audio("ui_accept", {"vol":-8})
 				$Transition.play("transit_to_replays")
 				Globals.settings_menu_focus = "Replays"
 			"Discard":
-				Settings.load_settings() # return to saved settings
+#				Settings.load_settings() # return to saved settings
 				play_audio("ui_back", {})
 				$Transition.play("transit_to_main")
 			
