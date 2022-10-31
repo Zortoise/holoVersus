@@ -19,8 +19,8 @@ const AIR_RESISTANCE = 0.03 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 1.0 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const GROUND_DASH_SPEED = 500.0 # duration in animation data
-const AIR_DASH_SPEED = 400.0 # duration in animation data
+const GROUND_DASH_SPEED = 400.0 # duration in animation data
+const AIR_DASH_SPEED = 350.0 # duration in animation data
 
 const DAMAGE_VALUE_LIMIT = 950.0
 const GUARD_GAUGE_FLOOR = -8000.0

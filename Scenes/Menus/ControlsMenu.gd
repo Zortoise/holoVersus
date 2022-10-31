@@ -4,8 +4,8 @@ extends Node2D
 const TAP_JUMP_OPTIONS = ["off", "on"]
 const INPUT_BUFFER_OPTIONS = ["none", "1 frame", "2 frames", "3 frames", "4 frames", "5 frames", "6 frames"
 		, "7 frames", "8 frames", "9 frames", "10 frames"]
-const DEADZONE_OPTIONS = ["0.05", "0.1", "0.15", "0.2", "0.25", "0.3", "0.35", "0.4", "0.45", "0.5", "0.55", 
-		"0.6", "0.65", "0.7", "0.75", "0.8", "0.85", "0.9", "0.95", "1.0"]
+const DEADZONE_OPTIONS = ["0.05", "0.10", "0.15", "0.20", "0.25", "0.30", "0.35", "0.40", "0.45", "0.50", "0.55", 
+		"0.60", "0.65", "0.70", "0.75", "0.80", "0.85", "0.90", "0.95", "1.00"]
 const DT_FASTFALL_OPTIONS = ["off", "on"]
 
 # for preset loader
@@ -538,8 +538,8 @@ func triggered3(triggered_node): # for preset list
 	
 func triggered4(triggered_node): # for deleting extra buttons
 	play_audio("ui_accept2", {"vol":-7})
-	print(input_map["P" + str(current_player + 1) + "_extra_buttons"])
-	print(triggered_node.extra_button_stored)
+#	print(input_map["P" + str(current_player + 1) + "_extra_buttons"])
+#	print(triggered_node.extra_button_stored)
 	input_map["P" + str(current_player + 1) + "_extra_buttons"].erase(triggered_node.extra_button_stored)
 	load_extra_buttons()
 	$ControlsListExtra/RemoveButton.initial_focus()
