@@ -98,12 +98,14 @@ func stimulate():
 			elif Animator.query(["AirDashTransit"]):
 				Character.animate("AirBlockStartup")
 		
-		if Character.dir != 0:
+		if Character.button_left in Character.input_state.just_pressed or \
+				Character.button_right in Character.input_state.just_pressed:
 			if Animator.query(["L1Startup"]) and Character.test_qc_chain_combo("F1"):
 				Character.animate("F1Startup")
 			elif Animator.query(["aL1Startup"]) and Character.test_qc_chain_combo("aF1"):
 				Character.animate("aF1Startup")
-		else:
+		elif Character.button_left in Character.input_state.just_released or \
+				Character.button_right in Character.input_state.just_released:
 			if Animator.query(["F1Startup"]) and Character.test_qc_chain_combo("L1"):
 				Character.animate("L1Startup")
 			elif Animator.query(["aF1Startup"]) and Character.test_qc_chain_combo("aL1"):
