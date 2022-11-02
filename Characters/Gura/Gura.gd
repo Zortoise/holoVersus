@@ -719,7 +719,7 @@ func start_audio(anim_name):
 			else:
 				Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
 		"Dash":
-			Character.play_audio("dash1", {"vol" : -6, "bus":"PitchDown2"})
+			Character.play_audio("dash1", {"vol" : -5, "bus":"PitchDown"})
 		"AirDash", "AirDashD", "AirDashU", "AirDashDD", "AirDashUU", "AirDashD2", "AirDashU2":
 			Character.play_audio("dash1", {"vol" : -6})
 			

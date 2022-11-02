@@ -1869,6 +1869,7 @@ func test_fastfall_cancel():
 	
 	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
 	if !is_normal_attack(move_name): return false # can only fastfall cancel Normals
+	if !move_name.begins_with("a"): return false # can only fastfall cancel aerials
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be fastfall cancelled
 	
 	return true
@@ -3282,8 +3283,8 @@ func generate_blockspark(hit_data):
 # universal actions
 func _on_SpritePlayer_anim_finished(anim_name):
 	
-#	if is_atk_active():
-#		reset_cancels()
+	if is_atk_startup():
+		reset_cancels()
 	
 	match anim_name:
 		"RunTransit":
