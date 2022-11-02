@@ -194,12 +194,26 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			# DASH CANCELS ---------------------------------------------------------------------------------
 				# if land a sweetspot hit, can dash cancel afterward
 							
-				Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
+				Globals.char_state.GROUND_ATK_RECOVERY:
+					if Character.test_dash_cancel():
+						Character.animate("DashTransit")
+						keep = false
+				
+				Globals.char_state.GROUND_ATK_ACTIVE:
 					if Character.dash_cancel:
 						Character.animate("DashTransit")
 						keep = false
 						
-				Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_ATK_ACTIVE:
+				Globals.char_state.AIR_ATK_RECOVERY:
+					if Character.test_dash_cancel():
+						if !Character.grounded:
+							Character.animate("AirDashTransit")
+							keep = false
+						else: # grounded
+							Character.animate("DashTransit")
+							keep = false
+				
+				Globals.char_state.AIR_ATK_ACTIVE:
 					if Character.dash_cancel:
 						if !Character.grounded:
 							if Character.air_dash > 0:

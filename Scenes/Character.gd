@@ -433,7 +433,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 			"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity) + "  grounded: " + str(grounded) + \
-			"\nchain_memory: " + str(chain_memory) + "\n" + str(input_state) + "\n" + str(current_guard_gauge) + " " + \
+			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + str(input_state) + "\n" + str(current_guard_gauge) + " " + \
 			str(current_ex_gauge)
 			
 			
@@ -694,7 +694,7 @@ func stimulate2(): # only ran if not in hitstop
 							velocity.x = lerp(velocity.x, speed * 0.7, 0.5)
 						
 			Globals.char_state.AIR_ATK_RECOVERY: # fastfall cancel from aerial hits
-				if test_air_jump_cancel():
+				if test_fastfall_cancel():
 					animate("Fall")
 
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
@@ -1247,22 +1247,26 @@ func process_input_buffer():
 								keep = false
 								
 						# AERIAL AIR JUMP CANCEL ---------------------------------------------------------------------------------
-							# WIP: cannot do during Repeat Penalty
 							
 						Globals.char_state.AIR_ATK_RECOVERY:		
-							if air_jump > 0 and test_air_jump_cancel():
+							if test_jump_cancel():
 								animate("AirJumpTransit")
 								keep = false
 								
 								
-						# ATK ATTRIBUTE JUMP CANCEL ---------------------------------------------------------------------------------
+						# JUMP CANCELS ---------------------------------------------------------------------------------
 								
-						Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
+						Globals.char_state.GROUND_ATK_RECOVERY:
+							if test_jump_cancel():
+								var move_name = Animator.current_animation.trim_suffix("Recovery")
+								move_name = move_name.trim_suffix("Active")
+								animate("JumpTransit")
+								keep = false
+						
+						Globals.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
 							if jump_cancel:
 								var move_name = Animator.current_animation.trim_suffix("Recovery")
 								move_name = move_name.trim_suffix("Active")
-#								if move_name in UniqueCharacter.MOVE_DATABASE and \
-#										Globals.atk_attr.JUMP_CANCEL in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
 								animate("JumpTransit")
 								keep = false
 									
@@ -1839,19 +1843,48 @@ func burst_extend_check(): # check if have resources to do it, then take away th
 		return false
 	change_burst_token(false)
 	return true
-
-func test_air_jump_cancel(): # for aerials' innate air jump cancel, some conditions must be fulfilled
-	if grounded or chain_combo == 0 or chain_combo == 2: return false # must be in air and have hitted an opponent with the aerial
-	# can only jump cancel on unblock or wrongblock
+	
+func test_jump_cancel():
+	if chain_combo != 1: return false # can only jump cancel on hit (not block)
+	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
 	
 	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
-	# must be an aerial normal
-	if is_normal_attack(move_name) and move_name.begins_with("a"): # note: some specials/supers may begin with "a"
-		if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name):
-			return false
-		else:
-			return true
-	else: return false
+	if !is_normal_attack(move_name): return false # can only jump cancel Normals
+	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be jump cancelled
+	
+	return true
+	
+func test_dash_cancel():
+	if chain_combo != 1: return false # can only dash cancel on hit (not block)
+	if !grounded and air_dash == 0: return false # if in air, need >1 air dash left
+	
+	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
+	if !is_normal_attack(move_name): return false # can only dash cancel Normals
+	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be dash cancelled
+	
+	return true
+	
+func test_fastfall_cancel():
+	if chain_combo != 1: return false # can only fastfall cancel on hit (not block)
+	
+	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
+	if !is_normal_attack(move_name): return false # can only fastfall cancel Normals
+	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be fastfall cancelled
+	
+	return true
+	
+#func test_air_jump_cancel(): # for aerials' innate air jump cancel, some conditions must be fulfilled
+#	if grounded or chain_combo == 0 or chain_combo == 2: return false # must be in air and have hitted an opponent with the aerial
+#	# can only jump cancel on unblock or wrongblock
+#
+#	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
+#	# must be an aerial normal
+#	if is_normal_attack(move_name) and move_name.begins_with("a"): # note: some specials/supers may begin with "a"
+#		if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name):
+#			return false
+#		else:
+#			return true
+#	else: return false
 
 func query_traits(): # may have certain conditions
 	return UniqueCharacter.query_traits()
@@ -3249,8 +3282,8 @@ func generate_blockspark(hit_data):
 # universal actions
 func _on_SpritePlayer_anim_finished(anim_name):
 	
-	if is_atk_active():
-		reset_cancels()
+#	if is_atk_active():
+#		reset_cancels()
 	
 	match anim_name:
 		"RunTransit":
