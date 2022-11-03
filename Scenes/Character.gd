@@ -1258,25 +1258,31 @@ func process_input_buffer():
 								
 						Globals.char_state.GROUND_ATK_RECOVERY:
 							if test_jump_cancel():
-								var move_name = Animator.current_animation.trim_suffix("Recovery")
-								move_name = move_name.trim_suffix("Active")
-								animate("JumpTransit")
-								keep = false
+								if button_down in input_state.pressed and !button_dash in input_state.pressed \
+									and soft_grounded: # cannot be pressing dash
+									position.y += 2 # 1 will cause issues with downward moving platforms
+									animate("FallTransit")
+									keep = false
+								else:
+									animate("JumpTransit")
+									keep = false
 						
 						Globals.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
 							if jump_cancel:
-								var move_name = Animator.current_animation.trim_suffix("Recovery")
-								move_name = move_name.trim_suffix("Active")
 								animate("JumpTransit")
 								keep = false
 									
 						# BLOCKHOP ---------------------------------------------------------------------------------
 									
 						Globals.char_state.GROUND_BLOCK:
-							animate("BlockHopTransit")
-							keep = false
-								
-							
+							if button_down in input_state.pressed and soft_grounded:
+								position.y += 2 # 1 will cause issues with downward moving platforms
+								animate("BlockHop")
+								keep = false
+							else:
+								animate("BlockHopTransit")
+								keep = false
+									
 			# FOR NON_JUMP ACTIONS --------------------------------------------------------------------------------------------------
 		
 			"Burst":

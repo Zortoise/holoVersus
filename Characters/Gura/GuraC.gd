@@ -305,18 +305,18 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 #			if !has_acted[0]:
 #				keep = !process_button(new_state, "H", has_acted, buffered_input[1])
 		
-		"InstaAirDash":
-			match new_state:
-				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
-					Character.animate("JumpTransit")
-					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
-					has_acted[0] = true
-					keep = false
-				Globals.char_state.GROUND_STARTUP:
-					Character.animate("JumpTransit")
-					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
-					has_acted[0] = true
-					keep = false
+#		"InstaAirDash":
+#			match new_state:
+#				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+#					Character.animate("JumpTransit")
+#					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
+#					has_acted[0] = true
+#					keep = false
+#				Globals.char_state.GROUND_STARTUP:
+#					Character.animate("JumpTransit")
+#					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
+#					has_acted[0] = true
+#					keep = false
 	
 	# ---------------------------------------------------------------------------------
 	
