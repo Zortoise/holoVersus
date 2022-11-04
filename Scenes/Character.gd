@@ -476,7 +476,7 @@ func stimulate(new_input_state):
 	
 			
 	if Globals.editor and Input.is_action_just_pressed("sound_test") and test:
-		$ModulatePlayer.play("armor_flash")
+		$ModulatePlayer.play("red_burst")
 		
 #		var test_pt = Detection.ground_finder(position, facing, Vector2(100, 50), Vector2(100, 100))
 #		if test_pt: emit_signal("SFX", "HitsparkB", "HitsparkB", test_pt, {})
@@ -3495,6 +3495,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 				emit_signal("projectile", player_ID, "Burst", LoadedSFX.burst_escape_move_data, position, {"facing" : burst_facing})
 			else:
 				emit_signal("projectile", player_ID, "Burst", LoadedSFX.burst_extend_move_data, position, {"facing" : burst_facing})
+				$ModulatePlayer.play("red_burst")
 			
 			
 	UniqueCharacter._on_SpritePlayer_anim_started(anim_name)

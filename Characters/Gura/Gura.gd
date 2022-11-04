@@ -726,7 +726,7 @@ func start_audio(anim_name):
 			
 		"BurstCounterStartup", "BurstEscapeStartup":
 			Character.play_audio("faller1", {"vol" : -12,})
-		"BurstCounter", "BurstEscape":
+		"BurstCounter", "BurstEscape", "BurstExtend":
 			Character.play_audio("blast1", {"vol" : -18,})
 
 

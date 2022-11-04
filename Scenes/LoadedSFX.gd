@@ -101,6 +101,28 @@ var modulate_animations = {
 			},
 		}
 	},
+	"red_burst" : {
+		"duration": 15,
+		"loop" : false,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(4.0, 4.0, 4.0),
+			},
+			3 :
+			{
+				"modulate" : Color(5.0, 1.0, 1.0),
+			},
+			7 :
+			{
+				"modulate" : Color(1.0, 1.0, 1.0),
+			},
+			11 :
+			{
+				"modulate" : Color(5.0, 1.0, 1.0),
+			},
+		}
+	},
 	"respawn_grace" :{
 		"duration": 6,
 		"loop" : true,
