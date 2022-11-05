@@ -702,11 +702,17 @@ func stimulate2(): # only ran if not in hitstop
 	if UniqueCharacter.STYLE == 0:
 		if button_block in input_state.pressed:
 			match state:
-				Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_C_RECOVERY: # cannot block instantly when crouching
+				Globals.char_state.GROUND_STANDBY:
 					animate("BlockStartup")
-				Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+				Globals.char_state.GROUND_C_RECOVERY:
+					if Globals.trait.C_REC_BLOCKING in query_traits():
+						animate("BlockStartup")
+				Globals.char_state.AIR_STANDBY:
 					animate("AirBlockStartup")
 					$VarJumpTimer.stop()
+#				Globals.char_state.AIR_C_RECOVERY:
+#					animate("AirBlockStartup")
+#					$VarJumpTimer.stop()
 				Globals.char_state.GROUND_STARTUP: # jump to blockhop
 					if Animator.query_to_play(["JumpTransit"]):
 						animate("BlockHopTransit")
