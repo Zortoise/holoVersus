@@ -10,7 +10,8 @@ const GRAVITY = 4000.0
 const SpecialTimer_WAIT_TIME = 30 # special button buffer, also used for SuperTimer
 const PEAK_DAMPER_MOD = 0.6 # used to reduce gravity at jump peak
 const PEAK_DAMPER_LIMIT = 400.0 # min velocity.y where jump peak gravity reduction kicks in
-const TERMINAL_THRESHOLD = 1.5 # if velocity.y is over this, no terminal velocity slowdown
+const TERMINAL_THRESHOLD = 1.5 # if velocity.y is over this during hitstun, no terminal velocity slowdown
+const FASTFALL_MOD = 1.15 # fastfall speed, mod of terminal velocity
 const VarJumpTimer_WAIT_TIME = 12 # frames after jumping where holding jump will reduce gravity
 const VAR_JUMP_GRAV_MOD = 0.2 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
@@ -115,7 +116,7 @@ var air_strafe_limit := 0.8 # speed limit of air strafing, limit depends on grou
 var jump_speed := 600
 var air_jump_mod := 0.9 # reduce height of air/wall jump
 var gravity_mod := 1.0
-var terminal_velocity_mod := 8.25 # for terminal velocity
+var terminal_velocity_mod := 7.5 # for terminal velocity
 var friction := 0.15 # between 0.0 and 1.0
 var acceleration := 0.15 # between 0.0 and 1.0, also affect downward acceleration when fastfalling
 var air_resistance := 0.03 # between 0.0 and 1.0
@@ -680,13 +681,12 @@ func stimulate2(): # only ran if not in hitstop
 
 					if Settings.dt_fastfall[player_ID] == 0 or (Settings.dt_fastfall[player_ID] == 1 and test_doubletap(button_down)):
 						if Settings.dt_fastfall[player_ID] == 1:
-							print("check")
-							tap_memory.append([button_down, 2])
+							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
 					
-						velocity.y = lerp(velocity.y, GRAVITY * Globals.FRAME * (terminal_velocity_mod) * 2.5, acceleration)
+						velocity.y = lerp(velocity.y, GRAVITY * Globals.FRAME * terminal_velocity_mod * FASTFALL_MOD, 0.3)
 						if Animator.query(["FallTransit"]): # go straight to fall animation
 							animate("Fall")
-							
+				
 						# fastfall reduce horizontal speed limit
 						if velocity.x < -speed * 0.7:
 							velocity.x = lerp(velocity.x, -speed * 0.7, 0.5)
@@ -818,9 +818,13 @@ func stimulate2(): # only ran if not in hitstop
 		
 	# terminal velocity downwards
 	var terminal = GRAVITY * Globals.FRAME * (terminal_velocity_mod)
+	if state == Globals.char_state.AIR_STANDBY and button_down in input_state.pressed:
+		terminal *= FASTFALL_MOD # increase terminal velocity when fastfalling
 	if state == Globals.char_state.AIR_BLOCK: # air blocking reduce terminal velocity
 		terminal *= AIRBLOCK_TERMINAL_MOD
-	if velocity.y > terminal and velocity.y < terminal * TERMINAL_THRESHOLD: # if too fast, no slow down
+	if $HitStunTimer.is_running() and velocity.y > terminal * TERMINAL_THRESHOLD:
+		pass # if too fast during hitstun, no slow down
+	elif velocity.y > terminal:
 		velocity.y = lerp(velocity.y, terminal, 0.75)
 	
 	
@@ -847,10 +851,9 @@ func stimulate2(): # only ran if not in hitstop
 				animate("CrouchReturn") # stand up
 	
 		Globals.char_state.GROUND_STARTUP:
-			if Animator.query(["JumpTransit"]):
-				friction_this_frame *= 0.25
+			friction_this_frame *= 0.0
 				
-		Globals.char_state.GROUND_RECOVERY:
+		Globals.char_state.GROUND_C_RECOVERY:
 			if Animator.query(["HardLanding"]): # lower friction when hardlanding?
 				friction_this_frame *= 0.5
 
@@ -1050,13 +1053,14 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running():
 					$HitStunGraceTimer.stimulate()
 				
-				# spike protection
-				if velocity.y >= HITSTUN_FALL_THRESHOLD and position.y > floor_level:
+				# spike protection before 70% damage
+				if get_damage_percent() < 0.7 and velocity.y >= HITSTUN_FALL_THRESHOLD and position.y > floor_level:
 					match state:
 						Globals.char_state.AIR_FLINCH_HITSTUN: # hitstun decay instantly if falling too fast during air flinch when too low
 							$HitStunTimer.stop()
 						Globals.char_state.LAUNCHED_HITSTUN:
-							$HitStunTimer.stimulate() # hitstun decay twice as fast if falling too fast during launch when too low
+							$HitStunTimer.stimulate()
+							$HitStunTimer.stimulate() # hitstun decay thrice as fast if falling too fast during launch when too low
 				
 			
 			# do shadow trails
@@ -1277,7 +1281,7 @@ func process_input_buffer():
 						Globals.char_state.GROUND_BLOCK:
 							if button_down in input_state.pressed and soft_grounded:
 								position.y += 2 # 1 will cause issues with downward moving platforms
-								animate("BlockHop")
+								animate("AirBlock")
 								keep = false
 							else:
 								animate("BlockHopTransit")
@@ -1576,7 +1580,7 @@ func check_landing(landing_state = 0):
 			1: # wave landing
 				animate("Brake")
 				emit_signal("SFX","GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-				var leveled_velocity_y = sign(velocity.x) * velocity_previous_frame.y
+				var leveled_velocity_y = sign(velocity.x) * velocity_previous_frame.length()
 				velocity.x += leveled_velocity_y
 			2: # air block to ground block
 				emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  

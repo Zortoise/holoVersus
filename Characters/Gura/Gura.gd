@@ -253,18 +253,18 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				keep = !process_button(new_state, "H", has_acted, buffered_input[1])
 		
-#		"InstaAirDash":
-#			match new_state:
-#				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
-#					Character.animate("JumpTransit")
-#					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
-#					has_acted[0] = true
-#					keep = false
-#				Globals.char_state.GROUND_STARTUP:
-#					Character.animate("JumpTransit")
-#					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
-#					has_acted[0] = true
-#					keep = false
+		"InstaAirDash": # needed to chain wavedashes
+			match new_state:
+				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+					Character.animate("JumpTransit")
+					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
+					has_acted[0] = true
+					keep = false
+				Globals.char_state.GROUND_STARTUP:
+					Character.animate("JumpTransit")
+					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
+					has_acted[0] = true
+					keep = false
 
 	
 	# ---------------------------------------------------------------------------------
@@ -578,10 +578,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.null_gravity = true
 		"AirDash":
 			consume_one_air_dash()
-			if Character.air_dash == 0:
-				Character.velocity.x = AIR_DASH_SPEED * 1.3 * Character.facing
-			else:
-				Character.velocity.x = AIR_DASH_SPEED * Character.facing
+#			if Character.air_dash == 0:
+#				Character.velocity.x = AIR_DASH_SPEED * 1.2 * Character.facing
+#			else:
+			Character.velocity.x = AIR_DASH_SPEED * 1.15 * Character.facing
 			Character.velocity.y = 0
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
@@ -614,13 +614,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
 		"AirDashD2":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * 1.3 * Character.facing, 0).rotated(PI/8 * Character.facing)
+			Character.velocity = Vector2(AIR_DASH_SPEED * 1.15 * Character.facing, 0).rotated(PI/8 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
 			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/8})
 		"AirDashU2":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * 1.3 * Character.facing, 0).rotated(-PI/8 * Character.facing)
+			Character.velocity = Vector2(AIR_DASH_SPEED * 1.15 * Character.facing, 0).rotated(-PI/8 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
 			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/8})	
