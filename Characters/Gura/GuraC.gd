@@ -65,8 +65,21 @@ func stimulate():
 #	Character.dir
 #	Character.v_dir
 	
-	# WIP, air strafing during aL2
-	# releasing Light during aL2
+	
+	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query(["aL2Active"]):
+		if Character.grounded:
+			Character.animate("HardLanding")
+		if !Character.button_light in Character.input_state.pressed:
+			Character.animate("aL2bRecovery")
+			
+	# dash dancing
+	if Character.state == Globals.char_state.GROUND_RECOVERY and Animator.query(["Dash"]):
+		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
+			Character.face(-1)
+			Character.animate("Dash")
+		elif Character.button_right in Character.input_state.just_pressed and !Character.button_left in Character.input_state.just_pressed:
+			Character.face(1)
+			Character.animate("Dash")
 	
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 
@@ -81,12 +94,6 @@ func stimulate():
 				if Animator.query_to_play(["JumpTransit"]):
 					Character.animate("BlockHopTransit")
 	
-	
-	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query(["aL2Active"]):
-		if Character.grounded:
-			Character.animate("HardLanding")
-		if !Character.button_light in Character.input_state.pressed:
-			Character.animate("aL2bRecovery")
 	
 	# QUICK CANCELS --------------------------------------------------------------------------------------------------
 

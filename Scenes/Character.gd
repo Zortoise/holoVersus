@@ -705,14 +705,18 @@ func stimulate2(): # only ran if not in hitstop
 				Globals.char_state.GROUND_STANDBY:
 					animate("BlockStartup")
 				Globals.char_state.GROUND_C_RECOVERY:
-					if Globals.trait.C_REC_BLOCKING in query_traits():
+					if Animator.query_current(["DashBrake"]):
+						if Globals.trait.DASH_BLOCK in query_traits():
+							animate("BlockStartup")
+					else:
 						animate("BlockStartup")
 				Globals.char_state.AIR_STANDBY:
 					animate("AirBlockStartup")
 					$VarJumpTimer.stop()
-#				Globals.char_state.AIR_C_RECOVERY:
-#					animate("AirBlockStartup")
-#					$VarJumpTimer.stop()
+				Globals.char_state.AIR_C_RECOVERY:
+					if !Animator.query_current(["AirDashBrake"]):
+						animate("AirBlockStartup")
+						$VarJumpTimer.stop()
 				Globals.char_state.GROUND_STARTUP: # jump to blockhop
 					if Animator.query_to_play(["JumpTransit"]):
 						animate("BlockHopTransit")
@@ -770,11 +774,11 @@ func stimulate2(): # only ran if not in hitstop
 		Globals.char_state.AIR_STANDBY:
 			check_landing() 
 		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_ACTIVE, Globals.char_state.AIR_RECOVERY, Globals.char_state.AIR_C_RECOVERY:
-			if Animator.query(["AirDash", "AirDashD", "AirDashDD"]):
+			if Animator.query(["AirDash", "AirDashD"]):
 				check_landing(1) # 2 means wavelanding
 			elif Animator.query(["AirBlockRecovery"]):
 				check_landing(4) # 4 means AirBlockRecovery to BlockCRecovery
-			else: # landing during AirDashBrake
+			else: # landing during AirDashBrake or AirDashDD
 				check_landing()
 		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
 			pass # WIP, cannot land during aerial startup and active frames, for now...
@@ -1586,8 +1590,7 @@ func check_landing(landing_state = 0):
 			1: # wave landing
 				animate("Brake")
 				emit_signal("SFX","GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-				var leveled_velocity_y = sign(velocity.x) * velocity_previous_frame.length()
-				velocity.x += leveled_velocity_y
+				velocity.x += sign(velocity.x) * UniqueCharacter.AIR_DASH_SPEED
 			2: # air block to ground block
 				emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  
 				animate("BlockLanding")
