@@ -17,7 +17,7 @@ const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft p
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
 const HITSTUN_GRAV_MOD = 0.75 # gravity multiplier during hitstun
 const QUICK_CANCEL_TIME = 2 # number of frames at startup the user can still change direction or cancel into a combination action
-const MovMemClearTimer_TIME = 5 # number of frames that move_memory will be cleared after hitstun/blockstun ends
+const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/airdash being invulnerable
 const MAX_EX_GAUGE = 50000.0
 const EX_GAUGE_REGEN_RATE = 750 # EX Gauge regened per second when idling
 const BURSTCOUNTER_EX_COST = 1
@@ -538,7 +538,7 @@ func stimulate2(): # only ran if not in hitstop
 	process_status_effects_timer() # remove expired status effects before running hit detection since that can add effects
 	
 	# clearing move memory, has a time between hitstun/blockstun ending and move memory being cleared
-	if move_memory.size() > 0 and !$MovMemClearTimer.is_running():
+	if move_memory.size() > 0 and !$HitStunGraceTimer.is_running():
 		move_memory = []
 
 	# regen/degen GG
@@ -1048,7 +1048,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 				$PBlockTimer.stimulate()
 				$PBlockCDTimer.stimulate()
 				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running():
-					$MovMemClearTimer.stimulate()
+					$HitStunGraceTimer.stimulate()
 				
 				# spike protection
 				if velocity.y >= HITSTUN_FALL_THRESHOLD and position.y > floor_level:
@@ -2105,7 +2105,13 @@ func query_polygons(): # requested by main game node when doing hit detection
 				polygons_queried.kborigin = Animator.query_point("kborigin")
 		polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
 		
-	if !query_status_effect(Globals.status_effect.RESPAWN_GRACE): # no hurtbox during respawn grace
+	if query_status_effect(Globals.status_effect.RESPAWN_GRACE):
+		pass  # no hurtbox during respawn grace
+	if $HitStunGraceTimer.is_running() and new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_ACTIVE, \
+			Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_ACTIVE, \
+			Globals.char_state.AIR_RECOVERY]:
+		pass  # no hurtbox during HitStunGrace in certain states
+	else:
 		polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
 
 	return polygons_queried
@@ -2492,7 +2498,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 func being_hit(hit_data): # called by main game node when taking a hit
 	
-	$MovMemClearTimer.time = MovMemClearTimer_TIME # reset MovMemClearTimer which only ticks down out of hitstun/blockstun
+	$HitStunGraceTimer.time = HitStunGraceTimer_TIME # reset HitStunGraceTimer which only ticks down out of hitstun/blockstun
 
 	
 	var attacker = get_node(hit_data.attacker_nodepath)
@@ -3616,7 +3622,7 @@ func save_state():
 		"PBlockTimer_time" : $PBlockTimer.time,
 		"PBlockCDTimer_time" : $PBlockCDTimer.time,
 		"RespawnTimer_time" : $RespawnTimer.time,
-		"MovMemClearTimer_time" : $MovMemClearTimer.time
+		"HitStunGraceTimer_time" : $HitStunGraceTimer.time
 	}
 
 	return state_data
@@ -3689,7 +3695,7 @@ func load_state(state_data):
 	$PBlockTimer.time = state_data.PBlockTimer_time
 	$PBlockCDTimer.time = state_data.PBlockCDTimer_time
 	$RespawnTimer.time = state_data.RespawnTimer_time
-	$MovMemClearTimer.time = state_data.MovMemClearTimer_time
+	$HitStunGraceTimer.time = state_data.HitStunGraceTimer_time
 
 
 	

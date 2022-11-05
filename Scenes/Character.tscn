@@ -103,7 +103,7 @@ margin_bottom = 22.0
 
 [node name="RespawnTimer" parent="." instance=ExtResource( 4 )]
 
-[node name="MovMemClearTimer" parent="." instance=ExtResource( 4 )]
+[node name="HitStunGraceTimer" parent="." instance=ExtResource( 4 )]
 
 [node name="TestNode2D" type="Node2D" parent="."]
 visible = false
