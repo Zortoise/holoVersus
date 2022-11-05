@@ -888,6 +888,8 @@ func detect_hit():
 					continue # attacker must pass the priority test
 				if defender_anti_airing(hitbox, hurtbox):
 					continue # attacker must not be using an aerial against an anti-airing defender
+				if defender_backdash(hitbox, hurtbox):
+					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/HARD_TO_BLOCK attack
 				if get_node(hitbox.owner_nodepath).is_hitcount_maxed(get_node(hurtbox.owner_nodepath).player_ID, hitbox.move_data):
 					continue # attacker must still have hitcount left
 				if get_node(hitbox.owner_nodepath).is_player_in_ignore_list(get_node(hurtbox.owner_nodepath).player_ID):
@@ -1028,6 +1030,17 @@ func defender_semi_invul(hitbox, hurtbox):
 				return true # defender's semi-invul succeeded
 	return false
 	
+func defender_backdash(hitbox, hurtbox):
+	var attacker = get_node(hitbox.owner_nodepath)
+	var defender = get_node(hurtbox.owner_nodepath)
+	var attacker_attr = attacker.query_atk_attr(hitbox.move_name)
+	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.HARD_TO_BLOCK in attacker_attr:
+		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
+				defender.Animator.query_to_play(["DashTransit", "AirDashTransit"]):
+			if defender.facing == sign(defender.position.x - attacker.position.x) and \
+					!defender.Animator.query_to_play(["AirDashUU", "AirDashDD"]):
+				return true # defender's backdash succeeded
+	return false # defender's backdash failed
 
 # HANDLING ZOOM --------------------------------------------------------------------------------------------------
 
