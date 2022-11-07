@@ -32,7 +32,7 @@ const GUARD_GAUGE_DEGEN_RATE = -0.75 # % of GG degened per second when GG > 100%
 const KB_MOD = 1.2 # light character take more knockback?
 const CHIP_DMG_MOD = 1.3 # take extra chip damage on block
 const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed
-const EX_BLOCK_DRAIN_RATE = 3500.0 # % of EX Gauge drain per second when EX Blocking
+const EX_BLOCK_DRAIN_RATE = 3400.0 # % of EX Gauge drain per second when EX Blocking
 const TRAITS = [Globals.trait.CROUCH_CANCEL, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
 
 const SDHitspark_COLOR = "blue"

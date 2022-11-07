@@ -307,27 +307,27 @@ var modulate_animations = {
 		"timestamps" : {
 			0 : # this is the timestamp of the key
 			{
-				"modulate" : Color(1.2, 0.8, 0.8), # red
+				"modulate" : Color(1.3, 0.7, 0.7), # red
 			},
 			2 :
 			{
-				"modulate" : Color(1.2, 1.2, 0.8), # yellow
+				"modulate" : Color(1.3, 1.3, 0.7), # yellow
 			},
 			4 :
 			{
-				"modulate" : Color(0.8, 1.2, 0.8), # green
+				"modulate" : Color(0.7, 1.3, 0.7), # green
 			},
 			6 :
 			{
-				"modulate" : Color(0.8, 1.2, 1.2), # cyan
+				"modulate" : Color(0.7, 1.3, 1.3), # cyan
 			},
 			8 :
 			{
-				"modulate" : Color(0.8, 0.8, 1.2), # blue
+				"modulate" : Color(0.7, 0.7, 1.3), # blue
 			},
 			10 :
 			{
-				"modulate" : Color(1.2, 0.8, 1.2), # purple
+				"modulate" : Color(1.3, 0.7, 1.3), # purple
 			},
 		}
 	},

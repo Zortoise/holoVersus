@@ -15,16 +15,17 @@ const VarJumpTimer_WAIT_TIME = 10 # frames after jumping where holding jump will
 const VAR_JUMP_GRAV_MOD = 0.2 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
-const HITSTUN_GRAV_MOD = 0.75 # gravity multiplier during hitstun
 const QUICK_CANCEL_TIME = 1 # number of frames at startup the user can still change direction or cancel into a combination action
 const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/airdash being invulnerable
 const MAX_EX_GAUGE = 50000.0
-const EX_GAUGE_REGEN_RATE = 750 # EX Gauge regened per second when idling
+const EX_GAUGE_REGEN_RATE = 1000 # EX Gauge regened per second when idling
 const BURSTCOUNTER_EX_COST = 1
 const BURSTESCAPE_GG_COST = 0.5
-const AIRBLOCK_GRAV_MOD = 0.5
-const AIRBLOCK_TERMINAL_MOD = 0.7
+const AIRBLOCK_GRAV_MOD = 0.5 # # multiply to GRAVITY to get gravity during air blocking
+const AIRBLOCK_TERMINAL_MOD = 0.7 # # multiply to get terminal velocity during air blocking
 const TAP_MEMORY_DURATION = 5
+const MAX_WALL_JUMP = 5
+const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal velocity during hitstun
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -41,7 +42,11 @@ const HITSTUN_REDUCTION_AT_MAX_GG = 0.5 # max reduction in hitstun when defender
 const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POSTIVE_FLOW_REGEN_MOD = 6.0 # increased Guard Guard Regen during Postive Flow
 const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
-const AIR_EX_BLOCK_COST_MOD = 1.25	# increased EX Gauge cost of EX Block if done in air
+const AIR_EX_BLOCK_COST_MOD = 1.3	# increased EX Gauge cost of EX Block if done in air
+
+const HITSTUN_GRAV_MOD = 0.65  # gravity multiplier during hitstun
+const HITSTUN_FRICTION = 0.15  # friction during hitstun
+const HITSTUN_AIR_RES = 0.03 # air resistance during hitstun
 
 const LETHAL_KB_MOD = 1.5 # multiply knockback strength when defender is at Damage Value Limit
 const LETHAL_HITSTOP = 25
@@ -101,7 +106,8 @@ const LAUNCH_DUST_THRESHOLD = 1400.0 # velocity where launch dust increase in fr
 
 const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
 const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
-const DDI_SIDE_MAX = 30 # horizontal Drift DI speed at 200% Guard Gauge
+const DDI_SIDE_MAX = 15 # horizontal Drift DI speed at 200% Guard Gauge
+const MAX_DDI_SIDE_SPEED = 300.0 # max horizontal Drift DI speed
 const DDI_UP_MAX = 0.40 # gravity decrease upward Drift DI at 200% Guard Gauge
 const DDI_DOWN_MAX = 1.60 # gravity increase downward Drift DI at 200% Guard Gauge
 const DI_MAX = PI/9 # change in knockback dir when using DI at 200% Guard Gauge
@@ -109,24 +115,7 @@ const DI_MIN_MOD = 0.1 # percent of max DI at 100% Guard Gauge
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
 const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
 
-# default movement stats, overwritten by unique character node
-var speed := 350
-var air_strafe_speed := 30
-var air_strafe_limit := 0.8 # speed limit of air strafing, limit depends on ground speed
-var jump_speed := 600
-var air_jump_mod := 0.9 # reduce height of air/wall jump
-var gravity_mod := 1.0
-var terminal_velocity_mod := 7.5 # for terminal velocity
-var fastfall_mod = 1.2
-var friction := 0.15 # between 0.0 and 1.0
-var acceleration := 0.15 # between 0.0 and 1.0, also affect downward acceleration when fastfalling
-var air_resistance := 0.03 # between 0.0 and 1.0
-var fall_grav_mod := 0.8 # reduced gravity when falling
 
-# default jumps, can be overwritten by unique character node
-var max_air_jump := 2
-var max_wall_jump := 5 # constant?
-var max_air_dash := 1
 
 # variables used, don't touch these
 var loaded_palette
@@ -160,9 +149,9 @@ var player_ID: int # player number controlling this character, 0 for P1, 1 for P
 
 
 # character state, save these when saving and loading along with position, sprite frame and animation progress
-onready var air_jump := max_air_jump
-onready var wall_jump := max_wall_jump
-onready var air_dash := max_air_dash
+var air_jump := 0
+var wall_jump := 0
+var air_dash := 0
 var state = Globals.char_state.GROUND_STANDBY
 var new_state = Globals.char_state.GROUND_STANDBY
 var velocity := Vector2.ZERO
@@ -271,20 +260,6 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	$FadePlayer.sprite = sprite
 	
 	# overwrite default movement stats
-	speed = UniqueCharacter.SPEED
-	air_strafe_speed = UniqueCharacter.AIR_STRAFE_SPEED
-	air_strafe_limit = UniqueCharacter.AIR_STRAFE_LIMIT
-	jump_speed = UniqueCharacter.JUMP_SPEED
-	air_jump_mod = UniqueCharacter.AIR_JUMP_MOD
-	gravity_mod = UniqueCharacter.GRAVITY_MOD
-	terminal_velocity_mod = UniqueCharacter.TERMINAL_VELOCITY_MOD
-	fastfall_mod = UniqueCharacter.FASTFALL_MOD
-	friction = UniqueCharacter.FRICTION
-	acceleration = UniqueCharacter.ACCELERATION
-	air_resistance = UniqueCharacter.AIR_RESISTANCE
-	fall_grav_mod = UniqueCharacter.FALL_GRAV_MOD
-	max_air_jump = UniqueCharacter.MAX_AIR_JUMP
-	max_air_dash = UniqueCharacter.MAX_AIR_DASH
 	
 	setup_boxes(UniqueCharacter.get_node("DefaultCollisionBox"))
 	reset_jumps()
@@ -621,7 +596,7 @@ func stimulate2(): # only ran if not in hitstop
 				if !Animator.query(["Run", "RunTransit"]):
 						animate("RunTransit")
 						
-				velocity.x = lerp(velocity.x, dir * speed, acceleration)
+				velocity.x = lerp(velocity.x, dir * UniqueCharacter.SPEED, UniqueCharacter.ACCELERATION)
 	
 	# AIR STRAFE --------------------------------------------------------------------------------------------------
 		# can air strafe during aerials at reduced speed
@@ -635,14 +610,14 @@ func stimulate2(): # only ran if not in hitstop
 						face(dir)
 					
 					# reduce air_strafe_speed and air_strafe_limit during AIR_ATK_STARTUP
-					var air_strafe_speed_temp = air_strafe_speed
-					var air_strafe_limit_temp = air_strafe_limit
+					var air_strafe_speed_temp = UniqueCharacter.AIR_STRAFE_SPEED
+					var air_strafe_limit_temp = UniqueCharacter.AIR_STRAFE_LIMIT
 					if state != Globals.char_state.AIR_STANDBY:
 						air_strafe_speed_temp *= AERIAL_STRAFE_MOD
 						air_strafe_limit_temp *= AERIAL_STRAFE_MOD
 					
 					if abs(velocity.x + (dir * air_strafe_speed_temp)) > abs(velocity.x): # if speeding up
-						if abs(velocity.x) < speed * air_strafe_limit_temp: # only allow strafing if below speed limit
+						if abs(velocity.x) < UniqueCharacter.SPEED * air_strafe_limit_temp: # only allow strafing if below speed limit
 							velocity.x += dir * air_strafe_speed_temp
 					else: # slowing down
 						velocity.x += dir * air_strafe_speed_temp
@@ -656,11 +631,12 @@ func stimulate2(): # only ran if not in hitstop
 					# DDI speed depends on guard gauge
 					var DDI_speed = lerp(DDI_SIDE_MAX * DI_MIN_MOD, DDI_SIDE_MAX, get_guard_gauge_percent_above())
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
-						if abs(velocity.x) < speed * 1.25: # only allow DIing if below speed limit
+						if abs(velocity.x) < MAX_DDI_SIDE_SPEED: # only allow DIing if below speed limit
 							# WIP, speed limit depends on Guard Gauge
 							velocity.x += dir * DDI_speed
 					else: # slowing down
 						velocity.x += dir * DDI_speed
+						
 	
 	# TURN AT START OF CERTAIN MOVES --------------------------------------------------------------------------------------------------
 
@@ -706,15 +682,16 @@ func stimulate2(): # only ran if not in hitstop
 						if Settings.dt_fastfall[player_ID] == 1:
 							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
 					
-						velocity.y = lerp(velocity.y, GRAVITY * Globals.FRAME * terminal_velocity_mod * fastfall_mod, 0.3)
+						velocity.y = lerp(velocity.y, GRAVITY * Globals.FRAME * UniqueCharacter.TERMINAL_VELOCITY_MOD * \
+								UniqueCharacter.FASTFALL_MOD, 0.3)
 						if Animator.query(["FallTransit"]): # go straight to fall animation
 							animate("Fall")
 				
 						# fastfall reduce horizontal speed limit
-						if velocity.x < -speed * 0.7:
-							velocity.x = lerp(velocity.x, -speed * 0.7, 0.5)
-						elif velocity.x > speed * 0.7:
-							velocity.x = lerp(velocity.x, speed * 0.7, 0.5)
+						if velocity.x < -UniqueCharacter.SPEED * 0.7:
+							velocity.x = lerp(velocity.x, -UniqueCharacter.SPEED * 0.7, 0.5)
+						elif velocity.x > UniqueCharacter.SPEED * 0.7:
+							velocity.x = lerp(velocity.x, UniqueCharacter.SPEED * 0.7, 0.5)
 						
 			Globals.char_state.AIR_ATK_RECOVERY: # fastfall cancel from aerial hits
 				if test_fastfall_cancel():
@@ -829,14 +806,15 @@ func stimulate2(): # only ran if not in hitstop
 
 # GRAVITY --------------------------------------------------------------------------------------------------
 
-	# variable jump system reduces gravity if you hold down the jump button
-	var gravity_temp = GRAVITY * gravity_mod
+	var gravity_temp
 	
 	if $HitStunTimer.is_running(): # fix and lower gravity during hitstun
 		gravity_temp = HITSTUN_GRAV_MOD * GRAVITY
+	else:
+		gravity_temp = GRAVITY * UniqueCharacter.GRAVITY_MOD # each character are affected by gravity differently out of hitstun
 	
 	if $VarJumpTimer.is_running() and (button_jump in input_state.pressed or button_up in input_state.pressed):
-		# holding jump will jump higher by reducing gravity
+		# variable jump system reduces gravity if you hold down the jump button
 		gravity_temp *= VAR_JUMP_GRAV_MOD
 
 	if !grounded and (abs(velocity.y) < PEAK_DAMPER_LIMIT): # reduce gravity at peak of jump
@@ -848,39 +826,54 @@ func stimulate2(): # only ran if not in hitstop
 
 	if !null_gravity and !grounded: # gravity only pulls you if you are in the air
 		
-		if $HitStunTimer.is_running() and current_guard_gauge > 0 and get_damage_percent() < 1.0: # up/down DI, depends on Guard Gauge
-			if v_dir == -1: # DIing upward
-				gravity_temp *= lerp((DDI_UP_MAX - 1.0) * DI_MIN_MOD + 1, DDI_UP_MAX, get_guard_gauge_percent_above())
-			elif v_dir == 1: # DIing downward
-				gravity_temp *= lerp((DDI_DOWN_MAX - 1.0) * DI_MIN_MOD + 1, DDI_DOWN_MAX, get_guard_gauge_percent_above())
+		if $HitStunTimer.is_running():
+			if current_guard_gauge > 0 and get_damage_percent() < 1.0: # up/down DI, depends on Guard Gauge
+				if v_dir == -1: # DIing upward
+					gravity_temp *= lerp((DDI_UP_MAX - 1.0) * DI_MIN_MOD + 1, DDI_UP_MAX, get_guard_gauge_percent_above())
+				elif v_dir == 1: # DIing downward
+					gravity_temp *= lerp((DDI_DOWN_MAX - 1.0) * DI_MIN_MOD + 1, DDI_DOWN_MAX, get_guard_gauge_percent_above())
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
-				gravity_temp *= fall_grav_mod
+				gravity_temp *= UniqueCharacter.FALL_GRAV_MOD
 				if state == Globals.char_state.AIR_BLOCK: # air blocking reduce gravity
 					gravity_temp *= AIRBLOCK_GRAV_MOD
 				
 		velocity.y += gravity_temp * Globals.FRAME
 		
 	# terminal velocity downwards
-	var terminal = GRAVITY * Globals.FRAME * (terminal_velocity_mod)
-	if state == Globals.char_state.AIR_STANDBY and button_down in input_state.pressed:
-		terminal *= fastfall_mod # increase terminal velocity when fastfalling
-	if state == Globals.char_state.AIR_BLOCK: # air blocking reduce terminal velocity
-		terminal *= AIRBLOCK_TERMINAL_MOD
-	if $HitStunTimer.is_running() and velocity.y > terminal * TERMINAL_THRESHOLD:
-		pass # if too fast during hitstun, no slow down
-	elif velocity.y > terminal:
-		velocity.y = lerp(velocity.y, terminal, 0.75)
-	
-	
+	var terminal
+	if $HitStunTimer.is_running(): # during hitstun, only slowdown within a certain range
+		terminal = GRAVITY * Globals.FRAME * HITSTUN_TERMINAL_VELOCITY_MOD
+		
+		if velocity.y < terminal * TERMINAL_THRESHOLD and velocity.y > terminal:
+			velocity.y = lerp(velocity.y, terminal, 0.75)
 			
+	else:
+		terminal = GRAVITY * Globals.FRAME * UniqueCharacter.TERMINAL_VELOCITY_MOD
+	
+		if state == Globals.char_state.AIR_STANDBY and button_down in input_state.pressed:
+			terminal *= UniqueCharacter.FASTFALL_MOD # increase terminal velocity when fastfalling
+		if state == Globals.char_state.AIR_BLOCK: # air blocking reduce terminal velocity
+			terminal *= AIRBLOCK_TERMINAL_MOD
+
+		if velocity.y > terminal:
+			velocity.y = lerp(velocity.y, terminal, 0.75)
+		
+
 # FRICTION/AIR RESISTANCE AND TRIGGERED ANIMATION CHANGES ----------------------------------------------------------
 	# place this at end of frame later
 	# for triggered animation changes, use query_to_play() instead
 	# query() check animation at either start/end of frame, query_to_play() only check final animation
 	
-	var friction_this_frame = friction
-	var air_res_this_frame = air_resistance
+	var friction_this_frame
+	var air_res_this_frame
+	
+	if !$HitStunTimer.is_running():
+		friction_this_frame = UniqueCharacter.FRICTION
+		air_res_this_frame = UniqueCharacter.AIR_RESISTANCE
+	else:
+		friction_this_frame = HITSTUN_FRICTION
+		air_res_this_frame = HITSTUN_AIR_RES
 	
 	match state:
 		Globals.char_state.GROUND_STANDBY:
@@ -1045,11 +1038,11 @@ func stimulate2(): # only ran if not in hitstop
 
 	# limit velocity if velocity limiter is not null, "if velocity_limiter.x" will not pass if it is zero!
 	if velocity_limiter.x != null:
-		velocity.x = clamp(velocity.x, -velocity_limiter.x * speed, velocity_limiter.x * speed)
-	if velocity_limiter.up != null and velocity.y < -velocity_limiter.up * speed:
-		velocity.y = -velocity_limiter.up * speed
-	if velocity_limiter.down != null and velocity.y > velocity_limiter.down * speed:
-		velocity.y = velocity_limiter.down * speed
+		velocity.x = clamp(velocity.x, -velocity_limiter.x * UniqueCharacter.SPEED, velocity_limiter.x * UniqueCharacter.SPEED)
+	if velocity_limiter.up != null and velocity.y < -velocity_limiter.up * UniqueCharacter.SPEED:
+		velocity.y = -velocity_limiter.up * UniqueCharacter.SPEED
+	if velocity_limiter.down != null and velocity.y > velocity_limiter.down * UniqueCharacter.SPEED:
+		velocity.y = velocity_limiter.down * UniqueCharacter.SPEED
 	if velocity_limiter.x_slow != null:
 		velocity.x = lerp(velocity.x, 0, velocity_limiter.x_slow) # x_slow is around 0.03?
 	if velocity_limiter.y_slow != null:
@@ -1583,17 +1576,17 @@ func face(in_dir):
 	sprite.scale.x = facing
 	
 func reset_jumps():
-	air_jump = max_air_jump # reset jump count on ground
-	wall_jump = max_wall_jump # reset wall jump count on ground
-	air_dash = max_air_dash
+	air_jump = UniqueCharacter.MAX_AIR_JUMP # reset jump count on ground
+	wall_jump = MAX_WALL_JUMP # reset wall jump count on ground
+	air_dash = UniqueCharacter.MAX_AIR_DASH
 	aerial_memory = []
 	
 func reset_jumps_except_walljumps():
-	air_jump = max_air_jump # reset jump count on wall
-	air_dash = max_air_dash
+	air_jump = UniqueCharacter.MAX_AIR_JUMP # reset jump count on wall
+	air_dash = UniqueCharacter.MAX_AIR_DASH
 	
 func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock) give you +1 air jump
-	if air_jump < max_air_jump: # cannot go over
+	if air_jump < UniqueCharacter.MAX_AIR_JUMP: # cannot go over
 		air_jump += 1
 	
 func reset_cancels(): # done whenever you use an attack
@@ -3489,11 +3482,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			if button_down in input_state.pressed:
 #				UniqueCharacter.hop()
 #			else:
-			velocity.y = -jump_speed
+			velocity.y = -UniqueCharacter.JUMP_SPEED
 			$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 			emit_signal("SFX","JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"BlockHopTransit2":
-			velocity.y = -jump_speed * 0.75
+			velocity.y = -UniqueCharacter.JUMP_SPEED * 0.75
 			emit_signal("SFX","JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"AirJumpTransit2":
 			aerial_memory = []
@@ -3502,21 +3495,21 @@ func _on_SpritePlayer_anim_started(anim_name):
 				# air jump directional boost
 				if dir != 0:
 					if dir * velocity.x < 0: # air jump change direction (no change in velocity if same direction)
-						velocity.x += dir * speed * 0.7
+						velocity.x += dir * UniqueCharacter.SPEED * 0.7
 					else:
 						velocity.x = velocity.x * 0.9 # air jump is slower horizontally since no startup
 				else: # neutral air jump
 					velocity.x = velocity.x * 0.7		
-				velocity.y = -jump_speed * air_jump_mod
+				velocity.y = -UniqueCharacter.JUMP_SPEED * UniqueCharacter.AIR_JUMP_MOD
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 				emit_signal("SFX","AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
 			else: # if next to wall when starting an air jump, do wall jump instead
 				if wall_jump_dir != 0:
-					velocity.x = wall_jump_dir * speed * 0.5
+					velocity.x = wall_jump_dir * UniqueCharacter.SPEED * 0.5
 				else:
 					velocity.x = 0
 					wall_jump_dir = facing
-				velocity.y = -jump_speed
+				velocity.y = -UniqueCharacter.JUMP_SPEED
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 				var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 						-wall_jump_dir)
@@ -3528,11 +3521,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"WallJumpTransit2":
 			aerial_memory = []
 			if wall_jump_dir != 0:
-				velocity.x = wall_jump_dir * speed * 0.5
+				velocity.x = wall_jump_dir * UniqueCharacter.SPEED * 0.5
 			else:
 				velocity.x = 0
 				wall_jump_dir = facing
-			velocity.y = -jump_speed
+			velocity.y = -UniqueCharacter.JUMP_SPEED
 			$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 			var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 					-wall_jump_dir)
