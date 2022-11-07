@@ -89,7 +89,7 @@ frame_data = {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "aHSfxOver",
 "SfxOver_vframes": 2,
-"duration": 15,
+"duration": 18,
 "hframes": 6,
 "loop": false,
 "spritesheet": "aHSprite",
@@ -101,14 +101,14 @@ frame_data = {
 "hurtbox": [ Vector2( -10, 18 ), Vector2( 2, 18 ), Vector2( 2, 7 ), Vector2( 12, 7 ), Vector2( 12, -22 ), Vector2( -10, -22 ) ],
 "sweetbox": [  ]
 },
-5: {
+6: {
 "SfxOver_frame": 0,
 "frame": 1,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -10, 1 ), Vector2( -17, 1 ), Vector2( -17, 6 ), Vector2( -10, 6 ), Vector2( -10, 17 ), Vector2( 6, 17 ), Vector2( 6, 5 ), Vector2( 15, 5 ), Vector2( 15, -20 ), Vector2( -10, -20 ) ],
 "sweetbox": [  ]
 },
-10: {
+12: {
 "SfxOver_frame": 1,
 "frame": 2,
 "hitbox": [  ],

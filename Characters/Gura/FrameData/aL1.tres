@@ -63,7 +63,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "aL1SfxUnder",
 "SfxUnder_vframes": 1,
-"duration": 12,
+"duration": 10,
 "hframes": 5,
 "loop": false,
 "spritesheet": "aL1Sprite",
@@ -74,7 +74,7 @@ frame_data = {
 "hitbox": [  ],
 "hurtbox": [ Vector2( -9, 19 ), Vector2( 3, 19 ), Vector2( 3, 8 ), Vector2( 13, 8 ), Vector2( 13, -21 ), Vector2( -9, -21 ) ]
 },
-6: {
+5: {
 "SfxUnder_frame": 0,
 "frame": 1,
 "hitbox": [  ],

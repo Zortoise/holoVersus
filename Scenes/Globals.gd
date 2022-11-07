@@ -10,18 +10,18 @@ enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, PROJECTILE}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum hitspark_type {CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
-enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTIAIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, HARD_TO_BLOCK
+enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE}
 # AIR_ATTACK = for all aerial Normals/Specials, allow grounded aerials to be blocked both on ground/air
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
-# ANTIAIR = startup and active are immune to non-grounded moves above you on the same tier
+# ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
 # JUMP_CANCEL = can cancel recovery with a jump, place this on the active animation with same name as the recovery animation
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = for rekkas, prevent turning during startup
 # EASY_BLOCK = can be blocked correctly both on ground and in air
-# HARD_TO_BLOCK = always wrongblocked if chain_combo is false, cannot perfect block
+# ANTI_GUARD = always wrongblocked if chain_combo is false, cannot perfect block
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers and moves with UNBLOCKABLE
 # UNBLOCKABLE = for command grabs
 # SCREEN_SHAKE = cause screen to shake on hit
@@ -30,7 +30,7 @@ enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLO
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFECT, AIR_PERFECT}
-enum trait {CROUCH_CANCEL, FAST_GRD_P_BLOCK, FAST_AIR_P_BLOCK, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BLOCK
+enum trait {CROUCH_CANCEL, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BLOCK
 		DASH_BLOCK}
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_UNIQUE, P1_ASSIST, P1_SPECIAL, 

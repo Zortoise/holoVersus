@@ -25,17 +25,21 @@ var animations = {}
 
 	
 # load and play an animation
-func play(anim):
+func play(anim: String):
 	if anim in animations:
 		playing = true
 		to_play_animation = anim
 		time = 0
 		looped_back = false
+	else:
+		print("Error: Animation " + anim + " not found.")
 		
 func stop():
 	playing = false
 	
 func is_playing():
+	if !current_animation in animations:
+		return false
 	if time >= animations[current_animation].duration - 1 and !animations[current_animation].loop:
 		return false
 	else: return true
@@ -50,9 +54,9 @@ func stimulate():
 				emit_signal("anim_started", current_animation)
 			set_up_texture()
 		
-		# if has loop section, just loop the section till animtion finishes, good for modulate animations
+		# if has loop section, just loop the section till animation finishes, good for modulate animations to shorten code
 		if "loop_section" in animations[current_animation]:
-			if time % animations[current_animation].loop_section in animations[current_animation]["timestamps"]:
+			if posmod(time, animations[current_animation].loop_section) in animations[current_animation]["timestamps"]:
 				process_timestamp(time % animations[current_animation].loop_section)
 		# no loop section, process normally
 		elif time in animations[current_animation]["timestamps"]:
@@ -202,7 +206,7 @@ func load_state(state_data):
 			var new_time
 			
 			if "loop_section" in animations[current_animation]: # for looped sections
-				new_time = time % animations[current_animation].loop_section
+				new_time = posmod(time, animations[current_animation].loop_section)
 			else: # for normal animations
 				new_time = time
 				

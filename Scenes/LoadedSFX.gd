@@ -289,6 +289,48 @@ var modulate_animations = {
 			},
 		}
 	},
+	"EX_block_flash" : {
+		"duration": 2,
+		"loop" : false,
+		"followup" : "EX_block_flash2",
+		"timestamps" : {
+			0 : # this is the timestamp of the key
+			{
+				"modulate" : Color(4.0, 4.0, 4.0),
+			},
+		}
+	},
+	"EX_block_flash2" : {
+		"duration": 12,
+		"loop" : true,
+		"shadow_trail" : 0,
+		"timestamps" : {
+			0 : # this is the timestamp of the key
+			{
+				"modulate" : Color(1.2, 0.8, 0.8), # red
+			},
+			2 :
+			{
+				"modulate" : Color(1.2, 1.2, 0.8), # yellow
+			},
+			4 :
+			{
+				"modulate" : Color(0.8, 1.2, 0.8), # green
+			},
+			6 :
+			{
+				"modulate" : Color(0.8, 1.2, 1.2), # cyan
+			},
+			8 :
+			{
+				"modulate" : Color(0.8, 0.8, 1.2), # blue
+			},
+			10 :
+			{
+				"modulate" : Color(1.2, 0.8, 1.2), # purple
+			},
+		}
+	},
 	"punish_flash" :{
 		"duration": 6,
 		"loop" : false,
