@@ -290,7 +290,7 @@ var modulate_animations = {
 		}
 	},
 	"EX_block_flash" : {
-		"duration": 2,
+		"duration": 4,
 		"loop" : false,
 		"followup" : "EX_block_flash2",
 		"timestamps" : {

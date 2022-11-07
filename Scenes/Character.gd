@@ -41,6 +41,7 @@ const HITSTUN_REDUCTION_AT_MAX_GG = 0.5 # max reduction in hitstun when defender
 const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POSTIVE_FLOW_REGEN_MOD = 6.0 # increased Guard Guard Regen during Postive Flow
 const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
+const AIR_EX_BLOCK_COST_MOD = 1.25	# increased EX Gauge cost of EX Block if done in air
 
 const LETHAL_KB_MOD = 1.5 # multiply knockback strength when defender is at Damage Value Limit
 const LETHAL_HITSTOP = 25
@@ -562,20 +563,7 @@ func stimulate2(): # only ran if not in hitstop
 	if !Globals.Game.input_lock and state == Globals.char_state.GROUND_STANDBY:
 		change_ex_gauge(EX_GAUGE_REGEN_RATE * Globals.FRAME)
 		
-	# drain EX Gauge when EX blocking
-	if is_blocking() and check_if_EX_block():
-		var ex_gauge_drain = round(UniqueCharacter.EX_BLOCK_DRAIN_RATE * Globals.FRAME)
-		change_ex_gauge(-ex_gauge_drain)
-		if current_ex_gauge <= 0.0:
-			match Animator.current_animation:
-				"EXBlock":
-					animate("Block")
-				"AirEXBlock":
-					animate("AirBlock")
-	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
-		reset_modulate()
 
-	
 	if is_on_ground($SoftPlatformDBox, velocity):
 		grounded = true
 		reset_jumps() # reset air jumps and air dashes here
@@ -586,6 +574,23 @@ func stimulate2(): # only ran if not in hitstop
 		soft_grounded = true
 	else:
 		soft_grounded = false
+		
+	
+	# drain EX Gauge when EX blocking
+	if is_blocking() and check_if_EX_block():
+		var ex_gauge_drain = round(UniqueCharacter.EX_BLOCK_DRAIN_RATE * Globals.FRAME)
+		if !grounded:
+			ex_gauge_drain *= AIR_EX_BLOCK_COST_MOD
+		change_ex_gauge(-ex_gauge_drain)
+		if current_ex_gauge <= 0.0:
+			match Animator.current_animation:
+				"EXBlock":
+					animate("Block")
+				"AirEXBlock":
+					animate("AirBlock")
+	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
+		reset_modulate()
+		
 		
 	if !is_attacking():
 		reset_cancels()
@@ -2433,7 +2438,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		_:  # normal block
 			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
-			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
+			if !defender.check_if_EX_block():
+				defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -3549,7 +3555,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"EXBlockStartup", "AirEXBlockStartup":
 			block_rec_cancel = false
 			$ModulatePlayer.play("EX_block_flash")
-			change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5)
+			if grounded:
+				change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5)
+			else:
+				change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5 * AIR_EX_BLOCK_COST_MOD)
 		"BlockRecovery", "AirBlockRecovery", "BlockCRecovery", "AirBlockCRecovery":
 			$PBlockTimer.stop() # stop perfect blocking		
 		"BurstCounterStartup", "BurstEscapeStartup":

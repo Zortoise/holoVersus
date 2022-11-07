@@ -734,6 +734,9 @@ func start_audio(anim_name):
 		"BurstCounter", "BurstEscape", "BurstExtend":
 			Character.play_audio("blast1", {"vol" : -18,})
 			
+		"EXBlockStartup", "AirEXBlockStartup":
+			Character.play_audio("bling1", {"vol" : -12,})
+			
 func landing_sound(): # can be called by main node
 	Character.play_audio("land1", {})
 
