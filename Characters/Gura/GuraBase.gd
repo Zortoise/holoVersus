@@ -193,7 +193,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2.4,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD],
+		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_REPEAT],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	"aL1" : {

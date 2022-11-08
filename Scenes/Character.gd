@@ -2594,7 +2594,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if array[0] == attacker.player_ID and array[1] == hit_data.move_name:
 			if !hit_data.repeat_penalty:
 				hit_data.repeat_penalty = true # found a repeat
-			else:
+				if Globals.atk_attr.NO_REPEAT in attacker.query_atk_attr(hit_data.move_name):
+					double_repeat = true
+					hit_data["double_repeat"] = true
+			elif !double_repeat:
 				double_repeat = true
 				hit_data["double_repeat"] = true # found multiple repeats
 				break
