@@ -913,12 +913,11 @@ func detect_hit():
 					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, hurtbox, true)
 						
 	for hit_data in hit_data_array:
-		$Players.move_child(get_node(hit_data.defender_nodepath), 0) # move defender to bottom layer
-		
 		# call being_hit() on the defender and landed_a_hit() on the attacker/projectile
 		get_node(hit_data.defender_nodepath).being_hit(hit_data) # will add stuff to hit_data, passing by reference
 		if !"entity_nodepath" in hit_data:
 			get_node(hit_data.attacker_nodepath).landed_a_hit(hit_data)
+			$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
 		else:
 			get_node(hit_data.entity_nodepath).landed_a_hit(hit_data)
 		
