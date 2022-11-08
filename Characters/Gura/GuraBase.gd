@@ -353,7 +353,7 @@ func consume_one_air_dash(): # different characters can have different types of 
 	Character.air_dash -= 1
 	
 func gain_one_air_dash(): # different characters can have different types of air_dash consumption
-	if Character.air_dash < Character.max_air_dash: # cannot go over
+	if Character.air_dash < MAX_AIR_DASH: # cannot go over
 		Character.air_dash += 1
 
 func shadow_trail():# process shadow trail

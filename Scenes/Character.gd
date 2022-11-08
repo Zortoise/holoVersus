@@ -2423,6 +2423,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain)
+			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.2)
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain)
@@ -2431,7 +2432,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		_:  # normal block
 			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
-			if !defender.check_if_EX_block():
+			if !"ex_block" in hit_data:
 				defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
@@ -2515,7 +2516,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				play_audio("bling2", {"vol" : -3, "bus" : "PitchDown"})
 			_: # normal block
-				play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
+				if "ex_block" in hit_data:
+					play_audio("bling6", {"vol" : -3})
+				else:
+					play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
 
 	elif hit_data.semi_disjoint and !Globals.trait.VULN_LIMBS in defender.query_traits(): # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
@@ -2604,6 +2608,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
 		
 	hit_data["weak_hit"] = weak_hit
+	
+	if defender.check_if_EX_block():
+		hit_data["ex_block"] = true
 		
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
@@ -2635,12 +2642,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.GROUND
 				
-			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker) and !defender.check_if_EX_block(): # projectiles cannot cross-up
+			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker) and !"ex_block" in hit_data: # projectiles cannot cross-up
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			elif !"entity_nodepath" in hit_data and (!attacker.grounded and attacker.get_feet_pos().y < defender.get_feet_pos().y) and \
 					!Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-					!defender.Animator.query(["BlockHopTransit"]) and !defender.check_if_EX_block():
+					!defender.Animator.query(["BlockHopTransit"]) and !"ex_block" in hit_data:
 				# for a wrong ground block, attacker must be in air and above you in position
 				# the attack must not have the EASY_BLOCK attribute, blockhopping squat frames can also block both air/ground
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
@@ -2674,13 +2681,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.AIR
 				
-			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker) and !defender.check_if_EX_block(): # projectiles cannot cross-up
+			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker) and !"ex_block" in hit_data: # projectiles cannot cross-up
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 			
 			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.AIR_ATTACK in attacker.query_atk_attr(hit_data.move_name) and \
 					attacker.get_feet_pos().y > defender.get_feet_pos().y and \
 					!Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-					!defender.Animator.query(["BlockHopTransit"]) and !defender.check_if_EX_block():
+					!defender.Animator.query(["BlockHopTransit"]) and !"ex_block" in hit_data:
 				# for a wrong air block, move must not be an AIR_ATTACK and attacker below you in position
 				# the attack must not have the EASY_BLOCK attribute, blockhopping squat frames can also block both air/ground
 				hit_data.block_state = Globals.block_state.AIR_WRONG
@@ -3314,9 +3321,9 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	match hit_data.move_data.hitspark_type:
 		Globals.hitspark_type.HIT:
 			match hitspark_level:
-				1:
-					hitspark = "HitsparkA"
-				2:
+#				1:
+#					hitspark = "HitsparkA"
+				1, 2:
 					hitspark = "HitsparkB"
 				3, 4:
 					hitspark = "HitsparkC"
@@ -3324,9 +3331,9 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 					hitspark = "HitsparkD"
 		Globals.hitspark_type.SLASH:
 			match hitspark_level:
-				1:
-					hitspark = "SlashsparkA"
-				2:
+#				1:
+#					hitspark = "SlashsparkA"
+				1, 2:
 					hitspark = "SlashsparkB"
 				3, 4:
 					hitspark = "SlashsparkC"
@@ -3351,6 +3358,8 @@ func generate_blockspark(hit_data):
 		blockspark = "WBlockspark"
 	elif hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
 		blockspark = "PBlockspark"
+	elif "ex_block" in hit_data:
+		blockspark = "EXBlockspark"
 	else:
 		blockspark = "Blockspark"
 	emit_signal("SFX", blockspark, "Blocksparks", hit_data.hit_center, {"rot" : block_dir})
@@ -3546,6 +3555,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			block_rec_cancel = false
 			perfect_block()
 		"EXBlockStartup", "AirEXBlockStartup":
+			$PBlockTimer.stop() # stop perfect blocking		
 			block_rec_cancel = false
 			$ModulatePlayer.play("EX_block_flash")
 			if grounded:
