@@ -15,10 +15,14 @@ var stoptimes := [0, 0]
 var startup_stopped := [false, false]
 var startup_stoptimes:= [0, 0]
 
+var damage_value_at_start := [0, 0]
+
+
 func _ready():
-	$Startup.text = ""
-	$Startup2.text = ""
-	$Advantage.text = ""
+	$FrameViewerList/Startup.text = ""
+	$FrameViewerList/Startup2.text = ""
+	$FrameViewerList/Advantage.text = ""
+	$FrameViewerList/Damage.text = ""
 
 func is_idle(player):
 	match player.state:
@@ -40,7 +44,7 @@ func stimulate():
 			if is_idle(P1_node) and is_idle(P2_node):
 				stop()
 			else:
-				var pip_number = posmod(time, 50)
+				var pip_number = posmod(time, 75)
 				
 				if pip_number == 0 and time != 0:
 					darken_pips() # next line
@@ -115,9 +119,12 @@ func start():
 	player_stopped = [false, false]
 	startup_stoptimes = [0, 0]
 	startup_stopped = [false, false]
-	$Startup.text = ""
-	$Startup2.text = ""
-	$Advantage.text = ""
+	$FrameViewerList/Startup.text = ""
+	$FrameViewerList/Startup2.text = ""
+	$FrameViewerList/Advantage.text = ""
+	$FrameViewerList/Damage.text = ""
+	
+	damage_value_at_start = [P1_node.current_damage_value, P2_node.current_damage_value]
 	
 		
 func stop():
@@ -131,13 +138,19 @@ func stop():
 	time = 0
 	var time_diff = stoptimes[1] - stoptimes[0]
 	if time_diff >= 0:
-		$Advantage.text = "+ " + str(time_diff)
+		$FrameViewerList/Advantage.text = "+ " + str(time_diff)
 	else:
-		$Advantage.text = "- " + str(abs(time_diff))
+		$FrameViewerList/Advantage.text = "- " + str(abs(time_diff))
 	if startup_stoptimes[0] > 0:
-		$Startup.text = "S: " + str(startup_stoptimes[0])
+		$FrameViewerList/Startup.text = "S: " + str(startup_stoptimes[0])
 	if startup_stoptimes[1] > 0:
-		$Startup2.text = "S: " + str(startup_stoptimes[1])
+		$FrameViewerList/Startup2.text = "S: " + str(startup_stoptimes[1])
+		
+	var P1_damage = P1_node.current_damage_value - damage_value_at_start[0]
+	var P2_damage = P2_node.current_damage_value - damage_value_at_start[1]
+	
+	if max(P1_damage, P2_damage) > 0:
+		$FrameViewerList/Damage.text = "D: " + str(max(P1_damage, P2_damage))
 		
 	
 func darken_pips():
