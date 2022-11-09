@@ -114,7 +114,7 @@ const DI_MAX = PI/9 # change in knockback dir when using DI at 200% Guard Gauge
 const DI_MIN_MOD = 0.1 # percent of max DI at 100% Guard Gauge
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
 const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
-
+const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is crouching
 
 
 # variables used, don't touch these
@@ -2836,6 +2836,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var knockback_strength = calculate_knockback_strength(hit_data)
 	hit_data["knockback_strength"] = knockback_strength
 	
+#	print(knockback_strength)
+	
 	# HITSTOP ---------------------------------------------------------------------------------------------------
 	
 	if !hit_data.lethal_hit:
@@ -3110,16 +3112,19 @@ func calculate_knockback_strength(hit_data):
 			# when being knocked downward (45 degree arc) while blocking, knockback is reduced
 			knockback_strength *= DOWNWARD_KB_REDUCTION_ON_BLOCK 
 
+	# for rekkas and combo-type moves/supers, no KB boost for non-finishers, these are considered "weak hits" as well
+	if Globals.atk_attr.AUTOCHAIN in attacker.query_atk_attr(hit_data.move_name):
+		return knockback_strength
+
 	if hit_data.lethal_hit: # increased knockback on a lethal hit, multi-hit and autochain will not cause lethal
 		if !hit_data.break_hit:
 			knockback_strength += LAUNCH_THRESHOLD
 		knockback_strength *= LETHAL_KB_MOD
 		
-	# for rekkas and combo-type moves/supers, no KB boost for non-finishers, these are considered "weak hits" as well
-	if Globals.atk_attr.AUTOCHAIN in attacker.query_atk_attr(hit_data.move_name):
-		return knockback_strength
-		
-	knockback_strength *= defender.UniqueCharacter.KB_MOD # defender's weight
+	elif defender.state == Globals.char_state.CROUCHING: # reduce knockback if opponent is crouching
+			knockback_strength *= CROUCH_REDUCTION_MOD
+			
+#	knockback_strength *= defender.UniqueCharacter.KB_MOD # defender's weight
 	
 	if attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) and defender.get_damage_percent() > DMG_THRES_WHEN_KB_BOOST_STARTS:
 		# no KB boost for multi-hit attacks till the last hit
@@ -3131,6 +3136,7 @@ func calculate_knockback_strength(hit_data):
 		#	130% damage is 200%		 x 2.0 knockback
 		# 	160% damage is 300%		 x 2.5 knockback
 		knockback_strength *= lerp(1.0, KB_BOOST_AT_DMG_VAL_LIMIT, dmg_val_boost)
+
 
 	return knockback_strength # lethal knockback is around 2000
 	
@@ -3181,6 +3187,8 @@ func calculate_knockback_dir(hit_data):
 func adjusted_atk_level(hit_data): # mostly for hitstun and blockstun
 	# atk_level = 1 are weak hits and cannot do a lot of stuff, cannot cause hitstun
 	
+	var defender = get_node(hit_data.defender_nodepath)
+	
 	var attack_level = hit_data.move_data.attack_level
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
 		attack_level -= 1 # atk lvl 2 become weak hit
@@ -3215,8 +3223,13 @@ func calculate_hitstun(hit_data): # hitstun and blockstun determined by attack l
 		hitstun *= LETHAL_HITSTUN_MOD
 		if defender.get_damage_percent() > 1.0:
 			hitstun *= defender.get_damage_percent()
-	elif defender.current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-		hitstun *= lerp(1.0, HITSTUN_REDUCTION_AT_MAX_GG, defender.get_guard_gauge_percent_above())
+	else:
+		if defender.current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+			hitstun *= lerp(1.0, HITSTUN_REDUCTION_AT_MAX_GG, defender.get_guard_gauge_percent_above())
+			
+		if defender.state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
+			hitstun *= CROUCH_REDUCTION_MOD
+		
 		
 	return hitstun
 
