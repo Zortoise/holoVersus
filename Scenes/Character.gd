@@ -15,7 +15,7 @@ const VarJumpTimer_WAIT_TIME = 10 # frames after jumping where holding jump will
 const VAR_JUMP_GRAV_MOD = 0.2 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
-const QUICK_CANCEL_TIME = 1 # number of frames at startup the user can still change direction or cancel into a combination action
+const QUICK_CANCEL_TIME = 2 # number of frames at startup the user can still change direction or cancel into a combination action
 const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/airdash being invulnerable
 const MAX_EX_GAUGE = 50000.0
 const EX_GAUGE_REGEN_RATE = 1000 # EX Gauge regened per second when idling
@@ -1805,8 +1805,9 @@ func get_move_name():
 	
 func check_quick_cancel(): # return true if you can change direction or cancel into a combination action currently
 	match state:
-		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, \
-				Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
+			return true
+		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
 			if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
 				# when time = 0 state is still in the previous one, since state only update when a new animation begins
 				return true
@@ -2215,6 +2216,9 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
 	
 func test_qc_chain_combo(attack_ref):
+	
+	if attack_ref in chain_memory: return false # cannot quick cancel into moves already done
+	
 	if chain_combo == 2: # on blocking opponent, can only qc into moves of higher strength
 		if get_atk_strength(chain_memory.back()) >= get_atk_strength(attack_ref):
 			return false

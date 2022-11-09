@@ -216,6 +216,8 @@ func debug():
 			stimulate(false)
 		elif playback_mode == false:
 			stimulate()
+		else:
+			stimulate(false)
 			
 #	if Input.is_action_just_pressed("frame_reverse"): # reverse 1 frame by loading save state of previous frame, can do up to certain times
 #		if playback_mode == false:
