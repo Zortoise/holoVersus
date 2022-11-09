@@ -108,8 +108,8 @@ const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during a
 const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
 const DDI_SIDE_MAX = 15 # horizontal Drift DI speed at 200% Guard Gauge
 const MAX_DDI_SIDE_SPEED = 300.0 # max horizontal Drift DI speed
-const DDI_UP_MAX = 0.40 # gravity decrease upward Drift DI at 200% Guard Gauge
-const DDI_DOWN_MAX = 1.60 # gravity increase downward Drift DI at 200% Guard Gauge
+const DDI_UP_MAX = 0.60 # gravity decrease upward Drift DI at 200% Guard Gauge
+const DDI_DOWN_MAX = 1.40 # gravity increase downward Drift DI at 200% Guard Gauge
 const DI_MAX = PI/9 # change in knockback dir when using DI at 200% Guard Gauge
 const DI_MIN_MOD = 0.1 # percent of max DI at 100% Guard Gauge
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
@@ -1891,6 +1891,9 @@ func burst_counter_check(): # check if have resources to do it, then take away t
 	return true
 	
 func burst_escape_check(): # check if have resources to do it, then take away those resources and return a bool
+	if current_guard_gauge >= UniqueCharacter.GUARD_GAUGE_CEIL:
+		change_guard_gauge_percent(-1.0)
+		return true
 	if !has_burst or current_guard_gauge <= 0:
 		return false # not enough resouces to use it
 	change_guard_gauge_percent(-BURSTESCAPE_GG_COST)
@@ -3186,8 +3189,6 @@ func calculate_knockback_dir(hit_data):
 
 func adjusted_atk_level(hit_data): # mostly for hitstun and blockstun
 	# atk_level = 1 are weak hits and cannot do a lot of stuff, cannot cause hitstun
-	
-	var defender = get_node(hit_data.defender_nodepath)
 	
 	var attack_level = hit_data.move_data.attack_level
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
