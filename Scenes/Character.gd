@@ -7,7 +7,7 @@ signal projectile (out_owner_ID, out_loaded_proj_ref, out_move_data, out_positio
 
 # constants
 const GRAVITY = 4000.0
-const SpecialTimer_WAIT_TIME = 5 # special button buffer, also used for SuperTimer
+const SpecialTimer_WAIT_TIME = 10 # special button buffer, also used for SuperTimer
 const PEAK_DAMPER_MOD = 0.6 # used to reduce gravity at jump peak
 const PEAK_DAMPER_LIMIT = 400.0 # min velocity.y where jump peak gravity reduction kicks in
 const TERMINAL_THRESHOLD = 1.5 # if velocity.y is over this during hitstun, no terminal velocity slowdown
@@ -42,7 +42,7 @@ const HITSTUN_REDUCTION_AT_MAX_GG = 0.5 # max reduction in hitstun when defender
 const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POSTIVE_FLOW_REGEN_MOD = 6.0 # increased Guard Guard Regen during Postive Flow
 const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
-const AIR_EX_BLOCK_COST_MOD = 1.3	# increased EX Gauge cost of EX Block if done in air
+#const AIR_EX_BLOCK_COST_MOD = 1.25	# increased EX Gauge cost of EX Block if done in air
 
 const HITSTUN_GRAV_MOD = 0.65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 0.15  # friction during hitstun
@@ -554,8 +554,8 @@ func stimulate2(): # only ran if not in hitstop
 	# drain EX Gauge when EX blocking
 	if is_blocking() and check_if_EX_block():
 		var ex_gauge_drain = round(UniqueCharacter.EX_BLOCK_DRAIN_RATE * Globals.FRAME)
-		if !grounded:
-			ex_gauge_drain *= AIR_EX_BLOCK_COST_MOD
+#		if !grounded:
+#			ex_gauge_drain *= AIR_EX_BLOCK_COST_MOD
 		change_ex_gauge(-ex_gauge_drain)
 		if current_ex_gauge <= 0.0:
 			match Animator.current_animation:
@@ -701,37 +701,41 @@ func stimulate2(): # only ran if not in hitstop
 	
 	if UniqueCharacter.STYLE == 0:
 		if button_block in input_state.pressed:
-			var startup
 			if ($SpecialTimer.is_running() or button_special in input_state.just_released) and \
 					current_ex_gauge >= UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5:
-				startup = "EXBlockStartup"
+				match state:
+						Globals.char_state.GROUND_BLOCK:
+							if Animator.query(["BlockStartup"]):
+								animate("EXBlockStartup")
+						Globals.char_state.GROUND_STANDBY:
+							animate("EXBlockStartup")
+						Globals.char_state.GROUND_C_RECOVERY:
+							if Animator.query_current(["DashBrake"]):
+								if Globals.trait.DASH_BLOCK in query_traits():
+									animate("EXBlockStartup")
+							else:
+								animate("EXBlockStartup")
+						Globals.char_state.AIR_STANDBY:
+							animate("AirEXBlockStartup")
+							$VarJumpTimer.stop()
+						Globals.char_state.AIR_C_RECOVERY:
+							if !Animator.query_current(["AirDashBrake"]):
+								animate("AirEXBlockStartup")
+								$VarJumpTimer.stop()
 			else:
-				startup = "BlockStartup"
-			match state:
-				Globals.char_state.GROUND_STANDBY:
-					animate(startup)
-				Globals.char_state.GROUND_C_RECOVERY:
-					if Animator.query_current(["DashBrake"]):
-						if Globals.trait.DASH_BLOCK in query_traits():
-							animate(startup)
-					else:
-						animate(startup)
-				Globals.char_state.AIR_STANDBY:
-					animate("Air" + startup)
-					$VarJumpTimer.stop()
-				Globals.char_state.AIR_C_RECOVERY:
-					if !Animator.query_current(["AirDashBrake"]):
-						animate("Air" + startup)
-						$VarJumpTimer.stop()
-				Globals.char_state.GROUND_STARTUP: # jump to blockhop
-					if Animator.query_to_play(["JumpTransit"]):
-						animate("BlockHopTransit")
+				match state:
+					Globals.char_state.GROUND_STANDBY:
+						animate("BlockStartup")
+					Globals.char_state.GROUND_C_RECOVERY:
+						if Animator.query_current(["DashBrake"]):
+							if Globals.trait.DASH_BLOCK in query_traits():
+								animate("BlockStartup")
+						else:
+							animate("BlockStartup")
+					Globals.char_state.GROUND_STARTUP: # jump to blockhop
+						if Animator.query_to_play(["JumpTransit"]):
+							animate("BlockHopTransit")
 						
-	if button_special in input_state.just_released and current_ex_gauge >= UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5:
-		if state == Globals.char_state.GROUND_BLOCK and Animator.query(["BlockStartup"]):
-			animate("EXBlockStartup")
-		elif state == Globals.char_state.AIR_BLOCK and Animator.query(["AirBlockStartup"]):
-			animate("AirEXBlockStartup")
 			
 
 # SPECIAL/EX BUTTON --------------------------------------------------------------------------------------------------	
@@ -1891,6 +1895,8 @@ func burst_counter_check(): # check if have resources to do it, then take away t
 	return true
 	
 func burst_escape_check(): # check if have resources to do it, then take away those resources and return a bool
+	if get_damage_percent() >= 1.0: # cannot Burst Escape at lethal range
+		return false
 	if current_guard_gauge >= UniqueCharacter.GUARD_GAUGE_CEIL:
 		change_guard_gauge_percent(-1.0)
 		return true
@@ -2430,7 +2436,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain)
-			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.2)
+			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.25)
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain)
@@ -2638,12 +2644,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
 					attacker.chain_memory.size() == 0 and !defender.get_node("BlockStunTimer").is_running():
-				# HtB attacks cannot work if opponent is in blockstun or you chain into it
+				# ANTI_GUARD attacks cannot work if opponent is in blockstun or you chain into it
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
 					!defender.get_node("BlockStunTimer").is_running():
-				# rare HtB projectiles, ignore chaining requirement
+				# rare ANTI_GUARD projectiles, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			elif defender.Animator.query(["WBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
@@ -2669,7 +2675,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN:
 			hit_data.sweetspotted = false  # blocking will not cause sweetspot hits
 			
-			if ((defender.get_node("PBlockTimer").is_running() and Globals.trait.AIR_PERFECT_BLOCK in defender.query_traits()) or \
+			if Globals.atk_attr.ANTI_AIR in attacker.query_atk_attr(hit_data.move_name):
+				hit_data.block_state = Globals.block_state.AIR_WRONG # anti-air attacks always wrongblock airborne defenders
+			
+			elif ((defender.get_node("PBlockTimer").is_running() and Globals.trait.AIR_PERFECT_BLOCK in defender.query_traits()) or \
 					defender.Animator.query(["PBlockstun", "AirPBlockStun"])) and \
 					!Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name):
 				#  being in PBlockstun will continue to PBlock all aerial attacks
@@ -2677,12 +2686,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
 					attacker.chain_memory.size() == 0 and !defender.get_node("BlockStunTimer").is_running():
-				# HtB attacks cannot work if opponent is in blockstun or you chain into it
+				# ANTI_GUARD attacks cannot work if opponent is in blockstun or you chain into it
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
 			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
 					!defender.get_node("BlockStunTimer").is_running():
-				# rare HtB projectiles, ignore chaining requirement
+				# rare ANTI_GUARD projectiles, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
 			elif defender.Animator.query(["AirWBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
@@ -3577,12 +3586,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 			perfect_block()
 		"EXBlockStartup", "AirEXBlockStartup":
 			$PBlockTimer.stop() # stop perfect blocking		
+			$SpecialTimer.stop() # to prevent accidental special moves
 			block_rec_cancel = false
 			$ModulatePlayer.play("EX_block_flash")
-			if grounded:
-				change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5)
-			else:
-				change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5 * AIR_EX_BLOCK_COST_MOD)
+#			if grounded:
+			change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5)
+#			else:
+#				change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5 * AIR_EX_BLOCK_COST_MOD)
 		"BlockRecovery", "AirBlockRecovery", "BlockCRecovery", "AirBlockCRecovery":
 			$PBlockTimer.stop() # stop perfect blocking		
 		"BurstCounterStartup", "BurstEscapeStartup":
