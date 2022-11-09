@@ -6,7 +6,7 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 335.0 # ground speed
+const SPEED = 330.0 # ground speed
 const AIR_STRAFE_SPEED = 30
 const AIR_STRAFE_LIMIT = 0.8 # speed limit of air strafing, limit depends on ground speed
 const JUMP_SPEED = 625.0
@@ -183,7 +183,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.HEAVY,
 		"hitcount" : 1,
 		"damage" : 70,
-		"knockback" : 500,
+		"knockback" : 550,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 6,
 		"priority": 5,
@@ -350,7 +350,7 @@ func check_collidable(): # some characters have move that can pass through other
 #	Character.emit_signal("SFX","JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 	
 func consume_one_air_dash(): # different characters can have different types of air_dash consumption
-	Character.air_dash -= 1
+	Character.air_dash = max(Character.air_dash - 1, 0)
 	
 func gain_one_air_dash(): # different characters can have different types of air_dash consumption
 	if Character.air_dash < MAX_AIR_DASH: # cannot go over

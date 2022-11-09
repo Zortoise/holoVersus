@@ -165,7 +165,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			# AIR DASH ---------------------------------------------------------------------------------
 				
 				Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
-					if Character.air_dash > 0:
+					if Character.air_dash > 0 or Character.get_node("HitStunGraceTimer").is_running():
 						if Character.button_down in Character.input_state.pressed and Character.check_snap_up():
 							
 							if Character.velocity_previous_frame.y < 0: # moving upward
