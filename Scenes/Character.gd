@@ -72,7 +72,6 @@ const BREAK_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Break
 
 const BASE_BLOCK_PUSHBACK_MOD = 0.7 # % of base knockback of attack
 const BASE_BLOCK_ATKER_PUSHBACK = 300 # how much the attacker is pushed away, fixed
-const BASE_BLOCK_CHIP_DAMAGE_MOD = 0.25 # % of damage taken as chip damage when blocking
 const DOWNWARD_KB_REDUCTION_ON_BLOCK = 0.25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
 const MAX_BASE_BLOCKSTUN = 8
 
@@ -83,7 +82,6 @@ const WRONGBLOCK_PUSHBACK_MOD = 1.0 # % of base knockback of attack
 const WRONGBLOCK_ATKER_PUSHBACK = 200 # how much the attacker is pushed away, fixed
 const WRONGBLOCK_HITSTOP = 7
 
-const PERFECTBLOCK_CHIP_DMG_MOD = 0.0 # no chip damage for perfect blocking
 const PERFECTBLOCK_GUARD_DRAIN_MOD = 0.15 # reduced guard drain for perfect blocking
 const PERFECTBLOCK_BLOCKSTUN_MOD = 0.5 # reduced blockstun for perfect blocking
 const PERFECTBLOCK_PUSHBACK_MOD = 0.25 # % of base knockback of attack
@@ -106,11 +104,11 @@ const LAUNCH_DUST_THRESHOLD = 1400.0 # velocity where launch dust increase in fr
 
 const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
 const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
-const DDI_SIDE_MAX = 15 # horizontal Drift DI speed at 200% Guard Gauge
+const DDI_SIDE_MAX = 30 # horizontal Drift DI speed at 200% Guard Gauge
 const MAX_DDI_SIDE_SPEED = 300.0 # max horizontal Drift DI speed
-const DDI_UP_MAX = 0.70 # gravity decrease upward Drift DI at 200% Guard Gauge
-const DDI_DOWN_MAX = 1.30 # gravity increase downward Drift DI at 200% Guard Gauge
-const DI_MAX = PI/10 # change in knockback dir when using DI at 200% Guard Gauge
+const DDI_UP_MAX = 0.7 # gravity decrease upward Drift DI at 200% Guard Gauge
+const DDI_DOWN_MAX = 1.6 # gravity increase downward Drift DI at 200% Guard Gauge
+const DI_MAX = PI/11 # change in knockback dir when using DI at 200% Guard Gauge
 const DI_MIN_MOD = 0.1 # percent of max DI at 100% Guard Gauge
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
 const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
@@ -2959,14 +2957,13 @@ func calculate_damage(hit_data):
 	if defender.current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
 		damage *= lerp(1.0, DMG_REDUCTION_AT_MAX_GG, defender.get_guard_gauge_percent_above())
 
-	if hit_data.block_state != Globals.block_state.UNBLOCKED: # WIP, different types of block
-		damage *= BASE_BLOCK_CHIP_DAMAGE_MOD
-		damage *= defender.UniqueCharacter.CHIP_DMG_MOD # each character take different amount of chip damage
+	if hit_data.block_state != Globals.block_state.UNBLOCKED:
+		damage *= defender.UniqueCharacter.BASE_BLOCK_CHIP_DAMAGE_MOD # each character take different amount of chip damage
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 				damage *= WRONGBLOCK_CHIP_DMG_MOD # increase chip damage for wrongblock
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-				damage *= PERFECTBLOCK_CHIP_DMG_MOD # reduce/negate chip damage for perfect block
+				damage *= 0 # negate chip damage for perfect block
 
 		
 	damage = ceil(damage) # whole numbers for damage, minimum damage is 1
@@ -3069,7 +3066,7 @@ func calculate_knockback_strength(hit_data):
 		knockback_strength *= LETHAL_KB_MOD
 		
 	elif defender.state == Globals.char_state.CROUCHING: # reduce knockback if opponent is crouching
-			knockback_strength *= CROUCH_REDUCTION_MOD
+		knockback_strength *= CROUCH_REDUCTION_MOD
 			
 #	knockback_strength *= defender.UniqueCharacter.KB_MOD # defender's weight
 	

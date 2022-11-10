@@ -6,7 +6,7 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 370.0 # ground speed
+const SPEED = 360.0 # ground speed
 const AIR_STRAFE_SPEED = 35
 const AIR_STRAFE_LIMIT = 0.8 # speed limit of air strafing, limit depends on ground speed
 const JUMP_SPEED = 700.0
@@ -21,17 +21,15 @@ const AIR_RESISTANCE = 0.03 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 1.0 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const GROUND_DASH_SPEED = 500.0 # duration in animation data
-const AIR_DASH_SPEED = 410.0 # duration in animation data
+const GROUND_DASH_SPEED = 480.0 # duration in animation data
+const AIR_DASH_SPEED = 390.0 # duration in animation data
 
 const DAMAGE_VALUE_LIMIT = 950.0
 const GUARD_GAUGE_FLOOR = -9000.0 # tankier characters have lower GUARD_GAUGE_FLOOR
 const GUARD_GAUGE_CEIL = 8000.0 # fixed? use GUARD_GAUGE_GAIN_MOD for tankier characters
 const GUARD_GAUGE_REGEN_RATE = 0.05 # % of GG regened per second when GG < 100%
 const GUARD_GAUGE_DEGEN_RATE = -0.75 # % of GG degened per second when GG > 100%
-#const EX_GAUGE_LIMIT = 400.0 # each bar is 100 units
-#const KB_MOD = 1.2 # light character take more knockback?
-const CHIP_DMG_MOD = 1.3 # take extra chip damage on block
+const BASE_BLOCK_CHIP_DAMAGE_MOD = 0.35 # % of damage taken as chip damage when blocking (average is 0.25)
 const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
 const AIR_BLOCK_DRAIN_RATE = 3400.0 # % of EX Gauge drain per second when Air Blocking
 const TRAITS = [Globals.trait.CROUCH_CANCEL, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
@@ -624,16 +622,16 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
 		"AirDashD2":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/8 * Character.facing)
+			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/7 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/8})
+			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 		"AirDashU2":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/8 * Character.facing)
+			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/7 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/8})	
+			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})	
 			
 		"L2Startup":
 			Character.velocity.x += Character.facing * SPEED * 0.8
