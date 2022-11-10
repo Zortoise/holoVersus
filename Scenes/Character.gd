@@ -190,6 +190,7 @@ var block_rec_cancel := false # set to true after blocking an attack, allow bloc
 var targeted_opponent: int # player_ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var has_burst := false # gain burst by ringing out opponent
 var tap_memory = [] # for double taps, 
+var impulse_used := false
 
 # controls
 var button_up
@@ -3611,6 +3612,7 @@ func save_state():
 		"block_rec_cancel" : block_rec_cancel,
 		"targeted_opponent" : targeted_opponent,
 		"has_burst": has_burst,
+		"impulse_used": impulse_used,
 		
 		"current_damage_value" : current_damage_value,
 		"current_guard_gauge" : current_guard_gauge,
@@ -3677,6 +3679,7 @@ func load_state(state_data):
 	block_rec_cancel = state_data.block_rec_cancel
 	targeted_opponent = state_data.targeted_opponent
 	has_burst = state_data.has_burst
+	impulse_used = state_data.impulse_used
 	
 	current_damage_value = state_data.current_damage_value
 	current_guard_gauge = state_data.current_guard_gauge

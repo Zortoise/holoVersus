@@ -563,14 +563,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 		var move_name = anim_name.trim_suffix("Active")
 		if move_name in MOVE_DATABASE:
 			Character.chain_memory.append(move_name)
+			Character.impulse_used = false
 			
-	elif Character.is_atk_startup():
+	elif Character.new_state == Globals.char_state.GROUND_ATK_STARTUP:
 		var move_name = anim_name.trim_suffix("Startup")
 		if move_name in MOVE_DATABASE:
-			if !Globals.atk_attr.AIR_ATTACK in MOVE_DATABASE[move_name].atk_attr and \
-					!Globals.atk_attr.NO_IMPULSE in MOVE_DATABASE[move_name].atk_attr: # ground impulse
-				if Character.dir == Character.facing:
-					Character.velocity.x = Character.dir * SPEED
+			if !Globals.atk_attr.NO_IMPULSE in MOVE_DATABASE[move_name].atk_attr: # ground impulse
+				Character.velocity.x = Character.dir * SPEED
+				Character.impulse_used = true
 
 	match anim_name:
 		"Dash":

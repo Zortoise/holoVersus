@@ -11,6 +11,16 @@ func stimulate():
 #	Character.dir
 #	Character.v_dir
 	
+	# quick impulse
+	if Character.new_state == Globals.char_state.GROUND_ATK_STARTUP and Character.dir != 0 and !Character.impulse_used and\
+			(Character.button_left in Character.input_state.just_pressed or \
+			Character.button_right in Character.input_state.just_pressed) and \
+			Animator.time <= Character.QUICK_CANCEL_TIME and Animator.time != 0:
+		var move_name = Animator.to_play_animation.trim_suffix("Startup")
+		if move_name in MOVE_DATABASE:
+			if !Globals.atk_attr.NO_IMPULSE in MOVE_DATABASE[move_name].atk_attr: # ground impulse
+				Character.velocity.x = Character.dir * SPEED
+				Character.impulse_used = true
 	
 	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query(["aL2Active"]):
 		if Character.grounded:
