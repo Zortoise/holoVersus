@@ -21,11 +21,12 @@ const MAX_EX_GAUGE = 50000.0
 const EX_GAUGE_REGEN_RATE = 1000 # EX Gauge regened per second when idling
 const BURSTCOUNTER_EX_COST = 1
 const BURSTESCAPE_GG_COST = 0.5
-const AIRBLOCK_GRAV_MOD = 0.5 # # multiply to GRAVITY to get gravity during air blocking
-const AIRBLOCK_TERMINAL_MOD = 0.7 # # multiply to get terminal velocity during air blocking
+const AIRBLOCK_GRAV_MOD = 0.5 # multiply to GRAVITY to get gravity during air blocking
+const AIRBLOCK_TERMINAL_MOD = 0.7 # multiply to get terminal velocity during air blocking
 const TAP_MEMORY_DURATION = 5
 const MAX_WALL_JUMP = 5
 const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal velocity during hitstun
+const HOP_JUMP_MOD = 0.8 # can hop by using up + jump
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -40,7 +41,7 @@ const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on r
 const DMG_REDUCTION_AT_MAX_GG = 0.5 # max reduction in damage when defender's Guard Gauge is at 200%
 const HITSTUN_REDUCTION_AT_MAX_GG = 0.5 # max reduction in hitstun when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
-const POSTIVE_FLOW_REGEN_MOD = 6.0 # increased Guard Guard Regen during Postive Flow
+const POS_FLOW_REGEN_MOD = 7.0 # increased Guard Guard Regen during Postive Flow
 const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
 
 const HITSTUN_GRAV_MOD = 0.65  # gravity multiplier during hitstun
@@ -522,7 +523,7 @@ func stimulate2(): # only ran if not in hitstop
 		if current_guard_gauge < 0 and !is_blocking():
 			var guard_gauge_regen = UniqueCharacter.GUARD_GAUGE_REGEN_RATE * abs(UniqueCharacter.GUARD_GAUGE_FLOOR) * Globals.FRAME
 			if query_status_effect(Globals.status_effect.POS_FLOW):
-				guard_gauge_regen *= POSTIVE_FLOW_REGEN_MOD # increased regen during positive flow
+				guard_gauge_regen *= POS_FLOW_REGEN_MOD # increased regen during positive flow
 			guard_gauge_regen = round(guard_gauge_regen)
 			current_guard_gauge = min(0, current_guard_gauge + guard_gauge_regen) # don't use change_guard_gauge() since it stops at 0
 			Globals.Game.guard_gauge_update(self)
@@ -2749,7 +2750,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		elif hit_data.move_name == "BurstExtend":
 			attacker.reset_jumps()
 			defender.reset_jumps()
-			defender.current_guard_gauge = 0
+			defender.current_guard_gauge = defender.UniqueCharacter.GUARD_GAUGE_FLOOR * 0.3
 			Globals.Game.guard_gauge_update(defender)
 			defender.move_memory = []
 			
@@ -3423,11 +3424,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Run":
 			emit_signal("SFX","RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"JumpTransit2":
-#			if button_down in input_state.pressed:
-#				UniqueCharacter.hop()
-#			else:
-			velocity.y = -UniqueCharacter.JUMP_SPEED
-			$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
+			if button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to hop
+				velocity.y = -UniqueCharacter.JUMP_SPEED * HOP_JUMP_MOD
+			else:
+				velocity.y = -UniqueCharacter.JUMP_SPEED
+				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 			emit_signal("SFX","JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"AirJumpTransit2":
 			aerial_memory = []

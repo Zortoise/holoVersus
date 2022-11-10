@@ -36,40 +36,7 @@ frame_data = {
 "frame": 7
 }
 },
-"vframes": 6
-},
-"EXBlockspark": {
-"duration": 17,
-"hframes": 6,
-"loop": false,
-"spritesheet": "BlocksparksSprite",
-"timestamps": {
-0: {
-"frame": 0
-},
-3: {
-"frame": 25
-},
-5: {
-"frame": 26
-},
-7: {
-"frame": 27
-},
-9: {
-"frame": 28
-},
-11: {
-"frame": 29
-},
-13: {
-"frame": 30
-},
-15: {
-"frame": 31
-}
-},
-"vframes": 6
+"vframes": 5
 },
 "PBlockspark": {
 "duration": 19,
@@ -105,7 +72,7 @@ frame_data = {
 "frame": 24
 }
 },
-"vframes": 6
+"vframes": 5
 },
 "WBlockspark": {
 "duration": 17,
@@ -138,6 +105,6 @@ frame_data = {
 "frame": 15
 }
 },
-"vframes": 6
+"vframes": 5
 }
 }
