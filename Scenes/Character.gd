@@ -33,13 +33,14 @@ const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 0.5 # damage modifier on repeat_penalty 
 const DMG_VAL_KB_LIMIT = 3.0 # max damage percent before knockback stop increasing
 const KB_BOOST_AT_DMG_VAL_LIMIT = 1.5 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
-const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
+#const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
 # const DMG_BOOST_AT_DMG_VAL_LIMIT = 1.5 # increase in damage taken when damage percent is at 100%, goes pass it when damage percent goes >100%
 # const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
 const PERFECTCHAIN_GGG_MOD = 0.5 # Guard Gain on hitstunned defender is reduced on perfect chains
 const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on repeat_penalty
 const DMG_REDUCTION_AT_MAX_GG = 0.5 # max reduction in damage when defender's Guard Gauge is at 200%
 const HITSTUN_REDUCTION_AT_MAX_GG = 0.5 # max reduction in hitstun when defender's Guard Gauge is at 200%
+const KB_BOOST_AT_MAX_GG = 1.5 # max increase of knockback when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN_MOD = 7.0 # increased Guard Guard Regen during Postive Flow
 const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
@@ -107,9 +108,9 @@ const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during a
 const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
 const DDI_SIDE_MAX = 15 # horizontal Drift DI speed at 200% Guard Gauge
 const MAX_DDI_SIDE_SPEED = 300.0 # max horizontal Drift DI speed
-const DDI_UP_MAX = 0.60 # gravity decrease upward Drift DI at 200% Guard Gauge
-const DDI_DOWN_MAX = 1.40 # gravity increase downward Drift DI at 200% Guard Gauge
-const DI_MAX = PI/9 # change in knockback dir when using DI at 200% Guard Gauge
+const DDI_UP_MAX = 0.70 # gravity decrease upward Drift DI at 200% Guard Gauge
+const DDI_DOWN_MAX = 1.30 # gravity increase downward Drift DI at 200% Guard Gauge
+const DI_MAX = PI/10 # change in knockback dir when using DI at 200% Guard Gauge
 const DI_MIN_MOD = 0.1 # percent of max DI at 100% Guard Gauge
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
 const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
@@ -1794,14 +1795,15 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 		return false
 	var move_name = get_move_name()
 	if move_name:
-		if !move_name in UniqueCharacter.MOVE_DATABASE: # no move found
-			return true
 		# test if move has LEDGE_DROP, no ledge stop if so
-		elif state != Globals.char_state.GROUND_ATK_STARTUP and \
+		if state != Globals.char_state.GROUND_ATK_STARTUP and \
 				Globals.atk_attr.LEDGE_DROP in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
 			return false # even with LEDGE_DROP, startup animation will still stop you at the ledge
 		else: return true # no LEDGE_DROP, will stop at ledge
-	return false # cannot get move_name, not attacking
+	else:
+		if is_attacking(): # attacking but move name not in database, stop at ledge
+			return true
+		return false # cannot get move_name, not attacking
 	
 func is_attacking():
 	match new_state:
@@ -2962,15 +2964,7 @@ func calculate_damage(hit_data):
 				damage *= WRONGBLOCK_CHIP_DMG_MOD # increase chip damage for wrongblock
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				damage *= PERFECTBLOCK_CHIP_DMG_MOD # reduce/negate chip damage for perfect block
-		
-#	if defender.get_damage_percent() > DMG_THRES_WHEN_DMG_BOOST_STARTS:
-#		var dmg_val_boost = (defender.get_damage_percent() - DMG_THRES_WHEN_DMG_BOOST_STARTS) / (1 - DMG_THRES_WHEN_DMG_BOOST_STARTS)
-#		# with DMG_THRES_WHEN_DMG_BOOST_STARTS at 0.7, DMG_BOOST_AT_DMG_VAL_LIMIT at 1.5:
-#		# 	70% damage is 0%		 x 1.0 damage
-#		#	100% damage is 100%		 x 1.5 damage
-#		#	130% damage is 200%		 x 2.0 damage
-#		# 	160% damage is 300%		 x 2.5 damage
-#		damage *= lerp(1.0, DMG_BOOST_AT_DMG_VAL_LIMIT, dmg_val_boost)
+
 		
 	damage = ceil(damage) # whole numbers for damage, minimum damage is 1
 	return damage
@@ -3076,18 +3070,18 @@ func calculate_knockback_strength(hit_data):
 			
 #	knockback_strength *= defender.UniqueCharacter.KB_MOD # defender's weight
 	
-	if attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) and defender.get_damage_percent() > DMG_THRES_WHEN_KB_BOOST_STARTS:
+	if attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) and defender.get_damage_percent() >= 1.0:
 		# no KB boost for multi-hit attacks till the last hit
-		var dmg_val_boost = min((defender.get_damage_percent() - DMG_THRES_WHEN_KB_BOOST_STARTS) / (1 - DMG_THRES_WHEN_KB_BOOST_STARTS) \
+		var dmg_val_boost = min((defender.get_damage_percent() - 1.0) / 0.25 * 0.5 + 2.0 \
 				, DMG_VAL_KB_LIMIT)
-		# with DMG_THRES_WHEN_KB_BOOST_STARTS at 0.7, DMG_VAL_KB_LIMIT at 3 (300%) and KB_BOOST_AT_DMG_VAL_LIMIT at 1.5:
-		# 	70% damage is 0%		 x 1.0 knockback
-		#	100% damage is 100%		 x 1.5 knockback
-		#	130% damage is 200%		 x 2.0 knockback
-		# 	160% damage is 300%		 x 2.5 knockback
-		knockback_strength *= lerp(1.0, KB_BOOST_AT_DMG_VAL_LIMIT, dmg_val_boost)
-
-
+		#	0.0 percent damage over is x2.0 knockback
+		#	0.25 percent damage over is x2.5 knockback
+		# 	0.5 percent damage over is x3.0 knockback
+		knockback_strength *= dmg_val_boost
+		
+	if defender.current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
+		knockback_strength *= lerp(1.0, KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
+	
 	return knockback_strength # lethal knockback is around 2000
 	
 	
