@@ -39,10 +39,9 @@ const PERFECTCHAIN_GGG_MOD = 0.5 # Guard Gain on hitstunned defender is reduced 
 const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on repeat_penalty
 const DMG_REDUCTION_AT_MAX_GG = 0.5 # max reduction in damage when defender's Guard Gauge is at 200%
 const HITSTUN_REDUCTION_AT_MAX_GG = 0.5 # max reduction in hitstun when defender's Guard Gauge is at 200%
-const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
+#const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POSTIVE_FLOW_REGEN_MOD = 6.0 # increased Guard Guard Regen during Postive Flow
 const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
-#const AIR_EX_BLOCK_COST_MOD = 1.25	# increased EX Gauge cost of EX Block if done in air
 
 const HITSTUN_GRAV_MOD = 0.65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 0.15  # friction during hitstun
@@ -72,19 +71,18 @@ const BREAK_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Break
 const BASE_BLOCK_PUSHBACK_MOD = 0.7 # % of base knockback of attack
 const BASE_BLOCK_ATKER_PUSHBACK = 300 # how much the attacker is pushed away, fixed
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 0.25 # % of damage taken as chip damage when blocking
-const BASE_BLOCK_GUARD_DRAIN_MOD = 0.5 # % of listed Guard Drain on base block
 const DOWNWARD_KB_REDUCTION_ON_BLOCK = 0.25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
 const MAX_BASE_BLOCKSTUN = 8
 
 const WRONGBLOCK_CHIP_DMG_MOD = 2.0 # increased chip damage for wrongblocking
-const WRONGBLOCK_GUARD_DRAIN_MOD = 3.0 # increased guard drain for wrongblocking
+const WRONGBLOCK_GUARD_DRAIN_MOD = 2.5 # increased guard drain for wrongblocking
 const WRONGBLOCK_BLOCKSTUN_MOD = 2.0 # increased blockstun for wrongblocking
 const WRONGBLOCK_PUSHBACK_MOD = 1.0 # % of base knockback of attack
 const WRONGBLOCK_ATKER_PUSHBACK = 200 # how much the attacker is pushed away, fixed
 const WRONGBLOCK_HITSTOP = 7
 
 const PERFECTBLOCK_CHIP_DMG_MOD = 0.0 # no chip damage for perfect blocking
-const PERFECTBLOCK_GUARD_DRAIN_MOD = 0.3 # reduced guard drain for perfect blocking
+const PERFECTBLOCK_GUARD_DRAIN_MOD = 0.15 # reduced guard drain for perfect blocking
 const PERFECTBLOCK_BLOCKSTUN_MOD = 0.5 # reduced blockstun for perfect blocking
 const PERFECTBLOCK_PUSHBACK_MOD = 0.25 # % of base knockback of attack
 const PERFECTBLOCK_ATKER_PUSHBACK = 700 # how much the attacker is pushed away, fixed
@@ -168,7 +166,7 @@ var monochrome := false
 
 onready var current_damage_value: float = 0.0
 onready var current_guard_gauge: float = 0.0
-onready var current_ex_gauge: float = 0.0
+onready var current_ex_gauge: float = 10000.0
 var stock_points_left
 
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
@@ -551,18 +549,14 @@ func stimulate2(): # only ran if not in hitstop
 		soft_grounded = false
 		
 	
-	# drain EX Gauge when EX blocking
-	if is_blocking() and check_if_EX_block():
-		var ex_gauge_drain = round(UniqueCharacter.EX_BLOCK_DRAIN_RATE * Globals.FRAME)
-#		if !grounded:
-#			ex_gauge_drain *= AIR_EX_BLOCK_COST_MOD
+	# drain EX Gauge when air blocking
+	if !grounded and is_blocking():
+		var ex_gauge_drain = round(UniqueCharacter.AIR_BLOCK_DRAIN_RATE * Globals.FRAME)
 		change_ex_gauge(-ex_gauge_drain)
 		if current_ex_gauge <= 0.0:
 			match Animator.current_animation:
-				"EXBlock":
-					animate("Block")
-				"AirEXBlock":
-					animate("AirBlock")
+				"AirBlock":
+					animate("FallTransit")
 	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
 		reset_modulate()
 		
@@ -641,11 +635,8 @@ func stimulate2(): # only ran if not in hitstop
 	# TURN AT START OF CERTAIN MOVES --------------------------------------------------------------------------------------------------
 
 		if facing != dir:
-			
-			if state == Globals.char_state.GROUND_BLOCK and Animator.query_current(["BlockHopTransit"]): # can change directions during block hop transit
-				face(dir)
 				
-			elif check_quick_cancel() and !Globals.atk_attr.NO_TURN in query_atk_attr() and \
+			if check_quick_cancel() and !Globals.atk_attr.NO_TURN in query_atk_attr() and \
 				!Animator.query_current(["BurstCounterStartup", "BurstEscapeStartup"]):
 				face(dir)
 			
@@ -701,41 +692,24 @@ func stimulate2(): # only ran if not in hitstop
 	
 	if UniqueCharacter.STYLE == 0:
 		if button_block in input_state.pressed:
-			if ($SpecialTimer.is_running() or button_special in input_state.just_released) and \
-					current_ex_gauge >= UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5:
-				match state:
-						Globals.char_state.GROUND_BLOCK:
-							if Animator.query(["BlockStartup"]):
-								animate("EXBlockStartup")
-						Globals.char_state.GROUND_STANDBY:
-							animate("EXBlockStartup")
-						Globals.char_state.GROUND_C_RECOVERY:
-							if Animator.query_current(["DashBrake"]):
-								if Globals.trait.DASH_BLOCK in query_traits():
-									animate("EXBlockStartup")
-							else:
-								animate("EXBlockStartup")
-						Globals.char_state.AIR_STANDBY:
-							animate("AirEXBlockStartup")
-							$VarJumpTimer.stop()
-						Globals.char_state.AIR_C_RECOVERY:
-							if !Animator.query_current(["AirDashBrake"]):
-								animate("AirEXBlockStartup")
-								$VarJumpTimer.stop()
-			else:
-				match state:
-					Globals.char_state.GROUND_STANDBY:
-						animate("BlockStartup")
-					Globals.char_state.GROUND_C_RECOVERY:
-						if Animator.query_current(["DashBrake"]):
-							if Globals.trait.DASH_BLOCK in query_traits():
-								animate("BlockStartup")
-						else:
+			match state:
+				Globals.char_state.GROUND_STANDBY:
+					animate("BlockStartup")
+				Globals.char_state.GROUND_C_RECOVERY:
+					if Animator.query_current(["DashBrake"]):
+						if Globals.trait.DASH_BLOCK in query_traits():
 							animate("BlockStartup")
-					Globals.char_state.GROUND_STARTUP: # jump to blockhop
-						if Animator.query_to_play(["JumpTransit"]):
-							animate("BlockHopTransit")
-						
+					else:
+						animate("BlockStartup")
+				Globals.char_state.AIR_STANDBY:
+					if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
+						animate("AirBlockStartup")
+						$VarJumpTimer.stop()
+				Globals.char_state.AIR_C_RECOVERY:
+					if !Animator.query_current(["AirDashBrake"]):
+						if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
+							animate("AirBlockStartup")
+							$VarJumpTimer.stop()
 			
 
 # SPECIAL/EX BUTTON --------------------------------------------------------------------------------------------------	
@@ -913,13 +887,13 @@ func stimulate2(): # only ran if not in hitstop
 
 		Globals.char_state.GROUND_BLOCK:
 			if UniqueCharacter.STYLE == 0:
-				if !button_block in input_state.pressed and Animator.query_to_play(["Block", "EXBlock"]):
+				if !button_block in input_state.pressed and Animator.query_to_play(["Block"]):
 					if !block_rec_cancel:
 						animate("BlockRecovery")
 					else:
 						animate("BlockCRecovery")
 			else:
-				if !button_dash in input_state.pressed and Animator.query_to_play(["Block", "EXBlock"]):
+				if !button_dash in input_state.pressed and Animator.query_to_play(["Block"]):
 					if !block_rec_cancel:
 						animate("BlockRecovery")
 					else:
@@ -927,21 +901,18 @@ func stimulate2(): # only ran if not in hitstop
 			
 		Globals.char_state.GROUND_BLOCKSTUN:
 			if !$BlockStunTimer.is_running():
-				if Animator.query_to_play(["EXBlockstun"]):
-					animate("EXBlockstunReturn")
-				else:
-					animate("BlockstunReturn")
+				animate("BlockstunReturn")
 			
 		Globals.char_state.AIR_BLOCK:
 			if UniqueCharacter.STYLE == 0:
-				if !button_block in input_state.pressed and Animator.query_to_play(["AirBlock", "AirEXBlock"]):
+				if !button_block in input_state.pressed and Animator.query_to_play(["AirBlock"]):
 					if !block_rec_cancel:
 						animate("AirBlockRecovery")
 					else:
 						animate("AirBlockCRecovery")
 				air_res_this_frame *= 1.5
 			else:
-				if !button_dash in input_state.pressed and Animator.query_to_play(["AirBlock", "AirEXBlock"]):
+				if !button_dash in input_state.pressed and Animator.query_to_play(["AirBlock"]):
 					if !block_rec_cancel:
 						animate("AirBlockRecovery")
 					else:
@@ -950,10 +921,7 @@ func stimulate2(): # only ran if not in hitstop
 			
 		Globals.char_state.AIR_BLOCKSTUN:
 			if !$BlockStunTimer.is_running():
-				if Animator.query_to_play(["AirEXBlockstun"]):
-					animate("AirEXBlockstunReturn")
-				else:
-					animate("AirBlockstunReturn")
+				animate("AirBlockstunReturn")
 			air_res_this_frame *= 1.5
 
 		Globals.char_state.AIR_ATK_STARTUP:
@@ -1327,17 +1295,6 @@ func process_input_buffer():
 								animate("JumpTransit")
 								keep = false
 									
-						# BLOCKHOP ---------------------------------------------------------------------------------
-									
-						Globals.char_state.GROUND_BLOCK:
-							if button_down in input_state.pressed and soft_grounded:
-								position.y += 2 # 1 will cause issues with downward moving platforms
-								animate("AirBlock")
-								keep = false
-							else:
-								animate("BlockHopTransit")
-								keep = false
-									
 			# FOR NON_JUMP ACTIONS --------------------------------------------------------------------------------------------------
 		
 			"Burst":
@@ -1432,17 +1389,17 @@ func state_detect(anim):
 		"LaunchAStop", "LaunchBStop", "LaunchCStop", "LaunchDStop", "LaunchEStop", "LaunchTransit", "Launch":
 			return Globals.char_state.LAUNCHED_HITSTUN
 			
-		"BlockStartup", "EXBlockStartup":
+		"BlockStartup":
 			return Globals.char_state.GROUND_BLOCK
-		"AirBlockStartup", "AirEXBlockStartup":
+		"AirBlockStartup":
 			return Globals.char_state.AIR_BLOCK
-		"Block", "BlockstunReturn", "EXBlock", "EXBlockstunReturn", "BlockHopTransit", "BlockLanding":
+		"Block", "BlockstunReturn", "BlockLanding":
 			return Globals.char_state.GROUND_BLOCK
-		"AirBlock", "AirBlockstunReturn", "AirEXBlock", "AirEXBlockstunReturn", "BlockHopTransit2":
+		"AirBlock", "AirBlockstunReturn":
 			return Globals.char_state.AIR_BLOCK
-		"Blockstun", "EXBlockstun", "PBlockstun", "WBlockstun":
+		"Blockstun", "PBlockstun", "WBlockstun":
 			return Globals.char_state.GROUND_BLOCKSTUN
-		"AirBlockstun", "AirEXBlockstun", "AirPBlockstun", "AirWBlockstun":
+		"AirBlockstun", "AirPBlockstun", "AirWBlockstun":
 			return Globals.char_state.AIR_BLOCKSTUN
 			
 		"BurstCounterStartup", "BurstEscapeStartup":
@@ -1636,7 +1593,7 @@ func check_landing(landing_state = 0):
 				animate("BlockLanding")
 			3: # air blockstun to ground blockstun
 				emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  
-				if Animator.query(["AirBlockstun", "AirEXBlockstun"]):
+				if Animator.query(["AirBlockstun"]):
 					animate("Blockstun")
 				elif Animator.query(["AirPBlockstun"]):
 					animate("PBlockstun")
@@ -1690,7 +1647,7 @@ func check_drop(drop_state = 0):
 				3: # ground block to air block
 					animate("AirBlock")
 				4: # ground blockstun to air blockstun
-					if Animator.query(["Blockstun", "EXBlockstun"]):
+					if Animator.query(["Blockstun"]):
 						animate("AirBlockstun")
 					elif Animator.query(["PBlockstun"]):
 						animate("AirPBlockstun")
@@ -2445,7 +2402,6 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		_:  # normal block
 			if !hit_data.double_repeat:
 				change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
-			if !"ex_block" in hit_data:
 				defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
@@ -2529,10 +2485,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				play_audio("bling2", {"vol" : -3, "bus" : "PitchDown"})
 			_: # normal block
-				if "ex_block" in hit_data:
-					play_audio("bling6", {"vol" : -3})
-				else:
-					play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
+				play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
 
 	elif hit_data.semi_disjoint and !Globals.trait.VULN_LIMBS in defender.query_traits(): # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
@@ -2624,9 +2577,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
 		
 	hit_data["weak_hit"] = weak_hit
-	
-	if defender.check_if_EX_block():
-		hit_data["ex_block"] = true
 		
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
@@ -2658,16 +2608,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.GROUND
 				
-			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker) and !"ex_block" in hit_data: # projectiles cannot cross-up
+			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
-				
-			elif !"entity_nodepath" in hit_data and (!attacker.grounded and attacker.get_feet_pos().y < defender.get_feet_pos().y) and \
-					!Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-					!defender.Animator.query(["BlockHopTransit"]) and !"ex_block" in hit_data:
-				# for a wrong ground block, attacker must be in air and above you in position
-				# the attack must not have the EASY_BLOCK attribute, blockhopping squat frames can also block both air/ground
-				hit_data.block_state = Globals.block_state.GROUND_WRONG
-				# projectiles cannot mix-up
 				
 			else:
 				hit_data.block_state = Globals.block_state.GROUND
@@ -2700,17 +2642,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.AIR
 				
-			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker) and !"ex_block" in hit_data: # projectiles cannot cross-up
+			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
 				hit_data.block_state = Globals.block_state.AIR_WRONG
-			
-			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.AIR_ATTACK in attacker.query_atk_attr(hit_data.move_name) and \
-					attacker.get_feet_pos().y > defender.get_feet_pos().y and \
-					!Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-					!defender.Animator.query(["BlockHopTransit"]) and !"ex_block" in hit_data:
-				# for a wrong air block, move must not be an AIR_ATTACK and attacker below you in position
-				# the attack must not have the EASY_BLOCK attribute, blockhopping squat frames can also block both air/ground
-				hit_data.block_state = Globals.block_state.AIR_WRONG
-				# projectiles cannot mix-up
 				
 			else:
 				hit_data.block_state = Globals.block_state.AIR
@@ -2953,12 +2886,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 		match hit_data.block_state:
 			Globals.block_state.GROUND:
-				if Animator.to_play_animation.begins_with("EX"):
-					animate("EXBlockstun")
-					block_rec_cancel = false
-				else:
-					animate("Blockstun")
-					block_rec_cancel = true
+				animate("Blockstun")
+				block_rec_cancel = true
 			Globals.block_state.GROUND_WRONG:
 				animate("WBlockstun")
 				block_rec_cancel = false
@@ -2966,12 +2895,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				animate("PBlockstun")
 				block_rec_cancel = true
 			Globals.block_state.AIR:
-				if Animator.to_play_animation.begins_with("AirEX"):
-					animate("AirEXBlockstun")
-					block_rec_cancel = false
-				else:
-					animate("AirBlockstun")
-					block_rec_cancel = true
+				animate("AirBlockstun")
+				block_rec_cancel = true
 			Globals.block_state.AIR_WRONG:
 				animate("AirWBlockstun")
 				block_rec_cancel = false
@@ -3050,8 +2975,8 @@ func calculate_guard_gauge_change(hit_data):
 	if !attacker_or_entity.is_hitcount_first_hit(defender.player_ID): # for multi-hit moves, only 1st hit affect GG
 		return 0.0
 	
-	if (defender.move_memory.size() > 0 or defender.get_node("HitStunTimer").is_running()):
-		# defender in hitstun or a little after, guard_gauge_change is positive
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and (defender.move_memory.size() > 0 or defender.get_node("HitStunTimer").is_running()):
+		# on a successful hit while defender in hitstun or a little after, guard_gauge_change is positive
 		guard_gauge_change = hit_data.move_data.guard_gain_on_combo
 		if hit_data.double_repeat:
 			guard_gauge_change *= REPEAT_GGG_MOD # Guard Gain on hitstunned defender is increased on double_repeat
@@ -3075,7 +3000,6 @@ func calculate_guard_gauge_change(hit_data):
 				guard_gauge_change *= PUNISH_GUARD_DRAIN_MOD # Guard Drain on non-hitstunned defender is increased on a punish hit
 		
 		if hit_data.block_state != Globals.block_state.UNBLOCKED:
-			guard_gauge_change *= BASE_BLOCK_GUARD_DRAIN_MOD # reduced Guard Drain on blocking defender, may have certain characteristics that can change this
 			match hit_data.block_state:
 				Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 					guard_gauge_change *= WRONGBLOCK_GUARD_DRAIN_MOD # increase GDrain for wrongblock
@@ -3083,8 +3007,8 @@ func calculate_guard_gauge_change(hit_data):
 					guard_gauge_change *= PERFECTBLOCK_GUARD_DRAIN_MOD # reduce/negate GDrain for perfect block
 			if !defender.grounded:
 				guard_gauge_change *= AIRBLOCK_GUARD_DRAIN_MOD # increase GDrain for airblocking opponent
-		else:
-			guard_gauge_change *= FIRST_HIT_GUARD_DRAIN_MOD # 1st hit of a combo or a stray hit inflict guard drain
+#		else:
+#			guard_gauge_change *= FIRST_HIT_GUARD_DRAIN_MOD # 1st hit of a combo or a stray hit inflict guard drain
 		
 	return round(guard_gauge_change)
 
@@ -3267,11 +3191,6 @@ func check_if_crossed_up(vec_to_attacker):
 	if sign(vec_to_attacker.x) == facing:
 		return false
 	return true
-	
-func check_if_EX_block():
-	if Animator.to_play_animation.begins_with("EX") or Animator.to_play_animation.begins_with("AirEX"):
-		return true
-	return false
 
 
 func calculate_hitstop(hit_data, knockback_strength): # hitstop determined by knockback power
@@ -3388,8 +3307,6 @@ func generate_blockspark(hit_data):
 		blockspark = "WBlockspark"
 	elif hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
 		blockspark = "PBlockspark"
-	elif "ex_block" in hit_data:
-		blockspark = "EXBlockspark"
 	else:
 		blockspark = "Blockspark"
 	emit_signal("SFX", blockspark, "Blocksparks", hit_data.hit_center, {"rot" : block_dir})
@@ -3447,32 +3364,20 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 		"BlockStartup":
 			animate("Block")
-		"EXBlockStartup":
-			animate("EXBlock")
 		"BlockstunReturn":
 			animate("Block")
-		"EXBlockstunReturn":
-			animate("EXBlock")
 		"BlockRecovery":
 			animate("Idle")
 		"BlockCRecovery":
 			animate("Idle")
 		"AirBlockStartup":
 			animate("AirBlock")
-		"AirEXBlockStartup":
-			animate("AirEXBlock")
 		"AirBlockstunReturn":
 			animate("AirBlock")
-		"AirEXBlockstunReturn":
-			animate("AirEXBlock")
 		"AirBlockRecovery":
 			animate("FallTransit")
 		"AirBlockCRecovery":
 			animate("FallTransit")
-		"BlockHopTransit":
-			animate("BlockHopTransit2")
-		"BlockHopTransit2":
-			animate("AirBlock")
 		"BlockLanding":
 			animate("Block")
 		"WBlockstun": # special, will return to regular blockstun after 6 frames (subjected to change)
@@ -3523,9 +3428,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			else:
 			velocity.y = -UniqueCharacter.JUMP_SPEED
 			$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
-			emit_signal("SFX","JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-		"BlockHopTransit2":
-			velocity.y = -UniqueCharacter.JUMP_SPEED * 0.75
 			emit_signal("SFX","JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"AirJumpTransit2":
 			aerial_memory = []
@@ -3584,15 +3486,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"AirBlockStartup":
 			block_rec_cancel = false
 			perfect_block()
-		"EXBlockStartup", "AirEXBlockStartup":
-			$PBlockTimer.stop() # stop perfect blocking		
-			$SpecialTimer.stop() # to prevent accidental special moves
-			block_rec_cancel = false
 			$ModulatePlayer.play("EX_block_flash")
-#			if grounded:
-			change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5)
-#			else:
-#				change_ex_gauge(-UniqueCharacter.EX_BLOCK_DRAIN_RATE * 0.5 * AIR_EX_BLOCK_COST_MOD)
+			change_ex_gauge(-UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5)
+			play_audio("bling1", {"vol" : -12,})
 		"BlockRecovery", "AirBlockRecovery", "BlockCRecovery", "AirBlockCRecovery":
 			$PBlockTimer.stop() # stop perfect blocking		
 		"BurstCounterStartup", "BurstEscapeStartup":
@@ -3603,6 +3499,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 				$ModulatePlayer.play("yellow_burst")
 			else:
 				$ModulatePlayer.play("blue_burst")
+			play_audio("faller1", {"vol" : -12,})
 		"BurstCounter", "BurstEscape", "BurstExtend":
 #			chain_combo = 0
 			velocity = Vector2.ZERO
@@ -3618,6 +3515,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			else:
 				emit_signal("projectile", player_ID, "Burst", LoadedSFX.burst_extend_move_data, position, {"facing" : burst_facing})
 				$ModulatePlayer.play("red_burst")
+			play_audio("blast1", {"vol" : -18,})
 			
 	UniqueCharacter._on_SpritePlayer_anim_started(anim_name)
 	

@@ -24,15 +24,15 @@ const GROUND_DASH_SPEED = 430.0 # duration in animation data
 const AIR_DASH_SPEED = 370.0 # duration in animation data
 
 const DAMAGE_VALUE_LIMIT = 950.0
-const GUARD_GAUGE_FLOOR = -8000.0
-const GUARD_GAUGE_CEIL = 8000.0
+const GUARD_GAUGE_FLOOR = -9000.0 # tankier characters have lower GUARD_GAUGE_FLOOR
+const GUARD_GAUGE_CEIL = 8000.0 # fixed? use GUARD_GAUGE_GAIN_MOD for tankier characters
 const GUARD_GAUGE_REGEN_RATE = 0.05 # % of GG regened per second when GG < 100%
 const GUARD_GAUGE_DEGEN_RATE = -0.75 # % of GG degened per second when GG > 100%
 #const EX_GAUGE_LIMIT = 400.0 # each bar is 100 units
 #const KB_MOD = 1.2 # light character take more knockback?
 const CHIP_DMG_MOD = 1.3 # take extra chip damage on block
-const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed
-const EX_BLOCK_DRAIN_RATE = 3400.0 # % of EX Gauge drain per second when EX Blocking
+const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
+const AIR_BLOCK_DRAIN_RATE = 3400.0 # % of EX Gauge drain per second when Air Blocking
 const TRAITS = [Globals.trait.CROUCH_CANCEL, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
 
 const SDHitspark_COLOR = "blue"
@@ -56,7 +56,7 @@ const MOVE_DATABASE = {
 		"attack_level" : 2,
 		"fixed_hitstop" : 1,
 		"priority": 2,
-		"guard_drain": 2000,
+		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -93,7 +93,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
 		"attack_level" : 3,
 		"priority": 2,
-		"guard_drain": 1500,
+		"guard_drain": 1000,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -111,7 +111,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.MIRRORED,
 		"attack_level" : 4, # 1~8, affect hitstun and blockstun
 		"priority": 4, # aL < L < aF < F < aH < H < Specials (depend on move) < EX (depend on move), Super, but some moves are different
-		"guard_drain": 2000, # on blocking opponent and opponent in neutral (multiplied), affect how well the move can guardcrush/break
+		"guard_drain": 1500, # on blocking opponent and opponent in neutral (multiplied), affect how well the move can guardcrush/break
 		# Supers have 0 Guard Drain
 		"guard_gain_on_combo" : 2500, # affect comboability
 		"EX_gain": 2000, # EX Gain on block is a certain % of EX Gain on hit, defenders blocking this attack will gain a certain % as well
@@ -132,7 +132,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 4,
 		"priority": 4,
-		"guard_drain": 2000,
+		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -151,7 +151,7 @@ const MOVE_DATABASE = {
 		"attack_level" : 4,
 		"fixed_blockstun" : 5,
 		"priority": 4,
-		"guard_drain": 2000,
+		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -169,7 +169,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 2,
 		"priority": 5,
-		"guard_drain": 3000,
+		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -204,7 +204,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
 		"attack_level" : 2,
 		"priority": 1,
-		"guard_drain": 1500,
+		"guard_drain": 1000,
 		"guard_gain_on_combo" : 2000,
 		"EX_gain": 1600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -222,7 +222,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 2,
 		"priority": 1,
-		"guard_drain": 1000,
+		"guard_drain": 750,
 		"guard_gain_on_combo" : 1500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -240,7 +240,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.RADIAL, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
 		"attack_level" : 3,
 		"priority": 3,
-		"guard_drain": 2000,
+		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -258,7 +258,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 5,
 		"priority": 3,
-		"guard_drain": 2000,
+		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -276,7 +276,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 6,
 		"priority": 5,
-		"guard_drain": 3000,
+		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
 		"EX_gain": 2500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -728,15 +728,8 @@ func start_audio(anim_name):
 			Character.play_audio("dash1", {"vol" : -5, "bus":"PitchDown"})
 		"AirDash", "AirDashD", "AirDashU", "AirDashDD", "AirDashUU", "AirDashD2", "AirDashU2":
 			Character.play_audio("dash1", {"vol" : -6})
-			
-		"BurstCounterStartup", "BurstEscapeStartup":
-			Character.play_audio("faller1", {"vol" : -12,})
-		"BurstCounter", "BurstEscape", "BurstExtend":
-			Character.play_audio("blast1", {"vol" : -18,})
-			
-		"EXBlockStartup", "AirEXBlockStartup":
-			Character.play_audio("bling1", {"vol" : -12,})
-			
+
+
 func landing_sound(): # can be called by main node
 	Character.play_audio("land1", {})
 

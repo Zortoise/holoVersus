@@ -1925,7 +1925,6 @@ value = 100.0
 texture_progress = ExtResource( 9 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/GaugesUnder/EXGauge"]
-autoplay = "RESET"
 anims/RESET = SubResource( 72 )
 anims/rainbow = SubResource( 73 )
 
@@ -1961,7 +1960,6 @@ align = 1
 valign = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/GaugesUnder/EXLevel"]
-autoplay = "RESET"
 anims/RESET = SubResource( 86 )
 anims/flash1 = SubResource( 74 )
 anims/flash2 = SubResource( 75 )
@@ -2142,7 +2140,6 @@ value = 100.0
 texture_progress = ExtResource( 9 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/GaugesUnder/EXGauge"]
-autoplay = "RESET"
 anims/RESET = SubResource( 80 )
 anims/rainbow = SubResource( 81 )
 
@@ -2178,7 +2175,6 @@ align = 1
 valign = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/GaugesUnder/EXLevel"]
-autoplay = "RESET"
 anims/RESET = SubResource( 97 )
 anims/flash1 = SubResource( 82 )
 anims/flash2 = SubResource( 83 )
