@@ -767,7 +767,7 @@ func stimulate2(): # only ran if not in hitstop
 		Globals.char_state.AIR_STANDBY:
 			check_landing() 
 		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_ACTIVE, Globals.char_state.AIR_RECOVERY, Globals.char_state.AIR_C_RECOVERY:
-			if Animator.query(["AirDash", "AirDashD"]):
+			if Animator.current_animation.begins_with("AirDash"):
 				check_landing(1) # 2 means wavelanding
 			elif Animator.query(["AirBlockRecovery"]):
 				check_landing(4) # 4 means AirBlockRecovery to BlockCRecovery
@@ -1589,7 +1589,7 @@ func check_landing(landing_state = 0):
 			0:
 				animate("SoftLanding")
 			1: # wave landing
-				animate("Brake")
+				animate("DashBrake")
 				emit_signal("SFX","GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				velocity.x += sign(velocity.x) * UniqueCharacter.AIR_DASH_SPEED
 			2: # air block to ground block

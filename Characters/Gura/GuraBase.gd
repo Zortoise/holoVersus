@@ -22,7 +22,7 @@ const FALL_GRAV_MOD = 1.0 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const GROUND_DASH_SPEED = 500.0 # duration in animation data
-const AIR_DASH_SPEED = 370.0 # duration in animation data
+const AIR_DASH_SPEED = 410.0 # duration in animation data
 
 const DAMAGE_VALUE_LIMIT = 950.0
 const GUARD_GAUGE_FLOOR = -9000.0 # tankier characters have lower GUARD_GAUGE_FLOOR
@@ -417,27 +417,28 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"DashBrake":
 			Character.animate("Idle")
 		"AirDashTransit":
-			if Character.air_dash > 1:
-				if Character.button_down in Character.input_state.pressed and Character.dir != 0: # downward air dash
-#					Character.face(Character.dir)
-					Character.animate("AirDashD")
-				elif Character.button_up in Character.input_state.pressed and Character.dir != 0: # upward air dash
-#					Character.face(Character.dir)
-					Character.animate("AirDashU")
-				elif Character.button_down in Character.input_state.pressed: # downward air dash
-					Character.animate("AirDashDD")
-				elif Character.button_up in Character.input_state.pressed: # upward air dash
-					Character.animate("AirDashUU")
-				else: # horizontal air dash
-					Character.animate("AirDash")
-			else:
-				if Character.button_down in Character.input_state.pressed: # downward air dash
-					Character.animate("AirDashD2")
-				elif Character.button_up in Character.input_state.pressed: # upward air dash
-					Character.animate("AirDashU2")
-				else: # horizontal air dash
-					Character.animate("AirDash")	
-		"AirDash", "AirDashD", "AirDashU", "AirDashUU", "AirDashDD", "AirDashD2", "AirDashU2":
+#			if Character.air_dash > 1:
+#				if Character.button_down in Character.input_state.pressed and Character.dir != 0: # downward air dash
+##					Character.face(Character.dir)
+#					Character.animate("AirDashD")
+#				elif Character.button_up in Character.input_state.pressed and Character.dir != 0: # upward air dash
+##					Character.face(Character.dir)
+#					Character.animate("AirDashU")
+#				elif Character.button_down in Character.input_state.pressed: # downward air dash
+#					Character.animate("AirDashDD")
+#				elif Character.button_up in Character.input_state.pressed: # upward air dash
+#					Character.animate("AirDashUU")
+#				else: # horizontal air dash
+#					Character.animate("AirDash")
+#			else:
+			if Character.button_down in Character.input_state.pressed: # downward air dash
+				Character.animate("AirDashD2")
+			elif Character.button_up in Character.input_state.pressed: # upward air dash
+				Character.animate("AirDashU2")
+			else: # horizontal air dash
+				Character.animate("AirDash")	
+#		"AirDash", "AirDashD", "AirDashU", "AirDashUU", "AirDashDD", "AirDashD2", "AirDashU2":
+		"AirDash", "AirDashD2", "AirDashU2":
 			Character.animate("AirDashBrake")
 		"AirDashBrake":
 			Character.animate("Fall")
@@ -590,46 +591,46 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			if Character.air_dash == 0:
 #				Character.velocity.x = AIR_DASH_SPEED * 1.2 * Character.facing
 #			else:
-			Character.velocity.x = AIR_DASH_SPEED * 1.15 * Character.facing
+			Character.velocity.x = AIR_DASH_SPEED * Character.facing
 			Character.velocity.y = 0
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
 			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
-		"AirDashD":
-			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/4 * Character.facing)
-			Character.null_gravity = true
-			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/4})
-		"AirDashU":
-			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/4 * Character.facing)
-			Character.null_gravity = true
-			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/4})	
-		"AirDashDD":
-			consume_one_air_dash()
-#			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/2 * Character.facing)
-			Character.velocity.y = AIR_DASH_SPEED
-			Character.null_gravity = true
-			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/2})
-		"AirDashUU":
-			consume_one_air_dash()
-#			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/2 * Character.facing)
-			Character.velocity.y = -AIR_DASH_SPEED
-			Character.null_gravity = true
-			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
+#		"AirDashD":
+#			consume_one_air_dash()
+#			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/4 * Character.facing)
+#			Character.null_gravity = true
+#			Character.shadow_timer = 1 # sync shadow trail
+#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/4})
+#		"AirDashU":
+#			consume_one_air_dash()
+#			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/4 * Character.facing)
+#			Character.null_gravity = true
+#			Character.shadow_timer = 1 # sync shadow trail
+#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/4})	
+#		"AirDashDD":
+#			consume_one_air_dash()
+##			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/2 * Character.facing)
+#			Character.velocity.y = AIR_DASH_SPEED
+#			Character.null_gravity = true
+#			Character.shadow_timer = 1 # sync shadow trail
+#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/2})
+#		"AirDashUU":
+#			consume_one_air_dash()
+##			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/2 * Character.facing)
+#			Character.velocity.y = -AIR_DASH_SPEED
+#			Character.null_gravity = true
+#			Character.shadow_timer = 1 # sync shadow trail
+#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
 		"AirDashD2":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * 1.15 * Character.facing, 0).rotated(PI/8 * Character.facing)
+			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/8 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
 			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/8})
 		"AirDashU2":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * 1.15 * Character.facing, 0).rotated(-PI/8 * Character.facing)
+			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/8 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
 			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/8})	

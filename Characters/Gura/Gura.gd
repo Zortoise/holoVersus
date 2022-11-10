@@ -128,11 +128,11 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							
 							if Character.velocity_previous_frame.y < 0: # moving upward
 								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
-								if Character.dir != 0:
+#								if Character.dir != 0:
 #									Character.face(Character.dir)
-									Character.animate("AirDashD") # snap up waveland if going upward, landing check will change it to brake later
-								else:
-									Character.animate("AirDashDD") 
+								Character.animate("AirDashD2") # snap up waveland if going upward, landing check will change it to brake later
+#								else:
+#									Character.animate("AirDashDD") 
 							elif Animator.time == 0: # moving downward and within 1st frame of falling, for easy wavedashing on soft platforms
 								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
 								Character.animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
