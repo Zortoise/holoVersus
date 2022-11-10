@@ -1293,6 +1293,7 @@ func process_input_buffer():
 						
 						Globals.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
 							if jump_cancel:
+								shadow_cancel()
 								animate("JumpTransit")
 								keep = false
 									
@@ -1724,10 +1725,12 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 func shadow_trail(starting_modulate_a = 0.5, lifetime = 10.0): # one shadow every 2 frames
 	if shadow_timer <= 0:
 		shadow_timer = 1
-		var sprite_node_path = sprite.get_path()
-		emit_signal("shadow_trail", sprite_node_path, position, starting_modulate_a, lifetime)
+		emit_signal("shadow_trail", sprite.get_path(), position, starting_modulate_a, lifetime)
 	else:
 		shadow_timer -= 1
+		
+func shadow_cancel(starting_modulate_a = 0.6, lifetime = 15.0):
+	emit_signal("shadow_trail", sprite.get_path(), position, starting_modulate_a, lifetime)
 		
 func launch_trail():
 	var frequency: int
@@ -1878,6 +1881,7 @@ func test_jump_cancel():
 	if !is_normal_attack(move_name): return false # can only jump cancel Normals
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be jump cancelled
 	
+	shadow_cancel()
 	return true
 	
 func test_dash_cancel():
@@ -1888,6 +1892,7 @@ func test_dash_cancel():
 	if !is_normal_attack(move_name): return false # can only dash cancel Normals
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be dash cancelled
 	
+	shadow_cancel()
 	return true
 	
 func test_fastfall_cancel():
@@ -1898,6 +1903,7 @@ func test_fastfall_cancel():
 	if !move_name.begins_with("a"): return false # can only fastfall cancel aerials
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be fastfall cancelled
 	
+	shadow_cancel()
 	return true
 	
 #func test_air_jump_cancel(): # for aerials' innate air jump cancel, some conditions must be fulfilled
@@ -2179,6 +2185,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		if get_atk_strength(move_name) >= get_atk_strength(attack_ref):
 			return false
 	
+	shadow_cancel()
 	return true
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
 	
@@ -2190,6 +2197,7 @@ func test_qc_chain_combo(attack_ref):
 		if get_atk_strength(chain_memory.back()) >= get_atk_strength(attack_ref):
 			return false
 	else: return true
+	
 	
 func get_atk_strength(move):
 	if !move in UniqueCharacter.MOVE_DATABASE:
