@@ -11,7 +11,7 @@ const SpecialTimer_WAIT_TIME = 10 # special button buffer, also used for SuperTi
 const PEAK_DAMPER_MOD = 0.6 # used to reduce gravity at jump peak
 const PEAK_DAMPER_LIMIT = 400.0 # min velocity.y where jump peak gravity reduction kicks in
 const TERMINAL_THRESHOLD = 1.5 # if velocity.y is over this during hitstun, no terminal velocity slowdown
-const VarJumpTimer_WAIT_TIME = 10 # frames after jumping where holding jump will reduce gravity
+const VarJumpTimer_WAIT_TIME = 8 # frames after jumping where holding jump will reduce gravity
 const VAR_JUMP_GRAV_MOD = 0.2 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
@@ -637,9 +637,10 @@ func stimulate2(): # only ran if not in hitstop
 
 		if facing != dir:
 				
-			if check_quick_cancel() and !Globals.atk_attr.NO_TURN in query_atk_attr() and \
+			if check_quick_cancel(true) and !Globals.atk_attr.NO_TURN in query_atk_attr() and \
 				!Animator.query_current(["BurstCounterStartup", "BurstEscapeStartup"]):
 				face(dir)
+				
 			
 
 
@@ -1768,10 +1769,14 @@ func get_move_name():
 	if move_name in UniqueCharacter.MOVE_DATABASE:
 		return move_name
 	
-func check_quick_cancel(): # return true if you can change direction or cancel into a combination action currently
+func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
 	match state:
 		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
 			return true
+		Globals.char_state.GROUND_ATK_STARTUP:
+			if turning:
+				return true
+			else: continue
 		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
 			if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
 				# when time = 0 state is still in the previous one, since state only update when a new animation begins
@@ -3179,7 +3184,7 @@ func calculate_hitstun(hit_data): # hitstun and blockstun determined by attack l
 
 func calculate_blockstun(hit_data):
 	
-	var blockstun = max(ceil(calculate_hitstun(hit_data) * 0.5) , MAX_BASE_BLOCKSTUN)
+	var blockstun = max(ceil(calculate_hitstun(hit_data) * 0.4) , MAX_BASE_BLOCKSTUN)
 	
 	if hit_data.block_state == Globals.block_state.AIR_WRONG or hit_data.block_state == Globals.block_state.GROUND_WRONG:
 		blockstun *= WRONGBLOCK_BLOCKSTUN_MOD
@@ -3437,6 +3442,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			else:
 				velocity.y = -UniqueCharacter.JUMP_SPEED
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
+			if dir != 0:
+				velocity.x += dir * UniqueCharacter.JUMP_HORIZONTAL_SPEED
 			emit_signal("SFX","JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"AirJumpTransit2":
 			aerial_memory = []

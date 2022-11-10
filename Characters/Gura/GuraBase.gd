@@ -6,10 +6,11 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 330.0 # ground speed
-const AIR_STRAFE_SPEED = 30
+const SPEED = 400.0 # ground speed
+const AIR_STRAFE_SPEED = 35
 const AIR_STRAFE_LIMIT = 0.8 # speed limit of air strafing, limit depends on ground speed
-const JUMP_SPEED = 625.0
+const JUMP_SPEED = 700.0
+const JUMP_HORIZONTAL_SPEED = 0.0
 const AIR_JUMP_MOD = 0.9 # reduce height of air jumps
 const GRAVITY_MOD = 1.0 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 7.5 # affect terminal velocity downward
@@ -20,7 +21,7 @@ const AIR_RESISTANCE = 0.03 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 1.0 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const GROUND_DASH_SPEED = 430.0 # duration in animation data
+const GROUND_DASH_SPEED = 515.0 # duration in animation data
 const AIR_DASH_SPEED = 370.0 # duration in animation data
 
 const DAMAGE_VALUE_LIMIT = 950.0
@@ -81,7 +82,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/5,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.NO_IMPULSE],
 		"move_sound" : { ref = "whoosh2", aux_data = {"vol" : -12} },
 		"hit_sound" : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
@@ -99,7 +100,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/5,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.LEDGE_DROP, Globals.atk_attr.NO_CHAIN_ON_BLOCK],
+		"atk_attr" : [Globals.atk_attr.LEDGE_DROP, Globals.atk_attr.NO_CHAIN_ON_BLOCK],
 		"move_sound" : { ref = "whoosh14", aux_data = {"vol" : -9, "bus" : "PitchDown"} },
 		"hit_sound" : { ref = "impact11", aux_data = {"vol" : -10} },
 	},
@@ -193,7 +194,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2.4,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_REPEAT],
+		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_REPEAT, Globals.atk_attr.NO_IMPULSE],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	"aL1" : {
@@ -563,7 +564,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 		var move_name = anim_name.trim_suffix("Active")
 		if move_name in MOVE_DATABASE:
 			Character.chain_memory.append(move_name)
-		
+			
+	elif Character.is_atk_startup():
+		var move_name = anim_name.trim_suffix("Startup")
+		if move_name in MOVE_DATABASE:
+			if !Globals.atk_attr.AIR_ATTACK in MOVE_DATABASE[move_name].atk_attr and \
+					!Globals.atk_attr.NO_IMPULSE in MOVE_DATABASE[move_name].atk_attr: # ground impulse
+				if Character.dir == Character.facing:
+					Character.velocity.x = Character.dir * SPEED
+
 	match anim_name:
 		"Dash":
 			Character.velocity.x = GROUND_DASH_SPEED * Character.facing

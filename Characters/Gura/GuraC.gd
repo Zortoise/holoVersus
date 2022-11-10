@@ -35,14 +35,23 @@ func stimulate():
 
 	if Character.button_dash in Character.input_state.pressed and Character.dir == 0 and Character.v_dir == 0:
 		match Character.state:
-			Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_C_RECOVERY: # cannot block instantly when crouching
+			Globals.char_state.GROUND_STANDBY:
 				Character.animate("BlockStartup")
-			Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
-				Character.animate("AirBlockStartup")
-				Character.get_node("VarJumpTimer").stop()
-			Globals.char_state.GROUND_STARTUP: # jump to blockhop
-				if Animator.query_to_play(["JumpTransit"]):
-					Character.animate("BlockHopTransit")
+			Globals.char_state.GROUND_C_RECOVERY:
+				if Animator.query_current(["DashBrake"]):
+					if Globals.trait.DASH_BLOCK in query_traits():
+						Character.animate("BlockStartup")
+				else:
+					Character.animate("BlockStartup")
+			Globals.char_state.AIR_STANDBY:
+				if Character.current_ex_gauge >= AIR_BLOCK_DRAIN_RATE * 0.5:
+					Character.animate("AirBlockStartup")
+					Character.get_node("VarJumpTimer").stop()
+			Globals.char_state.AIR_C_RECOVERY:
+				if !Animator.query_current(["AirDashBrake"]):
+					if Character.current_ex_gauge >= AIR_BLOCK_DRAIN_RATE * 0.5:
+						Character.animate("AirBlockStartup")
+						Character.get_node("VarJumpTimer").stop()
 	
 	
 	# QUICK CANCELS --------------------------------------------------------------------------------------------------
