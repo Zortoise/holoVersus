@@ -1881,9 +1881,12 @@ func burst_extend_check(): # check if have resources to do it, then take away th
 	return true
 	
 func test_jump_cancel():
-	if chain_combo != 1: return false # can only jump cancel on hit (not block)
-	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
-	
+	if grounded:
+		if chain_combo != 1: return false # can only jump cancel on hit (not block)
+	else:
+		if air_jump == 0: return false # if in air, need >1 air jump left
+		if chain_combo == 0: return false # if in air, can jump cancel on blocking opponents
+		
 	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
 	if !is_normal_attack(move_name): return false # can only jump cancel Normals
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be jump cancelled

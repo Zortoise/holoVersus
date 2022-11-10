@@ -6,7 +6,7 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 400.0 # ground speed
+const SPEED = 370.0 # ground speed
 const AIR_STRAFE_SPEED = 35
 const AIR_STRAFE_LIMIT = 0.8 # speed limit of air strafing, limit depends on ground speed
 const JUMP_SPEED = 700.0
@@ -21,7 +21,7 @@ const AIR_RESISTANCE = 0.03 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 1.0 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const GROUND_DASH_SPEED = 515.0 # duration in animation data
+const GROUND_DASH_SPEED = 500.0 # duration in animation data
 const AIR_DASH_SPEED = 370.0 # duration in animation data
 
 const DAMAGE_VALUE_LIMIT = 950.0
