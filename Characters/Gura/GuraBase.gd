@@ -558,19 +558,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("FallTransit")
 
 func _on_SpritePlayer_anim_started(anim_name):
-		
-	if Character.is_atk_active():
-		var move_name = anim_name.trim_suffix("Active")
-		if move_name in MOVE_DATABASE:
-			Character.chain_memory.append(move_name)
-			Character.impulse_used = false
-			
-	elif Character.new_state == Globals.char_state.GROUND_ATK_STARTUP:
-		var move_name = anim_name.trim_suffix("Startup")
-		if move_name in MOVE_DATABASE:
-			if !Globals.atk_attr.NO_IMPULSE in MOVE_DATABASE[move_name].atk_attr: # ground impulse
-				Character.velocity.x = Character.dir * SPEED
-				Character.impulse_used = true
 
 	match anim_name:
 		"Dash":
@@ -638,24 +625,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"L2Active":
 			Character.velocity.x += Character.facing * SPEED * 1.2
 			Character.null_friction = true
-			Character.emit_signal("SFX", "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})
 		"L2Recovery":
 			Character.velocity = Vector2(500 * Character.facing, 0).rotated(-PI/2.3 * Character.facing)
 		"F1Startup":
 			Character.velocity.x += Character.facing * SPEED * 0.25
 		"F1Active":
 			Character.velocity.x += Character.facing * SPEED * 0.5
-			Character.emit_signal("SFX", "RunDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Character.sfx_over.show()
 		"F2bStartup":
 			Character.velocity.x += Character.facing * SPEED * 0.5
-			Character.emit_signal("SFX", "RunDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"F1Recovery", "F2Active", "F2Recovery", "F3Active", "F3Recovery":
 			Character.sfx_over.show()
 		"HStartup":
 			Character.velocity.x += Character.facing * SPEED * 0.5
-			Character.emit_signal("SFX", "RunDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"HActive", "HbActive", "HRecovery":
 			Character.sfx_under.show()
 			

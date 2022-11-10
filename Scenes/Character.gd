@@ -641,8 +641,16 @@ func stimulate2(): # only ran if not in hitstop
 				!Animator.query_current(["BurstCounterStartup", "BurstEscapeStartup"]):
 				face(dir)
 				
-			
-
+		# quick impulse
+		if state == Globals.char_state.GROUND_ATK_STARTUP and !impulse_used and\
+				Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+			impulse_used = true
+			var move_name = Animator.to_play_animation.trim_suffix("Startup")
+			if move_name in UniqueCharacter.MOVE_DATABASE:
+				if !Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+					velocity.x = dir * UniqueCharacter.SPEED
+					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})	
+						
 
 # DOWN BUTTON --------------------------------------------------------------------------------------------------
 	
@@ -3414,12 +3422,27 @@ func _on_SpritePlayer_anim_started(anim_name):
 	
 	state = state_detect(Animator.current_animation) # update state
 	
-	if is_atk_startup(): #add to aerial memory if needed
+	if is_atk_startup():
 		var move_name = anim_name.trim_suffix("Startup")
-		if move_name in UniqueCharacter.MOVE_DATABASE and Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
-			aerial_memory.append(move_name)
-	if is_atk_recovery():
+		if move_name in UniqueCharacter.MOVE_DATABASE:
+			if Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
+				aerial_memory.append(move_name)  #add to aerial memory if needed
+			
+			if state == Globals.char_state.GROUND_ATK_STARTUP and dir != 0 and !impulse_used and \
+					!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+				velocity.x = dir * UniqueCharacter.SPEED
+				impulse_used = true
+				emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})	
+			
+	elif is_atk_recovery():
 		perfect_chain = false
+	
+	elif is_atk_active():
+		var move_name = anim_name.trim_suffix("Active")
+		if move_name in UniqueCharacter.MOVE_DATABASE:
+			chain_memory.append(move_name)
+			impulse_used = false
+
 	
 	null_friction = false
 	null_gravity = false
