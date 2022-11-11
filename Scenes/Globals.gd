@@ -37,9 +37,9 @@ enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFEC
 enum trait {CROUCH_CANCEL, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BLOCK
 		DASH_BLOCK}
 
-enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_UNIQUE, P1_ASSIST, P1_SPECIAL, 
-		P1_EX, P1_PAUSE,
-		P2_UP, P2_DOWN, P2_LEFT, P2_RIGHT, P2_JUMP, P2_LIGHT, P2_FIERCE, P2_DASH, P2_BLOCK, P2_UNIQUE, P2_ASSIST, P2_SPECIAL, P2_EX,
+enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
+		P1_UNIQUE, P1_PAUSE,
+		P2_UP, P2_DOWN, P2_LEFT, P2_RIGHT, P2_JUMP, P2_LIGHT, P2_FIERCE, P2_DASH, P2_BLOCK, P2_AUX, P2_SPECIAL, P2_UNIQUE,
 		P2_PAUSE}
 
 const FRAME = 1.0/60.0
@@ -115,11 +115,10 @@ onready var INPUTS = [ # acts like a const, need "onready var" since using enums
 		light = ["P1_light", Globals.button.P1_LIGHT],
 		fierce = ["P1_fierce", Globals.button.P1_FIERCE],
 		dash = ["P1_dash", Globals.button.P1_DASH],
-		unique = ["P1_unique", Globals.button.P1_UNIQUE],
+		aux = ["P1_aux", Globals.button.P1_AUX],
 		block = ["P1_block", Globals.button.P1_BLOCK],
-		assist = ["P1_assist", Globals.button.P1_ASSIST],
 		special = ["P1_special", Globals.button.P1_SPECIAL],
-		EX = ["P1_EX", Globals.button.P1_EX],
+		unique = ["P1_unique", Globals.button.P1_UNIQUE],
 		pause = ["P1_pause", Globals.button.P1_PAUSE]
 	},
 	{
@@ -131,11 +130,10 @@ onready var INPUTS = [ # acts like a const, need "onready var" since using enums
 		light = ["P2_light", Globals.button.P2_LIGHT],
 		fierce = ["P2_fierce", Globals.button.P2_FIERCE],
 		dash = ["P2_dash", Globals.button.P2_DASH],
-		unique = ["P2_unique", Globals.button.P2_UNIQUE],
+		aux = ["P2_aux", Globals.button.P2_AUX],
 		block = ["P2_block", Globals.button.P2_BLOCK],
-		assist = ["P2_assist", Globals.button.P2_ASSIST],
 		special = ["P2_special", Globals.button.P2_SPECIAL],
-		EX = ["P2_EX", Globals.button.P2_EX],
+		unique = ["P2_unique", Globals.button.P2_UNIQUE],
 		pause = ["P2_pause", Globals.button.P2_PAUSE]
 	},
 ]

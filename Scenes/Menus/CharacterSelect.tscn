@@ -711,7 +711,7 @@ position = Vector2( 640, 576 )
 scale = Vector2( 3, 3 )
 
 [node name="SelectSprite" parent="P1_Sprite" instance=ExtResource( 17 )]
-frame = 2
+frame = 3
 
 [node name="P2_Sprite" type="Node2D" parent="."]
 position = Vector2( 1280, 576 )
@@ -719,7 +719,7 @@ scale = Vector2( -3, 3 )
 
 [node name="SelectSprite" parent="P2_Sprite" instance=ExtResource( 17 )]
 material = SubResource( 28 )
-frame = 1
+frame = 2
 
 [node name="Grid" type="GridContainer" parent="."]
 margin_left = 179.0
@@ -1385,7 +1385,6 @@ anims/RESET = SubResource( 50 )
 anims/hold = SubResource( 51 )
 
 [node name="P1_ButtonCheck" type="Control" parent="."]
-visible = false
 margin_left = 64.0
 margin_top = 64.0
 margin_right = 64.0
@@ -1468,7 +1467,7 @@ margin_top = 156.0
 margin_right = 264.0
 margin_bottom = 180.0
 
-[node name="Unique" parent="P1_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
+[node name="Aux" parent="P1_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
 margin_left = 264.0
 margin_top = 156.0
 margin_right = 528.0
@@ -1486,91 +1485,90 @@ margin_right = 528.0
 margin_bottom = 213.0
 
 [node name="Blank" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
-margin_top = 227.0
+margin_top = 222.0
 margin_right = 264.0
-margin_bottom = 241.0
+margin_bottom = 236.0
 
-[node name="Assist" parent="P1_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
+[node name="Blank3" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
 margin_top = 222.0
 margin_right = 528.0
-margin_bottom = 246.0
+margin_bottom = 236.0
 
-[node name="EX" parent="P1_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 255.0
+[node name="Unique" parent="P1_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
+margin_top = 245.0
 margin_right = 264.0
-margin_bottom = 279.0
+margin_bottom = 269.0
 
 [node name="Special" parent="P1_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
 margin_left = 264.0
-margin_top = 255.0
+margin_top = 245.0
 margin_right = 528.0
-margin_bottom = 279.0
+margin_bottom = 269.0
 
 [node name="Blank2" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
-margin_top = 288.0
+margin_top = 278.0
 margin_right = 264.0
-margin_bottom = 302.0
+margin_bottom = 292.0
 
 [node name="Blank4" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 288.0
+margin_top = 278.0
 margin_right = 528.0
-margin_bottom = 302.0
+margin_bottom = 292.0
 
 [node name="TapJump" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
-margin_top = 311.0
+margin_top = 301.0
 margin_right = 264.0
-margin_bottom = 335.0
+margin_bottom = 325.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "Up to Jump:"
 
 [node name="TapJump2" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 311.0
+margin_top = 301.0
 margin_right = 528.0
-margin_bottom = 335.0
+margin_bottom = 325.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "off"
 
 [node name="DTFastfall" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
-margin_top = 344.0
+margin_top = 334.0
 margin_right = 264.0
-margin_bottom = 368.0
+margin_bottom = 358.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "DT Fastfall:"
 
 [node name="DTFastfall2" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 344.0
+margin_top = 334.0
 margin_right = 528.0
-margin_bottom = 368.0
+margin_bottom = 358.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "off"
 
 [node name="InputBuffer" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
-margin_top = 377.0
+margin_top = 367.0
 margin_right = 264.0
-margin_bottom = 401.0
+margin_bottom = 391.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "Input Buffer:"
 
 [node name="InputBuffer2" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 377.0
+margin_top = 367.0
 margin_right = 528.0
-margin_bottom = 401.0
+margin_bottom = 391.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "5 frames"
 
 [node name="P2_ButtonCheck" type="Control" parent="."]
-visible = false
 margin_left = 1280.0
 margin_top = 64.0
 margin_right = 1280.0
@@ -1653,7 +1651,7 @@ margin_top = 156.0
 margin_right = 264.0
 margin_bottom = 180.0
 
-[node name="Unique" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
+[node name="Aux" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
 margin_left = 264.0
 margin_top = 156.0
 margin_right = 528.0
@@ -1671,85 +1669,85 @@ margin_right = 528.0
 margin_bottom = 213.0
 
 [node name="Blank" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 227.0
+margin_top = 222.0
 margin_right = 264.0
-margin_bottom = 241.0
+margin_bottom = 236.0
 
-[node name="Assist" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
+[node name="Blank3" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
 margin_top = 222.0
 margin_right = 528.0
-margin_bottom = 246.0
+margin_bottom = 236.0
 
-[node name="EX" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 255.0
+[node name="Unique" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
+margin_top = 245.0
 margin_right = 264.0
-margin_bottom = 279.0
+margin_bottom = 269.0
 
 [node name="Special" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
 margin_left = 264.0
-margin_top = 255.0
+margin_top = 245.0
 margin_right = 528.0
-margin_bottom = 279.0
+margin_bottom = 269.0
 
 [node name="Blank2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 288.0
+margin_top = 278.0
 margin_right = 264.0
-margin_bottom = 302.0
+margin_bottom = 292.0
 
 [node name="Blank4" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 288.0
+margin_top = 278.0
 margin_right = 528.0
-margin_bottom = 302.0
+margin_bottom = 292.0
 
 [node name="TapJump" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 311.0
+margin_top = 301.0
 margin_right = 264.0
-margin_bottom = 335.0
+margin_bottom = 325.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "Up to Jump:"
 
 [node name="TapJump2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 311.0
+margin_top = 301.0
 margin_right = 528.0
-margin_bottom = 335.0
+margin_bottom = 325.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "off"
 
 [node name="DTFastfall" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 344.0
+margin_top = 334.0
 margin_right = 264.0
-margin_bottom = 368.0
+margin_bottom = 358.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "DT Fastfall:"
 
 [node name="DTFastfall2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 344.0
+margin_top = 334.0
 margin_right = 528.0
-margin_bottom = 368.0
+margin_bottom = 358.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "off"
 
 [node name="InputBuffer" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 377.0
+margin_top = 367.0
 margin_right = 264.0
-margin_bottom = 401.0
+margin_bottom = 391.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "Input Buffer:"
 
 [node name="InputBuffer2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
-margin_top = 377.0
+margin_top = 367.0
 margin_right = 528.0
-margin_bottom = 401.0
+margin_bottom = 391.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "5 frames"

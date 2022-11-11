@@ -1128,8 +1128,8 @@ func set_input_indicator():
 						indicator.get_node("InputLeft").show()
 					player.button_right:
 						indicator.get_node("InputRight").show()
-					player.button_EX:
-						indicator.get_node("InputEX").show()
+					player.button_unique:
+						indicator.get_node("InputUnique").show()
 					player.button_special:
 						indicator.get_node("InputSpecial").show()
 					player.button_jump:
@@ -1140,12 +1140,10 @@ func set_input_indicator():
 						indicator.get_node("InputFierce").show()
 					player.button_dash:
 						indicator.get_node("InputDash").show()
-					player.button_unique:
-						indicator.get_node("InputUnique").show()
+					player.button_aux:
+						indicator.get_node("InputAux").show()
 					player.button_block:
 						indicator.get_node("InputBlock").show()
-					player.button_assist:
-						indicator.get_node("InputAssist").show()
 				
 
 func damage_update(character, damage = 0):

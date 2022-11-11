@@ -202,10 +202,9 @@ var button_light
 var button_fierce
 var button_dash
 var button_block
-var button_unique
-var button_assist
+var button_aux
 var button_special
-var button_EX
+var button_unique
 var button_pause
 
 var test := false # used to test specific player, set by main game scene to just one player
@@ -230,10 +229,9 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	button_fierce = Globals.INPUTS[player_ID].fierce[1]
 	button_dash = Globals.INPUTS[player_ID].dash[1]
 	button_block = Globals.INPUTS[player_ID].block[1]
-	button_unique = Globals.INPUTS[player_ID].unique[1]
-	button_assist = Globals.INPUTS[player_ID].assist[1]
+	button_aux = Globals.INPUTS[player_ID].aux[1]
 	button_special = Globals.INPUTS[player_ID].special[1]
-	button_EX = Globals.INPUTS[player_ID].EX[1]
+	button_unique = Globals.INPUTS[player_ID].unique[1]
 	button_pause = Globals.INPUTS[player_ID].pause[1]
 	
 	# remove test character node and add the real character node
@@ -732,10 +730,10 @@ func stimulate2(): # only ran if not in hitstop
 				$SpecialTimer.stop()
 				$SuperTimer.time = SpecialTimer_WAIT_TIME
 				
-		if button_EX in input_state.just_released:
-			$SpecialTimer.stop()
-			$SuperTimer.stop()
-			$EXTimer.time = SpecialTimer_WAIT_TIME
+#		if button_EX in input_state.just_released:
+#			$SpecialTimer.stop()
+#			$SuperTimer.stop()
+#			$EXTimer.time = SpecialTimer_WAIT_TIME
 
 
 # --------------------------------------------------------------------------------------------------
@@ -1132,8 +1130,8 @@ func buffer_actions():
 			input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
 		if button_fierce in input_state.just_pressed:
 			input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
-		if button_unique in input_state.just_pressed:
-			input_buffer.append([button_unique, Settings.input_buffer_time[player_ID]])
+		if button_aux in input_state.just_pressed:
+			input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
 	
 	if input_buffer.size() > 0:
 		capture_combinations() # look for combinations in input buffer, erase buttons used in the combinations
@@ -1148,7 +1146,7 @@ func capture_combinations():
 	# instant air dash, place at back
 	combination(button_jump, button_dash, "InstaAirDash", null, true)
 	
-	combination(button_block, button_unique, "Burst") # can quick_cancel from block/unique startup
+	combination(button_block, button_aux, "Burst") # can quick_cancel from block/unique startup
 			
 	UniqueCharacter.capture_combinations()
 
@@ -1244,10 +1242,8 @@ func process_input_buffer():
 									input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
 								if button_fierce in input_state.pressed:
 									input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
-								if button_unique in input_state.pressed:
-									input_buffer.append([button_unique, Settings.input_buffer_time[player_ID]])
-								if button_assist in input_state.pressed:
-									input_buffer.append([button_assist, Settings.input_buffer_time[player_ID]])
+								if button_aux in input_state.pressed:
+									input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
 								
 						# BUFFERING AN INSTANT AIRDASH ---------------------------------------------------------------------------------
 							
@@ -1780,7 +1776,7 @@ func get_move_name():
 	return move_name
 	
 func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
-	match state:
+	match new_state:
 		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
 			return true
 		Globals.char_state.GROUND_ATK_STARTUP:

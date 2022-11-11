@@ -16,11 +16,10 @@ const DEFAULT_PRESETS = {
 			"light" : KEY_U,
 			"fierce" : KEY_I,
 			"dash" : KEY_O,
-			"unique" : KEY_K,
+			"aux" : KEY_K,
 			"block" : KEY_J,
-			"assist" : KEY_L,
 			"special" : KEY_SHIFT,
-			"EX" : KEY_CONTROL,
+			"unique" : KEY_CONTROL,
 			"pause" : KEY_ESCAPE,
 			"tapjump" : 1,
 			"dt_fastfall" : 0,
@@ -37,11 +36,10 @@ const DEFAULT_PRESETS = {
 			"light" : KEY_DELETE,
 			"fierce" : KEY_END,
 			"dash" : KEY_PAGEDOWN,
-			"unique" : KEY_INSERT,
+			"aux" : KEY_INSERT,
 			"block" : KEY_HOME,
-			"assist" : KEY_PAGEUP,
 			"special" : KEY_CONTROL,
-			"EX" : KEY_SHIFT,
+			"unique" : KEY_SHIFT,
 			"pause" : KEY_ESCAPE,
 			"tapjump" : 1,
 			"dt_fastfall" : 0,
@@ -58,11 +56,10 @@ const DEFAULT_PRESETS = {
 			"light" : KEY_KP_4,
 			"fierce" : KEY_KP_5,
 			"dash" : KEY_KP_6,
-			"unique" : KEY_KP_7,
+			"aux" : KEY_KP_7,
 			"block" : KEY_KP_8,
-			"assist" : KEY_KP_9,
 			"special" : KEY_KP_0,
-			"EX" : KEY_KP_ADD,
+			"unique" : KEY_KP_ADD,
 			"pause" : KEY_KP_SUBTRACT,
 			"tapjump" : 1,
 			"dt_fastfall" : 0,
@@ -79,11 +76,10 @@ const DEFAULT_PRESETS = {
 			"light" : [0, JOY_XBOX_B],
 			"fierce" : [0, JOY_XBOX_Y],
 			"dash" : [0, JOY_R],
-			"unique" : [0, JOY_XBOX_X],
+			"aux" : [0, JOY_XBOX_X],
 			"block" : [0, JOY_L],
-			"assist" : [0, JOY_R3],
 			"special" : [0, JOY_R2],
-			"EX" : [0, JOY_L2],
+			"unique" : [0, JOY_L2],
 			"pause" : [0, JOY_START],
 			"tapjump" : 0,
 			"dt_fastfall" : 0,
@@ -100,11 +96,10 @@ const DEFAULT_PRESETS = {
 			"light" : [1, JOY_XBOX_B],
 			"fierce" : [1, JOY_XBOX_Y],
 			"dash" : [1, JOY_R],
-			"unique" : [1, JOY_XBOX_X],
+			"aux" : [1, JOY_XBOX_X],
 			"block" : [1, JOY_L],
-			"assist" : [1, JOY_R3],
 			"special" : [1, JOY_R2],
-			"EX" : [1, JOY_L2],
+			"unique" : [1, JOY_L2],
 			"pause" : [1, JOY_START],
 			"tapjump" : 0,
 			"dt_fastfall" : 0,
@@ -134,9 +129,9 @@ func set_up_default_presets():
 			print("Error: Unable to create Presets folder")
 			
 	for preset_name in DEFAULT_PRESETS.keys():
-		if !dir.file_exists("user://Presets/" + preset_name + ".tres"):
-			var new_preset = load("res://Scenes/Menus/ControlPreset.gd").new()
-			new_preset.save_preset(preset_name, DEFAULT_PRESETS[preset_name].duplicate(true))
+#		if !dir.file_exists("user://Presets/" + preset_name + ".tres"):
+		var new_preset = load("res://Scenes/Menus/ControlPreset.gd").new()
+		new_preset.save_preset(preset_name, DEFAULT_PRESETS[preset_name].duplicate(true))
 	
 	
 func save_settings(config: Dictionary):

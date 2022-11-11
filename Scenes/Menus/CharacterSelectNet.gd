@@ -252,11 +252,10 @@ func load_buttoncheck():
 	grid.get_node("Light").load_button("Light", Settings.button_to_string(input_map["P1_light"]))
 	grid.get_node("Fierce").load_button("Fierce", Settings.button_to_string(input_map["P1_fierce"]))
 	grid.get_node("Dash").load_button("Dash", Settings.button_to_string(input_map["P1_dash"]))
-	grid.get_node("Unique").load_button("Unique", Settings.button_to_string(input_map["P1_unique"]))
+	grid.get_node("Aux").load_button("Aux", Settings.button_to_string(input_map["P1_aux"]))
 	grid.get_node("Block").load_button("Block", Settings.button_to_string(input_map["P1_block"]))
-	grid.get_node("Assist").load_button("Assist", Settings.button_to_string(input_map["P1_assist"]))
 	grid.get_node("Special").load_button("Special", Settings.button_to_string(input_map["P1_special"]))
-	grid.get_node("EX").load_button("EX", Settings.button_to_string(input_map["P1_EX"]))
+	grid.get_node("Unique").load_button("Unique", Settings.button_to_string(input_map["P1_unique"]))
 
 	grid.get_node("TapJump2").text = TAP_JUMP_OPTIONS[input_map["P1_tapjump"]]
 	grid.get_node("DTFastfall2").text = DT_FASTFALL_OPTIONS[input_map["P1_dt_fastfall"]]
@@ -278,7 +277,7 @@ func _physics_process(_delta):
 
 	# change palette, in phase 0 only
 	var p_dir = 0
-	if Input.is_action_just_pressed("P1_unique"):
+	if Input.is_action_just_pressed("P1_aux"):
 		p_dir -= 1
 	if Input.is_action_just_pressed("P1_block"):
 		p_dir += 1

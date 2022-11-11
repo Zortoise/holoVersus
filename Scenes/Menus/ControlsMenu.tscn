@@ -1090,7 +1090,7 @@ focus_neighbour_right = NodePath("../../ControlsListR/Dash")
 margin_top = 141.0
 margin_right = 408.0
 margin_bottom = 184.0
-focus_neighbour_right = NodePath("../../ControlsListR/Unique")
+focus_neighbour_right = NodePath("../../ControlsListR/Aux")
 
 [node name="Jump" parent="ControlsListL" instance=ExtResource( 9 )]
 margin_top = 188.0
@@ -1137,7 +1137,7 @@ margin_bottom = 137.0
 focus_neighbour_left = NodePath("../../ControlsListL/Left")
 focus_neighbour_right = NodePath("../../ControlsListExtra/RemoveButton")
 
-[node name="Unique" parent="ControlsListR" instance=ExtResource( 9 )]
+[node name="Aux" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_top = 141.0
 margin_right = 408.0
 margin_bottom = 184.0
@@ -1149,22 +1149,16 @@ margin_right = 408.0
 margin_bottom = 231.0
 focus_neighbour_left = NodePath("../../ControlsListL/Jump")
 
-[node name="Assist" parent="ControlsListR" instance=ExtResource( 9 )]
+[node name="Special" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_top = 235.0
 margin_right = 408.0
 margin_bottom = 278.0
 focus_neighbour_left = NodePath("../../ControlsListL/Pause")
 
-[node name="Special" parent="ControlsListR" instance=ExtResource( 9 )]
+[node name="Unique" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_top = 282.0
 margin_right = 408.0
 margin_bottom = 325.0
-focus_neighbour_left = NodePath("../../ControlsListL/Pause")
-
-[node name="EX" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 329.0
-margin_right = 408.0
-margin_bottom = 372.0
 focus_neighbour_left = NodePath("../../ControlsListL/Pause")
 focus_neighbour_bottom = NodePath("../../ControlsListBottom/TapJump")
 
@@ -1685,7 +1679,7 @@ text = "Up"
 [node name="Light" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
 margin_right = 584.0
-focus_neighbour_top = NodePath("../../../ControlsListR/EX")
+focus_neighbour_top = NodePath("../../../ControlsListR/Unique")
 size_flags_horizontal = 3
 text = "Light"
 
@@ -1726,13 +1720,13 @@ margin_bottom = 184.0
 size_flags_horizontal = 3
 text = "Right"
 
-[node name="Unique" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
+[node name="Aux" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
 margin_top = 141.0
 margin_right = 584.0
 margin_bottom = 184.0
 size_flags_horizontal = 3
-text = "Unique"
+text = "Aux"
 
 [node name="Jump" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_top = 188.0
@@ -1768,13 +1762,13 @@ margin_top = 296.0
 margin_right = 290.0
 margin_bottom = 310.0
 
-[node name="EX" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
+[node name="Unique" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
 margin_top = 282.0
 margin_right = 584.0
 margin_bottom = 325.0
 size_flags_horizontal = 3
-text = "EX"
+text = "Unique"
 
 [node name="Blank4" type="Label" parent="PopUpExtra/ExtraButtonActions"]
 margin_top = 329.0

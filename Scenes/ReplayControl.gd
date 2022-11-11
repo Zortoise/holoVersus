@@ -20,7 +20,7 @@ const LOAD_STATE = "P1_dash"
 const FRAME_ADVANCE = "P1_right"
 const FRAME_REVERSE = "P1_left"
 const TOGGLE_VIEWER = "P1_block"
-const TOGGLE_INPUTS = "P1_unique"
+const TOGGLE_INPUTS = "P1_aux"
 const STOP_WATCHING = "P1_pause"
 
 

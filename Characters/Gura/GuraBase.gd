@@ -391,7 +391,7 @@ func query_atk_attr(move_name): # may have certain conditions
 		"F3b":
 			return [Globals.atk_attr.ANTI_AIR]
 		"F3[h]":
-			return [Globals.atk_attr.SUPERARMOR]
+			return [Globals.atk_attr.SUPERARMOR, Globals.atk_attr.NO_TURN]
 		"aF1[h]":
 			return [Globals.atk_attr.LAND_CANCEL, Globals.atk_attr.NO_TURN]
 			
