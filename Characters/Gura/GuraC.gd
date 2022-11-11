@@ -17,6 +17,10 @@ func stimulate():
 		if !Character.button_light in Character.input_state.pressed:
 			Character.animate("aL2bRecovery")
 			
+	if Character.state == Globals.char_state.AIR_ATK_STARTUP and Animator.query(["aF1[h]Startup"]):
+		if !Character.button_light in Character.input_state.pressed:
+			Character.animate("aF1Active")
+			
 	# dash dancing
 	if Character.state == Globals.char_state.GROUND_RECOVERY and Animator.query(["Dash"]):
 		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:

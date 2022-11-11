@@ -19,6 +19,8 @@ const QUICK_CANCEL_TIME = 2 # number of frames at startup the user can still cha
 const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/airdash being invulnerable
 const MAX_EX_GAUGE = 50000.0
 const EX_GAUGE_REGEN_RATE = 1000 # EX Gauge regened per second when idling
+const GUARD_GAUGE_FLOOR = -10000.0
+const GUARD_GAUGE_CEIL = 10000.0
 const BURSTCOUNTER_EX_COST = 1
 const BURSTESCAPE_GG_COST = 0.5
 const AIRBLOCK_GRAV_MOD = 0.5 # multiply to GRAVITY to get gravity during air blocking
@@ -39,8 +41,6 @@ const KB_BOOST_AT_DMG_VAL_LIMIT = 1.5 # knockback power when damage percent is a
 const PERFECTCHAIN_GGG_MOD = 0.5 # Guard Gain on hitstunned defender is reduced on perfect chains
 const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on repeat_penalty
 const DMG_REDUCTION_AT_MAX_GG = 0.5 # max reduction in damage when defender's Guard Gauge is at 200%
-const HITSTUN_REDUCTION_AT_MAX_GG = 0.5 # max reduction in hitstun when defender's Guard Gauge is at 200%
-const KB_BOOST_AT_MAX_GG = 1.5 # max increase of knockback when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN_MOD = 7.0 # increased Guard Guard Regen during Postive Flow
 const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
@@ -521,14 +521,14 @@ func stimulate2(): # only ran if not in hitstop
 	# regen/degen GG
 	if move_memory.size() == 0:
 		if current_guard_gauge < 0 and !is_blocking():
-			var guard_gauge_regen = UniqueCharacter.GUARD_GAUGE_REGEN_RATE * abs(UniqueCharacter.GUARD_GAUGE_FLOOR) * Globals.FRAME
+			var guard_gauge_regen = UniqueCharacter.GUARD_GAUGE_REGEN_RATE * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME
 			if query_status_effect(Globals.status_effect.POS_FLOW):
 				guard_gauge_regen *= POS_FLOW_REGEN_MOD # increased regen during positive flow
 			guard_gauge_regen = round(guard_gauge_regen)
 			current_guard_gauge = min(0, current_guard_gauge + guard_gauge_regen) # don't use change_guard_gauge() since it stops at 0
 			Globals.Game.guard_gauge_update(self)
 		elif current_guard_gauge > 0:
-			var guard_gauge_degen = UniqueCharacter.GUARD_GAUGE_DEGEN_RATE * UniqueCharacter.GUARD_GAUGE_CEIL * Globals.FRAME
+			var guard_gauge_degen = UniqueCharacter.GUARD_GAUGE_DEGEN_RATE * GUARD_GAUGE_CEIL * Globals.FRAME
 			guard_gauge_degen = round(guard_gauge_degen)
 			current_guard_gauge = max(0, current_guard_gauge + guard_gauge_degen)
 			Globals.Game.guard_gauge_update(self)
@@ -637,8 +637,7 @@ func stimulate2(): # only ran if not in hitstop
 
 		if facing != dir:
 				
-			if check_quick_cancel(true) and !Globals.atk_attr.NO_TURN in query_atk_attr() and \
-				!Animator.query_current(["BurstCounterStartup", "BurstEscapeStartup"]):
+			if check_quick_cancel(true) and !Globals.atk_attr.NO_TURN in query_atk_attr():
 				face(dir)
 				
 		# quick impulse
@@ -775,13 +774,15 @@ func stimulate2(): # only ran if not in hitstop
 			check_landing() 
 		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_ACTIVE, Globals.char_state.AIR_RECOVERY, Globals.char_state.AIR_C_RECOVERY:
 			if Animator.current_animation.begins_with("AirDash"):
-				check_landing(1) # 2 means wavelanding
+				check_landing(1) # 1 means wavelanding
 			elif Animator.query(["AirBlockRecovery"]):
 				check_landing(4) # 4 means AirBlockRecovery to BlockCRecovery
 			else: # landing during AirDashBrake or AirDashDD
 				check_landing()
 		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
-			pass # WIP, cannot land during aerial startup and active frames, for now...
+			# cannot land during aerial startup and active frames unless they have the LAND_CANCEL atk attr
+			if Globals.atk_attr.LAND_CANCEL in query_atk_attr():
+				check_landing(7) # hard landing animation (still cancellable)
 		Globals.char_state.AIR_FLINCH_HITSTUN:
 			check_landing(5) # land during hitstun
 		Globals.char_state.LAUNCHED_HITSTUN:
@@ -1595,6 +1596,8 @@ func check_landing(landing_state = 0):
 		match landing_state:
 			0:
 				animate("SoftLanding")
+			7:
+				animate("HardLanding")
 			1: # wave landing
 				animate("DashBrake")
 				emit_signal("SFX","GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
@@ -1774,8 +1777,7 @@ func get_move_name():
 	var move_name = Animator.to_play_animation.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Recovery")
-	if move_name in UniqueCharacter.MOVE_DATABASE:
-		return move_name
+	return move_name
 	
 func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
 	match state:
@@ -1783,12 +1785,19 @@ func check_quick_cancel(turning = false): # return true if you can change direct
 			return true
 		Globals.char_state.GROUND_ATK_STARTUP:
 			if turning:
-				return true
+				var move_name = get_move_name()
+				if move_name == null: return false # if name at name of animation not found in database
+				if !Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
+					return true
 			else: continue
 		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
-			if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
-				# when time = 0 state is still in the previous one, since state only update when a new animation begins
-				return true
+			if !turning:
+				if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+					# when time = 0 state is still in the previous one, since state only update when a new animation begins
+					return true
+			else: # for turning, the QUICK_CANCEL_TIME is 1 frame lower, min is 1 frame
+				if Animator.time <= max(QUICK_CANCEL_TIME - 1, 1) and Animator.time != 0:
+					return true
 		Globals.char_state.GROUND_BLOCK:
 			if Animator.query(["BlockStartup"]):
 				return true
@@ -1800,17 +1809,14 @@ func check_quick_cancel(turning = false): # return true if you can change direct
 func check_ledge_stop(): # some animations prevent you from dropping off
 	if !grounded:
 		return false
-	var move_name = get_move_name()
-	if move_name:
+	if is_attacking():
 		# test if move has LEDGE_DROP, no ledge stop if so
 		if state != Globals.char_state.GROUND_ATK_STARTUP and \
-				Globals.atk_attr.LEDGE_DROP in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
+				Globals.atk_attr.LEDGE_DROP in query_atk_attr():
 			return false # even with LEDGE_DROP, startup animation will still stop you at the ledge
 		else: return true # no LEDGE_DROP, will stop at ledge
 	else:
-		if is_attacking(): # attacking but move name not in database, stop at ledge
-			return true
-		return false # cannot get move_name, not attacking
+		return false # not attacking
 	
 func is_attacking():
 	match new_state:
@@ -1872,7 +1878,7 @@ func burst_counter_check(): # check if have resources to do it, then take away t
 func burst_escape_check(): # check if have resources to do it, then take away those resources and return a bool
 	if get_damage_percent() >= 1.0: # cannot Burst Escape at lethal range
 		return false
-	if current_guard_gauge >= UniqueCharacter.GUARD_GAUGE_CEIL:
+	if current_guard_gauge >= GUARD_GAUGE_CEIL:
 		change_guard_gauge_percent(-1.0)
 		return true
 	if !has_burst or current_guard_gauge <= 0:
@@ -1936,46 +1942,22 @@ func test_fastfall_cancel():
 #			return true
 #	else: return false
 
+
 func query_traits(): # may have certain conditions
 	return UniqueCharacter.query_traits()
 	
+	
+# name should be stripped already!
 func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
 	
 	if is_burst(in_move_name):
-		return [Globals.atk_attr.SCREEN_SHAKE] # no need EASY_BLOCK since projectiles cannot cross-up/mix-up
+		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.NO_TURN]
 	
 	var move_name = in_move_name
 	if move_name == null:
-		if is_atk_active():
-			move_name = Animator.to_play_animation.trim_suffix("Active")
-	if move_name in UniqueCharacter.MOVE_DATABASE:
-		return UniqueCharacter.MOVE_DATABASE[move_name].atk_attr
-	return []
-	
-func query_atk_attr_active_or_rec(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
-	
-	if is_burst(in_move_name):
-		return [Globals.atk_attr.SCREEN_SHAKE] # no need EASY_BLOCK since projectiles cannot cross-up/mix-up
-	
-	var move_name = in_move_name
-	if move_name == null:
-		move_name = Animator.to_play_animation.trim_suffix("Active")
-		move_name = move_name.trim_suffix("Recovery")
-	if move_name in UniqueCharacter.MOVE_DATABASE:
-		return UniqueCharacter.MOVE_DATABASE[move_name].atk_attr
-	return []
-	
-func query_atk_attr_startup(): # for checking SEMI_INVUL_STARTUP in main game node
-	var move_name = Animator.to_play_animation
-	if move_name.ends_with("Startup"):
-		move_name = move_name.trim_suffix("Startup")
+		move_name = get_move_name()
 		
-	if move_name == "BurstCounter" or move_name == "BurstEscape":
-		return [Globals.atk_attr.SEMI_INVUL_STARTUP]
-	elif move_name in UniqueCharacter.MOVE_DATABASE:
-		return UniqueCharacter.MOVE_DATABASE[move_name].atk_attr
-	return []
-		
+	return UniqueCharacter.query_atk_attr(move_name)
 
 
 func progress_tap_memory(): # remove taps that expired
@@ -2195,7 +2177,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #	if "root" in UniqueCharacter.MOVE_DATABASE[move_name] and UniqueCharacter.MOVE_DATABASE[move_name].root == attack_ref:
 #		return false # for move variations/auto-chains with a root move
 
-	if Globals.atk_attr.NO_CHAIN in query_atk_attr_active_or_rec(move_name):
+	if Globals.atk_attr.NO_CHAIN in query_atk_attr(move_name):
 		return false
 	
 	if chain_combo == 2: # on blocking opponent, can only chain into moves of higher strength
@@ -2318,17 +2300,17 @@ func get_damage_percent():
 	return current_damage_value / UniqueCharacter.DAMAGE_VALUE_LIMIT
 	
 func get_guard_gauge_percent_below():
-	if current_guard_gauge <= UniqueCharacter.GUARD_GAUGE_FLOOR:
+	if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 		return 0.0
 	elif current_guard_gauge < 0:
-		return 1.0 - (current_guard_gauge / UniqueCharacter.GUARD_GAUGE_FLOOR)
+		return 1.0 - (current_guard_gauge / GUARD_GAUGE_FLOOR)
 	else: return 1.0
 	
 func get_guard_gauge_percent_above():
-	if current_guard_gauge >= UniqueCharacter.GUARD_GAUGE_CEIL:
+	if current_guard_gauge >= GUARD_GAUGE_CEIL:
 		return 1.0
 	elif current_guard_gauge > 0:
-		return (current_guard_gauge / UniqueCharacter.GUARD_GAUGE_CEIL)
+		return (current_guard_gauge / GUARD_GAUGE_CEIL)
 	else: return 0.0
 	
 func take_damage(damage): # called by attacker
@@ -2338,7 +2320,7 @@ func take_damage(damage): # called by attacker
 	
 func change_guard_gauge(guard_gauge_change): # called by attacker
 	current_guard_gauge += guard_gauge_change
-	current_guard_gauge = clamp(current_guard_gauge, UniqueCharacter.GUARD_GAUGE_FLOOR, UniqueCharacter.GUARD_GAUGE_CEIL)
+	current_guard_gauge = clamp(current_guard_gauge, GUARD_GAUGE_FLOOR, GUARD_GAUGE_CEIL)
 	current_guard_gauge = round(current_guard_gauge)
 	Globals.Game.guard_gauge_update(self)
 	
@@ -2354,30 +2336,30 @@ func change_guard_gauge_percent(guard_gauge_change_percent):
 			
 			var GG_above_percent = get_guard_gauge_percent_above()
 			if GG_above_percent >= abs(guard_gauge_change_percent): # if enough, substract normally
-				guard_gauge_change = guard_gauge_change_percent * abs(UniqueCharacter.GUARD_GAUGE_CEIL)
+				guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_CEIL)
 				
 			else: # not enough, must go under 0
 				guard_gauge_change_percent += GG_above_percent # get leftovers
 				guard_gauge_change = -current_guard_gauge # lower to 0 1st
-				guard_gauge_change += guard_gauge_change_percent * abs(UniqueCharacter.GUARD_GAUGE_FLOOR) # reduce below 0
+				guard_gauge_change += guard_gauge_change_percent * abs(GUARD_GAUGE_FLOOR) # reduce below 0
 				
 		else: # GG below 0, substract normally
-			guard_gauge_change = guard_gauge_change_percent * abs(UniqueCharacter.GUARD_GAUGE_FLOOR)
+			guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_FLOOR)
 			
 	elif guard_gauge_change_percent > 0: # increase GG
 		if current_guard_gauge < 0:
 			
 			var GG_below_percent = get_guard_gauge_percent_below()
 			if GG_below_percent <= abs(guard_gauge_change_percent): # if low enough, increase normally
-				guard_gauge_change = guard_gauge_change_percent * abs(UniqueCharacter.GUARD_GAUGE_FLOOR)
+				guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_FLOOR)
 				
 			else: # will go above 0
 				guard_gauge_change_percent -= 1.0 - GG_below_percent # get leftovers
 				guard_gauge_change = -current_guard_gauge # raise to 0 1st
-				guard_gauge_change += guard_gauge_change_percent * abs(UniqueCharacter.GUARD_GAUGE_CEIL) # raise above 0
+				guard_gauge_change += guard_gauge_change_percent * abs(GUARD_GAUGE_CEIL) # raise above 0
 							
 		else: # over 0, increase normally
-			guard_gauge_change = guard_gauge_change_percent * abs(UniqueCharacter.GUARD_GAUGE_CEIL)
+			guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_CEIL)
 			
 	change_guard_gauge(guard_gauge_change)
 	
@@ -2481,7 +2463,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				pass
 				
 		if hit_data.block_state == Globals.block_state.UNBLOCKED and \
-				Globals.atk_attr.JUMP_CANCEL in query_atk_attr_active_or_rec(hit_data.move_name):
+				Globals.atk_attr.JUMP_CANCEL in query_atk_attr(hit_data.move_name):
 			jump_cancel = true
 				
 	# BLOCK PUSHBACK ----------------------------------------------------------------------------------------------
@@ -2610,6 +2592,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	match defender.state:
 		
+		Globals.char_state.GROUND_ATK_STARTUP:
+			if !Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
+					Globals.atk_attr.SUPERARMOR in defender.query_atk_attr(): # defender has superarmor
+				hit_data.block_state = Globals.block_state.GROUND_WRONG
+		Globals.char_state.AIR_ATK_STARTUP:		
+			if !Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
+					Globals.atk_attr.SUPERARMOR in defender.query_atk_attr(): # defender has superarmor
+				hit_data.block_state = Globals.block_state.AIR_WRONG
+		
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN:
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
 			
@@ -2642,7 +2633,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 		Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN:
 			hit_data.sweetspotted = false  # blocking will not cause sweetspot hits
-			
+
 			if Globals.atk_attr.ANTI_AIR in attacker.query_atk_attr(hit_data.move_name):
 				hit_data.block_state = Globals.block_state.AIR_WRONG # anti-air attacks always wrongblock airborne defenders
 			
@@ -2696,6 +2687,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
 	defender.change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
+	
 	if defender.get_guard_gauge_percent_below() <= 0.001 and !hit_data.weak_hit and \
 			!Globals.atk_attr.AUTOCHAIN in attacker.query_atk_attr(hit_data.move_name):  # check for break hit
 		# setting to 0.001 instead of 0 allow multi-hit moves to cause break_hits on the last attack
@@ -2775,7 +2767,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		elif hit_data.move_name == "BurstExtend":
 			attacker.reset_jumps()
 			defender.reset_jumps()
-			defender.current_guard_gauge = defender.UniqueCharacter.GUARD_GAUGE_FLOOR * 0.3
+			defender.current_guard_gauge = 0.0
 			Globals.Game.guard_gauge_update(defender)
 			defender.move_memory = []
 			
@@ -2915,8 +2907,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				animate("Blockstun")
 				block_rec_cancel = true
 			Globals.block_state.GROUND_WRONG:
-				animate("WBlockstun")
-				block_rec_cancel = false
+				if !defender.is_atk_startup():
+					animate("WBlockstun")
+					block_rec_cancel = false
 			Globals.block_state.GROUND_PERFECT:
 				animate("PBlockstun")
 				block_rec_cancel = true
@@ -2924,8 +2917,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				animate("AirBlockstun")
 				block_rec_cancel = true
 			Globals.block_state.AIR_WRONG:
-				animate("AirWBlockstun")
-				block_rec_cancel = false
+				if !defender.is_atk_startup():
+					animate("AirWBlockstun")
+					block_rec_cancel = false
 			Globals.block_state.AIR_PERFECT:
 				animate("AirPBlockstun")
 				block_rec_cancel = true
@@ -3001,8 +2995,6 @@ func calculate_guard_gauge_change(hit_data):
 			guard_gauge_change *= SWEETSPOT_GGG_MOD # Guard Gain on hitstunned defender is reduced on sweetspotted hit
 		if !"entity_nodepath" in hit_data and attacker_or_entity.perfect_chain:
 			guard_gauge_change *= PERFECTCHAIN_GGG_MOD # Guard Gain on hitstunned defender is reduced on perfect chains
-			
-		guard_gauge_change *= defender.UniqueCharacter.GUARD_GAUGE_GAIN_MOD # each character gain different amount of GG when comboed
 	
 	else: # defender NOT in hitstun or just recovered from one, or blocking, guard_gauge_change is negative
 		guard_gauge_change = -hit_data.move_data.guard_drain
@@ -3089,7 +3081,7 @@ func calculate_knockback_strength(hit_data):
 		knockback_strength *= dmg_val_boost
 		
 	if defender.current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
-		knockback_strength *= lerp(1.0, KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
+		knockback_strength *= lerp(1.0, UniqueCharacter.KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
 	
 	return knockback_strength # lethal knockback is around 2000
 	
@@ -3176,7 +3168,7 @@ func calculate_hitstun(hit_data): # hitstun and blockstun determined by attack l
 			hitstun *= defender.get_damage_percent()
 	else:
 		if defender.current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-			hitstun *= lerp(1.0, HITSTUN_REDUCTION_AT_MAX_GG, defender.get_guard_gauge_percent_above())
+			hitstun *= lerp(1.0, UniqueCharacter.HITSTUN_REDUCTION_AT_MAX_GG, defender.get_guard_gauge_percent_above())
 			
 		if defender.state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
 			hitstun *= CROUCH_REDUCTION_MOD

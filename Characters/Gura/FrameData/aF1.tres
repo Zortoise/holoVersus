@@ -142,5 +142,26 @@ frame_data = {
 }
 },
 "vframes": 1
+},
+"aF1[h]Startup": {
+"SfxOver_hframes": 5,
+"SfxOver_spritesheet": "aF1SfxOver",
+"SfxOver_vframes": 1,
+"duration": 18,
+"hframes": 6,
+"loop": false,
+"spritesheet": "aF1Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 0,
+"frame": 2,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -12, -17 ), Vector2( -19, -17 ), Vector2( -19, -6 ), Vector2( -12, -6 ), Vector2( -12, 15 ), Vector2( 10, 15 ), Vector2( 10, -22 ), Vector2( -12, -22 ) ],
+"kborigin": null,
+"sdhurtbox": [  ],
+"sweetbox": [  ]
+}
+},
+"vframes": 1
 }
 }

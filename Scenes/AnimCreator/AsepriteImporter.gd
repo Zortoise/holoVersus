@@ -11,10 +11,10 @@ extends EditorScript
 
 # TARGETS ---------------------------------------------------------------------------------------------------
 
-export var entity_folder = "res://Assets/Effects/DustClouds/"
+export var entity_folder = "res://Characters/Gura/"
 # be sure to end with a "/"
 
-export var target_aseprite_filename = "DustClouds"
+export var target_aseprite_filename = "F3"
 # only need filename, not path, no need extension
 # if left empty, will process all .aseprite files in the AsepriteFiles folder in entity_folder
 

@@ -11,7 +11,7 @@ enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WS
 enum hitspark_type {CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
-		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_REPEAT, NO_IMPULSE}
+		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_REPEAT, NO_IMPULSE, SUPERARMOR, LAND_CANCEL}
 # AIR_ATTACK = for all aerial Normals/Specials, allow grounded aerials to be blocked both on ground/air
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -27,6 +27,8 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_REPEAT = incur Double Repeat on the 1st repetition, for heavy attacks
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
+# SUPERARMOR = Wrongblock all attacks, set attack_level of any attack received to 1
+# LAND_CANCEL = animation can be cancelled on landing
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge

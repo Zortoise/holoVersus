@@ -24,13 +24,15 @@ const MAX_AIR_DASH = 2
 const GROUND_DASH_SPEED = 480.0 # duration in animation data
 const AIR_DASH_SPEED = 390.0 # duration in animation data
 
+const HITSTUN_REDUCTION_AT_MAX_GG = 0.75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have higher
+const KB_BOOST_AT_MAX_GG = 2.0 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
+
 const DAMAGE_VALUE_LIMIT = 950.0
-const GUARD_GAUGE_FLOOR = -9000.0 # tankier characters have lower GUARD_GAUGE_FLOOR
-const GUARD_GAUGE_CEIL = 8000.0 # fixed? use GUARD_GAUGE_GAIN_MOD for tankier characters
 const GUARD_GAUGE_REGEN_RATE = 0.05 # % of GG regened per second when GG < 100%
-const GUARD_GAUGE_DEGEN_RATE = -0.75 # % of GG degened per second when GG > 100%
+const GUARD_GAUGE_DEGEN_RATE = -0.55 # % of GG degened per second when GG > 100%
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 0.35 # % of damage taken as chip damage when blocking (average is 0.25)
-const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
+#const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
+#const GUARD_GAUGE_LOSS_MOD = 1.2 # modify Guard Loss, tankier characters have lower GUARD_GAUGE_LOSS_MOD
 const AIR_BLOCK_DRAIN_RATE = 3400.0 # % of EX Gauge drain per second when Air Blocking
 const TRAITS = [Globals.trait.CROUCH_CANCEL, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
 
@@ -314,7 +316,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"AirDashU2", "AirDashD2":
 			return Globals.char_state.AIR_RECOVERY
 		
-		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "HStartup":
+		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", "HStartup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive":
 			return Globals.char_state.GROUND_ATK_ACTIVE
@@ -323,7 +325,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1bCRecovery", "F1CRecovery":
 			return Globals.char_state.GROUND_C_RECOVERY
 			
-		"aL1Startup", "aL2Startup", "aF1Startup", "aF3Startup", "aHStartup":
+		"aL1Startup", "aL2Startup", "aF1Startup", "aF1[h]Startup", "aF3Startup", "aHStartup":
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aL1Active", "aL2Active", "aF1Active", "aF3Active", "aHActive":
 			return Globals.char_state.AIR_ATK_ACTIVE
@@ -382,6 +384,21 @@ func query_move_data(move_name):
 	
 	return move_data
 	
+	
+func query_atk_attr(move_name): # may have certain conditions
+
+	match move_name: # can add various atk_attr to certain animations under under conditions
+		"F3b":
+			return [Globals.atk_attr.ANTI_AIR]
+		"F3[h]":
+			return [Globals.atk_attr.SUPERARMOR]
+		"aF1[h]":
+			return [Globals.atk_attr.LAND_CANCEL, Globals.atk_attr.NO_TURN]
+			
+	if move_name in MOVE_DATABASE:
+		return MOVE_DATABASE[move_name].atk_attr
+	return []
+
 
 func landed_a_hit(_hit_data): # reaction, can change hit_data from here
 	if Animator.query(["aL2Active"]):
@@ -492,8 +509,21 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"F3Startup":
-			Character.animate("F3Active")
+			if get("STYLE") == 0:
+				if Character.button_fierce in Character.input_state.pressed:
+					Character.animate("F3[h]Startup")
+				else:
+					Character.animate("F3bStartup")
+			else:
+				if Character.button_light in Character.input_state.pressed:
+					Character.animate("F3[h]Startup")
+				else:
+					Character.animate("F3bStartup")
 			Character.atk_startup_resets()
+		"F3bStartup":
+			Character.animate("F3Active")
+		"F3[h]Startup":
+			Character.animate("F3Active")
 		"F3Active":
 			Character.animate("F3Recovery")
 		"F3Recovery":
@@ -530,8 +560,19 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("FallTransit")
 
 		"aF1Startup":
-			Character.animate("aF1Active")
+			if get("STYLE") == 0:
+				if Character.button_fierce in Character.input_state.pressed:
+					Character.animate("aF1[h]Startup")
+				else:
+					Character.animate("aF1Active")
+			else:
+				if Character.button_light in Character.input_state.pressed:
+					Character.animate("aF1[h]Startup")
+				else:
+					Character.animate("aF1Active")
 			Character.atk_startup_resets()
+		"aF1[h]Startup":
+			Character.animate("aF1Active")
 		"aF1Active":
 			Character.animate("aF1Recovery")
 		"aF1Recovery":
@@ -634,6 +675,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.sfx_over.show()
 		"F2bStartup":
 			Character.velocity.x += Character.facing * SPEED * 0.5
+		"F3[h]Startup":
+			Character.get_node("ModulatePlayer").play("armor_flash")
 		"F1Recovery", "F2Active", "F2Recovery", "F3Active", "F3Recovery":
 			Character.sfx_over.show()
 		"HStartup":
@@ -653,7 +696,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aL2Recovery":
 			Character.velocity.y = -600
 			Character.sfx_over.show()
-		"aF1Startup":
+		"aF1Startup", "aF1[h]Startup":
 			Character.velocity_limiter.x = 0.85
 		"aF1Active", "aF1Recovery":
 			Character.velocity_limiter.x = 0.85

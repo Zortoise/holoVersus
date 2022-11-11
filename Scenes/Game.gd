@@ -1004,27 +1004,24 @@ func defender_anti_airing(hitbox, hurtbox):
 	if defender.state == Globals.char_state.GROUND_ATK_STARTUP or defender.state == Globals.char_state.GROUND_ATK_ACTIVE or \
 			defender.state == Globals.char_state.AIR_ATK_ACTIVE: # for airborne defender using anti-air, only anti-air during active frames
 		
-		var def_move_name = defender.Animator.to_play_animation.trim_suffix("Startup")
-		def_move_name = def_move_name.trim_suffix("Active")
-		def_move_name = def_move_name.trim_suffix("Recovery")
-		if def_move_name in defender.UniqueCharacter.MOVE_DATABASE:
-			var has_anti_air_attr = Globals.atk_attr.ANTI_AIR in defender.query_atk_attr(def_move_name)
-			if has_anti_air_attr and Globals.atk_attr.AIR_ATTACK in attacker.query_atk_attr(hitbox.move_name):
-				# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
-				# and the attacker must be using an AIR_ATTACK in air or on ground
-				# now to check tiers
-				var defender_tier = Globals.atk_type_to_tier(defender.UniqueCharacter.MOVE_DATABASE[def_move_name].atk_type)
-				var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
-				if defender_tier >= attacker_tier:
-					return true # defender successfully anti-aired
+		var has_anti_air_attr = Globals.atk_attr.ANTI_AIR in defender.query_atk_attr()
+		if has_anti_air_attr and Globals.atk_attr.AIR_ATTACK in attacker.UniqueCharacter.query_atk_attr(hitbox.move_name):
+			# don't use hitbox.move_data.atk_attr, some attacks have special conditions added in UniqueCharacter.query_atk_attr()
+			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
+			# and the attacker must be using an AIR_ATTACK in air or on ground
+			# now to check tiers
+			var defender_tier = Globals.atk_type.HEAVY # for normal AIR_ATTACK attribute, can defend against all aerials HEAVY or below
+			var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
+			if defender_tier >= attacker_tier:
+				return true # defender successfully anti-aired
 	return false
 	
 func defender_semi_invul(hitbox, hurtbox):
 	var attacker = get_node(hitbox.owner_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
 	if defender.state == Globals.char_state.GROUND_ATK_STARTUP or defender.state == Globals.char_state.AIR_ATK_STARTUP:
-		if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr_startup():
-			if Globals.atk_attr.UNBLOCKABLE in attacker.query_atk_attr(hitbox.move_name) or \
+		if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr():
+			if Globals.atk_attr.UNBLOCKABLE in attacker.UniqueCharacter.query_atk_attr(hitbox.move_name) or \
 					hitbox.move_data.atk_type == Globals.atk_type.EX or hitbox.move_data.atk_type == Globals.atk_type.SUPER:
 				return false # defender's semi-invul failed
 			else:
@@ -1034,7 +1031,7 @@ func defender_semi_invul(hitbox, hurtbox):
 func defender_backdash(hitbox, hurtbox):
 	var attacker = get_node(hitbox.owner_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
-	var attacker_attr = attacker.query_atk_attr(hitbox.move_name)
+	var attacker_attr = attacker.UniqueCharacter.query_atk_attr(hitbox.move_name)
 	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
 		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
 				defender.Animator.query_to_play(["DashTransit", "AirDashTransit"]):
