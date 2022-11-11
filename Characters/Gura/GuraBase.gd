@@ -34,7 +34,7 @@ const BASE_BLOCK_CHIP_DAMAGE_MOD = 0.35 # % of damage taken as chip damage when 
 #const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
 #const GUARD_GAUGE_LOSS_MOD = 1.2 # modify Guard Loss, tankier characters have lower GUARD_GAUGE_LOSS_MOD
 const AIR_BLOCK_DRAIN_RATE = 3400.0 # % of EX Gauge drain per second when Air Blocking
-const TRAITS = [Globals.trait.CROUCH_CANCEL, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
+const TRAITS = [Globals.trait.CHAIN_DASH, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
 
 const SDHitspark_COLOR = "blue"
 
@@ -211,7 +211,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : PI/2.5,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.HOLD_TO_DROP],
 		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12} },
 		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
@@ -342,7 +342,6 @@ func check_collidable(): # some characters have move that can pass through other
 		_:
 			pass
 	return true
-
 
 # ---------------------------------------------------------------------------------
 	
@@ -764,7 +763,7 @@ func start_audio(anim_name):
 
 
 func landing_sound(): # can be called by main node
-	Character.play_audio("land1", {})
+	Character.play_audio("land1", {"bus":"LowPass"})
 
 
 func stagger_audio():

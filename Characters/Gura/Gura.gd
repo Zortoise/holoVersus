@@ -79,6 +79,7 @@ func stimulate():
 				Character.animate("HStartup")
 			elif Animator.query(["aF1Startup", "aF3Startup"]) and Character.test_qc_chain_combo("aH"):
 				Character.animate("aHStartup")
+	
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 

@@ -664,9 +664,12 @@ func stimulate2(): # only ran if not in hitstop
 			# crouch to cancel ground dash recovery
 	
 			Globals.char_state.GROUND_C_RECOVERY:
-				if Animator.query(["SoftLanding"]):
+				if Animator.query(["SoftLanding", "HardLanding"]):
 					animate("Crouch")
-				elif Globals.trait.CROUCH_CANCEL in query_traits():
+				elif Animator.query(["DashBrake"]):
+					if Globals.trait.CHAIN_DASH in query_traits():
+						animate("CrouchTransit")
+				else:
 					animate("CrouchTransit")
 
 		# FASTFALL --------------------------------------------------------------------------------------------------
@@ -703,7 +706,7 @@ func stimulate2(): # only ran if not in hitstop
 				Globals.char_state.GROUND_STANDBY:
 					animate("BlockStartup")
 				Globals.char_state.GROUND_C_RECOVERY:
-					if Animator.query_current(["DashBrake"]):
+					if Animator.query(["DashBrake"]):
 						if Globals.trait.DASH_BLOCK in query_traits():
 							animate("BlockStartup")
 					else:
@@ -1673,6 +1676,15 @@ func check_drop(drop_state = 0):
 							continue # no AirHardDrop for moves with LEDGE_DROP in startup/active/recovery
 						else:
 							animate("AirHardDrop")
+		
+func check_auto_drop(): # during aerials, can drop through platforms if down is held
+	if !grounded and is_attacking():
+		if button_down in input_state.pressed:
+			return true
+		elif button_light in input_state.pressed or button_fierce in input_state.pressed:
+			if Globals.atk_attr.HOLD_TO_DROP in query_atk_attr(): # some aerials can be held to auto-drop
+				return true
+	return false
 		
 # check if in place for a down-dash snap up landing, if so, snap up
 func check_snap_up():

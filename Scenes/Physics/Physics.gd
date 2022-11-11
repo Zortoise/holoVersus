@@ -11,7 +11,6 @@ func character_move(collision_box, soft_platform_dbox, velocity, ledge_stop = fa
 	
 	return move_amount(move_amount, collision_box, soft_platform_dbox, velocity, ledge_stop) # move and return the velocity
 	
-# can be called by projectiles/etc as well
 func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, velocity, ledge_stop = false):
 	# will only collide with other players if owner of collision_box is a player
 	# just in case...
@@ -59,14 +58,24 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, velocit
 				velocity.y = 0
 				break
 		else: # moving downwards
-			if !is_on_ground(soft_platform_dbox, velocity):
-				collision_box.get_parent().position.y += sign(move_amount.y)
-				if Globals.Game.detect_kill(collision_box):
-					return Vector2.ZERO
-				move_amount.y -= sign(move_amount.y)
-			else: # stop moving
-				velocity.y = 0
-				break
+			if has_method("check_auto_drop") and call("check_auto_drop"): # passing through soft platforms
+				if !is_on_solid_ground(soft_platform_dbox, velocity):
+					collision_box.get_parent().position.y += sign(move_amount.y)
+					if Globals.Game.detect_kill(collision_box):
+						return Vector2.ZERO
+					move_amount.y -= sign(move_amount.y)
+				else: # stop moving
+					velocity.y = 0
+					break
+			else:
+				if !is_on_ground(soft_platform_dbox, velocity):
+					collision_box.get_parent().position.y += sign(move_amount.y)
+					if Globals.Game.detect_kill(collision_box):
+						return Vector2.ZERO
+					move_amount.y -= sign(move_amount.y)
+				else: # stop moving
+					velocity.y = 0
+					break
 			
 	return velocity
 	
@@ -124,6 +133,14 @@ func is_against_ceiling(collision_box, soft_platform_dbox):
 func is_on_ground(soft_platform_dbox, velocity):
 	if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms", "SoftPlatforms"], Vector2.DOWN) and \
 			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms", "SoftPlatforms"]) \
+			and velocity.y >= 0: # is not considered on ground if moving upwards
+		return true
+	else:
+		return false
+
+func is_on_solid_ground(soft_platform_dbox, velocity):
+	if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"], Vector2.DOWN) and \
+			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]) \
 			and velocity.y >= 0: # is not considered on ground if moving upwards
 		return true
 	else:
