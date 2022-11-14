@@ -640,6 +640,7 @@ align = 1
 valign = 2
 
 [node name="P1_InputStyle" type="VBoxContainer" parent="."]
+visible = false
 margin_left = 88.0
 margin_top = 472.0
 margin_right = 233.0
@@ -673,6 +674,7 @@ anims/flashing = SubResource( 69 )
 anims/gray = SubResource( 64 )
 
 [node name="P2_InputStyle" type="VBoxContainer" parent="."]
+visible = false
 margin_left = 1688.0
 margin_top = 472.0
 margin_right = 1833.0
@@ -711,7 +713,7 @@ position = Vector2( 640, 576 )
 scale = Vector2( 3, 3 )
 
 [node name="SelectSprite" parent="P1_Sprite" instance=ExtResource( 17 )]
-frame = 3
+frame = 8
 
 [node name="P2_Sprite" type="Node2D" parent="."]
 position = Vector2( 1280, 576 )
@@ -719,7 +721,7 @@ scale = Vector2( -3, 3 )
 
 [node name="SelectSprite" parent="P2_Sprite" instance=ExtResource( 17 )]
 material = SubResource( 28 )
-frame = 2
+frame = 7
 
 [node name="Grid" type="GridContainer" parent="."]
 margin_left = 179.0

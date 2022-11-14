@@ -15,7 +15,7 @@ const VarJumpTimer_WAIT_TIME = 8 # frames after jumping where holding jump will 
 const VAR_JUMP_GRAV_MOD = 0.2 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
-const QUICK_CANCEL_TIME = 2 # number of frames at startup the user can still change direction or cancel into a combination action
+const QUICK_CANCEL_TIME = 1 # number of frames at startup the user can still change direction or cancel into a combination action
 const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/airdash being invulnerable
 const MAX_EX_GAUGE = 50000.0
 const EX_GAUGE_REGEN_RATE = 1000 # EX Gauge regened per second when idling
@@ -29,6 +29,7 @@ const TAP_MEMORY_DURATION = 5
 const MAX_WALL_JUMP = 5
 const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal velocity during hitstun
 const HOP_JUMP_MOD = 0.8 # can hop by using up + jump
+const IMPULSE_MOD = 1.25 # multiply by UniqueCharacter.SPEED to get impulse velocity
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -134,7 +135,11 @@ var loaded_entities = { # filled up at initialization, WIP
 	
 }
 var floor_level
-var input_state
+var input_state = {
+		"pressed" : [],
+		"just_pressed" : [],
+		"just_released" : [],
+	}
 var dir := 0
 var v_dir := 0
 var wall_jump_dir := 0
@@ -189,8 +194,7 @@ var aerial_memory = [] # appended whenever an air attack (Normal/Special) is mad
 var block_rec_cancel := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
 var targeted_opponent: int # player_ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var has_burst := false # gain burst by ringing out opponent
-var tap_memory = [] # for double taps, 
-var impulse_used := false
+var tap_memory = [] # for double taps
 
 # controls
 var button_up
@@ -408,7 +412,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 			"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity) + "  grounded: " + str(grounded) + \
-			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + str(input_state) + "\n" + str(current_guard_gauge) + " " + \
+			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + str(input_buffer) + "\n" + str(current_guard_gauge) + " " + \
 			str(current_ex_gauge)
 			
 			
@@ -639,15 +643,25 @@ func stimulate2(): # only ran if not in hitstop
 				face(dir)
 				
 		# quick impulse
-		if state == Globals.char_state.GROUND_ATK_STARTUP and !impulse_used and\
-				Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
-			impulse_used = true
+#		if state == Globals.char_state.GROUND_ATK_STARTUP and !impulse_used and\
+#				Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+#			impulse_used = true
+#			var move_name = Animator.to_play_animation.trim_suffix("Startup")
+#			if move_name in UniqueCharacter.MOVE_DATABASE:
+#				if !Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+#					velocity.x = dir * UniqueCharacter.SPEED
+#					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})	
+
+	# IMPULSE --------------------------------------------------------------------------------------------------
+	
+	if button_left in input_state.pressed or button_right in input_state.pressed: # don't use dir for this one...
+		if new_state == Globals.char_state.GROUND_ATK_STARTUP and Animator.time == 2: # only possible on frame 2
 			var move_name = Animator.to_play_animation.trim_suffix("Startup")
-			if move_name in UniqueCharacter.MOVE_DATABASE:
-				if !Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
-					velocity.x = dir * UniqueCharacter.SPEED
-					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})	
-						
+			if move_name in UniqueCharacter.MOVE_DATABASE and \
+					!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+				velocity.x = facing * UniqueCharacter.SPEED * IMPULSE_MOD
+				emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+
 
 # DOWN BUTTON --------------------------------------------------------------------------------------------------
 	
@@ -700,26 +714,26 @@ func stimulate2(): # only ran if not in hitstop
 
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
-	if UniqueCharacter.STYLE == 0:
-		if button_block in input_state.pressed:
-			match state:
-				Globals.char_state.GROUND_STANDBY:
-					animate("BlockStartup")
-				Globals.char_state.GROUND_C_RECOVERY:
-					if Animator.query(["DashBrake"]):
-						if Globals.trait.DASH_BLOCK in query_traits():
-							animate("BlockStartup")
-					else:
+#	if UniqueCharacter.STYLE == 0:
+	if button_block in input_state.pressed:
+		match state:
+			Globals.char_state.GROUND_STANDBY:
+				animate("BlockStartup")
+			Globals.char_state.GROUND_C_RECOVERY:
+				if Animator.query(["DashBrake"]):
+					if Globals.trait.DASH_BLOCK in query_traits():
 						animate("BlockStartup")
-				Globals.char_state.AIR_STANDBY:
+				else:
+					animate("BlockStartup")
+			Globals.char_state.AIR_STANDBY:
+				if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
+					animate("AirBlockStartup")
+					$VarJumpTimer.stop()
+			Globals.char_state.AIR_C_RECOVERY:
+				if !Animator.query_current(["AirDashBrake"]):
 					if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
 						animate("AirBlockStartup")
 						$VarJumpTimer.stop()
-				Globals.char_state.AIR_C_RECOVERY:
-					if !Animator.query_current(["AirDashBrake"]):
-						if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
-							animate("AirBlockStartup")
-							$VarJumpTimer.stop()
 			
 
 # SPECIAL/EX BUTTON --------------------------------------------------------------------------------------------------	
@@ -751,48 +765,21 @@ func stimulate2(): # only ran if not in hitstop
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
 	
-	match state:
-		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
-			check_drop()
-		Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_ACTIVE, Globals.char_state.GROUND_RECOVERY, \
-				Globals.char_state.GROUND_ATK_STARTUP:
-			if Animator.query(["BlockRecovery"]):
-				check_drop(5) # 5 means BlockRecovery to AirBlockCRecovery
-			elif Animator.query(["DashTransit", "Dash"]): # dashing off ledges
+	if !grounded:
+		match new_state:
+			Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
+					Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_ACTIVE, Globals.char_state.GROUND_RECOVERY, \
+					Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
+					Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN:
 				check_drop()
-			else:
-				check_drop(1) # 1 means bad drop, fall off while doing a ground action, enter special aerial recovery
-		Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY:
-			check_drop(6) # 5 means dropping during active and recovery frames, some ground moves with LEDGE_DROP will move into the air
-		Globals.char_state.GROUND_FLINCH_HITSTUN:
-			check_drop(2) # 2 means dropping during ground flinch
-		Globals.char_state.GROUND_BLOCK:
-			check_drop(3) # 3 means dropping during block
-		Globals.char_state.GROUND_BLOCKSTUN:
-			check_drop(4) # 4 means dropping during blockstun
 				
-		Globals.char_state.AIR_STANDBY:
-			check_landing() 
-		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_ACTIVE, Globals.char_state.AIR_RECOVERY, Globals.char_state.AIR_C_RECOVERY:
-			if Animator.current_animation.begins_with("AirDash"):
-				check_landing(1) # 1 means wavelanding
-			elif Animator.query(["AirBlockRecovery"]):
-				check_landing(4) # 4 means AirBlockRecovery to BlockCRecovery
-			else: # landing during AirDashBrake or AirDashDD
+	else: # just in case, normally called when physics.gd runs into a floor
+		match new_state:
+			Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, Globals.char_state.AIR_STARTUP, \
+					Globals.char_state.AIR_ACTIVE, Globals.char_state.AIR_RECOVERY, Globals.char_state.AIR_ATK_STARTUP, \
+					Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_FLINCH_HITSTUN, \
+					Globals.char_state.LAUNCHED_HITSTUN, Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN:
 				check_landing()
-		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
-			# cannot land during aerial startup and active frames unless they have the LAND_CANCEL atk attr
-			if Globals.atk_attr.LAND_CANCEL in query_atk_attr():
-				check_landing(7) # hard landing animation (still cancellable)
-		Globals.char_state.AIR_FLINCH_HITSTUN:
-			check_landing(5) # land during hitstun
-		Globals.char_state.LAUNCHED_HITSTUN:
-			check_landing(6) # # land during launch_hitstun, can bounce or tech land
-		Globals.char_state.AIR_BLOCK:
-			check_landing(2) # 2 means dropping during air block
-		Globals.char_state.AIR_BLOCKSTUN:
-			check_landing(3) # 3 means dropping during air blockstun
-
 
 # GRAVITY --------------------------------------------------------------------------------------------------
 
@@ -898,38 +885,38 @@ func stimulate2(): # only ran if not in hitstop
 					UniqueCharacter.consume_one_air_dash() # reduce air_dash count by 1
 
 		Globals.char_state.GROUND_BLOCK:
-			if UniqueCharacter.STYLE == 0:
-				if !button_block in input_state.pressed and Animator.query_to_play(["Block"]):
-					if !block_rec_cancel:
-						animate("BlockRecovery")
-					else:
-						animate("BlockCRecovery")
-			else:
-				if !button_dash in input_state.pressed and Animator.query_to_play(["Block"]):
-					if !block_rec_cancel:
-						animate("BlockRecovery")
-					else:
-						animate("BlockCRecovery")	
+#			if UniqueCharacter.STYLE == 0:
+			if !button_block in input_state.pressed and Animator.query_to_play(["Block"]):
+				if !block_rec_cancel:
+					animate("BlockRecovery")
+				else:
+					animate("BlockCRecovery")
+#			else:
+#				if !button_dash in input_state.pressed and Animator.query_to_play(["Block"]):
+#					if !block_rec_cancel:
+#						animate("BlockRecovery")
+#					else:
+#						animate("BlockCRecovery")	
 			
 		Globals.char_state.GROUND_BLOCKSTUN:
 			if !$BlockStunTimer.is_running():
 				animate("BlockstunReturn")
 			
 		Globals.char_state.AIR_BLOCK:
-			if UniqueCharacter.STYLE == 0:
-				if !button_block in input_state.pressed and Animator.query_to_play(["AirBlock"]):
-					if !block_rec_cancel:
-						animate("AirBlockRecovery")
-					else:
-						animate("AirBlockCRecovery")
-				air_res_this_frame *= 1.5
-			else:
-				if !button_dash in input_state.pressed and Animator.query_to_play(["AirBlock"]):
-					if !block_rec_cancel:
-						animate("AirBlockRecovery")
-					else:
-						animate("AirBlockCRecovery")
-				air_res_this_frame *= 1.5
+#			if UniqueCharacter.STYLE == 0:
+			if !button_block in input_state.pressed and Animator.query_to_play(["AirBlock"]):
+				if !block_rec_cancel:
+					animate("AirBlockRecovery")
+				else:
+					animate("AirBlockCRecovery")
+			air_res_this_frame *= 1.5
+#			else:
+#				if !button_dash in input_state.pressed and Animator.query_to_play(["AirBlock"]):
+#					if !block_rec_cancel:
+#						animate("AirBlockRecovery")
+#					else:
+#						animate("AirBlockCRecovery")
+#				air_res_this_frame *= 1.5
 			
 		Globals.char_state.AIR_BLOCKSTUN:
 			if !$BlockStunTimer.is_running():
@@ -949,7 +936,7 @@ func stimulate2(): # only ran if not in hitstop
 					animate("FlinchBReturn")
 				$ModulatePlayer.play("unflinch_flash")
 			else:
-				friction_this_frame *= 0.75 # lower friction during flinch hitstun
+				friction_this_frame *= 0.5 # lower friction during flinch hitstun
 					
 		Globals.char_state.AIR_FLINCH_HITSTUN:
 			# when out of hitstun, recover
@@ -1046,7 +1033,9 @@ func stimulate2(): # only ran if not in hitstop
 		velocity.y = 0.0
 	
 	velocity_previous_frame = velocity # needed to check for hard landings
-	velocity = character_move($PlayerCollisionBox, $SoftPlatformDBox, velocity, check_ledge_stop())
+	var results = character_move($PlayerCollisionBox, $SoftPlatformDBox, velocity, check_ledge_stop())
+	velocity = results[0]
+	if results[1]: check_landing()
 		
 	# must process hitbox/hurtboxes after calculation (since need to use to_play_animation after it is calculated)
 	# however, must process before running the animation and advancing the time counter
@@ -1237,17 +1226,6 @@ func process_input_buffer():
 								animate("JumpTransit") # ground jump
 								keep = false
 							
-						Globals.char_state.GROUND_ATK_STARTUP: # can jump cancel the 1st frame of ground attacks, helps with instant aerials
-							if Animator.time <= 1:
-								animate("JumpTransit") # ground jump
-								keep = false
-								if button_light in input_state.pressed:
-									input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
-								if button_fierce in input_state.pressed:
-									input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
-								if button_aux in input_state.pressed:
-									input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
-								
 						# BUFFERING AN INSTANT AIRDASH ---------------------------------------------------------------------------------
 							
 						Globals.char_state.GROUND_STARTUP:
@@ -1359,6 +1337,35 @@ func animate(anim):
 	Animator.play(anim)
 	new_state = state_detect(anim)
 	
+	if anim.ends_with("Active"):
+		atk_startup_resets() # need to do this here to work! resets hitcount and ignore list
+
+	# when changing to a non-attacking state from attack startup, buffer pressed attack buttons
+	# dash is there to prevent EX Dodge from buffering attacks
+	if !is_attacking() and !button_dash in input_state.pressed:
+		match state:
+			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+				cancel_and_buffer()
+			_: # for animation transitions on the same frame as you pressing an attack
+				if button_light in input_state.just_pressed:
+					if button_fierce in input_state.just_pressed:
+						input_buffer.append(["H", Settings.input_buffer_time[player_ID]])
+					input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
+				if button_fierce in input_state.just_pressed:
+					input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
+				if button_aux in input_state.just_pressed:
+					input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
+			
+func cancel_and_buffer():
+	if button_light in input_state.pressed:
+		if button_fierce in input_state.pressed:
+			input_buffer.append(["H", Settings.input_buffer_time[player_ID]])
+		input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
+	if button_fierce in input_state.pressed:
+		input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
+	if button_aux in input_state.pressed:
+		input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
+
 func query_state(query_states: Array):
 	for x in query_states:
 		if state == x or new_state == x:
@@ -1384,7 +1391,7 @@ func state_detect(anim):
 		"AirJumpTransit", "WallJumpTransit", "AirJumpTransit2", "WallJumpTransit2", "AirDashTransit", "JumpTransit2":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Globals.char_state.AIR_STARTUP
-		"AirDash", "AirDashD", "AirDashU", "AirDashDD", "AirDashUU", "AirHardDrop", "AirBlockRecovery":
+		"AirDash", "AirDashD", "AirDashU", "AirDashDD", "AirDashUU", "AirBlockRecovery":
 			return Globals.char_state.AIR_RECOVERY
 		"AirDashBrake", "AirBlockCRecovery":
 			return Globals.char_state.AIR_C_RECOVERY
@@ -1580,110 +1587,138 @@ func check_wall_jump():
 			wall_jump_dir -= 1
 		return true
 	else: return false
-
+	
 		
-# this is ran every frame in an aerial state
-func check_landing(landing_state = 0):
-	if grounded:
-		
-		if Animator.query(["AirJumpTransit", "AirJumpTransit"]): # ground jump if landing during jump startup, can happen on any state
-			input_buffer.append([button_jump, Settings.input_buffer_time[player_ID]])
-		elif Animator.query_to_play(["AirDashTransit"]):
-			# unusual situation where you begin an airdash on the same frame you land
-			input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
-
-		match landing_state:
-			0:
+func check_landing(): # called by physics.gd when character stopped by floor
+	match new_state:
+		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+			animate("SoftLanding")
+			
+		Globals.char_state.AIR_STARTUP:
+			if Animator.query(["AirJumpTransit"]):
 				animate("SoftLanding")
-			7:
-				animate("HardLanding")
-			1: # wave landing
+				input_buffer.append([button_jump, Settings.input_buffer_time[player_ID]])
+			elif Animator.query(["AirDashTransit"]):
+				animate("SoftLanding")
+				input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
+				
+		Globals.char_state.AIR_ACTIVE:
+			pass # AIR_ACTIVE not used for now
+			
+		Globals.char_state.AIR_RECOVERY:
+			if Animator.to_play_animation.begins_with("AirDash") and !Animator.to_play_animation.ends_with("DD"): # wave landing
 				animate("DashBrake")
 				emit_signal("SFX","GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-				velocity.x += sign(velocity.x) * UniqueCharacter.AIR_DASH_SPEED
-			2: # air block to ground block
-				emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  
-				animate("BlockLanding")
-			3: # air blockstun to ground blockstun
-				emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  
-				if Animator.query(["AirBlockstun"]):
-					animate("Blockstun")
-				elif Animator.query(["AirPBlockstun"]):
-					animate("PBlockstun")
-				elif Animator.query(["AirWBlockstun"]):
-					animate("WBlockstun")
-				UniqueCharacter.landing_sound()
-			4: # AirBlockRecovery to BlockCRecovery
+				velocity.x = facing * UniqueCharacter.AIR_DASH_SPEED
+				
+			elif Animator.query(["AirBlockRecovery"]): # AirBlockRecovery to BlockCRecovery
 				emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  
 				animate("BlockCRecovery")
 				UniqueCharacter.landing_sound()
-			5: # land during hitstun               
-				emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})               
-				match Animator.to_play_animation:
-					"AirFlinchAStop", "AirFlinchA":
-						animate("FlinchA")
-					"AirFlinchBStop", "AirFlinchB":
-						animate("FlinchB")
-				UniqueCharacter.landing_sound()
-			6: # land during launch_hitstun, can bounce or tech land
-				if new_state == Globals.char_state.LAUNCHED_HITSTUN:
-					# need to use new_state to prevent an issue with grounded Break state causing HardLanding on flinch
-					var velocity_to_check: Vector2 # check using either velocity this frame or last frame
-					if velocity_previous_frame.length() > velocity.length():
-						velocity_to_check = velocity_previous_frame
-					else:
-						velocity_to_check = velocity
-					if velocity_to_check.length() <= TECH_THRESHOLD:
-						animate("HardLanding")
-						$HitStunTimer.stop()              
-						velocity.y = 0 # stop bouncing
-						$ModulatePlayer.play("tech_flash")
-						play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})   
 				
-# this is ran every frame in a grounded state
-func check_drop(drop_state = 0):
-	if !grounded:
-		if Animator.query(["JumpTransit"]): # instantly jump if dropped during jump transit, can happen on any char_state
-			animate("JumpTransit2")
-		else:
-			match drop_state:
-				0:
-					animate("FallTransit")
-				1: # uncancellable aerial recovery
-					animate("AirHardDrop")
-				2:	 # drop during hitstun
-					match Animator.to_play_animation:
-						"FlinchAStop", "FlinchA":
-							animate("AirFlinchA")
-						"FlinchBStop", "FlinchB":
-							animate("AirFlinchB")
-				3: # ground block to air block
-					animate("AirBlock")
-				4: # ground blockstun to air blockstun
-					if Animator.query(["Blockstun"]):
-						animate("AirBlockstun")
-					elif Animator.query(["PBlockstun"]):
-						animate("AirPBlockstun")
-					elif Animator.query(["WBlockstun"]):
-						animate("AirWBlockstun")
-				5: # BlockRecovery to AirBlockCRecovery
-					animate("AirBlockCRecovery")
-				6: # some ground move will move into the air
-					if new_state == Globals.char_state.GROUND_ATK_ACTIVE or new_state == Globals.char_state.GROUND_ATK_RECOVERY:
-						var move_name = get_move_name()
-						if move_name in UniqueCharacter.MOVE_DATABASE and \
-								Globals.atk_attr.LEDGE_DROP in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
-							continue # no AirHardDrop for moves with LEDGE_DROP in startup/active/recovery
-						else:
-							animate("AirHardDrop")
+			else: # landing during AirDashBrake or AirDashDD
+				animate("HardLanding")
+				
+		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
+			# cannot land during aerial startup and active frames unless they have the LAND_CANCEL atk attr
+			if Globals.atk_attr.LAND_CANCEL in query_atk_attr():
+				animate("HardLanding")
+				
+		Globals.char_state.AIR_FLINCH_HITSTUN: # land during hitstun               
+			emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})               
+			match Animator.to_play_animation:
+				"AirFlinchAStop", "AirFlinchA":
+					animate("FlinchA")
+				"AirFlinchBStop", "AirFlinchB":
+					animate("FlinchB")
+			UniqueCharacter.landing_sound()
+			
+		Globals.char_state.LAUNCHED_HITSTUN: # land during launch_hitstun, can bounce or tech land
+			if new_state == Globals.char_state.LAUNCHED_HITSTUN:
+				# need to use new_state to prevent an issue with grounded Break state causing HardLanding on flinch
+				var velocity_to_check: Vector2 # check using either velocity this frame or last frame
+				if velocity_previous_frame.length() > velocity.length():
+					velocity_to_check = velocity_previous_frame
+				else:
+					velocity_to_check = velocity
+				if velocity_to_check.length() <= TECH_THRESHOLD:
+					animate("HardLanding")
+					$HitStunTimer.stop()              
+					velocity.y = 0 # stop bouncing
+					$ModulatePlayer.play("tech_flash")
+					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})   
+			
+		Globals.char_state.AIR_BLOCK: # air block to ground block
+			emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  
+			animate("BlockLanding")
+			
+		Globals.char_state.AIR_BLOCKSTUN: # air blockstun to ground blockstun
+			emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})  
+			if Animator.query(["AirBlockstun"]):
+				animate("Blockstun")
+			elif Animator.query(["AirPBlockstun"]):
+				animate("PBlockstun")
+			elif Animator.query(["AirWBlockstun"]):
+				animate("WBlockstun")
+			UniqueCharacter.landing_sound()
+
+			
+func check_drop(): # called when character becomes airborne while in a grounded state
+	match new_state:
+		
+		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+			animate("FallTransit")
+			
+		Globals.char_state.GROUND_STARTUP:
+			if Animator.query(["JumpTransit"]): # instantly jump if dropped during jump transit
+				animate("JumpTransit2")
+			else:
+				animate("FallTransit")
+				
+		Globals.char_state.GROUND_ACTIVE:
+			pass # GROUND_ACTIVE not used for now
+			
+		Globals.char_state.GROUND_RECOVERY:
+			if Animator.query(["BlockRecovery"]):
+				animate("AirBlockCRecovery")
+			else:
+				animate("FallTransit")
+				
+		Globals.char_state.GROUND_ATK_STARTUP:
+			animate("FallTransit")
+				
+		Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY:
+			var move_name = get_move_name()
+			if move_name in UniqueCharacter.MOVE_DATABASE and \
+					Globals.atk_attr.LEDGE_DROP in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
+				continue
+			else:
+				animate("FallTransit")
+			
+		Globals.char_state.GROUND_FLINCH_HITSTUN:
+			match Animator.to_play_animation:
+				"FlinchAStop", "FlinchA":
+					animate("AirFlinchA")
+				"FlinchBStop", "FlinchB":
+					animate("AirFlinchB")
+			
+		Globals.char_state.GROUND_BLOCK:
+			animate("AirBlock")
+			
+		Globals.char_state.GROUND_BLOCKSTUN: # ground blockstun to air blockstun
+			if Animator.query(["Blockstun"]):
+				animate("AirBlockstun")
+			elif Animator.query(["PBlockstun"]):
+				animate("AirPBlockstun")
+			elif Animator.query(["WBlockstun"]):
+				animate("AirWBlockstun")
+
+
 		
 func check_auto_drop(): # during aerials, can drop through platforms if down is held
 	if !grounded and is_attacking():
 		if button_down in input_state.pressed:
 			return true
-		elif button_light in input_state.pressed or button_fierce in input_state.pressed:
-			if Globals.atk_attr.HOLD_TO_DROP in query_atk_attr(): # some aerials can be held to auto-drop
-				return true
 	return false
 		
 # check if in place for a down-dash snap up landing, if so, snap up
@@ -1788,9 +1823,12 @@ func get_move_name():
 	return move_name
 	
 func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
-	match new_state:
+	match state: # use current state instead of new_state
 		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
-			return true
+			if turning:
+				return true
+			elif Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+				return true
 		Globals.char_state.GROUND_ATK_STARTUP:
 			if turning:
 				var move_name = get_move_name()
@@ -1819,10 +1857,16 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 		return false
 	if is_attacking():
 		# test if move has LEDGE_DROP, no ledge stop if so
-		if state != Globals.char_state.GROUND_ATK_STARTUP and \
-				Globals.atk_attr.LEDGE_DROP in query_atk_attr():
-			return false # even with LEDGE_DROP, startup animation will still stop you at the ledge
-		else: return true # no LEDGE_DROP, will stop at ledge
+		if new_state != Globals.char_state.GROUND_ATK_STARTUP:
+			if Globals.atk_attr.LEDGE_DROP in query_atk_attr():
+				return false # even with LEDGE_DROP, startup animation will still stop you at the ledge
+			else:
+				return true # no LEDGE_DROP, will stop at ledge
+		else:
+			if dir == facing: # can drop off ledge on startup if you are holding forward
+				return false
+			else:
+				return true
 	else:
 		return false # not attacking
 	
@@ -3357,7 +3401,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("AirJumpTransit3")
 		"JumpTransit3", "AirJumpTransit3":
 			animate("Jump")
-		"FallTransit", "AirHardDrop":
+		"FallTransit":
 			animate("Fall")
 			
 		"FlinchAStop":
@@ -3427,13 +3471,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		if move_name in UniqueCharacter.MOVE_DATABASE:
 			if Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
 				aerial_memory.append(move_name)  #add to aerial memory if needed
-			
-			if state == Globals.char_state.GROUND_ATK_STARTUP and dir != 0 and !impulse_used and \
-					!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
-				velocity.x = dir * UniqueCharacter.SPEED
-				impulse_used = true
-				emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})	
-			
+	
 	elif is_atk_recovery():
 		perfect_chain = false
 	
@@ -3441,7 +3479,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 		var move_name = anim_name.trim_suffix("Active")
 		if move_name in UniqueCharacter.MOVE_DATABASE:
 			chain_memory.append(move_name)
-			impulse_used = false
 
 	
 	null_friction = false
@@ -3635,7 +3672,6 @@ func save_state():
 		"block_rec_cancel" : block_rec_cancel,
 		"targeted_opponent" : targeted_opponent,
 		"has_burst": has_burst,
-		"impulse_used": impulse_used,
 		
 		"current_damage_value" : current_damage_value,
 		"current_guard_gauge" : current_guard_gauge,
@@ -3702,7 +3738,6 @@ func load_state(state_data):
 	block_rec_cancel = state_data.block_rec_cancel
 	targeted_opponent = state_data.targeted_opponent
 	has_burst = state_data.has_burst
-	impulse_used = state_data.impulse_used
 	
 	current_damage_value = state_data.current_damage_value
 	current_guard_gauge = state_data.current_guard_gauge

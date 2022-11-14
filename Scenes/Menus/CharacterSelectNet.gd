@@ -41,7 +41,7 @@ var battle_lock := false
 var my_phase := 0 # 0 is picking characters, 1 is picking stage, 2 is finishing picking and waiting for opponent
 var my_picker_pos := 5
 var my_palette_picked := 1
-var my_input_style_picked := 0
+#var my_input_style_picked := 0
 
 onready var my_player_id = Netplay.my_player_id()
 #onready var my_player_id = 1 # this is for testing only
@@ -53,7 +53,7 @@ var my_stage
 var my_stage_half # either "select_L" or "select_R"
 var my_fullart
 var my_name
-var my_input_style
+#var my_input_style
 var my_sprite
 var my_picker
 var my_stageselect
@@ -65,7 +65,7 @@ var opponent_payload = {}
 var my_payload = {
 	"character" : null,
 	"palette" : null,
-	"input_style" : null,
+#	"input_style" : null,
 	"stage" : null,
 }
 
@@ -82,7 +82,7 @@ func _ready():
 	my_stage = get_node(player + "_Stage")
 	my_fullart = get_node(player + "_FullArt")
 	my_name = get_node(player + "_Name")
-	my_input_style = get_node(player + "_InputStyle")
+#	my_input_style = get_node(player + "_InputStyle")
 	my_sprite = get_node(player + "_Sprite")
 	my_picker = get_node(player + "_Picker")
 	my_stageselect = get_node(player + "_StageSelect")
@@ -154,7 +154,7 @@ func _ready():
 	my_stageselect.hide()
 	
 	changed_character()
-	change_input_style(my_input_style, 0)
+#	change_input_style(my_input_style, 0)
 	
 	# load last picked characters and stages
 	last_picked = Settings.load_last_picked()
@@ -183,8 +183,8 @@ func load_last_picked():
 				my_sprite.get_child(0).material.set_shader_param("swap", \
 						character_data[CHAR_GRID[my_picker_pos]]["palettes"][str(my_palette_picked)])
 						
-	if last_picked.P1_input_style != null:
-		change_input_style(my_input_style, last_picked.P1_input_style)
+#	if last_picked.P1_input_style != null:
+#		change_input_style(my_input_style, last_picked.P1_input_style)
 		
 	if last_picked.P1_stage != null:
 		if last_picked.P1_stage in stage_array:
@@ -222,13 +222,13 @@ func populate_stage_lists():
 		shift_stage_list(1)
 		
 	
-func change_input_style(input_style_node, input_style):
-	if input_style == 0:
-		input_style_node.get_node("HybridStyle/AnimationPlayer").play("flashing")
-		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("gray")
-	else:
-		input_style_node.get_node("HybridStyle/AnimationPlayer").play("gray")
-		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("flashing")
+#func change_input_style(input_style_node, input_style):
+#	if input_style == 0:
+#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("flashing")
+#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("gray")
+#	else:
+#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("gray")
+#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("flashing")
 		
 		
 func load_buttoncheck():
@@ -296,15 +296,15 @@ func _physics_process(_delta):
 		if my_phase == 2:
 			pass # cannot unselect stage in netplay
 	
-	if Input.is_action_just_pressed("P1_dash"): # change input style
-		if my_phase != 2:
-			play_audio("ui_accept", {"vol":-8})
-			if my_input_style_picked == 0:
-				my_input_style_picked = 1
-				change_input_style(my_input_style, 1)
-			else:
-				my_input_style_picked = 0
-				change_input_style(my_input_style, 0)
+#	if Input.is_action_just_pressed("P1_dash"): # change input style
+#		if my_phase != 2:
+#			play_audio("ui_accept", {"vol":-8})
+#			if my_input_style_picked == 0:
+#				my_input_style_picked = 1
+#				change_input_style(my_input_style, 1)
+#			else:
+#				my_input_style_picked = 0
+#				change_input_style(my_input_style, 0)
 	
 	if !battle_lock:
 		if opponent_payload.size() > 0: # opponent is ready
@@ -443,7 +443,7 @@ func picked_stage():
 	my_payload.character = CHAR_GRID[my_picker_pos]
 	my_payload.palette = my_palette_picked
 	my_payload.stage = my_stageselect.get_node("StageList").get_child(3).text
-	my_payload.input_style = my_input_style_picked
+#	my_payload.input_style = my_input_style_picked
 	rpc("opponent_ready", my_payload)
 	save_last_picked()
 	
@@ -456,22 +456,22 @@ func save_last_picked():
 			"P1_character" : my_picker_pos, # character is saved as their position!
 			"P1_palette" : my_payload.palette,
 			"P1_stage" : my_payload.stage,
-			"P1_input_style" : my_payload.input_style,
+#			"P1_input_style" : my_payload.input_style,
 			"P2_character" : null,
 			"P2_palette" : null,
 			"P2_stage" : null,
-			"P2_input_style" : null,
+#			"P2_input_style" : null,
 		}
 	else:
 		new_last_picked = {
 			"P1_character" : my_picker_pos,
 			"P1_palette" : my_payload.palette,
 			"P1_stage" : my_payload.stage,
-			"P1_input_style" : my_payload.input_style,
+#			"P1_input_style" : my_payload.input_style,
 			"P2_character" : last_picked.P2_character,
 			"P2_palette" : last_picked.P2_palette,
 			"P2_stage" : last_picked.P2_stage,
-			"P2_input_style" : last_picked.P2_input_style,
+#			"P2_input_style" : last_picked.P2_input_style,
 		}
 	Settings.save_last_picked(new_last_picked)
 	
@@ -491,17 +491,17 @@ func determine_char_and_stage():
 	if opponent == "P2":
 		Globals.P1_char_ref = my_payload.character
 		Globals.P1_palette = my_payload.palette
-		Globals.P1_input_style = my_payload.input_style
+#		Globals.P1_input_style = my_payload.input_style
 		Globals.P2_char_ref = opponent_payload.character
 		Globals.P2_palette = opponent_payload.palette
-		Globals.P2_input_style = opponent_payload.input_style
+#		Globals.P2_input_style = opponent_payload.input_style
 	else:
 		Globals.P1_char_ref = opponent_payload.character
 		Globals.P1_palette = opponent_payload.palette
-		Globals.P1_input_style = opponent_payload.input_style
+#		Globals.P1_input_style = opponent_payload.input_style
 		Globals.P2_char_ref = my_payload.character
 		Globals.P2_palette = my_payload.palette
-		Globals.P2_input_style = my_payload.input_style
+#		Globals.P2_input_style = my_payload.input_style
 		
 	# if both players picked the same character with the same palette, a random player will shift a palette
 	if Globals.P1_char_ref != "Random" and Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
@@ -538,18 +538,20 @@ func determine_char_and_stage():
 		new_stage_array.shuffle()
 		Globals.stage_ref = new_stage_array[0]
 		
-	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_input_style, \
-			Globals.P2_char_ref, Globals.P2_palette, Globals.P2_input_style)
+#	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_input_style, \
+#			Globals.P2_char_ref, Globals.P2_palette, Globals.P2_input_style)
+	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, \
+			Globals.P2_char_ref, Globals.P2_palette)
 
 		
-puppet func guest_receive_picks(stage_ref, P1_char_ref, P1_palette, P1_input_style, P2_char_ref, P2_palette, P2_input_style):
+puppet func guest_receive_picks(stage_ref, P1_char_ref, P1_palette, P2_char_ref, P2_palette):
 	Globals.stage_ref = stage_ref
 	Globals.P1_char_ref = P1_char_ref
 	Globals.P1_palette = P1_palette
-	Globals.P1_input_style = P1_input_style
+#	Globals.P1_input_style = P1_input_style
 	Globals.P2_char_ref = P2_char_ref
 	Globals.P2_palette = P2_palette
-	Globals.P2_input_style = P2_input_style
+#	Globals.P2_input_style = P2_input_style
 	
 	yield(get_tree().create_timer(0.5 - Netplay.ping/2.0), "timeout") # wait a short while before revealing
 	start_battle()
@@ -597,7 +599,7 @@ func start_battle():
 			get_node(opponent + "_Sprite").get_child(0).free()
 		get_node(opponent + "_Name").text = "Random"
 		
-	change_input_style(get_node(opponent + "_InputStyle"), opponent_payload.input_style)
+#	change_input_style(get_node(opponent + "_InputStyle"), opponent_payload.input_style)
 		
 	# re-set palettes
 	if $P1_Sprite.get_child_count() > 0:

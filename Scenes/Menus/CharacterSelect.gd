@@ -41,12 +41,12 @@ var battle_lock := false # set to true after starting battle, prevent certain ac
 var P1_phase := 0 # 0 is picking characters, 1 is picking stage, 2 is finishing picking and waiting for opponent
 var P1_picker_pos := 5
 var P1_palette_picked := 1
-var P1_input_style := 0
+#var P1_input_style := 0
 
 var P2_phase := 0
 var P2_picker_pos := 5
 var P2_palette_picked := 1
-var P2_input_style := 0
+#var P2_input_style := 0
 
 func _ready():
 	Globals.pausing = false
@@ -101,8 +101,8 @@ func _ready():
 	P1_changed_character()
 	P2_changed_character()
 	
-	change_input_style($P1_InputStyle, 0)
-	change_input_style($P2_InputStyle, 0)
+#	change_input_style($P1_InputStyle, 0)
+#	change_input_style($P2_InputStyle, 0)
 	
 	# load last picked characters and stages
 	var last_picked = Settings.load_last_picked()
@@ -153,13 +153,13 @@ func load_last_picked(last_picked):
 						character_data[CHAR_GRID[P2_picker_pos]]["palettes"][str(P2_palette_picked)])
 
 
-	if last_picked.P1_input_style != null:
-		P1_input_style = last_picked.P1_input_style
-		change_input_style($P1_InputStyle, last_picked.P1_input_style)
+#	if last_picked.P1_input_style != null:
+#		P1_input_style = last_picked.P1_input_style
+#		change_input_style($P1_InputStyle, last_picked.P1_input_style)
 		
-	if last_picked.P2_input_style != null:
-		P2_input_style = last_picked.P2_input_style
-		change_input_style($P2_InputStyle, last_picked.P2_input_style)
+#	if last_picked.P2_input_style != null:
+#		P2_input_style = last_picked.P2_input_style
+#		change_input_style($P2_InputStyle, last_picked.P2_input_style)
 		
 
 	if last_picked.P1_stage != null:
@@ -207,13 +207,13 @@ func populate_stage_lists():
 		shift_stage_list(1, 1)
 		
 		
-func change_input_style(input_style_node, input_style):
-	if input_style == 0:
-		input_style_node.get_node("HybridStyle/AnimationPlayer").play("flashing")
-		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("gray")
-	else:
-		input_style_node.get_node("HybridStyle/AnimationPlayer").play("gray")
-		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("flashing")
+#func change_input_style(input_style_node, input_style):
+#	if input_style == 0:
+#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("flashing")
+#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("gray")
+#	else:
+#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("gray")
+#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("flashing")
 		
 		
 func load_buttoncheck():
@@ -326,22 +326,22 @@ func _physics_process(_delta):
 		if P2_phase == 2:
 			P2_unpicked_stage()
 			
-	if Input.is_action_just_pressed("P1_dash"): # unselect character/stage
-		play_audio("ui_accept", {"vol":-8})
-		if P1_input_style == 0:
-			P1_input_style = 1
-			change_input_style($P1_InputStyle, 1)
-		else:
-			P1_input_style = 0
-			change_input_style($P1_InputStyle, 0)
-	if Input.is_action_just_pressed("P2_dash"): # unselect character/stage
-		play_audio("ui_accept", {"vol":-8})
-		if P2_input_style == 0:
-			P2_input_style = 1
-			change_input_style($P2_InputStyle, 1)
-		else:
-			P2_input_style = 0
-			change_input_style($P2_InputStyle, 0)
+#	if Input.is_action_just_pressed("P1_dash"): # unselect character/stage
+#		play_audio("ui_accept", {"vol":-8})
+#		if P1_input_style == 0:
+#			P1_input_style = 1
+#			change_input_style($P1_InputStyle, 1)
+#		else:
+#			P1_input_style = 0
+#			change_input_style($P1_InputStyle, 0)
+#	if Input.is_action_just_pressed("P2_dash"): # unselect character/stage
+#		play_audio("ui_accept", {"vol":-8})
+#		if P2_input_style == 0:
+#			P2_input_style = 1
+#			change_input_style($P2_InputStyle, 1)
+#		else:
+#			P2_input_style = 0
+#			change_input_style($P2_InputStyle, 0)
 			
 	if P1_phase == 2 and P2_phase == 2: # both players have picked characters and stages
 		start_battle()
@@ -633,10 +633,10 @@ func start_battle():
 
 	Globals.P1_char_ref = CHAR_GRID[P1_picker_pos]
 	Globals.P1_palette = P1_palette_picked
-	Globals.P1_input_style = P1_input_style
+#	Globals.P1_input_style = P1_input_style
 	Globals.P2_char_ref = CHAR_GRID[P2_picker_pos]
 	Globals.P2_palette = P2_palette_picked
-	Globals.P2_input_style = P2_input_style
+#	Globals.P2_input_style = P2_input_style
 	
 	
 	# saving last picked characters and stages
@@ -644,11 +644,11 @@ func start_battle():
 		"P1_character" : P1_picker_pos,
 		"P1_palette" : P1_palette_picked,
 		"P1_stage" : $P1_StageSelect/StageList.get_child(3).text,
-		"P1_input_style" : P1_input_style,
+#		"P1_input_style" : P1_input_style,
 		"P2_character" : P2_picker_pos,
 		"P2_palette" : P2_palette_picked,
 		"P2_stage" : $P2_StageSelect/StageList.get_child(3).text,
-		"P2_input_style" : P2_input_style,
+#		"P2_input_style" : P2_input_style,
 	}
 	Settings.save_last_picked(last_picked)
 	

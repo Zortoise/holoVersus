@@ -132,20 +132,20 @@ func setup():
 	
 	# add players, players added later overlap players added eariler
 	var P2_character
-	if P2_input_style == 0:
-		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + ".tscn").instance()
-	else:
-		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + "C.tscn").instance()
+#	if P2_input_style == 0:
+	P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + ".tscn").instance()
+#	else:
+#		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + "C.tscn").instance()
 	var P2 = Globals.loaded_character_scene.instance() # main character node, not unique character node
 	$Players.add_child(P2)
 	P2.init(1, P2_character, P2_position, P2_facing, P2_palette)
 	frame_viewer.P2_node = P2
 	
 	var P1_character
-	if P1_input_style == 0:
-		P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + ".tscn").instance()
-	else:
-		P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + "C.tscn").instance()
+#	if P1_input_style == 0:
+	P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + ".tscn").instance()
+#	else:
+#		P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + "C.tscn").instance()
 	var P1 = Globals.loaded_character_scene.instance()
 	$Players.add_child(P1)
 	P1.init(0, P1_character, P1_position, P1_facing, P1_palette)
