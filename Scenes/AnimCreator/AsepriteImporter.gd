@@ -11,7 +11,7 @@ extends EditorScript
 
 # TARGETS ---------------------------------------------------------------------------------------------------
 
-export var entity_folder = "res://Assets/Effects/Respawn/"
+export var entity_folder = "res://Assets/Effects/Hitsparks/"
 # be sure to end with a "/"
 
 export var target_aseprite_filename = ""

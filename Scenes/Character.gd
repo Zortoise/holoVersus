@@ -107,10 +107,10 @@ const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during a
 const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
 const DDI_SIDE_MAX = 30 # horizontal Drift DI speed at 200% Guard Gauge
 const MAX_DDI_SIDE_SPEED = 300.0 # max horizontal Drift DI speed
-const DDI_UP_MAX = 0.7 # gravity decrease upward Drift DI at 200% Guard Gauge
-const DDI_DOWN_MAX = 1.6 # gravity increase downward Drift DI at 200% Guard Gauge
-const DI_MAX = PI/11 # change in knockback dir when using DI at 200% Guard Gauge
-const DI_MIN_MOD = 0.1 # percent of max DI at 100% Guard Gauge
+const GDI_UP_MAX = 0.8 # gravity decrease upward Gravity DI at 200% Guard Gauge
+const GDI_DOWN_MAX = 1.3 # gravity increase downward Gravity DI at 200% Guard Gauge
+const VDI_MAX = 0.3 # change in knockback vector when using Vector DI at 200% Guard Gauge
+const DI_MIN_MOD = 0.0 # percent of max DI at 100% Guard Gauge
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
 const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
 const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is crouching
@@ -625,10 +625,11 @@ func stimulate2(): # only ran if not in hitstop
 				if $HitStunTimer.is_running() and current_guard_gauge > 0 and get_damage_percent() < 1.0:
 					# no changing facing
 					
-					# DDI speed depends on guard gauge
+					# DDI speed and speed limit depends on guard gauge
 					var DDI_speed = lerp(DDI_SIDE_MAX * DI_MIN_MOD, DDI_SIDE_MAX, get_guard_gauge_percent_above())
+					var DDI_speed_limit = lerp(MAX_DDI_SIDE_SPEED * DI_MIN_MOD, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
-						if abs(velocity.x) < MAX_DDI_SIDE_SPEED: # only allow DIing if below speed limit
+						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit
 							# WIP, speed limit depends on Guard Gauge
 							velocity.x += dir * DDI_speed
 					else: # slowing down
@@ -806,9 +807,9 @@ func stimulate2(): # only ran if not in hitstop
 		if $HitStunTimer.is_running():
 			if current_guard_gauge > 0 and get_damage_percent() < 1.0: # up/down DI, depends on Guard Gauge
 				if v_dir == -1: # DIing upward
-					gravity_temp *= lerp((DDI_UP_MAX - 1.0) * DI_MIN_MOD + 1, DDI_UP_MAX, get_guard_gauge_percent_above())
+					gravity_temp *= lerp((GDI_UP_MAX - 1.0) * DI_MIN_MOD + 1, GDI_UP_MAX, get_guard_gauge_percent_above())
 				elif v_dir == 1: # DIing downward
-					gravity_temp *= lerp((DDI_DOWN_MAX - 1.0) * DI_MIN_MOD + 1, DDI_DOWN_MAX, get_guard_gauge_percent_above())
+					gravity_temp *= lerp((GDI_DOWN_MAX - 1.0) * DI_MIN_MOD + 1, GDI_DOWN_MAX, get_guard_gauge_percent_above())
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
 				gravity_temp *= UniqueCharacter.FALL_GRAV_MOD
@@ -1019,7 +1020,7 @@ func stimulate2(): # only ran if not in hitstop
 	if velocity_limiter.y_slow != null:
 		velocity.y = lerp(velocity.y, 0, velocity_limiter.y_slow) # y_slow is around 0.03?
 	
-	process_DI()
+	process_VDI()
 	
 	if !$HitStopTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
 		launch_trail() # do launch trail before moving
@@ -1737,7 +1738,7 @@ func rng_generate(upper_limit: int): # will return a number from 0 to (upper_lim
 		return Globals.Game.rng_generate(upper_limit)
 	else: return null
 
-func process_DI():
+func process_VDI():
 	# to be able to DI, must be entering knockback animation and has a directional key pressed
 	if (dir != 0 or v_dir != 0) and current_guard_gauge > 0 and get_damage_percent() < 1.0 and \
 			((state == Globals.char_state.LAUNCHED_HITSTUN and Animator.query_to_play(["LaunchTransit"]) and \
@@ -1746,9 +1747,11 @@ func process_DI():
 			!Animator.query_current(["FlinchA", "FlinchB"])) or \
 			(state == Globals.char_state.AIR_FLINCH_HITSTUN and Animator.query_to_play(["AirFlinchA", "AirFlinchB"]) and \
 			!Animator.query_current(["AirFlinchA", "AirFlinchB"]))):
-		var DI_amount = lerp(DI_MAX * DI_MIN_MOD, DI_MAX, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
-		var new_angle = Globals.navigate(velocity, Vector2(dir, v_dir), DI_amount) # this return an angle closer to the target direction
-		velocity = Vector2(velocity.length(), 0).rotated(new_angle)
+		var VDI_amount = lerp(VDI_MAX * DI_MIN_MOD, VDI_MAX, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
+#		var new_angle = Globals.navigate(velocity, Vector2(dir, v_dir), DI_amount) # this return an angle closer to the target direction
+#		velocity = Vector2(velocity.length(), 0).rotated(new_angle)
+		var VDI_vector = Vector2(dir, v_dir).normalized() * (VDI_amount * velocity.length())
+		velocity += VDI_vector
 
 # SPECIAL EFFECTS --------------------------------------------------------------------------------------------------
 
