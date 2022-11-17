@@ -292,7 +292,7 @@ var modulate_animations = {
 	"EX_block_flash" : {
 		"duration": 4,
 		"loop" : false,
-		"followup" : "EX_block_flash2",
+#		"followup" : "EX_block_flash2",
 		"timestamps" : {
 			0 : # this is the timestamp of the key
 			{
@@ -300,37 +300,37 @@ var modulate_animations = {
 			},
 		}
 	},
-	"EX_block_flash2" : {
-		"duration": 12,
-		"loop" : true,
-		"shadow_trail" : 0,
-		"timestamps" : {
-			0 : # this is the timestamp of the key
-			{
-				"modulate" : Color(1.3, 0.7, 0.7), # red
-			},
-			2 :
-			{
-				"modulate" : Color(1.3, 1.3, 0.7), # yellow
-			},
-			4 :
-			{
-				"modulate" : Color(0.7, 1.3, 0.7), # green
-			},
-			6 :
-			{
-				"modulate" : Color(0.7, 1.3, 1.3), # cyan
-			},
-			8 :
-			{
-				"modulate" : Color(0.7, 0.7, 1.3), # blue
-			},
-			10 :
-			{
-				"modulate" : Color(1.3, 0.7, 1.3), # purple
-			},
-		}
-	},
+#	"EX_block_flash2" : {
+#		"duration": 12,
+#		"loop" : true,
+#		"shadow_trail" : 0,
+#		"timestamps" : {
+#			0 : # this is the timestamp of the key
+#			{
+#				"modulate" : Color(1.3, 0.7, 0.7), # red
+#			},
+#			2 :
+#			{
+#				"modulate" : Color(1.3, 1.3, 0.7), # yellow
+#			},
+#			4 :
+#			{
+#				"modulate" : Color(0.7, 1.3, 0.7), # green
+#			},
+#			6 :
+#			{
+#				"modulate" : Color(0.7, 1.3, 1.3), # cyan
+#			},
+#			8 :
+#			{
+#				"modulate" : Color(0.7, 0.7, 1.3), # blue
+#			},
+#			10 :
+#			{
+#				"modulate" : Color(1.3, 0.7, 1.3), # purple
+#			},
+#		}
+#	},
 	"punish_flash" :{
 		"duration": 6,
 		"loop" : false,

@@ -44,7 +44,7 @@ const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on r
 const DMG_REDUCTION_AT_MAX_GG = 0.5 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN_MOD = 7.0 # increased Guard Guard Regen during Postive Flow
-const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
+#const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
 
 const HITSTUN_GRAV_MOD = 0.65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 0.15  # friction during hitstun
@@ -147,6 +147,7 @@ var grounded := true
 var soft_grounded := false
 var hitstop = null # holder to influct hitstop at end of frame
 var status_effect_to_remove = [] # holder to remove status effects at end of frame
+var startup_cancel_flag := false # to avoid buffering attack when purposely cancelling startup
 
 var player_ID: int # player number controlling this character, 0 for P1, 1 for P2
 
@@ -553,19 +554,20 @@ func stimulate2(): # only ran if not in hitstop
 		
 	
 	# drain EX Gauge when air blocking
-	if !grounded and is_blocking():
-		var ex_gauge_drain = round(UniqueCharacter.AIR_BLOCK_DRAIN_RATE * Globals.FRAME)
-		change_ex_gauge(-ex_gauge_drain)
-		if current_ex_gauge <= 0.0:
-			match Animator.current_animation:
-				"AirBlock":
-					animate("FallTransit")
-	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
-		reset_modulate()
-		
+#	if !grounded and is_blocking():
+#		var ex_gauge_drain = round(UniqueCharacter.AIR_BLOCK_DRAIN_RATE * Globals.FRAME)
+#		change_ex_gauge(-ex_gauge_drain)
+#		if current_ex_gauge <= 0.0:
+#			match Animator.current_animation:
+#				"AirBlock":
+#					animate("FallTransit")
+#	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
+#		reset_modulate()
 		
 	if !is_attacking():
 		reset_cancels()
+
+	startup_cancel_flag = false # to cancel startup without incurring auto-buffer
 
 # CAPTURE DIRECTIONAL INPUTS --------------------------------------------------------------------------------------------------
 	
@@ -721,20 +723,20 @@ func stimulate2(): # only ran if not in hitstop
 			Globals.char_state.GROUND_STANDBY:
 				animate("BlockStartup")
 			Globals.char_state.GROUND_C_RECOVERY:
-				if Animator.query(["DashBrake"]):
+				if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
 					if Globals.trait.DASH_BLOCK in query_traits():
 						animate("BlockStartup")
 				else:
 					animate("BlockStartup")
 			Globals.char_state.AIR_STANDBY:
-				if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
+#				if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
+				animate("AirBlockStartup")
+				$VarJumpTimer.stop()
+			Globals.char_state.AIR_C_RECOVERY:
+				if !Animator.query_current(["AirDashBrake"]): # cannot air block out of air dash
+#					if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
 					animate("AirBlockStartup")
 					$VarJumpTimer.stop()
-			Globals.char_state.AIR_C_RECOVERY:
-				if !Animator.query_current(["AirDashBrake"]):
-					if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
-						animate("AirBlockStartup")
-						$VarJumpTimer.stop()
 			
 
 # SPECIAL/EX BUTTON --------------------------------------------------------------------------------------------------	
@@ -1335,6 +1337,7 @@ func process_input_buffer():
 # STATE DETECT ---------------------------------------------------------------------------------------------------
 
 func animate(anim):
+	
 	Animator.play(anim)
 	new_state = state_detect(anim)
 	
@@ -1343,7 +1346,7 @@ func animate(anim):
 
 	# when changing to a non-attacking state from attack startup, buffer pressed attack buttons
 	# dash is there to prevent EX Dodge from buffering attacks
-	if !is_attacking() and !button_dash in input_state.pressed:
+	if !startup_cancel_flag and !is_attacking() and !button_dash in input_state.pressed:
 		match state:
 			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
 				cancel_and_buffer()
@@ -1623,6 +1626,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
 			# cannot land during aerial startup and active frames unless they have the LAND_CANCEL atk attr
 			if Globals.atk_attr.LAND_CANCEL in query_atk_attr():
+				startup_cancel_flag = true
 				animate("HardLanding")
 				
 		Globals.char_state.AIR_FLINCH_HITSTUN: # land during hitstun               
@@ -3069,8 +3073,8 @@ func calculate_guard_gauge_change(hit_data):
 					guard_gauge_change *= WRONGBLOCK_GUARD_DRAIN_MOD # increase GDrain for wrongblock
 				Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 					guard_gauge_change *= PERFECTBLOCK_GUARD_DRAIN_MOD # reduce/negate GDrain for perfect block
-			if !defender.grounded:
-				guard_gauge_change *= AIRBLOCK_GUARD_DRAIN_MOD # increase GDrain for airblocking opponent
+#			if !defender.grounded:
+#				guard_gauge_change *= AIRBLOCK_GUARD_DRAIN_MOD # increase GDrain for airblocking opponent
 #		else:
 #			guard_gauge_change *= FIRST_HIT_GUARD_DRAIN_MOD # 1st hit of a combo or a stray hit inflict guard drain
 		
@@ -3561,8 +3565,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 			block_rec_cancel = false
 			perfect_block()
 			$ModulatePlayer.play("EX_block_flash")
-			change_ex_gauge(-UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5)
+			change_guard_gauge(UniqueCharacter.AIR_BLOCK_GG_COST)
 			play_audio("bling1", {"vol" : -12,})
+			remove_status_effect(Globals.status_effect.POS_FLOW)
 		"BlockRecovery", "AirBlockRecovery", "BlockCRecovery", "AirBlockCRecovery":
 			$PBlockTimer.stop() # stop perfect blocking		
 		"BurstCounterStartup", "BurstEscapeStartup":
