@@ -249,7 +249,7 @@ func watch_replay():
 	Globals.orig_rng_seed = replay.orig_rng_seed
 	Settings.input_buffer_time = replay.input_buffer_time
 	Settings.tap_jump = replay.tap_jump
-	Settings.dt_fastfall = replay.dt_fastfall
+	Settings.dj_fastfall = replay.dj_fastfall
 	
 	if replay.netgame == true:
 		Globals.replay_is_netgame = true

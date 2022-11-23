@@ -225,7 +225,7 @@ func load_buttoncheck():
 	var TAP_JUMP_OPTIONS = ["off", "on"]
 	var INPUT_BUFFER_OPTIONS = ["none", "1 frame", "2 frames", "3 frames", "4 frames", "5 frames", "6 frames"
 			, "7 frames", "8 frames", "9 frames", "10 frames"]
-	var DT_FASTFALL_OPTIONS = ["off", "on"]
+	var DJ_FASTFALL_OPTIONS = ["off", "on"]
 	
 	for player_ID in [0, 1]:
 		var player_index = str(player_ID + 1)
@@ -246,7 +246,7 @@ func load_buttoncheck():
 		grid.get_node("Unique").load_button("Unique", Settings.button_to_string(input_map["P" + player_index + "_unique"]))
 
 		grid.get_node("TapJump2").text = TAP_JUMP_OPTIONS[input_map["P" + player_index + "_tapjump"]]
-		grid.get_node("DTFastfall2").text = DT_FASTFALL_OPTIONS[input_map["P" + player_index + "_dt_fastfall"]]
+		grid.get_node("DJFastfall2").text = DJ_FASTFALL_OPTIONS[input_map["P" + player_index + "_dj_fastfall"]]
 		grid.get_node("InputBuffer2").text = INPUT_BUFFER_OPTIONS[input_map["P" + player_index + "_buffer"]]
 
 
@@ -352,45 +352,45 @@ func move_pickers(P1_dir, P2_dir):
 	if P1_phase == 0:
 		if P1_dir.x == 1:
 			P1_picker_pos += 1
-			if P1_picker_pos == 12: P1_picker_pos = 0
-			elif P1_picker_pos == 24: P1_picker_pos = 12
-			elif P1_picker_pos == 36: P1_picker_pos = 24
+			if P1_picker_pos == 11: P1_picker_pos = 0
+			elif P1_picker_pos == 22: P1_picker_pos = 11
+			elif P1_picker_pos == 33: P1_picker_pos = 22
 			P1_changed_character()
 		elif P1_dir.x == -1:
 			P1_picker_pos -= 1
-			if P1_picker_pos == -1: P1_picker_pos = 11
-			elif P1_picker_pos == 11: P1_picker_pos = 23
-			elif P1_picker_pos == 23: P1_picker_pos = 35
+			if P1_picker_pos == -1: P1_picker_pos = 10
+			elif P1_picker_pos == 10: P1_picker_pos = 21
+			elif P1_picker_pos == 21: P1_picker_pos = 32
 			P1_changed_character()
 		if P1_dir.y == 1:
-			P1_picker_pos += 12
-			if P1_picker_pos > 35: P1_picker_pos -= 36
+			P1_picker_pos += 11
+			if P1_picker_pos >= 33: P1_picker_pos -= 33
 			P1_changed_character()
 		elif P1_dir.y == -1:
-			P1_picker_pos -= 12
-			if P1_picker_pos < 0: P1_picker_pos += 36
+			P1_picker_pos -= 11
+			if P1_picker_pos < 0: P1_picker_pos += 33
 			P1_changed_character()
 		
 	if P2_phase == 0:
 		if P2_dir.x == 1:
 			P2_picker_pos += 1
-			if P2_picker_pos == 12: P2_picker_pos = 0
-			elif P2_picker_pos == 24: P2_picker_pos = 12
-			elif P2_picker_pos == 36: P2_picker_pos = 24
+			if P2_picker_pos == 11: P2_picker_pos = 0
+			elif P2_picker_pos == 22: P2_picker_pos = 11
+			elif P2_picker_pos == 33: P2_picker_pos = 22
 			P2_changed_character()
 		elif P2_dir.x == -1:
 			P2_picker_pos -= 1
-			if P2_picker_pos == -1: P2_picker_pos = 11
-			elif P2_picker_pos == 11: P2_picker_pos = 23
-			elif P2_picker_pos == 23: P2_picker_pos = 35
+			if P2_picker_pos == -1: P2_picker_pos = 10
+			elif P2_picker_pos == 10: P2_picker_pos = 21
+			elif P2_picker_pos == 21: P2_picker_pos = 32
 			P2_changed_character()
 		if P2_dir.y == 1:
-			P2_picker_pos += 12
-			if P2_picker_pos > 35: P2_picker_pos -= 36
+			P2_picker_pos += 11
+			if P2_picker_pos >= 33: P2_picker_pos -= 33
 			P2_changed_character()
 		elif P2_dir.y == -1:
-			P2_picker_pos -= 12
-			if P2_picker_pos < 0: P2_picker_pos += 36
+			P2_picker_pos -= 11
+			if P2_picker_pos < 0: P2_picker_pos += 33
 			P2_changed_character()		
 	
 func P1_changed_character():

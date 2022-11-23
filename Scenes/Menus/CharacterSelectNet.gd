@@ -239,7 +239,7 @@ func load_buttoncheck():
 	var TAP_JUMP_OPTIONS = ["off", "on"]
 	var INPUT_BUFFER_OPTIONS = ["none", "1 frame", "2 frames", "3 frames", "4 frames", "5 frames", "6 frames"
 			, "7 frames", "8 frames", "9 frames", "10 frames"]
-	var DT_FASTFALL_OPTIONS = ["off", "on"]
+	var DJ_FASTFALL_OPTIONS = ["off", "on"]
 	
 	var grid = my_buttoncheck.get_node("ButtonCheckGrid")
 
@@ -258,7 +258,7 @@ func load_buttoncheck():
 	grid.get_node("Unique").load_button("Unique", Settings.button_to_string(input_map["P1_unique"]))
 
 	grid.get_node("TapJump2").text = TAP_JUMP_OPTIONS[input_map["P1_tapjump"]]
-	grid.get_node("DTFastfall2").text = DT_FASTFALL_OPTIONS[input_map["P1_dt_fastfall"]]
+	grid.get_node("DJFastfall2").text = DJ_FASTFALL_OPTIONS[input_map["P1_dj_fastfall"]]
 	grid.get_node("InputBuffer2").text = INPUT_BUFFER_OPTIONS[input_map["P1_buffer"]]
 
 
@@ -325,23 +325,23 @@ func move_picker(dir):
 	if my_phase == 0:
 		if dir.x == 1:
 			my_picker_pos += 1
-			if my_picker_pos == 12: my_picker_pos = 0
-			elif my_picker_pos == 24: my_picker_pos = 12
-			elif my_picker_pos == 36: my_picker_pos = 24
+			if my_picker_pos == 11: my_picker_pos = 0
+			elif my_picker_pos == 22: my_picker_pos = 22
+			elif my_picker_pos == 33: my_picker_pos = 33
 			changed_character()
 		elif dir.x == -1:
 			my_picker_pos -= 1
-			if my_picker_pos == -1: my_picker_pos = 11
-			elif my_picker_pos == 11: my_picker_pos = 23
-			elif my_picker_pos == 23: my_picker_pos = 35
+			if my_picker_pos == -1: my_picker_pos = 10
+			elif my_picker_pos == 10: my_picker_pos = 21
+			elif my_picker_pos == 21: my_picker_pos = 32
 			changed_character()
 		if dir.y == 1:
-			my_picker_pos += 12
-			if my_picker_pos > 35: my_picker_pos -= 36
+			my_picker_pos += 11
+			if my_picker_pos >= 33: my_picker_pos -= 33
 			changed_character()
 		elif dir.y == -1:
-			my_picker_pos -= 12
-			if my_picker_pos < 0: my_picker_pos += 36
+			my_picker_pos -= 11
+			if my_picker_pos < 0: my_picker_pos += 33
 			changed_character()
 	
 func changed_character():

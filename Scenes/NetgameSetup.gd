@@ -60,7 +60,7 @@ func change_inputs(): # erase all inputs, load your P1_inputs into the slot for 
 	
 	var old_input_map = Settings.load_input_map()
 	
-	var input_list = ["P1_tapjump", "P1_buffer", "P1_dt_fastfall"] # hold the names of every input and tapjump/buffer for each player
+	var input_list = ["P1_tapjump", "P1_buffer", "P1_dj_fastfall"] # hold the names of every input and tapjump/buffer for each player
 	
 	for player_inputs in Globals.INPUTS: # iterate through each player dictionary
 		for input_array in player_inputs.values(): # iterate through each input array and get the key names
@@ -71,14 +71,14 @@ func change_inputs(): # erase all inputs, load your P1_inputs into the slot for 
 		0: # you are controlling P1, erase P2 controls
 			to_erase += "2"
 			new_input_map["P1_tapjump"] = old_input_map.P1_tapjump
-			new_input_map["P1_dt_fastfall"] = old_input_map.P1_dt_fastfall
+			new_input_map["P1_dj_fastfall"] = old_input_map.P1_dj_fastfall
 			new_input_map["P1_buffer"] = old_input_map.P1_buffer
 			new_input_map["P1_deadzone"] = old_input_map.P1_deadzone
 			new_input_map["P1_extra_buttons"] = old_input_map.P1_extra_buttons
 		1: # you are controlling P2, replace P2 controls with P1 controls and erase P1 controls
 			to_erase += "1"
 			new_input_map["P2_tapjump"] = old_input_map.P1_tapjump
-			new_input_map["P2_dt_fastfall"] = old_input_map.P1_dt_fastfall
+			new_input_map["P2_dj_fastfall"] = old_input_map.P1_dj_fastfall
 			new_input_map["P2_buffer"] = old_input_map.P1_buffer
 			new_input_map["P2_deadzone"] = old_input_map.P1_deadzone
 			new_input_map["P2_extra_buttons"] = old_input_map.P1_extra_buttons
@@ -92,7 +92,7 @@ func change_inputs(): # erase all inputs, load your P1_inputs into the slot for 
 			else: # you are controlling P2 and this is a P2 input, set to old P1's
 				new_input_map[input] = old_input_map["P1" + input.trim_prefix("P2")]
 				
-	return [old_input_map.P1_tapjump, old_input_map.P1_buffer, old_input_map.P1_dt_fastfall] # return your (old P1's) tapjump_and_buffer
+	return [old_input_map.P1_tapjump, old_input_map.P1_buffer, old_input_map.P1_dj_fastfall] # return your (old P1's) tapjump_and_buffer
 	# after the game, just load and set the saved input map since these changed inputs are not saved
 	# use: Settings.change_input_map(Settings.load_input_map())
 	
@@ -104,11 +104,11 @@ func combine_inputs(opponent_tapjump_and_buffer):
 		0: # you are controlling P1, add opponent's tapjump and buffer to P2's side
 			new_input_map["P2_tapjump"] = opponent_tapjump_and_buffer[0]
 			new_input_map["P2_buffer"] = opponent_tapjump_and_buffer[1]
-			new_input_map["P2_dt_fastfall"] = opponent_tapjump_and_buffer[2]
+			new_input_map["P2_dj_fastfall"] = opponent_tapjump_and_buffer[2]
 		1: # you are controlling P2, add opponent's tapjump and buffer to P1's side
 			new_input_map["P1_tapjump"] = opponent_tapjump_and_buffer[0]
 			new_input_map["P1_buffer"] = opponent_tapjump_and_buffer[1]
-			new_input_map["P1_dt_fastfall"] = opponent_tapjump_and_buffer[2]
+			new_input_map["P1_dj_fastfall"] = opponent_tapjump_and_buffer[2]
 		
 	Settings.change_input_map(new_input_map)
 	

@@ -25,11 +25,12 @@ const BURSTCOUNTER_EX_COST = 1
 const BURSTESCAPE_GG_COST = 0.5
 const AIRBLOCK_GRAV_MOD = 0.5 # multiply to GRAVITY to get gravity during air blocking
 const AIRBLOCK_TERMINAL_MOD = 0.7 # multiply to get terminal velocity during air blocking
-const TAP_MEMORY_DURATION = 5
+#const TAP_MEMORY_DURATION = 5
 const MAX_WALL_JUMP = 5
 const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal velocity during hitstun
 const HOP_JUMP_MOD = 0.8 # can hop by using up + jump
 const IMPULSE_MOD = 1.25 # multiply by UniqueCharacter.SPEED to get impulse velocity
+const PERFECT_IMPULSE_MOD = 1.75 # multiply by UniqueCharacter.SPEED to get impulse velocity
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -195,7 +196,7 @@ var aerial_memory = [] # appended whenever an air attack (Normal/Special) is mad
 var block_rec_cancel := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
 var targeted_opponent: int # player_ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var has_burst := false # gain burst by ringing out opponent
-var tap_memory = [] # for double taps
+#var tap_memory = [] # for double taps
 
 # controls
 var button_up
@@ -450,8 +451,8 @@ func stimulate(new_input_state):
 		
 	input_state = new_input_state # so that I can use it in other functions
 	
-	for button in input_state.just_released:
-		tap_memory.append([button, TAP_MEMORY_DURATION])
+#	for button in input_state.just_released:
+#		tap_memory.append([button, TAP_MEMORY_DURATION])
 		
 	
 			
@@ -658,12 +659,16 @@ func stimulate2(): # only ran if not in hitstop
 	# IMPULSE --------------------------------------------------------------------------------------------------
 	
 	if button_left in input_state.pressed or button_right in input_state.pressed: # don't use dir for this one...
-		if new_state == Globals.char_state.GROUND_ATK_STARTUP and Animator.time == 2: # only possible on frame 2
+		if new_state == Globals.char_state.GROUND_ATK_STARTUP and Animator.time == QUICK_CANCEL_TIME: # only possible on frame 1
 			var move_name = Animator.to_play_animation.trim_suffix("Startup")
 			if move_name in UniqueCharacter.MOVE_DATABASE and \
 					!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
-				velocity.x = facing * UniqueCharacter.SPEED * IMPULSE_MOD
-				emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+				if button_left in input_state.just_pressed or button_right in input_state.just_pressed:
+					velocity.x = facing * UniqueCharacter.SPEED * PERFECT_IMPULSE_MOD
+					emit_signal("SFX", "SpecialDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+				else:
+					velocity.x = facing * UniqueCharacter.SPEED * IMPULSE_MOD
+					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 
 
 # DOWN BUTTON --------------------------------------------------------------------------------------------------
@@ -696,9 +701,10 @@ func stimulate2(): # only ran if not in hitstop
 				if !Animator.query(["JumpTransit2", "JumpTransit3"]):
 
 
-					if Settings.dt_fastfall[player_ID] == 0 or (Settings.dt_fastfall[player_ID] == 1 and test_doubletap(button_down)):
-						if Settings.dt_fastfall[player_ID] == 1:
-							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
+					if Settings.dj_fastfall[player_ID] == 0 or \
+						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+#						if Settings.dt_fastfall[player_ID] == 1:
+#							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
 					
 						velocity.y = lerp(velocity.y, GRAVITY * Globals.FRAME * UniqueCharacter.TERMINAL_VELOCITY_MOD * \
 								UniqueCharacter.FASTFALL_MOD, 0.3)
@@ -710,10 +716,21 @@ func stimulate2(): # only ran if not in hitstop
 							velocity.x = lerp(velocity.x, -UniqueCharacter.SPEED * 0.7, 0.5)
 						elif velocity.x > UniqueCharacter.SPEED * 0.7:
 							velocity.x = lerp(velocity.x, UniqueCharacter.SPEED * 0.7, 0.5)
+							
+			Globals.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall
+				if Settings.dj_fastfall[player_ID] == 0 or \
+					(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+						
+					if !Animator.query(["AirJumpTransit2"]):
+						animate("Fall")
+					
 						
 			Globals.char_state.AIR_ATK_RECOVERY: # fastfall cancel from aerial hits
-				if test_fastfall_cancel():
-					animate("Fall")
+				if Settings.dj_fastfall[player_ID] == 0 or \
+					(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+						
+					if test_fastfall_cancel():
+						animate("Fall")
 
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
@@ -1051,7 +1068,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 	
 	test1()
 	
-	progress_tap_memory()
+#	progress_tap_memory()
 	
 	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
 										   # useful for status effects that are removed after being hit
@@ -1239,6 +1256,9 @@ func process_input_buffer():
 						# WALL JUMPS  --------------------------------------------------------------------------------------------------
 			
 						Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+							if Settings.dj_fastfall[player_ID] == 1 and button_down in input_state.pressed:
+								continue
+								
 							if check_wall_jump():
 								animate("WallJumpTransit")
 								keep = false
@@ -1263,6 +1283,9 @@ func process_input_buffer():
 						# AERIAL AIR JUMP CANCEL ---------------------------------------------------------------------------------
 							
 						Globals.char_state.AIR_ATK_RECOVERY:		
+							if Settings.dj_fastfall[player_ID] == 1 and button_down in input_state.pressed:
+								continue
+								
 							if test_jump_cancel():
 								animate("AirJumpTransit")
 								keep = false
@@ -1344,9 +1367,9 @@ func animate(anim):
 	if anim.ends_with("Active"):
 		atk_startup_resets() # need to do this here to work! resets hitcount and ignore list
 
-	# when changing to a non-attacking state from attack startup, buffer pressed attack buttons
-	# dash is there to prevent EX Dodge from buffering attacks
-	if !startup_cancel_flag and !is_attacking() and !button_dash in input_state.pressed:
+	# when changing to a non-attacking state from attack startup, auto-buffer pressed attack buttons
+	# actions that cancel startup frames deliberately (land cancel, EX Shift) will set startup_cancel_flag to true to prevent auto-buffer
+	if !startup_cancel_flag and !is_attacking():
 		match state:
 			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
 				cancel_and_buffer()
@@ -2019,21 +2042,21 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 	return UniqueCharacter.query_atk_attr(move_name)
 
 
-func progress_tap_memory(): # remove taps that expired
-	var to_erase = []
-	for tap in tap_memory:
-		tap[1] -= 1
-		if tap[1] <= 0:
-			to_erase.append(tap)
-	if to_erase.size() > 0:
-		for x in to_erase:
-			tap_memory.erase(x)
-			
-func test_doubletap(button):
-	for tap in tap_memory:
-		if tap[0] == button:
-			return true
-	return false
+#func progress_tap_memory(): # remove taps that expired
+#	var to_erase = []
+#	for tap in tap_memory:
+#		tap[1] -= 1
+#		if tap[1] <= 0:
+#			to_erase.append(tap)
+#	if to_erase.size() > 0:
+#		for x in to_erase:
+#			tap_memory.erase(x)
+#
+#func test_doubletap(button):
+#	for tap in tap_memory:
+#		if tap[0] == button:
+#			return true
+#	return false
 			
 
 # STATUS EFFECTS ---------------------------------------------------------------------------------------------------
@@ -3692,7 +3715,7 @@ func save_state():
 		"status_effects" : status_effects,
 		"hitcount_record" : hitcount_record,
 		"ignore_list" : ignore_list,
-		"tap_memory" : tap_memory,
+#		"tap_memory" : tap_memory,
 		
 		"sprite_scale" : sprite.scale,
 		"sprite_rotation" : sprite.rotation,
@@ -3763,7 +3786,7 @@ func load_state(state_data):
 	status_effects = state_data.status_effects
 	hitcount_record = state_data.hitcount_record
 	ignore_list = state_data.ignore_list
-	tap_memory = state_data.tap_memory
+#	tap_memory = state_data.tap_memory
 		
 	sprite.scale = state_data.sprite_scale
 	sprite.rotation = state_data.sprite_rotation

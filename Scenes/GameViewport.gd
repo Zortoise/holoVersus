@@ -129,7 +129,7 @@ func change_scene(new_scene: String): # called by animation
 	# save these 2 before restoring controls so that they can be saved to replays
 	Globals.temp_input_buffer_time = Settings.input_buffer_time.duplicate(true)
 	Globals.temp_tap_jump = Settings.tap_jump.duplicate(true)
-	Globals.temp_dt_fastfall = Settings.dt_fastfall.duplicate(true)
+	Globals.temp_dj_fastfall = Settings.dj_fastfall.duplicate(true)
 	
 	# change controls back to normal, don't do "if Netplay.is_netplay()" in case of disconnection
 # warning-ignore:return_value_discarded

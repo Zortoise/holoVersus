@@ -6,7 +6,7 @@ const INPUT_BUFFER_OPTIONS = ["none", "1 frame", "2 frames", "3 frames", "4 fram
 		, "7 frames", "8 frames", "9 frames", "10 frames"]
 const DEADZONE_OPTIONS = ["0.05", "0.10", "0.15", "0.20", "0.25", "0.30", "0.35", "0.40", "0.45", "0.50", "0.55", 
 		"0.60", "0.65", "0.70", "0.75", "0.80", "0.85", "0.90", "0.95", "1.00"]
-const DT_FASTFALL_OPTIONS = ["off", "on"]
+const DJ_FASTFALL_OPTIONS = ["off", "on"]
 
 # for preset loader
 const INITIAL_HELD_FRAMES = 10
@@ -101,7 +101,7 @@ func _ready():
 	$ControlsListR/Unique.load_button("Unique", Settings.button_to_string(input_map.P1_unique))
 	
 	$ControlsListBottom/TapJump.load_button("Up to Jump", TAP_JUMP_OPTIONS, input_map.P1_tapjump)
-	$ControlsListBottom/DTFastfall.load_button("DT Fastfall", DT_FASTFALL_OPTIONS, input_map.P1_dt_fastfall)
+	$ControlsListBottom/DJFastfall.load_button("Down+Jump Fastfall", DJ_FASTFALL_OPTIONS, input_map.P1_dj_fastfall)
 	$ControlsListBottom/InputBuffer.load_button("Input Buffer", INPUT_BUFFER_OPTIONS, input_map.P1_buffer)
 	$ControlsListBottom/Deadzone.load_button("Deadzone", DEADZONE_OPTIONS, input_map.P1_deadzone)
 	
@@ -299,7 +299,7 @@ func update_player_input():
 	var player_index = str(current_player + 1)
 	# save player's data into "input_map"
 	input_map["P" + player_index + "_tapjump"] = $ControlsListBottom/TapJump.option_pointer
-	input_map["P" + player_index + "_dt_fastfall"] = $ControlsListBottom/DTFastfall.option_pointer
+	input_map["P" + player_index + "_dj_fastfall"] = $ControlsListBottom/DJFastfall.option_pointer
 	input_map["P" + player_index + "_buffer"] = $ControlsListBottom/InputBuffer.option_pointer
 	input_map["P" + player_index + "_deadzone"] = $ControlsListBottom/Deadzone.option_pointer
 			
@@ -322,7 +322,7 @@ func load_player_input():
 	$ControlsListR/Unique.map(Settings.button_to_string(input_map["P" + player_index + "_unique"]))
 	
 	$ControlsListBottom/TapJump.change_pointer(input_map["P" + player_index + "_tapjump"])
-	$ControlsListBottom/DTFastfall.change_pointer(input_map["P" + player_index + "_dt_fastfall"])
+	$ControlsListBottom/DJFastfall.change_pointer(input_map["P" + player_index + "_dj_fastfall"])
 	$ControlsListBottom/InputBuffer.change_pointer(input_map["P" + player_index + "_buffer"])
 	$ControlsListBottom/Deadzone.change_pointer(input_map["P" + player_index + "_deadzone"])
 	

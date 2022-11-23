@@ -1202,45 +1202,45 @@ theme = ExtResource( 7 )
 [node name="ControlsListBottom" type="VBoxContainer" parent="."]
 margin_left = 576.0
 margin_top = 672.0
-margin_right = 1200.0
+margin_right = 1280.0
 margin_bottom = 967.0
 theme = SubResource( 21 )
 
 [node name="TapJump" parent="ControlsListBottom" instance=ExtResource( 5 )]
-margin_right = 624.0
+margin_right = 704.0
 focus_neighbour_top = NodePath("../../ControlsListL/Pause")
 
-[node name="DTFastfall" parent="ControlsListBottom" instance=ExtResource( 5 )]
+[node name="DJFastfall" parent="ControlsListBottom" instance=ExtResource( 5 )]
 margin_top = 47.0
-margin_right = 624.0
+margin_right = 704.0
 margin_bottom = 90.0
 focus_neighbour_top = NodePath("../../ControlsListL/Pause")
 
 [node name="InputBuffer" parent="ControlsListBottom" instance=ExtResource( 5 )]
 margin_top = 94.0
-margin_right = 624.0
+margin_right = 704.0
 margin_bottom = 137.0
 
 [node name="Deadzone" parent="ControlsListBottom" instance=ExtResource( 5 )]
 margin_top = 141.0
-margin_right = 624.0
+margin_right = 704.0
 margin_bottom = 184.0
 
 [node name="Blank2" type="Label" parent="ControlsListBottom"]
 margin_top = 188.0
-margin_right = 624.0
+margin_right = 704.0
 margin_bottom = 201.0
 custom_fonts/font = SubResource( 44 )
 
 [node name="SavePreset" parent="ControlsListBottom" instance=ExtResource( 11 )]
 margin_top = 205.0
-margin_right = 624.0
+margin_right = 704.0
 margin_bottom = 248.0
 text = "Save Preset"
 
 [node name="LoadPreset" parent="ControlsListBottom" instance=ExtResource( 11 )]
 margin_top = 252.0
-margin_right = 624.0
+margin_right = 704.0
 margin_bottom = 295.0
 focus_neighbour_bottom = NodePath("../../ControlsListL/Up")
 text = "Load Preset"

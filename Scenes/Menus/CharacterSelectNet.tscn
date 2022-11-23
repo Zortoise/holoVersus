@@ -827,6 +827,7 @@ position = Vector2( 640, 576 )
 scale = Vector2( 3, 3 )
 
 [node name="SelectSprite" parent="P1_Sprite" instance=ExtResource( 17 )]
+frame = 7
 
 [node name="P2_Sprite" type="Node2D" parent="."]
 position = Vector2( 1280, 576 )
@@ -834,17 +835,17 @@ scale = Vector2( -3, 3 )
 
 [node name="SelectSprite" parent="P2_Sprite" instance=ExtResource( 17 )]
 material = SubResource( 28 )
-frame = 8
+frame = 6
 
 [node name="Grid" type="GridContainer" parent="."]
-margin_left = 179.0
+margin_left = 244.0
 margin_top = 652.0
-margin_right = 1749.0
+margin_right = 1675.0
 margin_bottom = 1035.0
 theme = ExtResource( 10 )
 custom_constants/vseparation = 10
 custom_constants/hseparation = 10
-columns = 12
+columns = 11
 
 [node name="Blank" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25098 )
@@ -990,9 +991,9 @@ stretch_mode = 4
 
 [node name="Blank12" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 1441.0
-margin_right = 1562.0
-margin_bottom = 121.0
+margin_top = 131.0
+margin_right = 121.0
+margin_bottom = 252.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -1003,8 +1004,9 @@ stretch_mode = 4
 
 [node name="Blank13" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
+margin_left = 131.0
 margin_top = 131.0
-margin_right = 121.0
+margin_right = 252.0
 margin_bottom = 252.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -1016,20 +1018,6 @@ stretch_mode = 4
 
 [node name="Blank14" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 131.0
-margin_top = 131.0
-margin_right = 252.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank15" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 262.0
 margin_top = 131.0
 margin_right = 383.0
@@ -1042,7 +1030,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank16" type="TextureRect" parent="Grid"]
+[node name="Blank15" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 393.0
 margin_top = 131.0
@@ -1056,7 +1044,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank17" type="TextureRect" parent="Grid"]
+[node name="Blank16" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 524.0
 margin_top = 131.0
@@ -1070,7 +1058,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank18" type="TextureRect" parent="Grid"]
+[node name="Blank17" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 655.0
 margin_top = 131.0
@@ -1084,7 +1072,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank19" type="TextureRect" parent="Grid"]
+[node name="Blank18" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 786.0
 margin_top = 131.0
@@ -1098,7 +1086,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank20" type="TextureRect" parent="Grid"]
+[node name="Blank19" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 917.0
 margin_top = 131.0
@@ -1112,7 +1100,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank21" type="TextureRect" parent="Grid"]
+[node name="Blank20" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 1048.0
 margin_top = 131.0
@@ -1126,7 +1114,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank22" type="TextureRect" parent="Grid"]
+[node name="Blank21" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 1179.0
 margin_top = 131.0
@@ -1140,7 +1128,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank23" type="TextureRect" parent="Grid"]
+[node name="Blank22" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 1310.0
 margin_top = 131.0
@@ -1154,21 +1142,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank24" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 1441.0
-margin_top = 131.0
-margin_right = 1562.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank25" type="TextureRect" parent="Grid"]
+[node name="Blank23" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_top = 262.0
 margin_right = 121.0
@@ -1181,7 +1155,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank26" type="TextureRect" parent="Grid"]
+[node name="Blank24" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 131.0
 margin_top = 262.0
@@ -1195,7 +1169,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank27" type="TextureRect" parent="Grid"]
+[node name="Blank25" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 262.0
 margin_top = 262.0
@@ -1209,7 +1183,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank28" type="TextureRect" parent="Grid"]
+[node name="Blank26" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 393.0
 margin_top = 262.0
@@ -1223,7 +1197,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank29" type="TextureRect" parent="Grid"]
+[node name="Blank27" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 524.0
 margin_top = 262.0
@@ -1237,7 +1211,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank30" type="TextureRect" parent="Grid"]
+[node name="Blank28" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 655.0
 margin_top = 262.0
@@ -1251,7 +1225,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank31" type="TextureRect" parent="Grid"]
+[node name="Blank29" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 786.0
 margin_top = 262.0
@@ -1265,7 +1239,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank32" type="TextureRect" parent="Grid"]
+[node name="Blank30" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 917.0
 margin_top = 262.0
@@ -1279,7 +1253,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank33" type="TextureRect" parent="Grid"]
+[node name="Blank31" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 1048.0
 margin_top = 262.0
@@ -1293,7 +1267,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank34" type="TextureRect" parent="Grid"]
+[node name="Blank32" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 1179.0
 margin_top = 262.0
@@ -1307,7 +1281,7 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank35" type="TextureRect" parent="Grid"]
+[node name="Blank33" type="TextureRect" parent="Grid"]
 modulate = Color( 0, 0, 0, 0.25 )
 margin_left = 1310.0
 margin_top = 262.0
@@ -1321,25 +1295,11 @@ size_flags_stretch_ratio = 0.0
 texture = ExtResource( 4 )
 stretch_mode = 4
 
-[node name="Blank36" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 1441.0
-margin_top = 262.0
-margin_right = 1562.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
 [node name="P1_Picker" type="TextureRect" parent="."]
 modulate = Color( 0, 0, 0, 1 )
-margin_left = 834.0
+margin_left = 899.0
 margin_top = 652.0
-margin_right = 955.0
+margin_right = 1020.0
 margin_bottom = 773.0
 texture = ExtResource( 2 )
 
@@ -1350,9 +1310,9 @@ anims/flashing = SubResource( 25 )
 
 [node name="P2_Picker" type="TextureRect" parent="."]
 modulate = Color( 0, 0, 0, 1 )
-margin_left = 834.0
+margin_left = 899.0
 margin_top = 652.0
-margin_right = 955.0
+margin_right = 1020.0
 margin_bottom = 773.0
 texture = ExtResource( 9 )
 
@@ -1630,15 +1590,15 @@ theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "off"
 
-[node name="DTFastfall" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
+[node name="DJFastfall" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
 margin_top = 334.0
 margin_right = 264.0
 margin_bottom = 358.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "DT Fastfall:"
+text = "DJ Fastfall:"
 
-[node name="DTFastfall2" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
+[node name="DJFastfall2" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
 margin_top = 334.0
 margin_right = 528.0
@@ -1814,15 +1774,15 @@ theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "off"
 
-[node name="DTFastfall" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
+[node name="DJFastfall" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
 margin_top = 334.0
 margin_right = 264.0
 margin_bottom = 358.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "DT Fastfall:"
+text = "DJ Fastfall:"
 
-[node name="DTFastfall2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
+[node name="DJFastfall2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
 margin_left = 264.0
 margin_top = 334.0
 margin_right = 528.0

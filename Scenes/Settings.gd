@@ -4,7 +4,7 @@ const SETTINGS_FILEPATH = "" # filepath to the file containing saved settings
 
 var input_buffer_time := [5, 5] # can be changed by the user, index is the player ID
 var tap_jump := [true, true] # # can set so that up does not jump, index is the player ID
-var dt_fastfall := [false, false]
+var dj_fastfall := [false, false]
 
 const DEFAULT_PRESETS = {
 		"Alphanumeric" : {
@@ -22,7 +22,7 @@ const DEFAULT_PRESETS = {
 			"unique" : KEY_CONTROL,
 			"pause" : KEY_ESCAPE,
 			"tapjump" : 1,
-			"dt_fastfall" : 0,
+			"dj_fastfall" : 0,
 			"buffer" : 5,
 			"deadzone" : 3,
 			"extra_buttons" : [],
@@ -42,7 +42,7 @@ const DEFAULT_PRESETS = {
 			"unique" : KEY_SHIFT,
 			"pause" : KEY_ESCAPE,
 			"tapjump" : 1,
-			"dt_fastfall" : 0,
+			"dj_fastfall" : 0,
 			"buffer" : 5,
 			"deadzone" : 3,
 			"extra_buttons" : [],
@@ -62,7 +62,7 @@ const DEFAULT_PRESETS = {
 			"unique" : KEY_KP_ADD,
 			"pause" : KEY_KP_SUBTRACT,
 			"tapjump" : 1,
-			"dt_fastfall" : 0,
+			"dj_fastfall" : 0,
 			"buffer" : 5,
 			"deadzone" : 3,
 			"extra_buttons" : [],
@@ -82,7 +82,7 @@ const DEFAULT_PRESETS = {
 			"unique" : [0, JOY_L2],
 			"pause" : [0, JOY_START],
 			"tapjump" : 0,
-			"dt_fastfall" : 0,
+			"dj_fastfall" : 0,
 			"buffer" : 5,
 			"deadzone" : 3,
 			"extra_buttons" : [["left", [0, JOY_DPAD_LEFT]], ["right", [0, JOY_DPAD_RIGHT]], ["up", [0, JOY_DPAD_UP]], ["down", [0, JOY_DPAD_DOWN]]],
@@ -102,7 +102,7 @@ const DEFAULT_PRESETS = {
 			"unique" : [1, JOY_L2],
 			"pause" : [1, JOY_START],
 			"tapjump" : 0,
-			"dt_fastfall" : 0,
+			"dj_fastfall" : 0,
 			"buffer" : 5,
 			"deadzone" : 3,
 			"extra_buttons" : [["left", [1, JOY_DPAD_LEFT]], ["right", [1, JOY_DPAD_RIGHT]], ["up", [1, JOY_DPAD_UP]], ["down", [1, JOY_DPAD_DOWN]]]
@@ -328,8 +328,8 @@ func load_input_map():
 				if !input_array[0] in input_map:
 					valid = false
 					
-		for check in ["P1_tapjump", "P1_buffer", "P1_dt_fastfall", "P1_deadzone", "P1_extra_buttons", \
-				"P2_tapjump", "P2_buffer", "P2_dt_fastfall", "P2_deadzone", "P2_extra_buttons"]:
+		for check in ["P1_tapjump", "P1_buffer", "P1_dj_fastfall", "P1_deadzone", "P1_extra_buttons", \
+				"P2_tapjump", "P2_buffer", "P2_dj_fastfall", "P2_deadzone", "P2_extra_buttons"]:
 			if !check in input_map:
 				valid = false
 				
@@ -386,8 +386,8 @@ func change_input_map(new_input_map):	# runs this when saving new controls
 	tap_jump[1] = new_input_map.P2_tapjump
 	input_buffer_time[0] = new_input_map.P1_buffer
 	input_buffer_time[1] = new_input_map.P2_buffer
-	dt_fastfall[0] = new_input_map.P1_dt_fastfall
-	dt_fastfall[1] = new_input_map.P2_dt_fastfall
+	dj_fastfall[0] = new_input_map.P1_dj_fastfall
+	dj_fastfall[1] = new_input_map.P2_dj_fastfall
 	
 	
 func add_extra_buttons(player_ID, extra_button, new_input_map):
