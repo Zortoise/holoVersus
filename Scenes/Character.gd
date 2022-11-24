@@ -188,7 +188,7 @@ var chain_memory = [] # appended whenever you attack, reset when starting an att
 #var chaining := false # set to true when chaining any attack, false when starting an attack not from a chain, chained heavies loses ANTI_GUARD
 var dash_cancel := false # set to true when landing a Sweetspotted Normal, set to false when starting any attack
 var jump_cancel := false # set to true when landing any unblocked hit, set to false when starting any attack
-var perfect_chain := false # set to true when doing a 1 frame cancel, set to false when recovering from any attack
+var perfect_chain := false # set to true when doing a 1 frame cancel, set to false when not in active frames
 var move_memory = [] # appended whenever hit by a move, cleared whenever you recover from hitstun, to incur Repeat Penalty on attacker
 					# each entry is an array with [0] being the move name and [1] being the player_ID
 var aerial_memory = [] # appended whenever an air attack (Normal/Special) is made, cannot do the same air attack twice in a jump
@@ -197,6 +197,7 @@ var block_rec_cancel := false # set to true after blocking an attack, allow bloc
 var targeted_opponent: int # player_ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var has_burst := false # gain burst by ringing out opponent
 #var tap_memory = [] # for double taps
+var impulse_used := false
 
 # controls
 var button_up
@@ -414,7 +415,8 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 			"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity) + "  grounded: " + str(grounded) + \
-			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + str(input_buffer) + "\n" + str(current_guard_gauge) + " " + \
+			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
+			str(input_buffer) + "\n" + str(current_guard_gauge) + " " + \
 			str(current_ex_gauge)
 			
 			
@@ -647,28 +649,28 @@ func stimulate2(): # only ran if not in hitstop
 				face(dir)
 				
 		# quick impulse
-#		if state == Globals.char_state.GROUND_ATK_STARTUP and !impulse_used and\
-#				Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
-#			impulse_used = true
-#			var move_name = Animator.to_play_animation.trim_suffix("Startup")
-#			if move_name in UniqueCharacter.MOVE_DATABASE:
-#				if !Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
-#					velocity.x = dir * UniqueCharacter.SPEED
-#					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})	
+		if state == Globals.char_state.GROUND_ATK_STARTUP and !impulse_used and\
+				Animator.time <= QUICK_CANCEL_TIME:
+			impulse_used = true
+			var move_name = Animator.to_play_animation.trim_suffix("Startup")
+			if move_name in UniqueCharacter.MOVE_DATABASE:
+				if !Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+					velocity.x = dir * UniqueCharacter.SPEED * IMPULSE_MOD
+					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})	
 
 	# IMPULSE --------------------------------------------------------------------------------------------------
 	
-	if button_left in input_state.pressed or button_right in input_state.pressed: # don't use dir for this one...
-		if new_state == Globals.char_state.GROUND_ATK_STARTUP and Animator.time == QUICK_CANCEL_TIME: # only possible on frame 1
-			var move_name = Animator.to_play_animation.trim_suffix("Startup")
-			if move_name in UniqueCharacter.MOVE_DATABASE and \
-					!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
-				if button_left in input_state.just_pressed or button_right in input_state.just_pressed:
-					velocity.x = facing * UniqueCharacter.SPEED * PERFECT_IMPULSE_MOD
-					emit_signal("SFX", "SpecialDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-				else:
-					velocity.x = facing * UniqueCharacter.SPEED * IMPULSE_MOD
-					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+#	if button_left in input_state.pressed or button_right in input_state.pressed: # don't use dir for this one...
+#		if new_state == Globals.char_state.GROUND_ATK_STARTUP and Animator.time == QUICK_CANCEL_TIME: # only possible on frame 1
+#			var move_name = Animator.to_play_animation.trim_suffix("Startup")
+#			if move_name in UniqueCharacter.MOVE_DATABASE and \
+#					!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+#				if button_left in input_state.just_pressed or button_right in input_state.just_pressed:
+#					velocity.x = facing * UniqueCharacter.SPEED * PERFECT_IMPULSE_MOD
+#					emit_signal("SFX", "SpecialDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+#				else:
+#					velocity.x = facing * UniqueCharacter.SPEED * IMPULSE_MOD
+#					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 
 
 # DOWN BUTTON --------------------------------------------------------------------------------------------------
@@ -3501,14 +3503,28 @@ func _on_SpritePlayer_anim_started(anim_name):
 		if move_name in UniqueCharacter.MOVE_DATABASE:
 			if Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
 				aerial_memory.append(move_name)  #add to aerial memory if needed
-	
-	elif is_atk_recovery():
-		perfect_chain = false
-	
-	elif is_atk_active():
-		var move_name = anim_name.trim_suffix("Active")
-		if move_name in UniqueCharacter.MOVE_DATABASE:
-			chain_memory.append(move_name)
+				
+		if dir != 0: # impulse
+			if state == Globals.char_state.GROUND_ATK_STARTUP:
+#				var move_name = Animator.to_play_animation.trim_suffix("Startup")
+				if !impulse_used and move_name in UniqueCharacter.MOVE_DATABASE and \
+						!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+					impulse_used = true
+					if button_left in input_state.just_pressed or button_right in input_state.just_pressed:
+						velocity.x = dir * UniqueCharacter.SPEED * PERFECT_IMPULSE_MOD
+						emit_signal("SFX", "SpecialDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+					else:
+						velocity.x = dir * UniqueCharacter.SPEED * IMPULSE_MOD
+						emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+	else:
+		impulse_used = false
+		
+		if is_atk_active():
+			var move_name = anim_name.trim_suffix("Active")
+			if move_name in UniqueCharacter.MOVE_DATABASE:
+				chain_memory.append(move_name)
+		else:
+			perfect_chain = false # change to false if neither startup nor active
 
 	
 	null_friction = false
@@ -3696,13 +3712,13 @@ func save_state():
 		"orig_hitstun" : orig_hitstun,
 		"chain_combo" : chain_combo,
 		"chain_memory" : chain_memory,
-#		"chaining" : chaining,
 		"dash_cancel" : dash_cancel,
 		"jump_cancel" : jump_cancel,
 		"perfect_chain" : perfect_chain,
 		"block_rec_cancel" : block_rec_cancel,
 		"targeted_opponent" : targeted_opponent,
 		"has_burst": has_burst,
+		"impulse_used" : impulse_used,
 		
 		"current_damage_value" : current_damage_value,
 		"current_guard_gauge" : current_guard_gauge,
@@ -3762,13 +3778,13 @@ func load_state(state_data):
 	orig_hitstun = state_data.orig_hitstun
 	chain_combo = state_data.chain_combo
 	chain_memory = state_data.chain_memory
-#	chaining = state_data.chaining
 	dash_cancel = state_data.dash_cancel
 	jump_cancel = state_data.jump_cancel
 	perfect_chain = state_data.perfect_chain
 	block_rec_cancel = state_data.block_rec_cancel
 	targeted_opponent = state_data.targeted_opponent
 	has_burst = state_data.has_burst
+	impulse_used = state_data.impulse_used
 	
 	current_damage_value = state_data.current_damage_value
 	current_guard_gauge = state_data.current_guard_gauge
