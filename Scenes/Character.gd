@@ -1822,7 +1822,7 @@ func shadow_cancel(starting_modulate_a = 0.6, lifetime = 15.0):
 func launch_trail():
 	var frequency: int
 	if velocity.length() <= LAUNCH_DUST_THRESHOLD * 0.5:
-		frequency = 5
+		frequency = 4
 	elif velocity.length() <= LAUNCH_DUST_THRESHOLD: # the faster you go the more frequent the launch dust
 		frequency = 3
 	elif velocity.length() <= LAUNCH_DUST_THRESHOLD * 2:

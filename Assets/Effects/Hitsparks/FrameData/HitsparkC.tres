@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "HitsparkC": {
-"duration": 15,
+"duration": 17,
 "hframes": 6,
 "loop": false,
 "spritesheet": "HitsparkCSprite",
@@ -31,6 +31,9 @@ frame_data = {
 },
 13: {
 "frame": 6
+},
+15: {
+"frame": 7
 }
 },
 "vframes": 2
