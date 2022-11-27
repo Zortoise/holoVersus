@@ -67,6 +67,7 @@ func stimulate():
 	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query(["aL2Active"]):
 		if Character.grounded:
 			Character.animate("HardLanding")
+			landing_sound()
 		elif !Character.button_light in Character.input_state.pressed:
 			Character.animate("aL2bRecovery")
 			

@@ -56,7 +56,7 @@ const LETHAL_HITSTOP = 25
 const LETHAL_HITSTUN_MOD = 1.5 # multiply hitstun when defender is at Damage Value Limit
 
 const SD_KNOCKBACK_LIMIT = 300.0 # knockback strength limit of a semi-disjoint hit
-const SD_HIT_GUARD_DRAIN_MOD = 1.0 # Guard Drain on semi-disjoint hits
+const SD_HIT_GUARD_DRAIN_MOD = 1.5 # Guard Drain on semi-disjoint hits
 
 const SWEETSPOT_KB_MOD = 1.15
 const SWEETSPOT_DMG_MOD = 1.5 # damage modifier on sweetspotted hit 
@@ -1150,6 +1150,15 @@ func buffer_actions():
 	if input_buffer.size() > 0:
 		capture_combinations() # look for combinations in input buffer, erase buttons used in the combinations
 
+	if button_block in input_state.just_pressed and button_special in input_state.pressed: # Bursting
+		input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
+	if button_special in input_state.just_pressed and button_block in input_state.pressed: # can Burst if pressing special after block
+		if new_state == Globals.char_state.GROUND_BLOCK or new_state == Globals.char_state.AIR_BLOCK:
+			if !Animator.query_to_play(["Block", "AirBlock"]): # unless you are currently blocking (not block startup)
+				input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
+		else:
+			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
+
 	if button_jump in input_state.just_pressed:
 		input_buffer.push_front([button_jump, Settings.input_buffer_time[player_ID]])
 		
@@ -1160,7 +1169,7 @@ func capture_combinations():
 	# instant air dash, place at back
 	combination(button_jump, button_dash, "InstaAirDash", null, true)
 	
-	combination(button_block, button_aux, "Burst") # can quick_cancel from block/unique startup
+#	combination(button_block, button_special, "Burst") # place this here since button_special is never buffered
 			
 	UniqueCharacter.capture_combinations()
 
@@ -1862,10 +1871,10 @@ func check_quick_cancel(turning = false): # return true if you can change direct
 			elif Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
 				return true
 		Globals.char_state.GROUND_ATK_STARTUP:
-			if turning:
+			if turning and new_state == Globals.char_state.GROUND_ATK_STARTUP:
 				var move_name = get_move_name()
 				if move_name == null: return false # if name at name of animation not found in database
-				if !Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
+				if !Globals.atk_attr.NO_TURN in query_atk_attr():
 					return true
 			else: continue
 		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
@@ -3083,7 +3092,7 @@ func calculate_guard_gauge_change(hit_data):
 	else: # defender NOT in hitstun or just recovered from one, or blocking, guard_gauge_change is negative
 		guard_gauge_change = -hit_data.move_data.guard_drain
 		if hit_data.semi_disjoint:
-			guard_gauge_change *= 1.0 # may lower it, or let whiff punishes drain GG?
+			guard_gauge_change *= SD_HIT_GUARD_DRAIN_MOD # may lower/rise it, or let whiff punishes drain GG?
 		elif hit_data.double_repeat:
 			guard_gauge_change *= 0.0 # on blockstunned target
 		else:
@@ -3104,7 +3113,7 @@ func calculate_guard_gauge_change(hit_data):
 #			guard_gauge_change *= FIRST_HIT_GUARD_DRAIN_MOD # 1st hit of a combo or a stray hit inflict guard drain
 		
 	return round(guard_gauge_change)
-
+	
 	
 func calculate_knockback_strength(hit_data):
 
