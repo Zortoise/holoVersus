@@ -28,11 +28,12 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"AirDashU2", "AirDashD2":
 			return Globals.char_state.AIR_RECOVERY
 		
-		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", "HStartup":
+		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", \
+				"HStartup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive":
+		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"L1Recovery", "L1bRecovery", "L2bRecovery", "F1Recovery", "F2Recovery", "F3Recovery", "HRecovery":
+		"L1Recovery", "L1bRecovery", "L2bRecovery", "F1Recovery", "F2Recovery", "F3Recovery", "HRecovery", "H[h]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		"L1bCRecovery", "F1CRecovery":
 			return Globals.char_state.GROUND_C_RECOVERY
@@ -540,12 +541,21 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 
 		"HStartup":
-			Character.animate("HActive")
+			if Character.button_light in Character.input_state.pressed and Character.button_fierce in Character.input_state.pressed:
+				Character.animate("H[h]Startup")
+			else:
+				Character.animate("HActive")
 		"HActive":
 			Character.animate("HbActive")
 		"HbActive":
 			Character.animate("HRecovery")	
-		"HRecovery":
+		"H[h]Startup":
+			Character.animate("H[h]Active")
+		"H[h]Active":
+			Character.animate("Hb[h]Active")
+		"Hb[h]Active":
+			Character.animate("H[h]Recovery")
+		"HRecovery", "H[h]Recovery":
 			Character.animate("Idle")
 
 		"aL1Startup":
@@ -687,6 +697,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * SPEED * 0.5
 		"HActive", "HbActive", "HRecovery":
 			Character.sfx_under.show()
+			Character.sfx_over.show()
+		"H[h]Active", "Hb[h]Active", "H[h]Recovery":
+			Character.sfx_under.show()
+			Character.sfx_over.show()
 			
 		"aL1Startup":
 			Character.velocity_limiter.x = 0.85

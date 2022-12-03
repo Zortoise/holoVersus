@@ -1890,7 +1890,8 @@ func check_quick_cancel():
 	var move_name = get_move_name()
 	if move_name == null: return false
 	
-	if move_name in UniqueCharacter.MOVE_DATABASE and Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+	if move_name in UniqueCharacter.MOVE_DATABASE and !Globals.atk_attr.VARIANT_STARTUP in query_atk_attr(move_name) and \
+			Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
 		return true
 		
 	return false
@@ -2288,6 +2289,9 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	
 	if !is_atk_recovery() and !is_atk_active(): return false
 	if chain_combo == 0: return false # can only chain combo on hit
+	
+	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
+		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
 	if attack_ref in chain_memory: return false # cannot chain into moves already done
 	
 	var move_name = Animator.current_animation.trim_suffix("Recovery")
@@ -2314,6 +2318,9 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
 	
 func test_qc_chain_combo(attack_ref):
+	
+	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
+		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
 	
 	if attack_ref in chain_memory: return false # cannot quick cancel into moves already done
 	
@@ -2689,8 +2696,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
 	var double_repeat = false
+	var root_move_name = hit_data.move_name
+	
+	if hit_data.move_name in attacker.UniqueCharacter.MOVE_DATABASE and \
+			"root" in attacker.UniqueCharacter.MOVE_DATABASE[hit_data.move_name]:
+		root_move_name = attacker.UniqueCharacter.MOVE_DATABASE[hit_data.move_name].root # for move variations
+	
 	for array in move_memory:
-		if array[0] == attacker.player_ID and array[1] == hit_data.move_name:
+		if array[0] == attacker.player_ID and array[1] == root_move_name:
 			if !hit_data.repeat_penalty:
 				hit_data.repeat_penalty = true # found a repeat
 				if Globals.atk_attr.NO_REPEAT in attacker.query_atk_attr(hit_data.move_name):
@@ -2830,7 +2843,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 	# append repeated move to move memory here since calculation for guard_gauge change uses it
 	if !double_repeat and attacker_or_entity.is_hitcount_last_hit(defender.player_ID, hit_data.move_data): # for multi-hit move, only the last hit count
-		move_memory.append([attacker.player_ID, hit_data.move_name])
+		move_memory.append([attacker.player_ID, root_move_name])
 				
 				
 	# ---------------------------------------------------------------------------------
@@ -3551,6 +3564,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			if state == Globals.char_state.GROUND_ATK_STARTUP:
 #				var move_name = Animator.to_play_animation.trim_suffix("Startup")
 				if !impulse_used and move_name in UniqueCharacter.MOVE_DATABASE and \
+						!Globals.atk_attr.VARIANT_STARTUP in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr and \
 						!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
 					impulse_used = true
 					if button_left in input_state.just_pressed or button_right in input_state.just_pressed:
@@ -3565,7 +3579,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 		if is_atk_active():
 			var move_name = anim_name.trim_suffix("Active")
 			if move_name in UniqueCharacter.MOVE_DATABASE:
-				chain_memory.append(move_name)
+				if "root" in UniqueCharacter.MOVE_DATABASE[move_name]:
+					chain_memory.append(UniqueCharacter.MOVE_DATABASE[move_name].root)
+				else:
+					chain_memory.append(move_name)
 		else:
 			perfect_chain = false # change to false if neither startup nor active
 

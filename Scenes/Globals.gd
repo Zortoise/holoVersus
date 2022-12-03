@@ -10,8 +10,9 @@ enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, PROJECTILE}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum hitspark_type {CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
-enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
+enum atk_attr {VARIANT_STARTUP, AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_REPEAT, NO_IMPULSE, SUPERARMOR, LAND_CANCEL}
+# VARIANT_STARTUP = cannot be Quick Cancelled or Impulses, mainly used for variant of moves with extra startup animations
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-airs, don't erase this! Needed for air specials!
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
