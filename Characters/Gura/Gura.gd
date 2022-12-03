@@ -64,19 +64,18 @@ func stimulate():
 #	Character.dir
 #	Character.v_dir
 
-	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query(["aL2Active"]):
+	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query(["aL2Active"]): # pogo landing
 		if Character.grounded:
 			Character.animate("HardLanding")
 			landing_sound()
 		elif !Character.button_light in Character.input_state.pressed:
 			Character.animate("aL2bRecovery")
 			
-	if Character.state == Globals.char_state.AIR_ATK_STARTUP and Animator.query(["aF1[h]Startup"]):
+	if Character.state == Globals.char_state.AIR_ATK_STARTUP and Animator.query(["aF1[h]Startup"]): # land canceling held a.F
 		if !Character.button_fierce in Character.input_state.pressed:
 			Character.animate("aF1Active")
 			
-	# dash dancing
-	if Character.state == Globals.char_state.GROUND_RECOVERY and Animator.query(["Dash"]):
+	if Character.state == Globals.char_state.GROUND_RECOVERY and Animator.query(["Dash"]): 	# dash dancing
 		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
 			Character.face(-1)
 			Character.animate("Dash")
@@ -87,73 +86,46 @@ func stimulate():
 			
 	# QUICK CANCELS --------------------------------------------------------------------------------------------------
 	
-	if Character.check_quick_cancel():
 		
-		if Character.button_up in Character.input_state.just_pressed:
-			if Animator.query(["F1Startup"]) and Character.test_qc_chain_combo("F3"):
-				Character.animate("F3Startup")
-			elif Animator.query(["aF1Startup"]) and Character.test_qc_chain_combo("aF3"):
-				Character.animate("aF3Startup")
-			elif Settings.tap_jump[Character.player_ID] == 1 and Character.new_state == Globals.char_state.GROUND_ATK_STARTUP:
+	if Animator.time <= Character.QUICK_CANCEL_TIME and Animator.time != 0:
+		match Character.new_state:
+			Globals.char_state.GROUND_ATK_STARTUP:
 				# can jump cancel the 1st frame of ground attacks, helps with instant aerials
-				Character.animate("JumpTransit")
-				Character.cancel_and_buffer()
-				
-		if Character.button_up in Character.input_state.just_released:
-			if Animator.query(["F3Startup"]) and Character.test_qc_chain_combo("F1"):
-				Character.animate("F1Startup")
-			elif Animator.query(["aF3Startup"]) and Character.test_qc_chain_combo("aF1"):
-				Character.animate("aF1Startup")
-				
-		if Character.button_down in Character.input_state.just_pressed:
-			if Animator.query(["F1Startup"]) and Character.test_qc_chain_combo("F2"):
-				Character.animate("F2Startup")
-			elif Animator.query(["L1Startup"]) and Character.test_qc_chain_combo("L2"):
-				Character.animate("L2Startup")
-			elif Animator.query(["aL1Startup"]) and Character.test_qc_chain_combo("aL2"):
-				Character.animate("aL2Startup")
-				
-		if Character.button_down in Character.input_state.just_released:
-			if Animator.query(["F2Startup"]) and Character.test_qc_chain_combo("F1"):
-				Character.animate("F1Startup")
-			elif Animator.query(["L2Startup"]) and Character.test_qc_chain_combo("L1"):
-				Character.animate("L1Startup")
-			elif Animator.query(["aL2Startup"]) and Character.test_qc_chain_combo("aL1"):
-				Character.animate("aL1Startup")				
-				
-		if Character.button_fierce in Character.input_state.just_pressed:
-			if Animator.query(["L1Startup", "L2Startup"]) and Character.test_qc_chain_combo("H"):
-				Character.animate("HStartup")
-			elif Animator.query(["aL1Startup", "aL2Startup"]) and Character.test_qc_chain_combo("aH"):
-				Character.animate("aHStartup")
-				
-			elif !Character.button_jump in Character.input_state.pressed: # from jumpsquat to uptilt
-				if Animator.query_current(["JumpTransit"]):
-					Character.animate("F3Startup")
-				elif Animator.query_current(["AirJumpTransit"]):
-					Character.animate("aF3Startup")
-		
-		if Character.button_light in Character.input_state.just_pressed:
-			if Animator.query(["F1Startup", "F2Startup", "F3Startup"]) and Character.test_qc_chain_combo("H"):
-				Character.animate("HStartup")
-			elif Animator.query(["aF1Startup", "aF3Startup"]) and Character.test_qc_chain_combo("aH"):
-				Character.animate("aHStartup")
-				
-		if Character.button_jump in Character.input_state.just_pressed and Character.new_state == Globals.char_state.GROUND_ATK_STARTUP:
-			# can jump cancel the 1st frame of ground attacks, helps with instant aerials
-			Character.animate("JumpTransit")
-			Character.cancel_and_buffer()
-
+				if Character.button_jump in Character.input_state.just_pressed:
+					Character.animate("JumpTransit")
+					Character.cancel_and_buffer() # this buffers the attack buttons currently being pressed
+					
+				# releasing up button to cancel up-tilts to neutral
+				if Character.button_up in Character.input_state.just_released:
+					if Animator.query(["F3Startup"]) and Character.test_qc_chain_combo("F1"):
+						Character.animate("F1Startup")
+				# releasing down button to cancel down-tilts to neutral
+				if Character.button_down in Character.input_state.just_released:
+					if Animator.query(["F2Startup"]) and Character.test_qc_chain_combo("F1"):
+						Character.animate("F1Startup")
+					elif Animator.query(["L2Startup"]) and Character.test_qc_chain_combo("L1"):
+						Character.animate("L1Startup")
+						
+			Globals.char_state.AIR_ATK_STARTUP:
+				# releasing up button to cancel up-tilts to neutral
+				if Character.button_up in Character.input_state.just_released:
+					if Animator.query(["aF3Startup"]) and Character.test_qc_chain_combo("aF1"):
+						Character.animate("aF1Startup")
+				# releasing down button to cancel down-tilts to neutral
+				if Character.button_down in Character.input_state.just_released:
+					if Animator.query(["aL2Startup"]) and Character.test_qc_chain_combo("aL1"):
+						Character.animate("aL1Startup")
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 
 
 func capture_combinations():
 	
-	Character.combination(Character.button_up, Character.button_fierce, "UpFierce") # can quick_cancel from light/fierce startup	
-	
-	# Heavy Normal, place this after UpFierce
-	Character.combination(Character.button_light, Character.button_fierce, "H") # can quick_cancel from light/fierce startup
+	Character.combination(Character.button_up, Character.button_light, "UpLight")	
+	Character.combination(Character.button_down, Character.button_light, "DownLight")
+	Character.combination(Character.button_up, Character.button_fierce, "UpFierce")	
+	Character.combination(Character.button_down, Character.button_fierce, "DownFierce")
+	Character.combination(Character.button_light, Character.button_fierce, "H")
 
 	# Command Normals
 
@@ -250,36 +222,49 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 						else: # grounded
 							Character.animate("DashTransit")
 							keep = false
-		
+							
 		# ---------------------------------------------------------------------------------
 		
 		Character.button_light:
 			if !has_acted[0]:
-				if Character.button_down in Character.input_state.pressed:
-					keep = !process_button(new_state, "L2", has_acted, buffered_input[1])
-				if keep:
-					keep = !process_button(new_state, "L1", has_acted, buffered_input[1])
+#				if Character.button_down in Character.input_state.pressed:
+#					keep = !process_button(new_state, "L2", has_acted, buffered_input[1])
+#				if keep:
+				keep = !process_button(new_state, "L1", has_acted, buffered_input[1])
 		
 		Character.button_fierce:
 			if !has_acted[0]:
-				if Character.button_up in Character.input_state.pressed:
-					keep = !process_button(new_state, "F3", has_acted, buffered_input[1]) # need to do this too for more consistency
-				elif Character.button_down in Character.input_state.pressed:
-					keep = !process_button(new_state, "F2", has_acted, buffered_input[1])
-				if keep:
-					keep = !process_button(new_state, "F1", has_acted, buffered_input[1])
-
+#				if Character.button_up in Character.input_state.pressed:
+#					keep = !process_button(new_state, "F3", has_acted, buffered_input[1]) # need to do this too for more consistency
+#				elif Character.button_down in Character.input_state.pressed:
+#					keep = !process_button(new_state, "F2", has_acted, buffered_input[1])
+#				if keep:
+				keep = !process_button(new_state, "F1", has_acted, buffered_input[1])
 
 		# SPECIAL ACTIONS ---------------------------------------------------------------------------------
 		# buffered_input_action can be a string instead of int, for heavy attacks and special moves
+
+		"UpLight":
+			if !has_acted[0]:
+				keep = !process_button(new_state, "L3", has_acted, buffered_input[1])
+				
+		"DownLight":
+			if !has_acted[0]:
+				keep = !process_button(new_state, "L2", has_acted, buffered_input[1])
 
 		"UpFierce":
 			if !has_acted[0]:
 				keep = !process_button(new_state, "F3", has_acted, buffered_input[1])
 				
+		"DownFierce":
+			if !has_acted[0]:
+				keep = !process_button(new_state, "F2", has_acted, buffered_input[1])
+				
 		"H":
 			if !has_acted[0]:
 				keep = !process_button(new_state, "H", has_acted, buffered_input[1])
+					
+		# ---------------------------------------------------------------------------------
 		
 		"InstaAirDash": # needed to chain wavedashes
 			match new_state:
@@ -329,6 +314,15 @@ func process_button(new_state, attack_ref: String, has_acted: Array, buffer_time
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
 						return true
+			
+			# quick cancel
+			Globals.char_state.GROUND_ATK_STARTUP:
+				if attack_ref in MOVE_DATABASE:
+					if Character.check_quick_cancel(): # must be within 1st frame, animation name must be in MOVE_DATABASE
+						if Character.test_qc_chain_combo(attack_ref):
+							Character.animate(attack_ref + "Startup")
+							has_acted[0] = true
+							return true
 					
 			# chain cancel
 			Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_ATK_ACTIVE:
@@ -350,6 +344,23 @@ func process_button(new_state, attack_ref: String, has_acted: Array, buffer_time
 							Character.animate(attack_ref + "Startup")
 							has_acted[0] = true
 							return true
+							
+			# quick cancel
+			Globals.char_state.AIR_ATK_STARTUP:
+				if !Character.grounded:
+					if "a" + attack_ref in MOVE_DATABASE:
+						if Character.check_quick_cancel(): # must be within 1st frame, startup animation name must be in MOVE_DATABASE
+							if Character.test_qc_chain_combo("a" + attack_ref):
+								Character.animate("a" + attack_ref + "Startup")
+								has_acted[0] = true
+								return true
+				else:
+					if attack_ref in MOVE_DATABASE:
+						if Character.check_quick_cancel(): # must be within 1st frame, startup animation name must be in MOVE_DATABASE
+							if Character.test_qc_chain_combo(attack_ref):
+								Character.animate(attack_ref + "Startup")
+								has_acted[0] = true
+								return true
 					
 	return false
 						

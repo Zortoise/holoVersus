@@ -20,7 +20,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # JUMP_CANCEL = can cancel recovery with a jump, place this on the active animation with same name as the recovery animation
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = for rekkas, prevent turning during startup
-# EASY_BLOCK = can be blocked correctly both on ground and in air
+# EASY_BLOCK = can be blocked correctly in either direction
 # ANTI_GUARD = always wrongblocked if chain_combo is false, cannot perfect block
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers and moves with UNBLOCKABLE
 # UNBLOCKABLE = for command grabs
@@ -472,6 +472,8 @@ func atk_type_to_tier(atk_type):
 			return 2
 		Globals.atk_type.SUPER:
 			return 3
+		Globals.atk_type.PROJECTILE: # just in case
+			return -1
 	
 func status_effect_priority(effect):
 	match effect:

@@ -294,8 +294,8 @@ func load_last_picked():
 		return null	
 		
 	var valid := true 			
-	for check in ["P1_character", "P1_palette", "P1_stage", "P1_input_style", \
-			"P2_character", "P2_palette", "P2_stage", "P2_input_style"]:
+	for check in ["P1_character", "P1_palette", "P1_stage", \
+			"P2_character", "P2_palette", "P2_stage"]:
 		if !check in last_picked:
 			valid = false
 	

@@ -645,7 +645,7 @@ func stimulate2(): # only ran if not in hitstop
 
 		if facing != dir:
 				
-			if check_quick_cancel(true) and !Globals.atk_attr.NO_TURN in query_atk_attr():
+			if check_quick_turn() and !Globals.atk_attr.NO_TURN in query_atk_attr():
 				face(dir)
 				
 		# quick impulse
@@ -723,7 +723,7 @@ func stimulate2(): # only ran if not in hitstop
 				if Settings.dj_fastfall[player_ID] == 0 or \
 					(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
 						
-					if !Animator.query(["AirJumpTransit2"]):
+					if Animator.query(["AirJumpTransit"]):
 						animate("Fall")
 					
 						
@@ -1147,8 +1147,8 @@ func buffer_actions():
 		if button_aux in input_state.just_pressed:
 			input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
 	
-	if input_buffer.size() > 0:
-		capture_combinations() # look for combinations in input buffer, erase buttons used in the combinations
+	if input_state.just_pressed.size() > 0:
+		capture_combinations() # look for combinations
 
 	if button_block in input_state.just_pressed and button_special in input_state.pressed: # Bursting
 		input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
@@ -1863,27 +1863,20 @@ func get_move_name():
 	move_name = move_name.trim_suffix("Recovery")
 	return move_name
 	
-func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
+func check_quick_turn():
 	match state: # use current state instead of new_state
 		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
-			if turning:
+			return true
+		Globals.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on any startup frame
+			var move_name = get_move_name()
+			if move_name == null: return false
+			if !Globals.atk_attr.NO_TURN in query_atk_attr():
 				return true
-			elif Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
-				return true
-		Globals.char_state.GROUND_ATK_STARTUP:
-			if turning and new_state == Globals.char_state.GROUND_ATK_STARTUP:
+		Globals.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st frame
+			if Animator.time <= max(QUICK_CANCEL_TIME - 1, 1) and Animator.time != 0:
 				var move_name = get_move_name()
-				if move_name == null: return false # if name at name of animation not found in database
+				if move_name == null: return false
 				if !Globals.atk_attr.NO_TURN in query_atk_attr():
-					return true
-			else: continue
-		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
-			if !turning:
-				if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
-					# when time = 0 state is still in the previous one, since state only update when a new animation begins
-					return true
-			else: # for turning, the QUICK_CANCEL_TIME is 1 frame lower, min is 1 frame
-				if Animator.time <= max(QUICK_CANCEL_TIME - 1, 1) and Animator.time != 0:
 					return true
 		Globals.char_state.GROUND_BLOCK:
 			if Animator.query(["BlockStartup"]):
@@ -1892,6 +1885,45 @@ func check_quick_cancel(turning = false): # return true if you can change direct
 			if Animator.query(["AirBlockStartup"]):
 				return true
 	return false
+	
+func check_quick_cancel():
+	var move_name = get_move_name()
+	if move_name == null: return false
+	
+	if move_name in UniqueCharacter.MOVE_DATABASE and Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+		return true
+		
+	return false
+	
+#func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
+#	match state: # use current state instead of new_state
+#		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
+#			if turning:
+#				return true
+#			elif Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+#				return true
+#		Globals.char_state.GROUND_ATK_STARTUP:
+#			if turning and new_state == Globals.char_state.GROUND_ATK_STARTUP:
+#				var move_name = get_move_name()
+#				if move_name == null: return false # if name at name of animation not found in database
+#				if !Globals.atk_attr.NO_TURN in query_atk_attr():
+#					return true
+#			else: continue
+#		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+#			if !turning:
+#				if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+#					# when time = 0 state is still in the previous one, since state only update when a new animation begins
+#					return true
+#			else: # for turning, the QUICK_CANCEL_TIME is 1 frame lower, min is 1 frame
+#				if Animator.time <= max(QUICK_CANCEL_TIME - 1, 1) and Animator.time != 0:
+#					return true
+#		Globals.char_state.GROUND_BLOCK:
+#			if Animator.query(["BlockStartup"]):
+#				return true
+#		Globals.char_state.AIR_BLOCK:
+#			if Animator.query(["AirBlockStartup"]):
+#				return true
+#	return false
 		
 func check_ledge_stop(): # some animations prevent you from dropping off
 	if !grounded:
@@ -2718,7 +2750,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.GROUND
 				
-			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
+			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
+					check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			else:
@@ -2752,7 +2785,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.AIR
 				
-			elif !"entity_nodepath" in hit_data and check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
+			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
+					check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
 			else:

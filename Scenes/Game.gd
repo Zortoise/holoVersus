@@ -1005,10 +1005,10 @@ func defender_anti_airing(hitbox, hurtbox):
 			defender.state == Globals.char_state.AIR_ATK_ACTIVE: # for airborne defender using anti-air, only anti-air during active frames
 		
 		var has_anti_air_attr = Globals.atk_attr.ANTI_AIR in defender.query_atk_attr()
-		if has_anti_air_attr and Globals.atk_attr.AIR_ATTACK in attacker.UniqueCharacter.query_atk_attr(hitbox.move_name):
+		if has_anti_air_attr and (!attacker.grounded or Globals.atk_attr.AIR_ATTACK in attacker.UniqueCharacter.query_atk_attr(hitbox.move_name)):
 			# don't use hitbox.move_data.atk_attr, some attacks have special conditions added in UniqueCharacter.query_atk_attr()
 			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
-			# and the attacker must be using an AIR_ATTACK in air or on ground
+			# and the attacker must be using an AIR_ATTACK in air or on ground, or be airborne
 			# now to check tiers
 			var defender_tier = Globals.atk_type.HEAVY # for normal AIR_ATTACK attribute, can defend against all aerials HEAVY or below
 			var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
