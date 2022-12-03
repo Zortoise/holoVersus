@@ -72,9 +72,16 @@ func stimulate():
 		elif !Character.button_light in Character.input_state.pressed:
 			Character.animate("aL2bRecovery")
 			
-	if Character.state == Globals.char_state.AIR_ATK_STARTUP and Animator.query(["aF1[h]Startup"]): # land canceling held a.F
-		if !Character.button_fierce in Character.input_state.pressed:
+	if Character.state == Globals.char_state.AIR_ATK_STARTUP and Animator.query(["aF1[h]Startup"]): # if holding a.F
+		if !Character.button_fierce in Character.input_state.pressed: # releasing held a.F
 			Character.animate("aF1Active")
+		elif Character.grounded: # landing while holding a.F
+			if Character.button_up in Character.input_state.pressed: # if pressing up, cancel to neutral
+				Character.startup_cancel_flag = true
+				Character.animate("HardLanding")
+			else: # if not pressing up, do a.F
+				Character.animate("aF1Active")
+			
 			
 	if Character.state == Globals.char_state.GROUND_RECOVERY and Animator.query(["Dash"]): 	# dash dancing
 		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
@@ -414,9 +421,9 @@ func query_atk_attr(move_name): # may have certain conditions
 		"F3b":
 			return [Globals.atk_attr.ANTI_AIR]
 		"F3[h]":
-			return [Globals.atk_attr.SUPERARMOR, Globals.atk_attr.NO_TURN]
+			return [Globals.atk_attr.VARIANT_STARTUP, Globals.atk_attr.SUPERARMOR, Globals.atk_attr.NO_TURN]
 		"aF1[h]":
-			return [Globals.atk_attr.LAND_CANCEL, Globals.atk_attr.NO_TURN]
+			return [Globals.atk_attr.VARIANT_STARTUP, Globals.atk_attr.NO_TURN]
 			
 	if move_name in MOVE_DATABASE:
 		return MOVE_DATABASE[move_name].atk_attr
@@ -776,7 +783,7 @@ func start_audio(anim_name):
 		"AirJumpTransit2":
 			Character.play_audio("jump1", {"vol":-2})
 		"SoftLanding", "HardLanding", "BlockLanding":
-			if Character.velocity_previous_frame.y != 0:
+			if Character.velocity_previous_frame.y > 0:
 				landing_sound()
 		"LaunchTransit":
 			if Character.grounded and abs(Character.velocity.y) < 1:

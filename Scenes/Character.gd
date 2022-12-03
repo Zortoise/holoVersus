@@ -1056,7 +1056,7 @@ func stimulate2(): # only ran if not in hitstop
 	if abs(velocity.y) < 5.0:
 		velocity.y = 0.0
 	
-	velocity_previous_frame = velocity # needed to check for hard landings
+	velocity_previous_frame = velocity
 	var results = character_move($PlayerCollisionBox, $SoftPlatformDBox, velocity, check_ledge_stop())
 	velocity = results[0]
 	if results[1]: check_landing()
@@ -1659,17 +1659,18 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			else: # landing during AirDashBrake or AirDashDD
 				animate("HardLanding")
 				
-		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
-			# cannot land during aerial startup and active frames unless they have the LAND_CANCEL atk attr
-			if Globals.atk_attr.LAND_CANCEL in query_atk_attr():
-				startup_cancel_flag = true
-				animate("HardLanding")
-			else: continue
+#		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
+#			# cannot land during aerial startup and active frames unless they have the LAND_CANCEL atk attr
+#			if Globals.atk_attr.LAND_CANCEL in query_atk_attr():
+#				startup_cancel_flag = true
+#				animate("HardLanding")
+#			else: continue
 			
 		Globals.char_state.AIR_ATK_STARTUP: # can land cancel on the 1st few frames, will auto-buffer pressed attacks
-			if Animator.time <= AERIAL_STARTUP_LAND_CANCEL_TIME and Animator.time != 0:
+			if !Globals.atk_attr.VARIANT_STARTUP in query_atk_attr() and velocity_previous_frame.y > 0 and \
+					Animator.time <= AERIAL_STARTUP_LAND_CANCEL_TIME and Animator.time != 0:
 				animate("HardLanding") # this makes landing and attacking instantly easier
-	
+
 		Globals.char_state.AIR_FLINCH_HITSTUN: # land during hitstun               
 			emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})               
 			match Animator.to_play_animation:
@@ -2083,13 +2084,13 @@ func query_traits(): # may have certain conditions
 # name should be stripped already!
 func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
 	
-	if is_burst(in_move_name):
-		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.NO_TURN]
-	
 	var move_name = in_move_name
 	if move_name == null:
 		move_name = get_move_name()
 		
+	if is_burst(move_name):
+		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.NO_TURN]
+	
 	return UniqueCharacter.query_atk_attr(move_name)
 
 
