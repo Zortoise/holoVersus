@@ -296,7 +296,14 @@ func process_button(new_state, attack_ref: String, has_acted: Array, buffer_time
 					Character.chain_memory = []
 					has_acted[0] = true
 					return true
-				
+					
+			Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit
+				if attack_ref == "F3" and Animator.query_to_play(["JumpTransit"]):
+					Character.animate(attack_ref + "Startup")
+					Character.chain_memory = []
+					has_acted[0] = true
+					return true
+					
 			Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 				if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 					if "a" + attack_ref in MOVE_DATABASE and !("a" + attack_ref in Character.aerial_memory):

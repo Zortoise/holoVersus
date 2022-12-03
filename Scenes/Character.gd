@@ -31,6 +31,12 @@ const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal 
 const HOP_JUMP_MOD = 0.8 # can hop by using up + jump
 const IMPULSE_MOD = 1.25 # multiply by UniqueCharacter.SPEED to get impulse velocity
 const PERFECT_IMPULSE_MOD = 1.75 # multiply by UniqueCharacter.SPEED to get impulse velocity
+const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
+const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
+const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
+const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
+const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is crouching
+const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -104,17 +110,12 @@ const WEAK_HIT_AUDIO_NERF = -9
 const BOUNCE_DUST_THRESHOLD = 100.0 # min velocity towards surface needed to release BounceDust when bouncing
 const LAUNCH_DUST_THRESHOLD = 1400.0 # velocity where launch dust increase in frequency
 
-const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
-const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
 const DDI_SIDE_MAX = 30 # horizontal Drift DI speed at 200% Guard Gauge
 const MAX_DDI_SIDE_SPEED = 300.0 # max horizontal Drift DI speed
 const GDI_UP_MAX = 0.8 # gravity decrease upward Gravity DI at 200% Guard Gauge
 const GDI_DOWN_MAX = 1.3 # gravity increase downward Gravity DI at 200% Guard Gauge
 const VDI_MAX = 0.3 # change in knockback vector when using Vector DI at 200% Guard Gauge
 const DI_MIN_MOD = 0.0 # percent of max DI at 100% Guard Gauge
-const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
-const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
-const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is crouching
 
 
 # variables used, don't touch these
@@ -654,7 +655,8 @@ func stimulate2(): # only ran if not in hitstop
 			impulse_used = true
 			var move_name = Animator.to_play_animation.trim_suffix("Startup")
 			if move_name in UniqueCharacter.MOVE_DATABASE:
-				if !Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
+				if !Globals.atk_attr.VARIANT_STARTUP in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr and \
+						!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
 					velocity.x = dir * UniqueCharacter.SPEED * IMPULSE_MOD
 					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})	
 
@@ -1662,7 +1664,12 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			if Globals.atk_attr.LAND_CANCEL in query_atk_attr():
 				startup_cancel_flag = true
 				animate("HardLanding")
-				
+			else: continue
+			
+		Globals.char_state.AIR_ATK_STARTUP: # can land cancel on the 1st few frames, will auto-buffer pressed attacks
+			if Animator.time <= AERIAL_STARTUP_LAND_CANCEL_TIME and Animator.time != 0:
+				animate("HardLanding") # this makes landing and attacking instantly easier
+	
 		Globals.char_state.AIR_FLINCH_HITSTUN: # land during hitstun               
 			emit_signal("SFX","LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})               
 			match Animator.to_play_animation:
