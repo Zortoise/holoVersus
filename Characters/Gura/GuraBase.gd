@@ -43,6 +43,9 @@ const PALETTE_TO_PORTRAIT = {
 	2: Color(1.20, 0.70, 0.70),
 }
 
+const EX_FLASH_ANIM = [] # list of movenames that will emit EX flash
+#const EX_FLASH_ANIM = ["H", "Hb"]
+
 # const DIRECTORY_NAME = "res://Characters/Gura/"
 
 # this contain move_data for each active animation this character has
@@ -193,7 +196,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2.4,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_REPEAT, Globals.atk_attr.NO_IMPULSE],
+		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_IMPULSE],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	"H[h]" : {
@@ -230,7 +233,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2.4,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_REPEAT, Globals.atk_attr.NO_IMPULSE],
+		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_IMPULSE],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	"aL1" : {

@@ -7,7 +7,6 @@ signal projectile (out_owner_ID, out_loaded_proj_ref, out_move_data, out_positio
 
 # constants
 const GRAVITY = 4000.0
-const SpecialTimer_WAIT_TIME = 10 # special button buffer, also used for SuperTimer
 const PEAK_DAMPER_MOD = 0.6 # used to reduce gravity at jump peak
 const PEAK_DAMPER_LIMIT = 400.0 # min velocity.y where jump peak gravity reduction kicks in
 const TERMINAL_THRESHOLD = 1.5 # if velocity.y is over this during hitstun, no terminal velocity slowdown
@@ -25,7 +24,7 @@ const BURSTCOUNTER_EX_COST = 1
 const BURSTESCAPE_GG_COST = 0.5
 const AIRBLOCK_GRAV_MOD = 0.5 # multiply to GRAVITY to get gravity during air blocking
 const AIRBLOCK_TERMINAL_MOD = 0.7 # multiply to get terminal velocity during air blocking
-#const TAP_MEMORY_DURATION = 5
+const TAP_MEMORY_RELEASE_DURATION = 5 # for releasing Special/Unique for EX Moves/Supers, always QUICK_CANCEL_TIME + 1 for Light/Fierce
 const MAX_WALL_JUMP = 5
 const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal velocity during hitstun
 const HOP_JUMP_MOD = 0.8 # can hop by using up + jump
@@ -197,7 +196,7 @@ var aerial_memory = [] # appended whenever an air attack (Normal/Special) is mad
 var block_rec_cancel := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
 var targeted_opponent: int # player_ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var has_burst := false # gain burst by ringing out opponent
-#var tap_memory = [] # for double taps
+var tap_memory = []
 var impulse_used := false
 
 # controls
@@ -759,24 +758,6 @@ func stimulate2(): # only ran if not in hitstop
 					animate("AirBlockStartup")
 					$VarJumpTimer.stop()
 			
-
-# SPECIAL/EX BUTTON --------------------------------------------------------------------------------------------------	
-
-	if !query_status_effect(Globals.status_effect.RESPAWN_GRACE): # no special/ex/supers during respawn grace
-		if button_special in input_state.just_released and !button_block in input_state.pressed:
-			if !$SpecialTimer.is_running() and !$SuperTimer.is_running():
-				$EXTimer.stop()
-				$SpecialTimer.time = SpecialTimer_WAIT_TIME
-			else: # double/triple tab Special, prep for Super
-				$SpecialTimer.stop()
-				$SuperTimer.time = SpecialTimer_WAIT_TIME
-				
-#		if button_EX in input_state.just_released:
-#			$SpecialTimer.stop()
-#			$SuperTimer.stop()
-#			$EXTimer.time = SpecialTimer_WAIT_TIME
-
-
 # --------------------------------------------------------------------------------------------------
 
 	UniqueCharacter.stimulate() # some holdable buttons can have effect unique to the character
@@ -975,7 +956,7 @@ func stimulate2(): # only ran if not in hitstop
 		
 		Globals.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
-			if !$HitStunTimer.is_running() and Animator.query_to_play(["Launch"]):
+			if !$HitStunTimer.is_running() and Animator.query_to_play(["Launch", "LaunchTransit"]):
 				animate("FallTransit")
 				$ModulatePlayer.play("tech_flash")
 				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
@@ -1072,7 +1053,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 	
 	test1()
 	
-#	progress_tap_memory()
+	progress_tap_memory()
 	
 	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
 										   # useful for status effects that are removed after being hit
@@ -1107,6 +1088,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 							$HitStunTimer.stimulate() # hitstun decay thrice as fast if falling too fast during launch when too low
 				
 			
+			ex_flash()
 			# do shadow trails
 			UniqueCharacter.shadow_trail()
 			
@@ -1121,10 +1103,6 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 			$HitStopTimer.time = hitstop
 			
 		$ModulatePlayer.stimulate() # modulate animations continue even in hitstop
-		# advance special input timers
-		$SpecialTimer.stimulate()
-		$EXTimer.stimulate()
-		$SuperTimer.stimulate()
 		
 	test2()
 		
@@ -1138,14 +1116,19 @@ func buffer_actions():
 	
 	if button_up in input_state.just_pressed:
 		input_buffer.append([button_up, Settings.input_buffer_time[player_ID]])
+		tap_memory.append([button_up, QUICK_CANCEL_TIME + 3])
+	if button_down in input_state.just_pressed:
+		tap_memory.append([button_down, QUICK_CANCEL_TIME + 3])
 	if button_dash in input_state.just_pressed:
 		input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
 		
 	if !query_status_effect(Globals.status_effect.RESPAWN_GRACE): # no attacking during respawn grace
 		if button_light in input_state.just_pressed:
 			input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
+			tap_memory.append([button_light, QUICK_CANCEL_TIME + 1])
 		if button_fierce in input_state.just_pressed:
 			input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
+			tap_memory.append([button_fierce, QUICK_CANCEL_TIME + 1])
 		if button_aux in input_state.just_pressed:
 			input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
 	
@@ -1169,48 +1152,62 @@ func buffer_actions():
 func capture_combinations():
 	
 	# instant air dash, place at back
-	combination(button_jump, button_dash, "InstaAirDash", null, true)
+	combination(button_jump, button_dash, "InstaAirDash", true)
 	
 #	combination(button_block, button_special, "Burst") # place this here since button_special is never buffered
 			
 	UniqueCharacter.capture_combinations()
 
 
-func combination_single(button1, action, back = false): # useful for Special/EX/Super Moves
-	if button1 in input_state.just_pressed:
+#func combination_single(button1, action, back = false): # useful for Special/EX/Super Moves
+#	if button1 in input_state.just_pressed:
+#		if !back:
+#			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+#		else:
+#			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+
+func combination(button1, button2, action, back = false):
+	if (button1 in input_state.just_pressed and is_button_pressed(button2)) or \
+			(button2 in input_state.just_pressed and is_button_pressed(button1)):
 		if !back:
 			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
 		else:
 			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
-
-func combination(button1, button2, action, extra = null, back = false):
-	if (button1 in input_state.just_pressed and button2 in input_state.pressed) or \
-			(button1 in input_state.pressed and button2 in input_state.just_pressed):
-		if extra:
-			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID], extra])
-			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID], extra])
-		else:
-			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
-			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
 				
-func combination_trio(button1, button2, button3, action, extra = null, back = false):
-	if (button1 in input_state.just_pressed and button2 in input_state.pressed and button3 in input_state.pressed) or \
-			(button1 in input_state.pressed and button2 in input_state.just_pressed and button3 in input_state.pressed) or \
-			(button1 in input_state.pressed and button2 in input_state.pressed and button3 in input_state.just_pressed):
-		if extra:
-			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID], extra])
-			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID], extra])
+func combination_trio(button1, button2, button3, action, back = false):
+	if (button1 in input_state.just_pressed and is_button_pressed(button2) and is_button_pressed(button3)) or \
+			(button2 in input_state.just_pressed and is_button_pressed(button1) and is_button_pressed(button3)) or \
+			(button3 in input_state.just_pressed and is_button_pressed(button1) and is_button_pressed(button2)):
+		if !back:
+			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
 		else:
-			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
-			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+			
+func is_button_pressed(button):
+	if button in [button_light, button_fierce]: # for attack buttons, only considered "pressed" up to 1 frame after being pressed
+		for tap in tap_memory:
+			if tap[0] == button:
+				return true
+	elif button == button_up:
+		if Settings.tap_jump[player_ID] == 0: # tap jump off
+			if button in input_state.pressed:
+				return true
+		else: # tap jump on, can only use up-tilts within 1 frame of pressing up
+			for tap in tap_memory:
+				if tap[0] == button:
+					return true
+	elif button == button_down:
+		if grounded:
+			if button in input_state.pressed:
+				return true
+		else: # when in air, can only use down-tilts within 1 frame of pressing up
+			for tap in tap_memory:
+				if tap[0] == button:
+					return true
+	else:
+		if button in input_state.pressed:
+			return true
+	return false
 		
 	
 # INPUT BUFFER ---------------------------------------------------------------------------------------------------
@@ -1499,9 +1496,6 @@ func on_kill():
 		$BlockStunTimer.stop()
 		$HitStunTimer.stop()
 		$HitStopTimer.stop()
-		$SpecialTimer.stop()
-		$EXTimer.stop()
-		$SuperTimer.stop()
 		
 		$Sprites.hide()
 		state = Globals.char_state.DEAD
@@ -1826,6 +1820,19 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 				aux_data["palette"] = palette
 			emit_signal("SFX", anim, loaded_sfx_ref, particle_pos, aux_data)
 			
+func ex_flash():# process ex flash
+	if is_attacking(): 	# if current movename in UniqueCharacter.EX_FLASH_ANIM, will ex flash during startup/active/recovery
+		if get_move_name() in UniqueCharacter.EX_FLASH_ANIM:
+			if $ModulatePlayer.playing and $ModulatePlayer.query(["EX_flash", "EX_flash2"]):
+				return
+			else:
+				$ModulatePlayer.play("EX_flash")
+				return
+				
+	if $ModulatePlayer.playing and $ModulatePlayer.query(["EX_flash", "EX_flash2"]): # not doing an ex move, stop ex flash if ex flashing 
+		reset_modulate()
+		
+			
 func shadow_trail(starting_modulate_a = 0.5, lifetime = 10.0): # one shadow every 2 frames
 	if shadow_timer <= 0:
 		shadow_timer = 1
@@ -1872,9 +1879,10 @@ func get_move_name():
 	return move_name
 	
 func check_quick_turn():
-	match state: # use current state instead of new_state
+	match state:
 		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
 			return true
+	match new_state:
 		Globals.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on any startup frame
 			var move_name = get_move_name()
 			if move_name == null: return false
@@ -2094,15 +2102,15 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 	return UniqueCharacter.query_atk_attr(move_name)
 
 
-#func progress_tap_memory(): # remove taps that expired
-#	var to_erase = []
-#	for tap in tap_memory:
-#		tap[1] -= 1
-#		if tap[1] <= 0:
-#			to_erase.append(tap)
-#	if to_erase.size() > 0:
-#		for x in to_erase:
-#			tap_memory.erase(x)
+func progress_tap_memory(): # remove taps that expired
+	var to_erase = []
+	for tap in tap_memory:
+		tap[1] -= 1
+		if tap[1] <= 0:
+			to_erase.append(tap)
+	if to_erase.size() > 0:
+		for x in to_erase:
+			tap_memory.erase(x)
 #
 #func test_doubletap(button):
 #	for tap in tap_memory:
@@ -2293,6 +2301,16 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 		return null
 		
 	
+func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aerial normals
+	
+	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
+		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
+		
+	if attack_ref in aerial_memory: return false
+	
+	return true
+	
+	
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
 	
 	if !is_atk_recovery() and !is_atk_active(): return false
@@ -2331,6 +2349,7 @@ func test_qc_chain_combo(attack_ref):
 		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
 	
 	if attack_ref in chain_memory: return false # cannot quick cancel into moves already done
+	if attack_ref in aerial_memory: return false # cannot quick cancel into aerials already done during that jump
 	
 	if chain_combo == 2: # on blocking opponent, can only qc into moves of higher strength
 		if get_atk_strength(chain_memory.back()) >= get_atk_strength(attack_ref):
@@ -2698,7 +2717,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data["punish_hit"] = false
 	hit_data["break_hit"] = false
 	hit_data["block_state"] = Globals.block_state.UNBLOCKED # WIP
-	hit_data["repeat_penalty"] = false
+	hit_data["repeat"] = false
 	hit_data["double_repeat"] = false
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
@@ -2712,11 +2731,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	for array in move_memory:
 		if array[0] == attacker.player_ID and array[1] == root_move_name:
-			if !hit_data.repeat_penalty:
-				hit_data.repeat_penalty = true # found a repeat
-				if Globals.atk_attr.NO_REPEAT in attacker.query_atk_attr(hit_data.move_name):
-					double_repeat = true
+			if !hit_data.repeat:
+				hit_data.repeat = true # found a repeat
+				if !hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE]:
+					double_repeat = true # if attack is not light/fierce, can only repeat once
 					hit_data["double_repeat"] = true
+					break
 			elif !double_repeat:
 				double_repeat = true
 				hit_data["double_repeat"] = true # found multiple repeats
@@ -2984,9 +3004,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 			face(dir_to_attacker) # turn towards attacker              
 			
-			if adjusted_atk_level <= 1 and !state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
+			if adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running() and \
+					!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
 					Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
-					Globals.char_state.AIR_C_RECOVERY] and (knockback_dir == 0.0 or knockback_dir == PI): # last part needed to avoid AirDropHard
+					Globals.char_state.AIR_C_RECOVERY]:
 				pass # level 1 hit when defender is in non-passive states just push them back
 						
 			elif hit_data.hit_center.y >= position.y: # A/B depending on height hit
@@ -3219,15 +3240,16 @@ func calculate_knockback_strength(hit_data):
 			
 #	knockback_strength *= defender.UniqueCharacter.KB_MOD # defender's weight
 	
-	if attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) and defender.get_damage_percent() >= 1.0:
-		# no KB boost for multi-hit attacks till the last hit
-		var dmg_val_boost = min((defender.get_damage_percent() - 1.0) / 0.25 * 0.5 + 2.0 \
-				, DMG_VAL_KB_LIMIT)
-		#	0.0 percent damage over is x2.0 knockback
-		#	0.25 percent damage over is x2.5 knockback
-		# 	0.5 percent damage over is x3.0 knockback
-		knockback_strength *= dmg_val_boost
-		
+	if !hit_data.weak_hit:
+		if attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) and defender.get_damage_percent() >= 1.0:
+			# no KB boost for multi-hit attacks till the last hit
+			var dmg_val_boost = min((defender.get_damage_percent() - 1.0) / 0.25 * 0.5 + 2.0 \
+					, DMG_VAL_KB_LIMIT)
+			#	0.0 percent damage over is x2.0 knockback
+			#	0.25 percent damage over is x2.5 knockback
+			# 	0.5 percent damage over is x3.0 knockback
+			knockback_strength *= dmg_val_boost
+			
 	if defender.current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
 		knockback_strength *= lerp(1.0, UniqueCharacter.KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
 	
@@ -3564,9 +3586,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 	
 	if is_atk_startup():
 		var move_name = anim_name.trim_suffix("Startup")
-		if move_name in UniqueCharacter.MOVE_DATABASE:
-			if Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
-				aerial_memory.append(move_name)  #add to aerial memory if needed
 				
 		if dir != 0: # impulse
 			if state == Globals.char_state.GROUND_ATK_STARTUP:
@@ -3588,9 +3607,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 			var move_name = anim_name.trim_suffix("Active")
 			if move_name in UniqueCharacter.MOVE_DATABASE:
 				if "root" in UniqueCharacter.MOVE_DATABASE[move_name]:
-					chain_memory.append(UniqueCharacter.MOVE_DATABASE[move_name].root)
+					chain_memory.append(UniqueCharacter.MOVE_DATABASE[move_name].root) # add move to chain memory
+					if Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
+						aerial_memory.append(UniqueCharacter.MOVE_DATABASE[move_name].root) # add aerial to aerial_memory
 				else:
 					chain_memory.append(move_name)
+					if Globals.atk_attr.AIR_ATTACK in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr:
+						aerial_memory.append(move_name)
+					
 		else:
 			perfect_chain = false # change to false if neither startup nor active
 
@@ -3799,7 +3823,7 @@ func save_state():
 		"status_effects" : status_effects,
 		"hitcount_record" : hitcount_record,
 		"ignore_list" : ignore_list,
-#		"tap_memory" : tap_memory,
+		"tap_memory" : tap_memory,
 		
 		"sprite_scale" : sprite.scale,
 		"sprite_rotation" : sprite.rotation,
@@ -3815,9 +3839,6 @@ func save_state():
 		"HitStunTimer_time" : $HitStunTimer.time,
 		"BlockStunTimer_time" : $BlockStunTimer.time,
 		"HitStopTimer_time" : $HitStopTimer.time,
-		"SpecialTimer_time" : $SpecialTimer.time,
-		"EXTimer_time" : $EXTimer.time,
-		"SuperTimer_time" : $SuperTimer.time,
 		"PBlockTimer_time" : $PBlockTimer.time,
 		"PBlockCDTimer_time" : $PBlockCDTimer.time,
 		"RespawnTimer_time" : $RespawnTimer.time,
@@ -3870,7 +3891,7 @@ func load_state(state_data):
 	status_effects = state_data.status_effects
 	hitcount_record = state_data.hitcount_record
 	ignore_list = state_data.ignore_list
-#	tap_memory = state_data.tap_memory
+	tap_memory = state_data.tap_memory
 		
 	sprite.scale = state_data.sprite_scale
 	sprite.rotation = state_data.sprite_rotation
@@ -3889,9 +3910,6 @@ func load_state(state_data):
 	$HitStunTimer.time = state_data.HitStunTimer_time
 	$BlockStunTimer.time = state_data.BlockStunTimer_time
 	$HitStopTimer.time = state_data.HitStopTimer_time
-	$SpecialTimer.time = state_data.SpecialTimer_time
-	$EXTimer.time = state_data.EXTimer_time
-	$SuperTimer.time = state_data.SuperTimer_time
 	$PBlockTimer.time = state_data.PBlockTimer_time
 	$PBlockCDTimer.time = state_data.PBlockCDTimer_time
 	$RespawnTimer.time = state_data.RespawnTimer_time

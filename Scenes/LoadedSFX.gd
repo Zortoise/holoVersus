@@ -258,9 +258,8 @@ var modulate_animations = {
 		}
 	},
 	"EX_flash2" : {
-		"duration": 37,
-		"loop" : false,
-		"loop_section" : 18,
+		"duration": 18,
+		"loop" : true,
 		"shadow_trail" : 0,
 		"timestamps" : {
 			0 : # this is the timestamp of the key

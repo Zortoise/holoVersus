@@ -103,36 +103,38 @@ func stimulate():
 					Character.animate("JumpTransit")
 					Character.cancel_and_buffer() # this buffers the attack buttons currently being pressed
 					
-				# releasing up button to cancel up-tilts to neutral
-				if Character.button_up in Character.input_state.just_released:
-					if Animator.query(["F3Startup"]) and Character.test_qc_chain_combo("F1"):
-						Character.animate("F1Startup")
-				# releasing down button to cancel down-tilts to neutral
-				if Character.button_down in Character.input_state.just_released:
-					if Animator.query(["F2Startup"]) and Character.test_qc_chain_combo("F1"):
-						Character.animate("F1Startup")
-					elif Animator.query(["L2Startup"]) and Character.test_qc_chain_combo("L1"):
-						Character.animate("L1Startup")
+			# no longer need to cancel from button release due to new tilt system
+			
+#				# releasing up button to cancel up-tilts to neutral
+#				if Character.button_up in Character.input_state.just_released:
+#					if Animator.query(["F3Startup"]) and Character.test_qc_chain_combo("F1"):
+#						Character.animate("F1Startup")
+#				# releasing down button to cancel down-tilts to neutral
+#				if Character.button_down in Character.input_state.just_released:
+#					if Animator.query(["F2Startup"]) and Character.test_qc_chain_combo("F1"):
+#						Character.animate("F1Startup")
+#					elif Animator.query(["L2Startup"]) and Character.test_qc_chain_combo("L1"):
+#						Character.animate("L1Startup")
 						
-			Globals.char_state.AIR_ATK_STARTUP:
-				# releasing up button to cancel up-tilts to neutral
-				if Character.button_up in Character.input_state.just_released:
-					if Animator.query(["aF3Startup"]) and Character.test_qc_chain_combo("aF1"):
-						Character.animate("aF1Startup")
-				# releasing down button to cancel down-tilts to neutral
-				if Character.button_down in Character.input_state.just_released:
-					if Animator.query(["aL2Startup"]) and Character.test_qc_chain_combo("aL1"):
-						Character.animate("aL1Startup")
+#			Globals.char_state.AIR_ATK_STARTUP:
+#				# releasing up button to cancel up-tilts to neutral
+#				if Character.button_up in Character.input_state.just_released:
+#					if Animator.query(["aF3Startup"]) and Character.test_qc_chain_combo("aF1"):
+#						Character.animate("aF1Startup")
+#				# releasing down button to cancel down-tilts to neutral
+#				if Character.button_down in Character.input_state.just_released:
+#					if Animator.query(["aL2Startup"]) and Character.test_qc_chain_combo("aL1"):
+#						Character.animate("aL1Startup")
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 
 
 func capture_combinations():
 	
-	Character.combination(Character.button_up, Character.button_light, "UpLight")	
-	Character.combination(Character.button_down, Character.button_light, "DownLight")
-	Character.combination(Character.button_up, Character.button_fierce, "UpFierce")	
-	Character.combination(Character.button_down, Character.button_fierce, "DownFierce")
+	Character.combination(Character.button_up, Character.button_light, "uL")	
+	Character.combination(Character.button_down, Character.button_light, "dL")
+	Character.combination(Character.button_up, Character.button_fierce, "uF")	
+	Character.combination(Character.button_down, Character.button_fierce, "dF")
 	Character.combination(Character.button_light, Character.button_fierce, "H")
 
 	# Command Normals
@@ -252,19 +254,19 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		# SPECIAL ACTIONS ---------------------------------------------------------------------------------
 		# buffered_input_action can be a string instead of int, for heavy attacks and special moves
 
-		"UpLight":
+		"uL":
 			if !has_acted[0]:
 				keep = !process_button(new_state, "L3", has_acted, buffered_input[1])
 				
-		"DownLight":
+		"dL":
 			if !has_acted[0]:
 				keep = !process_button(new_state, "L2", has_acted, buffered_input[1])
 
-		"UpFierce":
+		"uF":
 			if !has_acted[0]:
 				keep = !process_button(new_state, "F3", has_acted, buffered_input[1])
 				
-		"DownFierce":
+		"dF":
 			if !has_acted[0]:
 				keep = !process_button(new_state, "F2", has_acted, buffered_input[1])
 				
@@ -313,11 +315,19 @@ func process_button(new_state, attack_ref: String, has_acted: Array, buffer_time
 					
 			Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 				if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
-					if "a" + attack_ref in MOVE_DATABASE and !("a" + attack_ref in Character.aerial_memory):
+					if "a" + attack_ref in MOVE_DATABASE and Character.test_aerial_memory("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						Character.chain_memory = []
 						has_acted[0] = true
 						return true
+						
+			Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit
+				if "a" + attack_ref == "aF3" and Character.test_aerial_memory("a" + attack_ref) and \
+						Animator.query_to_play(["AirJumpTransit", "AirJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
+					Character.animate("a" + attack_ref + "Startup")
+					Character.chain_memory = []
+					has_acted[0] = true
+					return true
 				
 			# chain cancel
 			Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
@@ -342,7 +352,7 @@ func process_button(new_state, attack_ref: String, has_acted: Array, buffer_time
 			# chain cancel
 			Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_ATK_ACTIVE:
 				if !Character.grounded:
-					if "a" + attack_ref in MOVE_DATABASE and !("a" + attack_ref in Character.aerial_memory):
+					if "a" + attack_ref in MOVE_DATABASE and Character.test_aerial_memory("a" + attack_ref):
 						if Character.test_chain_combo("a" + attack_ref):
 							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 								Character.get_node("ModulatePlayer").play("unflinch_flash")
@@ -400,10 +410,10 @@ func shadow_trail():# process shadow trail
 			return
 			
 	match Animator.to_play_animation:
-		"Dash", "AirDash", "AirDashD", "AirDashU", "AirDashUU", "AirDashDD":
+		"Dash", "AirDash", "AirDashD2", "AirDashU2":
 			Character.shadow_trail()
-
-
+			
+			
 func query_move_data(move_name):
 	# move data may change for certain moves under certain conditions, unique to character
 	var move_data = MOVE_DATABASE[move_name]

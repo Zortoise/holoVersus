@@ -91,12 +91,6 @@ margin_bottom = 22.0
 
 [node name="HitStopTimer" parent="." instance=ExtResource( 4 )]
 
-[node name="SpecialTimer" parent="." instance=ExtResource( 4 )]
-
-[node name="EXTimer" parent="." instance=ExtResource( 4 )]
-
-[node name="SuperTimer" parent="." instance=ExtResource( 4 )]
-
 [node name="PBlockTimer" parent="." instance=ExtResource( 4 )]
 
 [node name="PBlockCDTimer" parent="." instance=ExtResource( 4 )]
