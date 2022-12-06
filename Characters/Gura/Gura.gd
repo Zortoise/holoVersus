@@ -83,7 +83,8 @@ func stimulate():
 				Character.animate("aF1Active")
 			
 			
-	if Character.state == Globals.char_state.GROUND_RECOVERY and Animator.query(["Dash"]): 	# dash dancing
+	if Character.state == Globals.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
+			Animator.query(["Dash"]): 	# dash dancing, need to hold dash
 		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
 			Character.face(-1)
 			Character.animate("Dash")
@@ -306,8 +307,9 @@ func process_button(new_state, attack_ref: String, has_acted: Array, buffer_time
 					has_acted[0] = true
 					return true
 					
-			Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit
-				if attack_ref == "F3" and Animator.query_to_play(["JumpTransit"]):
+			Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
+				if attack_ref == "F3" and !Character.button_jump in Character.input_state.pressed and \
+						Animator.query_to_play(["JumpTransit"]):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
@@ -321,8 +323,9 @@ func process_button(new_state, attack_ref: String, has_acted: Array, buffer_time
 						has_acted[0] = true
 						return true
 						
-			Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit
-				if "a" + attack_ref == "aF3" and Character.test_aerial_memory("a" + attack_ref) and \
+			Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
+				if "a" + attack_ref == "aF3" and !Character.button_jump in Character.input_state.pressed and \
+						Character.test_aerial_memory("a" + attack_ref) and \
 						Animator.query_to_play(["AirJumpTransit", "AirJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
 					Character.animate("a" + attack_ref + "Startup")
 					Character.chain_memory = []

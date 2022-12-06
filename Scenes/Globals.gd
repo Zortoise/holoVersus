@@ -6,7 +6,7 @@ enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, G
 		GROUND_C_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, GROUND_FLINCH_HITSTUN,
 		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_ATK_STARTUP, GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY,
 		AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, GROUND_BLOCKSTUN, AIR_BLOCK, AIR_BLOCKSTUN}
-enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, PROJECTILE}
+enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum hitspark_type {CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
@@ -49,7 +49,7 @@ const FLAT_STOCK_LOSS = 500
 # preloading scenes will cause issues, do them on onready variables instead
 onready var loaded_audio_scene := load("res://Scenes/AudioManager.tscn")
 onready var loaded_character_scene := load("res://Scenes/Character.tscn")
-onready var loaded_proj_scene := load("res://Scenes/Projectile.tscn")
+onready var loaded_entity_scene := load("res://Scenes/Entity.tscn")
 onready var loaded_SFX_scene := load("res://Scenes/SFX.tscn")
 onready var loaded_shadow_scene := load("res://Scenes/Shadow.tscn")
 onready var loaded_palette_shader = load("res://Scenes/Shaders/Palette.gdshader")
@@ -58,6 +58,26 @@ onready var loaded_guard_gauge = ResourceLoader.load("res://Assets/UI/guard_gaug
 onready var loaded_guard_gauge_pos = load("res://Assets/UI/guard_gauge_pos.tres")
 
 onready var loaded_ui_audio_scene := load("res://Scenes/Menus/UIAudio.tscn")
+
+
+onready var common_entity_data = {
+	"BurstCounter" : {
+		"scene" : load("res://Assets/Entities/BurstCounter.tscn"),
+		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
+		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
+	},
+	"BurstEscape" : {
+		"scene" : load("res://Assets/Entities/BurstEscape.tscn"),
+		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
+		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
+	},
+	"BurstExtend" : {
+		"scene" : load("res://Assets/Entities/BurstExtend.tscn"),
+		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
+		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
+	},
+}
+
 
 var editor: bool # check if running in editor or not
 
@@ -471,7 +491,7 @@ func atk_type_to_tier(atk_type):
 			return 2
 		Globals.atk_type.SUPER:
 			return 3
-		Globals.atk_type.PROJECTILE: # just in case
+		Globals.atk_type.ENTITY: # just in case
 			return -1
 	
 func status_effect_priority(effect):

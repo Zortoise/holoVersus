@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/input_assist.png-ce595b36bc3d6953a54a4b652a18ff70.stex"
+path="res://.import/BurstSprite.png-882f5448994b75a27fb680c3eaabc2f9.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/UI/inputs/input_assist.png"
-dest_files=[ "res://.import/input_assist.png-ce595b36bc3d6953a54a4b652a18ff70.stex" ]
+source_file="res://Assets/Entities/Spritesheets/BurstSprite.png"
+dest_files=[ "res://.import/BurstSprite.png-882f5448994b75a27fb680c3eaabc2f9.stex" ]
 
 [params]
 

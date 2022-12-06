@@ -40,7 +40,7 @@ stretch_mode = 2
 
 [node name="SoftPlatform1" type="Sprite" parent="."]
 modulate = Color( 0.819608, 0.819608, 0.819608, 1 )
-position = Vector2( -128, 12 )
+position = Vector2( -128, 44 )
 texture = ExtResource( 8 )
 
 [node name="SoftPlatform" parent="SoftPlatform1" instance=ExtResource( 3 )]
@@ -52,7 +52,7 @@ rect_pivot_offset = Vector2( 38, 13 )
 
 [node name="SoftPlatform2" type="Sprite" parent="."]
 modulate = Color( 0.819608, 0.819608, 0.819608, 1 )
-position = Vector2( 128, 12 )
+position = Vector2( 128, 44 )
 texture = ExtResource( 8 )
 
 [node name="SoftPlatform" parent="SoftPlatform2" instance=ExtResource( 3 )]
@@ -65,19 +65,18 @@ rect_pivot_offset = Vector2( 38, 13 )
 [node name="MainPlatform" type="TextureRect" parent="."]
 modulate = Color( 1.5, 1.5, 1.5, 1 )
 margin_left = -256.0
-margin_top = 96.0
+margin_top = 128.0
 margin_right = 256.0
-margin_bottom = 320.0
+margin_bottom = 448.0
 texture = ExtResource( 6 )
 stretch_mode = 2
 
 [node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 1 )]
-visible = false
 margin_right = 512.0
-margin_bottom = 224.0
+margin_bottom = 320.0
 
 [node name="MovingPlatform1" type="Path2D" parent="."]
-position = Vector2( 0, 8 )
+position = Vector2( 0, 40 )
 curve = SubResource( 5 )
 script = ExtResource( 5 )
 
@@ -98,7 +97,7 @@ margin_right = 64.0
 margin_bottom = 8.00001
 
 [node name="MovingPlatform2" type="Path2D" parent="."]
-position = Vector2( 0, 56 )
+position = Vector2( 0, 88 )
 curve = SubResource( 6 )
 script = ExtResource( 4 )
 
@@ -119,13 +118,13 @@ margin_right = 64.0
 margin_bottom = 48.0
 
 [node name="P1_Position" type="Position2D" parent="."]
-position = Vector2( -128, 96 )
+position = Vector2( -128, 128 )
 
 [node name="P2_Position" type="Position2D" parent="."]
-position = Vector2( 128, 96 )
+position = Vector2( 128, 128 )
 
 [node name="MiddlePosition" type="Position2D" parent="."]
-position = Vector2( 0, 96 )
+position = Vector2( 0, 128 )
 
 [node name="StageBox" type="ReferenceRect" parent="."]
 margin_left = -704.0
@@ -134,6 +133,7 @@ margin_right = 704.0
 margin_bottom = 448.0
 
 [node name="RespawnPoints" type="Node2D" parent="."]
+position = Vector2( 0, 32 )
 
 [node name="RespawnPoint1" type="Position2D" parent="RespawnPoints"]
 position = Vector2( -192, 40 )

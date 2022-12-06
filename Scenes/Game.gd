@@ -522,17 +522,17 @@ func stimulate(rendering = true):
 	for player in $Players.get_children():
 		player.stimulate(player_input_state)
 
-	for NPE in $NonPlayerEntitiesBack.get_children():
-		if NPE.free:
-			NPE.free()
+	for entity in $EntitiesBack.get_children():
+		if entity.free:
+			entity.free()
 		else:
-			NPE.stimulate()
+			entity.stimulate()
 		
-	for NPE in $NonPlayerEntitiesFront.get_children():
-		if NPE.free:
-			NPE.free()
+	for entity in $EntitiesFront.get_children():
+		if entity.free:
+			entity.free()
 		else:
-			NPE.stimulate()
+			entity.stimulate()
 
 	detect_hit()
 	
@@ -540,11 +540,11 @@ func stimulate(rendering = true):
 	for player in $Players.get_children():
 		player.stimulate_after()
 		
-	for NPE in $NonPlayerEntitiesBack.get_children():
-		NPE.stimulate_after()
+	for entity in $EntitiesBack.get_children():
+		entity.stimulate_after()
 		
-	for NPE in $NonPlayerEntitiesFront.get_children():
-		NPE.stimulate_after()
+	for entity in $EntitiesFront.get_children():
+		entity.stimulate_after()
 
 
 	for shadow in $ShadowTrail.get_children():
@@ -603,8 +603,8 @@ func save_state(timestamp):
 			},
 		"player_data" : {},
 		"shadow_data" : [],
-		"NPE_back_data" : [],
-		"NPE_front_data" : [],
+		"entities_back_data" : [],
+		"entities_front_data" : [],
 		"SFX_back_data" : [],
 		"SFX_front_data" : [],
 		"audio_data" : [],
@@ -626,11 +626,11 @@ func save_state(timestamp):
 	for shadow in $ShadowTrail.get_children():
 		game_state.shadow_data.append(shadow.save_state())
 		
-	for NPE in $NonPlayerEntitiesBack.get_children():
-		game_state.NPE_back_data.append(NPE.save_state())
+	for entity in $EntitiesBack.get_children():
+		game_state.entities_back_data.append(entity.save_state())
 		
-	for NPE in $NonPlayerEntitiesFront.get_children():
-		game_state.NPE_front_data.append(NPE.save_state())
+	for entity in $EntitiesFront.get_children():
+		game_state.entities_front_data.append(entity.save_state())
 		
 	for SFX in $SFXFront.get_children():
 		game_state.SFX_front_data.append(SFX.save_state())
@@ -675,10 +675,10 @@ func load_state(game_state):
 	# remove children
 	for shadow in $ShadowTrail.get_children():
 		shadow.free()
-	for NPE in $NonPlayerEntitiesBack.get_children():
-		NPE.free()
-	for NPE in $NonPlayerEntitiesFront.get_children():
-		NPE.free()
+	for entity in $EntitiesBack.get_children():
+		entity.free()
+	for entity in $EntitiesFront.get_children():
+		entity.free()
 	for SFX in $SFXFront.get_children():
 		SFX.free()
 	for SFX in $SFXBack.get_children():
@@ -692,15 +692,15 @@ func load_state(game_state):
 		$ShadowTrail.add_child(new_shadow)
 		new_shadow.load_state(state_data)
 
-	for state_data in loaded_game_state.NPE_back_data:
-		var new_projectile = Globals.loaded_proj_scene.instance()
-		$NonPlayerEntitiesBack.add_child(new_projectile)
-		new_projectile.load_state(state_data)
+	for state_data in loaded_game_state.entities_back_data:
+		var new_entity = Globals.loaded_entity_scene.instance()
+		$EntitiesBack.add_child(new_entity)
+		new_entity.load_state(state_data)
 		
-	for state_data in loaded_game_state.NPE_front_data:
-		var new_projectile = Globals.loaded_proj_scene.instance()
-		$NonPlayerEntitiesFront.add_child(new_projectile)
-		new_projectile.load_state(state_data)
+	for state_data in loaded_game_state.entities_front_data:
+		var new_entity = Globals.loaded_entity_scene.instance()
+		$EntitiesFront.add_child(new_entity)
+		new_entity.load_state(state_data)
 		
 	for state_data in loaded_game_state.SFX_front_data:
 		var new_SFX = Globals.loaded_SFX_scene.instance()
@@ -842,9 +842,9 @@ func detect_hit():
 			
 			hurtboxes.append(hurtbox)
 			
-	# for projectiles
-	var entities = $NonPlayerEntitiesBack.get_children()
-	entities.append_array($NonPlayerEntitiesFront.get_children())
+	# for entities
+	var entities = $EntitiesBack.get_children()
+	entities.append_array($EntitiesFront.get_children())
 	
 	for entity in entities:
 		var polygons_queried = entity.query_polygons()
@@ -855,7 +855,7 @@ func detect_hit():
 			var move_data = entity.query_move_data()
 			var hitbox = {
 				"polygon" : converted_polygon,
-				"owner_nodepath" : get_player_node(entity.owner_ID).get_path(),
+				"owner_nodepath" : entity.master_path,
 				"entity_nodepath" : entity.get_path(),
 				"facing": entity.facing,
 				"kborigin" : null,
@@ -896,11 +896,11 @@ func detect_hit():
 					continue # attacker must still have hitcount left
 				if get_node(hitbox.owner_nodepath).is_player_in_ignore_list(get_node(hurtbox.owner_nodepath).player_ID):
 					continue # defender must not be in attacker's ignore list
-			else: # for projectiles
+			else: # for entities
 				if get_node(hitbox.entity_nodepath).is_hitcount_maxed(get_node(hurtbox.owner_nodepath).player_ID, hitbox.move_data):
-					continue # projectile must still have hitcount left
+					continue # entity must still have hitcount left
 				if get_node(hitbox.entity_nodepath).is_player_in_ignore_list(get_node(hurtbox.owner_nodepath).player_ID):
-					continue # defender must not be in projectile's ignore list
+					continue # defender must not be in entity's ignore list
 						
 			# get an array of PoolVector2Arrays of the intersecting polygons
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.polygon)
@@ -915,7 +915,7 @@ func detect_hit():
 					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, hurtbox, true)
 						
 	for hit_data in hit_data_array:
-		# call being_hit() on the defender and landed_a_hit() on the attacker/projectile
+		# call being_hit() on the defender and landed_a_hit() on the attacker/entity
 		get_node(hit_data.defender_nodepath).being_hit(hit_data) # will add stuff to hit_data, passing by reference
 		if !"entity_nodepath" in hit_data:
 			get_node(hit_data.attacker_nodepath).landed_a_hit(hit_data)
@@ -957,20 +957,11 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_d
 #		"defensive_state": hurtbox.defensive_state,
 	}
 	
-	if "entity_nodepath" in hitbox: # flag hit as a projectile
+	if "entity_nodepath" in hitbox: # flag hit as a entity
 		hit_data["entity_nodepath"] = hitbox.entity_nodepath
 	
 	hit_data_array.append(hit_data)
 	
-	
-
-## 1st frame of attack is immune to attacks of equal or lower priority
-#func test_priority(hitbox, hurtbox): # return false if attacker fail the priority check, will not process the hit if so
-#	var defender = get_node(hurtbox.owner_nodepath)
-#	if defender.is_atk_active() and defender.Animator.time == 0:
-#		if hitbox.move_data.priority <= defender.query_move_data_and_name().move_data.priority:
-#			return false
-#	return true
 	
 func test_priority(hitbox, hurtbox): # return false if attacker fail the priority check, will not process the hit if so
 	var attacker = get_node(hitbox.owner_nodepath)
@@ -1319,14 +1310,13 @@ func rng_generate(upper_limit: int): # will return a number from 0 to (upper_lim
 			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------
 
-# init(in_owner_ID, in_loaded_proj_ref, in_move_data: Dictionary, in_position: Vector2, aux_data: Dictionary):
-func _on_Character_projectile(in_owner_ID: int, in_loaded_proj_ref, in_move_data: Dictionary, out_position, aux_data: Dictionary):
-	var projectile = Globals.loaded_proj_scene.instance()
+func _on_Character_entity(master_path: NodePath, entity_ref: String, out_position, aux_data: Dictionary):
+	var entity = Globals.loaded_entity_scene.instance()
 	if !"back" in aux_data:
-		$NonPlayerEntitiesFront.add_child(projectile)
+		$EntitiesFront.add_child(entity)
 	else:
-		$NonPlayerEntitiesBack.add_child(projectile)
-	projectile.init(in_owner_ID, in_loaded_proj_ref, in_move_data, out_position, aux_data)
+		$EntitiesBack.add_child(entity)
+	entity.init(master_path, entity_ref, out_position, aux_data)
 	
 
 # for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb

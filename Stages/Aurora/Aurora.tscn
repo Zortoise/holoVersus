@@ -81,7 +81,7 @@ texture = ExtResource( 5 )
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 16
+frame = 3
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]
@@ -117,18 +117,15 @@ color = Color( 1, 0.984314, 0, 0.243137 )
 script = ExtResource( 32 )
 
 [node name="MainPlatform" type="Sprite" parent="."]
-position = Vector2( 0, 256 )
+position = Vector2( 0, 288 )
 texture = ExtResource( 3 )
-__meta__ = {
-"_edit_lock_": true
-}
 
 [node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 4 )]
 visible = false
 margin_left = -256.0
 margin_top = -160.0
 margin_right = 256.0
-margin_bottom = 120.0
+margin_bottom = 160.0
 
 [node name="FlowerGlow" type="Sprite" parent="MainPlatform"]
 material = SubResource( 1 )
@@ -167,7 +164,7 @@ texture = ExtResource( 9 )
 script = ExtResource( 6 )
 
 [node name="SoftPlatformLeft" type="Path2D" parent="."]
-position = Vector2( -256, 16 )
+position = Vector2( -256, 48 )
 curve = SubResource( 4 )
 script = ExtResource( 35 )
 
@@ -185,7 +182,7 @@ margin_right = 64.0
 margin_bottom = 8.0
 
 [node name="SoftPlatformRight" type="Path2D" parent="."]
-position = Vector2( 256, 40 )
+position = Vector2( 256, 72 )
 curve = SubResource( 5 )
 script = ExtResource( 36 )
 
@@ -204,7 +201,7 @@ margin_right = 64.0
 margin_bottom = 8.0
 
 [node name="SoftPlatformMiddle" type="Path2D" parent="."]
-position = Vector2( 0, 40 )
+position = Vector2( 0, 72 )
 curve = SubResource( 6 )
 script = ExtResource( 37 )
 
@@ -223,16 +220,13 @@ margin_right = 64.0
 margin_bottom = 8.0
 
 [node name="P1_Position" type="Position2D" parent="."]
-visible = false
-position = Vector2( -128, 96 )
+position = Vector2( -128, 128 )
 
 [node name="P2_Position" type="Position2D" parent="."]
-visible = false
-position = Vector2( 128, 96 )
+position = Vector2( 128, 128 )
 
 [node name="MiddlePosition" type="Position2D" parent="."]
-visible = false
-position = Vector2( 0, 96 )
+position = Vector2( 0, 128 )
 
 [node name="StageBox" type="ReferenceRect" parent="."]
 visible = false
@@ -242,7 +236,7 @@ margin_right = 704.0
 margin_bottom = 448.0
 
 [node name="RespawnPoints" type="Node2D" parent="."]
-visible = false
+position = Vector2( 0, 32 )
 
 [node name="RespawnPoint1" type="Position2D" parent="RespawnPoints"]
 position = Vector2( -192, -64 )

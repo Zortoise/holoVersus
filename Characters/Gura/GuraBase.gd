@@ -23,6 +23,8 @@ const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const GROUND_DASH_SPEED = 480.0 # duration in animation data
 const AIR_DASH_SPEED = 390.0 # duration in animation data
+const IMPULSE_MOD = 1.25 # multiply by SPEED to get impulse velocity
+const LONG_HOP_JUMP_MOD = 1.25 # multiply by SPEED to get horizontal velocity gain when doing long hops
 
 const HITSTUN_REDUCTION_AT_MAX_GG = 0.75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have higher
 const KB_BOOST_AT_MAX_GG = 2.0 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
@@ -296,7 +298,7 @@ const MOVE_DATABASE = {
 		"damage" : 60,
 		"knockback" : 350,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 5,
+		"attack_level" : 4,
 		"priority": 3,
 		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,

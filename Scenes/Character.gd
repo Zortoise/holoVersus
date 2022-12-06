@@ -3,7 +3,7 @@ extends "res://Scenes/Physics/Physics.gd"
 signal SFX (anim, loaded_sfx_ref, out_position, aux_data)
 # aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
 signal shadow_trail (sprite_node_path, out_position, starting_modulate_a, lifetime)
-signal projectile (out_owner_ID, out_loaded_proj_ref, out_move_data, out_position, aux_data)
+signal entity (master_path, entity_ref, out_position, aux_data)
 
 # constants
 const GRAVITY = 4000.0
@@ -28,8 +28,7 @@ const TAP_MEMORY_RELEASE_DURATION = 5 # for releasing Special/Unique for EX Move
 const MAX_WALL_JUMP = 5
 const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal velocity during hitstun
 const HOP_JUMP_MOD = 0.8 # can hop by using up + jump
-const IMPULSE_MOD = 1.25 # multiply by UniqueCharacter.SPEED to get impulse velocity
-const PERFECT_IMPULSE_MOD = 1.75 # multiply by UniqueCharacter.SPEED to get impulse velocity
+const PERFECT_IMPULSE_MOD = 1.4 # multiply by UniqueCharacter.SPEED and  UniqueCharacter.IMPULSE MOD to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
 const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
@@ -39,14 +38,14 @@ const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can la
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
-const REPEAT_DMG_MOD = 0.5 # damage modifier on repeat_penalty 
+const REPEAT_DMG_MOD = 0.5 # damage modifier on double_repeat 
 const DMG_VAL_KB_LIMIT = 3.0 # max damage percent before knockback stop increasing
 const KB_BOOST_AT_DMG_VAL_LIMIT = 1.5 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
 #const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
 # const DMG_BOOST_AT_DMG_VAL_LIMIT = 1.5 # increase in damage taken when damage percent is at 100%, goes pass it when damage percent goes >100%
 # const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
 const PERFECTCHAIN_GGG_MOD = 0.5 # Guard Gain on hitstunned defender is reduced on perfect chains
-const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on repeat_penalty
+const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on double_repeat
 const DMG_REDUCTION_AT_MAX_GG = 0.5 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN_MOD = 7.0 # increased Guard Guard Regen during Postive Flow
@@ -118,7 +117,7 @@ const DI_MIN_MOD = 0.0 # percent of max DI at 100% Guard Gauge
 
 
 # variables used, don't touch these
-var loaded_palette
+var loaded_palette = null
 onready var Animator = $SpritePlayer # clean code
 onready var sprite = $Sprites/Sprite # clean code
 onready var sfx_under = $Sprites/SfxUnder # clean code
@@ -132,8 +131,12 @@ var spritesheets = { # filled up at initialization via set_up_spritesheets()
 var unique_audio = { # filled up at initialization
 #	"example" : load("res://Characters/___/UniqueAudio/example.wav") # example
 }
-var loaded_entities = { # filled up at initialization, WIP
-	
+var entity_data = { # filled up at initialization, WIP
+#	"BurstCounter" : { # example
+#		"scene" : load("res://Assets/Entities/BurstCounter.tscn"),
+#		"frame_data" : load("res://Assets/Entities/Burst/FrameData/Burst.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Burst/Spritesheets/BurstSprite.png")
+#	},
 }
 var floor_level
 var input_state = {
@@ -300,7 +303,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 # warning-ignore:return_value_discarded
 	connect("shadow_trail", Globals.Game, "_on_Character_shadow_trail")
 # warning-ignore:return_value_discarded
-	connect("projectile", Globals.Game, "_on_Character_projectile")
+	connect("entity", Globals.Game, "_on_Character_entity")
 	
 	# target a random opponent
 	var players = []
@@ -512,9 +515,9 @@ func stimulate2(): # only ran if not in hitstop
 	dir = 0
 	v_dir = 0
 	
-	if abs(velocity.x) < 1.0: # do this at start too
+	if abs(velocity.x) < 5.0: # do this at start too
 		velocity.x = 0.0
-	if abs(velocity.y) < 1.0:
+	if abs(velocity.y) < 5.0:
 		velocity.y = 0.0
 		
 	ignore_list_progress_timer()
@@ -656,7 +659,7 @@ func stimulate2(): # only ran if not in hitstop
 			if move_name in UniqueCharacter.MOVE_DATABASE:
 				if !Globals.atk_attr.VARIANT_STARTUP in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr and \
 						!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
-					velocity.x = dir * UniqueCharacter.SPEED * IMPULSE_MOD
+					velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
 					emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})	
 
 	# IMPULSE --------------------------------------------------------------------------------------------------
@@ -2707,7 +2710,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		 vec_to_attacker.x = hit_data.attack_facing
 	var dir_to_attacker = sign(vec_to_attacker.x) # for setting facing on defender
 		
-	if "ignore_time" in hit_data.move_data: # some moves only hit once every few frames, done via an ignore list on the attacker/projectile
+	if "ignore_time" in hit_data.move_data: # some moves only hit once every few frames, done via an ignore list on the attacker/entity
 			attacker_or_entity.append_ignore_list(defender.player_ID, hit_data.move_data.ignore_time)
 			
 			
@@ -2742,7 +2745,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data["double_repeat"] = true # found multiple repeats
 				break
 	# append repeated move to move_memory later after guard gauge change calculation
-	# for projectiles, use the attacker's ID
+	# for entities, use the entity's master's player ID
 	
 	var weak_hit
 	if hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
@@ -2782,7 +2785,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
 					!defender.get_node("BlockStunTimer").is_running():
-				# rare ANTI_GUARD projectiles, ignore chaining requirement
+				# rare ANTI_GUARD entity, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			elif defender.Animator.query(["WBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
@@ -2792,7 +2795,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.block_state = Globals.block_state.GROUND
 				
 			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-					check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
+					check_if_crossed_up(vec_to_attacker): # entities cannot cross-up
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			else:
@@ -2817,7 +2820,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
 					!defender.get_node("BlockStunTimer").is_running():
-				# rare ANTI_GUARD projectiles, ignore chaining requirement
+				# rare ANTI_GUARD entity, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
 			elif defender.Animator.query(["AirWBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
@@ -2827,7 +2830,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.block_state = Globals.block_state.AIR
 				
 			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-					check_if_crossed_up(vec_to_attacker): # projectiles cannot cross-up
+					check_if_crossed_up(vec_to_attacker): # entities cannot cross-up
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
 			else:
@@ -3069,7 +3072,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if attacker.is_hitcount_last_hit(defender.player_ID, hit_data.move_data):
 				face(dir_to_attacker) # turn towards attacker, for multi-hit move only the last hit turns blocking defender for cross-ups
 		else:
-			face(dir_to_attacker) # multi-hit projectiles turn on 1st hit
+			face(dir_to_attacker) # multi-hit entities turn on 1st hit
 			
 		match hit_data.block_state:
 			Globals.block_state.GROUND:
@@ -3243,11 +3246,11 @@ func calculate_knockback_strength(hit_data):
 	if !hit_data.weak_hit:
 		if attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) and defender.get_damage_percent() >= 1.0:
 			# no KB boost for multi-hit attacks till the last hit
-			var dmg_val_boost = min((defender.get_damage_percent() - 1.0) / 0.25 * 0.5 + 2.0 \
+			var dmg_val_boost = min((defender.get_damage_percent() - 1.0) / 0.125 * 0.5 + 2.0 \
 					, DMG_VAL_KB_LIMIT)
 			#	0.0 percent damage over is x2.0 knockback
-			#	0.25 percent damage over is x2.5 knockback
-			# 	0.5 percent damage over is x3.0 knockback
+			#	0.125 percent damage over is x2.5 knockback
+			# 	0.25 percent damage over is x3.0 knockback
 			knockback_strength *= dmg_val_boost
 			
 	if defender.current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
@@ -3441,8 +3444,6 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		
 		if hit_data.sweetspotted or hit_data.punish_hit: # if sweetspotted/punish hit, hitspark level increased by 1
 			hitspark_level = clamp(hitspark_level + 1, 1, 5) # max is 5
-#		elif hit_data.repeat_penalty: # reduce by 1 if repeat
-#			hitspark_level = clamp(hitspark_level - 1, 1, 5) # min is 5
 		
 	var hitspark = ""
 		
@@ -3595,10 +3596,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 						!Globals.atk_attr.NO_IMPULSE in UniqueCharacter.MOVE_DATABASE[move_name].atk_attr: # ground impulse
 					impulse_used = true
 					if button_left in input_state.just_pressed or button_right in input_state.just_pressed:
-						velocity.x = dir * UniqueCharacter.SPEED * PERFECT_IMPULSE_MOD
+						velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD * PERFECT_IMPULSE_MOD
 						emit_signal("SFX", "SpecialDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 					else:
-						velocity.x = dir * UniqueCharacter.SPEED * IMPULSE_MOD
+						velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
 						emit_signal("SFX", "GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 	else:
 		impulse_used = false
@@ -3630,13 +3631,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Run":
 			emit_signal("SFX","RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"JumpTransit2":
-			if button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to hop
+			if button_special in input_state.pressed and button_jump in input_state.pressed: # special and jump to hop
 				velocity.y = -UniqueCharacter.JUMP_SPEED * HOP_JUMP_MOD
+				if dir != 0: # when hopping can press left/right for a long hop that reset momentum
+					velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.LONG_HOP_JUMP_MOD
 			else:
 				velocity.y = -UniqueCharacter.JUMP_SPEED
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
-			if dir != 0:
-				velocity.x += dir * UniqueCharacter.JUMP_HORIZONTAL_SPEED
+				if dir != 0: # when hopping can press left/right for a long jump, for most characters there is no increases
+					velocity.x += dir * UniqueCharacter.JUMP_HORIZONTAL_SPEED
 			emit_signal("SFX","JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"AirJumpTransit2":
 			aerial_memory = []
@@ -3647,7 +3650,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 					if dir * velocity.x < 0: # air jump change direction (no change in velocity if same direction)
 						velocity.x += dir * UniqueCharacter.SPEED * 0.7
 					else:
-						velocity.x = velocity.x * 0.9 # air jump is slower horizontally since no startup
+						velocity.x = velocity.x * 0.9 # air jump is slower horizontally since no friction
 				else: # neutral air jump
 					velocity.x = velocity.x * 0.7		
 				velocity.y = -UniqueCharacter.JUMP_SPEED * UniqueCharacter.AIR_JUMP_MOD
@@ -3715,15 +3718,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 			velocity = Vector2.ZERO
 			velocity_limiter.x = 0
 			null_gravity = true
-			var burst_facing = 1
-			if rng_generate(2) == 0:
-				burst_facing = -1
+#			var burst_facing = 1
+#			if rng_generate(2) == 0:
+#				burst_facing = -1
 			if anim_name == "BurstCounter":
-				emit_signal("projectile", player_ID, "Burst", LoadedSFX.burst_counter_move_data, position, {"facing" : burst_facing})
+				emit_signal("entity", get_path(), "BurstCounter", position, {})
 			elif anim_name == "BurstEscape":
-				emit_signal("projectile", player_ID, "Burst", LoadedSFX.burst_escape_move_data, position, {"facing" : burst_facing})
+				emit_signal("entity", get_path(), "BurstEscape", position, {})
 			else:
-				emit_signal("projectile", player_ID, "Burst", LoadedSFX.burst_extend_move_data, position, {"facing" : burst_facing})
+				emit_signal("entity", get_path(), "BurstExtend", position, {})
 				$ModulatePlayer.play("red_burst")
 			play_audio("blast1", {"vol" : -18,})
 			
