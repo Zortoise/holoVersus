@@ -1,10 +1,9 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Scenes/Character.gd" type="Script" id=2]
 [ext_resource path="res://Characters/Gura/Gura.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/FrameTimer.tscn" type="PackedScene" id=4]
-[ext_resource path="res://Scenes/Physics/PlayerCollisionBox.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/Physics/DetectBox.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Scenes/ModulatePlayer.gd" type="Script" id=7]
 [ext_resource path="res://Scenes/SpritePlayer.gd" type="Script" id=8]
@@ -41,12 +40,14 @@ script = ExtResource( 7 )
 [node name="FadePlayer" type="Node" parent="."]
 script = ExtResource( 9 )
 
-[node name="PlayerCollisionBox" parent="." instance=ExtResource( 5 )]
+[node name="PlayerCollisionBox" parent="." instance=ExtResource( 6 )]
 visible = false
+modulate = Color( 1, 1, 1, 0.231373 )
 margin_left = -10.0
-margin_top = -22.0
+margin_top = -16.0
 margin_right = 10.0
 margin_bottom = 22.0
+color = Color( 0.945098, 1, 0.282353, 1 )
 
 [node name="SoftPlatformDBox" parent="." instance=ExtResource( 6 )]
 visible = false

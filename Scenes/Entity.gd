@@ -16,6 +16,7 @@ var master_path: NodePath
 var velocity := Vector2.ZERO
 var lifespan = null
 var absorption_value = null
+var life_point = null # loses 1 on each hit, cannot depend on hitcount (piercing projectiles hit each player only once, for instance)
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
 var ignore_list = [] # some moves has ignore_time, after hitting will ignore that player for a number of frames, used for multi-hit specials
 var unique_data = {} # data unique for the entity, stored as a dictionary
@@ -25,7 +26,7 @@ var hitstop = null
 
 
 # for common entities, aux_data contain "common", loaded scene stored in Globals.common_entity_data
-func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2, _aux_data: Dictionary):
+func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary):
 	
 	master_path = in_master_path
 #	master_ID = get_node(master_path).player_ID
@@ -50,16 +51,7 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 	
 	load_entity()
 		
-	# set up starting data
-	$SpritePlayer.play(UniqueEntity.START_ANIM)
-	velocity = Vector2(UniqueEntity.START_SPEED, 0).rotated(UniqueEntity.START_ROTATION)
-	
-	if UniqueEntity.LIFESPAN != null: # set starting lifespan
-		lifespan = UniqueEntity.LIFESPAN
-	if "ABSORPTION" in UniqueEntity: # set starting absorption_value
-		absorption_value = UniqueEntity.ABSORPTION
-		
-	UniqueEntity.init()
+	UniqueEntity.init(aux_data)
 
 		
 func load_entity():
@@ -84,16 +76,25 @@ func load_entity():
 	
 	# set up collision box dimensions
 	if UniqueEntity.has_node("DefaultCollisionBox"):
-		$EntityCollisionBox.rect_position = UniqueEntity.get_node("DefaultCollisionBox").rect_position
-		$EntityCollisionBox.rect_size = UniqueEntity.get_node("DefaultCollisionBox").rect_size
+		var ref_rect = UniqueEntity.get_node("DefaultCollisionBox")
+		$EntityCollisionBox.rect_position = ref_rect.rect_position
+		$EntityCollisionBox.rect_size = ref_rect.rect_size
+		$EntityCollisionBox.add_to_group("Entities")
 		
-		if UniqueEntity.GROUNDED_ENTITY:
+		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
+			$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
+			$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
+			$SoftPlatformDBox.rect_size.x = ref_rect.rect_size.x
+			$SoftPlatformDBox.rect_size.y = 1
+		else:
+			$SoftPlatformDBox.free()
 			
 	else: # no collision, delete EntityCollisionBox
 		$EntityCollisionBox.free()
+		$SoftPlatformDBox.free()
 		
-	if UniqueEntity.PALETTE != null: # load palette
+	if "PALETTE" in UniqueEntity: # load palette
 		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palette
 			if UniqueEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
 				$Sprite.material = ShaderMaterial.new()
@@ -135,10 +136,25 @@ func stimulate2(): # only ran if not in hitstop
 	if abs(velocity.y) < 5.0:
 		velocity.y = 0.0
 	
-	# WIP
-#	velocity = character_move($PlayerCollisionBox, $SoftPlatformDBox, velocity, check_ledge_stop())
+
+	# movement
+	if has_node("EntityCollisionBox"):
 	
-#	stimulate_after() # WIP, testing
+		var results # [in_velocity, landing_check, collision_check, ledgedrop_check]
+		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS:
+			results = move($EntityCollisionBox, $SoftPlatformDBox, velocity, Globals.entity_trait.LEDGE_DROP in UniqueEntity.TRAITS)
+		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
+			results = move($EntityCollisionBox, $EntityCollisionBox, velocity)
+			
+		velocity = results[0]
+		
+		if results[2] == true and UniqueEntity.has_method("collision"):
+			UniqueEntity.collision()
+		if results[3] == true and UniqueEntity.has_method("ledge_drop"):
+			UniqueEntity.ledge_drop()
+		
+	else: # no collision with platforms
+		position += velocity
 	
 	
 func stimulate_after(): # do this after hit detection
@@ -156,6 +172,13 @@ func stimulate_after(): # do this after hit detection
 	if hitstop:
 		$HitStopTimer.time = hitstop
 		
+		
+func check_fallthrough(): # return true if entity falls through soft platforms
+	if UniqueEntity.has_method("check_fallthrough"): # some entities may interact with soft platforms
+		return UniqueEntity.check_fallthrough
+	else:
+		return true
+
 
 func query_polygons(): # requested by main game node when doing hit detection
 
@@ -174,7 +197,9 @@ func query_polygons(): # requested by main game node when doing hit detection
 
 
 func query_move_data(): # requested by main game node when doing hit detection
-	if Animator.current_animation in UniqueEntity.MOVE_DATABASE:
+	if UniqueEntity.has_method("query_move_data"):
+		return UniqueEntity.query_move_data()
+	elif Animator.current_animation in UniqueEntity.MOVE_DATABASE:
 		return UniqueEntity.MOVE_DATABASE[Animator.current_animation]
 	return null
 
@@ -184,6 +209,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	var attacker = get_node(hit_data.attacker_nodepath) # will be this entity's master
 
 #	attacker.UniqueCharacter.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
+
+	if UniqueEntity.has_method("landed_a_hit"):
+		return UniqueEntity.landed_a_hit(hit_data) # reaction
 
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
@@ -324,9 +352,13 @@ func is_player_in_ignore_list(in_ID):
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 
 func _on_SpritePlayer_anim_finished(anim_name):
-	match anim_name:
-		"Kill":
-			free = true # don't use queue_free!
+	
+	if anim_name.ends_with("Kill"):
+		free = true # don't use queue_free!
+		
+#	match anim_name:
+#		"Kill":
+#			free = true # don't use queue_free!
 			
 	UniqueEntity._on_SpritePlayer_anim_finished(anim_name)
 	
@@ -365,6 +397,7 @@ func save_state():
 		"velocity" : velocity,
 		"lifespan" : lifespan,
 		"absorption_value" : absorption_value,
+		"life_point" : life_point,
 		"hitcount_record" : hitcount_record,
 		"ignore_list" : ignore_list,
 		"unique_data" : unique_data,
@@ -391,6 +424,7 @@ func load_state(state_data):
 	velocity = state_data.velocity
 	lifespan = state_data.lifespan
 	absorption_value = state_data.absorption_value
+	life_point = state_data.life_point
 	hitcount_record = state_data.hitcount_record
 	ignore_list = state_data.ignore_list
 	unique_data = state_data.unique_data

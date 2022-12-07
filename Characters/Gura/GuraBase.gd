@@ -104,7 +104,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/5,
-		"atk_attr" : [Globals.atk_attr.LEDGE_DROP],
+		"atk_attr" : [Globals.atk_attr.LEDGE_DROP, Globals.atk_attr.NO_IMPULSE],
 		"move_sound" : { ref = "whoosh14", aux_data = {"vol" : -9, "bus" : "PitchDown"} },
 		"hit_sound" : { ref = "impact11", aux_data = {"vol" : -10} },
 	},

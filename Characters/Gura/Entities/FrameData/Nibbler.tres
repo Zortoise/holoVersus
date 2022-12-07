@@ -1,0 +1,164 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"SfxUnder_hframes": 1,
+"SfxUnder_spritesheet": "NibblerSfxUnder",
+"SfxUnder_vframes": 1,
+"duration": 26,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NibblerSprite",
+"timestamps": {
+0: {
+"SfxUnder_frame": 0,
+"frame": 0,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+6: {
+"SfxUnder_frame": 0,
+"frame": 1,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+13: {
+"SfxUnder_frame": 0,
+"frame": 2,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+19: {
+"SfxUnder_frame": 0,
+"frame": 3,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+}
+},
+"vframes": 3
+},
+"Kill": {
+"SfxUnder_hframes": 1,
+"SfxUnder_spritesheet": "NibblerSfxUnder",
+"SfxUnder_vframes": 1,
+"duration": 24,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NibblerSprite",
+"timestamps": {
+0: {
+"SfxUnder_frame": 0,
+"frame": 7,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+3: {
+"SfxUnder_frame": 0,
+"frame": 8,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+6: {
+"SfxUnder_frame": 0,
+"frame": 9,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+9: {
+"SfxUnder_frame": 0,
+"frame": 10,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+12: {
+"SfxUnder_frame": 0,
+"frame": 11,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+15: {
+"SfxUnder_frame": 0,
+"frame": 12,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+18: {
+"SfxUnder_frame": 0,
+"frame": 13,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+21: {
+"SfxUnder_frame": 0,
+"frame": 14,
+"hitbox": [  ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+}
+},
+"vframes": 3
+},
+"bActive": {
+"SfxUnder_hframes": 1,
+"SfxUnder_spritesheet": "NibblerSfxUnder",
+"SfxUnder_vframes": 1,
+"duration": 24,
+"hframes": 6,
+"loop": true,
+"spritesheet": "NibblerSprite",
+"timestamps": {
+0: {
+"SfxUnder_frame": 0,
+"frame": 4,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+8: {
+"SfxUnder_frame": 0,
+"frame": 5,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+16: {
+"SfxUnder_frame": 0,
+"frame": 6,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ],
+"hurtbox": [  ],
+"kborigin": null,
+"sweetbox": [  ]
+}
+},
+"vframes": 3
+}
+}

@@ -1,0 +1,78 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 30,
+"hframes": 5,
+"loop": false,
+"spritesheet": "NibblerSpawnSprite",
+"timestamps": {
+0: {
+"entityspawn": null,
+"frame": 0
+},
+6: {
+"entityspawn": null,
+"frame": 1
+},
+12: {
+"entityspawn": null,
+"frame": 2
+},
+18: {
+"entityspawn": null,
+"frame": 3
+},
+24: {
+"entityspawn": Vector2( 8, -22 ),
+"frame": 4
+}
+},
+"vframes": 1
+},
+"bKill": {
+"duration": 48,
+"hframes": 5,
+"loop": false,
+"spritesheet": "NibblerSpawnSprite",
+"timestamps": {
+0: {
+"entityspawn": null,
+"frame": 0
+},
+6: {
+"entityspawn": null,
+"frame": 1
+},
+12: {
+"entityspawn": null,
+"frame": 2
+},
+18: {
+"entityspawn": null,
+"frame": 3
+},
+24: {
+"entityspawn": null,
+"frame": 1
+},
+30: {
+"entityspawn": null,
+"frame": 2
+},
+36: {
+"entityspawn": null,
+"frame": 3
+},
+42: {
+"entityspawn": Vector2( 8, -22 ),
+"frame": 4
+}
+},
+"vframes": 1
+}
+}

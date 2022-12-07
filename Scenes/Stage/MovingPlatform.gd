@@ -27,12 +27,12 @@ func move_platform():
 		
 		# apply position_change vector to all riding entities
 		for rider_box in rider_boxes:
-			if rider_box.is_in_group("Players"):
+			if rider_box.is_in_group("Players") or rider_box.is_in_group("Entities"):
 				 # rider is player character
 				# position_change need to be in integer!'
 				var rider = rider_box.get_parent()
 				rider.move_amount(position_change, rider_box, rider.get_node("SoftPlatformDBox"), Vector2.ZERO)
-				# no need the velocity
+				# no need the velocity, grounded Entities always have SoftPlatformDBox
 			else:
 				rider_box.get_parent().position += position_change # for most other grounded entities, don't need to check for collision
 						

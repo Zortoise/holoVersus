@@ -707,6 +707,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"L2Active":
 			Character.velocity.x += Character.facing * SPEED * 1.2
 			Character.null_friction = true
+			Character.emit_signal("SFX", "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true})	
 		"L2Recovery":
 			Character.velocity = Vector2(500 * Character.facing, 0).rotated(-PI/2.3 * Character.facing)
 		"F1Startup":

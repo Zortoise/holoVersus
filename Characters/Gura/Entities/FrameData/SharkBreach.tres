@@ -1,0 +1,65 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 49,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SharkBreachSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [  ]
+},
+2: {
+"frame": 1,
+"hitbox": [  ]
+},
+4: {
+"frame": 2,
+"hitbox": [  ]
+},
+7: {
+"frame": 3,
+"hitbox": [ Vector2( -12, -41 ), Vector2( -28, -41 ), Vector2( -28, 0 ), Vector2( 34, 0 ), Vector2( 34, -23 ), Vector2( 44, -23 ), Vector2( 44, -52 ), Vector2( 32, -52 ), Vector2( 32, -78 ), Vector2( -12, -78 ) ]
+},
+12: {
+"frame": 4,
+"hitbox": [ Vector2( 9, -73 ), Vector2( -20, -73 ), Vector2( -20, -21 ), Vector2( 50, -21 ), Vector2( 50, -88 ), Vector2( 9, -88 ) ]
+},
+17: {
+"frame": 5,
+"hitbox": [ Vector2( 15, -45 ), Vector2( 16, -45 ), Vector2( 16, -17 ), Vector2( 70, -17 ), Vector2( 70, -37 ), Vector2( 95, -37 ), Vector2( 95, -70 ), Vector2( 76, -70 ), Vector2( 76, -81 ), Vector2( 15, -81 ) ]
+},
+22: {
+"frame": 6,
+"hitbox": [ Vector2( 33, -10 ), Vector2( 105, -10 ), Vector2( 105, -56 ), Vector2( 86, -56 ), Vector2( 86, -76 ), Vector2( 33, -76 ) ]
+},
+27: {
+"frame": 7,
+"hitbox": [ Vector2( 41, -1 ), Vector2( 111, -1 ), Vector2( 111, -40 ), Vector2( 96, -40 ), Vector2( 96, -54 ), Vector2( 80, -54 ), Vector2( 80, -55 ), Vector2( 41, -55 ) ]
+},
+31: {
+"frame": 8,
+"hitbox": [  ]
+},
+35: {
+"frame": 9,
+"hitbox": [  ]
+},
+39: {
+"frame": 10,
+"hitbox": [  ]
+},
+44: {
+"frame": 11,
+"hitbox": [  ]
+}
+},
+"vframes": 2
+}
+}

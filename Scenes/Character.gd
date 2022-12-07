@@ -132,10 +132,16 @@ var unique_audio = { # filled up at initialization
 #	"example" : load("res://Characters/___/UniqueAudio/example.wav") # example
 }
 var entity_data = { # filled up at initialization, WIP
-#	"BurstCounter" : { # example
-#		"scene" : load("res://Assets/Entities/BurstCounter.tscn"),
-#		"frame_data" : load("res://Assets/Entities/Burst/FrameData/Burst.tres"),
-#		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Burst/Spritesheets/BurstSprite.png")
+#	"TridentProj" : { # example
+#		"scene" : load("res://Characters/Gura/Entities/TridentProj.tscn"),
+#		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
+#	},
+}
+var sfx_data = { # filled up at initialization, WIP
+#	"WaterJet" : { # example
+#		"frame_data" : load("res://Characters/Gura/SFX/FrameData/WaterJet.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/WaterJetSprite.png")
 #	},
 }
 var floor_level
@@ -317,6 +323,8 @@ func setup_boxes(ref_rect): # set up detection boxes
 	
 	$PlayerCollisionBox.rect_position = ref_rect.rect_position
 	$PlayerCollisionBox.rect_size = ref_rect.rect_size
+	$PlayerCollisionBox.add_to_group("Players")
+	$PlayerCollisionBox.add_to_group("Grounded")
 
 	# if SoftPlatformDBox detects a soft platform, that means that character is currently phasing through
 	# no collision with soft platforms if so
@@ -396,6 +404,36 @@ func set_up_unique_audio():
 						ResourceLoader.load(directory_name + "UniqueAudio/" + file_name2 + ".wav")
 			file_name = directory.get_next()
 	else: print("Error: Cannot open UniqueAudio folder for character")
+	
+func set_up_entities():
+#	var entity_data = { # filled up at initialization, WIP
+#	#	"TridentProj" : { # example
+#	#		"scene" : load("res://Characters/Gura/Entities/TridentProj.tscn"),
+#	#		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+#	#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
+#	#	},
+#	}
+	var directory = Directory.new()
+	if directory.open(directory_name + "UniqueAudio/") == OK:
+		directory.list_dir_begin()
+		var file_name = directory.get_next()
+		while file_name != "":
+			# load all needed files and add them to the dictionary
+			if file_name.ends_with(".wav.import"):
+				var file_name2 = file_name.get_file().trim_suffix(".wav.import")
+				unique_audio[file_name2] = \
+						ResourceLoader.load(directory_name + "UniqueAudio/" + file_name2 + ".wav")
+			file_name = directory.get_next()
+	else: print("Error: Cannot open UniqueAudio folder for character")
+	
+func set_up_sfx():
+#	var sfx_data = { # filled up at initialization, WIP
+#	#	"WaterJet" : { # example
+#	#		"frame_data" : load("res://Characters/Gura/SFX/FrameData/WaterJet.tres"),
+#	#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/WaterJetSprite.png")
+#	#	},
+#	}
+	pass
 	
 # TESTING --------------------------------------------------------------------------------------------------
 
@@ -1041,7 +1079,7 @@ func stimulate2(): # only ran if not in hitstop
 		velocity.y = 0.0
 	
 	velocity_previous_frame = velocity
-	var results = character_move($PlayerCollisionBox, $SoftPlatformDBox, velocity, check_ledge_stop())
+	var results = move($PlayerCollisionBox, $SoftPlatformDBox, velocity, check_ledge_stop())
 	velocity = results[0]
 	if results[1]: check_landing()
 		
@@ -1082,14 +1120,15 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 					$HitStunGraceTimer.stimulate()
 				
 				# spike protection before 70% damage
-				if get_damage_percent() < 0.7 and velocity.y >= HITSTUN_FALL_THRESHOLD and position.y > floor_level:
-					match state:
-						Globals.char_state.AIR_FLINCH_HITSTUN: # hitstun decay instantly if falling too fast during air flinch when too low
-							$HitStunTimer.stop()
-						Globals.char_state.LAUNCHED_HITSTUN:
-							$HitStunTimer.stimulate()
-							$HitStunTimer.stimulate() # hitstun decay thrice as fast if falling too fast during launch when too low
-				
+				if get_damage_percent() < 0.7 and position.y > floor_level:
+					$HitStunTimer.stimulate() # hitstun decay twice as fast if below floor level
+					if velocity.y >= HITSTUN_FALL_THRESHOLD: # if falling too fast...
+						match state:
+							Globals.char_state.AIR_FLINCH_HITSTUN: # hitstun decay instantly
+								$HitStunTimer.stop()
+							Globals.char_state.LAUNCHED_HITSTUN:
+								$HitStunTimer.stimulate() # hitstun decay thrice as fast
+					
 			
 			ex_flash()
 			# do shadow trails
@@ -1759,7 +1798,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 
 
 		
-func check_auto_drop(): # during aerials, can drop through platforms if down is held
+func check_fallthrough(): # during aerials, can drop through platforms if down is held
 	if !grounded and is_attacking():
 		if button_down in input_state.pressed:
 			return true
@@ -2277,7 +2316,7 @@ func query_polygons(): # requested by main game node when doing hit detection
 		
 	if query_status_effect(Globals.status_effect.RESPAWN_GRACE):
 		pass  # no hurtbox during respawn grace
-	if $HitStunGraceTimer.is_running() and new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_ACTIVE, \
+	elif $HitStunGraceTimer.is_running() and new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_ACTIVE, \
 			Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_ACTIVE, \
 			Globals.char_state.AIR_RECOVERY]:
 		pass  # no hurtbox during HitStunGrace in certain states
@@ -3631,7 +3670,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Run":
 			emit_signal("SFX","RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"JumpTransit2":
-			if button_special in input_state.pressed and button_jump in input_state.pressed: # special and jump to hop
+			if button_special in input_state.pressed: # special and jump to hop
 				velocity.y = -UniqueCharacter.JUMP_SPEED * HOP_JUMP_MOD
 				if dir != 0: # when hopping can press left/right for a long hop that reset momentum
 					velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.LONG_HOP_JUMP_MOD

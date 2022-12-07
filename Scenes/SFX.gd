@@ -31,8 +31,8 @@ func init(in_anim: String, in_loaded_sfx_ref, in_position: Vector2, aux_data: Di
 	
 func load_sfx_ref(): # load frame data and spritesheet
 	if !loaded_sfx_ref is NodePath: # loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
-		$Sprite.texture = LoadedSFX.loaded_sfx[loaded_sfx_ref]["loaded_spritesheet"]
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, LoadedSFX.loaded_sfx[loaded_sfx_ref]["loaded_frame_data"])
+		$Sprite.texture = LoadedSFX.loaded_sfx[loaded_sfx_ref]["spritesheet"]
+		$SpritePlayer.init_with_loaded_frame_data($Sprite, LoadedSFX.loaded_sfx[loaded_sfx_ref]["frame_data"])
 	else: # loaded_sfx_ref is a NodePath leading to the sfx's loaded FrameData .tres file and loaded spritesheet
 		# WIP
 		pass

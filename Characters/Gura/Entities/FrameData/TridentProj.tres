@@ -1,0 +1,286 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 1,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+},
+5: {
+"frame": 2,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+},
+10: {
+"frame": 3,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+}
+},
+"vframes": 4
+},
+"Kill": {
+"duration": 19,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 4,
+"hitbox": [  ]
+},
+2: {
+"frame": 5,
+"hitbox": [  ]
+},
+4: {
+"frame": 6,
+"hitbox": [  ]
+},
+7: {
+"frame": 7,
+"hitbox": [  ]
+},
+10: {
+"frame": 8,
+"hitbox": [  ]
+},
+13: {
+"frame": 9,
+"hitbox": [  ]
+},
+16: {
+"frame": 10,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+},
+"Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+}
+},
+"vframes": 4
+},
+"[h2]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 1,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+},
+5: {
+"frame": 2,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+},
+10: {
+"frame": 3,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+}
+},
+"vframes": 4
+},
+"[h2]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+}
+},
+"vframes": 4
+},
+"[h]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 1,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+},
+5: {
+"frame": 2,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+},
+10: {
+"frame": 3,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+}
+},
+"vframes": 4
+},
+"[h]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+}
+},
+"vframes": 4
+},
+"aActive": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 12,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+},
+5: {
+"frame": 13,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+},
+10: {
+"frame": 14,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+}
+},
+"vframes": 4
+},
+"aKill": {
+"duration": 19,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 15,
+"hitbox": [  ]
+},
+2: {
+"frame": 16,
+"hitbox": [  ]
+},
+4: {
+"frame": 17,
+"hitbox": [  ]
+},
+7: {
+"frame": 18,
+"hitbox": [  ]
+},
+10: {
+"frame": 19,
+"hitbox": [  ]
+},
+13: {
+"frame": 20,
+"hitbox": [  ]
+},
+16: {
+"frame": 21,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+},
+"aSpawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 11,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[h2]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 12,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+},
+5: {
+"frame": 13,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+},
+10: {
+"frame": 14,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[h2]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 11,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[h]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 12,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+},
+5: {
+"frame": 13,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+},
+10: {
+"frame": 14,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[h]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 11,
+"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+}
+},
+"vframes": 4
+}
+}

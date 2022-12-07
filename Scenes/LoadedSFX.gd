@@ -7,12 +7,12 @@ var loaded_sfx = {} # code in _ready() will load this with frame_data and sprite
 # example:
 #	loaded_sfx = {
 #		"DustClouds" : {
-#			"loaded_frame_data" : load("res://Assets/Effects/DustClouds/FrameData/DustClouds.tres")
-#			"loaded_spritesheet" : ResourceLoader.load("res://Assets/Effects/DustClouds/Spritesheets/DustCloudsSprite.png")
+#			"frame_data" : load("res://Assets/Effects/DustClouds/FrameData/DustClouds.tres")
+#			"spritesheet" : ResourceLoader.load("res://Assets/Effects/DustClouds/Spritesheets/DustCloudsSprite.png")
 #		}
 #		"HitsparkB" : {
-#			"loaded_frame_data" : load("res://Assets/Effects/Hitsparks/FrameData/HitsparkB.tres")
-#			"loaded_spritesheet" : ResourceLoader.load("res://Assets/Effects/Hitsparks/Spritesheets/HitsparkBSprite.png")
+#			"frame_data" : load("res://Assets/Effects/Hitsparks/FrameData/HitsparkB.tres")
+#			"spritesheet" : ResourceLoader.load("res://Assets/Effects/Hitsparks/Spritesheets/HitsparkBSprite.png")
 #		}
 #	}
 
@@ -649,9 +649,9 @@ func load_sfx(folder_name):
 				frame_data_file_name = frame_data_file_name.trim_suffix(".tres")
 				
 				loaded_sfx[frame_data_file_name] = {}
-				loaded_sfx[frame_data_file_name]["loaded_frame_data"] = \
+				loaded_sfx[frame_data_file_name]["frame_data"] = \
 						load("res://Assets/Effects/" + folder_name + "/FrameData/" + frame_data_file_name + ".tres")
-				loaded_sfx[frame_data_file_name]["loaded_spritesheet"] = \
+				loaded_sfx[frame_data_file_name]["spritesheet"] = \
 						load("res://Assets/Effects/" + folder_name + "/Spritesheets/" + frame_data_file_name + "Sprite.png")
 				
 			frame_data_file_name = dir.get_next()

@@ -1,0 +1,83 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"duration": 21,
+"hframes": 6,
+"loop": true,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 3
+},
+7: {
+"frame": 4
+},
+14: {
+"frame": 5
+}
+},
+"vframes": 3
+},
+"Kill": {
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 6
+},
+3: {
+"frame": 7
+},
+6: {
+"frame": 8
+}
+},
+"vframes": 3
+},
+"Spawn": {
+"duration": 10,
+"hframes": 6,
+"loop": false,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+2: {
+"frame": 1
+},
+5: {
+"frame": 2
+}
+},
+"vframes": 3
+},
+"Turn": {
+"duration": 8,
+"hframes": 6,
+"loop": false,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 9
+},
+2: {
+"frame": 10
+},
+4: {
+"frame": 11
+},
+6: {
+"frame": 12
+}
+},
+"vframes": 3
+}
+}

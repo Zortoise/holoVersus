@@ -1,13 +1,11 @@
 extends Node2D
 
-const START_SPEED = 0.0
-const START_ROTATION = 0.0
-const START_ANIM = "Kill"
-
-const GROUNDED_ENTITY = false
-
+#const START_SPEED = 0.0
+#const START_ROTATION = 0.0
 const PALETTE = "blue"
-const LIFESPAN = null
+#const LIFESPAN = null
+
+const TRAITS = []
 
 # cleaner code
 onready var Entity = get_parent()
@@ -24,7 +22,6 @@ const MOVE_DATABASE = {
 		"knockback" : 550,
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"attack_level" : 8,
-		"priority": 9,
 		"fixed_entity_hitstop" : 0,
 		"fixed_hitstop" : 15,
 		"fixed_hitstun" : 30,
@@ -39,8 +36,17 @@ const MOVE_DATABASE = {
 	}
 }
 
-func init():
-	pass
+func init(_aux_data: Dictionary):
+	
+	# set up starting data
+	
+	Animator.play("Kill") # starting animation
+	
+#	Entity.velocity = Vector2(START_SPEED, 0).rotated(START_ROTATION)
+	
+#	Entity.lifespan = LIFESPAN # set starting lifespan
+#	Entity.absorption_value = ABSORPTION # set starting absorption_value
+
 	
 func stimulate():
 	pass

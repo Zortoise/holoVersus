@@ -22,5 +22,11 @@ margin_right = 0.0
 margin_bottom = 0.0
 color = Color( 1, 0.92549, 0.32549, 1 )
 
+[node name="SoftPlatformDBox" parent="." instance=ExtResource( 3 )]
+margin_left = -10.0
+margin_top = 21.0
+margin_right = 10.0
+margin_bottom = 22.0
+
 [connection signal="anim_finished" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_finished"]
 [connection signal="anim_started" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_started"]
