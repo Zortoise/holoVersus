@@ -5,4 +5,31 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"BigSplash": {
+"duration": 24,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BigSplashSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+4: {
+"frame": 1
+},
+8: {
+"frame": 2
+},
+12: {
+"frame": 3
+},
+16: {
+"frame": 4
+},
+20: {
+"frame": 5
+}
+},
+"vframes": 1
+}
 }

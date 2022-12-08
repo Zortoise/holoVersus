@@ -590,7 +590,7 @@ func _ready():
 	# load directories from res://Assets/Effects/
 	var dir = Directory.new()
 	if dir.open("res://Assets/Effects/") == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var folder_name = dir.get_next()
 		while folder_name != "":
 			# load all needed directories
@@ -601,7 +601,7 @@ func _ready():
 	
 	# load .png files from res://Assets/Palettes/
 	if dir.change_dir("res://Assets/Palettes/") == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var file_name = dir.get_next()
 		while file_name != "":
 			# load all needed directories
@@ -613,7 +613,7 @@ func _ready():
 	
 	# load .wav files from res://Assets/Audio/Common
 	if dir.change_dir("res://Assets/Audio/Common/") == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var file_name = dir.get_next()
 		while file_name != "":
 			# load all needed directories
@@ -625,7 +625,7 @@ func _ready():
 	
 	# load .wav files from res://Assets/Audio/UI
 	if dir.change_dir("res://Assets/Audio/UI/") == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var file_name = dir.get_next()
 		while file_name != "":
 			# load all needed directories
@@ -641,7 +641,7 @@ func load_sfx(folder_name):
 	# load sfx from res://Assets/Effects/
 	var dir = Directory.new()
 	if dir.open("res://Assets/Effects/" + folder_name + "/FrameData/") == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var frame_data_file_name = dir.get_next()
 		while frame_data_file_name != "":
 			# load all needed files and add them to the dictionary

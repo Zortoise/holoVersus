@@ -562,7 +562,7 @@ func load_preset_list(): # load in the presets in the Presets directory
 	var dir = Directory.new()
 	if dir.dir_exists("user://Presets"):
 		if dir.open("user://Presets") == OK:
-			dir.list_dir_begin()
+			dir.list_dir_begin(true)
 			var file_name = dir.get_next()
 			while file_name != "":
 				if file_name.ends_with(".tres"):

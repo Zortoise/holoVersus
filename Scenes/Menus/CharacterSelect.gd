@@ -54,7 +54,7 @@ func _ready():
 	# load characters
 	var dir = Directory.new()
 	if dir.open("res://Characters/") == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var character_name = dir.get_next()
 		while character_name != "":
 			if !character_name.begins_with("."):
@@ -67,7 +67,7 @@ func _ready():
 				character_data[character_name]["palettes"] = {}
 				var dir2 = Directory.new()
 				if dir2.open("res://Characters/" + character_name + "/Palettes/") == OK:
-					dir2.list_dir_begin()
+					dir2.list_dir_begin(true)
 					var palette_name = dir2.get_next()
 					while palette_name != "":
 						if palette_name.ends_with(".png.import"):
@@ -83,7 +83,7 @@ func _ready():
 	populate_char_grid()
 	
 	if dir.change_dir("res://Stages/") == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var stage_name = dir.get_next()
 		while stage_name != "":
 			if !stage_name.begins_with("."):

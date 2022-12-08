@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"Splash": {
+"SmallSplash": {
 "duration": 17,
 "hframes": 4,
 "loop": false,

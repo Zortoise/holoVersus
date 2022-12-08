@@ -2,15 +2,15 @@ extends Node2D
 
 
 var free := false
-var loaded_sfx_ref
+var sfx_ref
 
 var palette_ref = null
 
 # for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
-# for unique sfx, loaded_sfx_ref will be a NodePath leading to the sfx's loaded FrameData .tres file and loaded spritesheet
-func init(in_anim: String, in_loaded_sfx_ref, in_position: Vector2, aux_data: Dictionary):
+# for unique sfx, loaded_sfx_ref will be a an array with master's nodepath as 1st entry and string for 2nd entry
+func init(in_anim: String, in_sfx_ref, in_position: Vector2, aux_data: Dictionary):
 	
-	loaded_sfx_ref = in_loaded_sfx_ref
+	sfx_ref = in_sfx_ref
 	load_sfx_ref() # load frame data and spritesheet
 	
 	position = in_position
@@ -30,12 +30,14 @@ func init(in_anim: String, in_loaded_sfx_ref, in_position: Vector2, aux_data: Di
 	
 	
 func load_sfx_ref(): # load frame data and spritesheet
-	if !loaded_sfx_ref is NodePath: # loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
-		$Sprite.texture = LoadedSFX.loaded_sfx[loaded_sfx_ref]["spritesheet"]
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, LoadedSFX.loaded_sfx[loaded_sfx_ref]["frame_data"])
-	else: # loaded_sfx_ref is a NodePath leading to the sfx's loaded FrameData .tres file and loaded spritesheet
-		# WIP
-		pass
+	if sfx_ref is String and sfx_ref in LoadedSFX.loaded_sfx: # common sfx
+		$Sprite.texture = LoadedSFX.loaded_sfx[sfx_ref]["spritesheet"]
+		$SpritePlayer.init_with_loaded_frame_data($Sprite, LoadedSFX.loaded_sfx[sfx_ref]["frame_data"])
+	elif sfx_ref is Array: # unique sfx, loaded_sfx_ref will be a an array with master's nodepath as 1st entry and string for 2nd entry
+		$Sprite.texture = get_node(sfx_ref[0]).sfx_data[sfx_ref[1]]["spritesheet"]
+		$SpritePlayer.init_with_loaded_frame_data($Sprite, get_node(sfx_ref[0]).sfx_data[sfx_ref[1]]["frame_data"])
+	else:
+		print("Error: sfx_ref not found.")
 
 
 func palette():
@@ -57,7 +59,7 @@ func _on_SpritePlayer_anim_finished(_anim_name):
 
 func save_state():
 	var state_data = {
-		"loaded_sfx_ref" : loaded_sfx_ref,
+		"sfx_ref" : sfx_ref,
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
 		"free" : free,
 		"position" : position,
@@ -75,7 +77,7 @@ func load_state(state_data):
 	if state_data.palette_ref != null:
 		palette()
 	
-	loaded_sfx_ref = state_data.loaded_sfx_ref
+	sfx_ref = state_data.sfx_ref
 	load_sfx_ref()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)

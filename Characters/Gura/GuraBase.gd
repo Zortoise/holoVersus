@@ -328,5 +328,58 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
 	},
+	
+	"SP1": {
+		"atk_type" : Globals.atk_type.SPECIAL, # used for chaining
+		"priority": 0,
+		"atk_attr" : [], # some projectile moves can have attributes like superarmor
+	},
+	"aSP1": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"priority": 0,
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+	},
+	"SP1[c1]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "SP1",
+		"priority": 0,
+		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
+		"atk_attr" : [Globals.atk_attr.VARIANT_STARTUP]
+	},
+	"SP1[c2]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "SP1",
+		"priority": 0,
+		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
+		"atk_attr" : [Globals.atk_attr.VARIANT_STARTUP]
+	},
+	"SP1[c3]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "SP1",
+		"priority": 0,
+		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
+		"atk_attr" : [Globals.atk_attr.VARIANT_STARTUP]
+	},
+	"aSP1[c1]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "aSP1",
+		"priority": 0,
+		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.VARIANT_STARTUP]
+	},
+	"aSP1[c2]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "aSP1",
+		"priority": 0,
+		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.VARIANT_STARTUP]
+	},
+	"aSP1[c3]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "aSP1",
+		"priority": 0,
+		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.VARIANT_STARTUP]
+	},
 }
 

@@ -5,29 +5,8 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"Active": {
-"duration": 15,
-"hframes": 6,
-"loop": true,
-"spritesheet": "TridentProjSprite",
-"timestamps": {
-0: {
-"frame": 1,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
-},
-5: {
-"frame": 2,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
-},
-10: {
-"frame": 3,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
-}
-},
-"vframes": 4
-},
 "Kill": {
-"duration": 19,
+"duration": 17,
 "hframes": 6,
 "loop": false,
 "spritesheet": "TridentProjSprite",
@@ -40,43 +19,26 @@ frame_data = {
 "frame": 5,
 "hitbox": [  ]
 },
-4: {
+5: {
 "frame": 6,
 "hitbox": [  ]
 },
-7: {
+8: {
 "frame": 7,
 "hitbox": [  ]
 },
-10: {
+11: {
 "frame": 8,
 "hitbox": [  ]
 },
-13: {
+14: {
 "frame": 9,
 "hitbox": [  ]
-},
-16: {
-"frame": 10,
-"hitbox": [  ]
 }
 },
 "vframes": 4
 },
-"Spawn": {
-"duration": 4,
-"hframes": 6,
-"loop": false,
-"spritesheet": "TridentProjSprite",
-"timestamps": {
-0: {
-"frame": 0,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
-}
-},
-"vframes": 4
-},
-"[h2]Active": {
+"[c1]Active": {
 "duration": 15,
 "hframes": 6,
 "loop": true,
@@ -84,20 +46,20 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 1,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 },
 5: {
 "frame": 2,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 },
 10: {
 "frame": 3,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 }
 },
 "vframes": 4
 },
-"[h2]Spawn": {
+"[c1]Spawn": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -105,12 +67,12 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 0,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
 }
 },
 "vframes": 4
 },
-"[h]Active": {
+"[c2]Active": {
 "duration": 15,
 "hframes": 6,
 "loop": true,
@@ -118,20 +80,20 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 1,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 },
 5: {
 "frame": 2,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 },
 10: {
 "frame": 3,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 }
 },
 "vframes": 4
 },
-"[h]Spawn": {
+"[c2]Spawn": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -139,146 +101,176 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 0,
-"hitbox": [ Vector2( -10, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -10, -19 ) ]
+"hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
 }
 },
 "vframes": 4
 },
-"aActive": {
+"[c3]Active": {
 "duration": 15,
 "hframes": 6,
 "loop": true,
 "spritesheet": "TridentProjSprite",
 "timestamps": {
 0: {
-"frame": 12,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 1,
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 },
 5: {
-"frame": 13,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 2,
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 },
 10: {
-"frame": 14,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 3,
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
+}
+},
+"vframes": 4
+},
+"[c3]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
 }
 },
 "vframes": 4
 },
 "aKill": {
-"duration": 19,
+"duration": 17,
 "hframes": 6,
 "loop": false,
 "spritesheet": "TridentProjSprite",
 "timestamps": {
 0: {
-"frame": 15,
+"frame": 14,
 "hitbox": [  ]
 },
 2: {
+"frame": 15,
+"hitbox": [  ]
+},
+5: {
 "frame": 16,
 "hitbox": [  ]
 },
-4: {
+8: {
 "frame": 17,
 "hitbox": [  ]
 },
-7: {
+11: {
 "frame": 18,
 "hitbox": [  ]
 },
-10: {
+14: {
 "frame": 19,
 "hitbox": [  ]
-},
-13: {
-"frame": 20,
-"hitbox": [  ]
-},
-16: {
-"frame": 21,
-"hitbox": [  ]
 }
 },
 "vframes": 4
 },
-"aSpawn": {
-"duration": 4,
-"hframes": 6,
-"loop": false,
-"spritesheet": "TridentProjSprite",
-"timestamps": {
-0: {
-"frame": 11,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
-}
-},
-"vframes": 4
-},
-"a[h2]Active": {
+"a[c1]Active": {
 "duration": 15,
 "hframes": 6,
 "loop": true,
 "spritesheet": "TridentProjSprite",
 "timestamps": {
 0: {
-"frame": 12,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 11,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 },
 5: {
-"frame": 13,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 12,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 },
 10: {
-"frame": 14,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 13,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 }
 },
 "vframes": 4
 },
-"a[h2]Spawn": {
+"a[c1]Spawn": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "TridentProjSprite",
 "timestamps": {
 0: {
-"frame": 11,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 10,
+"hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
 }
 },
 "vframes": 4
 },
-"a[h]Active": {
+"a[c2]Active": {
 "duration": 15,
 "hframes": 6,
 "loop": true,
 "spritesheet": "TridentProjSprite",
 "timestamps": {
 0: {
-"frame": 12,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 11,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 },
 5: {
-"frame": 13,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 12,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 },
 10: {
-"frame": 14,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"frame": 13,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 }
 },
 "vframes": 4
 },
-"a[h]Spawn": {
+"a[c2]Spawn": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "TridentProjSprite",
 "timestamps": {
 0: {
+"frame": 10,
+"hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[c3]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
 "frame": 11,
-"hitbox": [ Vector2( -10, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -10, -12 ) ]
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
+},
+5: {
+"frame": 12,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
+},
+10: {
+"frame": 13,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[c3]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 10,
+"hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
 }
 },
 "vframes": 4

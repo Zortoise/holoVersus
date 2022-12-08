@@ -11,10 +11,10 @@ extends EditorScript
 
 # TARGETS ---------------------------------------------------------------------------------------------------
 
-export var entity_folder = "res://Characters/Gura/SFX/"
+export var entity_folder = "res://Characters/Gura/"
 # be sure to end with a "/"
 
-export var target_aseprite_filename = ""
+export var target_aseprite_filename = "SP1"
 # only need filename, not path, no need extension
 # if left empty, will process all .aseprite files in the AsepriteFiles folder in entity_folder
 
@@ -33,7 +33,7 @@ func _run():
 	else: # if target_aseprite_filename is empty, process all aseprite_files in AsepriteFiles folder in entity_folder
 		var dir = Directory.new()
 		if dir.open(entity_folder + "AsepriteFiles/") == OK:
-			dir.list_dir_begin()
+			dir.list_dir_begin(true)
 			var file_name = dir.get_next()
 			while file_name != "":
 				if file_name.ends_with(".aseprite"):

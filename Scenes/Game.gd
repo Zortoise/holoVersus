@@ -735,6 +735,17 @@ func detect_kill(character_box):
 		return true
 	return false
 	
+func detect_offstage(entity_sprite_box):
+# warning-ignore:unassigned_variable
+	var target_box: Rect2
+	target_box.position = entity_sprite_box.rect_global_position
+	target_box.size = entity_sprite_box.rect_size
+	if !stage_box.get_rect().intersects(target_box):
+		# if collision box is outside stage_box, kill them
+		entity_sprite_box.get_parent().on_offstage()
+		return true
+	return false
+	
 func get_killblast_angle_and_screenshake(body_position):
 	
 	var out_angle := 0.0
@@ -1310,7 +1321,7 @@ func rng_generate(upper_limit: int): # will return a number from 0 to (upper_lim
 			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------
 
-func _on_Character_entity(master_path: NodePath, entity_ref: String, out_position, aux_data: Dictionary):
+func _spawn_entity(master_path: NodePath, entity_ref: String, out_position, aux_data: Dictionary):
 	var entity = Globals.loaded_entity_scene.instance()
 	if !"back" in aux_data:
 		$EntitiesFront.add_child(entity)
@@ -1321,7 +1332,7 @@ func _on_Character_entity(master_path: NodePath, entity_ref: String, out_positio
 
 # for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
 # for unique sfx, loaded_sfx_ref will be a NodePath leading to the sfx's loaded FrameData .tres file and loaded spritesheet
-func _on_Character_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary):
+func _spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary):
 	var sfx = Globals.loaded_SFX_scene.instance()
 	if !"back" in aux_data:
 		$SFXFront.add_child(sfx)
@@ -1330,7 +1341,7 @@ func _on_Character_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dic
 	sfx.init(anim, loaded_sfx_ref, out_position, aux_data)
 	
 	
-func _on_Character_shadow_trail(sprite_node_path, out_position, starting_modulate_a = 0.5, lifetime = 10.0):
+func _spawn_shadow(sprite_node_path, out_position, starting_modulate_a = 0.5, lifetime = 10.0):
 	var shadow = Globals.loaded_shadow_scene.instance()
 	$ShadowTrail.add_child(shadow)
 	shadow.init(sprite_node_path, out_position, starting_modulate_a, lifetime)

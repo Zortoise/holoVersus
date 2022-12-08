@@ -32,6 +32,8 @@ func move_platform():
 				# position_change need to be in integer!'
 				var rider = rider_box.get_parent()
 				rider.move_amount(position_change, rider_box, rider.get_node("SoftPlatformDBox"), Vector2.ZERO)
+				if rider.has_method("set_true_position"):
+					rider.call("set_true_position")
 				# no need the velocity, grounded Entities always have SoftPlatformDBox
 			else:
 				rider_box.get_parent().position += position_change # for most other grounded entities, don't need to check for collision

@@ -5,11 +5,11 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"WaterJet": {
+"TridentRing": {
 "duration": 16,
 "hframes": 4,
 "loop": false,
-"spritesheet": "WaterJetSprite",
+"spritesheet": "TridentRingSprite",
 "timestamps": {
 0: {
 "frame": 0

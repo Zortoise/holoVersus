@@ -5,11 +5,22 @@ var player_push_slowdown # set by constant in Character.gd
 
 # soft_platform_dbox is needed to phase through soft platforms
 func move(collision_box, soft_platform_dbox, in_velocity: Vector2, ledge_stop = false):
-	var move_amount = Vector2.ZERO
-	move_amount.x = round(in_velocity.x * Globals.FRAME)
-	move_amount.y = round(in_velocity.y * Globals.FRAME)
 	
-	return move_amount(move_amount, collision_box, soft_platform_dbox, in_velocity, ledge_stop) # move and return the velocity
+	call("move_true_position", in_velocity) # first, move the true position
+	var target_position = call("get_true_position")
+	target_position.x = round(target_position.x) # then get the new target position derived from the true position
+	target_position.y = round(target_position.y)
+	
+	var move_amount = Vector2.ZERO # get the number of pixels to move horziontally/vertically from target position - current position
+	move_amount.x = target_position.x - position.x
+	move_amount.y = target_position.y - position.y
+	
+	var results = move_amount(move_amount, collision_box, soft_platform_dbox, in_velocity, ledge_stop) # move and return the velocity
+	
+	if position != target_position: # unable to reach target_position (collision, pushing, etc), set true position to current position
+		call("set_true_position")
+	
+	return results
 	
 func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velocity: Vector2, ledge_stop = false):
 	# will only collide with other players if owner of collision_box is a player
@@ -34,18 +45,19 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 				# no collision with other players during hitstun
 				if $HitStunTimer.is_running() or colliding_characters.size() == 0:
 					collision_box.get_parent().position.x += sign(move_amount.x)
-					if Globals.Game.detect_kill(collision_box):
-						return [Vector2.ZERO, false]
 					move_amount.x -= sign(move_amount.x)
 				else:
 					for colliding_character in colliding_characters: # push collided player 1 pixel whike you lose 1 move_amount
 						colliding_character.move_amount(Vector2(sign(move_amount.x), 0), colliding_character.get_node("PlayerCollisionBox"), \
 							colliding_character.get_node("SoftPlatformDBox"), Vector2.ZERO)
+						colliding_character.set_true_position()
 					move_amount.x -= sign(move_amount.x) # skip moving this move_amount
 					in_velocity.x *= player_push_slowdown # slow you down a little more
 			else: # non-player moving
 				collision_box.get_parent().position.x += sign(move_amount.x)
 				move_amount.x -= sign(move_amount.x)
+			if check_offstage(collision_box):
+				return [Vector2.ZERO, false, false, false]
 		else:
 			in_velocity.x = 0
 			collision_check = true
@@ -57,9 +69,9 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 			# if no solid platform above
 			if !is_against_ceiling(collision_box, soft_platform_dbox):
 				collision_box.get_parent().position.y += sign(move_amount.y)
-				if Globals.Game.detect_kill(collision_box):
-					return [Vector2.ZERO, false]
 				move_amount.y -= sign(move_amount.y)
+				if check_offstage(collision_box):
+					return [Vector2.ZERO, false, false, false]
 			else: # stop moving
 				in_velocity.y = 0
 				collision_check = true
@@ -68,9 +80,9 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 			if has_method("check_fallthrough") and call("check_fallthrough"): # passing through soft platforms
 				if !is_on_solid_ground(soft_platform_dbox, in_velocity):
 					collision_box.get_parent().position.y += sign(move_amount.y)
-					if Globals.Game.detect_kill(collision_box):
-						return [Vector2.ZERO, false]
 					move_amount.y -= sign(move_amount.y)
+					if check_offstage(collision_box):
+						return [Vector2.ZERO, false, false, false]
 				else: # stop moving
 					in_velocity.y = 0
 					landing_check = true
@@ -79,9 +91,9 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 			else:
 				if !is_on_ground(soft_platform_dbox, in_velocity):
 					collision_box.get_parent().position.y += sign(move_amount.y)
-					if Globals.Game.detect_kill(collision_box):
-						return [Vector2.ZERO, false]
 					move_amount.y -= sign(move_amount.y)
+					if check_offstage(collision_box):
+						return [Vector2.ZERO, false, false, false]
 				else: # stop moving
 					in_velocity.y = 0
 					landing_check = true
@@ -89,6 +101,15 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 					break
 			
 	return [in_velocity, landing_check, collision_check, ledgedrop_check]
+	
+	
+func check_offstage(collision_box):
+	if collision_box.is_in_group("Players") and Globals.Game.detect_kill(collision_box):
+		return true
+	elif collision_box.is_in_group("Entities") and collision_box.get_parent().has_node("EntitySpriteBox") and \
+			Globals.Game.detect_offstage(collision_box.get_parent().get_node("EntitySpriteBox")):
+		return true
+	return false
 	
 # no need to get character collision for up and down movement for now
 func get_colliding_characters_side(collision_box, direction):

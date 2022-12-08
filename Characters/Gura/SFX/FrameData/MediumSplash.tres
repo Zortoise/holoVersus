@@ -5,4 +5,28 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"MediumSplash": {
+"duration": 20,
+"hframes": 5,
+"loop": false,
+"spritesheet": "MediumSplashSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+4: {
+"frame": 1
+},
+8: {
+"frame": 2
+},
+12: {
+"frame": 3
+},
+16: {
+"frame": 4
+}
+},
+"vframes": 1
+}
 }

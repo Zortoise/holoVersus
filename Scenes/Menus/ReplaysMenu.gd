@@ -45,7 +45,7 @@ func load_replays(): # load in the replays in the Replays directory
 	var dir = Directory.new()
 	if dir.dir_exists("user://Replays"):
 		if dir.open("user://Replays") == OK:
-			dir.list_dir_begin()
+			dir.list_dir_begin(true)
 			var file_name = dir.get_next()
 			while file_name != "":
 				if file_name.ends_with(".tres"):

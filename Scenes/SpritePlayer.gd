@@ -11,7 +11,7 @@ func init(in_sprite, in_sfx_over, in_sfx_under, frame_data_path):
 	# open the frame_data_path and get the filenames of all files in it
 	var dir = Directory.new()
 	if dir.open(frame_data_path) == OK:
-		dir.list_dir_begin()
+		dir.list_dir_begin(true)
 		var file_name = dir.get_next()
 		while file_name != "":
 			if file_name.ends_with(".tres"): # load all files with name ending in ".tres"

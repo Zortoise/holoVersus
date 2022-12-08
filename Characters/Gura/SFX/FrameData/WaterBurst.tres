@@ -5,4 +5,28 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"WaterBurst": {
+"duration": 19,
+"hframes": 5,
+"loop": false,
+"spritesheet": "WaterBurstSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+5: {
+"frame": 1
+},
+10: {
+"frame": 2
+},
+13: {
+"frame": 3
+},
+16: {
+"frame": 4
+}
+},
+"vframes": 1
+}
 }

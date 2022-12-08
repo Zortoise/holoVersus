@@ -22,6 +22,8 @@ margin_right = 0.0
 margin_bottom = 0.0
 color = Color( 1, 0.92549, 0.32549, 1 )
 
+[node name="EntitySpriteBox" parent="." instance=ExtResource( 3 )]
+
 [node name="SoftPlatformDBox" parent="." instance=ExtResource( 3 )]
 margin_left = -10.0
 margin_top = 21.0

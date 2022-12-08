@@ -13,6 +13,7 @@ var facing := 1
 var v_facing := 1
 var master_path: NodePath
 #var master_ID: int
+var true_position := Vector2.ZERO # int*1000 instead of int, needed for slow and precise movement
 var velocity := Vector2.ZERO
 var lifespan = null
 var absorption_value = null
@@ -32,6 +33,7 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 #	master_ID = get_node(master_path).player_ID
 	entity_ref = in_entity_ref
 	position = in_position
+	set_true_position()
 	
 	facing = get_node(master_path).facing # face in same direction as master
 	scale.x = facing
@@ -94,6 +96,13 @@ func load_entity():
 		$EntityCollisionBox.free()
 		$SoftPlatformDBox.free()
 		
+	if UniqueEntity.has_node("DefaultSpriteBox"): # for an entity to go offstage, the entire sprite must be offstage
+		var ref_rect = UniqueEntity.get_node("DefaultSpriteBox")
+		$EntitySpriteBox.rect_position = ref_rect.rect_position
+		$EntitySpriteBox.rect_size = ref_rect.rect_size
+	else:
+		$EntitySpriteBox.free()
+		
 	if "PALETTE" in UniqueEntity: # load palette
 		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palette
 			if UniqueEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
@@ -123,7 +132,30 @@ func stimulate2(): # only ran if not in hitstop
 		velocity.x = 0.0
 	if abs(velocity.y) < 5.0:
 		velocity.y = 0.0
-	
+		
+	# clashing projectiles, clash with their EntityCollisionBoxes
+	if absorption_value != null and absorption_value > 0 and has_node("EntityCollisionBox"):
+		var interact_array = Detection.detect_return([$EntityCollisionBox], ["Entities"])
+		if interact_array.size() > 0: # detected other entities
+			var interact_array2 = []
+			for x in interact_array: # filter out entities with no absorption value or about to be killed
+				if x.absorption_value != null and absorption_value > 0:
+					interact_array2.append(x)
+			var lowest_AV = absorption_value # find lowest absorption_value
+			for x in interact_array2:
+				if x.absorption_value < lowest_AV:
+					lowest_AV = x.absorption_value
+					
+			absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
+			if absorption_value <= 0:
+				UniqueEntity.kill()
+			for x in interact_array2:
+				x.absorption_value -= lowest_AV
+				if x.absorption_value <= 0:
+					x.UniqueEntity.kill()
+		
+				
+			
 	UniqueEntity.stimulate()
 	
 	ignore_list_progress_timer()
@@ -173,12 +205,38 @@ func stimulate_after(): # do this after hit detection
 		$HitStopTimer.time = hitstop
 		
 		
+# TRUE POSITION --------------------------------------------------------------------------------------------------	
+	# record the position to 0.001 of a pixel as integers, needed for slow and precise movements
+	# to move an object, first do move_true_position(), then get_true_position()
+	# round off the results and compare it to integer position to get move_amount and plug it in move_amount()
+	# on collision, or anything that manipulate position directly (fallthrough, moving platforms), reset true_position to integer position
+		
+func set_true_position():
+	true_position.x = round(position.x * 1000)
+	true_position.y = round(position.y * 1000)
+	
+func get_true_position():
+# warning-ignore:unassigned_variable
+	var float_position: Vector2
+	float_position.x = true_position.x / 1000
+	float_position.y = true_position.y / 1000
+	return float_position
+	
+func move_true_position(in_velocity):
+	true_position.x = round(true_position.x + (in_velocity.x * Globals.FRAME * 1000 ))
+	true_position.y = round(true_position.y + (in_velocity.y * Globals.FRAME * 1000))
+	
+# --------------------------------------------------------------------------------------------------
+		
 func check_fallthrough(): # return true if entity falls through soft platforms
 	if UniqueEntity.has_method("check_fallthrough"): # some entities may interact with soft platforms
 		return UniqueEntity.check_fallthrough
 	else:
 		return true
 
+func on_offstage(): # what to do if entity leaves stage
+	if UniqueEntity.has_method("on_offstage"):
+		UniqueEntity.on_offstage()
 
 func query_polygons(): # requested by main game node when doing hit detection
 
@@ -203,15 +261,26 @@ func query_move_data(): # requested by main game node when doing hit detection
 		return UniqueEntity.MOVE_DATABASE[Animator.current_animation]
 	return null
 
+func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
+	
+	if in_move_name == null:
+		in_move_name = Animator.current_animation
+	
+	if UniqueEntity.has_method("query_atk_attr"):
+		return UniqueEntity.query_atk_attr(in_move_name)
+	elif in_move_name in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[in_move_name].atk_attr
+	return []
+	
 
 func landed_a_hit(hit_data): # called by main game node when landing a hit
-
+	
 	var attacker = get_node(hit_data.attacker_nodepath) # will be this entity's master
 
 #	attacker.UniqueCharacter.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
 
 	if UniqueEntity.has_method("landed_a_hit"):
-		return UniqueEntity.landed_a_hit(hit_data) # reaction
+		UniqueEntity.landed_a_hit(hit_data) # reaction
 
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
@@ -225,6 +294,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
 				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
+			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.25)
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
 				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
@@ -244,6 +314,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	else:
 		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
 			hitstop = hit_data.hitstop
+			
 			
 
 	# AUDIO ----------------------------------------------------------------------------------------------
@@ -394,6 +465,7 @@ func save_state():
 		
 		"free" : free,
 		"master_path" : master_path,
+		"true_position" : true_position,
 		"velocity" : velocity,
 		"lifespan" : lifespan,
 		"absorption_value" : absorption_value,
@@ -415,12 +487,13 @@ func load_state(state_data):
 	rotation = state_data.rotation
 
 	entity_ref = state_data.entity_ref
+	master_path = state_data.master_path
 	load_entity()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	
 	free = state_data.free
-	master_path = state_data.master_path
+	true_position = state_data.true_position
 	velocity = state_data.velocity
 	lifespan = state_data.lifespan
 	absorption_value = state_data.absorption_value
