@@ -1,7 +1,7 @@
 extends "res://Scenes/Physics/Physics.gd"
 
 #signal SFX (anim, loaded_sfx_ref, out_position, aux_data)
-#signal shadow (sprite_node_path, out_position, starting_modulate_a, lifetime)
+#signal afterimage (sprite_node_path, out_position, starting_modulate_a, lifetime)
 #signal entity (master_path, entity_ref, out_position, aux_data)
 
 # constants
@@ -177,10 +177,10 @@ var velocity_limiter = { # as % of speed, some animations limit max velocity in 
 	"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null
 	}
 var input_buffer = []
-var shadow_timer := 0 # for use by unique character node
+var afterimage_timer := 0 # for use by unique character node
 var monochrome := false
 
-var sprite_texture_ref = { # used for shadows
+var sprite_texture_ref = { # used for afterimages
 	"sprite" : null,
 	"sfx_over" : null,
 	"sfx_under" : null
@@ -1180,8 +1180,8 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 					
 			
 			ex_flash()
-			# do shadow trails
-			UniqueCharacter.shadow_trail()
+			# do afterimage trails
+			UniqueCharacter.afterimage_trail()
 			
 			# spin character during launch, be sure to do this after SpritePlayer since rotation is reset at start of each animation
 			if !$HitStopTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
@@ -1268,7 +1268,7 @@ func buffer_actions():
 func capture_combinations():
 	
 	# instant air dash, place at back
-	combination(button_jump, button_dash, "InstaAirDash", true)
+	combination(button_jump, button_dash, "InstaAirDash")
 	
 #	combination(button_block, button_special, "Burst") # place this here since button_special is never buffered
 			
@@ -1501,7 +1501,7 @@ func process_input_buffer():
 						
 						Globals.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
 							if jump_cancel:
-								shadow_cancel()
+								afterimage_cancel()
 								animate("JumpTransit")
 								keep = false
 								
@@ -2034,14 +2034,14 @@ func ex_flash():# process ex flash
 func get_spritesheets():
 	pass
 			
-func shadow_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0): # one shadow every 2 frames
-	if shadow_timer <= 0:
-		shadow_timer = 1
+func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0): # one afterimage every 2 frames
+	if afterimage_timer <= 0:
+		afterimage_timer = 1
 		
 # warning-ignore:unassigned_variable
 		var main_color_modulate: Color
 		
-		if color_modulate == null: # if no color_modulate provided, sfx_over and sfx_under shadows will follow color_modulate of main sprite
+		if color_modulate == null: # if no color_modulate provided, sfx_over and sfx_under afterimages will follow color_modulate of main sprite
 			main_color_modulate.r = sprite.modulate.r
 			main_color_modulate.g = sprite.modulate.g
 			main_color_modulate.b = sprite.modulate.b
@@ -2049,30 +2049,30 @@ func shadow_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime = 1
 			main_color_modulate = color_modulate
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_shadow(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
+			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
 					starting_modulate_a, lifetime)
 			
-		Globals.Game.spawn_shadow(get_path(), sprite_texture_ref.sprite, sprite.get_path(), color_modulate, \
+		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), color_modulate, \
 				starting_modulate_a, lifetime)
-#		spawn_shadow(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
+#		spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_shadow(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
+			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
 					starting_modulate_a, lifetime)
 	else:
-		shadow_timer -= 1
+		afterimage_timer -= 1
 		
-func shadow_cancel(starting_modulate_a = 0.6, lifetime = 15.0): # no need color_modulate for now
+func afterimage_cancel(starting_modulate_a = 0.6, lifetime = 15.0): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_shadow(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
+		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
 				starting_modulate_a, lifetime)
 		
-	Globals.Game.spawn_shadow(get_path(), sprite_texture_ref.sprite, sprite.get_path(), null, \
+	Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), null, \
 			starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_shadow(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
+		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
 				starting_modulate_a, lifetime)
 		
 		
@@ -2139,15 +2139,17 @@ func check_quick_turn():
 				return true
 	return false
 	
-func check_quick_cancel(): # cannot quick cancel from EX/Supers
+func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	var move_name = get_move_name()
 	if move_name == null: return false
+	if !move_name in UniqueCharacter.STARTERS or move_name in UniqueCharacter.SUPERS: return false
 	
-	if move_name in UniqueCharacter.STARTERS:
-		if move_name in UniqueCharacter.EX_MOVES or move_name in UniqueCharacter.SUPERS:
+	if move_name in UniqueCharacter.EX_MOVES: # cancelling from ex move, only other ex moves are possible
+		if attack_ref in UniqueCharacter.EX_MOVES: # cancelling into another ex move
 			if Animator.time <= QUICK_CANCEL_TIME + 1 and Animator.time != 0:
 				return true # EX and Supers have a wider window to quick cancel into
-		elif Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+	else: # cancelling from a normal move
+		if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
 			return true
 		
 	return false
@@ -2297,7 +2299,7 @@ func test_jump_cancel():
 	if !is_normal_attack(move_name): return false # can only jump cancel Normals
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be jump cancelled
 	
-	shadow_cancel()
+	afterimage_cancel()
 	return true
 	
 func test_dash_cancel():
@@ -2308,7 +2310,7 @@ func test_dash_cancel():
 	if !is_normal_attack(move_name): return false # can only dash cancel Normals
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be dash cancelled
 	
-	shadow_cancel()
+	afterimage_cancel()
 	return true
 	
 func test_fastfall_cancel():
@@ -2319,7 +2321,7 @@ func test_fastfall_cancel():
 	if !move_name.begins_with("a"): return false # can only fastfall cancel aerials
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be fastfall cancelled
 	
-	shadow_cancel()
+	afterimage_cancel()
 	return true
 	
 #func test_air_jump_cancel(): # for aerials' innate air jump cancel, some conditions must be fulfilled
@@ -2618,7 +2620,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		3: # landed a special move (hit/block), can only chain under certain conditions, WIP
 			return false
 	
-	shadow_cancel()
+	afterimage_cancel()
 	return true
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
 	
@@ -3961,10 +3963,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Run":
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"JumpTransit2":
-			if button_special in input_state.pressed: # special and jump to hop
+			if button_down in input_state.pressed: # down and jump to hop, cannot hop on soft platforms
 				velocity.y = -UniqueCharacter.JUMP_SPEED * HOP_JUMP_MOD
 				if dir != 0: # when hopping can press left/right for a long hop that reset momentum
 					velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.LONG_HOP_JUMP_MOD
+			elif button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to super jump, cannot adjust height
+				velocity.y = -UniqueCharacter.JUMP_SPEED * UniqueCharacter.SUPER_JUMP_MOD
+				velocity.x = 0
 			else:
 				velocity.y = -UniqueCharacter.JUMP_SPEED
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
@@ -4139,7 +4144,7 @@ func save_state():
 		"null_friction" : null_friction,
 		"velocity_limiter" : velocity_limiter,
 		"input_buffer" : input_buffer,
-		"shadow_timer" : shadow_timer,
+		"afterimage_timer" : afterimage_timer,
 		"launch_starting_rot" : launch_starting_rot,
 		"orig_hitstun" : orig_hitstun,
 		"chain_combo" : chain_combo,
@@ -4208,7 +4213,7 @@ func load_state(state_data):
 	null_friction = state_data.null_friction
 	velocity_limiter = state_data.velocity_limiter
 	input_buffer = state_data.input_buffer
-	shadow_timer = state_data.shadow_timer
+	afterimage_timer = state_data.afterimage_timer
 	launch_starting_rot = state_data.launch_starting_rot
 	orig_hitstun = state_data.orig_hitstun
 	chain_combo = state_data.chain_combo

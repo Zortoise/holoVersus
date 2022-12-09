@@ -212,22 +212,22 @@ func query_atk_attr(in_move_name):
 			
 			
 func stimulate():
-	match Animator.current_animation: # shadow trail
+	match Animator.current_animation: # afterimage trail
 		"[c2]Active", "a[c2]Active":
 			if posmod(Entity.lifetime, 3) == 0:
-				Globals.Game.spawn_shadow(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
-#				spawn_shadow(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
+#				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 				
 		"[c3]Active", "[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_shadow(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
 						{"facing":Entity.facing, "rot":START_ROTATION, "palette" : Entity.master_path})
 						
 		"a[c3]Active", "a[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_shadow(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
 						{"facing":Entity.facing, "rot":-START_ROTATION, "palette" : Entity.master_path})

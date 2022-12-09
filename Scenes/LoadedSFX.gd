@@ -260,7 +260,7 @@ var modulate_animations = {
 	"EX_flash2" : {
 		"duration": 18,
 		"loop" : true,
-		"shadow_trail" : 0,
+		"afterimage_trail" : 0,
 		"timestamps" : {
 			0 : # this is the timestamp of the key
 			{
@@ -302,7 +302,7 @@ var modulate_animations = {
 #	"EX_block_flash2" : {
 #		"duration": 12,
 #		"loop" : true,
-#		"shadow_trail" : 0,
+#		"afterimage_trail" : 0,
 #		"timestamps" : {
 #			0 : # this is the timestamp of the key
 #			{

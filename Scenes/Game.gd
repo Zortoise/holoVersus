@@ -550,11 +550,11 @@ func stimulate(rendering = true):
 		entity.stimulate_after()
 
 
-	for shadow in $ShadowTrail.get_children():
-		if shadow.free: # Physics Tick version of queue_free()
-			shadow.free()
+	for afterimage in $Afterimages.get_children():
+		if afterimage.free: # Physics Tick version of queue_free()
+			afterimage.free()
 		else:
-			shadow.stimulate()
+			afterimage.stimulate()
 		
 	for SFX in $SFXFront.get_children():
 		if SFX.free:
@@ -605,7 +605,7 @@ func save_state(timestamp):
 	#		"game_set" : null
 			},
 		"player_data" : {},
-		"shadow_data" : [],
+		"afterimage_data" : [],
 		"entities_back_data" : [],
 		"entities_front_data" : [],
 		"SFX_back_data" : [],
@@ -626,8 +626,8 @@ func save_state(timestamp):
 	for player in $Players.get_children():
 		game_state.player_data[player.player_ID] = player.save_state()
 
-	for shadow in $ShadowTrail.get_children():
-		game_state.shadow_data.append(shadow.save_state())
+	for afterimage in $Afterimages.get_children():
+		game_state.afterimage_data.append(afterimage.save_state())
 		
 	for entity in $EntitiesBack.get_children():
 		game_state.entities_back_data.append(entity.save_state())
@@ -676,8 +676,8 @@ func load_state(game_state):
 		player.load_state(loaded_game_state.player_data[player.player_ID])
 	
 	# remove children
-	for shadow in $ShadowTrail.get_children():
-		shadow.free()
+	for afterimage in $Afterimages.get_children():
+		afterimage.free()
 	for entity in $EntitiesBack.get_children():
 		entity.free()
 	for entity in $EntitiesFront.get_children():
@@ -690,10 +690,10 @@ func load_state(game_state):
 		AudioManager.kill()
 		
 	# re-add children
-	for state_data in loaded_game_state.shadow_data:
-		var new_shadow = Globals.loaded_shadow_scene.instance()
-		$ShadowTrail.add_child(new_shadow)
-		new_shadow.load_state(state_data)
+	for state_data in loaded_game_state.afterimage_data:
+		var new_afterimage = Globals.loaded_afterimage_scene.instance()
+		$Afterimages.add_child(new_afterimage)
+		new_afterimage.load_state(state_data)
 
 	for state_data in loaded_game_state.entities_back_data:
 		var new_entity = Globals.loaded_entity_scene.instance()
@@ -1340,10 +1340,10 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary)
 	sfx.init(anim, loaded_sfx_ref, out_position, aux_data)
 	
 	
-func spawn_shadow(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0):
-	var shadow = Globals.loaded_shadow_scene.instance()
-	$ShadowTrail.add_child(shadow)
-	shadow.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime)
+func spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0):
+	var afterimage = Globals.loaded_afterimage_scene.instance()
+	$Afterimages.add_child(afterimage)
+	afterimage.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime)
 	
 	
 # aux_data contain "vol", "bus"

@@ -63,7 +63,7 @@ func _physics_process(_delta):
 	
 	if $ViewportContainer/Viewport/Game.playback_mode:
 		pass
-		$Test/Playback.show()
+#		$Test/Playback.show()
 	else:
 		$Test/Playback.hide()
 		

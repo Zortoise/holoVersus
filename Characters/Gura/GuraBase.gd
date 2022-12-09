@@ -13,7 +13,7 @@ const JUMP_SPEED = 700.0
 const JUMP_HORIZONTAL_SPEED = 0.0
 const AIR_JUMP_MOD = 0.9 # reduce height of air jumps
 const GRAVITY_MOD = 1.0 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 7.5 # affect terminal velocity downward
+const TERMINAL_VELOCITY_MOD = 7.2 # affect terminal velocity downward
 const FASTFALL_MOD = 1.2 # fastfall speed, mod of terminal velocity
 const FRICTION = 0.15 # between 0.0 and 1.0
 const ACCELERATION = 0.15 # between 0.0 and 1.0
@@ -25,6 +25,7 @@ const GROUND_DASH_SPEED = 480.0 # duration in animation data
 const AIR_DASH_SPEED = 390.0 # duration in animation data
 const IMPULSE_MOD = 1.25 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 1.25 # multiply by SPEED to get horizontal velocity gain when doing long hops
+const SUPER_JUMP_MOD = 1.5
 
 const HITSTUN_REDUCTION_AT_MAX_GG = 0.75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have higher
 const KB_BOOST_AT_MAX_GG = 2.0 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
@@ -50,7 +51,7 @@ const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3",
 const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "SP3[ex]", "aSP3[ex]"]
 const SUPERS = []
 
-const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP3[ex]", "aSP3[ex]", "aSP3b[ex]"] # list of movenames that will emit EX flash
+const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP3[ex]", "aSP3[ex]", "SP3b[ex]"] # list of movenames that will emit EX flash
 #const EX_FLASH_ANIM = ["H", "Hb"]
 
 # const DIRECTORY_NAME = "res://Characters/Gura/"
@@ -381,7 +382,7 @@ const MOVE_DATABASE = {
 		"atk_attr" : [],
 	},
 	
-	"aSP3" : {
+	"SP3" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 40,
@@ -401,7 +402,7 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
-	"aSP3b" : {
+	"SP3b" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 70,
@@ -419,7 +420,7 @@ const MOVE_DATABASE = {
 		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
-	"aSP3[h]" : {
+	"SP3[h]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP3",
 		"hitcount" : 1,
@@ -440,7 +441,7 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
-	"aSP3b[h]" : {
+	"SP3b[h]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP3b",
 		"hitcount" : 1,
@@ -459,7 +460,7 @@ const MOVE_DATABASE = {
 		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
-	"aSP3[ex]" : {
+	"SP3[ex]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 60,
@@ -479,7 +480,7 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
-	"aSP3b[ex]" : {
+	"SP3b[ex]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 120,
