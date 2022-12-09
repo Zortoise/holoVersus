@@ -41,20 +41,32 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 		elif !is_against_wall(collision_box, soft_platform_dbox, sign(move_amount.x)):
 			# for players, has to test collision with other players as well
 			if collision_box.is_in_group("Players"):
-				var colliding_characters = get_colliding_characters_side(collision_box, sign(move_amount.x))
 				# no collision with other players during hitstun
-				if $HitStunTimer.is_running() or colliding_characters.size() == 0:
-					collision_box.get_parent().position.x += sign(move_amount.x)
+				if $HitStunTimer.is_running():
+					position.x += sign(move_amount.x)
+					if sign(move_amount.x) > 0: # check if player touched blast barrier
+						var result = check_blast_barriers(collision_box, Globals.compass.E, in_velocity)
+						if result != null:
+							return [result, false, false, false]
+					elif sign(move_amount.x) < 0:
+						var result = check_blast_barriers(collision_box, Globals.compass.W, in_velocity)
+						if result != null:
+							return [result, false, false, false]
 					move_amount.x -= sign(move_amount.x)
-				else:
-					for colliding_character in colliding_characters: # push collided player 1 pixel whike you lose 1 move_amount
-						colliding_character.move_amount(Vector2(sign(move_amount.x), 0), colliding_character.get_node("PlayerCollisionBox"), \
-							colliding_character.get_node("SoftPlatformDBox"), Vector2.ZERO)
-						colliding_character.set_true_position()
-					move_amount.x -= sign(move_amount.x) # skip moving this move_amount
-					in_velocity.x *= player_push_slowdown # slow you down a little more
+				else: # check for other players
+					var colliding_characters = get_colliding_characters_side(collision_box, sign(move_amount.x))
+					if colliding_characters.size() == 0:
+						position.x += sign(move_amount.x)
+						move_amount.x -= sign(move_amount.x)
+					else:
+						for colliding_character in colliding_characters: # push collided player 1 pixel whike you lose 1 move_amount
+							colliding_character.move_amount(Vector2(sign(move_amount.x), 0), colliding_character.get_node("PlayerCollisionBox"), \
+								colliding_character.get_node("SoftPlatformDBox"), Vector2.ZERO)
+							colliding_character.set_true_position()
+						move_amount.x -= sign(move_amount.x) # skip moving this move_amount
+						in_velocity.x *= player_push_slowdown # slow you down a little more
 			else: # non-player moving
-				collision_box.get_parent().position.x += sign(move_amount.x)
+				position.x += sign(move_amount.x)		
 				move_amount.x -= sign(move_amount.x)
 			if check_offstage(collision_box):
 				return [Vector2.ZERO, false, false, false]
@@ -68,10 +80,17 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 		if move_amount.y < 0: # moving upwards
 			# if no solid platform above
 			if !is_against_ceiling(collision_box, soft_platform_dbox):
-				collision_box.get_parent().position.y += sign(move_amount.y)
+				position.y += sign(move_amount.y)
 				move_amount.y -= sign(move_amount.y)
+				
 				if check_offstage(collision_box):
 					return [Vector2.ZERO, false, false, false]
+					
+				if collision_box.is_in_group("Players") and $HitStunTimer.is_running(): # check if player touched blast barrier
+					var result = check_blast_barriers(collision_box, Globals.compass.N, in_velocity)
+					if result != null:
+						return [result, false, false, false]
+						
 			else: # stop moving
 				in_velocity.y = 0
 				collision_check = true
@@ -79,7 +98,7 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 		else: # moving downwards
 			if has_method("check_fallthrough") and call("check_fallthrough"): # passing through soft platforms
 				if !is_on_solid_ground(soft_platform_dbox, in_velocity):
-					collision_box.get_parent().position.y += sign(move_amount.y)
+					position.y += sign(move_amount.y)
 					move_amount.y -= sign(move_amount.y)
 					if check_offstage(collision_box):
 						return [Vector2.ZERO, false, false, false]
@@ -90,7 +109,7 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 					break
 			else:
 				if !is_on_ground(soft_platform_dbox, in_velocity):
-					collision_box.get_parent().position.y += sign(move_amount.y)
+					position.y += sign(move_amount.y)
 					move_amount.y -= sign(move_amount.y)
 					if check_offstage(collision_box):
 						return [Vector2.ZERO, false, false, false]
@@ -110,6 +129,27 @@ func check_offstage(collision_box):
 			Globals.Game.detect_offstage(collision_box.get_parent().get_node("EntitySpriteBox")):
 		return true
 	return false
+	
+func check_blast_barriers(collision_box, compass_dir, in_velocity):
+	if call("get_damage_percent") >= 0.7: # no barrier if damage value too high
+		return null
+	match compass_dir: # return null if not touching barriers
+		Globals.compass.W:
+			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierL):
+				return null
+			call("bounce_dust", compass_dir)
+			return Vector2(-in_velocity.x, in_velocity.y)
+		Globals.compass.E:
+			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierR):
+				return null
+			call("bounce_dust", compass_dir)
+			return Vector2(-in_velocity.x, in_velocity.y)
+		Globals.compass.N:
+			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierU):
+				return null
+			call("bounce_dust", compass_dir)
+			return Vector2(in_velocity.x, -in_velocity.y)
+
 	
 # no need to get character collision for up and down movement for now
 func get_colliding_characters_side(collision_box, direction):
@@ -197,12 +237,12 @@ func snap_up(collision_box, dashland_dbox):
 			return
 		# else if no solid platform above, move up 1 pixel
 		elif !Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2.UP):
-			collision_box.get_parent().position.y -= 1
+			position.y -= 1
 		else: # hit a solid platform, stop immediately, revert all movement
-			collision_box.get_parent().position.y += x
+			position.y += x
 			return
 	# if fail to snap up after moving the max allowed distance, return to starting position
-	collision_box.get_parent().position.y += max_movement
+	position.y += max_movement
 
 
 		

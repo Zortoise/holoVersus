@@ -3,6 +3,20 @@ extends Node
 # autoload, global functions for detecting objects using detect boxes
 
 
+func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are nodes like ColorRect
+# warning-ignore:unassigned_variable
+	var detect_box: Rect2
+	detect_box.position = box1.rect_global_position
+	detect_box.size = box1.rect_size
+# warning-ignore:unassigned_variable
+	var target_box: Rect2
+	target_box.position = box2.rect_global_position
+	target_box.size = box2.rect_size
+	if detect_box.intersects(target_box):
+		return true
+	else: return false
+	
+
 # search for collision boxes in groups_to_comb for boxes that intersect with input boxes
 # may be offseted by a unit vector
 # return true if found intersected stuff
@@ -22,6 +36,7 @@ func detect_bool(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO)
 				if detect_box.intersects(target_box):
 					return true
 	return false
+
 	
 # return array of found intersected stuff, return the parents of the intersected boxes
 func detect_return(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO):

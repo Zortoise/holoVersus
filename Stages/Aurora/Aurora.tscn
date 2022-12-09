@@ -81,7 +81,6 @@ texture = ExtResource( 5 )
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 3
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]
@@ -234,6 +233,25 @@ margin_left = -704.0
 margin_top = -448.0
 margin_right = 704.0
 margin_bottom = 448.0
+
+[node name="BlastBarrierL" type="ColorRect" parent="StageBox"]
+margin_left = -64.0
+margin_right = 56.0
+margin_bottom = 896.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierR" type="ColorRect" parent="StageBox"]
+margin_left = 1352.0
+margin_right = 1472.0
+margin_bottom = 896.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierU" type="ColorRect" parent="StageBox"]
+margin_left = -64.0
+margin_top = -64.0
+margin_right = 1472.0
+margin_bottom = 56.0
+color = Color( 0, 0, 0, 1 )
 
 [node name="RespawnPoints" type="Node2D" parent="."]
 position = Vector2( 0, 32 )

@@ -140,6 +140,40 @@ frame_data = {
 },
 "vframes": 4
 },
+"[ex]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 1,
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
+},
+5: {
+"frame": 2,
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
+},
+10: {
+"frame": 3,
+"hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
+}
+},
+"vframes": 4
+},
+"[ex]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
+}
+},
+"vframes": 4
+},
 "aKill": {
 "duration": 17,
 "hframes": 6,
@@ -263,6 +297,40 @@ frame_data = {
 "vframes": 4
 },
 "a[c3]Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 10,
+"hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[ex]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 11,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
+},
+5: {
+"frame": 12,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
+},
+10: {
+"frame": 13,
+"hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
+}
+},
+"vframes": 4
+},
+"a[ex]Spawn": {
 "duration": 4,
 "hframes": 6,
 "loop": false,

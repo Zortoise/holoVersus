@@ -15,6 +15,7 @@ var master_path: NodePath
 #var master_ID: int
 var true_position := Vector2.ZERO # int*1000 instead of int, needed for slow and precise movement
 var velocity := Vector2.ZERO
+var lifetime := 0
 var lifespan = null
 var absorption_value = null
 var life_point = null # loses 1 on each hit, cannot depend on hitcount (piercing projectiles hit each player only once, for instance)
@@ -36,7 +37,7 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 	set_true_position()
 	
 	facing = get_node(master_path).facing # face in same direction as master
-	scale.x = facing
+	$Sprite.scale.x = facing
 	
 	# for sprites:
 #	if "facing" in aux_data:
@@ -138,21 +139,23 @@ func stimulate2(): # only ran if not in hitstop
 		var interact_array = Detection.detect_return([$EntityCollisionBox], ["Entities"])
 		if interact_array.size() > 0: # detected other entities
 			var interact_array2 = []
-			for x in interact_array: # filter out entities with no absorption value or about to be killed
-				if x.absorption_value != null and absorption_value > 0:
+			for x in interact_array: # filter out entities with no absorption value or about to be killed or share this entity's master
+				if x.absorption_value != null and absorption_value > 0 and \
+						x.get_node(master_path).player_ID != get_node(master_path).player_ID:
 					interact_array2.append(x)
-			var lowest_AV = absorption_value # find lowest absorption_value
-			for x in interact_array2:
-				if x.absorption_value < lowest_AV:
-					lowest_AV = x.absorption_value
-					
-			absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
-			if absorption_value <= 0:
-				UniqueEntity.kill()
-			for x in interact_array2:
-				x.absorption_value -= lowest_AV
-				if x.absorption_value <= 0:
-					x.UniqueEntity.kill()
+			if interact_array2.size() > 0:
+				var lowest_AV = absorption_value # find lowest absorption_value
+				for x in interact_array2:
+					if x.absorption_value < lowest_AV:
+						lowest_AV = x.absorption_value
+						
+				absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
+				if absorption_value <= 0:
+					UniqueEntity.kill()
+				for x in interact_array2:
+					x.absorption_value -= lowest_AV
+					if x.absorption_value <= 0:
+						x.UniqueEntity.kill()
 		
 				
 			
@@ -194,10 +197,9 @@ func stimulate_after(): # do this after hit detection
 	if !$HitStopTimer.is_running():
 		$SpritePlayer.stimulate()
 		
-		if lifespan != null:
-			lifespan -= 1
-			if lifespan == 0:
-				free = true
+		lifetime += 1
+		if lifespan != null and lifetime >= lifespan:
+			free = true
 				
 	# start hitstop timer at end of frame after SpritePlayer.stimulate() by setting hitstop to a number other than null for the frame
 	# new hitstops override old ones
@@ -279,9 +281,6 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 #	attacker.UniqueCharacter.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
 
-	if UniqueEntity.has_method("landed_a_hit"):
-		UniqueEntity.landed_a_hit(hit_data) # reaction
-
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
 	attacker.targeted_opponent = defender.player_ID # target last attacked opponent
@@ -315,6 +314,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
 			hitstop = hit_data.hitstop
 			
+	# WIP, change to screen freeze later
+	if hit_data.lethal_hit: # on lethal hit, hitstop this entity's master as well
+		get_node(master_path).get_node("HitStopTimer").time = hit_data.hitstop
 			
 
 	# AUDIO ----------------------------------------------------------------------------------------------
@@ -356,6 +358,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				elif volume_change < 0:
 					aux_data["vol"] = volume_change
 				play_audio(sound.ref, aux_data)
+				
+	if UniqueEntity.has_method("landed_a_hit"):
+		UniqueEntity.landed_a_hit(hit_data) # reaction
 	
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------
@@ -467,6 +472,7 @@ func save_state():
 		"master_path" : master_path,
 		"true_position" : true_position,
 		"velocity" : velocity,
+		"lifetime" : lifetime,
 		"lifespan" : lifespan,
 		"absorption_value" : absorption_value,
 		"life_point" : life_point,
@@ -481,9 +487,9 @@ func save_state():
 func load_state(state_data):
 	position = state_data.position
 	facing = state_data.facing
-	scale.x = facing
+	$Sprite.scale.x = facing
 	v_facing = state_data.v_facing
-	scale.y = v_facing
+	$Sprite.scale.y = v_facing
 	rotation = state_data.rotation
 
 	entity_ref = state_data.entity_ref
@@ -495,6 +501,7 @@ func load_state(state_data):
 	free = state_data.free
 	true_position = state_data.true_position
 	velocity = state_data.velocity
+	lifetime = state_data.lifetime
 	lifespan = state_data.lifespan
 	absorption_value = state_data.absorption_value
 	life_point = state_data.life_point

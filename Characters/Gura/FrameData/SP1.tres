@@ -6,46 +6,46 @@
 script = ExtResource( 1 )
 frame_data = {
 "SP1Recovery": {
-"duration": 24,
+"duration": 21,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
 "timestamps": {
 0: {
 "entityspawn": null,
+"frame": 6,
+"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
+},
+3: {
+"entityspawn": null,
+"frame": 7,
+"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
+},
+6: {
+"entityspawn": null,
+"frame": 8,
+"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
+},
+9: {
+"entityspawn": null,
 "frame": 9,
-"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
-},
-4: {
-"entityspawn": null,
-"frame": 10,
-"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
-},
-8: {
-"entityspawn": null,
-"frame": 11,
-"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
-},
-12: {
-"entityspawn": null,
-"frame": 12,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -23 ), Vector2( -12, -23 ) ]
 },
-16: {
+13: {
 "entityspawn": null,
-"frame": 13,
+"frame": 10,
 "hurtbox": [ Vector2( -16, 22 ), Vector2( 11, 22 ), Vector2( 11, -26 ), Vector2( -16, -26 ) ]
 },
-20: {
+17: {
 "entityspawn": null,
-"frame": 14,
+"frame": 11,
 "hurtbox": [ Vector2( -13, 22 ), Vector2( 11, 22 ), Vector2( 11, -24 ), Vector2( -13, -24 ) ]
 }
 },
 "vframes": 5
 },
 "SP1Startup": {
-"duration": 12,
+"duration": 11,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
@@ -60,12 +60,12 @@ frame_data = {
 "frame": 1,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
-6: {
+5: {
 "entityspawn": null,
 "frame": 2,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
-9: {
+8: {
 "entityspawn": null,
 "frame": 3,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
@@ -81,7 +81,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": Vector2( 40, -15 ),
-"frame": 8,
+"frame": 5,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 }
 },
@@ -95,12 +95,12 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 4,
+"frame": 12,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 3: {
 "entityspawn": null,
-"frame": 5,
+"frame": 13,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 }
 },
@@ -114,7 +114,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 7,
+"frame": 4,
 "hurtbox": [ Vector2( -4, 1 ), Vector2( -14, 1 ), Vector2( -14, 22 ), Vector2( 10, 22 ), Vector2( 10, 9 ), Vector2( 22, 9 ), Vector2( 22, -17 ), Vector2( -4, -17 ) ]
 }
 },
@@ -128,7 +128,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": Vector2( 40, -15 ),
-"frame": 8,
+"frame": 5,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 }
 },
@@ -142,7 +142,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 6,
+"frame": 14,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 3: {
@@ -152,12 +152,12 @@ frame_data = {
 },
 6: {
 "entityspawn": null,
-"frame": 4,
+"frame": 12,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 9: {
 "entityspawn": null,
-"frame": 5,
+"frame": 13,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 12: {
@@ -176,7 +176,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 7,
+"frame": 4,
 "hurtbox": [ Vector2( -4, 1 ), Vector2( -14, 1 ), Vector2( -14, 22 ), Vector2( 10, 22 ), Vector2( 10, 9 ), Vector2( 22, 9 ), Vector2( 22, -17 ), Vector2( -4, -17 ) ]
 }
 },
@@ -190,7 +190,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": Vector2( 40, -15 ),
-"frame": 8,
+"frame": 5,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 }
 },
@@ -204,53 +204,135 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 7,
+"frame": 4,
 "hurtbox": [ Vector2( -4, 1 ), Vector2( -14, 1 ), Vector2( -14, 22 ), Vector2( 10, 22 ), Vector2( 10, 9 ), Vector2( 22, 9 ), Vector2( 22, -17 ), Vector2( -4, -17 ) ]
 }
 },
 "vframes": 5
 },
-"aSP1Recovery": {
-"duration": 24,
+"SP1[ex]Active": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP1Sprite",
+"timestamps": {
+0: {
+"entityspawn": Vector2( 40, -15 ),
+"frame": 5,
+"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
+}
+},
+"vframes": 5
+},
+"SP1[ex]Recovery": {
+"duration": 21,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 24,
-"hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
+"frame": 6,
+"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
+},
+3: {
+"entityspawn": null,
+"frame": 7,
+"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
+},
+6: {
+"entityspawn": null,
+"frame": 8,
+"hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
+},
+9: {
+"entityspawn": null,
+"frame": 9,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -23 ), Vector2( -12, -23 ) ]
+},
+13: {
+"entityspawn": null,
+"frame": 10,
+"hurtbox": [ Vector2( -16, 22 ), Vector2( 11, 22 ), Vector2( 11, -26 ), Vector2( -16, -26 ) ]
+},
+17: {
+"entityspawn": null,
+"frame": 11,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 11, 22 ), Vector2( 11, -24 ), Vector2( -13, -24 ) ]
+}
+},
+"vframes": 5
+},
+"SP1[ex]Startup": {
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP1Sprite",
+"timestamps": {
+0: {
+"entityspawn": null,
+"frame": 0,
+"hurtbox": [ Vector2( -9, 22 ), Vector2( 14, 22 ), Vector2( 14, -23 ), Vector2( -9, -23 ) ]
+},
+2: {
+"entityspawn": null,
+"frame": 1,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 4: {
 "entityspawn": null,
-"frame": 25,
+"frame": 3,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
+},
+7: {
+"entityspawn": null,
+"frame": 4,
+"hurtbox": [ Vector2( -4, 1 ), Vector2( -14, 1 ), Vector2( -14, 22 ), Vector2( 10, 22 ), Vector2( 10, 9 ), Vector2( 22, 9 ), Vector2( 22, -17 ), Vector2( -4, -17 ) ]
+}
+},
+"vframes": 5
+},
+"aSP1Recovery": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP1Sprite",
+"timestamps": {
+0: {
+"entityspawn": null,
+"frame": 21,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
-8: {
+3: {
 "entityspawn": null,
-"frame": 26,
+"frame": 22,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
-12: {
+6: {
 "entityspawn": null,
-"frame": 27,
+"frame": 23,
+"hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
+},
+9: {
+"entityspawn": null,
+"frame": 24,
 "hurtbox": [ Vector2( -9, 18 ), Vector2( 15, 18 ), Vector2( 15, -19 ), Vector2( -9, -19 ) ]
 },
-16: {
+13: {
 "entityspawn": null,
-"frame": 28,
+"frame": 25,
 "hurtbox": [ Vector2( -13, 18 ), Vector2( 10, 18 ), Vector2( 10, -20 ), Vector2( -13, -20 ) ]
 },
-20: {
+17: {
 "entityspawn": null,
-"frame": 29,
+"frame": 26,
 "hurtbox": [ Vector2( -11, 14 ), Vector2( 11, 14 ), Vector2( 11, -21 ), Vector2( -11, -21 ) ]
 }
 },
 "vframes": 5
 },
 "aSP1Startup": {
-"duration": 12,
+"duration": 11,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
@@ -265,12 +347,12 @@ frame_data = {
 "frame": 16,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
-6: {
+5: {
 "entityspawn": null,
 "frame": 17,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
-9: {
+8: {
 "entityspawn": null,
 "frame": 18,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
@@ -286,7 +368,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": Vector2( 33, 1 ),
-"frame": 23,
+"frame": 20,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 }
 },
@@ -300,12 +382,12 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 19,
+"frame": 27,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 3: {
 "entityspawn": null,
-"frame": 20,
+"frame": 28,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 }
 },
@@ -319,7 +401,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 22,
+"frame": 19,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
 }
 },
@@ -333,7 +415,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": Vector2( 33, 1 ),
-"frame": 23,
+"frame": 20,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 }
 },
@@ -347,7 +429,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 21,
+"frame": 29,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 3: {
@@ -357,12 +439,12 @@ frame_data = {
 },
 6: {
 "entityspawn": null,
-"frame": 19,
+"frame": 27,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 9: {
 "entityspawn": null,
-"frame": 20,
+"frame": 28,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 12: {
@@ -381,7 +463,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
-"frame": 22,
+"frame": 19,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
 }
 },
@@ -395,7 +477,7 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": Vector2( 33, 1 ),
-"frame": 23,
+"frame": 20,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 }
 },
@@ -409,7 +491,89 @@ frame_data = {
 "timestamps": {
 0: {
 "entityspawn": null,
+"frame": 19,
+"hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
+}
+},
+"vframes": 5
+},
+"aSP1[ex]Active": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP1Sprite",
+"timestamps": {
+0: {
+"entityspawn": Vector2( 33, 1 ),
+"frame": 20,
+"hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
+}
+},
+"vframes": 5
+},
+"aSP1[ex]Recovery": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP1Sprite",
+"timestamps": {
+0: {
+"entityspawn": null,
+"frame": 21,
+"hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
+},
+3: {
+"entityspawn": null,
 "frame": 22,
+"hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
+},
+6: {
+"entityspawn": null,
+"frame": 23,
+"hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
+},
+9: {
+"entityspawn": null,
+"frame": 24,
+"hurtbox": [ Vector2( -9, 18 ), Vector2( 15, 18 ), Vector2( 15, -19 ), Vector2( -9, -19 ) ]
+},
+13: {
+"entityspawn": null,
+"frame": 25,
+"hurtbox": [ Vector2( -13, 18 ), Vector2( 10, 18 ), Vector2( 10, -20 ), Vector2( -13, -20 ) ]
+},
+17: {
+"entityspawn": null,
+"frame": 26,
+"hurtbox": [ Vector2( -11, 14 ), Vector2( 11, 14 ), Vector2( 11, -21 ), Vector2( -11, -21 ) ]
+}
+},
+"vframes": 5
+},
+"aSP1[ex]Startup": {
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP1Sprite",
+"timestamps": {
+0: {
+"entityspawn": null,
+"frame": 15,
+"hurtbox": [ Vector2( -12, 15 ), Vector2( 12, 15 ), Vector2( 12, -22 ), Vector2( -12, -22 ) ]
+},
+2: {
+"entityspawn": null,
+"frame": 16,
+"hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
+},
+4: {
+"entityspawn": null,
+"frame": 18,
+"hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
+},
+7: {
+"entityspawn": null,
+"frame": 19,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
 }
 },

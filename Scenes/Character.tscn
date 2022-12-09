@@ -100,6 +100,8 @@ margin_bottom = 22.0
 
 [node name="HitStunGraceTimer" parent="." instance=ExtResource( 4 )]
 
+[node name="BurstLockTimer" parent="." instance=ExtResource( 4 )]
+
 [node name="TestNode2D" type="Node2D" parent="."]
 visible = false
 position = Vector2( 0, 24 )
@@ -114,8 +116,6 @@ custom_fonts/font = SubResource( 28 )
 text = "test"
 align = 1
 valign = 1
-
-[node name="AudioPlayers" type="Node" parent="."]
 
 [connection signal="anim_finished" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_finished"]
 [connection signal="anim_started" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_started"]

@@ -1,6 +1,6 @@
 extends Node
 
-const VERSION = "Test Build 3"
+const VERSION = "Test Build 4"
 
 enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_RECOVERY,
 		GROUND_C_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, GROUND_FLINCH_HITSTUN,
@@ -10,8 +10,8 @@ enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum hitspark_type {CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
-enum atk_attr {VARIANT_STARTUP, AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
-		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB}
+enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
+		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB, NO_PUSHBACK}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-airs, don't erase this! Needed for air specials!
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -28,6 +28,7 @@ enum atk_attr {VARIANT_STARTUP, AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AI
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
 # SUPERARMOR = Wrongblock all attacks, set attack_level of any attack received to 1
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
+# NO_PUSHBACK = no pushback if not blocked, used mainly to make certain moves more punishable
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge

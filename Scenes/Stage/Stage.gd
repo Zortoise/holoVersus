@@ -3,6 +3,9 @@ extends Node
 
 func init(): # called by unique stage code when init() is called
 	Globals.Game.stage_box = $StageBox
+	Globals.Game.blastbarrierL = $StageBox/BlastBarrierL
+	Globals.Game.blastbarrierR = $StageBox/BlastBarrierR
+	Globals.Game.blastbarrierU = $StageBox/BlastBarrierU
 	Globals.Game.middle_point = $MiddlePosition.position
 	for respawn_point in $RespawnPoints.get_children():
 		Globals.Game.respawn_points.append(respawn_point.position)

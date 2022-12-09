@@ -320,10 +320,10 @@ __meta__ = {
 }
 
 [node name="TextureRect" type="TextureRect" parent="Background"]
-margin_left = -38.0
-margin_top = -24.0
-margin_right = 1275.0
-margin_bottom = 1104.0
+margin_left = -24.0
+margin_top = -13.0
+margin_right = 1289.0
+margin_bottom = 1115.0
 texture = ExtResource( 7 )
 
 [node name="BlackBox" type="Sprite" parent="Background"]

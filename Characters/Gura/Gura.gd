@@ -3,12 +3,13 @@ extends "res://Characters/Gura/GuraBase.gd"
 #const STYLE = 0
 
 # Steps to add an attack:
-# 1. Add it in MOVE_DATABASE
+# 1. Add it in MOVE_DATABASE and STARTERS, also in EX_MOVES/SUPERS
 # 2. Add it in state_detect()
 # 3. Add it in _on_SpritePlayer_anim_finished() to set the transitions
 # 4. Add it in _on_SpritePlayer_anim_started() to set up sfx_over, entity/sfx spawning  and other physics modifying characteristics
 # 5. Add it in process_buffered_input() for inputs
 # 6. Add it in capture_combinations() if it is a special action
+# 7. Add any startup/recovery animations not in MOVE_DATABASE to query_atk_attr()
 
 # --------------------------------------------------------------------------------------------------
 
@@ -29,11 +30,11 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_RECOVERY
 		
 		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", \
-				"HStartup", "H[h]Startup":
+			"HStartup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"L1Recovery", "L1bRecovery", "L2bRecovery", "F1Recovery", "F2Recovery", "F3Recovery", "HRecovery", "H[h]Recovery":
+		"L1Recovery", "L1bRecovery", "L2bRecovery", "F1Recovery", "F2Recovery", "F3Recovery", "HbRecovery", "Hb[h]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		"L1bCRecovery", "F1CRecovery":
 			return Globals.char_state.GROUND_C_RECOVERY
@@ -47,19 +48,28 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L2cCRecovery", "aF1CRecovery", "aF3CRecovery":
 			return Globals.char_state.AIR_C_RECOVERY
 			
-		"SP1Startup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup":
+		"SP1Startup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", "SP1[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active":
+		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active", "SP1[ex]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"SP1Recovery":
+		"SP1Recovery", "SP1[ex]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
-		"aSP1Startup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup":
+		"aSP1Startup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", "aSP1[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active":
+		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active", "aSP1[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP1Recovery":
+		"aSP1Recovery", "aSP1[ex]Recovery":
 			return Globals.char_state.AIR_ATK_RECOVERY
 			
+		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
+			return Globals.char_state.GROUND_ATK_STARTUP
+		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup", "aSP3bStartup", "aSP3b[h]Startup", "aSP3b[ex]Startup":
+			return Globals.char_state.AIR_ATK_STARTUP
+		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
+			return Globals.char_state.AIR_ATK_ACTIVE
+		"aSP3Recovery", "aSP3bRecovery", "aSP3[ex]Recovery":
+			return Globals.char_state.AIR_ATK_RECOVERY
+		
 	print("Error: " + anim + " not found.")
 			
 
@@ -80,12 +90,18 @@ func stimulate():
 #	Character.dir
 #	Character.v_dir
 
-	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aL2Active"]): # pogo landing
+	# LAND CANCEL --------------------------------------------------------------------------------------------------
+
+	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aL2Active"]):
 		if Character.grounded:
 			Character.animate("HardLanding")
 			landing_sound()
 		elif !Character.button_light in Character.input_state.pressed:
 			Character.animate("aL2bRecovery")
+	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["aSP3bRecovery"]):
+		if Character.grounded:
+			Character.animate("HardLanding")
+			landing_sound()
 			
 	# RELEASING HELD INPUTS --------------------------------------------------------------------------------------------------
 			
@@ -96,7 +112,10 @@ func stimulate():
 					Character.animate("SP1[c1]bStartup")
 			"SP1[c2]Startup":
 				if !Character.button_light in Character.input_state.pressed:
-					Character.animate("SP1[c2]bStartup")
+					if Animator.time == 1:
+						Character.animate("SP1[c3]Startup")
+					else:
+						Character.animate("SP1[c2]bStartup")
 			
 	if Character.state == Globals.char_state.AIR_ATK_STARTUP:
 		match Animator.current_animation:
@@ -107,6 +126,7 @@ func stimulate():
 					if Character.button_up in Character.input_state.pressed: # if pressing up, cancel to neutral
 						Character.startup_cancel_flag = true
 						Character.animate("HardLanding")
+						landing_sound()
 					else: # if not pressing up, do a.F
 						Character.animate("aF1Active")
 			
@@ -114,14 +134,19 @@ func stimulate():
 				if !Character.button_light in Character.input_state.pressed or Character.grounded:
 					Character.animate("aSP1[c1]bStartup")
 			"aSP1[c2]Startup":
-				if !Character.button_light in Character.input_state.pressed or Character.grounded:
+				if Character.grounded:
 					Character.animate("aSP1[c2]bStartup")
+				elif !Character.button_light in Character.input_state.pressed:
+					if Animator.time == 1:
+						Character.animate("aSP1[c3]Startup")
+					else:
+						Character.animate("aSP1[c2]bStartup")
 					
 			
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
 	if Character.state == Globals.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
-			Animator.query_current(["Dash"]): 	# dash dancing, need to hold dash
+		Animator.query_current(["Dash"]): 	# dash dancing, need to hold dash
 		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
 			Character.face(-1)
 			Character.animate("Dash")
@@ -169,22 +194,28 @@ func stimulate():
 
 func capture_combinations():
 	
-	Character.combination(Character.button_up, Character.button_light, "uL")	
+	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
-	Character.combination(Character.button_up, Character.button_fierce, "uF")	
+	Character.combination(Character.button_up, Character.button_fierce, "uF")
 	Character.combination(Character.button_down, Character.button_fierce, "dF")
 	Character.combination(Character.button_light, Character.button_fierce, "H")
 	
 	Character.combination(Character.button_special, Character.button_light, "Sp.L")
+	Character.ex_combination(Character.button_special, Character.button_light, "ExSp.L")
+	Character.combination_trio(Character.button_special, Character.button_up, Character.button_light, "Sp.uL")
+	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_light, "ExSp.uL")
 
 func rebuffer_actions():
-	Character.rebuffer(Character.button_up, Character.button_light, "uL")	
+	Character.rebuffer(Character.button_up, Character.button_light, "uL")
 	Character.rebuffer(Character.button_down, Character.button_light, "dL")
-	Character.rebuffer(Character.button_up, Character.button_fierce, "uF")	
+	Character.rebuffer(Character.button_up, Character.button_fierce, "uF")
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
 	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
+	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_light, "Sp.uL")
+	
+#	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
 
@@ -217,9 +248,9 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							elif Character.velocity_previous_frame.y < 0: # moving upward
 								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
 								Character.animate("DashBrake")
-								Character.emit_signal("SFX","GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-										{"facing":Character.facing, "grounded":true})
-								Character.velocity.x = Character.facing * AIR_DASH_SPEED			
+								Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
+									{"facing":Character.facing, "grounded":true})
+								Character.velocity.x = Character.facing * AIR_DASH_SPEED
 								dash_sound()
 								
 							else: # not moving upward
@@ -310,6 +341,19 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		"Sp.L":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP1", has_acted, buffered_input[1])
+				
+		"Sp.uL":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
+				
+		"ExSp.L":
+			if !has_acted[0]:
+				keep = process_move(new_state, "SP1[ex]", has_acted, buffered_input[1])
+					
+		"ExSp.uL":
+			if !has_acted[0]:
+				keep = process_move(new_state, "SP3[ex]", has_acted, buffered_input[1])
+
 					
 		# ---------------------------------------------------------------------------------
 		
@@ -328,84 +372,110 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 	# no need to return input_to_add since array is passed by reference
 		
 func is_grounded_uptilt(attack_ref):
-	if attack_ref in ["F3"]:
+	if attack_ref in ["F3", "SP3"]:
 		return true
 	return false
 	
 func is_aerial_uptilt(attack_ref):
-	if attack_ref in ["aF3"]:
+	if attack_ref in ["aF3", "aSP3"]:
 		return true
 	return false
+	
+func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
+	if !attack_ref in EX_MOVES: return true # not ex move
+	if !quick_cancel: # not quick cancelling, must afford it
+		if Character.current_ex_gauge >= 0:
+			Character.change_ex_gauge(-0)
+			Character.play_audio("bling6", {"vol" : -9, "bus" : "HighPass"}) # EX chime
+			return true
+		else: return false
+	else:
+		if Character.get_move_name() in EX_MOVES: # can quick cancel from 1 EX move to another, no cost and no chime if so
+			return true
+		elif Character.current_ex_gauge >= 0: # quick cancel from non-ex move to EX move, must afford the cost
+			Character.change_ex_gauge(-0)
+			Character.play_audio("bling6", {"vol" : -9, "bus" : "HighPass"}) # EX chime
+			return true
+		else: return false
 
 func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time): # return true if button consumed
 	match new_state:
 			
-			Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
-				if attack_ref in MOVE_DATABASE:
+		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+			if Character.grounded and attack_ref in STARTERS:
+				if is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
 					return true
 					
-			Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
-				if is_grounded_uptilt(attack_ref) and !Character.button_jump in Character.input_state.pressed and \
-						Animator.query_to_play(["JumpTransit"]):
+		Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
+			if Character.grounded and is_grounded_uptilt(attack_ref) and !Character.button_jump in Character.input_state.pressed and \
+					Animator.query_to_play(["JumpTransit"]):
+				if is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
 					return true
 					
-			Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
-				if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
-					if ("a" + attack_ref) in MOVE_DATABASE and Character.test_aerial_memory("a" + attack_ref):
+		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
+				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
+					if is_ex_valid(attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						Character.chain_memory = []
 						has_acted[0] = true
 						return true
 						
-			Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
-				if is_aerial_uptilt("a" + attack_ref) and !Character.button_jump in Character.input_state.pressed and \
-						Character.test_aerial_memory("a" + attack_ref) and \
-						Animator.query_to_play(["AirJumpTransit", "AirJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
+		Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
+			if is_aerial_uptilt("a" + attack_ref) and !Character.button_jump in Character.input_state.pressed and \
+					Character.test_aerial_memory("a" + attack_ref) and \
+					Animator.query_to_play(["AirJumpTransit", "AirJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
+				if is_ex_valid(attack_ref):
 					Character.animate("a" + attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
 					return true
 				
 			# chain cancel
-			Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
-				if attack_ref in MOVE_DATABASE:
-					if Character.test_chain_combo(attack_ref):
+		Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
+			if attack_ref in STARTERS:
+				if Character.test_chain_combo(attack_ref):
+					if is_ex_valid(attack_ref):
 						if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 							Character.get_node("ModulatePlayer").play("unflinch_flash")
 							Character.perfect_chain = true
+							
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
 						return true
 			
 			# quick cancel
-			Globals.char_state.GROUND_ATK_STARTUP:
-				if attack_ref in MOVE_DATABASE:
-					if Character.check_quick_cancel(): # must be within 1st frame, animation name must be in MOVE_DATABASE
-						if Character.test_qc_chain_combo(attack_ref):
+		Globals.char_state.GROUND_ATK_STARTUP:
+			if Character.grounded and attack_ref in STARTERS:
+				if Character.check_quick_cancel(): # must be within 1st frame, animation name must be in MOVE_DATABASE
+					if Character.test_qc_chain_combo(attack_ref):
+						if is_ex_valid(attack_ref, true):
 							Character.animate(attack_ref + "Startup")
 							has_acted[0] = true
 							return true
 					
 			# chain cancel
-			Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_ATK_ACTIVE:
-				if !Character.grounded:
-					if ("a" + attack_ref) in MOVE_DATABASE and Character.test_aerial_memory("a" + attack_ref):
-						if Character.test_chain_combo("a" + attack_ref):
+		Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_ATK_ACTIVE:
+			if !Character.grounded:
+				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
+					if Character.test_chain_combo("a" + attack_ref):
+						if is_ex_valid(attack_ref):
 							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 								Character.get_node("ModulatePlayer").play("unflinch_flash")
 								Character.perfect_chain = true
 							Character.animate("a" + attack_ref + "Startup")
 							has_acted[0] = true
 							return true
-				else:
-					if attack_ref in MOVE_DATABASE:
-						if Character.test_chain_combo(attack_ref): # grounded
+			else:
+				if attack_ref in STARTERS:
+					if Character.test_chain_combo(attack_ref): # grounded
+						if is_ex_valid(attack_ref):
 							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 								Character.get_node("ModulatePlayer").play("unflinch_flash")
 								Character.perfect_chain = true
@@ -414,18 +484,20 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 							return true
 							
 			# quick cancel
-			Globals.char_state.AIR_ATK_STARTUP:
-				if !Character.grounded:
-					if ("a" + attack_ref) in MOVE_DATABASE:
-						if Character.check_quick_cancel(): # must be within 1st frame, startup animation name must be in MOVE_DATABASE
-							if Character.test_qc_chain_combo("a" + attack_ref):
+		Globals.char_state.AIR_ATK_STARTUP:
+			if !Character.grounded:
+				if ("a" + attack_ref) in STARTERS:
+					if Character.check_quick_cancel(): # must be within 1st frame, startup animation name must be in MOVE_DATABASE
+						if Character.test_qc_chain_combo("a" + attack_ref):
+							if is_ex_valid(attack_ref, true):
 								Character.animate("a" + attack_ref + "Startup")
 								has_acted[0] = true
 								return true
-				else:
-					if attack_ref in MOVE_DATABASE:
-						if Character.check_quick_cancel(): # must be within 1st frame, startup animation name must be in MOVE_DATABASE
-							if Character.test_qc_chain_combo(attack_ref):
+			else:
+				if attack_ref in STARTERS:
+					if Character.check_quick_cancel(): # must be within 1st frame, startup animation name must be in MOVE_DATABASE
+						if Character.test_qc_chain_combo(attack_ref):
+							if is_ex_valid(attack_ref, true):
 								Character.animate(attack_ref + "Startup")
 								has_acted[0] = true
 								return true
@@ -445,8 +517,8 @@ func shadow_trail():# process shadow trail
 	
 	# shadow trail for certain modulate animations with the key "shadow_trail"
 	if LoadedSFX.modulate_animations.has(Character.get_node("ModulatePlayer").current_animation) and \
-			LoadedSFX.modulate_animations[Character.get_node("ModulatePlayer").current_animation].has("shadow_trail") and \
-			Character.get_node("ModulatePlayer").is_playing():
+		LoadedSFX.modulate_animations[Character.get_node("ModulatePlayer").current_animation].has("shadow_trail") and \
+		Character.get_node("ModulatePlayer").is_playing():
 		# basic shadow trail for "shadow_trail" = 0
 		if LoadedSFX.modulate_animations[Character.get_node("ModulatePlayer").current_animation]["shadow_trail"] == 0:
 			Character.shadow_trail()
@@ -457,7 +529,7 @@ func shadow_trail():# process shadow trail
 			Character.shadow_trail()
 			
 			
-func query_move_data(move_name):
+func query_move_data(move_name) -> Dictionary: # can only be called during active frames
 	# move data may change for certain moves under certain conditions, unique to character
 	var move_data = MOVE_DATABASE[move_name]
 	
@@ -467,17 +539,41 @@ func query_move_data(move_name):
 	
 	return move_data
 	
+func query_priority(move_name) -> int: # can only be called during active frames
+			
+	if move_name in MOVE_DATABASE and "priority" in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name].priority
+		
+	print("Error: Cannot retrieve priority for " + move_name)
+	return 0
 	
-func query_atk_attr(move_name): # may have certain conditions
+func query_atk_attr(move_name) -> Array: # may have certain conditions
 
+	# return atk attr for startup and recovery animations not in MOVE_DATABASE
 	match move_name: # can add various atk_attr to certain animations under under conditions
+		"L2b":
+			return MOVE_DATABASE["L2"].atk_attr
 		"F3b":
-			return [Globals.atk_attr.ANTI_AIR]
+			return MOVE_DATABASE["F3"].atk_attr
 		"F3[h]":
 			return [Globals.atk_attr.SUPERARMOR]
+		"aL2b":
+			return MOVE_DATABASE["aL2"].atk_attr
+		"aF1[h]":
+			return MOVE_DATABASE["aF1"].atk_attr
+		"SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]":
+			return MOVE_DATABASE["SP1"].atk_attr
+		"SP3":
+			return MOVE_DATABASE["aSP3"].atk_attr
+		"SP3[h]": 
+			return MOVE_DATABASE["aSP3[h]"].atk_attr
+		"SP3[ex]": 
+			return MOVE_DATABASE["aSP3[ex]"].atk_attr
 			
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr
+		
+	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
 
 
@@ -533,7 +629,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			elif Character.button_up in Character.input_state.pressed: # upward air dash
 				Character.animate("AirDashU2")
 			else: # horizontal air dash
-				Character.animate("AirDash")	
+				Character.animate("AirDash")
 #		"AirDash", "AirDashD", "AirDashU", "AirDashUU", "AirDashDD", "AirDashD2", "AirDashU2":
 		"AirDash", "AirDashD2", "AirDashU2":
 			Character.animate("AirDashBrake")
@@ -613,14 +709,14 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"HActive":
 			Character.animate("HbActive")
 		"HbActive":
-			Character.animate("HRecovery")	
+			Character.animate("HbRecovery")
 		"H[h]Startup":
 			Character.animate("H[h]Active")
 		"H[h]Active":
 			Character.animate("Hb[h]Active")
 		"Hb[h]Active":
-			Character.animate("H[h]Recovery")
-		"HRecovery", "H[h]Recovery":
+			Character.animate("Hb[h]Recovery")
+		"HbRecovery", "Hb[h]Recovery":
 			Character.animate("Idle")
 
 		"aL1Startup":
@@ -708,7 +804,74 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP1Recovery")
 		"aSP1Recovery":
 			Character.animate("FallTransit")
-
+			
+		"SP1[ex]Startup":
+			Character.animate("SP1[ex]Active")
+		"SP1[ex]Active":
+			Character.animate("SP1[ex]Recovery")
+		"SP1[ex]Recovery":
+			Character.animate("Idle")
+		"aSP1[ex]Startup":
+			Character.animate("aSP1[ex]Active")
+		"aSP1[ex]Active":
+			Character.animate("aSP1[ex]Recovery")
+		"aSP1[ex]Recovery":
+			Character.animate("FallTransit")
+			
+		"SP3Startup":
+			if Character.button_light in Character.input_state.pressed:
+				Character.animate("SP3[h]Startup")
+			else:
+				Character.animate("aSP3bStartup")
+				Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
+						{"facing":Character.facing, "grounded":true, "back":true})
+		"aSP3Startup":
+			if Character.button_light in Character.input_state.pressed:
+				Character.animate("aSP3[h]Startup")
+			else:
+				Character.animate("aSP3bStartup")
+				Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
+						{"facing":Character.facing, "rot":-PI/2})
+		"aSP3bStartup":
+			Character.animate("aSP3Active")
+		"SP3[h]Startup":
+			Character.animate("aSP3b[h]Startup")
+			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true, "back":true})
+		"aSP3[h]Startup":
+			Character.animate("aSP3b[h]Startup")
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
+					{"facing":Character.facing, "rot":-PI/2})
+		"aSP3b[h]Startup":
+			Character.animate("aSP3[h]Active")
+		"aSP3Active":
+			Character.animate("aSP3bActive")
+		"aSP3[h]Active":
+			Character.animate("aSP3b[h]Active")
+		"aSP3bActive", "aSP3b[h]Active":
+			Character.animate("aSP3Recovery")
+		"aSP3Recovery":
+			Character.animate("aSP3bRecovery")
+		"aSP3bRecovery":
+			Character.animate("FallTransit")
+			
+		"SP3[ex]Startup":
+			Character.animate("aSP3b[ex]Startup")
+			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true, "back":true})
+		"aSP3[ex]Startup":
+			Character.animate("aSP3b[ex]Startup")
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
+					{"facing":Character.facing, "rot":-PI/2})
+		"aSP3b[ex]Startup":
+			Character.animate("aSP3[ex]Active")
+		"aSP3[ex]Active":
+			Character.animate("aSP3b[ex]Active")
+		"aSP3b[ex]Active":
+			Character.animate("aSP3[ex]Recovery")
+		"aSP3[ex]Recovery":
+			Character.animate("aSP3bRecovery")
+			
 
 func _on_SpritePlayer_anim_started(anim_name):
 
@@ -717,8 +880,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x = GROUND_DASH_SPEED * Character.facing
 			Character.null_friction = true
 			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})	
+			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
+				{"facing":Character.facing, "grounded":true})
 		"AirDashTransit":
 			Character.aerial_memory = []
 			Character.velocity.x *= 0.2
@@ -733,53 +896,53 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.y = 0
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
+			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 #		"AirDashD":
 #			consume_one_air_dash()
 #			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/4 * Character.facing)
 #			Character.null_gravity = true
 #			Character.shadow_timer = 1 # sync shadow trail
-#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/4})
+#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/4})
 #		"AirDashU":
 #			consume_one_air_dash()
 #			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/4 * Character.facing)
 #			Character.null_gravity = true
 #			Character.shadow_timer = 1 # sync shadow trail
-#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/4})	
+#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/4})	
 #		"AirDashDD":
 #			consume_one_air_dash()
 ##			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/2 * Character.facing)
 #			Character.velocity.y = AIR_DASH_SPEED
 #			Character.null_gravity = true
 #			Character.shadow_timer = 1 # sync shadow trail
-#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/2})
+#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/2})
 #		"AirDashUU":
 #			consume_one_air_dash()
 ##			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/2 * Character.facing)
 #			Character.velocity.y = -AIR_DASH_SPEED
 #			Character.null_gravity = true
 #			Character.shadow_timer = 1 # sync shadow trail
-#			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
+#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
 		"AirDashD2":
 			consume_one_air_dash()
 			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/7 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
+			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 		"AirDashU2":
 			consume_one_air_dash()
 			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/7 * Character.facing)
 			Character.null_gravity = true
 			Character.shadow_timer = 1 # sync shadow trail
-			Character.emit_signal("SFX", "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})	
+			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})
 			
 		"L2Startup":
 			Character.velocity.x += Character.facing * SPEED * 0.8
 		"L2Active":
 			Character.velocity.x += Character.facing * SPEED * 1.2
 			Character.null_friction = true
-			Character.emit_signal("SFX", "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})	
+			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
+				{"facing":Character.facing, "grounded":true})
 		"L2Recovery":
 			Character.velocity = Vector2(500 * Character.facing, 0).rotated(-PI/2.3 * Character.facing)
 		"F1Startup":
@@ -795,10 +958,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.sfx_over.show()
 		"HStartup":
 			Character.velocity.x += Character.facing * SPEED * 0.5
-		"HActive", "HbActive", "HRecovery":
+		"HActive", "HbActive", "HbRecovery":
 			Character.sfx_under.show()
 			Character.sfx_over.show()
-		"H[h]Active", "Hb[h]Active", "H[h]Recovery":
+		"H[h]Active", "Hb[h]Active", "Hb[h]Recovery":
 			Character.sfx_under.show()
 			Character.sfx_over.show()
 			
@@ -848,7 +1011,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 0.7
 			Character.sfx_over.show()
 			
-		"aSP1Startup":
+		"aSP1Startup", "aSP1[ex]Startup":
 			Character.velocity_limiter.x_slow = 0.2
 			Character.velocity_limiter.y_slow = 0.2
 			Character.null_gravity = true
@@ -858,30 +1021,67 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
 			Character.velocity.x += Character.facing * SPEED * 0.5
 			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Character.emit_signal("entity", Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 1})
-			Character.emit_signal("SFX","SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 1})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
 			Character.velocity.x += Character.facing * SPEED * 0.5
 			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Character.emit_signal("entity", Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 2})
-			Character.emit_signal("SFX","SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 2})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
 			Character.velocity.x += Character.facing * SPEED * 0.5
 			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Character.emit_signal("entity", Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 3})
-			Character.emit_signal("SFX","SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 3})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP1[ex]Active":
+			Character.velocity.x += Character.facing * SPEED * 0.5
+			var spawn_point = Character.position + Animator.query_point("entityspawn")
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 4})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP1[c1]Active":
 			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Character.emit_signal("entity", Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 1})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 1})
 		"aSP1[c2]Active":
 			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Character.emit_signal("entity", Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 2})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 2})
 		"aSP1[c3]Active":
 			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Character.emit_signal("entity", Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 3})
-		"aSP1Recovery":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 3})
+		"aSP1[ex]Active":
+			var spawn_point = Character.position + Animator.query_point("entityspawn")
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 4})
+		"aSP1Recovery", "aSP1[ex]Recovery":
 			Character.velocity_limiter.x = 0.7
 			Character.velocity_limiter.down = 0.7
+			
+		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
+			Character.sfx_under.show()
+		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
+			Character.velocity.x *= 0.5
+			Character.velocity_limiter.y_slow = 0.2
+			Character.null_gravity = true
+			Character.sfx_under.show()
+		"aSP3bStartup":
+			Character.velocity.x *= 0.5
+			Character.velocity.y = -500
+			Character.null_gravity = true
+			Character.sfx_under.show()
+		"aSP3Active":
+			Character.null_gravity = true
+			Character.sfx_under.show()
+		"aSP3b[h]Startup", "aSP3b[ex]Startup":
+			Character.velocity.x *= 0.5
+			Character.velocity.y = -700
+			Character.null_gravity = true
+			Character.sfx_under.show()
+		"aSP3[h]Active", "aSP3[ex]Active":
+			Character.null_gravity = true
+			Character.sfx_under.show()
+		"aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
+			Character.sfx_under.show()
+		"aSP3Recovery", "aSP3[ex]Recovery", "aSP3bRecovery":
+			Character.velocity_limiter.x = 0.7
+			Character.sfx_under.show()
 			
 	start_audio(anim_name)
 
@@ -927,7 +1127,6 @@ func dash_sound(): # can be called by snap-up wavelanding
 
 
 func stagger_anim():
-	# WIP, for animations like Run to produce footsteps during certain frames
 	
 	match Animator.current_animation:
 		"Run":
@@ -936,8 +1135,8 @@ func stagger_anim():
 					Character.play_audio("footstep2", {"vol":-1})
 		"SP1[c1]Startup", "SP1[c2]Startup":
 			match sprite.frame:
-				5:
-					Character.emit_signal("SFX","LandDust", "DustClouds", Character.get_feet_pos(), \
-							{"facing":Character.facing, "grounded":true})
+				13:
+					Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
+						{"facing":Character.facing, "grounded":true})
 					
 					

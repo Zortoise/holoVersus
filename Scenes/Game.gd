@@ -30,6 +30,9 @@ onready var starting_stock_pts = Globals.starting_stock_pts
 # variables for stage box and starting positions/facings, these are set by the stage's node
 var stage
 var stage_box
+var blastbarrierL
+var blastbarrierR
+var blastbarrierU
 var respawn_points = []
 var middle_point
 var P1_position: Vector2
@@ -384,7 +387,7 @@ func _process(delta):
 	
 	
 	handle_zoom(delta) # complex stuff to determine zoom level
-	HUD_fade() # fade out UI elements if a player goes behind them, WIP
+	HUD_fade() # fade out UI elements if a player goes behind them
 	
 
 	
@@ -987,44 +990,39 @@ func test_priority(hitbox, hurtbox): # return false if attacker fail the priorit
 		# this allow higher priority attack to beat lower priority ones after the frame 1 invincibility of Rule 1
 		# sweetspots should at least be 3 frames long (50ms)
 		elif attacker.Animator.time <= 1:
-			if hitbox.move_data.priority < defender.query_move_data_and_name().move_data.priority:
+			if hitbox.move_data.priority < defender.query_priority():
 				return false
 	return true
-	
-## SDHurtbox during active frame cannot be hit by attacks of lower priority
-#func test_sd_priority(hitbox, hurtbox): # return false if attacker fail the priority check, will not process the hit if so
-#	var defender = get_node(hurtbox.owner_nodepath)
-#	if defender.is_atk_active() and hitbox.move_data.priority < defender.query_move_data_and_name().move_data.priority:
-#		return false
-#	return true
 	
 	
 func defender_anti_airing(hitbox, hurtbox):
 	var attacker = get_node(hitbox.owner_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
 	
-	if defender.state == Globals.char_state.GROUND_ATK_STARTUP or defender.state == Globals.char_state.GROUND_ATK_ACTIVE or \
-			defender.state == Globals.char_state.AIR_ATK_ACTIVE: # for airborne defender using anti-air, only anti-air during active frames
-		
-		var has_anti_air_attr = Globals.atk_attr.ANTI_AIR in defender.query_atk_attr()
-		if has_anti_air_attr and (!attacker.grounded or Globals.atk_attr.AIR_ATTACK in attacker.UniqueCharacter.query_atk_attr(hitbox.move_name)):
-			# don't use hitbox.move_data.atk_attr, some attacks have special conditions added in UniqueCharacter.query_atk_attr()
-			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
-			# and the attacker must be using an AIR_ATTACK in air or on ground, or be airborne
-			# now to check tiers
-			var defender_tier = Globals.atk_type.HEAVY # for normal AIR_ATTACK attribute, can defend against all aerials HEAVY or below
-			var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
-			if defender_tier >= attacker_tier:
-				return true # defender successfully anti-aired
+	match hitbox.move_data.atk_type: # only normal attacks can be anti-aired
+		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
+	
+			if defender.new_state in [Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, \
+					Globals.char_state.AIR_ATK_ACTIVE]: # for airborne defender using anti-air, only anti-air during active frames
+				
+				var has_anti_air_attr = Globals.atk_attr.ANTI_AIR in defender.query_atk_attr()
+				if has_anti_air_attr and (!attacker.grounded or Globals.atk_attr.AIR_ATTACK in attacker.query_atk_attr(hitbox.move_name)):
+					# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
+					# and the attacker must be using an AIR_ATTACK in air or on ground, or be airborne
+					return true # defender successfully anti-aired
 	return false
 	
 func defender_semi_invul(hitbox, hurtbox):
-	var attacker = get_node(hitbox.owner_nodepath)
+	var attacker_or_entity
+	if !"entity_nodepath" in hitbox: # not entity
+		attacker_or_entity = get_node(hitbox.owner_nodepath)
+	else:
+		attacker_or_entity = get_node(hitbox.entity_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
-	if defender.state == Globals.char_state.GROUND_ATK_STARTUP or defender.state == Globals.char_state.AIR_ATK_STARTUP:
+	if defender.new_state in [Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP]:
 		if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr():
-			if Globals.atk_attr.UNBLOCKABLE in attacker.UniqueCharacter.query_atk_attr(hitbox.move_name) or \
-					hitbox.move_data.atk_type == Globals.atk_type.EX or hitbox.move_data.atk_type == Globals.atk_type.SUPER:
+			if Globals.atk_attr.UNBLOCKABLE in attacker_or_entity.query_atk_attr(hitbox.move_name) or \
+					hitbox.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
 				return false # defender's semi-invul failed
 			else:
 				return true # defender's semi-invul succeeded
@@ -1033,7 +1031,7 @@ func defender_semi_invul(hitbox, hurtbox):
 func defender_backdash(hitbox, hurtbox):
 	var attacker = get_node(hitbox.owner_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
-	var attacker_attr = attacker.UniqueCharacter.query_atk_attr(hitbox.move_name)
+	var attacker_attr = attacker.query_atk_attr(hitbox.move_name)
 	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
 		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
 				defender.Animator.query_to_play(["DashTransit", "AirDashTransit"]):
@@ -1321,7 +1319,7 @@ func rng_generate(upper_limit: int): # will return a number from 0 to (upper_lim
 			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------
 
-func _spawn_entity(master_path: NodePath, entity_ref: String, out_position, aux_data: Dictionary):
+func spawn_entity(master_path: NodePath, entity_ref: String, out_position, aux_data: Dictionary):
 	var entity = Globals.loaded_entity_scene.instance()
 	if !"back" in aux_data:
 		$EntitiesFront.add_child(entity)
@@ -1332,7 +1330,8 @@ func _spawn_entity(master_path: NodePath, entity_ref: String, out_position, aux_
 
 # for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
 # for unique sfx, loaded_sfx_ref will be a NodePath leading to the sfx's loaded FrameData .tres file and loaded spritesheet
-func _spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary):
+# aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
+func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary):
 	var sfx = Globals.loaded_SFX_scene.instance()
 	if !"back" in aux_data:
 		$SFXFront.add_child(sfx)
@@ -1341,10 +1340,10 @@ func _spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary
 	sfx.init(anim, loaded_sfx_ref, out_position, aux_data)
 	
 	
-func _spawn_shadow(sprite_node_path, out_position, starting_modulate_a = 0.5, lifetime = 10.0):
+func spawn_shadow(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0):
 	var shadow = Globals.loaded_shadow_scene.instance()
 	$ShadowTrail.add_child(shadow)
-	shadow.init(sprite_node_path, out_position, starting_modulate_a, lifetime)
+	shadow.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime)
 	
 	
 # aux_data contain "vol", "bus"

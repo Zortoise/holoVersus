@@ -7,7 +7,9 @@ var sfx_ref
 var palette_ref = null
 
 # for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
-# for unique sfx, loaded_sfx_ref will be a an array with master's nodepath as 1st entry and string for 2nd entry
+# for unique sfx, in_sfx_ref will be a an array with master's nodepath as 1st entry and string for 2nd entry
+# for master's palette, place "palette" : get_path() in aux_data, palette_ref will be master's nodepath
+# aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
 func init(in_anim: String, in_sfx_ref, in_position: Vector2, aux_data: Dictionary):
 	
 	sfx_ref = in_sfx_ref
@@ -41,11 +43,15 @@ func load_sfx_ref(): # load frame data and spritesheet
 
 
 func palette():
-	if palette_ref in LoadedSFX.loaded_sfx_palette:
+	if !palette_ref is NodePath:
+		if palette_ref in LoadedSFX.loaded_sfx_palette:
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Globals.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[palette_ref])
+	elif get_node(palette_ref).loaded_palette != null: # same palette as master, just set UniqueEntity.PALETTE to null
 		$Sprite.material = ShaderMaterial.new()
 		$Sprite.material.shader = Globals.loaded_palette_shader
-		$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[palette_ref])
-		
+		$Sprite.material.set_shader_param("swap", get_node(palette_ref).loaded_palette)
 
 func stimulate():
 	$SpritePlayer.stimulate()

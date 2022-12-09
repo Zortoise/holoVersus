@@ -45,7 +45,12 @@ const PALETTE_TO_PORTRAIT = {
 	2: Color(1.20, 0.70, 0.70),
 }
 
-const EX_FLASH_ANIM = [] # list of movenames that will emit EX flash
+const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "SP3", "aSP1", "aSP1[ex]", \
+		"SP3", "aSP3", "SP3[ex]", "aSP3[ex]"]
+const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "SP3[ex]", "aSP3[ex]"]
+const SUPERS = []
+
+const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP3[ex]", "aSP3[ex]", "aSP3b[ex]"] # list of movenames that will emit EX flash
 #const EX_FLASH_ANIM = ["H", "Hb"]
 
 # const DIRECTORY_NAME = "res://Characters/Gura/"
@@ -216,7 +221,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2.4,
-		"atk_attr" : [Globals.atk_attr.VARIANT_STARTUP, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN],
+		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
@@ -337,49 +342,160 @@ const MOVE_DATABASE = {
 	"aSP1": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [],
 	},
 	"SP1[c1]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"root" : "SP1",
-		"priority": 0,
+		"root" : "SP1", # needed for aerial memory
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-		"atk_attr" : [Globals.atk_attr.VARIANT_STARTUP]
 	},
 	"SP1[c2]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "SP1",
-		"priority": 0,
-		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-		"atk_attr" : [Globals.atk_attr.VARIANT_STARTUP]
+		"move_sound" : { ref = "whoosh12", aux_data = {} },
 	},
 	"SP1[c3]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "SP1",
-		"priority": 0,
-		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-		"atk_attr" : [Globals.atk_attr.VARIANT_STARTUP]
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
 	},
 	"aSP1[c1]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP1",
-		"priority": 0,
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.VARIANT_STARTUP]
 	},
 	"aSP1[c2]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP1",
-		"priority": 0,
-		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.VARIANT_STARTUP]
+		"move_sound" : { ref = "whoosh12", aux_data = {} },
 	},
 	"aSP1[c3]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP1",
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+	},
+	"SP1[ex]": {
+		"atk_type" : Globals.atk_type.EX,
 		"priority": 0,
-		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.VARIANT_STARTUP]
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+		"atk_attr" : [], # some projectile moves can have attributes like superarmor
+	},
+	"aSP1[ex]": {
+		"atk_type" : Globals.atk_type.EX,
+		"priority": 0,
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+		"atk_attr" : [],
+	},
+	
+	"aSP3" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"hitcount" : 1,
+		"damage" : 40,
+		"knockback" : 600,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 2,
+		"fixed_blockstun" : 5,
+		"priority": 5,
+		"guard_drain": 2000,
+		"guard_gain_on_combo" : 3500,
+		"EX_gain": 1000,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : 0,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.DRAG_KB, \
+				Globals.atk_attr.NO_PUSHBACK],
+		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
+		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
+	},
+	"aSP3b" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"hitcount" : 1,
+		"damage" : 70,
+		"knockback" : 550,
+		"knockback_type": Globals.knockback_type.RADIAL,
+		"attack_level" : 6,
+		"fixed_blockstun" : 5,
+		"priority": 5,
+		"guard_drain": 0,
+		"guard_gain_on_combo" : 0,
+		"EX_gain": 1500,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : 0,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
+		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
+	},
+	"aSP3[h]" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "aSP3",
+		"hitcount" : 1,
+		"damage" : 40,
+		"knockback" : 650,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 2,
+		"fixed_blockstun" : 5,
+		"priority": 5,
+		"guard_drain": 2000,
+		"guard_gain_on_combo" : 3500,
+		"EX_gain": 1000,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : 0,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.DRAG_KB, \
+				Globals.atk_attr.NO_PUSHBACK],
+		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
+		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
+	},
+	"aSP3b[h]" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "aSP3b",
+		"hitcount" : 1,
+		"damage" : 70,
+		"knockback" : 550,
+		"knockback_type": Globals.knockback_type.RADIAL,
+		"attack_level" : 6,
+		"fixed_blockstun" : 5,
+		"priority": 5,
+		"guard_drain": 0,
+		"guard_gain_on_combo" : 0,
+		"EX_gain": 1500,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : 0,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
+		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
+	},
+	"aSP3[ex]" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"hitcount" : 1,
+		"damage" : 60,
+		"knockback" : 650,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 2,
+		"fixed_blockstun" : 5,
+		"priority": 5,
+		"guard_drain": 2000,
+		"guard_gain_on_combo" : 3500,
+		"EX_gain": 0,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : 0,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.DRAG_KB, \
+				Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.SEMI_INVUL_STARTUP],
+		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
+		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
+	},
+	"aSP3b[ex]" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"hitcount" : 1,
+		"damage" : 120,
+		"knockback" : 600,
+		"knockback_type": Globals.knockback_type.RADIAL,
+		"attack_level" : 6,
+		"fixed_blockstun" : 5,
+		"priority": 5,
+		"guard_drain": 0,
+		"guard_gain_on_combo" : 0,
+		"EX_gain": 0,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : 0,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.SEMI_INVUL_STARTUP],
+		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 }
 
