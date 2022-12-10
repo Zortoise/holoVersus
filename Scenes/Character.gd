@@ -1243,12 +1243,13 @@ func buffer_actions():
 		release_memory.append([button_unique, QUICK_CANCEL_TIME + 3])
 		
 	if !query_status_effect(Globals.status_effect.RESPAWN_GRACE): # no attacking during respawn grace
-		if button_light in input_state.just_pressed:
-			input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
-			tap_memory.append([button_light, QUICK_CANCEL_TIME + 3])
-		if button_fierce in input_state.just_pressed:
-			input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
-			tap_memory.append([button_fierce, QUICK_CANCEL_TIME + 3])
+		if !button_unique in input_state.pressed:
+			if button_light in input_state.just_pressed:
+				input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
+				tap_memory.append([button_light, QUICK_CANCEL_TIME + 3])
+			if button_fierce in input_state.just_pressed:
+				input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
+				tap_memory.append([button_fierce, QUICK_CANCEL_TIME + 3])
 		if button_aux in input_state.just_pressed:
 			input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
 	
@@ -1782,6 +1783,8 @@ func respawn():
 func face(in_dir):
 	facing = in_dir
 	sprite.scale.x = facing
+	sfx_over.scale.x = facing
+	sfx_under.scale.x = facing
 	
 func reset_jumps():
 	air_jump = UniqueCharacter.MAX_AIR_JUMP # reset jump count on ground
@@ -2160,8 +2163,12 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 			if Animator.time <= QUICK_CANCEL_TIME + 1 and Animator.time != 0:
 				return true # EX and Supers have a wider window to quick cancel into
 	else: # cancelling from a normal move
-		if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
-			return true
+		if attack_ref in UniqueCharacter.EX_MOVES: # cancelling into an ex move from normal move has wider window
+			if Animator.time <= QUICK_CANCEL_TIME + 2 and Animator.time != 0:
+				return true
+		else:
+			if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
+				return true
 		
 	return false
 	
@@ -2196,7 +2203,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 #	return false
 		
 func check_ledge_stop(): # some animations prevent you from dropping off
-	if !grounded:
+	if !grounded or new_state in [Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, \
+			Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_C_RECOVERY]:
 		return false
 	if is_attacking():
 		var move_name = get_move_name()
@@ -2544,6 +2552,7 @@ func query_polygons(): # requested by main game node when doing hit detection
 		"hitbox" : null,
 		"sweetbox": null,
 		"kborigin": null,
+		"vacpoint" : null,
 	}
 	
 	if state != Globals.char_state.DEAD:
@@ -2553,6 +2562,7 @@ func query_polygons(): # requested by main game node when doing hit detection
 					polygons_queried.hitbox = Animator.query_polygon("hitbox")
 					polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
 					polygons_queried.kborigin = Animator.query_point("kborigin")
+					polygons_queried.vacpoint = Animator.query_point("vacpoint")
 			polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
 			
 		if query_status_effect(Globals.status_effect.RESPAWN_GRACE):
@@ -3016,10 +3026,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		vec_to_attacker.x = hit_data.attack_facing
 	var dir_to_attacker = sign(vec_to_attacker.x) # for setting facing on defender
 		
-	if "ignore_time" in hit_data.move_data: # some moves only hit once every few frames, done via an ignore list on the attacker/entity
-		attacker_or_entity.append_ignore_list(defender.player_ID, hit_data.move_data.ignore_time)
-			
-			
+	
 	hit_data["angle_to_atker"] = atan2(vec_to_attacker.y, vec_to_attacker.x)
 	
 	hit_data["lethal_hit"] = false
@@ -3033,6 +3040,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data["multihit"] = true
 	if Globals.atk_attr.AUTOCHAIN in attacker_or_entity.query_atk_attr(hit_data.move_name):
 		hit_data["autochain"] = true
+		
+	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
+	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
+		attacker_or_entity.append_ignore_list(defender.player_ID, hit_data.move_data.ignore_time)
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -3297,6 +3308,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !double_repeat: # lock Burst Escape for a few frames afterwards, some moves like Autochain moves lock for more
 		if "burstlock" in hit_data.move_data:
 			$BurstLockTimer.time = hit_data.move_data.burstlock
+		elif "multihit" in hit_data and "ignore_time" in hit_data.move_data and hit_data.move_data.ignore_time > BurstLockTimer_TIME:
+			$BurstLockTimer.time = hit_data.move_data.ignore_time
 		else:
 			$BurstLockTimer.time = BurstLockTimer_TIME
 			
@@ -3604,7 +3617,11 @@ func calculate_knockback_dir(hit_data):
 	var knockback_dir := 0.0
 	
 	var knockback_type = hit_data.move_data.knockback_type
-	var KBOrigin = hit_data.kborigin
+	
+	var KBOrigin = null
+	if "kborigin" in hit_data:
+		KBOrigin = hit_data.kborigin
+		
 	var ref_vector: Vector2 # vector from KBOrigin to hit_center
 	if KBOrigin:
 		ref_vector = hit_data.hit_center - KBOrigin
@@ -3642,7 +3659,11 @@ func calculate_knockback_dir(hit_data):
 	if "multihit" in hit_data or "autochain" in hit_data:
 		if Globals.atk_attr.DRAG_KB in attacker_or_entity.query_atk_attr(hit_data.move_name):
 			knockback_dir = atan2(attacker_or_entity.velocity.y, attacker_or_entity.velocity.x)
-				
+		elif "vacpoint" in hit_data: # or vacuum towards VacPoint
+			var vac_vector =  hit_data.vacpoint - hit_data.hit_center
+			knockback_dir = atan2(vac_vector.y, vac_vector.x)
+		elif "fixed_knockback_dir_multi" in hit_data.move_data:
+			knockback_dir = hit_data.move_data.fixed_knockback_dir_multi
 	return knockback_dir
 
 
@@ -3991,8 +4012,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 			else:
 				velocity.y = -UniqueCharacter.JUMP_SPEED
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
-				if dir != 0: # when hopping can press left/right for a long jump, for most characters there is no increases
-					velocity.x += dir * UniqueCharacter.JUMP_HORIZONTAL_SPEED
+				if dir != 0: # when jumping can press left/right for a long jump
+#					var old_horizontal_vel = velocity.x
+					if abs(velocity.x) < UniqueCharacter.SPEED: # cannot surpass SPEED
+						velocity.x += dir * UniqueCharacter.JUMP_HORIZONTAL_SPEED
+						velocity.x = clamp(velocity.x, -UniqueCharacter.SPEED, UniqueCharacter.SPEED)
+#					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"AirJumpTransit2":
 			aerial_memory = []

@@ -824,7 +824,6 @@ func detect_hit():
 				"polygon" : converted_polygon,
 				"owner_nodepath" : player.get_path(),
 				"facing": player.facing,
-				"kborigin" : null,
 				"move_name" : move_data_and_name.move_name,
 				"move_data" : move_data_and_name.move_data, # damage, attack level, etc
 			}
@@ -835,6 +834,8 @@ func detect_hit():
 				hitbox["sweetbox"] = converted_polygon2
 			if polygons_queried.kborigin: # if kborigin is not null
 				hitbox["kborigin"] = player.position + polygons_queried.kborigin
+			if polygons_queried.vacpoint: # if kborigin is not null
+				hitbox["vacpoint"] = player.position + polygons_queried.vacpoint
 				
 			hitboxes.append(hitbox)
 			
@@ -862,7 +863,7 @@ func detect_hit():
 	
 	for entity in entities:
 		var polygons_queried = entity.query_polygons()
-		if polygons_queried.hitbox != null: # if hitbox is not empty
+		if polygons_queried.hitbox: # if hitbox is not empty
 			var converted_polygon = []
 			for point in polygons_queried.hitbox: # convert to global position
 				converted_polygon.append(entity.position + point)
@@ -872,17 +873,18 @@ func detect_hit():
 				"owner_nodepath" : entity.master_path,
 				"entity_nodepath" : entity.get_path(),
 				"facing": entity.facing,
-				"kborigin" : null,
 				"move_name" : move_data.move_name,
 				"move_data" : move_data, # damage, attack level, etc
 			}
-			if polygons_queried.sweetbox != null: # if sweetbox is not empty
+			if polygons_queried.sweetbox: # if sweetbox is not empty
 				var converted_polygon2 = []
 				for point in polygons_queried.sweetbox: # convert to global position
 					converted_polygon2.append(entity.position + point)
 				hitbox["sweetbox"] = converted_polygon2
-			if polygons_queried.kborigin != null: # if kborigin is not null
+			if polygons_queried.kborigin: # if kborigin is not null
 				hitbox["kborigin"] = entity.position + polygons_queried.kborigin
+			if polygons_queried.vacpoint: # if kborigin is not null
+				hitbox["vacpoint"] = entity.position + polygons_queried.vacpoint
 				
 			hitboxes.append(hitbox)
 	
@@ -963,13 +965,17 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_d
 		"hit_center" : hit_center,
 		"semi_disjoint": semi_disjoint,
 		"sweetspotted" : sweetspotted,
-		"kborigin": hitbox.kborigin,
 		"attack_facing" : hitbox.facing,
 		"defend_facing" : hurtbox.facing,
 		"move_name" : hitbox.move_name,
 		"move_data" : hitbox.move_data,
 #		"defensive_state": hurtbox.defensive_state,
 	}
+	
+	if "kborigin" in hitbox:
+		hit_data["kborigin"] = hitbox.kborigin
+	if "vacpoint" in hitbox:
+		hit_data["vacpoint"] = hitbox.vacpoint
 	
 	if "entity_nodepath" in hitbox: # flag hit as a entity
 		hit_data["entity_nodepath"] = hitbox.entity_nodepath
@@ -1213,7 +1219,7 @@ func ex_gauge_update(character):
 		1, 2:
 			ex_gauge_bar.get_node("AnimationPlayer").stop()
 			ex_gauge_bar.modulate = Color(1.0, 1.0, 1.0)
-			ex_lvl_indicator.get_node("AnimationPlayer").play("flash1")
+			ex_lvl_indicator.get_node("AnimationPlayer").play("flash2")
 		3, 4:
 			ex_gauge_bar.get_node("AnimationPlayer").stop()
 			ex_gauge_bar.modulate = Color(1.0, 1.0, 1.0)
@@ -1340,10 +1346,11 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary)
 	sfx.init(anim, loaded_sfx_ref, out_position, aux_data)
 	
 	
-func spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0):
+func spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, \
+		lifetime = 10.0, use_master_palette = true):
 	var afterimage = Globals.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
-	afterimage.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime)
+	afterimage.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, use_master_palette)
 	
 	
 # aux_data contain "vol", "bus"

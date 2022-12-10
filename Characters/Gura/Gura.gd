@@ -61,6 +61,13 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aSP1Recovery", "aSP1[ex]Recovery":
 			return Globals.char_state.AIR_ATK_RECOVERY
 			
+		"aSP2Startup", "aSP2[ex]Startup":
+			return Globals.char_state.AIR_ATK_STARTUP
+		"aSP2Active", "aSP2[h]Active", "aSP2[ex]Active":
+			return Globals.char_state.AIR_ATK_ACTIVE
+		"aSP2Recovery", "aSP2[h]Recovery":
+			return Globals.char_state.AIR_ATK_RECOVERY
+			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup", "SP3bStartup", "SP3b[h]Startup", "SP3b[ex]Startup":
@@ -69,6 +76,13 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_ACTIVE
 		"SP3Recovery", "SP3bRecovery", "SP3[ex]Recovery":
 			return Globals.char_state.AIR_ATK_RECOVERY
+			
+		"SP4Startup", "SP4[ex]Startup":
+			return Globals.char_state.GROUND_ATK_STARTUP
+		"SP4Active", "SP4[h]Active", "SP4[ex]Active":
+			return Globals.char_state.GROUND_ATK_ACTIVE
+		"SP4Recovery":
+			return Globals.char_state.GROUND_ATK_RECOVERY
 		
 	print("Error: " + anim + " not found.")
 			
@@ -77,8 +91,8 @@ func check_collidable(): # some characters have move that can pass through other
 	match Animator.to_play_animation:
 #		"Dash": 			# example
 #			return false
-		_:
-			pass
+		"aSP2[h]Active":
+			return false
 	return true
 
 # UNIQUE INPUT CAPTURE --------------------------------------------------------------------------------------------------
@@ -202,8 +216,13 @@ func capture_combinations():
 	
 	Character.combination(Character.button_special, Character.button_light, "Sp.L")
 	Character.ex_combination(Character.button_special, Character.button_light, "ExSp.L")
+	
 	Character.combination_trio(Character.button_special, Character.button_up, Character.button_light, "Sp.uL")
 	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_light, "ExSp.uL")
+	
+	Character.combination(Character.button_special, Character.button_fierce, "Sp.F")
+	Character.ex_combination(Character.button_special, Character.button_fierce, "ExSp.F")
+
 
 func rebuffer_actions():
 	Character.rebuffer(Character.button_up, Character.button_light, "uL")
@@ -214,6 +233,7 @@ func rebuffer_actions():
 	
 	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
 	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_light, "Sp.uL")
+	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
 	
 #	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
 
@@ -346,6 +366,11 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
 				
+		"Sp.F":
+			if !has_acted[0]:
+				if !Character.grounded:
+					keep = !process_move(new_state, "SP2", has_acted, buffered_input[1])
+				
 		"ExSp.L":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP1[ex]", has_acted, buffered_input[1])
@@ -358,7 +383,13 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				if keep:
 					keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
 
-					
+		"ExSp.F":
+			if !has_acted[0]:
+				if !Character.grounded:
+					keep = !process_move(new_state, "SP2[ex]", has_acted, buffered_input[1])
+					if keep:
+						keep = !process_move(new_state, "SP2", has_acted, buffered_input[1])	
+						
 		# ---------------------------------------------------------------------------------
 		
 		"InstaAirDash": # needed to chain wavedashes
@@ -425,7 +456,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-					if is_ex_valid(attack_ref):
+					if is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						Character.chain_memory = []
 						has_acted[0] = true
@@ -435,7 +466,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			if is_aerial_uptilt("a" + attack_ref) and !Character.button_jump in Character.input_state.pressed and \
 					Character.test_aerial_memory("a" + attack_ref) and \
 					Animator.query_to_play(["AirJumpTransit", "AirJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
-				if is_ex_valid(attack_ref):
+				if is_ex_valid("a" + attack_ref):
 					Character.animate("a" + attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
@@ -469,7 +500,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			if !Character.grounded:
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 					if Character.test_chain_combo("a" + attack_ref):
-						if is_ex_valid(attack_ref):
+						if is_ex_valid("a" + attack_ref):
 							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 								Character.get_node("ModulatePlayer").play("unflinch_flash")
 								Character.perfect_chain = true
@@ -493,7 +524,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 				if ("a" + attack_ref) in STARTERS:
 					if Character.check_quick_cancel("a" + attack_ref):
 						if Character.test_qc_chain_combo("a" + attack_ref):
-							if is_ex_valid(attack_ref, true):
+							if is_ex_valid("a" + attack_ref, true):
 								Character.animate("a" + attack_ref + "Startup")
 								has_acted[0] = true
 								return true
@@ -822,6 +853,25 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP1[ex]Recovery":
 			Character.animate("FallTransit")
 			
+		"aSP2Startup":
+			if Character.button_fierce in Character.input_state.pressed:
+				Character.animate("aSP2[h]Active")
+			else:
+				Character.animate("aSP2Active")
+		"aSP2Active":
+			Character.animate("aSP2Recovery")
+		"aSP2[h]Active":
+			Character.animate("aSP2[h]Recovery")
+		"aSP2[h]Recovery":
+			Character.animate("aSP2Recovery")
+		"aSP2Recovery":
+			Character.animate("FallTransit")
+				
+		"aSP2[ex]Startup":
+			Character.animate("aSP2[ex]Active")
+		"aSP2[ex]Active":
+			Character.animate("aSP2Recovery")
+			
 		"SP3Startup":
 			if Character.button_light in Character.input_state.pressed:
 				Character.animate("SP3[h]Startup")
@@ -875,6 +925,16 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("SP3[ex]Recovery")
 		"SP3[ex]Recovery":
 			Character.animate("SP3bRecovery")
+			
+		"SP4Startup":
+			if Character.button_fierce in Character.input_state.pressed:
+				Character.animate("SP4[h]Active")
+			else:
+				Character.animate("SP4Active")
+		"SP4[ex]Startup":
+			Character.animate("SP4[ex]Active")
+		"SP4Active", "SP4[h]Active", "SP4[ex]Active":
+			Character.animate("SP4Recovery")
 			
 
 func _on_SpritePlayer_anim_started(anim_name):
@@ -1058,6 +1118,43 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 0.7
 			Character.velocity_limiter.down = 0.7
 			
+		"aSP2Startup", "aSP2[ex]Startup":
+			Character.velocity_limiter.x_slow = 0.2
+			Character.velocity_limiter.y_slow = 0.2
+			Character.null_gravity = true
+			Character.sfx_under.show()
+		"aSP2Active":
+			Character.velocity.x = Character.facing * 400
+			Character.velocity.y = 0
+			Character.null_gravity = true
+			Character.null_friction = true
+			Character.sfx_under.show()
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
+		"aSP2[h]Active":
+			Character.velocity.x = Character.facing * 500
+			Character.velocity.y = 0
+			Character.null_gravity = true
+			Character.null_friction = true
+			Character.sfx_under.show()
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
+		"aSP2[ex]Active":
+			Character.velocity.x = Character.facing * 500
+			Character.velocity.y = 0
+			Character.null_gravity = true
+			Character.null_friction = true
+			Character.sfx_under.show()
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
+		"aSP2[h]Recovery":
+			Character.velocity_limiter.down = 0.2
+			Character.velocity.x *= 0.5
+			Character.null_friction = true
+			Character.sfx_under.show()
+		"aSP2Recovery":
+			Character.velocity_limiter.down = 0.7
+			Character.velocity.x *= 0.5
+			Character.sfx_under.show()
+		
+			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			Character.sfx_under.show()
 		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
@@ -1085,6 +1182,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.sfx_under.show()
 		"SP3Recovery", "SP3[ex]Recovery", "SP3bRecovery":
 			Character.velocity_limiter.x = 0.7
+			Character.sfx_under.show()
+			
+		"SP4Startup", "SP4[ex]Startup":
+			Character.sfx_under.show()
+		"SP4Active", "SP4[h]Active", "SP4[exActive":
+			Character.velocity.x += Character.facing * SPEED * 0.25
+			Character.sfx_under.show()
+		"SP4Recovery":
 			Character.sfx_under.show()
 			
 	start_audio(anim_name)

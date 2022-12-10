@@ -246,12 +246,14 @@ func query_polygons(): # requested by main game node when doing hit detection
 		"hitbox" : null,
 		"sweetbox": null,
 		"kborigin": null,
+		"vacpoint": null,
 	}
 
 	if !$HitStopTimer.is_running(): # no hitbox during hitstop
 		polygons_queried.hitbox = Animator.query_polygon("hitbox")
 		polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
 		polygons_queried.kborigin = Animator.query_point("kborigin")
+		polygons_queried.vacpoint = Animator.query_point("vacpoint")
 
 	return polygons_queried
 

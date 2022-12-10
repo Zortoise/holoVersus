@@ -10,7 +10,7 @@ const SPEED = 360.0 # ground speed
 const AIR_STRAFE_SPEED = 35
 const AIR_STRAFE_LIMIT = 0.8 # speed limit of air strafing, limit depends on ground speed
 const JUMP_SPEED = 700.0
-const JUMP_HORIZONTAL_SPEED = 0.0
+const JUMP_HORIZONTAL_SPEED = 100.0
 const AIR_JUMP_MOD = 0.9 # reduce height of air jumps
 const GRAVITY_MOD = 1.0 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 7.2 # affect terminal velocity downward
@@ -46,12 +46,12 @@ const PALETTE_TO_PORTRAIT = {
 	2: Color(1.20, 0.70, 0.70),
 }
 
-const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "SP3", "aSP1", "aSP1[ex]", \
-		"SP3", "aSP3", "SP3[ex]", "aSP3[ex]"]
-const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "SP3[ex]", "aSP3[ex]"]
+const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
+		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]"]
+const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]"]
 const SUPERS = []
 
-const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP3[ex]", "aSP3[ex]", "SP3b[ex]"] # list of movenames that will emit EX flash
+const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP3b[ex]", "SP4[ex]"] # list of movenames that will emit EX flash
 #const EX_FLASH_ANIM = ["H", "Hb"]
 
 # const DIRECTORY_NAME = "res://Characters/Gura/"
@@ -187,7 +187,7 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2.4,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN],
-		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
+		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
 	"Hb" : {
@@ -223,7 +223,7 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2.4,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN],
-		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
+		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
 	"Hb[h]" : {
@@ -382,6 +382,68 @@ const MOVE_DATABASE = {
 		"atk_attr" : [],
 	},
 	
+	"aSP2" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"hitcount" : 3,
+		"ignore_time" : 8,
+		"damage" : 40,
+		"knockback" : 500,
+		"fixed_knockback_multi" : 200,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 4,
+		"fixed_blockstun" : 5,
+		"priority": 7,
+		"guard_drain": 1500,
+		"guard_gain_on_combo" : 2500,
+		"EX_gain": 1000,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : -PI/4,
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
+		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
+	},
+	"aSP2[h]" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"hitcount" : 1,
+		"damage" : 80,
+		"knockback" : 500,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 4,
+		"fixed_blockstun" : 5,
+		"priority": 7,
+		"guard_drain": 1500,
+		"guard_gain_on_combo" : 2500,
+		"EX_gain": 2500,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : -PI/2,
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
+		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
+	},
+	"aSP2[ex]" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"hitcount" : 5,
+		"ignore_time" : 6,
+		"damage" : 40,
+		"knockback" : 600,
+		"fixed_knockback_multi" : 200,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 5,
+		"fixed_blockstun" : 5,
+		"priority": 10,
+		"guard_drain": 2000,
+		"guard_gain_on_combo" : 3500,
+		"EX_gain": 0,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : -PI/4,
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
+		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
+	},
+	
 	"SP3" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
@@ -391,7 +453,7 @@ const MOVE_DATABASE = {
 		"attack_level" : 2,
 		"fixed_blockstun" : 5,
 		"burstlock": 8,
-		"priority": 5,
+		"priority": 8,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1000,
@@ -411,7 +473,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"attack_level" : 6,
 		"fixed_blockstun" : 5,
-		"priority": 5,
+		"priority": 8,
 		"guard_drain": 0,
 		"guard_gain_on_combo" : 0,
 		"EX_gain": 1500,
@@ -431,7 +493,7 @@ const MOVE_DATABASE = {
 		"attack_level" : 2,
 		"fixed_blockstun" : 5,
 		"burstlock": 8,
-		"priority": 5,
+		"priority": 8,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1000,
@@ -452,7 +514,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"attack_level" : 6,
 		"fixed_blockstun" : 5,
-		"priority": 5,
+		"priority": 8,
 		"guard_drain": 0,
 		"guard_gain_on_combo" : 0,
 		"EX_gain": 1500,
@@ -471,7 +533,7 @@ const MOVE_DATABASE = {
 		"attack_level" : 2,
 		"fixed_blockstun" : 5,
 		"burstlock": 8,
-		"priority": 5,
+		"priority": 11,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
 		"EX_gain": 0,
@@ -491,7 +553,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"attack_level" : 6,
 		"fixed_blockstun" : 5,
-		"priority": 5,
+		"priority": 11,
 		"guard_drain": 0,
 		"guard_gain_on_combo" : 0,
 		"EX_gain": 0,
@@ -500,6 +562,25 @@ const MOVE_DATABASE = {
 		"KB_angle" : 0,
 		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.SEMI_INVUL_STARTUP],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
+	},
+	
+	"SP4": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"priority": 0,
+		"atk_attr" : [],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+	},
+	"SP4[h]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"priority": 0,
+		"atk_attr" : [],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+	},
+	"SP4[ex]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"priority": 0,
+		"atk_attr" : [],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
 	},
 }
 
