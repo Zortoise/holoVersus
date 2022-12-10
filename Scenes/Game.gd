@@ -30,8 +30,8 @@ onready var starting_stock_pts = Globals.starting_stock_pts
 # variables for stage box and starting positions/facings, these are set by the stage's node
 var stage
 var stage_box
-var blastbarrierL
-var blastbarrierR
+#var blastbarrierL
+#var blastbarrierR
 var blastbarrierU
 var respawn_points = []
 var middle_point

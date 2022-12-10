@@ -216,6 +216,7 @@ var has_burst := false # gain burst by ringing out opponent
 var tap_memory = []
 var release_memory = []
 var impulse_used := false
+var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout the duration of BurstLockTimer
 
 
 # controls
@@ -683,14 +684,18 @@ func stimulate2(): # only ran if not in hitstop
 			Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, \
 				Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
 				Globals.char_state.AIR_BLOCK:
+					
+				if state == Globals.char_state.AIR_ATK_ACTIVE and Globals.atk_attr.NO_STRAFE in query_atk_attr():
+					continue # cannot strafe during some aerials
 				
 				if !grounded:
 					if state == Globals.char_state.AIR_STANDBY and dir != facing: # flipping over
 						face(dir)
 					
-					# reduce air_strafe_speed and air_strafe_limit during AIR_ATK_STARTUP
 					var air_strafe_speed_temp = UniqueCharacter.AIR_STRAFE_SPEED
 					var air_strafe_limit_temp = UniqueCharacter.AIR_STRAFE_LIMIT
+					
+					# reduce air_strafe_speed and air_strafe_limit during AIR_ATK_STARTUP
 					if state != Globals.char_state.AIR_STANDBY:
 						air_strafe_speed_temp *= AERIAL_STRAFE_MOD
 						air_strafe_limit_temp *= AERIAL_STRAFE_MOD
@@ -704,8 +709,7 @@ func stimulate2(): # only ran if not in hitstop
 	# LEFT/RIGHT DI --------------------------------------------------------------------------------------------------
 					
 			_:
-				if $HitStunTimer.is_running() and current_guard_gauge > 0 and get_damage_percent() < 1.0:
-					# no changing facing
+				if $HitStunTimer.is_running() and can_DI():# no changing facing
 					
 					# DDI speed and speed limit depends on guard gauge
 					var DDI_speed = lerp(DDI_SIDE_MAX * DI_MIN_MOD, DDI_SIDE_MAX, get_guard_gauge_percent_above())
@@ -898,7 +902,7 @@ func stimulate2(): # only ran if not in hitstop
 	if !null_gravity and !grounded: # gravity only pulls you if you are in the air
 		
 		if $HitStunTimer.is_running():
-			if current_guard_gauge > 0 and get_damage_percent() < 1.0: # up/down DI, depends on Guard Gauge
+			if can_DI(): # up/down DI, depends on Guard Gauge
 				if v_dir == -1: # DIing upward
 					gravity_temp *= lerp((GDI_UP_MAX - 1.0) * DI_MIN_MOD + 1, GDI_UP_MAX, get_guard_gauge_percent_above())
 				elif v_dir == 1: # DIing downward
@@ -1963,10 +1967,17 @@ func rng_generate(upper_limit: int): # will return a number from 0 to (upper_lim
 	if Globals.Game.has_method("rng_generate"):
 		return Globals.Game.rng_generate(upper_limit)
 	else: return null
+	
+func can_DI(): # already checked for HitStunTimer
+	if current_guard_gauge <= 0 or get_damage_percent() >= 1.0:
+		return false
+	if DI_seal and $BurstLockTimer.is_running():
+		return false
+	return true
 
 func process_VDI():
 	# to be able to DI, must be entering knockback animation and has a directional key pressed
-	if (dir != 0 or v_dir != 0) and current_guard_gauge > 0 and get_damage_percent() < 1.0 and \
+	if (dir != 0 or v_dir != 0) and !DI_seal and current_guard_gauge > 0 and get_damage_percent() < 1.0 and \
 		((state == Globals.char_state.LAUNCHED_HITSTUN and Animator.query_to_play(["LaunchTransit"]) and \
 		!Animator.query_current(["LaunchTransit"])) or \
 		(state == Globals.char_state.GROUND_FLINCH_HITSTUN and Animator.query_to_play(["FlinchA", "FlinchB"]) and \
@@ -2926,7 +2937,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		# if blocked hit, pushback
 	
 	if hit_data.block_state != Globals.block_state.UNBLOCKED and !Globals.atk_attr.NO_PUSHBACK in query_atk_attr(hit_data.move_name) and \
-			is_hitcount_last_hit(defender.player_ID, hit_data.move_data):
+			!"multihit" in hit_data:
 		 # for multi-hit only last hit has pushback
 		var pushback_strength := 0.0
 		match hit_data.block_state:
@@ -3018,6 +3029,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data["repeat"] = false
 	hit_data["double_repeat"] = false
 	
+	if !attacker_or_entity.is_hitcount_last_hit(defender.player_ID, hit_data.move_data):
+		hit_data["multihit"] = true
+	if Globals.atk_attr.AUTOCHAIN in attacker_or_entity.query_atk_attr(hit_data.move_name):
+		hit_data["autochain"] = true
+	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
 	var double_repeat = false
@@ -3044,7 +3060,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	var weak_hit
 	if hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
-		!attacker_or_entity.is_hitcount_last_hit(defender.player_ID, hit_data.move_data): # multi-hit moves cannot cause lethal/break/sweetspot/punish outside of last hit
+		"multihit" in hit_data: # multi-hit moves cannot cause lethal/break/sweetspot/punish outside of last hit
 		weak_hit = true
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
 		
@@ -3154,8 +3170,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	defender.change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 
-	if defender.get_guard_gauge_percent_below() <= 0.01 and !hit_data.weak_hit and \
-		!Globals.atk_attr.AUTOCHAIN in attacker_or_entity.query_atk_attr(hit_data.move_name):  # check for break hit
+	if defender.get_guard_gauge_percent_below() <= 0.01 and !hit_data.weak_hit and !"autochain" in hit_data:  # check for break hit
 		# setting to 0.01 instead of 0 allow multi-hit moves to cause break_hits on the last attack
 		hit_data.break_hit = true
 		hit_data.block_state = Globals.block_state.UNBLOCKED
@@ -3168,7 +3183,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data.block_state = Globals.block_state.UNBLOCKED # wrongblocking has no effect when damage is over limit
 				
 	# append repeated move to move memory here since calculation for guard_gauge change uses it
-	if !double_repeat and attacker_or_entity.is_hitcount_last_hit(defender.player_ID, hit_data.move_data): # for multi-hit move, only the last hit count
+	if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit count
 		move_memory.append([attacker.player_ID, root_move_name])
 				
 				
@@ -3179,7 +3194,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------
 	
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
-	if Globals.atk_attr.AUTOCHAIN in attacker_or_entity.query_atk_attr(hit_data.move_name):
+	if "autochain" in hit_data:
 		hit_data.lethal_hit = false
 	
 	if hit_data.double_repeat:
@@ -3284,6 +3299,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			$BurstLockTimer.time = hit_data.move_data.burstlock
 		else:
 			$BurstLockTimer.time = BurstLockTimer_TIME
+			
+	if "autochain" in hit_data or "multihit" in hit_data:
+		DI_seal = true
+	else:
+		DI_seal = false
 	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
@@ -3376,7 +3396,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 	else: # blocking
 		if !"entity_nodepath" in hit_data:
-			if attacker.is_hitcount_last_hit(defender.player_ID, hit_data.move_data):
+			if !"multihit" in hit_data:
 				face(dir_to_attacker) # turn towards attacker, for multi-hit move only the last hit turns blocking defender for cross-ups
 		else: # multi-hit entities turn on 1st hit
 			if attacker_or_entity.velocity.x == 0:
@@ -3506,18 +3526,18 @@ func calculate_guard_gauge_change(hit_data):
 	
 func calculate_knockback_strength(hit_data):
 
-	var attacker = get_node(hit_data.attacker_nodepath)
-	
-	var attacker_or_entity = attacker # cleaner code
-	if "entity_nodepath" in hit_data:
-		attacker_or_entity = get_node(hit_data.entity_nodepath)
+#	var attacker = get_node(hit_data.attacker_nodepath)
+#
+#	var attacker_or_entity = attacker # cleaner code
+#	if "entity_nodepath" in hit_data:
+#		attacker_or_entity = get_node(hit_data.entity_nodepath)
 		
 	var defender = get_node(hit_data.defender_nodepath)
 
 	var knockback_strength = hit_data.move_data.knockback
 	
 	# for certain multi-hit attacks (not autochain), fixed KB or drag KB till the last hit
-	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data):
+	if "multihit" in hit_data:
 		if "fixed_knockback_multi" in hit_data.move_data:
 			knockback_strength = hit_data.move_data.fixed_knockback_multi
 #		if Globals.atk_attr.DRAG_KB in attacker_or_entity.query_atk_attr(hit_data.move_name):
@@ -3542,8 +3562,8 @@ func calculate_knockback_strength(hit_data):
 			# when being knocked downward (45 degree arc) while blocking, knockback is reduced
 			knockback_strength *= DOWNWARD_KB_REDUCTION_ON_BLOCK
 
-	# for rekkas and combo-type moves/supers, no KB boost for non-finishers, these are considered "weak hits" as well
-	if Globals.atk_attr.AUTOCHAIN in attacker_or_entity.query_atk_attr(hit_data.move_name):
+	# for rekkas and combo-type moves/supers, no KB boost for non-finishers
+	if "autochain" in hit_data:
 		return knockback_strength
 
 	if hit_data.lethal_hit: # increased knockback on a lethal hit, multi-hit and autochain will not cause lethal
@@ -3557,8 +3577,7 @@ func calculate_knockback_strength(hit_data):
 #	knockback_strength *= defender.UniqueCharacter.KB_MOD # defender's weight
 	
 	if !hit_data.weak_hit:
-		if attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) and defender.get_damage_percent() >= 1.0:
-			# no KB boost for multi-hit attacks till the last hit
+		if defender.get_damage_percent() >= 1.0: # no KB boost for multi-hit attacks (weak hits) till the last hit
 			var dmg_val_boost = min((defender.get_damage_percent() - 1.0) / 0.125 * 0.5 + 2.0 \
 				, DMG_VAL_KB_LIMIT)
 			#	0.0 percent damage over is x2.0 knockback
@@ -3620,8 +3639,7 @@ func calculate_knockback_dir(hit_data):
 			knockback_dir = atan2(0, cos(knockback_dir))
 			
 		# for certain multi-hit attacks and autochain), can be drag KB till the last hit
-	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data) or \
-			Globals.atk_attr.AUTOCHAIN in attacker_or_entity.query_atk_attr(hit_data.move_name):
+	if "multihit" in hit_data or "autochain" in hit_data:
 		if Globals.atk_attr.DRAG_KB in attacker_or_entity.query_atk_attr(hit_data.move_name):
 			knockback_dir = atan2(attacker_or_entity.velocity.y, attacker_or_entity.velocity.x)
 				
@@ -4156,6 +4174,7 @@ func save_state():
 		"targeted_opponent" : targeted_opponent,
 		"has_burst": has_burst,
 		"impulse_used" : impulse_used,
+		"DI_seal" : DI_seal,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -4225,6 +4244,7 @@ func load_state(state_data):
 	targeted_opponent = state_data.targeted_opponent
 	has_burst = state_data.has_burst
 	impulse_used = state_data.impulse_used
+	DI_seal = state_data.DI_seal
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	

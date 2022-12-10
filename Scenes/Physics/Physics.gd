@@ -44,14 +44,14 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 				# no collision with other players during hitstun
 				if $HitStunTimer.is_running():
 					position.x += sign(move_amount.x)
-					if sign(move_amount.x) > 0: # check if player touched blast barrier
-						var result = check_blast_barriers(collision_box, Globals.compass.E, in_velocity)
-						if result != null:
-							return [result, false, false, false]
-					elif sign(move_amount.x) < 0:
-						var result = check_blast_barriers(collision_box, Globals.compass.W, in_velocity)
-						if result != null:
-							return [result, false, false, false]
+#					if sign(move_amount.x) > 0: # check if player touched blast barrier
+#						var result = check_blast_barriers(collision_box, Globals.compass.E, in_velocity)
+#						if result != null:
+#							return [result, false, false, false]
+#					elif sign(move_amount.x) < 0:
+#						var result = check_blast_barriers(collision_box, Globals.compass.W, in_velocity)
+#						if result != null:
+#							return [result, false, false, false]
 					move_amount.x -= sign(move_amount.x)
 				else: # check for other players
 					var colliding_characters = get_colliding_characters_side(collision_box, sign(move_amount.x))
@@ -134,21 +134,22 @@ func check_blast_barriers(collision_box, compass_dir, in_velocity):
 	if call("get_damage_percent") >= 0.7: # no barrier if damage value too high
 		return null
 	match compass_dir: # return null if not touching barriers
-		Globals.compass.W:
-			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierL):
-				return null
-			call("bounce_dust", compass_dir)
-			return Vector2(-in_velocity.x, in_velocity.y)
-		Globals.compass.E:
-			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierR):
-				return null
-			call("bounce_dust", compass_dir)
-			return Vector2(-in_velocity.x, in_velocity.y)
+#		Globals.compass.W:
+#			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierL):
+#				return null
+#			call("bounce_dust", compass_dir)
+#			return Vector2(-in_velocity.x, in_velocity.y)
+#		Globals.compass.E:
+#			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierR):
+#				return null
+#			call("bounce_dust", compass_dir)
+#			return Vector2(-in_velocity.x, in_velocity.y)
 		Globals.compass.N:
 			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierU):
 				return null
 			call("bounce_dust", compass_dir)
 			return Vector2(in_velocity.x, -in_velocity.y)
+	return null
 
 	
 # no need to get character collision for up and down movement for now

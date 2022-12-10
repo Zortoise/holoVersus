@@ -133,18 +133,6 @@ margin_top = -448.0
 margin_right = 704.0
 margin_bottom = 448.0
 
-[node name="BlastBarrierL" type="ColorRect" parent="StageBox"]
-margin_left = -64.0
-margin_right = 56.0
-margin_bottom = 896.0
-color = Color( 0, 0, 0, 1 )
-
-[node name="BlastBarrierR" type="ColorRect" parent="StageBox"]
-margin_left = 1352.0
-margin_right = 1472.0
-margin_bottom = 896.0
-color = Color( 0, 0, 0, 1 )
-
 [node name="BlastBarrierU" type="ColorRect" parent="StageBox"]
 margin_left = -64.0
 margin_top = -64.0
