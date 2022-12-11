@@ -33,14 +33,30 @@ func init(aux_data: Dictionary):
 			
 func stimulate():
 	
-	match Animator.current_animation: # afterimage trail
-		_:
-			pass
+	match Animator.current_animation: # triggering shark breach
+		"Active", "[h]Active", "Turn", "bTurn":
+			if get_node(Entity.master_path).unique_data.groundfin_trigger:
+#				var breach_facing = get_node(Entity.master_path).get_last_tapped_dir()
+#				var turned := false
+#				if breach_facing == 0:
+#					breach_facing = get_node(Entity.master_path).dir
+#				else:
+#					turned = true # aleady turned via get_last_tapped_dir()
+#				if breach_facing == 0:
+#					breach_facing = Entity.facing
+				var breach_facing = sign(Globals.Game.get_player_node(get_node(Entity.master_path).targeted_opponent).position.x - Entity.position.x)
+				if breach_facing == 0:
+					breach_facing = Entity.facing
+				Globals.Game.spawn_entity(Entity.master_path, "SharkBreach", Entity.position, {"facing" : breach_facing})
+				# reduce ground fin count
+				get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
+				Entity.free = true
 
 	
 func kill(_sound = true):
 	if !Animator.current_animation.ends_with("Kill"):
 		Animator.play("Kill")
+		# reduce ground fin count
 		get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
 	
 	
@@ -49,9 +65,9 @@ func collision(): # collided with a wall, turns
 	
 func ledge_stop(): # about to go off the ledge, turns
 	match Animator.current_animation:
-		"Spawn", "Active", "bActive":
+		"Spawn", "Active":
 			Animator.play("Turn")
-		"[h]Spawn", "[h]Active", "b[h]Active":
+		"[h]Spawn", "[h]Active":
 			Animator.play("[h]Turn")
 	
 func _on_SpritePlayer_anim_finished(anim_name):
@@ -60,17 +76,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Animator.play("Active")
 		"[h]Spawn":
 			Animator.play("[h]Active")
-		"Active":
-			Animator.play("bActive")
-		"[h]Active":
-			Animator.play("b[h]Active")
 			
 		"Turn":
-			Animator.play("bActive")
+			Animator.play("Active")
 			Entity.velocity = Vector2(300, 0)
 			Entity.velocity.x *= Entity.facing
 		"[h]Turn":
-			Animator.play("b[h]Active")
+			Animator.play("[h]Active")
 			Entity.velocity = Vector2(150, 0)
 			Entity.velocity.x *= Entity.facing
 			
@@ -84,8 +96,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Entity.velocity.x *= Entity.facing
 		"Turn", "[h]Turn":
 			Entity.velocity.x = 0
-			Entity.facing = -Entity.facing
-			sprite.scale.x = Entity.facing
+			Entity.face(-Entity.facing)
 		"Kill":
 			Entity.velocity = Vector2.ZERO
 

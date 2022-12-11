@@ -48,6 +48,7 @@ const PALETTE_TO_PORTRAIT = {
 
 const UNIQUE_DATA_REF = {
 	"groundfin_count" : 0,
+	"groundfin_trigger" : false,
 	"instinct_gauge" : 0
 }
 
@@ -474,9 +475,9 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 70,
-		"knockback" : 550,
+		"knockback" : 475,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"attack_level" : 6,
+		"attack_level" : 5,
 		"fixed_blockstun" : 5,
 		"priority": 8,
 		"guard_drain": 0,
@@ -515,9 +516,9 @@ const MOVE_DATABASE = {
 		"root" : "aSP3b",
 		"hitcount" : 1,
 		"damage" : 70,
-		"knockback" : 550,
+		"knockback" : 500,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"attack_level" : 6,
+		"attack_level" : 5,
 		"fixed_blockstun" : 5,
 		"priority": 8,
 		"guard_drain": 0,
@@ -554,7 +555,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 120,
-		"knockback" : 600,
+		"knockback" : 525,
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"attack_level" : 6,
 		"fixed_blockstun" : 5,

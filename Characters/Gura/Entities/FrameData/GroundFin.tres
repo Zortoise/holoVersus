@@ -6,13 +6,19 @@
 script = ExtResource( 1 )
 frame_data = {
 "Active": {
-"duration": 7,
+"duration": 21,
 "hframes": 6,
-"loop": false,
+"loop": true,
 "spritesheet": "GroundFinSprite",
 "timestamps": {
 0: {
 "frame": 3
+},
+7: {
+"frame": 4
+},
+14: {
+"frame": 5
 }
 },
 "vframes": 3
@@ -75,13 +81,19 @@ frame_data = {
 "vframes": 3
 },
 "[h]Active": {
-"duration": 7,
+"duration": 21,
 "hframes": 6,
-"loop": false,
+"loop": true,
 "spritesheet": "GroundFinSprite",
 "timestamps": {
 0: {
 "frame": 3
+},
+7: {
+"frame": 4
+},
+14: {
+"frame": 5
 }
 },
 "vframes": 3
@@ -121,42 +133,6 @@ frame_data = {
 },
 6: {
 "frame": 12
-}
-},
-"vframes": 3
-},
-"bActive": {
-"duration": 21,
-"hframes": 6,
-"loop": true,
-"spritesheet": "GroundFinSprite",
-"timestamps": {
-0: {
-"frame": 4
-},
-7: {
-"frame": 5
-},
-14: {
-"frame": 3
-}
-},
-"vframes": 3
-},
-"b[h]Active": {
-"duration": 21,
-"hframes": 6,
-"loop": true,
-"spritesheet": "GroundFinSprite",
-"timestamps": {
-0: {
-"frame": 4
-},
-7: {
-"frame": 5
-},
-14: {
-"frame": 3
 }
 },
 "vframes": 3

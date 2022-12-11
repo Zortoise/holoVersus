@@ -219,11 +219,11 @@ func capture_combinations():
 	Character.combination(Character.button_special, Character.button_light, "Sp.L")
 	Character.ex_combination(Character.button_special, Character.button_light, "ExSp.L")
 	
-	Character.combination_trio(Character.button_special, Character.button_up, Character.button_light, "Sp.uL")
-	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_light, "ExSp.uL")
-	
 	Character.combination(Character.button_special, Character.button_fierce, "Sp.F")
 	Character.ex_combination(Character.button_special, Character.button_fierce, "ExSp.F")
+	
+	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
 
 
 func rebuffer_actions():
@@ -234,10 +234,23 @@ func rebuffer_actions():
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
 	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
-	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_light, "Sp.uL")
 	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
+	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
 	
-#	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
+func rebuffer_EX(): # only rebuffer EX moves on release of up/down
+	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
+	Character.ex_rebuffer(Character.button_special, Character.button_fierce, "ExSp.F")
+	Character.ex_rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
+	
+func capture_instant_actions():
+	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
+	
+func process_instant_actions():
+	Character.unique_data.groundfin_trigger = false
+	if !Character.get_node("HitStunTimer").is_running() and !Character.get_node("BlockStunTimer").is_running():
+		if "GroundFinTrigger" in Character.instant_actions:
+			Character.unique_data.groundfin_trigger = true # flag for triggering
+
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
 
@@ -364,10 +377,6 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP1", has_acted, buffered_input[1])
 				
-		"Sp.uL":
-			if !has_acted[0]:
-				keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
-				
 		"Sp.F":
 			if !has_acted[0]:
 				if !Character.grounded:
@@ -375,18 +384,16 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				else:
 					if Character.unique_data.groundfin_count == 0:
 						keep = !process_move(new_state, "SP4", has_acted, buffered_input[1])
+						
+		"Sp.uF":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
 				
 		"ExSp.L":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP1[ex]", has_acted, buffered_input[1])
 				if keep:
 					keep = !process_move(new_state, "SP1", has_acted, buffered_input[1])
-					
-		"ExSp.uL":
-			if !has_acted[0]:
-				keep = !process_move(new_state, "SP3[ex]", has_acted, buffered_input[1])
-				if keep:
-					keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
 
 		"ExSp.F":
 			if !has_acted[0]:
@@ -399,6 +406,12 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 						keep = !process_move(new_state, "SP4[ex]", has_acted, buffered_input[1])	
 						if keep:
 							keep = !process_move(new_state, "SP4", has_acted, buffered_input[1])
+							
+		"ExSp.uF":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP3[ex]", has_acted, buffered_input[1])
+				if keep:
+					keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
 						
 		# ---------------------------------------------------------------------------------
 		
@@ -429,16 +442,16 @@ func is_aerial_uptilt(attack_ref):
 func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
 	if !attack_ref in EX_MOVES: return true # not ex move
 	if !quick_cancel: # not quick cancelling, must afford it
-		if Character.current_ex_gauge >= 10000:
-			Character.change_ex_gauge(-10000)
+		if Character.current_ex_gauge >= Character.EX_MOVE_COST:
+			Character.change_ex_gauge(-Character.EX_MOVE_COST)
 			Character.play_audio("bling6", {"vol" : -9, "bus" : "HighPass"}) # EX chime
 			return true
 		else: return false
 	else:
 		if Character.get_move_name() in EX_MOVES: # can quick cancel from 1 EX move to another, no cost and no chime if so
 			return true
-		elif Character.current_ex_gauge >= 10000: # quick cancel from non-ex move to EX move, must afford the cost
-			Character.change_ex_gauge(-10000)
+		elif Character.current_ex_gauge >= Character.EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
+			Character.change_ex_gauge(-Character.EX_MOVE_COST)
 			Character.play_audio("bling6", {"vol" : -9, "bus" : "HighPass"}) # EX chime
 			return true
 		else: return false
@@ -885,14 +898,14 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP2Recovery")
 			
 		"SP3Startup":
-			if Character.button_light in Character.input_state.pressed:
+			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("SP3[h]Startup")
 			else:
 				Character.animate("SP3bStartup")
 				Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 						{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3Startup":
-			if Character.button_light in Character.input_state.pressed:
+			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("aSP3[h]Startup")
 			else:
 				Character.animate("SP3bStartup")

@@ -131,7 +131,7 @@ func check_offstage(collision_box):
 	return false
 	
 func check_blast_barriers(collision_box, compass_dir, in_velocity):
-	if call("get_damage_percent") >= 0.7: # no barrier if damage value too high
+	if call("get_damage_percent") >= 0.75: # no barrier if damage value too high
 		return null
 	match compass_dir: # return null if not touching barriers
 #		Globals.compass.W:

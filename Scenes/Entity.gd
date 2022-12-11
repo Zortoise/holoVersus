@@ -36,8 +36,10 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 	position = in_position
 	set_true_position()
 	
-	facing = get_node(master_path).facing # face in same direction as master
-	$Sprite.scale.x = facing
+	if !"facing" in aux_data:
+		face(get_node(master_path).facing) # face in same direction as master
+	else:
+		face(aux_data.facing)
 	
 	# for sprites:
 #	if "facing" in aux_data:
@@ -54,8 +56,11 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 	
 	load_entity()
 		
+	if "UNIQUE_DATA_REF" in UniqueEntity:
+		unique_data = UniqueEntity.UNIQUE_DATA_REF.duplicate(true)
+		
 	UniqueEntity.init(aux_data)
-
+	
 		
 func load_entity():
 
@@ -163,6 +168,10 @@ func stimulate2(): # only ran if not in hitstop
 	
 	ignore_list_progress_timer()
 	
+	if free:
+		$Sprite.hide()
+		return
+	
 	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
 	velocity.y = round(velocity.y)
 	
@@ -235,6 +244,10 @@ func move_true_position(in_velocity):
 	true_position.y = round(true_position.y + (in_velocity.y * Globals.FRAME * 1000))
 	
 # --------------------------------------------------------------------------------------------------
+		
+func face(in_dir):
+	facing = in_dir
+	$Sprite.scale.x = facing
 		
 func check_fallthrough(): # return true if entity falls through soft platforms
 	if UniqueEntity.has_method("check_fallthrough"): # some entities may interact with soft platforms
