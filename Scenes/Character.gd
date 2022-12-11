@@ -34,7 +34,7 @@ const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
 const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is crouching
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
-const EX_MOVE_COST = 0 # 10000
+const EX_MOVE_COST = 10000 # 10000
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13

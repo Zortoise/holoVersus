@@ -99,7 +99,7 @@ func _ready():
 	get_node(opponent + "_Stage").hide()
 	get_node(opponent + "_FullArt").hide()
 	get_node(opponent + "_Name").hide()
-	get_node(opponent + "_InputStyle").hide()
+#	get_node(opponent + "_InputStyle").hide()
 	get_node(opponent + "_Sprite").hide()
 	get_node(opponent + "_Picker").free()
 	get_node(opponent + "_StageSelect").free()
@@ -576,7 +576,7 @@ func start_battle():
 	get_node(opponent + "_Stage/AnimationPlayer").play("flash")
 	get_node(opponent + "_FullArt").show()
 	get_node(opponent + "_FullArt/AnimationPlayer").play("flash")
-	get_node(opponent + "_InputStyle").show()
+#	get_node(opponent + "_InputStyle").show()
 	get_node(opponent + "_Name").show()
 	get_node(opponent + "_Sprite").show()
 

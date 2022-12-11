@@ -79,7 +79,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 		"Turn":
 			Animator.play("Active")
-			Entity.velocity = Vector2(300, 0)
+			Entity.velocity = Vector2(250, 0)
 			Entity.velocity.x *= Entity.facing
 		"[h]Turn":
 			Animator.play("[h]Active")
@@ -89,7 +89,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
 		"Spawn":
-			Entity.velocity = Vector2(300, 0)
+			Entity.velocity = Vector2(250, 0)
 			Entity.velocity.x *= Entity.facing
 		"[h]Spawn":
 			Entity.velocity = Vector2(150, 0)

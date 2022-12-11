@@ -53,7 +53,8 @@ var record_end_time := 0 # set end of playback, when loading set true_frame_time
 
 var test_state # save state for testing
 #onready var debugger = load("res://Scenes/Debugger.gd").new() # for checking input stuff, very useful
-
+var test_saved_game_states: Dictionary
+var frame_reverse := true
 
 # GameState, these are to be saved
 var frametime := 0
@@ -195,7 +196,7 @@ func debug():
 	#			var loaded_data = ResourceLoader.load("res://Scenes/SavedData/GameState.tres")
 	#			load_state(loaded_data)
 			if test_state != null:
-				load_state(test_state)
+				load_state(test_state, false)
 				true_frametime = frametime
 				match_input_log.set_end_frametime(frametime)
 				emit_signal("loaded_state") # to tell text to show message
@@ -224,12 +225,13 @@ func debug():
 		else:
 			stimulate(false)
 			
-#	if Input.is_action_just_pressed("frame_reverse"): # reverse 1 frame by loading save state of previous frame, can do up to certain times
-#		if playback_mode == false:
-#			if frametime - 1 in $NetgameSetup.saved_game_states:
-#				load_state($NetgameSetup.saved_game_states[frametime - 1])
-#				true_frametime = frametime
-#				match_input_log.set_end_frametime(frametime)
+	if frame_reverse and Input.is_action_just_pressed("frame_reverse"): # reverse 1 frame by loading save state of previous frame, can do up to certain times
+		if playback_mode == false:
+			if Globals.Game.frametime - 2 in test_saved_game_states:
+				load_state(test_saved_game_states[frametime - 2])
+				true_frametime = frametime
+				stimulate(false)
+				match_input_log.set_end_frametime(frametime)
 			
 			
 func export_logs():
@@ -490,6 +492,8 @@ func stimulate(rendering = true):
 		$NetgameSetup.auto_savestate() # save first before processing inputs, so that when loading will start processing input on same frame
 	elif Globals.watching_replay:
 		$ReplayControl.replay_auto_savestate()
+	elif Globals.editor and frame_reverse:
+		test_auto_savestate()
 	
 	if rendering: # not loading inputs for log, capture new ones
 		if !Globals.Game.input_lock: # no inputs when input lock is on
@@ -595,6 +599,13 @@ func stimulate(rendering = true):
 	
 # SAVING/LOADING GAME STATE --------------------------------------------------------------------------------------------------
 	
+func test_auto_savestate(): # make a savestate every frame of the past 60 frames for testing
+	save_state(frametime)
+	if test_saved_game_states.size() > 61: # erase savestates if too many
+		var oldest_key = test_saved_game_states.keys().min()
+# warning-ignore:return_value_discarded
+		test_saved_game_states.erase(oldest_key) # erase oldest savestate
+	
 func save_state(timestamp):
 
 	var game_state = {
@@ -655,6 +666,8 @@ func save_state(timestamp):
 			$NetgameSetup.saved_game_states[timestamp] = game_state.duplicate(true)
 		elif Globals.watching_replay:
 			$ReplayControl.replay_saved_game_states[timestamp] = game_state.duplicate(true)
+		elif frame_reverse and Globals.editor:
+			test_saved_game_states[timestamp] = game_state.duplicate(true)
 	else:
 		if !Globals.watching_replay:
 			test_state = game_state.duplicate(true)
@@ -662,7 +675,7 @@ func save_state(timestamp):
 			$ReplayControl.test_state = game_state.duplicate(true)
 
 
-func load_state(game_state):
+func load_state(game_state, loading_autosave = true):
 	
 	var loaded_game_state = game_state.duplicate(true)
 
@@ -724,6 +737,9 @@ func load_state(game_state):
 		
 	if Globals.static_stage == 0:
 		stage.load_state(loaded_game_state.stage_data)
+		
+	if frame_reverse and !loading_autosave: # when loading manual save, erase autoload states
+		test_saved_game_states = {}
 	
 	
 # DETECT RINGOUT --------------------------------------------------------------------------------------------------	
