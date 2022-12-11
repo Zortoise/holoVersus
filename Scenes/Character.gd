@@ -144,6 +144,8 @@ var sfx_data = { # filled up at initialization
 #	},
 }
 var floor_level
+var left_ledge
+var right_ledge
 var input_state = {
 	"pressed" : [],
 	"just_pressed" : [],
@@ -296,6 +298,8 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	position = start_position
 	set_true_position()
 	floor_level = Globals.Game.middle_point.y # get floor level of stage
+	left_ledge = Globals.Game.left_ledge_point.x
+	right_ledge = Globals.Game.right_ledge_point.x
 	
 	if facing != start_facing:
 		face(start_facing)
@@ -317,6 +321,8 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.stock_points_update(self)
 	Globals.Game.burst_update(self)
+	
+	unique_data = UniqueCharacter.UNIQUE_DATA_REF.duplicate(true)
 	
 	# target a random opponent
 	var players = []
@@ -1172,15 +1178,19 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running():
 					$HitStunGraceTimer.stimulate()
 				
-				# spike protection before 70% damage
-				if get_damage_percent() < 0.7 and position.y > floor_level:
-					$HitStunTimer.stimulate() # hitstun decay twice as fast if below floor level
-					if velocity.y >= HITSTUN_FALL_THRESHOLD: # if falling too fast...
-						match state:
-							Globals.char_state.AIR_FLINCH_HITSTUN: # hitstun decay instantly
-								$HitStunTimer.stop()
-							Globals.char_state.LAUNCHED_HITSTUN:
-								$HitStunTimer.stimulate() # hitstun decay thrice as fast
+				# offstage protection before 70% damage
+				if get_damage_percent() < 0.7:
+					var left_boundary = lerp(left_ledge, Globals.Game.stage_box.rect_position.x, 1.0/3.0)
+					var right_boundary = lerp(right_ledge, Globals.Game.stage_box.rect_position.x + \
+							Globals.Game.stage_box.rect_size.x, 1.0/3.0)
+					if position.x < left_boundary or position.x > right_boundary or position.y > floor_level:
+						$HitStunTimer.stimulate() # hitstun decay twice as fast
+						if position.y > floor_level and velocity.y >= HITSTUN_FALL_THRESHOLD: # if falling too fast...
+							match state:
+								Globals.char_state.AIR_FLINCH_HITSTUN: # hitstun decay instantly
+									$HitStunTimer.stop()
+								Globals.char_state.LAUNCHED_HITSTUN:
+									$HitStunTimer.stimulate() # hitstun decay thrice as fast
 					
 			
 			ex_flash()
@@ -2164,7 +2174,9 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 				return true # EX and Supers have a wider window to quick cancel into
 	else: # cancelling from a normal move
 		if attack_ref in UniqueCharacter.EX_MOVES: # cancelling into an ex move from normal move has wider window
-			if Animator.time <= QUICK_CANCEL_TIME + 2 and Animator.time != 0:
+			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
+			if (button_light in input_state.pressed or button_fierce in input_state.pressed) and \
+					Animator.time <= QUICK_CANCEL_TIME + 2 and Animator.time != 0:
 				return true
 		else:
 			if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
@@ -2302,7 +2314,7 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 	return true
 	
 func burst_extend_check(): # check if have resources to do it, then take away those resources and return a bool
-	if !has_burst or !chain_combo in [1, 3]:
+	if !has_burst or !chain_combo in [1, 3] or get_move_name() in UniqueCharacter.SUPERS:
 		return false
 	change_burst_token(false)
 	return true

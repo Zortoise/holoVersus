@@ -237,11 +237,12 @@ func kill(sound = true):
 	match Animator.current_animation:
 		"[c1]Spawn", "[c2]Spawn", "[c3]Spawn", "[ex]Spawn", "[c1]Active", "[c2]Active", "[c3]Active", "[ex]Active":
 			Animator.play("Kill")
+			if sound:
+				Entity.play_audio("break2", {"vol" : -15})
 		"a[c1]Spawn", "a[c2]Spawn", "a[c3]Spawn", "a[ex]Spawn", "a[c1]Active", "a[c2]Active", "a[c3]Active", "a[ex]Active":
 			Animator.play("aKill")
-	
-	if sound:
-		Entity.play_audio("break2", {"vol" : -15})
+			if sound:
+				Entity.play_audio("break2", {"vol" : -15})
 	
 	
 func collision(): # collided with a platform

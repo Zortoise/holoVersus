@@ -7,6 +7,8 @@ func init(): # called by unique stage code when init() is called
 #	Globals.Game.blastbarrierR = $StageBox/BlastBarrierR
 	Globals.Game.blastbarrierU = $StageBox/BlastBarrierU
 	Globals.Game.middle_point = $MiddlePosition.position
+	Globals.Game.left_ledge_point = $LeftLedgePosition.position
+	Globals.Game.right_ledge_point = $RightLedgePosition.position
 	for respawn_point in $RespawnPoints.get_children():
 		Globals.Game.respawn_points.append(respawn_point.position)
 	

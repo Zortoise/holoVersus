@@ -81,7 +81,7 @@ texture = ExtResource( 5 )
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 6
+frame = 8
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]
@@ -224,6 +224,12 @@ position = Vector2( -128, 128 )
 
 [node name="P2_Position" type="Position2D" parent="."]
 position = Vector2( 128, 128 )
+
+[node name="LeftLedgePosition" type="Position2D" parent="."]
+position = Vector2( -256, 128 )
+
+[node name="RightLedgePosition" type="Position2D" parent="."]
+position = Vector2( 256, 128 )
 
 [node name="MiddlePosition" type="Position2D" parent="."]
 position = Vector2( 0, 128 )

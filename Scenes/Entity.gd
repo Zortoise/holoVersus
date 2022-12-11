@@ -177,16 +177,22 @@ func stimulate2(): # only ran if not in hitstop
 	
 		var results # [in_velocity, landing_check, collision_check, ledgedrop_check]
 		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS:
-			results = move($EntityCollisionBox, $SoftPlatformDBox, velocity, Globals.entity_trait.LEDGE_DROP in UniqueEntity.TRAITS)
+			results = move($EntityCollisionBox, $SoftPlatformDBox, velocity, Globals.entity_trait.LEDGE_STOP in UniqueEntity.TRAITS)
 		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
 			results = move($EntityCollisionBox, $EntityCollisionBox, velocity)
 			
 		velocity = results[0]
 		
-		if results[2] == true and UniqueEntity.has_method("collision"):
-			UniqueEntity.collision()
-		if results[3] == true and UniqueEntity.has_method("ledge_drop"):
-			UniqueEntity.ledge_drop()
+		if UniqueEntity.has_method("collision"): # entity can collide with solid platforms
+			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
+				UniqueEntity.kill()
+			elif results[2] == true: # if colliding with a solid platform, runs collision() which can kill it or bounce it
+				UniqueEntity.collision()
+		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS and UniqueEntity.has_method("ledge_stop"):
+			if !is_on_ground($SoftPlatformDBox, velocity): # spawned in the air, kill it
+				UniqueEntity.kill()
+			elif (results[3] == true): # reached a ledge
+				UniqueEntity.ledge_stop()
 		
 	else: # no collision with platforms
 		position += velocity
@@ -199,7 +205,7 @@ func stimulate_after(): # do this after hit detection
 		
 		lifetime += 1
 		if lifespan != null and lifetime >= lifespan:
-			free = true
+			UniqueEntity.kill()
 				
 	# start hitstop timer at end of frame after SpritePlayer.stimulate() by setting hitstop to a number other than null for the frame
 	# new hitstops override old ones

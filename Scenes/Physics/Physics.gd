@@ -188,6 +188,12 @@ func is_against_wall(collision_box, soft_platform_dbox, direction):
 	else:
 		return false
 		
+func is_in_wall(soft_platform_dbox):
+	if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+		return true
+	else:
+		return false
+		
 func is_against_ledge(soft_platform_dbox, direction):
 	if !Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms", "SoftPlatforms"], Vector2(direction, 1)):
 		return true

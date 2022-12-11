@@ -46,6 +46,11 @@ const PALETTE_TO_PORTRAIT = {
 	2: Color(1.20, 0.70, 0.70),
 }
 
+const UNIQUE_DATA_REF = {
+	"groundfin_count" : 0,
+	"instinct_gauge" : 0
+}
+
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
 		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]"]
 const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]"]
@@ -322,7 +327,7 @@ const MOVE_DATABASE = {
 		"damage" : 100,
 		"knockback" : 475,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 6,
+		"attack_level" : 4,
 		"priority": 5,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
@@ -385,10 +390,10 @@ const MOVE_DATABASE = {
 	"aSP2" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 3,
-		"ignore_time" : 8,
+		"ignore_time" : 6,
 		"damage" : 40,
 		"knockback" : 500,
-		"fixed_knockback_multi" : 200,
+		"fixed_knockback_multi" : 300,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 4,
 		"fixed_blockstun" : 5,
@@ -425,10 +430,10 @@ const MOVE_DATABASE = {
 	"aSP2[ex]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 5,
-		"ignore_time" : 6,
+		"ignore_time" : 5,
 		"damage" : 40,
 		"knockback" : 600,
-		"fixed_knockback_multi" : 200,
+		"fixed_knockback_multi" : 300,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"attack_level" : 5,
 		"fixed_blockstun" : 5,

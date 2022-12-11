@@ -35,6 +35,8 @@ var stage_box
 var blastbarrierU
 var respawn_points = []
 var middle_point
+var left_ledge_point
+var right_ledge_point
 var P1_position: Vector2
 var P1_facing: int
 var P2_position: Vector2

@@ -119,6 +119,42 @@ frame_data = {
 },
 "vframes": 2
 },
+"SP4[ex]Recovery": {
+"SfxUnder_hframes": 6,
+"SfxUnder_spritesheet": "SP4SfxUnder",
+"SfxUnder_vframes": 2,
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP4Sprite",
+"timestamps": {
+0: {
+"SfxUnder_frame": 6,
+"entityspawn": null,
+"frame": 4,
+"hurtbox": [ Vector2( -9, 22 ), Vector2( 13, 22 ), Vector2( 13, -20 ), Vector2( -9, -20 ) ]
+},
+2: {
+"SfxUnder_frame": 7,
+"entityspawn": null,
+"frame": 5,
+"hurtbox": [ Vector2( -14, 22 ), Vector2( 6, 22 ), Vector2( 6, -19 ), Vector2( -14, -19 ) ]
+},
+6: {
+"SfxUnder_frame": 8,
+"entityspawn": null,
+"frame": 6,
+"hurtbox": [ Vector2( -15, 22 ), Vector2( 7, 22 ), Vector2( 7, -18 ), Vector2( -15, -18 ) ]
+},
+11: {
+"SfxUnder_frame": 9,
+"entityspawn": null,
+"frame": 7,
+"hurtbox": [ Vector2( -19, 22 ), Vector2( 10, 22 ), Vector2( 10, -2 ), Vector2( 3, -2 ), Vector2( 3, -20 ), Vector2( -19, -20 ) ]
+}
+},
+"vframes": 2
+},
 "SP4[ex]Startup": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP4SfxUnder",

@@ -6,19 +6,13 @@
 script = ExtResource( 1 )
 frame_data = {
 "Active": {
-"duration": 21,
+"duration": 7,
 "hframes": 6,
-"loop": true,
+"loop": false,
 "spritesheet": "GroundFinSprite",
 "timestamps": {
 0: {
 "frame": 3
-},
-7: {
-"frame": 4
-},
-14: {
-"frame": 5
 }
 },
 "vframes": 3
@@ -76,6 +70,93 @@ frame_data = {
 },
 6: {
 "frame": 12
+}
+},
+"vframes": 3
+},
+"[h]Active": {
+"duration": 7,
+"hframes": 6,
+"loop": false,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 3
+}
+},
+"vframes": 3
+},
+"[h]Spawn": {
+"duration": 10,
+"hframes": 6,
+"loop": false,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+2: {
+"frame": 1
+},
+5: {
+"frame": 2
+}
+},
+"vframes": 3
+},
+"[h]Turn": {
+"duration": 8,
+"hframes": 6,
+"loop": false,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 9
+},
+2: {
+"frame": 10
+},
+4: {
+"frame": 11
+},
+6: {
+"frame": 12
+}
+},
+"vframes": 3
+},
+"bActive": {
+"duration": 21,
+"hframes": 6,
+"loop": true,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 4
+},
+7: {
+"frame": 5
+},
+14: {
+"frame": 3
+}
+},
+"vframes": 3
+},
+"b[h]Active": {
+"duration": 21,
+"hframes": 6,
+"loop": true,
+"spritesheet": "GroundFinSprite",
+"timestamps": {
+0: {
+"frame": 4
+},
+7: {
+"frame": 5
+},
+14: {
+"frame": 3
 }
 },
 "vframes": 3

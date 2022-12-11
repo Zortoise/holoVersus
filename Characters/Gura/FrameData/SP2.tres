@@ -20,7 +20,7 @@ frame_data = {
 "hitbox": [ Vector2( -10, 29 ), Vector2( 20, 29 ), Vector2( 20, 21 ), Vector2( 35, 21 ), Vector2( 35, -9 ), Vector2( 20, -9 ), Vector2( 20, -25 ), Vector2( -10, -25 ) ],
 "hurtbox": [ Vector2( -2, -2 ), Vector2( -10, -2 ), Vector2( -10, 13 ), Vector2( 9, 13 ), Vector2( 9, 5 ), Vector2( 16, 5 ), Vector2( 16, -22 ), Vector2( -2, -22 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 6: {
 "SfxUnder_frame": 3,
@@ -28,7 +28,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 24 ), Vector2( 22, 24 ), Vector2( 22, 16 ), Vector2( 31, 16 ), Vector2( 31, -6 ), Vector2( 21, -6 ), Vector2( 21, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -3, -3 ), Vector2( -10, -3 ), Vector2( -10, 10 ), Vector2( 2, 10 ), Vector2( 2, 7 ), Vector2( 15, 7 ), Vector2( 15, -18 ), Vector2( -3, -18 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 11: {
 "SfxUnder_frame": 4,
@@ -36,7 +36,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 22 ), Vector2( 22, 22 ), Vector2( 22, 11 ), Vector2( 31, 11 ), Vector2( 31, -9 ), Vector2( 22, -9 ), Vector2( 22, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -13, 12 ), Vector2( 16, 12 ), Vector2( 16, -11 ), Vector2( -13, -11 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 16: {
 "SfxUnder_frame": 5,
@@ -44,7 +44,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 10 ), Vector2( -11, 10 ), Vector2( -11, 17 ), Vector2( 22, 17 ), Vector2( 22, 10 ), Vector2( 31, 10 ), Vector2( 31, -13 ), Vector2( 21, -13 ), Vector2( 21, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -14, 2 ), Vector2( -5, 2 ), Vector2( -5, 16 ), Vector2( 18, 16 ), Vector2( 18, -11 ), Vector2( -14, -11 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 21: {
 "SfxUnder_frame": 6,
@@ -52,7 +52,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 19 ), Vector2( 24, 19 ), Vector2( 24, -13 ), Vector2( 15, -13 ), Vector2( 15, -21 ), Vector2( -12, -21 ) ],
 "hurtbox": [ Vector2( -18, 9 ), Vector2( -8, 9 ), Vector2( -8, 18 ), Vector2( 12, 18 ), Vector2( 12, -10 ), Vector2( -18, -10 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 25: {
 "SfxUnder_frame": 7,
@@ -60,7 +60,7 @@ frame_data = {
 "hitbox": [ Vector2( -16, 19 ), Vector2( 18, 19 ), Vector2( 18, -17 ), Vector2( 3, -17 ), Vector2( 3, -27 ), Vector2( -16, -27 ) ],
 "hurtbox": [ Vector2( -12, -6 ), Vector2( -18, -6 ), Vector2( -18, 14 ), Vector2( 11, 14 ), Vector2( 11, -6 ), Vector2( -4, -6 ), Vector2( -4, -14 ), Vector2( -12, -14 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 29: {
 "SfxUnder_frame": 8,
@@ -68,7 +68,35 @@ frame_data = {
 "hitbox": [ Vector2( 2, -19 ), Vector2( -17, -19 ), Vector2( -17, 17 ), Vector2( -4, 17 ), Vector2( -4, 28 ), Vector2( 12, 28 ), Vector2( 12, 17 ), Vector2( 17, 17 ), Vector2( 17, -27 ), Vector2( 2, -27 ) ],
 "hurtbox": [ Vector2( -17, 11 ), Vector2( 11, 11 ), Vector2( 11, -16 ), Vector2( -17, -16 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
+}
+},
+"vframes": 3
+},
+"aSP2CRecovery": {
+"SfxUnder_hframes": 6,
+"SfxUnder_spritesheet": "SP2SfxUnder",
+"SfxUnder_vframes": 3,
+"duration": 14,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP2Sprite",
+"timestamps": {
+0: {
+"SfxUnder_frame": 15,
+"frame": 11,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 19 ), Vector2( 12, 19 ), Vector2( 12, -22 ), Vector2( -10, -22 ) ],
+"sweetbox": [  ],
+"vacpoint": null
+},
+6: {
+"SfxUnder_frame": 16,
+"frame": 12,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 12 ), Vector2( 13, 12 ), Vector2( 13, -21 ), Vector2( -10, -21 ) ],
+"sweetbox": [  ],
+"vacpoint": null
 }
 },
 "vframes": 3
@@ -77,7 +105,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP2SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 25,
+"duration": 11,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP2Sprite",
@@ -95,22 +123,6 @@ frame_data = {
 "frame": 10,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, -5 ), Vector2( -19, -5 ), Vector2( -19, 11 ), Vector2( -4, 11 ), Vector2( -4, 3 ), Vector2( 10, 3 ), Vector2( 10, -21 ), Vector2( -11, -21 ) ],
-"sweetbox": [  ],
-"vacpoint": null
-},
-11: {
-"SfxUnder_frame": 15,
-"frame": 11,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -10, 19 ), Vector2( 12, 19 ), Vector2( 12, -22 ), Vector2( -10, -22 ) ],
-"sweetbox": [  ],
-"vacpoint": null
-},
-17: {
-"SfxUnder_frame": 16,
-"frame": 12,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -10, 12 ), Vector2( 13, 12 ), Vector2( 13, -21 ), Vector2( -10, -21 ) ],
 "sweetbox": [  ],
 "vacpoint": null
 }
@@ -160,7 +172,7 @@ frame_data = {
 "hitbox": [ Vector2( -10, 29 ), Vector2( 20, 29 ), Vector2( 20, 21 ), Vector2( 35, 21 ), Vector2( 35, -9 ), Vector2( 20, -9 ), Vector2( 20, -25 ), Vector2( -10, -25 ) ],
 "hurtbox": [ Vector2( -2, -2 ), Vector2( -10, -2 ), Vector2( -10, 13 ), Vector2( 9, 13 ), Vector2( 9, 5 ), Vector2( 16, 5 ), Vector2( 16, -22 ), Vector2( -2, -22 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 6: {
 "SfxUnder_frame": 3,
@@ -168,7 +180,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 24 ), Vector2( 22, 24 ), Vector2( 22, 16 ), Vector2( 31, 16 ), Vector2( 31, -6 ), Vector2( 21, -6 ), Vector2( 21, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -3, -3 ), Vector2( -10, -3 ), Vector2( -10, 10 ), Vector2( 2, 10 ), Vector2( 2, 7 ), Vector2( 15, 7 ), Vector2( 15, -18 ), Vector2( -3, -18 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 11: {
 "SfxUnder_frame": 4,
@@ -176,7 +188,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 22 ), Vector2( 22, 22 ), Vector2( 22, 11 ), Vector2( 31, 11 ), Vector2( 31, -9 ), Vector2( 22, -9 ), Vector2( 22, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -13, 12 ), Vector2( 16, 12 ), Vector2( 16, -11 ), Vector2( -13, -11 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 16: {
 "SfxUnder_frame": 5,
@@ -184,7 +196,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 10 ), Vector2( -11, 10 ), Vector2( -11, 17 ), Vector2( 22, 17 ), Vector2( 22, 10 ), Vector2( 31, 10 ), Vector2( 31, -13 ), Vector2( 21, -13 ), Vector2( 21, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -14, 2 ), Vector2( -5, 2 ), Vector2( -5, 16 ), Vector2( 18, 16 ), Vector2( 18, -11 ), Vector2( -14, -11 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 21: {
 "SfxUnder_frame": 6,
@@ -192,7 +204,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 19 ), Vector2( 24, 19 ), Vector2( 24, -13 ), Vector2( 15, -13 ), Vector2( 15, -21 ), Vector2( -12, -21 ) ],
 "hurtbox": [ Vector2( -18, 9 ), Vector2( -8, 9 ), Vector2( -8, 18 ), Vector2( 12, 18 ), Vector2( 12, -10 ), Vector2( -18, -10 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 25: {
 "SfxUnder_frame": 7,
@@ -200,7 +212,7 @@ frame_data = {
 "hitbox": [ Vector2( -16, 19 ), Vector2( 18, 19 ), Vector2( 18, -17 ), Vector2( 3, -17 ), Vector2( 3, -27 ), Vector2( -16, -27 ) ],
 "hurtbox": [ Vector2( -12, -6 ), Vector2( -18, -6 ), Vector2( -18, 14 ), Vector2( 11, 14 ), Vector2( 11, -6 ), Vector2( -4, -6 ), Vector2( -4, -14 ), Vector2( -12, -14 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 29: {
 "SfxUnder_frame": 8,
@@ -208,7 +220,7 @@ frame_data = {
 "hitbox": [ Vector2( 2, -19 ), Vector2( -17, -19 ), Vector2( -17, 17 ), Vector2( -4, 17 ), Vector2( -4, 28 ), Vector2( 12, 28 ), Vector2( 12, 17 ), Vector2( 17, 17 ), Vector2( 17, -27 ), Vector2( 2, -27 ) ],
 "hurtbox": [ Vector2( -17, 11 ), Vector2( 11, 11 ), Vector2( 11, -16 ), Vector2( -17, -16 ) ],
 "sweetbox": [  ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 }
 },
 "vframes": 3
@@ -256,7 +268,7 @@ frame_data = {
 "hitbox": [ Vector2( -10, 29 ), Vector2( 20, 29 ), Vector2( 20, 21 ), Vector2( 35, 21 ), Vector2( 35, -9 ), Vector2( 20, -9 ), Vector2( 20, -25 ), Vector2( -10, -25 ) ],
 "hurtbox": [ Vector2( -2, -2 ), Vector2( -10, -2 ), Vector2( -10, 13 ), Vector2( 9, 13 ), Vector2( 9, 5 ), Vector2( 16, 5 ), Vector2( 16, -22 ), Vector2( -2, -22 ) ],
 "sweetbox": [ Vector2( 23, 13 ), Vector2( 35, 13 ), Vector2( 35, -1 ), Vector2( 23, -1 ) ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 6: {
 "SfxUnder_frame": 3,
@@ -264,7 +276,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 24 ), Vector2( 22, 24 ), Vector2( 22, 16 ), Vector2( 31, 16 ), Vector2( 31, -6 ), Vector2( 21, -6 ), Vector2( 21, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -3, -3 ), Vector2( -10, -3 ), Vector2( -10, 10 ), Vector2( 2, 10 ), Vector2( 2, 7 ), Vector2( 15, 7 ), Vector2( 15, -18 ), Vector2( -3, -18 ) ],
 "sweetbox": [ Vector2( 21, 12 ), Vector2( 31, 12 ), Vector2( 31, 1 ), Vector2( 21, 1 ) ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 11: {
 "SfxUnder_frame": 4,
@@ -272,7 +284,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 22 ), Vector2( 22, 22 ), Vector2( 22, 11 ), Vector2( 31, 11 ), Vector2( 31, -9 ), Vector2( 22, -9 ), Vector2( 22, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -13, 12 ), Vector2( 16, 12 ), Vector2( 16, -11 ), Vector2( -13, -11 ) ],
 "sweetbox": [ Vector2( 22, 5 ), Vector2( 31, 5 ), Vector2( 31, -4 ), Vector2( 22, -4 ) ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 },
 16: {
 "SfxUnder_frame": 5,
@@ -280,7 +292,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 10 ), Vector2( -11, 10 ), Vector2( -11, 17 ), Vector2( 22, 17 ), Vector2( 22, 10 ), Vector2( 31, 10 ), Vector2( 31, -13 ), Vector2( 21, -13 ), Vector2( 21, -19 ), Vector2( -12, -19 ) ],
 "hurtbox": [ Vector2( -14, 2 ), Vector2( -5, 2 ), Vector2( -5, 16 ), Vector2( 18, 16 ), Vector2( 18, -11 ), Vector2( -14, -11 ) ],
 "sweetbox": [ Vector2( 22, 1 ), Vector2( 31, 1 ), Vector2( 31, -9 ), Vector2( 22, -9 ) ],
-"vacpoint": Vector2( 74, -4 )
+"vacpoint": Vector2( 74, -20 )
 }
 },
 "vframes": 3

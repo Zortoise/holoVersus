@@ -123,11 +123,16 @@ position = Vector2( -128, 128 )
 [node name="P2_Position" type="Position2D" parent="."]
 position = Vector2( 128, 128 )
 
+[node name="LeftLedgePosition" type="Position2D" parent="."]
+position = Vector2( -256, 128 )
+
+[node name="RightLedgePosition" type="Position2D" parent="."]
+position = Vector2( 256, 128 )
+
 [node name="MiddlePosition" type="Position2D" parent="."]
 position = Vector2( 0, 128 )
 
 [node name="StageBox" type="ReferenceRect" parent="."]
-visible = false
 margin_left = -704.0
 margin_top = -448.0
 margin_right = 704.0

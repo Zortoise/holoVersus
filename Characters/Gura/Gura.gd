@@ -19,7 +19,7 @@ var Animator
 var sprite
 
 func _ready():
-	get_node("TestSprite").hide() # test sprite is for sizing collision box
+	get_node("TestSprite").free() # test sprite is for sizing collision box
 	
 # STATE_DETECT --------------------------------------------------------------------------------------------------
 
@@ -67,6 +67,8 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_ACTIVE
 		"aSP2Recovery", "aSP2[h]Recovery":
 			return Globals.char_state.AIR_ATK_RECOVERY
+		"aSP2CRecovery":
+			return Globals.char_state.AIR_C_RECOVERY
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
@@ -81,7 +83,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"SP4Active", "SP4[h]Active", "SP4[ex]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"SP4Recovery":
+		"SP4Recovery", "SP4[ex]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		
 	print("Error: " + anim + " not found.")
@@ -370,6 +372,9 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				if !Character.grounded:
 					keep = !process_move(new_state, "SP2", has_acted, buffered_input[1])
+				else:
+					if Character.unique_data.groundfin_count == 0:
+						keep = !process_move(new_state, "SP4", has_acted, buffered_input[1])
 				
 		"ExSp.L":
 			if !has_acted[0]:
@@ -388,7 +393,12 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				if !Character.grounded:
 					keep = !process_move(new_state, "SP2[ex]", has_acted, buffered_input[1])
 					if keep:
-						keep = !process_move(new_state, "SP2", has_acted, buffered_input[1])	
+						keep = !process_move(new_state, "SP2", has_acted, buffered_input[1])
+				else:
+					if Character.unique_data.groundfin_count <= 1:
+						keep = !process_move(new_state, "SP4[ex]", has_acted, buffered_input[1])	
+						if keep:
+							keep = !process_move(new_state, "SP4", has_acted, buffered_input[1])
 						
 		# ---------------------------------------------------------------------------------
 		
@@ -865,6 +875,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP2[h]Recovery":
 			Character.animate("aSP2Recovery")
 		"aSP2Recovery":
+			Character.animate("aSP2CRecovery")
+		"aSP2CRecovery":
 			Character.animate("FallTransit")
 				
 		"aSP2[ex]Startup":
@@ -933,8 +945,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.animate("SP4Active")
 		"SP4[ex]Startup":
 			Character.animate("SP4[ex]Active")
-		"SP4Active", "SP4[h]Active", "SP4[ex]Active":
+		"SP4Active", "SP4[h]Active":
 			Character.animate("SP4Recovery")
+		"SP4[ex]Active":
+			Character.animate("SP4[ex]Recovery")
+		"SP4Recovery", "SP4[ex]Recovery":
+			Character.animate("Idle")
 			
 
 func _on_SpritePlayer_anim_started(anim_name):
@@ -1149,7 +1165,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x *= 0.5
 			Character.null_friction = true
 			Character.sfx_under.show()
-		"aSP2Recovery":
+		"aSP2Recovery", "aSP2CRecovery":
 			Character.velocity_limiter.down = 0.7
 			Character.velocity.x *= 0.5
 			Character.sfx_under.show()
@@ -1186,10 +1202,26 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"SP4Startup", "SP4[ex]Startup":
 			Character.sfx_under.show()
-		"SP4Active", "SP4[h]Active", "SP4[exActive":
+		"SP4Active":
 			Character.velocity.x += Character.facing * SPEED * 0.25
 			Character.sfx_under.show()
-		"SP4Recovery":
+			var spawn_point = Character.position + Animator.query_point("entityspawn")
+			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {})
+			Character.unique_data.groundfin_count += 1
+		"SP4[h]Active":
+			Character.velocity.x += Character.facing * SPEED * 0.25
+			Character.sfx_under.show()
+			var spawn_point = Character.position + Animator.query_point("entityspawn")
+			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true})
+			Character.unique_data.groundfin_count += 1
+		"SP4[ex]Active":
+			Character.velocity.x += Character.facing * SPEED * 0.25
+			Character.sfx_under.show()
+			var spawn_point = Character.position + Animator.query_point("entityspawn")
+			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"ex" : true})
+			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true, "ex" : true})
+			Character.unique_data.groundfin_count += 2
+		"SP4Recovery", "SP4[ex]Recovery":
 			Character.sfx_under.show()
 			
 	start_audio(anim_name)
