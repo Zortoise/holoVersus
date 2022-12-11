@@ -3133,20 +3133,20 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		"root" in attacker.UniqueCharacter.MOVE_DATABASE[hit_data.move_name]:
 		root_move_name = attacker.UniqueCharacter.MOVE_DATABASE[hit_data.move_name].root # for move variations
 	
-	for array in move_memory:
-		if array[0] == attacker.player_ID and array[1] == root_move_name:
-			if !hit_data.repeat:
-				hit_data.repeat = true # found a repeat
-				if !hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE]:
-					double_repeat = true # if attack is not light/fierce, can only repeat once
-					hit_data["double_repeat"] = true
+	if !Globals.atk_attr.REPEATABLE in attacker_or_entity.query_atk_attr(hit_data.move_name):
+		for array in move_memory:
+			if array[0] == attacker.player_ID and array[1] == root_move_name:
+				if !hit_data.repeat:
+					hit_data.repeat = true # found a repeat
+					if !hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE]:
+						double_repeat = true # if attack is not light/fierce, can only repeat once
+						hit_data["double_repeat"] = true
+						break
+				elif !double_repeat:
+					double_repeat = true
+					hit_data["double_repeat"] = true # found multiple repeats
 					break
-			elif !double_repeat:
-				double_repeat = true
-				hit_data["double_repeat"] = true # found multiple repeats
-				break
-	# append repeated move to move_memory later after guard gauge change calculation
-	# for entities, use the entity's master's player ID
+		# append repeated move to move_memory later after guard gauge change calculation
 	
 	var weak_hit
 	if hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \

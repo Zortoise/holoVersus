@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "Active": {
-"duration": 21,
+"duration": 15,
 "hframes": 6,
 "loop": true,
 "spritesheet": "GroundFinSprite",
@@ -14,10 +14,10 @@ frame_data = {
 0: {
 "frame": 3
 },
-7: {
+5: {
 "frame": 4
 },
-14: {
+10: {
 "frame": 5
 }
 },
@@ -81,7 +81,7 @@ frame_data = {
 "vframes": 3
 },
 "[h]Active": {
-"duration": 21,
+"duration": 15,
 "hframes": 6,
 "loop": true,
 "spritesheet": "GroundFinSprite",
@@ -89,10 +89,10 @@ frame_data = {
 0: {
 "frame": 3
 },
-7: {
+5: {
 "frame": 4
 },
-14: {
+10: {
 "frame": 5
 }
 },

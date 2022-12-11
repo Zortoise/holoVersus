@@ -574,19 +574,19 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
 		"atk_attr" : [],
-		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[h]": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
 		"atk_attr" : [],
-		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[ex]": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
 		"atk_attr" : [],
-		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
+		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 }
 
