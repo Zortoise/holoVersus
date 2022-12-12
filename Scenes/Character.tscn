@@ -102,6 +102,8 @@ margin_bottom = 22.0
 
 [node name="BurstLockTimer" parent="." instance=ExtResource( 4 )]
 
+[node name="PosFlowSealTimer" parent="." instance=ExtResource( 4 )]
+
 [node name="TestNode2D" type="Node2D" parent="."]
 visible = false
 position = Vector2( 0, 24 )

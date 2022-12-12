@@ -36,6 +36,7 @@ const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is c
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
 const EX_MOVE_COST = 10000 # 10000
+const PosFlowSealTimer_TIME = 60 # number of frames you cannot use gain Positive Flow after certain actions that spends it
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -1188,6 +1189,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 				$PBlockTimer.stimulate()
 				$PBlockCDTimer.stimulate()
 				$BurstLockTimer.stimulate()
+				$PosFlowSealTimer.stimulate()
 				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running():
 					$HitStunGraceTimer.stimulate()
 				
@@ -2411,6 +2413,7 @@ func burst_revoke_check(move_name):
 		return false
 	change_guard_gauge_percent(-BURSTREVOKE_GG_COST)
 	remove_status_effect(Globals.status_effect.POS_FLOW)
+	$PosFlowSealTimer.time = PosFlowSealTimer_TIME
 	return true
 	
 func test_jump_cancel():
@@ -2990,7 +2993,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
 	match hit_data.block_state: # gain Positive Flow if unblocked/wrongblocked, GG is under 100%, atk_level > 1
 		Globals.block_state.UNBLOCKED, Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-			if current_guard_gauge < 0 and hit_data.adjusted_atk_level > 1:
+			if !$PosFlowSealTimer.is_running() and current_guard_gauge < 0 and hit_data.adjusted_atk_level > 1:
 				add_status_effect(Globals.status_effect.POS_FLOW, null)
 	
 	# EX GAIN ----------------------------------------------------------------------------------------------
@@ -4404,6 +4407,7 @@ func save_state():
 		"RespawnTimer_time" : $RespawnTimer.time,
 		"HitStunGraceTimer_time" : $HitStunGraceTimer.time,
 		"BurstLockTimer_time" : $BurstLockTimer.time,
+		"PosFlowSealTimer_time" : $PosFlowSealTimer.time,
 	}
 
 	return state_data
@@ -4483,6 +4487,7 @@ func load_state(state_data):
 	$RespawnTimer.time = state_data.RespawnTimer_time
 	$HitStunGraceTimer.time = state_data.HitStunGraceTimer_time
 	$BurstLockTimer.time = state_data.BurstLockTimer_time
+	$PosFlowSealTimer.time = state_data.PosFlowSealTimer_time
 
 
 	
