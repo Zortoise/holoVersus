@@ -36,7 +36,7 @@ const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is c
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
 const EX_MOVE_COST = 10000 # 10000
-const PosFlowSealTimer_TIME = 60 # number of frames you cannot use gain Positive Flow after certain actions that spends it
+const PosFlowSealTimer_TIME = 60 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -81,7 +81,7 @@ const BREAK_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Break
 const BASE_BLOCK_PUSHBACK_MOD = 0.7 # % of base knockback of attack
 const BASE_BLOCK_ATKER_PUSHBACK = 300 # how much the attacker is pushed away, fixed
 const DOWNWARD_KB_REDUCTION_ON_BLOCK = 0.25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
-const MAX_BASE_BLOCKSTUN = 8
+const MIN_BASE_BLOCKSTUN = 8
 
 const WRONGBLOCK_CHIP_DMG_MOD = 2.0 # increased chip damage for wrongblocking
 const WRONGBLOCK_GUARD_DRAIN_MOD = 2.5 # increased guard drain for wrongblocking
@@ -226,6 +226,7 @@ var impulse_used := false
 var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout the duration of BurstLockTimer
 var instant_actions := [] # when an instant action is inputed it is stored here for 1 frame, only process next frame
 						 # this allows for quick cancels and triggering entities
+var pos_flow_seal := false # some moves (BurstRevoke) will prevent you from gaining Positive Flow till targeted opponent's HitStunGraceTimer is over
 
 
 # controls
@@ -655,6 +656,10 @@ func stimulate2(): # only ran if not in hitstop
 		reset_cancels()
 		
 	startup_cancel_flag = false # to cancel startup without incurring auto-buffer
+	
+	if pos_flow_seal and !$PosFlowSealTimer.is_running():
+		if !Globals.Game.get_player_node(targeted_opponent).get_node("HitStunTimer").is_running():
+			pos_flow_seal = false
 
 # CAPTURE DIRECTIONAL INPUTS --------------------------------------------------------------------------------------------------
 	
@@ -849,14 +854,14 @@ func stimulate2(): # only ran if not in hitstop
 			Globals.char_state.GROUND_STANDBY:
 				animate("BlockStartup")
 			Globals.char_state.GROUND_C_RECOVERY:
-#				if Animator.query(["BurstRevoke2"]):
-#					continue
+				if Animator.query(["BurstRevoke2"]): # cannot block out of BurstRevoke
+					continue
 				if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
 					if Globals.trait.DASH_BLOCK in query_traits():
 						animate("BlockStartup")
 				else:
-					continue
-#					animate("BlockStartup")
+#					continue
+					animate("BlockStartup")
 		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqueCharacter.AIR_BLOCK_GG_COST:
 			match state:
 				Globals.char_state.AIR_STANDBY:
@@ -1614,13 +1619,13 @@ func process_input_buffer():
 								chain_memory = []
 								has_acted[0] = true
 								keep = false
-						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
-							var move_name = get_move_name()
-							if burst_revoke_check(move_name):
-								animate("BurstRevoke")
-								chain_memory = []
-								has_acted[0] = true
-								keep = false
+#						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+#							var move_name = get_move_name()
+#							if burst_revoke_check(move_name):
+#								animate("BurstRevoke")
+#								chain_memory = []
+#								has_acted[0] = true
+#								keep = false
 						Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
 								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
 							var move_name = get_move_name()
@@ -2413,6 +2418,7 @@ func burst_revoke_check(move_name):
 		return false
 	change_guard_gauge_percent(-BURSTREVOKE_GG_COST)
 	remove_status_effect(Globals.status_effect.POS_FLOW)
+	pos_flow_seal = true
 	$PosFlowSealTimer.time = PosFlowSealTimer_TIME
 	return true
 	
@@ -2537,6 +2543,10 @@ func add_status_effect(effect, lifetime):
 			status_effects.insert(index, [effect, lifetime]) # if found an existing effect with higher priority, insert before it
 			break
 	new_status_effect(effect)
+	
+func load_status_effects(): # loading game state, reapply all one-time visual changes from status_effects
+	for status_effect in status_effects:
+		new_status_effect(status_effect[0])
 
 func query_status_effect(effect):
 	for status_effect in status_effects:
@@ -2573,7 +2583,7 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 		status_effects.erase(status_effect)
 		clear_visual_effect_of_status(status_effect[0])
 		
-func new_status_effect(effect): # run on frame the status effect is inflicted, used to modify stats
+func new_status_effect(effect): # run on frame the status effect is inflicted/state is loaded, for visual effects
 	match effect:
 		Globals.status_effect.POS_FLOW:
 			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
@@ -2993,7 +3003,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
 	match hit_data.block_state: # gain Positive Flow if unblocked/wrongblocked, GG is under 100%, atk_level > 1
 		Globals.block_state.UNBLOCKED, Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-			if !$PosFlowSealTimer.is_running() and current_guard_gauge < 0 and hit_data.adjusted_atk_level > 1:
+			if !pos_flow_seal and current_guard_gauge < 0 and hit_data.adjusted_atk_level > 1:
 				add_status_effect(Globals.status_effect.POS_FLOW, null)
 	
 	# EX GAIN ----------------------------------------------------------------------------------------------
@@ -3848,7 +3858,7 @@ func calculate_hitstun(hit_data): # hitstun and blockstun determined by attack l
 		return hit_data.move_data.fixed_hitstun
 	
 	var defender = get_node(hit_data.defender_nodepath)
-	
+		
 	if hit_data.adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running():
 		return 0 # weak hit on opponent not in hitstun
 
@@ -3872,7 +3882,7 @@ func calculate_hitstun(hit_data): # hitstun and blockstun determined by attack l
 
 func calculate_blockstun(hit_data):
 	
-	var blockstun = max(ceil(calculate_hitstun(hit_data) * 0.4) , MAX_BASE_BLOCKSTUN)
+	var blockstun = max(ceil(calculate_hitstun(hit_data) * 0.4) , MIN_BASE_BLOCKSTUN)
 	
 	if hit_data.block_state == Globals.block_state.AIR_WRONG or hit_data.block_state == Globals.block_state.GROUND_WRONG:
 		blockstun *= WRONGBLOCK_BLOCKSTUN_MOD
@@ -4271,7 +4281,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			play_audio("blast1", {"vol" : -18,})
 		"BurstRevoke":
 			null_gravity = true
-			Globals.Game.spawn_entity(get_path(), "BurstRevoke", position, {})
+			Globals.Game.spawn_entity(get_path(), "BurstRevoke", position, {"back":true})
 			$ModulatePlayer.play("pink_burst")
 			play_audio("blast1", {"vol" : -24,})
 		"BurstRevoke2":
@@ -4369,6 +4379,7 @@ func save_state():
 		"has_burst": has_burst,
 		"impulse_used" : impulse_used,
 		"DI_seal" : DI_seal,
+		"pos_flow_seal" : pos_flow_seal,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -4441,6 +4452,7 @@ func load_state(state_data):
 	has_burst = state_data.has_burst
 	impulse_used = state_data.impulse_used
 	DI_seal = state_data.DI_seal
+	pos_flow_seal = state_data.pos_flow_seal
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	
@@ -4458,7 +4470,9 @@ func load_state(state_data):
 	move_memory = state_data.move_memory
 	aerial_memory = state_data.aerial_memory
 	aerial_sp_memory = state_data.aerial_sp_memory
+	remove_all_status_effects()
 	status_effects = state_data.status_effects
+	load_status_effects()
 	hitcount_record = state_data.hitcount_record
 	ignore_list = state_data.ignore_list
 	tap_memory = state_data.tap_memory
