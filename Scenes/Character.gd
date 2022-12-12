@@ -3873,11 +3873,12 @@ func calculate_blockstun(hit_data):
 	
 	if hit_data.block_state == Globals.block_state.AIR_WRONG or hit_data.block_state == Globals.block_state.GROUND_WRONG:
 		blockstun *= WRONGBLOCK_BLOCKSTUN_MOD
-	elif hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
-		blockstun *= PERFECTBLOCK_BLOCKSTUN_MOD
+	else:
+		if hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
+			blockstun *= PERFECTBLOCK_BLOCKSTUN_MOD
 		
-	if "fixed_blockstun" in hit_data.move_data:
-		blockstun = hit_data.move_data.fixed_blockstun
+		if "fixed_blockstun" in hit_data.move_data: # fixed blockstun does not apply on wrongblocked hits
+			blockstun = hit_data.move_data.fixed_blockstun
 	
 	return blockstun
 	

@@ -247,7 +247,8 @@ func capture_instant_actions():
 	
 func process_instant_actions():
 	Character.unique_data.groundfin_trigger = false
-	if !Character.get_node("HitStunTimer").is_running() and !Character.get_node("BlockStunTimer").is_running():
+	if !Character.get_node("RespawnTimer").is_running() and !Character.get_node("HitStunTimer").is_running() and \
+			!Character.get_node("BlockStunTimer").is_running():
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 
