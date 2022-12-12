@@ -2,7 +2,7 @@ extends Node2D
 
 #const START_SPEED = 0.0
 #const START_ROTATION = 0.0
-const PALETTE = "yellow"
+const PALETTE = "pink"
 #const LIFESPAN = null
 
 const TRAITS = []
@@ -15,22 +15,19 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
-		"move_name" : "BurstCounter", # for entities, keep move_name in move_data, for checking repeat
+		"move_name" : "BurstRevoke", # for entities, keep move_name in move_data, for checking repeat_penalty
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 0,
-		"knockback" : 550,
+		"knockback" : 500,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"attack_level" : 8,
+		"attack_level" : 1,
 		"fixed_entity_hitstop" : 0,
-		"fixed_hitstop" : 15,
-		"fixed_hitstun" : 30,
-		"fixed_blockstun" : 35,
 		"guard_drain": 0,
 		"guard_gain_on_combo" : 0,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "yellow",
+		"hitspark_palette" : "pink",
 		"KB_angle" : 0.0,
 		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
 	}
@@ -51,8 +48,6 @@ func init(_aux_data: Dictionary):
 func stimulate():
 	pass
 	
-func query_atk_attr(_in_move_name):
-	return [Globals.atk_attr.SCREEN_SHAKE]
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:

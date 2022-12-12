@@ -10,6 +10,7 @@ enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum hitspark_type {CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
+enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-airs, don't erase this! Needed for air specials!
@@ -77,6 +78,11 @@ onready var common_entity_data = {
 	},
 	"BurstExtend" : {
 		"scene" : load("res://Assets/Entities/BurstExtend.tscn"),
+		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
+		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
+	},
+	"BurstRevoke" : {
+		"scene" : load("res://Assets/Entities/BurstRevoke.tscn"),
 		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
 		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
 	},

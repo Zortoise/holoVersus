@@ -833,7 +833,7 @@ func detect_hit():
 		var polygons_queried = player.query_polygons()
 		# will not return hitbox if in hitstop or when HarmlessTimer is running or if hits_left_in_current_active = 0
 		
-		if polygons_queried.hitbox: # if hitbox is not empty
+		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var converted_polygon = []
 			for point in polygons_queried.hitbox: # convert to global position
 				converted_polygon.append(player.position + point)
@@ -845,19 +845,19 @@ func detect_hit():
 				"move_name" : move_data_and_name.move_name,
 				"move_data" : move_data_and_name.move_data, # damage, attack level, etc
 			}
-			if polygons_queried.sweetbox: # if sweetbox is not empty
+			if polygons_queried.sweetbox != null: # if sweetbox is not empty
 				var converted_polygon2 = []
 				for point in polygons_queried.sweetbox: # convert to global position
 					converted_polygon2.append(player.position + point)
 				hitbox["sweetbox"] = converted_polygon2
-			if polygons_queried.kborigin: # if kborigin is not null
+			if polygons_queried.kborigin != null: # if kborigin is not null
 				hitbox["kborigin"] = player.position + polygons_queried.kborigin
-			if polygons_queried.vacpoint: # if kborigin is not null
+			if polygons_queried.vacpoint != null: # if kborigin is not null
 				hitbox["vacpoint"] = player.position + polygons_queried.vacpoint
 				
 			hitboxes.append(hitbox)
 			
-		if polygons_queried.hurtbox:
+		if polygons_queried.hurtbox != null:
 			var converted_polygon = []
 			for point in polygons_queried.hurtbox: # convert to global position
 				converted_polygon.append(player.position + point)
@@ -867,7 +867,7 @@ func detect_hit():
 				"facing": player.facing,
 #				"defensive_state" : null, # blocking, punishable state, etc
 			}
-			if polygons_queried.sdhurtbox:
+			if polygons_queried.sdhurtbox != null:
 				var converted_polygon2 = []
 				for point in polygons_queried.sdhurtbox: # convert to global position
 					converted_polygon2.append(player.position + point)
@@ -881,7 +881,7 @@ func detect_hit():
 	
 	for entity in entities:
 		var polygons_queried = entity.query_polygons()
-		if polygons_queried.hitbox: # if hitbox is not empty
+		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var converted_polygon = []
 			for point in polygons_queried.hitbox: # convert to global position
 				converted_polygon.append(entity.position + point)
@@ -894,14 +894,14 @@ func detect_hit():
 				"move_name" : move_data.move_name,
 				"move_data" : move_data, # damage, attack level, etc
 			}
-			if polygons_queried.sweetbox: # if sweetbox is not empty
+			if polygons_queried.sweetbox != null: # if sweetbox is not empty
 				var converted_polygon2 = []
 				for point in polygons_queried.sweetbox: # convert to global position
 					converted_polygon2.append(entity.position + point)
 				hitbox["sweetbox"] = converted_polygon2
-			if polygons_queried.kborigin: # if kborigin is not null
+			if polygons_queried.kborigin != null: # if kborigin is not null
 				hitbox["kborigin"] = entity.position + polygons_queried.kborigin
-			if polygons_queried.vacpoint: # if kborigin is not null
+			if polygons_queried.vacpoint != null: # if kborigin is not null
 				hitbox["vacpoint"] = entity.position + polygons_queried.vacpoint
 				
 			hitboxes.append(hitbox)

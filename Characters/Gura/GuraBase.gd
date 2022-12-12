@@ -49,7 +49,7 @@ const PALETTE_TO_PORTRAIT = {
 const UNIQUE_DATA_REF = {
 	"groundfin_count" : 0,
 	"groundfin_trigger" : false,
-	"instinct_gauge" : 0
+	"frenzy_gauge" : 0,
 }
 
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
@@ -411,6 +411,7 @@ const MOVE_DATABASE = {
 	},
 	"aSP2[h]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
+		"root" : "aSP2",
 		"hitcount" : 1,
 		"damage" : 80,
 		"knockback" : 500,
@@ -450,7 +451,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},
 	
-	"SP3" : {
+	"aSP3" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 40,
@@ -471,7 +472,7 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
-	"SP3b" : {
+	"aSP3b" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 70,
@@ -489,7 +490,7 @@ const MOVE_DATABASE = {
 		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
-	"SP3[h]" : {
+	"aSP3[h]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP3",
 		"hitcount" : 1,
@@ -511,7 +512,7 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
-	"SP3b[h]" : {
+	"aSP3b[h]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP3b",
 		"hitcount" : 1,
@@ -530,7 +531,7 @@ const MOVE_DATABASE = {
 		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
-	"SP3[ex]" : {
+	"aSP3[ex]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 60,
@@ -551,7 +552,7 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
-	"SP3b[ex]" : {
+	"aSP3b[ex]" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"hitcount" : 1,
 		"damage" : 120,

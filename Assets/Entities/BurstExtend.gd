@@ -50,6 +50,8 @@ func init(_aux_data: Dictionary):
 func stimulate():
 	pass
 	
+func query_atk_attr(_in_move_name):
+	return [Globals.atk_attr.SCREEN_SHAKE]
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:

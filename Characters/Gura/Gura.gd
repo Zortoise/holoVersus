@@ -72,11 +72,11 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup", "SP3bStartup", "SP3b[h]Startup", "SP3b[ex]Startup":
+		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup", "aSP3bStartup", "aSP3b[h]Startup", "aSP3b[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"SP3Active", "SP3[h]Active", "SP3[ex]Active", "SP3bActive", "SP3b[h]Active", "SP3b[ex]Active":
+		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"SP3Recovery", "SP3bRecovery", "SP3[ex]Recovery":
+		"aSP3Recovery", "aSP3bRecovery", "aSP3[ex]Recovery":
 			return Globals.char_state.AIR_ATK_RECOVERY
 			
 		"SP4Startup", "SP4[ex]Startup":
@@ -457,6 +457,10 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		else: return false
 
 func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time): # return true if button consumed
+	
+	if Character.grounded and Character.button_jump in Character.input_state.pressed:
+		return false # since this will trigger instant aerial
+	
 	match new_state:
 			
 		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
@@ -468,8 +472,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 					return true
 					
 		Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
-			if Character.grounded and is_grounded_uptilt(attack_ref) and !Character.button_jump in Character.input_state.pressed and \
-					Animator.query_to_play(["JumpTransit"]):
+			if Character.grounded and is_grounded_uptilt(attack_ref) and Animator.query_to_play(["JumpTransit"]):
 				if is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
@@ -621,12 +624,12 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 			return MOVE_DATABASE["aF1"].atk_attr
 		"SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]":
 			return MOVE_DATABASE["SP1"].atk_attr
-		"aSP3":
-			return MOVE_DATABASE["SP3"].atk_attr
-		"aSP3[h]": 
-			return MOVE_DATABASE["SP3[h]"].atk_attr
-		"aSP3[ex]": 
-			return MOVE_DATABASE["SP3[ex]"].atk_attr
+		"SP3":
+			return MOVE_DATABASE["aSP3"].atk_attr
+		"SP3[h]": 
+			return MOVE_DATABASE["aSP3[h]"].atk_attr
+		"SP3[ex]": 
+			return MOVE_DATABASE["aSP3[ex]"].atk_attr
 			
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr
@@ -901,55 +904,55 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("SP3[h]Startup")
 			else:
-				Character.animate("SP3bStartup")
+				Character.animate("aSP3bStartup")
 				Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 						{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3Startup":
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("aSP3[h]Startup")
 			else:
-				Character.animate("SP3bStartup")
+				Character.animate("aSP3bStartup")
 				Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
 						{"facing":Character.facing, "rot":-PI/2})
-		"SP3bStartup":
-			Character.animate("SP3Active")
+		"aSP3bStartup":
+			Character.animate("aSP3Active")
 		"SP3[h]Startup":
-			Character.animate("SP3b[h]Startup")
+			Character.animate("aSP3b[h]Startup")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3[h]Startup":
-			Character.animate("SP3b[h]Startup")
+			Character.animate("aSP3b[h]Startup")
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
 					{"facing":Character.facing, "rot":-PI/2})
-		"SP3b[h]Startup":
-			Character.animate("SP3[h]Active")
-		"SP3Active":
-			Character.animate("SP3bActive")
-		"SP3[h]Active":
-			Character.animate("SP3b[h]Active")
-		"SP3bActive", "SP3b[h]Active":
-			Character.animate("SP3Recovery")
-		"SP3Recovery":
-			Character.animate("SP3bRecovery")
-		"SP3bRecovery":
+		"aSP3b[h]Startup":
+			Character.animate("aSP3[h]Active")
+		"aSP3Active":
+			Character.animate("aSP3bActive")
+		"aSP3[h]Active":
+			Character.animate("aSP3b[h]Active")
+		"aSP3bActive", "aSP3b[h]Active":
+			Character.animate("aSP3Recovery")
+		"aSP3Recovery":
+			Character.animate("aSP3bRecovery")
+		"aSP3bRecovery":
 			Character.animate("FallTransit")
 			
 		"SP3[ex]Startup":
-			Character.animate("SP3b[ex]Startup")
+			Character.animate("aSP3b[ex]Startup")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3[ex]Startup":
-			Character.animate("SP3b[ex]Startup")
+			Character.animate("aSP3b[ex]Startup")
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
 					{"facing":Character.facing, "rot":-PI/2})
-		"SP3b[ex]Startup":
-			Character.animate("SP3[ex]Active")
-		"SP3[ex]Active":
-			Character.animate("SP3b[ex]Active")
-		"SP3b[ex]Active":
-			Character.animate("SP3[ex]Recovery")
-		"SP3[ex]Recovery":
-			Character.animate("SP3bRecovery")
+		"aSP3b[ex]Startup":
+			Character.animate("aSP3[ex]Active")
+		"aSP3[ex]Active":
+			Character.animate("aSP3b[ex]Active")
+		"aSP3b[ex]Active":
+			Character.animate("aSP3[ex]Recovery")
+		"aSP3[ex]Recovery":
+			Character.animate("aSP3bRecovery")
 			
 		"SP4Startup":
 			if Character.button_fierce in Character.input_state.pressed:
@@ -1191,25 +1194,25 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.y_slow = 0.2
 			Character.null_gravity = true
 			Character.sfx_under.show()
-		"SP3bStartup":
+		"aSP3bStartup":
 			Character.velocity.x *= 0.5
 			Character.velocity.y = -500
 			Character.null_gravity = true
 			Character.sfx_under.show()
-		"SP3Active":
+		"aSP3Active":
 			Character.null_gravity = true
 			Character.sfx_under.show()
-		"SP3b[h]Startup", "SP3b[ex]Startup":
+		"aSP3b[h]Startup", "aSP3b[ex]Startup":
 			Character.velocity.x *= 0.5
 			Character.velocity.y = -700
 			Character.null_gravity = true
 			Character.sfx_under.show()
-		"SP3[h]Active", "SP3[ex]Active":
+		"aSP3[h]Active", "aSP3[ex]Active":
 			Character.null_gravity = true
 			Character.sfx_under.show()
-		"SP3bActive", "SP3b[h]Active", "SP3b[ex]Active":
+		"aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			Character.sfx_under.show()
-		"SP3Recovery", "SP3[ex]Recovery", "SP3bRecovery":
+		"aSP3Recovery", "aSP3[ex]Recovery", "aSP3bRecovery":
 			Character.velocity_limiter.x = 0.7
 			Character.sfx_under.show()
 			

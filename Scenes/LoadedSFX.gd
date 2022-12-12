@@ -115,11 +115,34 @@ var modulate_animations = {
 			},
 			7 :
 			{
-				"modulate" : Color(1.0, 1.0, 1.0),
+				"modulate" : Color(4.0, 4.0, 4.0),
 			},
 			11 :
 			{
 				"modulate" : Color(5.0, 1.0, 1.0),
+			},
+		}
+	},
+	"pink_burst" : {
+		"duration": 12,
+		"loop" : false,
+		"afterimage_trail" : 0,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(4.0, 4.0, 4.0),
+			},
+			3 :
+			{
+				"modulate" : Color(5.0, 1.0, 1.5),
+			},
+			5 :
+			{
+				"modulate" : Color(4.0, 4.0, 4.0),
+			},
+			7 :
+			{
+				"modulate" : Color(5.0, 1.0, 1.5),
 			},
 		}
 	},
