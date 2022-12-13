@@ -466,8 +466,8 @@ const MOVE_DATABASE = {
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.DRAG_KB, \
+		"KB_angle" : -PI/2,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, \
 				Globals.atk_attr.NO_PUSHBACK],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -506,8 +506,8 @@ const MOVE_DATABASE = {
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.DRAG_KB, \
+		"KB_angle" : -PI/2,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, \
 				Globals.atk_attr.NO_PUSHBACK],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -546,8 +546,8 @@ const MOVE_DATABASE = {
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.DRAG_KB, \
+		"KB_angle" : -PI/2,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, \
 				Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.SEMI_INVUL_STARTUP],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },

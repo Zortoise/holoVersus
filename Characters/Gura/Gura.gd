@@ -915,28 +915,28 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("SP3[h]Startup")
 			else:
-				Character.animate("aSP3bStartup")
+				Character.animate("aSP3Active")
 				Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 						{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3Startup":
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("aSP3[h]Startup")
 			else:
-				Character.animate("aSP3bStartup")
+				Character.animate("aSP3Active")
 				Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
 						{"facing":Character.facing, "rot":-PI/2})
-		"aSP3bStartup":
-			Character.animate("aSP3Active")
+#		"aSP3bStartup":
+#			Character.animate("aSP3Active")
 		"SP3[h]Startup":
-			Character.animate("aSP3b[h]Startup")
+			Character.animate("aSP3[h]Active")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3[h]Startup":
-			Character.animate("aSP3b[h]Startup")
+			Character.animate("aSP3[h]Active")
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
 					{"facing":Character.facing, "rot":-PI/2})
-		"aSP3b[h]Startup":
-			Character.animate("aSP3[h]Active")
+#		"aSP3b[h]Startup":
+#			Character.animate("aSP3[h]Active")
 		"aSP3Active":
 			Character.animate("aSP3bActive")
 		"aSP3[h]Active":
@@ -949,15 +949,15 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("FallTransit")
 			
 		"SP3[ex]Startup":
-			Character.animate("aSP3b[ex]Startup")
+			Character.animate("aSP3[ex]Active")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3[ex]Startup":
-			Character.animate("aSP3b[ex]Startup")
+			Character.animate("aSP3[ex]Active")
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
 					{"facing":Character.facing, "rot":-PI/2})
-		"aSP3b[ex]Startup":
-			Character.animate("aSP3[ex]Active")
+#		"aSP3b[ex]Startup":
+#			Character.animate("aSP3[ex]Active")
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1205,20 +1205,24 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.y_slow = 0.2
 			Character.null_gravity = true
 			Character.sfx_under.show()
-		"aSP3bStartup":
+#		"aSP3bStartup":
+#			Character.velocity.x *= 0.5
+#			Character.velocity.y = -500
+#			Character.null_gravity = true
+#			Character.sfx_under.show()
+		"aSP3Active":
 			Character.velocity.x *= 0.5
 			Character.velocity.y = -500
 			Character.null_gravity = true
 			Character.sfx_under.show()
-		"aSP3Active":
-			Character.null_gravity = true
-			Character.sfx_under.show()
-		"aSP3b[h]Startup", "aSP3b[ex]Startup":
+#		"aSP3b[h]Startup", "aSP3b[ex]Startup":
+#			Character.velocity.x *= 0.5
+#			Character.velocity.y = -700
+#			Character.null_gravity = true
+#			Character.sfx_under.show()
+		"aSP3[h]Active", "aSP3[ex]Active":
 			Character.velocity.x *= 0.5
 			Character.velocity.y = -700
-			Character.null_gravity = true
-			Character.sfx_under.show()
-		"aSP3[h]Active", "aSP3[ex]Active":
 			Character.null_gravity = true
 			Character.sfx_under.show()
 		"aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":

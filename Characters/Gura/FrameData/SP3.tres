@@ -361,26 +361,6 @@ frame_data = {
 },
 "vframes": 2
 },
-"aSP3bStartup": {
-"SfxUnder_hframes": 6,
-"SfxUnder_spritesheet": "SP3SfxUnder",
-"SfxUnder_vframes": 3,
-"duration": 1,
-"hframes": 6,
-"loop": false,
-"spritesheet": "SP3Sprite",
-"timestamps": {
-0: {
-"SfxUnder_frame": 4,
-"frame": 3,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -8, 18 ), Vector2( 5, 18 ), Vector2( 5, 1 ), Vector2( 21, 1 ), Vector2( 21, -19 ), Vector2( -8, -19 ) ],
-"kborigin": null,
-"sweetbox": [  ]
-}
-},
-"vframes": 2
-},
 "aSP3b[ex]Active": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
@@ -417,26 +397,6 @@ frame_data = {
 },
 "vframes": 2
 },
-"aSP3b[ex]Startup": {
-"SfxUnder_hframes": 6,
-"SfxUnder_spritesheet": "SP3SfxUnder",
-"SfxUnder_vframes": 3,
-"duration": 1,
-"hframes": 6,
-"loop": false,
-"spritesheet": "SP3Sprite",
-"timestamps": {
-0: {
-"SfxUnder_frame": 4,
-"frame": 3,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -8, 18 ), Vector2( 5, 18 ), Vector2( 5, 1 ), Vector2( 21, 1 ), Vector2( 21, -19 ), Vector2( -8, -19 ) ],
-"kborigin": null,
-"sweetbox": [  ]
-}
-},
-"vframes": 2
-},
 "aSP3b[h]Active": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
@@ -468,26 +428,6 @@ frame_data = {
 "hitbox": [ Vector2( -42, -49 ), Vector2( -55, -49 ), Vector2( -55, 19 ), Vector2( 48, 19 ), Vector2( 48, -48 ), Vector2( 33, -48 ), Vector2( 33, -62 ), Vector2( -42, -62 ) ],
 "hurtbox": [ Vector2( -17, -1 ), Vector2( -2, -1 ), Vector2( -2, 13 ), Vector2( 8, 13 ), Vector2( 8, -1 ), Vector2( 13, -1 ), Vector2( 13, -25 ), Vector2( -17, -25 ) ],
 "kborigin": Vector2( -12, 67 ),
-"sweetbox": [  ]
-}
-},
-"vframes": 2
-},
-"aSP3b[h]Startup": {
-"SfxUnder_hframes": 6,
-"SfxUnder_spritesheet": "SP3SfxUnder",
-"SfxUnder_vframes": 3,
-"duration": 1,
-"hframes": 6,
-"loop": false,
-"spritesheet": "SP3Sprite",
-"timestamps": {
-0: {
-"SfxUnder_frame": 4,
-"frame": 3,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -8, 18 ), Vector2( 5, 18 ), Vector2( 5, 1 ), Vector2( 21, 1 ), Vector2( 21, -19 ), Vector2( -8, -19 ) ],
-"kborigin": null,
 "sweetbox": [  ]
 }
 },
