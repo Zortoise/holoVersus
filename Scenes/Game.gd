@@ -1016,11 +1016,11 @@ func test_priority(hitbox, hurtbox): # return false if attacker fail the priorit
 		elif attacker.Animator.time <= 1:
 			if hitbox.move_data.priority < defender.query_priority():
 				return false
-	# Rule 3: jabs cannot hit an opponent during THEIR startup animation on 1st 2 frames of YOUR active frame
-	# this means that jabs (fastest is 6-frame startup) will lose to 8-framers (clash if same priority)
+	# Rule 3: jabs cannot hit an opponent during THEIR startup animation on 1st _ frames of YOUR active frame
+	# this means that jabs should lose to 8-framers (clash if same priority)
 	# moves with Held variations have 8-frame startup on minimum, this allow Held Superarmor moves to beat jabs
 	elif defender.is_atk_startup():
-		if hitbox.move_name == "L1" and attacker.Animator.time <= 1:
+		if "active_delay" in hitbox.move_data and attacker.Animator.time < hitbox.move_data.active_delay:
 			return false
 	return true
 	

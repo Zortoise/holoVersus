@@ -3692,10 +3692,26 @@ func calculate_guard_gauge_change(hit_data):
 	
 	if !attacker_or_entity.is_hitcount_first_hit(defender.player_ID): # for multi-hit moves, only 1st hit affect GG
 		return 0.0
+		
+	var guard_drain
+	var guard_gain_on_combo
+		
+	# for autochain followup
+	if "chain_starter" in hit_data.move_data:
+		# if already hit the opponent with a previous move, deal no guard gauge change
+		if (defender.get_node("HitStunTimer").is_running() or defender.get_node("BlockStunTimer").is_running()):
+			return 0.0
+		else: # follow the starter's stats
+			guard_drain = UniqueCharacter.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_drain
+			guard_gain_on_combo = UniqueCharacter.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
+			
+	else: # normal attack
+		guard_drain = hit_data.move_data.guard_drain
+		guard_gain_on_combo = hit_data.move_data.guard_gain_on_combo
 	
 	if hit_data.block_state == Globals.block_state.UNBLOCKED and (defender.move_memory.size() > 0 or defender.get_node("HitStunTimer").is_running()):
 		# on a successful hit while defender in hitstun or a little after, guard_gauge_change is positive
-		guard_gauge_change = hit_data.move_data.guard_gain_on_combo
+		guard_gauge_change = guard_gain_on_combo
 		if hit_data.double_repeat:
 			guard_gauge_change *= REPEAT_GGG_MOD # Guard Gain on hitstunned defender is increased on double_repeat
 		if hit_data.sweetspotted:
@@ -3704,7 +3720,7 @@ func calculate_guard_gauge_change(hit_data):
 			guard_gauge_change *= PERFECTCHAIN_GGG_MOD # Guard Gain on hitstunned defender is reduced on perfect chains
 	
 	else: # defender NOT in hitstun or just recovered from one, or blocking, guard_gauge_change is negative
-		guard_gauge_change = -hit_data.move_data.guard_drain
+		guard_gauge_change = -guard_drain
 		if hit_data.semi_disjoint:
 			guard_gauge_change *= SD_HIT_GUARD_DRAIN_MOD # may lower/rise it, or let whiff punishes drain GG?
 		elif hit_data.double_repeat:
