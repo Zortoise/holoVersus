@@ -852,8 +852,12 @@ func stimulate2(): # only ran if not in hitstop
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
 	alt_block = false
-	if button_dash in input_state.pressed and v_dir == 0 and !button_left in input_state.pressed and !button_right in input_state.pressed:
-		alt_block = true
+	if v_dir == 0 and !button_left in input_state.pressed and !button_right in input_state.pressed:
+		if button_dash in input_state.pressed: 
+			alt_block = true
+		if button_dash in input_state.just_pressed and button_aux in input_state.pressed:
+			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
+			
 	
 #	if UniqueCharacter.STYLE == 0:
 	if alt_block or (button_block in input_state.pressed and !button_aux in input_state.pressed):
@@ -1337,7 +1341,9 @@ func capture_combinations():
 	
 	if !button_unique in input_state.pressed: # this allows you to use Unique + Aux command when blocking without doing a Burst
 		combination(button_block, button_aux, "Burst")
-	
+		if button_aux in input_state.just_pressed and alt_block == true:
+			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
+		
 #	combination(button_block, button_special, "Burst") # place this here since button_special is never buffered
 		
 	if !button_unique in input_state.pressed:
