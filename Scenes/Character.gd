@@ -852,7 +852,8 @@ func stimulate2(): # only ran if not in hitstop
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
 	alt_block = false
-	if v_dir == 0 and !button_left in input_state.pressed and !button_right in input_state.pressed:
+	if !button_up in input_state.pressed and !button_down in input_state.pressed and \
+			!button_left in input_state.pressed and !button_right in input_state.pressed:
 		if button_dash in input_state.pressed: 
 			alt_block = true
 		if button_dash in input_state.just_pressed and button_aux in input_state.pressed:

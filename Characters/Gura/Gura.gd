@@ -696,9 +696,9 @@ func _on_SpritePlayer_anim_finished(anim_name):
 #				else: # horizontal air dash
 #					Character.animate("AirDash")
 #			else:
-			if Character.button_down in Character.input_state.pressed: # downward air dash
+			if Character.v_dir == 1: # downward air dash
 				Character.animate("AirDashD2")
-			elif Character.button_up in Character.input_state.pressed: # upward air dash
+			elif Character.v_dir == -1: # upward air dash
 				Character.animate("AirDashU2")
 			else: # horizontal air dash
 				Character.animate("AirDash")
