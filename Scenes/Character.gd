@@ -1029,18 +1029,11 @@ func stimulate2(): # only ran if not in hitstop
 					UniqueCharacter.consume_one_air_dash() # reduce air_dash count by 1
 
 		Globals.char_state.GROUND_BLOCK:
-#			if UniqueCharacter.STYLE == 0:
 			if !button_block in input_state.pressed and !alt_block and Animator.query_to_play(["Block"]):
 				if !block_rec_cancel:
 					animate("BlockRecovery")
 				else:
 					animate("BlockCRecovery")
-#			else:
-#				if !button_dash in input_state.pressed and Animator.query_to_play(["Block"]):
-#					if !block_rec_cancel:
-#						animate("BlockRecovery")
-#					else:
-#						animate("BlockCRecovery")	
 			
 		Globals.char_state.GROUND_BLOCKSTUN:
 			if !$BlockStunTimer.is_running():
@@ -2407,6 +2400,8 @@ func is_normal_attack(move_name):
 	return false
 	
 func is_special_move(move_name):
+	if move_name in UniqueCharacter.SPECIALS or move_name in UniqueCharacter.EX_MOVES:
+		return true # not all special moves are in MOVE_DATABASE
 	if UniqueCharacter.MOVE_DATABASE.has(move_name):
 		match UniqueCharacter.MOVE_DATABASE[move_name].atk_type:
 			Globals.atk_type.SPECIAL, Globals.atk_type.EX: # can only chain combo into a Normal
@@ -2763,6 +2758,7 @@ func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aeri
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
 	
 	if !is_atk_recovery() and !is_atk_active(): return false
+	
 	if chain_combo in [Globals.chain_combo.RESET, Globals.chain_combo.NO_CHAIN]: return false # can only chain combo on hit
 	
 	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
@@ -2833,6 +2829,12 @@ func test_qc_chain_combo(attack_ref):
 	
 func get_atk_strength(move):
 	if !move in UniqueCharacter.MOVE_DATABASE:
+		if move in UniqueCharacter.SPECIALS:
+			return 3
+		elif move in UniqueCharacter.EX_MOVES:
+			return 4
+		elif move in UniqueCharacter.SUPERS:
+			return 5
 		return 0 # just in case
 	match UniqueCharacter.MOVE_DATABASE[move].atk_type:
 		Globals.atk_type.LIGHT:
