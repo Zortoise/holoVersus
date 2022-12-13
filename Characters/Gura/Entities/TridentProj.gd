@@ -29,7 +29,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/4,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -17} },
+		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c2]Active" : {
 		"move_name" : "TridentProj",
@@ -61,7 +61,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/4,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
 		"move_name" : "TridentProj",
@@ -77,7 +77,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/4,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c1]Active" : {
 		"move_name" : "TridentProj2", # upwards and downwards trident can be done once each before incurring repeat penalty
@@ -93,7 +93,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -0.295,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -17} },
+		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c2]Active" : {
 		"move_name" : "TridentProj2",
@@ -125,7 +125,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -0.295,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[ex]Active" : {
 		"move_name" : "TridentProj2",
@@ -141,7 +141,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -0.295,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	}
 }
 

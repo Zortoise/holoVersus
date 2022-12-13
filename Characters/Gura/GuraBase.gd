@@ -23,7 +23,7 @@ const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const GROUND_DASH_SPEED = 480.0 # duration in animation data
 const AIR_DASH_SPEED = 390.0 # duration in animation data
-const IMPULSE_MOD = 1.25 # multiply by SPEED to get impulse velocity
+const IMPULSE_MOD = 1.5 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 1.25 # multiply by SPEED to get horizontal velocity gain when doing long hops
 const SUPER_JUMP_MOD = 1.5
 

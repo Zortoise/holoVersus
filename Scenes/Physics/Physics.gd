@@ -162,23 +162,20 @@ func get_colliding_characters_side(collision_box, direction):
 	for character in characters_detected:
 		# check if you are moving toward them or away
 		if ((direction == 1 and character.position.x > tester.position.x) or \
-				(direction == -1 and character.position.x < tester.position.x)) and \
-				is_collidable(character): # will not collide with hitstunned players unless they are in hitstop
-			
-			colliding_characters.append(character)
+				(direction == -1 and character.position.x < tester.position.x)):
+			if has_method("check_collidable") and call("check_collidable"):
+				colliding_characters.append(character)
 			
 	return colliding_characters
 	
-func is_collidable(character):
-	if !self.UniqueCharacter.check_collidable():
-		return false
-#	if !character.get_node("HitStunTimer").is_running(): # not in hitstun
-#		return true # some characters have move that can pass through other characters
-#	elif character.get_node("HitStopTimer").is_running(): # or if in hitstun, in hitstop
-#		return true
-	elif character.state == Globals.char_state.LAUNCHED_HITSTUN:
-		return false
-	return true
+#func is_collidable(character):
+#	if !call("check_collidable"):
+#		return false
+##	if !character.get_node("HitStunTimer").is_running(): # not in hitstun
+##		return true # some characters have move that can pass through other characters
+##	elif character.get_node("HitStopTimer").is_running(): # or if in hitstun, in hitstop
+##		return true
+#	return true
 	
 # return true if a wall in "direction", 1 is right, -1 is left
 func is_against_wall(collision_box, soft_platform_dbox, direction):

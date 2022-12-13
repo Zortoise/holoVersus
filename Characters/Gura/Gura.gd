@@ -87,11 +87,10 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		
 	print("Error: " + anim + " not found.")
-			
-
-func check_collidable(): # some characters have move that can pass through other characters
+		
+func check_collidable():  # some characters have move that can pass through other characters
 	match Animator.to_play_animation:
-#		"Dash": 			# example
+#		"Dash":
 #			return false
 		"aSP2[h]Active":
 			return false
@@ -161,14 +160,14 @@ func stimulate():
 			
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
-	if Character.state == Globals.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
-		Animator.query_current(["Dash"]): 	# dash dancing, need to hold dash
-		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
-			Character.face(-1)
-			Character.animate("Dash")
-		elif Character.button_right in Character.input_state.just_pressed and !Character.button_left in Character.input_state.just_pressed:
-			Character.face(1)
-			Character.animate("Dash")
+#	if Character.state == Globals.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
+#		Animator.query_current(["Dash"]): 	# dash dancing, need to hold dash
+#		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
+#			Character.face(-1)
+#			Character.animate("Dash")
+#		elif Character.button_right in Character.input_state.just_pressed and !Character.button_left in Character.input_state.just_pressed:
+#			Character.face(1)
+#			Character.animate("Dash")
 
 			
 	# QUICK CANCELS --------------------------------------------------------------------------------------------------
@@ -266,7 +265,9 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			# GROUND DASH ---------------------------------------------------------------------------------
 		
 				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
-					if keep and !Animator.query(["DashBrake"]): # cannot dash during dash brake
+					if keep and !Character.button_light in Character.input_state.just_pressed and \
+							!Character.button_fierce in Character.input_state.just_pressed and !Animator.query(["DashBrake"]):
+						# cannot dash while pressing an attack, or during dash brake
 						Character.animate("DashTransit")
 						keep = false
 						
@@ -462,6 +463,15 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
 		return false # since this will trigger instant aerial
 	
+	match Character.state:
+		Globals.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
+			if Animator.query_current(["DashTransit"]):
+				if is_ex_valid(attack_ref):
+					Character.animate(attack_ref + "Startup")
+					Character.chain_memory = []
+					has_acted[0] = true
+					return true
+						
 	match new_state:
 			
 		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:

@@ -164,6 +164,7 @@ var hitstop = null # holder to influct hitstop at end of frame
 var status_effect_to_remove = [] # holder to remove status effects at end of frame
 var startup_cancel_flag := false # allow cancelling of startup frames without rebuffering
 var instant_actions_temp := [] # used to transfer instant actions into instant_actions array after stored ones are processed
+var alt_block := false # neutral dash can be used to block as well
 
 var player_ID: int # player number controlling this character, 0 for P1, 1 for P2
 
@@ -753,7 +754,9 @@ func stimulate2(): # only ran if not in hitstop
 			if move_name in UniqueCharacter.STARTERS:
 				if !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
 					impulse_used = true
-					velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
+					var impulse = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
+					velocity.x += impulse
+					velocity.x = clamp(velocity.x, -abs(impulse), abs(impulse))
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 
 	if button_right in input_state.just_pressed:
@@ -848,9 +851,18 @@ func stimulate2(): # only ran if not in hitstop
 
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
+	alt_block = false
+	if button_dash in input_state.pressed and v_dir == 0 and !button_left in input_state.pressed and !button_right in input_state.pressed:
+		alt_block = true
+	
 #	if UniqueCharacter.STYLE == 0:
-	if button_block in input_state.pressed and !button_aux in input_state.pressed:
+	if alt_block or (button_block in input_state.pressed and !button_aux in input_state.pressed):
 		match state:
+			
+		# ground blocking
+			Globals.char_state.GROUND_STARTUP: # can block on 1st frame of ground dash
+				if Animator.query_current(["DashTransit"]):
+					animate("BlockStartup")
 			Globals.char_state.GROUND_STANDBY:
 				animate("BlockStartup")
 			Globals.char_state.GROUND_C_RECOVERY:
@@ -862,8 +874,14 @@ func stimulate2(): # only ran if not in hitstop
 				else:
 #					continue
 					animate("BlockStartup")
+					
+		# air blocking
 		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqueCharacter.AIR_BLOCK_GG_COST:
 			match state:
+				Globals.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
+					if Animator.query_current(["AirDashTransit"]):
+						animate("AirBlockStartup")
+						$VarJumpTimer.stop()
 				Globals.char_state.AIR_STANDBY:
 	#				if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
 					animate("AirBlockStartup")
@@ -1008,7 +1026,7 @@ func stimulate2(): # only ran if not in hitstop
 
 		Globals.char_state.GROUND_BLOCK:
 #			if UniqueCharacter.STYLE == 0:
-			if !button_block in input_state.pressed and Animator.query_to_play(["Block"]):
+			if !button_block in input_state.pressed and !alt_block and Animator.query_to_play(["Block"]):
 				if !block_rec_cancel:
 					animate("BlockRecovery")
 				else:
@@ -1026,7 +1044,7 @@ func stimulate2(): # only ran if not in hitstop
 			
 		Globals.char_state.AIR_BLOCK:
 #			if UniqueCharacter.STYLE == 0:
-			if !button_block in input_state.pressed and Animator.query_to_play(["AirBlock"]):
+			if !button_block in input_state.pressed and !alt_block and Animator.query_to_play(["AirBlock"]):
 				if !block_rec_cancel:
 					animate("AirBlockRecovery")
 				else:
@@ -1270,7 +1288,7 @@ func buffer_actions():
 	if button_down in input_state.just_pressed:
 		tap_memory.append([button_down, TAP_MEMORY_DURATION])
 	if button_dash in input_state.just_pressed:
-		if !button_unique in input_state.pressed:
+		if !alt_block and !button_unique in input_state.pressed:
 			input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
 		
 	if button_special in input_state.just_released:
@@ -1758,6 +1776,15 @@ func state_detect(anim):
 			
 	
 # ---------------------------------------------------------------------------------------------------
+
+func check_collidable(): # called by Physics.gd
+	if state == Globals.char_state.LAUNCHED_HITSTUN:
+		return false
+	if new_state == Globals.char_state.GROUND_ATK_STARTUP: # cross-up attack
+		if button_dash in input_state.pressed and chain_memory.size() == 0:
+			return false
+			
+	return UniqueCharacter.check_collidable()
 
 func perfect_block():
 	if $PBlockCDTimer.is_running():
@@ -2569,11 +2596,11 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 				effect_to_erase.append(status_effect)
 				
 		match status_effect[0]:
-			Globals.status_effect.BREAK_RECOVER: # when recovering from a combo where a Break occur, restore Guard Gauge
+			Globals.status_effect.BREAK_RECOVER: # when recovering from a combo where a Break occur, restore Guard Gauge to 50%
 				if !$HitStunTimer.is_running():
 					effect_to_erase.append(status_effect)
-					if current_guard_gauge < 0:
-						current_guard_gauge = 0
+					if current_guard_gauge < GUARD_GAUGE_FLOOR * 0.5:
+						current_guard_gauge = GUARD_GAUGE_FLOOR * 0.5
 						Globals.Game.guard_gauge_update(self)
 			Globals.status_effect.POS_FLOW: # positive flow ends if guard gauge returns to 0
 				if current_guard_gauge >= 0:
@@ -4131,10 +4158,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 				if !impulse_used and move_name in UniqueCharacter.STARTERS and !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
 					impulse_used = true
 					if instant_dir != 0:
-						velocity.x = instant_dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD * PERFECT_IMPULSE_MOD
+						var impulse = instant_dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD * PERFECT_IMPULSE_MOD
+						velocity.x += impulse
+						velocity.x = clamp(velocity.x, -abs(impulse), abs(impulse))
 						Globals.Game.spawn_SFX("SpecialDust", "DustClouds", get_feet_pos(), {"facing":instant_dir, "grounded":true})
 					else:
-						velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
+						var impulse = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
+						velocity.x += impulse
+						velocity.x = clamp(velocity.x, -abs(impulse), abs(impulse))
 						Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 						
 		
@@ -4176,8 +4207,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"JumpTransit2":
 			if button_down in input_state.pressed: # down and jump to hop, cannot hop on soft platforms
 				velocity.y = -UniqueCharacter.JUMP_SPEED * HOP_JUMP_MOD
-				if dir != 0: # when hopping can press left/right for a long hop that reset momentum
-					velocity.x = dir * UniqueCharacter.SPEED * UniqueCharacter.LONG_HOP_JUMP_MOD
+				if dir != 0: # when hopping can press left/right for a long hop
+					var boost = dir * UniqueCharacter.SPEED * UniqueCharacter.LONG_HOP_JUMP_MOD
+					velocity.x += boost
+					velocity.x = clamp(velocity.x, -abs(boost), abs(boost))
 			elif button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to super jump, cannot adjust height
 				velocity.y = -UniqueCharacter.JUMP_SPEED * UniqueCharacter.SUPER_JUMP_MOD
 				velocity.x = 0
