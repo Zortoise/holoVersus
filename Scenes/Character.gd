@@ -179,8 +179,8 @@ var true_position := Vector2.ZERO # int*1000 instead of int, needed for slow and
 var velocity := Vector2.ZERO
 var facing := 1 # 1 for facing right, -1 for facing left
 var velocity_previous_frame := Vector2.ZERO # needed to check for landings
-var null_gravity := false # set to true during certain special states, like air dashing
-var null_friction := false # set to true during certain special states, like ground dashing
+var gravity_mod := 1.0 # set to true during certain special states, like air dashing
+var friction_mod := 1.0 # set to true during certain special states, like ground dashing
 var velocity_limiter = { # as % of speed, some animations limit max velocity in a certain direction, if null means no limit
 	"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null
 	}
@@ -938,6 +938,8 @@ func stimulate2(): # only ran if not in hitstop
 	if $VarJumpTimer.is_running() and (button_jump in input_state.pressed or button_up in input_state.pressed):
 		# variable jump system reduces gravity if you hold down the jump button
 		gravity_temp *= VAR_JUMP_GRAV_MOD
+		
+	gravity_temp *= gravity_mod # gravity_mod is based off current animation
 
 	if !grounded and (abs(velocity.y) < PEAK_DAMPER_LIMIT): # reduce gravity at peak of jump
 		gravity_temp = lerp(gravity_temp, gravity_temp * PEAK_DAMPER_MOD, \
@@ -946,7 +948,7 @@ func stimulate2(): # only ran if not in hitstop
 		if Animator.query_to_play(["Jump"]): # don't use query() for this one
 			animate("FallTransit")
 
-	if !null_gravity and !grounded: # gravity only pulls you if you are in the air
+	if !grounded: # gravity only pulls you if you are in the air
 		
 		if $HitStunTimer.is_running():
 			if can_DI(): # up/down DI, depends on Guard Gauge
@@ -1132,13 +1134,11 @@ func stimulate2(): # only ran if not in hitstop
 	
 # APPLY FRICTION/AIR RESISTANCE --------------------------------------------------------------------------------------------------
 
-	# apply friction if on ground
-	if grounded and !null_friction:
-		velocity.x = lerp(velocity.x, 0, friction_this_frame)
-			
-	# apply air resistance if in air
-	if !grounded and !null_gravity: # null gravity means no air resistance as well
-		velocity.x = lerp(velocity.x, 0, air_res_this_frame)
+	if grounded: # apply friction if on ground
+		velocity.x = lerp(velocity.x, 0, friction_this_frame * friction_mod)
+
+	else: # apply air resistance if in air
+		velocity.x = lerp(velocity.x, 0, air_res_this_frame * gravity_mod) # gravity_mod reduces air resistance as well
 	
 
 # --------------------------------------------------------------------------------------------------
@@ -4219,8 +4219,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			perfect_chain = false # change to false if neither startup nor active
 
 	
-	null_friction = false
-	null_gravity = false
+	friction_mod = 1.0
+	gravity_mod = 1.0
 	velocity_limiter = {"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null}
 	sprite.rotation = 0
 	sfx_under.hide()
@@ -4315,7 +4315,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"BurstCounterStartup", "BurstEscapeStartup":
 			velocity_limiter.x_slow = 0.2
 			velocity_limiter.y_slow = 0.2
-			null_gravity = true
+			gravity_mod = 0.0
 			if anim_name == "BurstCounterStartup":
 				$ModulatePlayer.play("yellow_burst")
 			else:
@@ -4325,7 +4325,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			chain_combo = 0
 			velocity = Vector2.ZERO
 			velocity_limiter.x = 0
-			null_gravity = true
+			gravity_mod = 0.0
 #			var burst_facing = 1
 #			if rng_generate(2) == 0:
 #				burst_facing = -1
@@ -4338,12 +4338,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 				$ModulatePlayer.play("red_burst")
 			play_audio("blast1", {"vol" : -18,})
 		"BurstRevoke":
-			null_gravity = true
+			gravity_mod = 0.0
 			Globals.Game.spawn_entity(get_path(), "BurstRevoke", position, {"back":true})
 			$ModulatePlayer.play("pink_burst")
 			play_audio("blast1", {"vol" : -24,})
 		"BurstRevoke2":
-			null_gravity = true
+			gravity_mod = 0.0
 			
 	UniqueCharacter._on_SpritePlayer_anim_started(anim_name)
 	
@@ -4420,8 +4420,8 @@ func save_state():
 		"velocity" : velocity,
 		"facing" : facing,
 		"velocity_previous_frame" : velocity_previous_frame,
-		"null_gravity" : null_gravity,
-		"null_friction" : null_friction,
+		"gravity_mod" : gravity_mod,
+		"friction_mod" : friction_mod,
 		"velocity_limiter" : velocity_limiter,
 		"input_buffer" : input_buffer,
 		"afterimage_timer" : afterimage_timer,
@@ -4493,8 +4493,8 @@ func load_state(state_data):
 	velocity = state_data.velocity
 	facing = state_data.facing
 	velocity_previous_frame = state_data.velocity_previous_frame
-	null_gravity = state_data.null_gravity
-	null_friction = state_data.null_friction
+	gravity_mod = state_data.gravity_mod
+	friction_mod = state_data.friction_mod
 	velocity_limiter = state_data.velocity_limiter
 	input_buffer = state_data.input_buffer
 	afterimage_timer = state_data.afterimage_timer
