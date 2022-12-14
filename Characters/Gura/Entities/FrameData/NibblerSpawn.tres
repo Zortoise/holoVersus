@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "Kill": {
-"duration": 30,
+"duration": 58,
 "hframes": 5,
 "loop": false,
 "spritesheet": "NibblerSpawnSprite",
@@ -15,52 +15,35 @@ frame_data = {
 "entityspawn": null,
 "frame": 0
 },
-6: {
+4: {
 "entityspawn": null,
 "frame": 1
 },
-12: {
+8: {
 "entityspawn": null,
 "frame": 2
 },
-18: {
+12: {
 "entityspawn": null,
 "frame": 3
 },
-24: {
-"entityspawn": Vector2( 8, -22 ),
-"frame": 4
-}
-},
-"vframes": 1
-},
-"bKill": {
-"duration": 48,
-"hframes": 5,
-"loop": false,
-"spritesheet": "NibblerSpawnSprite",
-"timestamps": {
-0: {
-"entityspawn": null,
-"frame": 0
-},
-6: {
+16: {
 "entityspawn": null,
 "frame": 1
 },
-12: {
+20: {
 "entityspawn": null,
 "frame": 2
 },
-18: {
+24: {
 "entityspawn": null,
 "frame": 3
 },
-24: {
+28: {
 "entityspawn": null,
 "frame": 1
 },
-30: {
+32: {
 "entityspawn": null,
 "frame": 2
 },
@@ -68,7 +51,19 @@ frame_data = {
 "entityspawn": null,
 "frame": 3
 },
-42: {
+40: {
+"entityspawn": null,
+"frame": 1
+},
+44: {
+"entityspawn": null,
+"frame": 2
+},
+48: {
+"entityspawn": null,
+"frame": 3
+},
+52: {
 "entityspawn": Vector2( 8, -22 ),
 "frame": 4
 }

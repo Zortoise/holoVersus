@@ -91,7 +91,7 @@ func ground_finder(global_pos: Vector2, facing, offset: Vector2, detect_size: Ve
 	var origin = Vector2(global_pos.x + (facing * offset.x), global_pos.y + offset.y)
 # warning-ignore:unassigned_variable
 	var detect_box: Rect2
-	detect_box.position = Vector2(origin.x - detect_size.x/2.0, origin.y - detect_size.y/2.0)
+	detect_box.position = Vector2(origin.x - round(detect_size.x/2.0), origin.y - round(detect_size.y/2.0))
 	detect_box.size = detect_size
 	Globals.Game.get_node("PolygonDrawer").extra_boxes.append(detect_box) # draw the box out
 	
@@ -99,7 +99,7 @@ func ground_finder(global_pos: Vector2, facing, offset: Vector2, detect_size: Ve
 	var found_platform_box
 	var best_value
 	match v_bias:
-		0: best_value = detect_box.size.y / 2.0 # for closest, compare distance to center horizontal line of detect box
+		0: best_value = round(detect_box.size.y / 2.0) # for closest, compare distance to center horizontal line of detect box
 		1: best_value = detect_box.position.y + detect_box.size.y # for highest, compare highest
 		-1: best_value = detect_box.position.y
 	

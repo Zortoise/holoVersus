@@ -14,9 +14,3 @@ vframes = 19
 __meta__ = {
 "_editor_description_": "YXNlcHJpdGVfd2l6YXJkX2NvbmZpZwpwbGF5ZXJ8PUFuaW1hdGlvblBsYXllcgpzb3VyY2V8PXJlczovL0NoYXJhY3RlcnMvR3VyYS9HdXJhLmFzZXByaXRlCmxheWVyfD1CYXNlCm9wX2V4cHw9RmFsc2UKb19mb2xkZXJ8PXJlczovL0NoYXJhY3RlcnMvR3VyYQpvX25hbWV8PQpvbmx5X3Zpc2libGV8PUZhbHNlCm9fZXhfcHw9Cg=="
 }
-
-[node name="DefaultCollisionBox" type="ReferenceRect" parent="."]
-margin_left = -10.0
-margin_top = -16.0
-margin_right = 10.0
-margin_bottom = 22.0

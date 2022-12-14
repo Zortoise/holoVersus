@@ -49,12 +49,13 @@ const PALETTE_TO_PORTRAIT = {
 const UNIQUE_DATA_REF = {
 	"groundfin_count" : 0,
 	"groundfin_trigger" : false,
-	"frenzy_gauge" : 0,
+	"bitten_player_path" : null,
+	"bitemark_time" : 0,
 }
 
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
-		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]"]
-const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4"]
+		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5"]
+const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
 const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]"]
 const SUPERS = []
 
@@ -343,12 +344,12 @@ const MOVE_DATABASE = {
 	"SP1": {
 		"atk_type" : Globals.atk_type.SPECIAL, # used for chaining
 		"priority": 0,
-		"atk_attr" : [], # some projectile moves can have attributes like superarmor
+		"atk_attr" : [Globals.atk_attr.NON_ATTACK], # some projectile moves can have attributes like superarmor
 	},
 	"aSP1": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 	},
 	"SP1[c1]": {
 		"root" : "SP1", # needed for aerial memory
@@ -378,13 +379,13 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"priority": 0,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
-		"atk_attr" : [], # some projectile moves can have attributes like superarmor
+		"atk_attr" : [Globals.atk_attr.NON_ATTACK], # some projectile moves can have attributes like superarmor
 	},
 	"aSP1[ex]": {
 		"atk_type" : Globals.atk_type.EX,
 		"priority": 0,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 	},
 	
 	"aSP2" : {
@@ -570,20 +571,41 @@ const MOVE_DATABASE = {
 	"SP4": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[h]": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[ex]": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
+	
+	"aSP5" : {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
+		"hitcount" : 1,
+		"damage" : 100,
+		"knockback" : 475,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 4,
+		"priority": 5,
+		"guard_drain": 2000,
+		"guard_gain_on_combo" : 3500,
+		"EX_gain": 2500,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "red",
+		"KB_angle" : -PI/4,
+		"atk_attr" : [Globals.atk_attr.QUICK_TURN_LIMIT],
+		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
+		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
+	}
+	
 }
 

@@ -501,8 +501,7 @@ func test2():
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity) + "  grounded: " + str(grounded) + \
 		"\naerial_sp_memory: " + str(aerial_sp_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
-		str(input_buffer) + "\n" + str(current_guard_gauge) + " " + \
-		str(current_ex_gauge)
+		str(input_buffer) + "\n" + str(input_state)
 			
 			
 func _process(_delta):
@@ -1409,8 +1408,13 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 
 	# for neutral ex move, cannot do it if pressed up/down a few frames before, helps prevent accidental "option selects"
 	# like doing ex up-special but it is in aerial_sp_memory, so you end up doing ex neutral-special
+	# for ex moves without the light+fierce input, cannot perform if both light and fierce are pressed
+	var exclude_buttons = [button_up, button_down]
+	if button1 == button_light: exclude_buttons.append(button_fierce)
+	elif button1 == button_fierce: exclude_buttons.append(button_light)
+	
 	for tap in tap_memory:
-		if tap[0] == button_up or tap[0] == button_down:
+		if tap[0] in exclude_buttons:
 			return
 			
 	if (button1 in input_state.just_pressed and is_button_released(button_ex)) or \
@@ -1619,12 +1623,12 @@ func process_input_buffer():
 				if Animator.current_animation.begins_with("Burst"):
 					keep = false
 				else:
-					match new_state:
+					match state: # not new state
 						Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
 							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN, \
 							Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN:
-							if Animator.query(["WBlockstun", "AirWBlockstun"]): # no burst during wrongblock
+							if Animator.query_current(["WBlockstun", "AirWBlockstun"]): # no burst during wrongblock
 								continue
 							if burst_counter_check():
 								animate("BurstCounterStartup")
@@ -2259,6 +2263,9 @@ func check_quick_turn():
 				return false
 			if Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
 				return false
+			if Globals.atk_attr.QUICK_TURN_LIMIT in query_atk_attr(move_name): # some moves lock quick turn after a few (3) frames
+				if Animator.time > 3:
+					return false
 			return true
 		Globals.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st frame
 			if Animator.time <= 1 and Animator.time != 0:
@@ -2445,6 +2452,13 @@ func burst_revoke_check(move_name):
 	if !chain_combo in [Globals.chain_combo.RESET] or move_name in UniqueCharacter.EX_MOVES or move_name in UniqueCharacter.SUPERS or \
 			get_guard_gauge_percent_true() < BURSTREVOKE_GG_COST:
 		return false
+	if Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
+		# for projectiles and such, cannot Burst Revoke during active frames or if opponent is in hitstun/blockstun
+		if is_atk_active():
+			return false
+		var target = Globals.Game.get_player_node(targeted_opponent)
+		if target.get_node("HitStunTimer").is_running() or target.get_node("BlockStunTimer").is_running():
+			return false
 	change_guard_gauge_percent(-BURSTREVOKE_GG_COST)
 	remove_status_effect(Globals.status_effect.POS_FLOW)
 	pos_flow_seal = true
@@ -3098,6 +3112,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				
 				if hit_data.sweetspotted or hit_data.punish_hit:
 					dash_cancel = true # for sweetspotted/punish hit, allow dash_cancel
+					jump_cancel = true
 					
 				if is_aerial() and hit_data.block_state in [Globals.block_state.UNBLOCKED, Globals.block_state.GROUND_WRONG, \
 					Globals.block_state.AIR_WRONG]:

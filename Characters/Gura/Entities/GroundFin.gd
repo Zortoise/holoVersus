@@ -27,14 +27,14 @@ func init(aux_data: Dictionary):
 		Animator.play("Spawn")
 
 	if "ex" in aux_data: # set starting lifespan
-		Entity.lifespan = 300
+		Entity.lifespan = 600
 	else:
-		Entity.lifespan = 180	
+		Entity.lifespan = 300	
 			
 func stimulate():
 	
 	match Animator.current_animation: # triggering shark breach
-		"Active", "[h]Active", "Turn", "bTurn":
+		"Active", "[h]Active", "Turn", "[h]Turn":
 			if get_node(Entity.master_path).unique_data.groundfin_trigger:
 #				var breach_facing = get_node(Entity.master_path).get_last_tapped_dir()
 #				var turned := false

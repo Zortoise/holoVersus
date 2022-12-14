@@ -85,6 +85,17 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.GROUND_ATK_ACTIVE
 		"SP4Recovery", "SP4[ex]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
+			
+		"SP5Startup":
+			return Globals.char_state.GROUND_ATK_STARTUP
+		"aSP5Startup":
+			return Globals.char_state.AIR_ATK_STARTUP
+		"aSP5Active":
+			return Globals.char_state.AIR_ATK_ACTIVE
+		"aSP5Recovery", "aSP5bRecovery":
+			return Globals.char_state.AIR_ATK_RECOVERY
+		"SP5bRecovery":
+			return Globals.char_state.GROUND_ATK_RECOVERY
 		
 	print("Error: " + anim + " not found.")
 		
@@ -104,6 +115,11 @@ func stimulate():
 #	Character.input_state
 #	Character.dir
 #	Character.v_dir
+
+	if Character.unique_data.bitten_player_path != null: # duration of bitemark
+		Character.unique_data.bitemark_time -= 1
+		if Character.unique_data.bitemark_time <= 0:
+			Character.unique_data.bitten_player_path = null
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 
@@ -223,6 +239,8 @@ func capture_combinations():
 	
 	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
 	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
+	
+	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 
 
 func rebuffer_actions():
@@ -235,6 +253,7 @@ func rebuffer_actions():
 	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
 	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
 	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	
 func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
@@ -243,13 +262,25 @@ func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 	
 func capture_instant_actions():
 	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
+	Character.combination(Character.button_unique, Character.button_light, "BitemarkTrigger", false, true)
 	
 func process_instant_actions():
 	Character.unique_data.groundfin_trigger = false
+	
 	if !Character.get_node("RespawnTimer").is_running() and !Character.get_node("HitStunTimer").is_running() and \
 			!Character.get_node("BlockStunTimer").is_running():
+				
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
+			
+		if "BitemarkTrigger" in Character.instant_actions:
+			if Character.unique_data.bitten_player_path != null:
+				var spawn_point = get_node(Character.unique_data.bitten_player_path).position
+				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
+				if spawn_point != null:
+					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point, {})
+					Character.unique_data.bitemark_time = 0
+					Character.unique_data.bitten_player_path = null
 
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
@@ -390,6 +421,10 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		"Sp.uF":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
+				
+		"Sp.H":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP5", has_acted, buffered_input[1])
 				
 		"ExSp.L":
 			if !has_acted[0]:
@@ -625,6 +660,8 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 	match move_name: # can add various atk_attr to certain animations under under conditions
 		"L2b":
 			return MOVE_DATABASE["L2"].atk_attr
+		"F2b":
+			return MOVE_DATABASE["F2"].atk_attr
 		"F3b":
 			return MOVE_DATABASE["F3"].atk_attr
 		"F3[h]":
@@ -641,6 +678,8 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 			return MOVE_DATABASE["aSP3[h]"].atk_attr
 		"SP3[ex]": 
 			return MOVE_DATABASE["aSP3[ex]"].atk_attr
+		"SP5", "SP5b", "aSP5b":
+			return MOVE_DATABASE["aSP5"].atk_attr
 			
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr
@@ -649,11 +688,18 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 	return []
 
 
-func landed_a_hit(_hit_data): # reaction, can change hit_data from here
-	if Animator.query(["aL2Active"]):
-		Character.animate("aL2Recovery")
-	elif Animator.query(["L2Active"]):
-		Character.animate("L2Recovery")
+func landed_a_hit(hit_data): # reaction, can change hit_data from here
+	
+	match hit_data.move_name:
+		"aL2":
+			Character.animate("aL2Recovery")
+		"L2":
+			Character.animate("L2Recovery")
+		"aSP5":
+			Character.unique_data.bitten_player_path = hit_data.defender_nodepath
+			Character.unique_data.bitemark_time = 180
+		
+#	bitten_player_path
 	
 	
 func being_hit(hit_data): # reaction, can change hit_data from here
@@ -979,6 +1025,20 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP4Recovery", "SP4[ex]Recovery":
 			Character.animate("Idle")
 			
+		"SP5Startup", "aSP5Startup":
+			Character.animate("aSP5Active")
+		"aSP5Active":
+			Character.animate("aSP5Recovery")
+		"aSP5Recovery":
+			if Character.grounded:
+				Character.animate("SP5bRecovery")
+			else:
+				Character.animate("aSP5bRecovery")
+		"SP5bRecovery":
+			Character.animate("Idle")
+		"aSP5bRecovery":
+			Character.animate("FallTransit")
+			
 
 func _on_SpritePlayer_anim_started(anim_name):
 
@@ -1267,6 +1327,25 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true, "ex" : true})
 			Character.unique_data.groundfin_count += 2
 		"SP4Recovery", "SP4[ex]Recovery":
+			Character.sfx_under.show()
+			
+		"SP5Startup":
+			Character.sfx_under.show()
+		"aSP5Startup":
+			Character.velocity_limiter.x_slow = 0.2
+			Character.velocity_limiter.y_slow = 0.2
+			Character.gravity_mod = 0.0
+			Character.sfx_under.show()
+		"aSP5Active":
+			Character.velocity.x = Character.facing * 200
+			Character.velocity.y = 0
+			Character.gravity_mod = 0.0
+			Character.friction_mod = 0.0
+			Character.sfx_under.show()
+		"aSP5Recovery":
+			Character.velocity_limiter.down = 0.2
+			Character.velocity.x *= 0.5
+			Character.gravity_mod = 0.25
 			Character.sfx_under.show()
 			
 	start_audio(anim_name)

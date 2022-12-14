@@ -162,6 +162,7 @@ func setup():
 		get_player_node(Netplay.my_player_id()).add_child(you_label)
 		
 	P1.test = true # testing purposes
+	P2.test = true # testing purposes
 
 # --------------------------------------------------------------------------------------------------
 
@@ -1055,6 +1056,8 @@ func defender_semi_invul(hitbox, hurtbox):
 					hitbox.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
 				return false # defender's semi-invul failed
 			else:
+				if "chain_combo" in attacker_or_entity: # prevent Burst Revoke
+					attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
 				return true # defender's semi-invul succeeded
 	return false
 	

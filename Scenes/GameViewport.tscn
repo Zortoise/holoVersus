@@ -1965,7 +1965,7 @@ anims/flash2 = SubResource( 75 )
 anims/rainbow = SubResource( 77 )
 
 [node name="Inputs" type="Node2D" parent="HUD/P1_HUDRect"]
-position = Vector2( 240, 896 )
+position = Vector2( 240, 1032 )
 
 [node name="InputFrame" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
 modulate = Color( 1, 1, 1, 0.5 )
@@ -2018,6 +2018,13 @@ texture = ExtResource( 32 )
 [node name="InputBlock" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
 position = Vector2( 63, -11 )
 texture = ExtResource( 31 )
+
+[node name="Unique" type="Node2D" parent="HUD/P1_HUDRect"]
+position = Vector2( 240, 888 )
+
+[node name="GuraHUD" type="Node2D" parent="HUD/P1_HUDRect/Unique"]
+
+[node name="Bitemark" type="AnimatedSprite" parent="HUD/P1_HUDRect/Unique/GuraHUD"]
 
 [node name="P2_HUDRect" type="ReferenceRect" parent="HUD"]
 margin_left = 1200.0
@@ -2163,7 +2170,7 @@ anims/flash2 = SubResource( 83 )
 anims/rainbow = SubResource( 85 )
 
 [node name="Inputs" type="Node2D" parent="HUD/P2_HUDRect"]
-position = Vector2( 240, 896 )
+position = Vector2( 240, 1032 )
 
 [node name="InputFrame" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
 modulate = Color( 1, 1, 1, 0.5 )
@@ -2216,6 +2223,9 @@ texture = ExtResource( 32 )
 [node name="InputBlock" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
 position = Vector2( 63, -11 )
 texture = ExtResource( 31 )
+
+[node name="Unique" type="Node2D" parent="HUD/P2_HUDRect"]
+position = Vector2( 240, 888 )
 
 [node name="P3_HUDRect" type="ReferenceRect" parent="HUD"]
 visible = false
