@@ -32,10 +32,13 @@ func init():
 
 func replay_auto_savestate(): # make a savestate every frame of the past 60 frames for replaying
 	Globals.Game.save_state(Globals.Game.frametime)
-	if replay_saved_game_states.size() > MAX_REPLAY_SAVE_STATES: # erase savestates if too many
-		var oldest_key = replay_saved_game_states.keys().min()
-# warning-ignore:return_value_discarded
-		replay_saved_game_states.erase(oldest_key) # erase oldest savestate
+	while replay_saved_game_states.size() > MAX_REPLAY_SAVE_STATES: # erase savestates if too many
+## warning-ignore:return_value_discarded
+		replay_saved_game_states.erase(replay_saved_game_states.keys().min())
+		
+#		var oldest_key = replay_saved_game_states.keys().min()
+## warning-ignore:return_value_discarded
+#		replay_saved_game_states.erase(oldest_key) # erase oldest savestate
 
 
 func replay_control():

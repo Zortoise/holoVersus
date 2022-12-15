@@ -6,7 +6,20 @@
 script = ExtResource( 1 )
 frame_data = {
 "Kill": {
-"duration": 58,
+"duration": 6,
+"hframes": 5,
+"loop": false,
+"spritesheet": "NibblerSpawnSprite",
+"timestamps": {
+0: {
+"entityspawn": Vector2( 8, -22 ),
+"frame": 4
+}
+},
+"vframes": 1
+},
+"Spawn": {
+"duration": 52,
 "hframes": 5,
 "loop": false,
 "spritesheet": "NibblerSpawnSprite",
@@ -62,10 +75,6 @@ frame_data = {
 48: {
 "entityspawn": null,
 "frame": 3
-},
-52: {
-"entityspawn": Vector2( 8, -22 ),
-"frame": 4
 }
 },
 "vframes": 1

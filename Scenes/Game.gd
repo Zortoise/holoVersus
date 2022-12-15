@@ -52,6 +52,7 @@ var record_end_time := 0 # set end of playback, when loading set true_frame_time
 							# inputs pass record_end_time within match_input_log
 
 var test_state # save state for testing
+var test_state2 # save state for testing
 #onready var debugger = load("res://Scenes/Debugger.gd").new() # for checking input stuff, very useful
 var test_saved_game_states: Dictionary
 var frame_reverse := true
@@ -162,7 +163,10 @@ func setup():
 		get_player_node(Netplay.my_player_id()).add_child(you_label)
 		
 	P1.test = true # testing purposes
-	P2.test = true # testing purposes
+#	P2.test = true # testing purposes
+	
+	for player in $Players.get_children(): # each player target a random other player
+		player.initial_targeting()
 
 # --------------------------------------------------------------------------------------------------
 
@@ -176,9 +180,11 @@ func set_camera_limit():
 
 func debug():
 	if Input.is_action_just_pressed("speed_up"):
-		play_speed += 1
-	if Input.is_action_just_pressed("speed_down") and play_speed > 0:
-		play_speed -= 1
+# warning-ignore:narrowing_conversion
+		play_speed = min(play_speed + 1, 1)
+	if Input.is_action_just_pressed("speed_down"):
+# warning-ignore:narrowing_conversion
+		play_speed = max(play_speed - 1, 0)
 			
 	if Input.is_action_just_released("zoom_in"):
 		Globals.change_zoom_level(0.1)
@@ -198,6 +204,25 @@ func debug():
 	#			load_state(loaded_data)
 			if test_state != null:
 				load_state(test_state, false)
+				true_frametime = frametime
+				match_input_log.set_end_frametime(frametime)
+				emit_signal("loaded_state") # to tell text to show message
+			else:
+				print("Error: Saved game state not found")
+				
+	# save state
+	if Input.is_action_just_pressed("save_state2"):
+		save_state("test_state2")
+		emit_signal("saved_state") # to tell text to show message
+		
+	# load state
+	if Input.is_action_just_pressed("load_state2"):
+		if playback_mode == false:
+	#		if ResourceLoader.exists("res://Scenes/SavedData/GameState.tres"):
+	#			var loaded_data = ResourceLoader.load("res://Scenes/SavedData/GameState.tres")
+	#			load_state(loaded_data)
+			if test_state2 != null:
+				load_state(test_state2, false)
 				true_frametime = frametime
 				match_input_log.set_end_frametime(frametime)
 				emit_signal("loaded_state") # to tell text to show message
@@ -602,10 +627,13 @@ func stimulate(rendering = true):
 	
 func test_auto_savestate(): # make a savestate every frame of the past 60 frames for testing
 	save_state(frametime)
-	if test_saved_game_states.size() > 61: # erase savestates if too many
-		var oldest_key = test_saved_game_states.keys().min()
+	while test_saved_game_states.size() > 181: # erase savestates if too many
 # warning-ignore:return_value_discarded
-		test_saved_game_states.erase(oldest_key) # erase oldest savestate
+		test_saved_game_states.erase(test_saved_game_states.keys().min())
+#
+#		var oldest_key = test_saved_game_states.keys().min()
+## warning-ignore:return_value_discarded
+#		test_saved_game_states.erase(oldest_key) # erase oldest savestate
 	
 func save_state(timestamp):
 
@@ -670,10 +698,14 @@ func save_state(timestamp):
 		elif frame_reverse and Globals.editor:
 			test_saved_game_states[timestamp] = game_state.duplicate(true)
 	else:
-		if !Globals.watching_replay:
-			test_state = game_state.duplicate(true)
-		else:
-			$ReplayControl.test_state = game_state.duplicate(true)
+		if timestamp == "test_state":
+			if !Globals.watching_replay:
+				test_state = game_state.duplicate(true)
+			else:
+				$ReplayControl.test_state = game_state.duplicate(true)
+		elif timestamp == "test_state2":
+			if !Globals.watching_replay:
+				test_state2 = game_state.duplicate(true)
 
 
 func load_state(game_state, loading_autosave = true):
@@ -740,7 +772,7 @@ func load_state(game_state, loading_autosave = true):
 		stage.load_state(loaded_game_state.stage_data)
 		
 	if frame_reverse and !loading_autosave: # when loading manual save, erase autoload states
-		test_saved_game_states = {}
+		test_saved_game_states.clear()
 	
 	
 # DETECT RINGOUT --------------------------------------------------------------------------------------------------	
@@ -1282,6 +1314,8 @@ func burst_update(character):
 	else:
 		burst_token.hide()
 				
+func set_uniqueHUD(player_ID, uniqueHUD):
+	HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Unique").add_child(uniqueHUD)
 				
 func get_player_node(player_ID):
 	for player in $Players.get_children():
@@ -1374,10 +1408,10 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary)
 	
 	
 func spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, \
-		lifetime = 10.0, use_master_palette = true):
+		lifetime = 10.0, afterimage_shader = Globals.afterimage_shader.MASTER):
 	var afterimage = Globals.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
-	afterimage.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, use_master_palette)
+	afterimage.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 	
 	
 # aux_data contain "vol", "bus"

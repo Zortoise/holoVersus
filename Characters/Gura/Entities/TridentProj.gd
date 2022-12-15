@@ -64,7 +64,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
-		"move_name" : "TridentProj",
+		"move_name" : "TridentProjEX",
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 3,
 		"damage" : 60,
@@ -128,7 +128,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[ex]Active" : {
-		"move_name" : "TridentProj2",
+		"move_name" : "TridentProj2EX",
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 3,
 		"damage" : 60,
@@ -179,7 +179,7 @@ func init(aux_data: Dictionary):
 
 func query_move_data():
 	
-	var move_ref = Animator.current_animation
+	var move_ref = Animator.to_play_animation
 	
 	match move_ref:
 		"[c1]Spawn":
@@ -204,37 +204,37 @@ func query_move_data():
 
 
 func query_atk_attr(in_move_name):
-	if Animator.query_current(["[c3]Active", "a[c3]Active", "[c3]Spawn", "a[c3]Spawn"]):
+	if Animator.query_to_play(["[c3]Active", "a[c3]Active", "[c3]Spawn", "a[c3]Spawn"]):
 		return [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB]
 	match in_move_name:
-		"TridentProj", "TridentProj2":
+		"TridentProj", "TridentProj2", "TridentProjEX", "TridentProj2EX":
 			return [Globals.atk_attr.DRAG_KB]
 			
 			
 func stimulate():
-	match Animator.current_animation: # afterimage trail
+	match Animator.to_play_animation: # afterimage trail
 		"[c2]Active", "a[c2]Active":
 			if posmod(Entity.lifetime, 3) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 				
 		"[c3]Active", "[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
 						{"facing":Entity.facing, "rot":START_ROTATION, "palette" : Entity.master_path})
 						
 		"a[c3]Active", "a[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
 						{"facing":Entity.facing, "rot":-START_ROTATION, "palette" : Entity.master_path})
 	
 	
 func kill(sound = true):
-	match Animator.current_animation:
+	match Animator.to_play_animation:
 		"[c1]Spawn", "[c2]Spawn", "[c3]Spawn", "[ex]Spawn", "[c1]Active", "[c2]Active", "[c3]Active", "[ex]Active":
 			Animator.play("Kill")
 			if sound:

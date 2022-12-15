@@ -50,16 +50,19 @@ const UNIQUE_DATA_REF = {
 	"groundfin_count" : 0,
 	"groundfin_trigger" : false,
 	"bitten_player_path" : null,
-	"bitemark_time" : 0,
+	"nibbler_count" : 0,
+	"nibbler_cancel" : false,
 }
 
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
-		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5"]
+		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]"]
 const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
-const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]"]
+const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]"]
 const SUPERS = []
 
-const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP3b[ex]", "SP4[ex]"] # list of movenames that will emit EX flash
+# list of movenames that will emit EX flash
+const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
+		"SP5b[ex]", "aSP5b[ex]"]
 #const EX_FLASH_ANIM = ["H", "Hb"]
 
 # const DIRECTORY_NAME = "res://Characters/Gura/"
@@ -430,7 +433,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},
 	"aSP2[ex]" : {
-		"atk_type" : Globals.atk_type.SPECIAL,
+		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 5,
 		"ignore_time" : 5,
 		"damage" : 40,
@@ -530,7 +533,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	"aSP3[ex]" : {
-		"atk_type" : Globals.atk_type.SPECIAL,
+		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 1,
 		"damage" : 60,
 		"knockback" : 650,
@@ -551,7 +554,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
 	"aSP3b[ex]" : {
-		"atk_type" : Globals.atk_type.SPECIAL,
+		"atk_type" : Globals.atk_type.EX,
 		"chain_starter" : "aSP3[ex]",
 		"hitcount" : 1,
 		"damage" : 120,
@@ -581,7 +584,7 @@ const MOVE_DATABASE = {
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[ex]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
+		"atk_type" : Globals.atk_type.EX,
 		"priority": 0,
 		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
@@ -603,8 +606,27 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "red",
 		"KB_angle" : -PI/4,
 		"atk_attr" : [Globals.atk_attr.QUICK_TURN_LIMIT],
-		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
-		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
+		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
+		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
+	},
+	"aSP5[ex]" : {
+		"atk_type" : Globals.atk_type.EX,
+		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
+		"hitcount" : 1,
+		"damage" : 130,
+		"knockback" : 500,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"attack_level" : 4,
+		"priority": 5,
+		"guard_drain": 2500,
+		"guard_gain_on_combo" : 3500,
+		"EX_gain": 0,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "red",
+		"KB_angle" : -PI/4,
+		"atk_attr" : [Globals.atk_attr.QUICK_TURN_LIMIT],
+		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
+		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
 	}
 	
 }

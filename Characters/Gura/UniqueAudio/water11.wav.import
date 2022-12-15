@@ -1,0 +1,23 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/water11.wav-df4e2ed43e392a7e4e2b5b628dc8b22c.sample"
+
+[deps]
+
+source_file="res://Characters/Gura/UniqueAudio/water11.wav"
+dest_files=[ "res://.import/water11.wav-df4e2ed43e392a7e4e2b5b628dc8b22c.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

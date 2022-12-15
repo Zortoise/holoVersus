@@ -38,7 +38,7 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 	
 	if !"facing" in aux_data:
 		face(get_node(master_path).facing) # face in same direction as master
-	else:
+	elif aux_data.facing != 0: # just in case
 		face(aux_data.facing)
 	
 	# for sprites:
@@ -246,14 +246,22 @@ func move_true_position(in_velocity):
 # --------------------------------------------------------------------------------------------------
 		
 func face(in_dir):
-	facing = in_dir
-	$Sprite.scale.x = facing
+	if in_dir != 0:
+		facing = in_dir
+		$Sprite.scale.x = facing
 		
 func check_fallthrough(): # return true if entity falls through soft platforms
 	if UniqueEntity.has_method("check_fallthrough"): # some entities may interact with soft platforms
-		return UniqueEntity.check_fallthrough
+		return UniqueEntity.check_fallthrough()
 	else:
 		return true
+		
+func check_passthrough(): # return true if entity ignore walls/floors
+	if UniqueEntity.has_method("check_passthrough"):
+		return UniqueEntity.check_passthrough()
+	else:
+		return false
+
 
 func on_offstage(): # what to do if entity leaves stage
 	if UniqueEntity.has_method("on_offstage"):
@@ -280,14 +288,14 @@ func query_polygons(): # requested by main game node when doing hit detection
 func query_move_data(): # requested by main game node when doing hit detection
 	if UniqueEntity.has_method("query_move_data"):
 		return UniqueEntity.query_move_data()
-	elif Animator.current_animation in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[Animator.current_animation]
+	elif Animator.to_play_animation in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[Animator.to_play_animation]
 	return null
 
 func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
 	
 	if in_move_name == null:
-		in_move_name = Animator.current_animation
+		in_move_name = Animator.to_play_animation
 	
 	if UniqueEntity.has_method("query_atk_attr"):
 		return UniqueEntity.query_atk_attr(in_move_name)
@@ -304,7 +312,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
-	attacker.targeted_opponent = defender.player_ID # target last attacked opponent
+	attacker.targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
 
 	# no positive flow for entities
 

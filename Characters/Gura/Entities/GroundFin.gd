@@ -33,7 +33,7 @@ func init(aux_data: Dictionary):
 			
 func stimulate():
 	
-	match Animator.current_animation: # triggering shark breach
+	match Animator.to_play_animation: # triggering shark breach
 		"Active", "[h]Active", "Turn", "[h]Turn":
 			if get_node(Entity.master_path).unique_data.groundfin_trigger:
 #				var breach_facing = get_node(Entity.master_path).get_last_tapped_dir()
@@ -44,17 +44,20 @@ func stimulate():
 #					turned = true # aleady turned via get_last_tapped_dir()
 #				if breach_facing == 0:
 #					breach_facing = Entity.facing
-				var breach_facing = sign(Globals.Game.get_player_node(get_node(Entity.master_path).targeted_opponent).position.x - Entity.position.x)
-				if breach_facing == 0:
-					breach_facing = Entity.facing
+				var breach_facing = Entity.facing
+				var new_facing_ref = get_node(get_node(Entity.master_path).targeted_opponent_path).position.x - Entity.position.x
+				if new_facing_ref != 0: # turn to face targeted opponent
+					breach_facing = sign(new_facing_ref)
 				Globals.Game.spawn_entity(Entity.master_path, "SharkBreach", Entity.position, {"facing" : breach_facing})
+				Entity.play_audio("water4", {"unique_path" : Entity.master_path, "vol" : -23})
+				Entity.play_audio("water8", {"unique_path" : Entity.master_path, "vol" : -13})
 				# reduce ground fin count
 				get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
 				Entity.free = true
 
 	
 func kill(_sound = true):
-	if !Animator.current_animation.ends_with("Kill"):
+	if !Animator.to_play_animation.ends_with("Kill"):
 		Animator.play("Kill")
 		# reduce ground fin count
 		get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
@@ -64,7 +67,7 @@ func collision(): # collided with a wall, turns
 	ledge_stop()
 	
 func ledge_stop(): # about to go off the ledge, turns
-	match Animator.current_animation:
+	match Animator.to_play_animation:
 		"Spawn", "Active":
 			Animator.play("Turn")
 		"[h]Spawn", "[h]Active":

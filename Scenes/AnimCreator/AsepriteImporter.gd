@@ -11,10 +11,10 @@ extends EditorScript
 
 # TARGETS ---------------------------------------------------------------------------------------------------
 
-export var entity_folder = "res://Characters/Gura/Entities/"
-# be sure to end with a "/"
+export var entity_folder = "res://Characters/Gura/Entities"
+# be sure to end with a "/", or not if you wish, I guess
 
-export var target_aseprite_filename = "NibblerSpawn"
+export var target_aseprite_filename = "Nibbler"
 # only need filename, not path, no need extension
 # if left empty, will process all .aseprite files in the AsepriteFiles folder in entity_folder
 
@@ -27,6 +27,10 @@ export var aseprite_exe = "C:\\Program Files\\Aseprite-v1.2.39\\Aseprite.exe"
 const COLUMN_COUNT := 6 # for exported spritesheet
 
 func _run():
+	
+	if !entity_folder.ends_with("/"):
+		entity_folder += "/" # stop accidentally leaving it out
+		
 	# if target_aseprite_filename is not empty, only process that aseprite file and ignore the rest
 	if target_aseprite_filename != "":
 		process_aseprite_file(target_aseprite_filename)

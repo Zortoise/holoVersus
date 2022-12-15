@@ -181,6 +181,8 @@ func get_colliding_characters_side(collision_box, direction):
 func is_against_wall(collision_box, soft_platform_dbox, direction):
 	if Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2(direction, 0)) and \
 			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+		if has_method("check_passthrough") and call("check_passthrough"):
+			return false
 		return true
 	else:
 		return false
@@ -201,6 +203,8 @@ func is_against_ledge(soft_platform_dbox, direction):
 func is_against_ceiling(collision_box, soft_platform_dbox):
 	if Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2.UP) and \
 			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+		if has_method("check_passthrough") and call("check_passthrough"):
+			return false
 		return true
 	else:
 		return false
@@ -218,6 +222,8 @@ func is_on_solid_ground(soft_platform_dbox, in_velocity):
 	if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"], Vector2.DOWN) and \
 			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]) \
 			and in_velocity.y >= 0: # is not considered on ground if moving upwards
+		if has_method("check_passthrough") and call("check_passthrough"):
+			return false
 		return true
 	else:
 		return false

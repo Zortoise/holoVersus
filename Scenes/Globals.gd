@@ -43,6 +43,7 @@ enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFEC
 enum trait {CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BLOCK
 		DASH_BLOCK}
 enum entity_trait {GROUNDED, LEDGE_STOP}
+enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
 		P1_UNIQUE, P1_PAUSE,
@@ -62,6 +63,7 @@ onready var loaded_SFX_scene := load("res://Scenes/SFX.tscn")
 onready var loaded_afterimage_scene := load("res://Scenes/Afterimage.tscn")
 onready var loaded_palette_shader = load("res://Scenes/Shaders/Palette.gdshader")
 onready var monochrome_shader = load("res://Scenes/Shaders/Monochrome.gdshader")
+onready var white_shader = load("res://Scenes/Shaders/White.gdshader")
 onready var loaded_guard_gauge = ResourceLoader.load("res://Assets/UI/guard_gauge1.png")
 onready var loaded_guard_gauge_pos = load("res://Assets/UI/guard_gauge_pos.tres")
 

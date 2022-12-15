@@ -87,6 +87,7 @@ const WRONGBLOCK_CHIP_DMG_MOD = 2.0 # increased chip damage for wrongblocking
 const WRONGBLOCK_GUARD_DRAIN_MOD = 2.5 # increased guard drain for wrongblocking
 const WRONGBLOCK_BLOCKSTUN_MOD = 2.0 # increased blockstun for wrongblocking
 const WRONGBLOCK_PUSHBACK_MOD = 1.0 # % of base knockback of attack
+const WRONGBLOCK_AERIAL_PUSHBACK_MOD = 2.0 # increase knockback on aerial wrongblock
 const WRONGBLOCK_ATKER_PUSHBACK = 200 # how much the attacker is pushed away, fixed
 const WRONGBLOCK_HITSTOP = 7
 
@@ -163,7 +164,7 @@ var soft_grounded := false
 var hitstop = null # holder to influct hitstop at end of frame
 var status_effect_to_remove = [] # holder to remove status effects at end of frame
 var startup_cancel_flag := false # allow cancelling of startup frames without rebuffering
-var instant_actions_temp := [] # used to transfer instant actions into instant_actions array after stored ones are processed
+var instant_actions_temp := [] # used to transfer instant actions captured this frame into instant_actions array after stored ones are processed
 var alt_block := false # neutral dash can be used to block as well
 
 var player_ID: int # player number controlling this character, 0 for P1, 1 for P2
@@ -219,7 +220,7 @@ var aerial_memory = [] # appended whenever an air normal attack is made, cannot 
 var aerial_sp_memory = [] # appended whenever an air normal attack is made, cannot do the same air normal twice before landing
 						  # reset on landing
 var block_rec_cancel := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
-var targeted_opponent: int # player_ID of the opponent, changes whenever you land a hit on an opponent or is attacked
+var targeted_opponent_path: NodePath # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
 var has_burst := false # gain burst by ringing out opponent
 var tap_memory = []
 var release_memory = []
@@ -332,13 +333,6 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	Globals.Game.burst_update(self)
 	
 	unique_data = UniqueCharacter.UNIQUE_DATA_REF.duplicate(true)
-	
-	# target a random opponent
-	var players = []
-	for x in Globals.player_count:
-		if x != player_ID:
-			players.append(x)
-	targeted_opponent = players[rng_generate(players.size())]
 	
 
 func setup_boxes(ref_rect): # set up detection boxes
@@ -479,6 +473,17 @@ func set_up_sfx(): # scan all .tres files within SFX/FrameData folder and add th
 			file_name = directory.get_next()
 	else: print("Error: Cannot open SFX folder for character")
 	
+	
+func initial_targeting(): # target random players at start, cannot do in init() since need all players to be added first
+	# target a random opponent
+	var player_ids = []
+	for x in Globals.player_count:
+		if x != player_ID:
+			 player_ids.append(x)
+	targeted_opponent_path = Globals.Game.get_player_node(player_ids[rng_generate(player_ids.size())]).get_path()
+	
+
+	
 # TESTING --------------------------------------------------------------------------------------------------
 
 # for testing only
@@ -543,23 +548,28 @@ func stimulate(new_input_state):
 	
 			
 	if Globals.editor and Input.is_action_just_pressed("sound_test") and test:
-		$ModulatePlayer.play("red_burst")
-		
-#		var test_pt = Detection.ground_finder(position, facing, Vector2(100, 50), Vector2(100, 100))
-#		if test_pt: Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", test_pt, {})
-		
-		match test_num % 3:
-			0:
-				play_audio("kill1", {"vol" : -10})
-			1:
-				play_audio("kill2", {"vol" : -12})
-			2:
-				play_audio("kill3", {"vol" : -12, "bus" : "Reverb"})
-
-		test_num += 1
-		
-		change_guard_gauge_percent(-1.0)
-		
+#		$ModulatePlayer.play("red_burst")
+#
+##		var test_pt = Detection.ground_finder(position, facing, Vector2(100, 50), Vector2(100, 100))
+##		if test_pt: Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", test_pt, {})
+#
+#		match test_num % 3:
+#			0:
+#				play_audio("kill1", {"vol" : -10})
+#			1:
+#				play_audio("kill2", {"vol" : -12})
+#			2:
+#				play_audio("kill3", {"vol" : -12, "bus" : "Reverb"})
+#
+#		test_num += 1
+		change_ex_gauge(50000)
+		change_burst_token(true)
+		get_node(targeted_opponent_path).change_guard_gauge_percent(-0.8)
+		get_node(targeted_opponent_path).change_ex_gauge(50000)
+		get_node(targeted_opponent_path).change_burst_token(true)
+		unique_data.bitten_player_path = targeted_opponent_path
+		unique_data.nibbler_count = 3
+		UniqueCharacter.update_uniqueHUD()
 		
 # PAUSING --------------------------------------------------------------------------------------------------
 		
@@ -658,7 +668,7 @@ func stimulate2(): # only ran if not in hitstop
 	startup_cancel_flag = false # to cancel startup without incurring auto-buffer
 	
 	if pos_flow_seal and !$PosFlowSealTimer.is_running():
-		if !Globals.Game.get_player_node(targeted_opponent).get_node("HitStunTimer").is_running():
+		if !get_node(targeted_opponent_path).get_node("HitStunTimer").is_running():
 			pos_flow_seal = false
 
 # CAPTURE DIRECTIONAL INPUTS --------------------------------------------------------------------------------------------------
@@ -789,7 +799,7 @@ func stimulate2(): # only ran if not in hitstop
 
 # DOWN BUTTON --------------------------------------------------------------------------------------------------
 	
-	if button_down in input_state.pressed:
+	if button_down in input_state.pressed and !button_unique in input_state.pressed:
 		
 		match state:
 			
@@ -1229,8 +1239,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 					
 			
 			ex_flash()
-			# do afterimage trails
-			UniqueCharacter.afterimage_trail()
+			process_afterimage_trail() 	# do afterimage trails
 			
 			# spin character during launch, be sure to do this after SpritePlayer since rotation is reset at start of each animation
 			if !$HitStopTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
@@ -1287,6 +1296,11 @@ func buffer_actions():
 	if button_dash in input_state.just_pressed:
 		if !alt_block and !button_unique in input_state.pressed:
 			input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
+		
+	if button_special in input_state.just_pressed:
+		tap_memory.append([button_special, TAP_MEMORY_DURATION])
+	if button_unique in input_state.just_pressed:
+		tap_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
 	if button_special in input_state.just_released:
 		release_memory.append([button_special, TAP_MEMORY_DURATION])
@@ -1357,6 +1371,7 @@ func rebuffer(button1, button2, action, back = false):
 			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
 		else:
 			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+
 				
 func rebuffer_trio(button1, button2, button3, action, back = false):
 	if button1 in input_state.pressed and button2 in input_state.pressed and button3 in input_state.pressed:
@@ -1387,10 +1402,14 @@ func combination(button1, button2, action, back = false, instant = false):
 		if !instant:
 			if !back:
 				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+				return true
 			else:
 				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+				return true
 		else:
 			instant_actions_temp.append(action)
+			return true
+	return false
 				
 func combination_trio(button1, button2, button3, action, back = false, instant = false):
 	if (button1 in input_state.just_pressed and is_button_pressed(button2) and is_button_pressed(button3)) or \
@@ -1399,10 +1418,14 @@ func combination_trio(button1, button2, button3, action, back = false, instant =
 		if !instant:
 			if !back:
 				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+				return true
 			else:
 				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+				return true
 		else:
 			instant_actions_temp.append(action)
+			return true
+	return false
 			
 func ex_combination(button_ex, button1, action, back = false, instant = false):
 
@@ -1442,6 +1465,7 @@ func ex_combination_trio(button_ex, button1, button2, action, back = false, inst
 			
 func is_button_pressed(button):
 	if button in [button_light, button_fierce]: # for attack buttons, considered "pressed" a few frame after being tapped as well
+		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
 		for tap in tap_memory:
 			if tap[0] == button:
 				return true
@@ -1490,10 +1514,41 @@ func is_button_released(button):
 	
 func capture_and_process_instant_actions(): # capture instant actions after directional keys are read
 	instant_actions_temp = [] # clear captured instant actions last frame
-	UniqueCharacter.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
-	UniqueCharacter.process_instant_actions() # process stored instant actions last frame
+	if button_unique in input_state.pressed:
+		UniqueCharacter.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
+	UniqueCharacter.process_instant_actions() # process stored instant actions in instant_actions array last frame
 	instant_actions = [] # stored instant_actions last frame are removed
 	instant_actions.append_array(instant_actions_temp) # store instant actions captured this frame into instant_actions array
+	
+# to quick cancel instant actions, some instant actions captured within capture_instant_actions() will cancel certain instant actions that are
+# 	stored in instant_actions array
+# capturing up/down tilt instant actions will erase neutral instant actions in instant_actions array
+# releasing up/down will erase up-tilt/down-tilt instant actions instant_actions array and capture a neutral one
+
+func instant_action_tilt_combination(attack_button, neutral_action, down_tilt_action, up_tilt_action):
+	
+	if !attack_button in input_state.pressed: return
+	
+	var down_tilted := false
+	var up_tilted := false
+	
+	if down_tilt_action != null:
+		down_tilted = combination_trio(button_unique, button_down, attack_button, down_tilt_action, false, true)
+	if !down_tilted and up_tilt_action != null:
+		up_tilted = combination_trio(button_unique, button_up, attack_button, up_tilt_action, false, true)
+	if !down_tilted and !up_tilted:
+		combination(button_unique, attack_button, neutral_action, false, true)
+	else:
+		instant_actions.erase(neutral_action) # a down_tilt or up_tilt has been captured, erase neutral action captured last frame
+	
+	# releasing up/down will erase up-tilt/down-tilt instant actions instant_actions array and capture a neutral one
+	if down_tilt_action != null and button_down in input_state.just_released and down_tilt_action in instant_actions:
+		instant_actions.erase(down_tilt_action)
+		instant_actions_temp.append(neutral_action)
+	elif up_tilt_action != null and button_up in input_state.just_released and up_tilt_action in instant_actions:
+		instant_actions.erase(up_tilt_action)
+		instant_actions_temp.append(neutral_action)
+		
 	
 # INPUT BUFFER ---------------------------------------------------------------------------------------------------
 	
@@ -1836,7 +1891,7 @@ func on_kill():
 			
 		# your targeted opponent gain burst token if you die with Damage Value over Damage Value Limit
 		if get_damage_percent() >= 1.0:
-			Globals.Game.get_player_node(targeted_opponent).change_burst_token(true)
+			get_node(targeted_opponent_path).change_burst_token(true)
 			
 	
 func respawn():
@@ -2175,6 +2230,21 @@ func ex_flash():# process ex flash
 func get_spritesheets():
 	pass
 			
+func process_afterimage_trail():# process afterimage trail
+	# Character.afterimage_trail() can accept 2 parameters, 1st is the starting modulate, 2nd is the lifetime
+	
+	# afterimage trail for certain modulate animations with the key "afterimage_trail"
+	if LoadedSFX.modulate_animations.has($ModulatePlayer.current_animation) and \
+		LoadedSFX.modulate_animations[$ModulatePlayer.current_animation].has("afterimage_trail") and \
+		$ModulatePlayer.is_playing():
+		# basic afterimage trail for "afterimage_trail" = 0
+		if LoadedSFX.modulate_animations[$ModulatePlayer.current_animation]["afterimage_trail"] == 0:
+			afterimage_trail()
+			return
+			
+	UniqueCharacter.afterimage_trail()
+			
+			
 func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0): # one afterimage every 2 frames
 	if afterimage_timer <= 0:
 		afterimage_timer = 1
@@ -2295,9 +2365,10 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	else: # cancelling from a normal move
 		if attack_ref in UniqueCharacter.EX_MOVES: # cancelling into an ex move from normal move has wider window
 			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
-			if (button_light in input_state.pressed or button_fierce in input_state.pressed) and \
-					Animator.time <= 3 and Animator.time != 0:
-				return true
+			if (button_light in input_state.pressed or button_fierce in input_state.pressed):
+				if !are_inputs_too_close():
+					if Animator.time <= 5 and Animator.time != 0:
+						return true
 		else:
 			if !grounded and (button_up in input_state.just_released or button_down in input_state.just_released):
 				if Animator.time <= 5 and Animator.time != 0: # release up/down rebuffer has wider window if in the air
@@ -2309,6 +2380,22 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 			elif Animator.time <= 1 and Animator.time != 0:
 				return true
 		
+	return false
+	
+func are_inputs_too_close():
+	var time_of_last_special_or_unique_tap = null
+	var time_of_last_attack_tap = null
+	
+	for tap in tap_memory:
+		if tap[0] in [button_special, button_unique]:
+			time_of_last_special_or_unique_tap = tap[1]
+		elif tap[0] in [button_light, button_fierce]:
+			time_of_last_attack_tap = tap[1]
+			
+	if time_of_last_special_or_unique_tap == null or time_of_last_attack_tap == null:
+		return false
+	elif abs(time_of_last_special_or_unique_tap - time_of_last_attack_tap) <= 2:
+		return true
 	return false
 	
 #func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
@@ -2416,6 +2503,25 @@ func is_special_move(move_name):
 				return true
 	return false
 	
+# called by unique character to check if there is an EX version and if it is valid
+func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
+	if !attack_ref in UniqueCharacter.EX_MOVES: return true # not ex move
+	if !quick_cancel: # not quick cancelling, must afford it
+		if current_ex_gauge >= EX_MOVE_COST:
+			change_ex_gauge(-EX_MOVE_COST)
+			play_audio("bling6", {"vol" : -6, "bus" : "HighPass"}) # EX chime
+			return true
+		else:
+			return false
+	else:
+		if get_move_name() in UniqueCharacter.EX_MOVES: # can quick cancel from 1 EX move to another, no cost and no chime if so
+			return true
+		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
+			change_ex_gauge(-EX_MOVE_COST)
+			play_audio("bling6", {"vol" : -6, "bus" : "HighPass"}) # EX chime
+			return true
+		else:
+			return false
 	
 func is_burst(move_name):
 	if move_name.begins_with("Burst"):
@@ -2456,7 +2562,7 @@ func burst_revoke_check(move_name):
 		# for projectiles and such, cannot Burst Revoke during active frames or if opponent is in hitstun/blockstun
 		if is_atk_active():
 			return false
-		var target = Globals.Game.get_player_node(targeted_opponent)
+		var target = get_node(targeted_opponent_path)
 		if target.get_node("HitStunTimer").is_running() or target.get_node("BlockStunTimer").is_running():
 			return false
 	change_guard_gauge_percent(-BURSTREVOKE_GG_COST)
@@ -3049,7 +3155,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
-	targeted_opponent = defender.player_ID # target last attacked opponent
+	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
 	
 	match hit_data.block_state: # gain Positive Flow if unblocked/wrongblocked, GG is under 100%, atk_level > 1
 		Globals.block_state.UNBLOCKED, Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
@@ -3210,8 +3316,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
 
-	
-	targeted_opponent = attacker.player_ID # target opponent who last attacked you
+	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
 	
 	# get direction to attacker
 	var vec_to_attacker = attacker_or_entity.position - defender.position
@@ -3528,50 +3633,52 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# ---------------------------------------------------------------------------------------------------
 			
+	var knockback_unit_vec := Vector2(1, 0).rotated(knockback_dir)
+		
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
 		if knockback_strength <= LAUNCH_THRESHOLD:
 			
-			if !"entity_nodepath" in hit_data:
-				face(dir_to_attacker) # turn towards attacker
-			else:
-				if attacker_or_entity.velocity.x == 0:
-					face(dir_to_attacker) # face towards entity if it is not moving horizontally
-				else:
-					face(-attacker_or_entity.facing) # face same direction as entity if it is moving horizontally
+#			if !"entity_nodepath" in hit_data:
+#				face(dir_to_attacker) # turn towards attacker
+#			else:
+#				if attacker_or_entity.velocity.x == 0:
+#					face(dir_to_attacker) # face towards entity if it is not moving horizontally
+#				else:
+#					face(-attacker_or_entity.velocity.x) # face same direction as entity if it is moving horizontally
 				
 			if adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running() and \
 				!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
 				Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
 				Globals.char_state.AIR_C_RECOVERY]:
-				pass # level 1 hit when defender is in non-passive states just push them back
+				pass # level 1 hit when defender is in non-passive states just push them back, no turn
 						
-			elif hit_data.hit_center.y >= position.y: # A/B depending on height hit
-				if grounded:
-					animate("FlinchAStop")
-				else:
-					animate("AirFlinchAStop")
 			else:
-				if grounded:
-					animate("FlinchBStop")
+				if knockback_unit_vec.x == 0.0:
+					face(dir_to_attacker) # turn towards attacker/entity if hit straight up
 				else:
-					animate("AirFlinchBStop")
+					face(-sign(knockback_unit_vec.x))
+				
+				if hit_data.hit_center.y >= position.y: # A/B depending on height hit
+					if grounded:
+						animate("FlinchAStop")
+					else:
+						animate("AirFlinchAStop")
+				else:
+					if grounded:
+						animate("FlinchBStop")
+					else:
+						animate("AirFlinchBStop")
 					
 		else: # launch
 			
 			# level 1 hit when defender is in non-passive states just push them back
 			if adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running() and \
-				!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
-				Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
-				Globals.char_state.AIR_C_RECOVERY]:
-				if !"entity_nodepath" in hit_data:
-					face(dir_to_attacker) # turn towards attacker
-				else:
-					if attacker_or_entity.velocity.x == 0:
-						face(dir_to_attacker) # face towards entity if it is not moving horizontally
-					else:
-						face(-attacker_or_entity.facing) # face same direction as entity if it is moving horizontally
+					!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
+					Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
+					Globals.char_state.AIR_C_RECOVERY]:
+				pass
 						
 			else:
 				knockback_strength += LAUNCH_BOOST
@@ -3617,20 +3724,23 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						launch_starting_rot = PI/4
 					
 	else: # blocking
+		
 		if !"entity_nodepath" in hit_data:
-			if !"multihit" in hit_data:
-				face(dir_to_attacker) # turn towards attacker, for multi-hit move only the last hit turns blocking defender for cross-ups
+			if !"multihit" in hit_data: # for multi-hit move only the last hit turns blocking defender for cross-ups
+				
+				if knockback_unit_vec.x == 0.0:
+					face(dir_to_attacker) # turn towards attacker/entity if hit straight up
+				else:
+					face(-sign(knockback_unit_vec.x))
+				
 		else: # multi-hit entities turn on 1st hit
-			if attacker_or_entity.velocity.x == 0:
-				face(dir_to_attacker) # face towards entity if it is not moving horizontally
+			if knockback_unit_vec.x == 0.0:
+				face(dir_to_attacker) # turn towards attacker/entity if hit straight up
 			else:
-				face(-attacker_or_entity.facing) # face same direction as entity if it is moving horizontally
-			
-		if adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running() and \
-			!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
-			Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
-			Globals.char_state.AIR_C_RECOVERY]:
-			pass # level 1 hit when defender is in non-passive states just push them back
+				face(-sign(knockback_unit_vec.x))
+		
+		if adjusted_atk_level <= 1:
+			pass # level 1 hit when defender is blocking just push them back
 			
 		else:
 			match hit_data.block_state:
@@ -3654,13 +3764,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				Globals.block_state.AIR_PERFECT:
 					animate("AirPBlockstun")
 					block_rec_cancel = true
-
-
-	# currently using reset velocity method, round values for more consistency
-	var knockback_velocity := Vector2(knockback_strength, 0).rotated(knockback_dir)
+		
+		
+	var knockback_velocity = knockback_unit_vec * knockback_strength
 	
 	if hit_data.block_state != Globals.block_state.UNBLOCKED and grounded:
-		knockback_velocity.y = 0 # set horizontal pushback on blocking defender
+		knockback_velocity.y = 0 # set to horizontal pushback on blocking defender
 		
 	velocity = knockback_velocity
 		
@@ -3799,6 +3908,8 @@ func calculate_knockback_strength(hit_data):
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 				knockback_strength *= WRONGBLOCK_PUSHBACK_MOD # increase KB for wrongblock
+				if !defender.grounded:
+					knockback_strength *= WRONGBLOCK_AERIAL_PUSHBACK_MOD
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				knockback_strength *= PERFECTBLOCK_PUSHBACK_MOD # reduce/negate KB for perfect block
 			_:
@@ -4448,7 +4559,7 @@ func save_state():
 		"jump_cancel" : jump_cancel,
 		"perfect_chain" : perfect_chain,
 		"block_rec_cancel" : block_rec_cancel,
-		"targeted_opponent" : targeted_opponent,
+		"targeted_opponent_path" : targeted_opponent_path,
 		"has_burst": has_burst,
 		"impulse_used" : impulse_used,
 		"DI_seal" : DI_seal,
@@ -4521,7 +4632,7 @@ func load_state(state_data):
 	jump_cancel = state_data.jump_cancel
 	perfect_chain = state_data.perfect_chain
 	block_rec_cancel = state_data.block_rec_cancel
-	targeted_opponent = state_data.targeted_opponent
+	targeted_opponent_path = state_data.targeted_opponent_path
 	has_burst = state_data.has_burst
 	impulse_used = state_data.impulse_used
 	DI_seal = state_data.DI_seal
@@ -4540,6 +4651,7 @@ func load_state(state_data):
 	Globals.Game.burst_update(self)
 	
 	unique_data = state_data.unique_data
+	if UniqueCharacter.has_method("update_uniqueHUD"): UniqueCharacter.update_uniqueHUD()
 	move_memory = state_data.move_memory
 	aerial_memory = state_data.aerial_memory
 	aerial_sp_memory = state_data.aerial_sp_memory

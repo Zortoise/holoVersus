@@ -10,11 +10,11 @@ var starting_modulate_a
 var master_path: NodePath
 var player_image := false # afterimage is that of a player
 var spritesheet_ref: String
-var use_master_shader := true
+var afterimage_shader = Globals.afterimage_shader.MASTER
 
 
 func init(in_master_path, in_spritesheet_ref, sprite_node_path, in_color_modulate = null, \
-		in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_use_master_shader = true):
+		in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Globals.afterimage_shader.MASTER):
 	
 	master_path = in_master_path
 	spritesheet_ref = in_spritesheet_ref
@@ -26,8 +26,8 @@ func init(in_master_path, in_spritesheet_ref, sprite_node_path, in_color_modulat
 	else:
 		print("Error: " + spritesheet_ref + " spritesheet not found in Shadow.gd.")
 		
-	use_master_shader = in_use_master_shader
-
+	afterimage_shader = in_afterimage_shader
+	apply_shader()
 
 	var sprite_base = get_node(sprite_node_path)
 	$Sprite.hframes = sprite_base.hframes
@@ -41,20 +41,32 @@ func init(in_master_path, in_spritesheet_ref, sprite_node_path, in_color_modulat
 		$Sprite.modulate.r = color_modulate.r
 		$Sprite.modulate.g = color_modulate.g
 		$Sprite.modulate.b = color_modulate.b
-		
-	if use_master_shader and get_node(master_path).loaded_palette != null: # same palette as master
-		$Sprite.material = ShaderMaterial.new()
-		$Sprite.material.shader = Globals.loaded_palette_shader
-		$Sprite.material.set_shader_param("swap", get_node(master_path).loaded_palette)
 	
 	life = float(in_lifetime)
 	lifetime = float(in_lifetime)
 	starting_modulate_a = float(in_starting_modulate_a)
 	position = sprite_base.global_position
 
+func apply_shader():
+	match afterimage_shader:
+		Globals.afterimage_shader.NONE:
+			pass
+		Globals.afterimage_shader.MASTER:
+			if get_node(master_path).loaded_palette != null:
+				$Sprite.material = ShaderMaterial.new()
+				$Sprite.material.shader = Globals.loaded_palette_shader
+				$Sprite.material.set_shader_param("swap", get_node(master_path).loaded_palette)
+		Globals.afterimage_shader.MONOCHROME:
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Globals.monochrome_shader
+		Globals.afterimage_shader.WHITE:
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Globals.white_shader
+			$Sprite.material.set_shader_param("whitening", 1.0)
+
 func stimulate():
 	if player_image and get_node(master_path).get_node("HitStopTimer").is_running():
-		return # does no advance if afterimage owner is a player and is in hitstun
+		return # does not advance if afterimage owner is a player and is in hitstun
 	
 	life -= 1.0
 	modulate.a = lerp(starting_modulate_a, 0.0, 1.0 - life/lifetime)
@@ -70,7 +82,7 @@ func save_state():
 		"master_path" : master_path,
 		"player_image" : player_image,
 		"spritesheet_ref" : spritesheet_ref,
-		"use_master_shader" : use_master_shader,
+		"afterimage_shader" : afterimage_shader,
 		"hframes" : $Sprite.hframes,
 		"vframes" : $Sprite.vframes,
 		"frame" : $Sprite.frame,
@@ -98,11 +110,8 @@ func load_state(state_data):
 	else:
 		print("Error: " + spritesheet_ref + " spritesheet not found in Shadow.gd.")
 	
-	use_master_shader = state_data.use_master_shader
-	if use_master_shader and get_node(master_path).loaded_palette != null: # same palette as master
-		$Sprite.material = ShaderMaterial.new()
-		$Sprite.material.shader = Globals.loaded_palette_shader
-		$Sprite.material.set_shader_param("swap", get_node(master_path).loaded_palette)
+	afterimage_shader = state_data.afterimage_shader
+	apply_shader()
 	
 	$Sprite.hframes = state_data.hframes
 	$Sprite.vframes = state_data.vframes

@@ -17,9 +17,15 @@ extends "res://Characters/Gura/GuraBase.gd"
 onready var Character = get_parent()
 var Animator
 var sprite
+var uniqueHUD
 
 func _ready():
 	get_node("TestSprite").free() # test sprite is for sizing collision box
+	uniqueHUD = load("res://Characters/Gura/GuraHUD.tscn").instance()
+	Globals.Game.set_uniqueHUD(Character.player_ID, uniqueHUD)
+	uniqueHUD.get_node("Bitemark1").hide()
+	uniqueHUD.get_node("Bitemark2").hide()
+	uniqueHUD.get_node("Bitemark3").hide()
 	
 # STATE_DETECT --------------------------------------------------------------------------------------------------
 
@@ -86,15 +92,15 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"SP4Recovery", "SP4[ex]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 			
-		"SP5Startup":
+		"SP5Startup", "SP5[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"aSP5Startup":
+		"aSP5Startup", "aSP5[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"aSP5Active":
+		"aSP5Active", "aSP5[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP5Recovery", "aSP5bRecovery":
+		"aSP5Recovery", "aSP5bRecovery", "aSP5[ex]Recovery", "aSP5b[ex]Recovery":
 			return Globals.char_state.AIR_ATK_RECOVERY
-		"SP5bRecovery":
+		"SP5bRecovery", "SP5b[ex]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		
 	print("Error: " + anim + " not found.")
@@ -116,10 +122,11 @@ func stimulate():
 #	Character.dir
 #	Character.v_dir
 
-	if Character.unique_data.bitten_player_path != null: # duration of bitemark
-		Character.unique_data.bitemark_time -= 1
-		if Character.unique_data.bitemark_time <= 0:
-			Character.unique_data.bitten_player_path = null
+#	if Character.unique_data.bitten_player_path != null: # bitemark
+#		if get_node(Character.unique_data.bitten_player_path).state == Globals.char_state.DEAD:
+#			Character.unique_data.bitten_player_path = null # if marked opponent dead, ends bitemark
+#			Character.unique_data.nibbler_count = 0
+
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 
@@ -241,6 +248,7 @@ func capture_combinations():
 	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
 	
 	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
+	Character.ex_combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
 
 
 func rebuffer_actions():
@@ -259,11 +267,12 @@ func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
 	Character.ex_rebuffer(Character.button_special, Character.button_fierce, "ExSp.F")
 	Character.ex_rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
+	Character.ex_rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
 	
 func capture_instant_actions():
 	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
-	Character.combination(Character.button_unique, Character.button_light, "BitemarkTrigger", false, true)
-	
+	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
+
 func process_instant_actions():
 	Character.unique_data.groundfin_trigger = false
 	
@@ -273,14 +282,45 @@ func process_instant_actions():
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 			
-		if "BitemarkTrigger" in Character.instant_actions:
+		if "BitemarkTriggerU" in Character.instant_actions:
 			if Character.unique_data.bitten_player_path != null:
 				var spawn_point = get_node(Character.unique_data.bitten_player_path).position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
 					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point, {})
-					Character.unique_data.bitemark_time = 0
-					Character.unique_data.bitten_player_path = null
+					Character.play_audio("water15", {"unique_path" : Character.get_path()})
+					Character.unique_data.nibbler_count -= 1
+					update_uniqueHUD()
+					if Character.unique_data.nibbler_count <= 0:
+						Character.unique_data.bitten_player_path = null
+						
+		if "BitemarkTriggerD" in Character.instant_actions:
+			if Character.unique_data.bitten_player_path != null:
+				var spawn_point = Character.position
+				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
+				if spawn_point != null:
+					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point, {})
+					Character.play_audio("water15", {"unique_path" : Character.get_path()})
+					Character.unique_data.nibbler_count -= 1
+					update_uniqueHUD()
+					if Character.unique_data.nibbler_count <= 0:
+						Character.unique_data.bitten_player_path = null
+						
+		if "BitemarkTrigger" in Character.instant_actions:
+			if Character.unique_data.bitten_player_path != null:
+				var spawn_point = (get_node(Character.unique_data.bitten_player_path).position + Character.position) * 0.5
+				spawn_point.x = round(spawn_point.x)
+				spawn_point.y = round(spawn_point.y)
+				var spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
+				if spawn_point2 == null: # if no ground found below, check above a little
+					spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
+				if spawn_point2 != null:
+					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point2, {})
+					Character.play_audio("water15", {"unique_path" : Character.get_path()})
+					Character.unique_data.nibbler_count -= 1
+					update_uniqueHUD()
+					if Character.unique_data.nibbler_count <= 0:
+						Character.unique_data.bitten_player_path = null
 
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
@@ -449,6 +489,12 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				keep = !process_move(new_state, "SP3[ex]", has_acted, buffered_input[1])
 				if keep:
 					keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
+					
+		"ExSp.H":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP5[ex]", has_acted, buffered_input[1])
+				if keep:
+					keep = !process_move(new_state, "SP5", has_acted, buffered_input[1])
 						
 		# ---------------------------------------------------------------------------------
 		
@@ -467,32 +513,15 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 	# no need to return input_to_add since array is passed by reference
 		
 func is_grounded_uptilt(attack_ref):
-	if attack_ref in ["F3", "SP3"]:
+	if attack_ref in ["F3", "SP3", "SP3[ex]"]:
 		return true
 	return false
 	
 func is_aerial_uptilt(attack_ref):
-	if attack_ref in ["aF3", "aSP3"]:
+	if attack_ref in ["aF3", "aSP3", "aSP3[ex]"]:
 		return true
 	return false
 	
-func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
-	if !attack_ref in EX_MOVES: return true # not ex move
-	if !quick_cancel: # not quick cancelling, must afford it
-		if Character.current_ex_gauge >= Character.EX_MOVE_COST:
-			Character.change_ex_gauge(-Character.EX_MOVE_COST)
-			Character.play_audio("bling6", {"vol" : -9, "bus" : "HighPass"}) # EX chime
-			return true
-		else: return false
-	else:
-		if Character.get_move_name() in EX_MOVES: # can quick cancel from 1 EX move to another, no cost and no chime if so
-			return true
-		elif Character.current_ex_gauge >= Character.EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
-			Character.change_ex_gauge(-Character.EX_MOVE_COST)
-			Character.play_audio("bling6", {"vol" : -9, "bus" : "HighPass"}) # EX chime
-			return true
-		else: return false
-
 func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time): # return true if button consumed
 	
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
@@ -501,7 +530,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 	match Character.state:
 		Globals.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
 			if Animator.query_current(["DashTransit"]):
-				if is_ex_valid(attack_ref):
+				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
@@ -511,7 +540,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			
 		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
 			if Character.grounded and attack_ref in STARTERS:
-				if is_ex_valid(attack_ref):
+				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
@@ -519,7 +548,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 					
 		Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
 			if Character.grounded and is_grounded_uptilt(attack_ref) and Animator.query_to_play(["JumpTransit"]):
-				if is_ex_valid(attack_ref):
+				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
@@ -528,7 +557,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-					if is_ex_valid("a" + attack_ref):
+					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						Character.chain_memory = []
 						has_acted[0] = true
@@ -538,7 +567,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			if is_aerial_uptilt("a" + attack_ref) and !Character.button_jump in Character.input_state.pressed and \
 					Character.test_aerial_memory("a" + attack_ref) and \
 					Animator.query_to_play(["AirJumpTransit", "AirJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
-				if is_ex_valid("a" + attack_ref):
+				if Character.is_ex_valid("a" + attack_ref):
 					Character.animate("a" + attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
@@ -548,7 +577,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 		Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
 			if attack_ref in STARTERS:
 				if Character.test_chain_combo(attack_ref):
-					if is_ex_valid(attack_ref):
+					if Character.is_ex_valid(attack_ref):
 						if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 							Character.get_node("ModulatePlayer").play("unflinch_flash")
 							Character.perfect_chain = true
@@ -562,7 +591,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			if Character.grounded and attack_ref in STARTERS:
 				if Character.check_quick_cancel(attack_ref): # must be within 1st frame, animation name must be in MOVE_DATABASE
 					if Character.test_qc_chain_combo(attack_ref):
-						if is_ex_valid(attack_ref, true):
+						if Character.is_ex_valid(attack_ref, true):
 							Character.animate(attack_ref + "Startup")
 							has_acted[0] = true
 							return true
@@ -572,7 +601,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			if !Character.grounded:
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 					if Character.test_chain_combo("a" + attack_ref):
-						if is_ex_valid("a" + attack_ref):
+						if Character.is_ex_valid("a" + attack_ref):
 							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 								Character.get_node("ModulatePlayer").play("unflinch_flash")
 								Character.perfect_chain = true
@@ -582,7 +611,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			else:
 				if attack_ref in STARTERS:
 					if Character.test_chain_combo(attack_ref): # grounded
-						if is_ex_valid(attack_ref):
+						if Character.is_ex_valid(attack_ref):
 							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 								Character.get_node("ModulatePlayer").play("unflinch_flash")
 								Character.perfect_chain = true
@@ -596,7 +625,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 				if ("a" + attack_ref) in STARTERS:
 					if Character.check_quick_cancel("a" + attack_ref):
 						if Character.test_qc_chain_combo("a" + attack_ref):
-							if is_ex_valid("a" + attack_ref, true):
+							if Character.is_ex_valid("a" + attack_ref, true):
 								Character.animate("a" + attack_ref + "Startup")
 								has_acted[0] = true
 								return true
@@ -604,13 +633,33 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 				if attack_ref in STARTERS:
 					if Character.check_quick_cancel(attack_ref):
 						if Character.test_qc_chain_combo(attack_ref):
-							if is_ex_valid(attack_ref, true):
+							if Character.is_ex_valid(attack_ref, true):
 								Character.animate(attack_ref + "Startup")
 								has_acted[0] = true
 								return true
 					
 	return false
 						
+
+func update_uniqueHUD():
+	match Character.unique_data.nibbler_count:
+		0:
+			uniqueHUD.get_node("Bitemark1").hide()
+			uniqueHUD.get_node("Bitemark2").hide()
+			uniqueHUD.get_node("Bitemark3").hide()
+		1:
+			uniqueHUD.get_node("Bitemark1").show()
+			uniqueHUD.get_node("Bitemark2").hide()
+			uniqueHUD.get_node("Bitemark3").hide()
+		2:
+			uniqueHUD.get_node("Bitemark1").show()
+			uniqueHUD.get_node("Bitemark2").show()
+			uniqueHUD.get_node("Bitemark3").hide()
+		3:
+			uniqueHUD.get_node("Bitemark1").show()
+			uniqueHUD.get_node("Bitemark2").show()
+			uniqueHUD.get_node("Bitemark3").show()
+			
 						
 func consume_one_air_dash(): # different characters can have different types of air_dash consumption
 	Character.air_dash = max(Character.air_dash - 1, 0)
@@ -620,17 +669,6 @@ func gain_one_air_dash(): # different characters can have different types of air
 		Character.air_dash += 1
 
 func afterimage_trail():# process afterimage trail
-	# Character.afterimage_trail() can accept 2 parameters, 1st is the starting modulate, 2nd is the lifetime
-	
-	# afterimage trail for certain modulate animations with the key "afterimage_trail"
-	if LoadedSFX.modulate_animations.has(Character.get_node("ModulatePlayer").current_animation) and \
-		LoadedSFX.modulate_animations[Character.get_node("ModulatePlayer").current_animation].has("afterimage_trail") and \
-		Character.get_node("ModulatePlayer").is_playing():
-		# basic afterimage trail for "afterimage_trail" = 0
-		if LoadedSFX.modulate_animations[Character.get_node("ModulatePlayer").current_animation]["afterimage_trail"] == 0:
-			Character.afterimage_trail()
-			return
-			
 	match Animator.to_play_animation:
 		"Dash", "AirDash", "AirDashD2", "AirDashU2":
 			Character.afterimage_trail()
@@ -680,6 +718,8 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 			return MOVE_DATABASE["aSP3[ex]"].atk_attr
 		"SP5", "SP5b", "aSP5b":
 			return MOVE_DATABASE["aSP5"].atk_attr
+		"SP5[ex]", "SP5b[ex]", "aSP5b[ex]":
+			return MOVE_DATABASE["aSP5[ex]"].atk_attr
 			
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr
@@ -697,9 +737,21 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			Character.animate("L2Recovery")
 		"aSP5":
 			Character.unique_data.bitten_player_path = hit_data.defender_nodepath
-			Character.unique_data.bitemark_time = 180
-		
-#	bitten_player_path
+			if hit_data.sweetspotted:
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
+			else:
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 1, 3)
+			update_uniqueHUD()
+			Character.unique_data.nibbler_cancel = false
+		"aSP5[ex]":
+			Character.unique_data.bitten_player_path = hit_data.defender_nodepath
+			if hit_data.sweetspotted:
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 3, 3)
+			else:
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
+			update_uniqueHUD()
+			Character.unique_data.nibbler_cancel = false
+
 	
 	
 func being_hit(hit_data): # reaction, can change hit_data from here
@@ -710,6 +762,13 @@ func being_hit(hit_data): # reaction, can change hit_data from here
 			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
 				if Animator.query(["AirDashU2", "AirDashD2"]):
 					hit_data.punish_hit = true
+					
+	if hit_data.block_state in [Globals.block_state.UNBLOCKED, Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG]:
+		Character.unique_data.nibbler_cancel = true # cancel spawning nibblers
+		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
+		update_uniqueHUD()
+		if Character.unique_data.nibbler_count == 0:
+			Character.unique_data.bitten_player_path = null # lose bitemark if you are hit
 					
 	
 func query_traits(): # may have special conditions
@@ -1027,16 +1086,25 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 		"SP5Startup", "aSP5Startup":
 			Character.animate("aSP5Active")
+		"SP5[ex]Startup", "aSP5[ex]Startup":
+			Character.animate("aSP5[ex]Active")
 		"aSP5Active":
 			Character.animate("aSP5Recovery")
+		"aSP5[ex]Active":
+			Character.animate("aSP5[ex]Recovery")
 		"aSP5Recovery":
 			if Character.grounded:
 				Character.animate("SP5bRecovery")
 			else:
 				Character.animate("aSP5bRecovery")
-		"SP5bRecovery":
+		"aSP5[ex]Recovery":
+			if Character.grounded:
+				Character.animate("SP5b[ex]Recovery")
+			else:
+				Character.animate("aSP5b[ex]Recovery")
+		"SP5bRecovery", "SP5b[ex]Recovery":
 			Character.animate("Idle")
-		"aSP5bRecovery":
+		"aSP5bRecovery", "aSP5b[ex]Recovery":
 			Character.animate("FallTransit")
 			
 
@@ -1329,20 +1397,22 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP4Recovery", "SP4[ex]Recovery":
 			Character.sfx_under.show()
 			
-		"SP5Startup":
+		"SP5Startup", "SP5[ex]Startup":
 			Character.sfx_under.show()
-		"aSP5Startup":
+		"aSP5Startup", "aSP5[ex]Startup":
 			Character.velocity_limiter.x_slow = 0.2
 			Character.velocity_limiter.y_slow = 0.2
 			Character.gravity_mod = 0.0
 			Character.sfx_under.show()
-		"aSP5Active":
+		"aSP5Active", "aSP5[ex]Active":
 			Character.velocity.x = Character.facing * 200
 			Character.velocity.y = 0
 			Character.gravity_mod = 0.0
 			Character.friction_mod = 0.0
 			Character.sfx_under.show()
-		"aSP5Recovery":
+			if Character.grounded:
+				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"aSP5Recovery", "aSP5[ex]Recovery":
 			Character.velocity_limiter.down = 0.2
 			Character.velocity.x *= 0.5
 			Character.gravity_mod = 0.25
