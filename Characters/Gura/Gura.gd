@@ -10,6 +10,7 @@ extends "res://Characters/Gura/GuraBase.gd"
 # 5. Add it in process_buffered_input() for inputs
 # 6. Add it in capture_combinations() if it is a special action
 # 7. Add any startup/recovery animations not in MOVE_DATABASE to query_atk_attr()
+# 8. For uptilts, add it in is_grounded_uptilt() and is_aerial_uptilt(), even for EX moves
 
 # --------------------------------------------------------------------------------------------------
 
@@ -102,6 +103,19 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"SP5bRecovery", "SP5b[ex]Recovery":
 			return Globals.char_state.GROUND_ATK_RECOVERY
+			
+		"SP6[ex]Startup":
+			return Globals.char_state.GROUND_ATK_STARTUP
+		"aSP6[ex]Startup":
+			return Globals.char_state.AIR_ATK_STARTUP
+		"aSP6[ex]Active":
+			return Globals.char_state.AIR_ATK_ACTIVE
+		"SP6[ex]Recovery", "SP6[ex]GrabRecovery":
+			return Globals.char_state.GROUND_ATK_RECOVERY
+		"aSP6[ex]Recovery", "aSP6[ex]GrabRecovery":
+			return Globals.char_state.AIR_ATK_RECOVERY
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
+			return Globals.char_state.SEQUENCE_USER
 		
 	print("Error: " + anim + " not found.")
 		
@@ -180,7 +194,7 @@ func stimulate():
 					else:
 						Character.animate("aSP1[c2]bStartup")
 					
-			
+
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
 #	if Character.state == Globals.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
@@ -192,40 +206,136 @@ func stimulate():
 #			Character.face(1)
 #			Character.animate("Dash")
 
-			
-	# QUICK CANCELS --------------------------------------------------------------------------------------------------
+# 1. Set both players into special char_states, they will cut into stimulate_sequence() from stimulate2()
+# 2. Grabber move according to their premade sequence in stimulate_sequence(), which also moves Grabbed directly via move_sequence_target_to()
+# 3. move_sequence_target_to() ignores ceiling, if either player touch the ground they trigger end_sequence_step() which can have reactions
+# 4. if Grabbed's move_sequence_target_to() hits a wall, use grab point to calculate new x-positive for the Grabber
+#		then use move_sequence_target_to() on Grabber to reach there
+#		if Grabber's move_sequence_target_to collides as well, break the grab instantly
+
+func stimulate_sequence():
 	
-		
-#	if Animator.time <= Character.QUICK_CANCEL_TIME and Animator.time != 0:
-#		match Character.new_state:
-#			Globals.char_state.GROUND_ATK_STARTUP:
-#				# can jump cancel the 1st frame of ground attacks, helps with instant aerials
-#				if Character.button_jump in Character.input_state.just_pressed:
-#					Character.animate("JumpTransit")
-#					Character.rebuffer_actions() # this buffers the attack buttons currently being pressed
-					
-			# no longer need to cancel from button release due to new tilt system
+	var Partner = get_node(Character.targeted_opponent_path)
+	
+	match Animator.current_animation:
+		"SP6[ex]SeqA":
+			pass
+		"SP6[ex]SeqB":
+			if Character.dir == -Character.facing: # can air strafe backwards when going up
+				Character.velocity.x += Character.dir * 10
+			else:
+				Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
+			Character.velocity.x = clamp(Character.velocity.x, -100, 100) # max air strafe speed
+			Character.velocity.y += 1000 * Globals.FRAME # gravity
+		"SP6[ex]SeqC":
+			Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
+		"SP6[ex]SeqD":
+			pass
+		"SP6[ex]SeqE":
+			pass
+							
+func start_sequence(): # easier to do it all here
+	var Partner = get_node(Character.targeted_opponent_path)
+	
+	match Animator.current_animation:
+		"SP6[ex]SeqA":
+			Character.velocity = Vector2.ZERO # freeze first
+		"SP6[ex]SeqB":
+			Character.velocity = Vector2(0, -500) # jump up
+			if Character.grounded:
+				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP6[ex]SeqC":
+			Character.face(-Character.facing)
+			Character.velocity.y = 600 # dive down
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, \
+					{"facing":Character.facing, "rot":PI/2})
+		"SP6[ex]SeqE":  # you hit ground
+			# WIP: move opponent to your feet level
+			Character.velocity.x = 0
+			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
+					{"facing":Character.facing, "back":true, "grounded":true})
+			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.set_screenshake()
+		"aSP6[ex]SeqE":  # parther hit the groun
+			Character.velocity.x = 0
+			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.set_screenshake()
+							
+func end_sequence_step(): # sequence steps that have effect when ended, like falling steps being ended when hitting the ground
+	var Partner = get_node(Character.targeted_opponent_path)
+	
+	match Animator.current_animation:
+		"SP6[ex]SeqD": # ends when either you or parther hit the ground
+			if !Character.grounded: # parther hit the ground
+				Character.animate("aSP6[ex]SeqE")
+			else: # you hit ground
+				Character.animate("SP6[ex]SeqE")
+		"SP6[ex]SeqE":
+			pass # place damage/knockback here
+		"aSP6[ex]SeqE":
+			pass # place damage/knockback here
 			
-#				# releasing up button to cancel up-tilts to neutral
-#				if Character.button_up in Character.input_state.just_released:
-#					if Animator.query(["F3Startup"]) and Character.test_qc_chain_combo("F1"):
-#						Character.animate("F1Startup")
-#				# releasing down button to cancel down-tilts to neutral
-#				if Character.button_down in Character.input_state.just_released:
-#					if Animator.query(["F2Startup"]) and Character.test_qc_chain_combo("F1"):
-#						Character.animate("F1Startup")
-#					elif Animator.query(["L2Startup"]) and Character.test_qc_chain_combo("L1"):
-#						Character.animate("L1Startup")
-						
-#			Globals.char_state.AIR_ATK_STARTUP:
-#				# releasing up button to cancel up-tilts to neutral
-#				if Character.button_up in Character.input_state.just_released:
-#					if Animator.query(["aF3Startup"]) and Character.test_qc_chain_combo("aF1"):
-#						Character.animate("aF1Startup")
-#				# releasing down button to cancel down-tilts to neutral
-#				if Character.button_down in Character.input_state.just_released:
-#					if Animator.query(["aL2Startup"]) and Character.test_qc_chain_combo("aL1"):
-#						Character.animate("aL1Startup")
+func sequence_fallthrough(): # which step in sequence ignore soft platforms
+	match Animator.current_animation:
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
+			return true
+	return false
+	
+func sequence_ledgestop(): # which step in sequence are stopped by ledges
+	return false
+	
+func sequence_passthrough(): # which step in sequence ignore all platforms (for cinematic supers)
+	return false
+	
+func sequence_passfloor(): # which step in sequence ignore hard floor
+	match Animator.current_animation:
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
+			return true
+	return false
+			
+#	"SP6[ex]SeqE" : {
+#		"damage" : 200,
+#		"guard_drain": 2500,
+#		"guard_gain_on_combo" : 3500,
+#		"launch_power" : 500,
+#		"launch_angle" : -PI/2.2,
+#		"hitstun" : 20,
+#	}
+
+#		# get physics from current step in UniqueCharacter.SEQUENCES[sequence_name]
+#		var seq_data
+#
+#		if "gravity" in seq_data: # gravity during sequence
+#			velocity.y += seq_data.gravity * Globals.FRAME
+#
+#		if "horiz_slow" in seq_data: # friction/air resistance during sequence
+#			velocity.x = lerp(velocity.x, 0, seq_data.horiz_slow)
+#
+#		if "verti_slow" in seq_data:
+#			velocity.y = lerp(velocity.y, 0, seq_data.verti_slow)
+#
+#		if "x_vel_limit" in seq_data:	
+#			velocity.x = clamp(velocity.x, -seq_data.x_vel_limit, seq_data.x_vel_limit)
+#
+#		if "up_vel_limit" in seq_data:	
+#			velocity.y = min(velocity.y, -seq_data.up_vel_limit)
+#
+#		if "down_vel_limit" in seq_data:	
+#			velocity.y = max(velocity.y, seq_data.down_vel_limit)
+#
+#		if "sfx" in seq_data:
+#			if Animator.time in seq_data.sfx:
+#				pass
+
+#		if "lerp_x" in seq_data:
+#			velocity.x = 0.0
+#			# WIP, use move_amount to move directly without using velocity
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 
@@ -249,6 +359,8 @@ func capture_combinations():
 	
 	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	Character.ex_combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
+	
+	Character.ex_combination(Character.button_special, Character.button_aux, "ExSp.A")
 
 
 func rebuffer_actions():
@@ -266,8 +378,8 @@ func rebuffer_actions():
 func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
 	Character.ex_rebuffer(Character.button_special, Character.button_fierce, "ExSp.F")
-	Character.ex_rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
-	Character.ex_rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
+#	Character.ex_rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
+#	Character.ex_rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
 	
 func capture_instant_actions():
 	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
@@ -449,7 +561,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		"Sp.L":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP1", has_acted, buffered_input[1])
-				
+	
 		"Sp.F":
 			if !has_acted[0]:
 				if !Character.grounded:
@@ -495,6 +607,10 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				keep = !process_move(new_state, "SP5[ex]", has_acted, buffered_input[1])
 				if keep:
 					keep = !process_move(new_state, "SP5", has_acted, buffered_input[1])
+					
+		"ExSp.A":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP6[ex]", has_acted, buffered_input[1])
 						
 		# ---------------------------------------------------------------------------------
 		
@@ -672,7 +788,8 @@ func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
 		"Dash", "AirDash", "AirDashD2", "AirDashU2":
 			Character.afterimage_trail()
-			
+		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
+			Character.afterimage_trail()
 			
 func query_move_data(move_name) -> Dictionary: # can only be called during active frames
 	# move data may change for certain moves under certain conditions, unique to character
@@ -720,6 +837,8 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 			return MOVE_DATABASE["aSP5"].atk_attr
 		"SP5[ex]", "SP5b[ex]", "aSP5b[ex]":
 			return MOVE_DATABASE["aSP5[ex]"].atk_attr
+		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
+			return MOVE_DATABASE["aSP6[ex]"].atk_attr
 			
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr
@@ -1107,6 +1226,35 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP5bRecovery", "aSP5b[ex]Recovery":
 			Character.animate("FallTransit")
 			
+		"SP6[ex]Startup", "aSP6[ex]Startup":
+			Character.animate("aSP6[ex]Active")
+		"aSP6[ex]Active":
+			if Character.grounded:
+				Character.animate("SP6[ex]Recovery")
+			else:
+				Character.animate("aSP6[ex]Recovery")
+		"SP6[ex]Recovery":
+			Character.animate("Idle")
+		"aSP6[ex]Recovery":
+			Character.animate("FallTransit")
+			
+		"SP6[ex]SeqA":
+			Character.animate("SP6[ex]SeqB")
+		"SP6[ex]SeqB":
+			Character.animate("SP6[ex]SeqC")
+		"SP6[ex]SeqC":
+			Character.animate("SP6[ex]SeqD")
+		"SP6[ex]SeqE":
+			end_sequence_step()
+			Character.animate("SP6[ex]GrabRecovery")
+		"SP6[ex]GrabRecovery":
+			Character.animate("Idle")
+		"aSP6[ex]SeqE":
+			end_sequence_step()
+			Character.animate("aSP6[ex]GrabRecovery")
+		"aSP6[ex]GrabRecovery":
+			Character.animate("FallTransit")
+			
 
 func _on_SpritePlayer_anim_started(anim_name):
 
@@ -1417,6 +1565,26 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x *= 0.5
 			Character.gravity_mod = 0.25
 			Character.sfx_under.show()
+			
+		"SP6[ex]Startup":
+			Character.velocity.x = 0.0
+		"aSP6[ex]Startup":
+			Character.velocity_limiter.x_slow = 0.2
+			Character.velocity_limiter.y_slow = 0.2
+			Character.gravity_mod = 0.0
+		"aSP6[ex]Active":
+			if Character.grounded:
+				Character.velocity.x = Character.facing * 100
+			Character.velocity.y = 0.0
+			Character.gravity_mod = 0.0
+		"aSP6[ex]Recovery":
+			Character.velocity_limiter.x = 0.2
+			Character.gravity_mod = 0.25
+			Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
+		"SP6[ex]Recovery":
+			Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
+			start_sequence()
 			
 	start_audio(anim_name)
 

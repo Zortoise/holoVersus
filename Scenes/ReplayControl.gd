@@ -33,7 +33,7 @@ func init():
 func replay_auto_savestate(): # make a savestate every frame of the past 60 frames for replaying
 	Globals.Game.save_state(Globals.Game.frametime)
 	while replay_saved_game_states.size() > MAX_REPLAY_SAVE_STATES: # erase savestates if too many
-## warning-ignore:return_value_discarded
+# warning-ignore:return_value_discarded
 		replay_saved_game_states.erase(replay_saved_game_states.keys().min())
 		
 #		var oldest_key = replay_saved_game_states.keys().min()
@@ -77,6 +77,8 @@ func replay_control():
 			
 	if Input.is_action_just_pressed(FRAME_REVERSE): # reverse 1 frame by loading save state of previous frame, can do up to certain times
 		if Globals.Game.frametime - 2 in replay_saved_game_states:
+# warning-ignore:return_value_discarded
+			replay_saved_game_states.erase(Globals.Game.frametime)
 			Globals.Game.load_state(replay_saved_game_states[Globals.Game.frametime - 2])
 			Globals.Game.true_frametime = Globals.Game.frametime
 			Globals.Game.stimulate(false)

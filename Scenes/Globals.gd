@@ -5,15 +5,16 @@ const VERSION = "Test Build 4"
 enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_RECOVERY,
 		GROUND_C_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, GROUND_FLINCH_HITSTUN,
 		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_ATK_STARTUP, GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY,
-		AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, GROUND_BLOCKSTUN, AIR_BLOCK, AIR_BLOCKSTUN}
+		AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, GROUND_BLOCKSTUN, AIR_BLOCK, AIR_BLOCKSTUN,
+		SEQUENCE_USER, SEQUENCE_TARGET}
 enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
-enum hitspark_type {CUSTOM, HIT, SLASH}
+enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE
-		QUICK_TURN_LIMIT, NON_ATTACK}
+		QUICK_TURN_LIMIT, NON_ATTACK, CANNOT_CHAIN_INTO}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-airs, don't erase this! Needed for air specials!
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -35,6 +36,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # REPEATABLE = will not incur repeat penalty, use for multi-entities
 # QUICK_TURN_LIMIT = for grounded attacks, can only quick turn on the first 3 frames
 # NON_ATTACK = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun/blockstun
+# CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge
@@ -287,6 +289,10 @@ func char_state_to_string(state):
 			return "AIR_BLOCK"
 		Globals.char_state.AIR_BLOCKSTUN:
 			return "AIR_BLOCKSTUN"
+		Globals.char_state.SEQUENCE_TARGET:
+			return "SEQUENCE_TARGET"
+		Globals.char_state.SEQUENCE_USER:
+			return "SEQUENCE_USER"
 			
 
 func change_zoom_level(change):

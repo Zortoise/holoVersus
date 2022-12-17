@@ -14,7 +14,7 @@ const JUMP_HORIZONTAL_SPEED = 100.0
 const AIR_JUMP_MOD = 0.9 # reduce height of air jumps
 const GRAVITY_MOD = 1.0 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 7.2 # affect terminal velocity downward
-const FASTFALL_MOD = 1.2 # fastfall speed, mod of terminal velocity
+const FASTFALL_MOD = 1.35 # fastfall speed, mod of terminal velocity
 const FRICTION = 0.15 # between 0.0 and 1.0
 const ACCELERATION = 0.15 # between 0.0 and 1.0
 const AIR_RESISTANCE = 0.03 # between 0.0 and 1.0
@@ -55,14 +55,14 @@ const UNIQUE_DATA_REF = {
 }
 
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
-		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]"]
+		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
-const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]"]
+const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 const SUPERS = []
 
 # list of movenames that will emit EX flash
 const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
-		"SP5b[ex]", "aSP5b[ex]"]
+		"SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA"]
 #const EX_FLASH_ANIM = ["H", "Hb"]
 
 # const DIRECTORY_NAME = "res://Characters/Gura/"
@@ -627,7 +627,26 @@ const MOVE_DATABASE = {
 		"atk_attr" : [Globals.atk_attr.QUICK_TURN_LIMIT],
 		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
+	},
+	
+	"aSP6[ex]" : {
+		"atk_type" : Globals.atk_type.EX,
+		"sequence": "SP6[ex]SeqA",
+		"hitcount" : 1,
+		"priority": 9,
+		"hitspark_type" : Globals.hitspark_type.NONE,
+		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.CANNOT_CHAIN_INTO],
+	},
+	
+	"SP6[ex]SeqE" : {
+		"damage" : 200,
+		"guard_drain": 2500,
+		"guard_gain_on_combo" : 3500,
+		"launch_power" : 500,
+		"launch_angle" : -PI/2.2,
+		"hitstun" : 20,
 	}
 	
 }
+
 

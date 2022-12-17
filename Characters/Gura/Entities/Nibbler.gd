@@ -42,6 +42,7 @@ func _ready():
 func init(_aux_data: Dictionary):
 	 # starting animation
 	Animator.play("Active")
+	Entity.absorption_value = 1
 
 func query_move_data():
 	

@@ -254,6 +254,8 @@ func debug():
 	if frame_reverse and Input.is_action_just_pressed("frame_reverse"): # reverse 1 frame by loading save state of previous frame, can do up to certain times
 		if playback_mode == false:
 			if Globals.Game.frametime - 2 in test_saved_game_states:
+# warning-ignore:return_value_discarded
+				test_saved_game_states.erase(frametime)
 				load_state(test_saved_game_states[frametime - 2])
 				true_frametime = frametime
 				stimulate(false)
@@ -982,13 +984,21 @@ func detect_hit():
 					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, hurtbox, true)
 						
 	for hit_data in hit_data_array:
-		# call being_hit() on the defender and landed_a_hit() on the attacker/entity
-		get_node(hit_data.defender_nodepath).being_hit(hit_data) # will add stuff to hit_data, passing by reference
-		if !"entity_nodepath" in hit_data:
-			get_node(hit_data.attacker_nodepath).landed_a_hit(hit_data)
-			$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
+		
+		if !"sequence" in hit_data.move_data:
+			# call being_hit() on the defender and landed_a_hit() on the attacker/entity
+			get_node(hit_data.defender_nodepath).being_hit(hit_data) # will add stuff to hit_data, passing by reference
+			if !"entity_nodepath" in hit_data:
+				get_node(hit_data.attacker_nodepath).landed_a_hit(hit_data)
+				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
+			else:
+				get_node(hit_data.entity_nodepath).landed_a_hit(hit_data)
 		else:
-			get_node(hit_data.entity_nodepath).landed_a_hit(hit_data)
+			get_node(hit_data.defender_nodepath).being_grabbed(hit_data)
+			if !"entity_nodepath" in hit_data:
+				get_node(hit_data.attacker_nodepath).landed_a_grab(hit_data)
+			else: # rare projectile grab
+				get_node(hit_data.entity_nodepath).landed_a_grab(hit_data)
 		
 						
 func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_disjoint = false):

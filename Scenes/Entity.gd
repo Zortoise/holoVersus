@@ -145,8 +145,8 @@ func stimulate2(): # only ran if not in hitstop
 		if interact_array.size() > 0: # detected other entities
 			var interact_array2 = []
 			for x in interact_array: # filter out entities with no absorption value or about to be killed or share this entity's master
-				if x.absorption_value != null and absorption_value > 0 and \
-						x.get_node(master_path).player_ID != get_node(master_path).player_ID:
+				if x.absorption_value != null and x.absorption_value > 0 and \
+						x.get_node(master_path).player_ID != get_node(x.master_path).player_ID:
 					interact_array2.append(x)
 			if interact_array2.size() > 0:
 				var lowest_AV = absorption_value # find lowest absorption_value

@@ -22,7 +22,7 @@ func move(collision_box, soft_platform_dbox, in_velocity: Vector2, ledge_stop = 
 	
 	return results
 	
-func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velocity: Vector2, ledge_stop = false):
+func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velocity = Vector2.ZERO, ledge_stop = false):
 	# will only collide with other players if owner of collision_box is a player
 	# just in case...
 	move_amount.x = int(move_amount.x)
@@ -122,9 +122,30 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 	return [in_velocity, landing_check, collision_check, ledgedrop_check]
 	
 	
+	
+func move_sequence_target_to(new_position: Vector2): # called by grabber, also move used to move grabber if grabbed hit a wall
+	
+	var move_amount = Vector2.ZERO
+	move_amount.x = round(new_position.x - position.x)
+	move_amount.y = round(new_position.y - position.y)
+	
+	while move_amount.x != 0:
+		pass
+	while move_amount.y != 0:
+		pass
+		
+	var results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
+	call("set_true_position")
+	
+	return results # [in_velocity, landing_check, collision_check, ledgedrop_check]
+	
+	
 func check_offstage(collision_box):
 	if collision_box.is_in_group("Players") and Globals.Game.detect_kill(collision_box):
-		return true
+		if get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+			return false
+		else:
+			return true
 	elif collision_box.is_in_group("Entities") and collision_box.get_parent().has_node("EntitySpriteBox") and \
 			Globals.Game.detect_offstage(collision_box.get_parent().get_node("EntitySpriteBox")):
 		return true
@@ -205,6 +226,8 @@ func is_against_ceiling(collision_box, soft_platform_dbox):
 			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
 		if has_method("check_passthrough") and call("check_passthrough"):
 			return false
+		if collision_box.is_in_group("Players") and get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+			return false # no hitting ceiling in sequences
 		return true
 	else:
 		return false

@@ -29,13 +29,15 @@ const HITSTUN_TERMINAL_VELOCITY_MOD = 7.5 # multiply to GRAVITY to get terminal 
 const HOP_JUMP_MOD = 0.8 # can hop by using up + jump
 const PERFECT_IMPULSE_MOD = 1.4 # multiply by UniqueCharacter.SPEED and  UniqueCharacter.IMPULSE MOD to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 0.5 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
+#const GRAVITY_UP_STRAFE_MOD = 0.9 # can reduce gravity if holding up during aerial startup/active
+#const GRAVITY_DOWN_STRAFE_MOD = 1.3 # can increase gravity if holding down during aerial startup/active
 const HITSTUN_FALL_THRESHOLD = 400.0 # if falling too fast during hitstun will help out
 const PLAYER_PUSH_SLOWDOWN = 0.95 # how much characters are slowed when they push against each other
 const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
 const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is crouching
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
-const EX_MOVE_COST = 10000 # 10000
+const EX_MOVE_COST = 0 # 10000
 const PosFlowSealTimer_TIME = 60 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
 
 const MIN_HITSTOP = 5
@@ -229,7 +231,6 @@ var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout
 var instant_actions := [] # when an instant action is inputed it is stored here for 1 frame, only process next frame
 						 # this allows for quick cancels and triggering entities
 var pos_flow_seal := false # some moves (BurstRevoke) will prevent you from gaining Positive Flow till targeted opponent's HitStunGraceTimer is over
-
 
 # controls
 var button_up
@@ -589,10 +590,10 @@ func stimulate(new_input_state):
 	$RespawnTimer.stimulate()
 	
 	if !$RespawnTimer.is_running():
-		if $HitStopTimer.is_running():
-			buffer_actions() # can still buffer buttons during hitstop
-		else:
+		if !$HitStopTimer.is_running():
 			stimulate2()
+		else:
+			buffer_actions() # can still buffer buttons during hitstop
 		
 
 
@@ -689,6 +690,10 @@ func stimulate2(): # only ran if not in hitstop
 #			dir = 1
 #	elif button_left in input_state.just_pressed:
 #		dir = -1
+		
+	if state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
+		stimulate_sequence()
+		return
 		
 # LEFT/RIGHT BUTTON --------------------------------------------------------------------------------------------------
 
@@ -823,40 +828,49 @@ func stimulate2(): # only ran if not in hitstop
 		# FASTFALL --------------------------------------------------------------------------------------------------
 			# cannot fastfall right after jumping
 			
-			Globals.char_state.AIR_STANDBY:
-				if !Animator.query(["JumpTransit2", "JumpTransit3"]):
+		if Settings.dj_fastfall[player_ID] == 0 and (button_special in input_state.pressed or button_unique in input_state.pressed):
+			
+			# if normal fastfall, cannot fastfall when button_special/button_unique are held down
+			# this makes aerial EX move down-tilts not fastfall too easily
+			
+			pass
+		else:
+			
+			match state:
+				Globals.char_state.AIR_STANDBY:
+					if !Animator.query(["JumpTransit2", "JumpTransit3"]):
 
 
+						if Settings.dj_fastfall[player_ID] == 0 or \
+							(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+	#						if Settings.dt_fastfall[player_ID] == 1:
+	#							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
+						
+							velocity.y = lerp(velocity.y, GRAVITY * Globals.FRAME * UniqueCharacter.TERMINAL_VELOCITY_MOD * \
+								UniqueCharacter.FASTFALL_MOD, 0.3)
+							if Animator.query(["FallTransit"]): # go straight to fall animation
+								animate("Fall")
+					
+							# fastfall reduce horizontal speed limit
+							if velocity.x < -UniqueCharacter.SPEED * 0.7:
+								velocity.x = lerp(velocity.x, -UniqueCharacter.SPEED * 0.7, 0.5)
+							elif velocity.x > UniqueCharacter.SPEED * 0.7:
+								velocity.x = lerp(velocity.x, UniqueCharacter.SPEED * 0.7, 0.5)
+								
+				Globals.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall
 					if Settings.dj_fastfall[player_ID] == 0 or \
 						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
-#						if Settings.dt_fastfall[player_ID] == 1:
-#							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
-					
-						velocity.y = lerp(velocity.y, GRAVITY * Globals.FRAME * UniqueCharacter.TERMINAL_VELOCITY_MOD * \
-							UniqueCharacter.FASTFALL_MOD, 0.3)
-						if Animator.query(["FallTransit"]): # go straight to fall animation
-							animate("Fall")
-				
-						# fastfall reduce horizontal speed limit
-						if velocity.x < -UniqueCharacter.SPEED * 0.7:
-							velocity.x = lerp(velocity.x, -UniqueCharacter.SPEED * 0.7, 0.5)
-						elif velocity.x > UniqueCharacter.SPEED * 0.7:
-							velocity.x = lerp(velocity.x, UniqueCharacter.SPEED * 0.7, 0.5)
 							
-			Globals.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall
-				if Settings.dj_fastfall[player_ID] == 0 or \
-					(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+						if Animator.query(["AirJumpTransit"]):
+							animate("Fall")
 						
-					if Animator.query(["AirJumpTransit"]):
-						animate("Fall")
-					
-						
-			Globals.char_state.AIR_ATK_RECOVERY: # fastfall cancel from aerial hits
-				if Settings.dj_fastfall[player_ID] == 0 or \
-					(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
-						
-					if test_fastfall_cancel():
-						animate("Fall")
+							
+				Globals.char_state.AIR_ATK_RECOVERY: # fastfall cancel from aerial hits
+					if Settings.dj_fastfall[player_ID] == 0 or \
+						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+							
+						if test_fastfall_cancel():
+							animate("Fall")
 
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
@@ -970,6 +984,13 @@ func stimulate2(): # only ran if not in hitstop
 				gravity_temp *= UniqueCharacter.FALL_GRAV_MOD
 				if state == Globals.char_state.AIR_BLOCK: # air blocking reduce gravity
 					gravity_temp *= AIRBLOCK_GRAV_MOD
+					
+#			# during aerial startup and active, can control gravity a little as well by pressing up/down
+#			if state in [Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE]:
+#				if v_dir == -1:
+#					gravity_temp *= GRAVITY_UP_STRAFE_MOD
+#				elif v_dir == 1:
+#					gravity_temp *= GRAVITY_DOWN_STRAFE_MOD
 				
 		velocity.y += gravity_temp * Globals.FRAME
 		
@@ -985,7 +1006,8 @@ func stimulate2(): # only ran if not in hitstop
 		terminal = GRAVITY * Globals.FRAME * UniqueCharacter.TERMINAL_VELOCITY_MOD
 	
 		if state == Globals.char_state.AIR_STANDBY and button_down in input_state.pressed:
-			terminal *= UniqueCharacter.FASTFALL_MOD # increase terminal velocity when fastfalling
+			if Settings.dj_fastfall[player_ID] == 0 or (Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+				terminal *= UniqueCharacter.FASTFALL_MOD # increase terminal velocity when fastfalling
 		if state == Globals.char_state.AIR_BLOCK: # air blocking reduce terminal velocity
 			terminal *= AIRBLOCK_TERMINAL_MOD
 
@@ -1190,6 +1212,39 @@ func stimulate2(): # only ran if not in hitstop
 	
 	# ends here, process hit detection in game scene, afterwards game scene will call stimulate_after() to finish up
 	
+#func sequence_step_start():
+#	var seq_data
+#
+#	if "start_vel" in seq_data:
+#		velocity = seq_data.start_vel
+		
+	
+func stimulate_sequence(): # cut into this during stimulate2() during sequences
+	
+	test0()
+	
+	if state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
+		pass
+		
+	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqueCharacter.SEQUENCES[sequence_name]
+		
+		UniqueCharacter.stimulate_sequence()
+		
+	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
+	velocity.y = round(velocity.y)
+	
+	if abs(velocity.x) < 5.0:
+		velocity.x = 0.0
+	if abs(velocity.y) < 5.0:
+		velocity.y = 0.0
+	
+	velocity_previous_frame = velocity
+	var results = move($PlayerCollisionBox, $SoftPlatformDBox, velocity, UniqueCharacter.sequence_ledgestop())
+	velocity = results[0]
+	
+	if results[1]: UniqueCharacter.end_sequence_step() # hit the ground
+	if results[3]: UniqueCharacter.end_sequence_step() # stopped by ledge
+	
 	
 func stimulate_after(): # called by game scene after hit detection to finish up the frame
 	
@@ -1255,6 +1310,8 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 		
 	test2()
 		
+
+	
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
 	# record the position to 0.001 of a pixel as integers, needed for slow and precise movements
@@ -1388,12 +1445,12 @@ func ex_rebuffer(button_ex, button1, action, back = false):
 		else:
 			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
 #
-func ex_rebuffer_trio(button_ex, button1, button2, action, back = false):
-	if button1 in input_state.pressed and button2 in input_state.pressed and is_button_released(button_ex):
-		if !back:
-			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
-		else:
-			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+#func ex_rebuffer_trio(button_ex, button1, button2, action, back = false):
+#	if button1 in input_state.pressed and button2 in input_state.pressed and is_button_released(button_ex):
+#		if !back:
+#			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+#		else:
+#			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
 			
 
 func combination(button1, button2, action, back = false, instant = false):
@@ -1464,7 +1521,7 @@ func ex_combination_trio(button_ex, button1, button2, action, back = false, inst
 			instant_actions_temp.append(action)
 			
 func is_button_pressed(button):
-	if button in [button_light, button_fierce]: # for attack buttons, considered "pressed" a few frame after being tapped as well
+	if button in [button_light, button_fierce, button_aux]: # for attack buttons, considered "pressed" a few frame after being tapped as well
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
 		for tap in tap_memory:
 			if tap[0] == button:
@@ -1703,6 +1760,8 @@ func process_input_buffer():
 #								chain_memory = []
 #								has_acted[0] = true
 #								keep = false
+
+					match new_state: # so that cannot burst on last frame of recovery
 						Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
 								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
 							var move_name = get_move_name()
@@ -2132,9 +2191,20 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 
 		
 func check_fallthrough(): # during aerials, can drop through platforms if down is held
-	if !grounded and is_attacking():
+	if state == Globals.char_state.SEQUENCE_USER:
+		return UniqueCharacter.sequence_fallthrough()
+	elif state == Globals.char_state.SEQUENCE_TARGET:
+		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
+	elif !grounded and is_attacking():
 		if button_down in input_state.pressed:
 			return true
+	return false
+	
+func check_passthrough():
+	if state == Globals.char_state.SEQUENCE_USER:
+		return UniqueCharacter.sequence_fallthrough() # for cinematic supers
+	elif state == Globals.char_state.SEQUENCE_TARGET:
+		return get_node(targeted_opponent_path).check_passthrough() # copy passthrough state of the one grabbing you
 	return false
 		
 # check if in place for a down-dash snap up landing, if so, snap up
@@ -2365,7 +2435,7 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	else: # cancelling from a normal move
 		if attack_ref in UniqueCharacter.EX_MOVES: # cancelling into an ex move from normal move has wider window
 			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
-			if (button_light in input_state.pressed or button_fierce in input_state.pressed):
+			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed):
 				if !are_inputs_too_close():
 					if Animator.time <= 5 and Animator.time != 0:
 						return true
@@ -2389,7 +2459,7 @@ func are_inputs_too_close():
 	for tap in tap_memory:
 		if tap[0] in [button_special, button_unique]:
 			time_of_last_special_or_unique_tap = tap[1]
-		elif tap[0] in [button_light, button_fierce]:
+		elif tap[0] in [button_light, button_fierce, button_aux]:
 			time_of_last_attack_tap = tap[1]
 			
 	if time_of_last_special_or_unique_tap == null or time_of_last_attack_tap == null:
@@ -2452,14 +2522,15 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 func is_attacking():
 	match new_state:
 		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
-			Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
+				Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY, \
+				Globals.char_state.SEQUENCE_USER:
 			return true
 	return false
 	
 func is_blocking():
 	match new_state:
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, Globals.char_state.GROUND_BLOCKSTUN, \
-			Globals.char_state.AIR_BLOCKSTUN:
+				Globals.char_state.AIR_BLOCKSTUN:
 			return true
 	return false
 	
@@ -2889,8 +2960,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	var move_name = Animator.current_animation.trim_suffix("Recovery")
 	move_name = move_name.trim_suffix("Active")
 	
-	if !move_name in UniqueCharacter.MOVE_DATABASE:
-		return false # just in case
+#	if !move_name in UniqueCharacter.MOVE_DATABASE:
+#		return false # just in case
 		
 #	# test if chaining into itself
 #	if move_name == attack_ref:
@@ -2898,7 +2969,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #	if "root" in UniqueCharacter.MOVE_DATABASE[move_name] and UniqueCharacter.MOVE_DATABASE[move_name].root == attack_ref:
 #		return false # for move variations/auto-chains with a root move
 
-	if Globals.atk_attr.NO_CHAIN in query_atk_attr(move_name):
+	if Globals.atk_attr.NO_CHAIN in query_atk_attr(move_name) or Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
 		return false
 		
 	match chain_combo:
@@ -2921,6 +2992,9 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 func test_qc_chain_combo(attack_ref):
 	
 	if chain_combo == Globals.chain_combo.NO_CHAIN: return false # just in case
+	
+	if chain_combo != Globals.chain_combo.RESET and Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
+		return false # if you are chain comboing and trying to quick cancel a valid move into one with CANNOT_CHAIN_INTO
 	
 	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
 		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
@@ -3308,7 +3382,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	$HitStunGraceTimer.time = HitStunGraceTimer_TIME # reset HitStunGraceTimer which only ticks down out of hitstun/blockstun
 
-	
 	var attacker = get_node(hit_data.attacker_nodepath)
 	var defender = get_node(hit_data.defender_nodepath)
 	
@@ -3559,7 +3632,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			defender.reset_jumps()
 			defender.current_guard_gauge = 0.0
 			Globals.Game.guard_gauge_update(defender)
-			defender.move_memory = []
+#			defender.move_memory = []
 		# BurstRevoke does not reset anything
 			
 	# -------------------------------------------------------------------------------------------
@@ -3772,6 +3845,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		knockback_velocity.y = 0 # set to horizontal pushback on blocking defender
 		
 	velocity = knockback_velocity
+	
+	
+func landed_a_grab(hit_data):
+	animate(hit_data.move_data.sequence)
+	
+func being_grabbed(hit_data):
+	pass
 		
 		
 # HIT CALCULATION ---------------------------------------------------------------------------------------------------
@@ -4179,13 +4259,17 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 					hitspark = "SlashsparkC"
 				5:
 					hitspark = "SlashsparkD"
+		Globals.hitspark_type.CUSTOM:
+			# WIP
+			pass
 					
-	var v_mirror := false
-	if rng_generate(2) == 0: v_mirror = true # 50% change of mirror the hitspark
-	var aux_data = {"rot": hit_data.knockback_dir + PI, "v_mirror":v_mirror}
-	if hit_data.move_data["hitspark_palette"] != "red":
-		aux_data["palette"] = hit_data.move_data["hitspark_palette"]
-	Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, aux_data)
+	if hitspark != "":
+		var v_mirror := false
+		if rng_generate(2) == 0: v_mirror = true # 50% change of mirror the hitspark
+		var aux_data = {"rot": hit_data.knockback_dir + PI, "v_mirror":v_mirror}
+		if hit_data.move_data["hitspark_palette"] != "red":
+			aux_data["palette"] = hit_data.move_data["hitspark_palette"]
+		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, aux_data)
 	
 	
 func generate_blockspark(hit_data):

@@ -153,5 +153,6 @@ func ground_finder(global_pos: Vector2, facing, offset: Vector2, detect_size: Ve
 			found_pos.x = leftmost_pt
 			
 	return found_pos
-	# for ground burst wave type attacks, make a Point2D controller with a facing and timestamps, it does ground_finder() with 1 pixel width boxes
+	# for ground burst wave type attacks, each projectile at certain Animator.time will do a ground finder to spawn another one
+	# can pass a counter from one to another that decreases by 1 after each burst
 	# at certain offsets, will stop if fail to find ground
