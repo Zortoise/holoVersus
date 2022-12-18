@@ -539,7 +539,7 @@ func _process(_delta):
 			$TestNode2D.hide()
 			
 			
-func stimulate(new_input_state):
+func simulate(new_input_state):
 		
 	input_state = new_input_state # so that I can use it in other functions
 			
@@ -588,19 +588,19 @@ func stimulate(new_input_state):
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
 	
-	$HitStopTimer.stimulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
+	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
-	$RespawnTimer.stimulate()
+	$RespawnTimer.simulate()
 	
 	if !$RespawnTimer.is_running():
 		if !$HitStopTimer.is_running():
-			stimulate2()
+			simulate2()
 		else:
 			buffer_actions() # can still buffer buttons during hitstop
 		
 
 
-func stimulate2(): # only ran if not in hitstop
+func simulate2(): # only ran if not in hitstop
 	
 # START OF FRAME --------------------------------------------------------------------------------------------------
 
@@ -695,7 +695,7 @@ func stimulate2(): # only ran if not in hitstop
 #		dir = -1
 		
 	if state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
-		stimulate_sequence()
+		simulate_sequence()
 		return
 		
 # LEFT/RIGHT BUTTON --------------------------------------------------------------------------------------------------
@@ -925,7 +925,7 @@ func stimulate2(): # only ran if not in hitstop
 			
 # --------------------------------------------------------------------------------------------------
 
-	UniqueCharacter.stimulate() # some holdable buttons can have effect unique to the character
+	UniqueCharacter.simulate() # some holdable buttons can have effect unique to the character
 	
 	buffer_actions()
 	
@@ -1213,10 +1213,10 @@ func stimulate2(): # only ran if not in hitstop
 	# however, must process before running the animation and advancing the time counter
 	# must process after moving the character as well or will misalign
 	
-	# ends here, process hit detection in game scene, afterwards game scene will call stimulate_after() to finish up
+	# ends here, process hit detection in game scene, afterwards game scene will call simulate_after() to finish up
 	
 
-func stimulate_after(): # called by game scene after hit detection to finish up the frame
+func simulate_after(): # called by game scene after hit detection to finish up the frame
 	
 	test1()
 	
@@ -1239,19 +1239,19 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 		if !$HitStopTimer.is_running():
 			
 			# render the next frame, this update the time!
-			$SpritePlayer.stimulate()
-			$FadePlayer.stimulate() # ModulatePlayer ignore hitstop but FadePlayer doesn't
+			$SpritePlayer.simulate()
+			$FadePlayer.simulate() # ModulatePlayer ignore hitstop but FadePlayer doesn't
 			
 			if !hitstop: # timers do not run on exact frame frame hitstop starts
-				$VarJumpTimer.stimulate()
-				$HitStunTimer.stimulate()
-				$BlockStunTimer.stimulate()
-				$PBlockTimer.stimulate()
-				$PBlockCDTimer.stimulate()
-				$BurstLockTimer.stimulate()
-				$PosFlowSealTimer.stimulate()
+				$VarJumpTimer.simulate()
+				$HitStunTimer.simulate()
+				$BlockStunTimer.simulate()
+				$PBlockTimer.simulate()
+				$PBlockCDTimer.simulate()
+				$BurstLockTimer.simulate()
+				$PosFlowSealTimer.simulate()
 				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running():
-					$HitStunGraceTimer.stimulate()
+					$HitStunGraceTimer.simulate()
 				
 				# offstage protection before 75% damage
 				if get_damage_percent() < 0.75:
@@ -1259,13 +1259,13 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 					var right_boundary = lerp(right_ledge, Globals.Game.stage_box.rect_position.x + \
 						Globals.Game.stage_box.rect_size.x, 1.0/3.0)
 					if position.x < left_boundary or position.x > right_boundary or position.y > floor_level:
-						$HitStunTimer.stimulate() # hitstun decay twice as fast
+						$HitStunTimer.simulate() # hitstun decay twice as fast
 						if position.y > floor_level and velocity.y >= HITSTUN_FALL_THRESHOLD: # if falling too fast...
 							match state:
 								Globals.char_state.AIR_FLINCH_HITSTUN: # hitstun decay instantly
 									$HitStunTimer.stop()
 								Globals.char_state.LAUNCHED_HITSTUN:
-									$HitStunTimer.stimulate() # hitstun decay thrice as fast
+									$HitStunTimer.simulate() # hitstun decay thrice as fast
 					
 			
 			ex_flash()
@@ -1276,12 +1276,12 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 				sprite.rotation = launch_starting_rot - facing * (orig_hitstun - $HitStunTimer.time) * \
 					LAUNCH_ROT_SPEED * Globals.FRAME
 		
-		# start hitstop timer at end of frame after SpritePlayer.stimulate() by setting hitstop to a number other than null for the frame
+		# start hitstop timer at end of frame after SpritePlayer.simulate() by setting hitstop to a number other than null for the frame
 		# new hitstops override old ones
 		if hitstop:
 			$HitStopTimer.time = hitstop
 			
-		$ModulatePlayer.stimulate() # modulate animations continue even in hitstop
+		$ModulatePlayer.simulate() # modulate animations continue even in hitstop
 		
 	test2()
 		
@@ -1621,7 +1621,7 @@ func process_input_buffer():
 								position.y += 2 # 1 will cause issues with downward moving platforms
 								set_true_position()
 								animate("FallTransit")
-								grounded = false # need to do this since moving outside of the end of stimulate2()
+								grounded = false # need to do this since moving outside of the end of simulate2()
 								keep = false
 									
 							if keep:
@@ -4281,7 +4281,7 @@ func generate_blockspark(hit_data):
 	
 # AUTO SEQUENCES ---------------------------------------------------------------------------------------------------
 		
-func stimulate_sequence(): # cut into this during stimulate2() during sequences
+func simulate_sequence(): # cut into this during simulate2() during sequences
 	
 	test0()
 	
@@ -4291,7 +4291,7 @@ func stimulate_sequence(): # cut into this during stimulate2() during sequences
 		
 	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqueCharacter.SEQUENCES[sequence_name]
 		
-		UniqueCharacter.stimulate_sequence()
+		UniqueCharacter.simulate_sequence()
 		
 	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
 	velocity.y = round(velocity.y)
@@ -4306,7 +4306,7 @@ func stimulate_sequence(): # cut into this during stimulate2() during sequences
 	velocity = results[0]
 	
 	if state == Globals.char_state.SEQUENCE_USER:
-		UniqueCharacter.stimulate_sequence_after() # move grabbed target after grabber has moved
+		UniqueCharacter.simulate_sequence_after() # move grabbed target after grabber has moved
 	
 	if results[1]: UniqueCharacter.end_sequence_step("ground") # hit the ground
 	if results[3]: UniqueCharacter.end_sequence_step("ledge") # stopped by ledge

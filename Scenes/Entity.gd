@@ -122,18 +122,18 @@ func load_entity():
 			$Sprite.material.set_shader_param("swap", get_node(master_path).loaded_palette)
 				
 
-func stimulate():
+func simulate():
 	if Globals.Game.is_stage_paused(): return
 	
 	hitstop = null
-	$HitStopTimer.stimulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
+	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
 	
 	if !$HitStopTimer.is_running():
-		stimulate2()
+		simulate2()
 
 
-func stimulate2(): # only ran if not in hitstop
+func simulate2(): # only ran if not in hitstop
 	
 	if abs(velocity.x) < 5.0: # do this at the start too
 		velocity.x = 0.0
@@ -165,7 +165,7 @@ func stimulate2(): # only ran if not in hitstop
 		
 				
 			
-	UniqueEntity.stimulate()
+	UniqueEntity.simulate()
 	
 	ignore_list_progress_timer()
 	
@@ -208,17 +208,17 @@ func stimulate2(): # only ran if not in hitstop
 		position += velocity
 	
 	
-func stimulate_after(): # do this after hit detection
+func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
 	
 	if !$HitStopTimer.is_running():
-		$SpritePlayer.stimulate()
+		$SpritePlayer.simulate()
 		
 		lifetime += 1
 		if lifespan != null and lifetime >= lifespan:
 			UniqueEntity.kill()
 				
-	# start hitstop timer at end of frame after SpritePlayer.stimulate() by setting hitstop to a number other than null for the frame
+	# start hitstop timer at end of frame after SpritePlayer.simulate() by setting hitstop to a number other than null for the frame
 	# new hitstops override old ones
 	if hitstop:
 		$HitStopTimer.time = hitstop

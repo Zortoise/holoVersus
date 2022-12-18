@@ -34,7 +34,7 @@ func is_idle(player):
 				return true
 	return false
 
-func stimulate():
+func simulate():
 	if visible:
 		
 		if !running: # check whether to start running

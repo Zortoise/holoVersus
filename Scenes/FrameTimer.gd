@@ -3,7 +3,7 @@ extends Node
 var time := 0
 
 	
-func stimulate():
+func simulate():
 	if time > 0:
 		time -= 1
 	elif time < 0:

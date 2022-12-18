@@ -33,7 +33,7 @@ const MOVE_DATABASE = {
 func init(_aux_data: Dictionary):
 	Animator.play("Kill") # starting animation
 
-func stimulate():
+func simulate():
 	pass
 	
 func query_atk_attr(_in_move_name):

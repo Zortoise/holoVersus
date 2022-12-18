@@ -73,7 +73,7 @@ func replay_control():
 			print("Error: Saved game state not found")
 
 	if Input.is_action_just_pressed(FRAME_ADVANCE):
-		Globals.Game.stimulate(false)
+		Globals.Game.simulate(false)
 			
 	if Input.is_action_just_pressed(FRAME_REVERSE): # reverse 1 frame by loading save state of previous frame, can do up to certain times
 		if Globals.Game.frametime - 2 in replay_saved_game_states:
@@ -81,7 +81,7 @@ func replay_control():
 			replay_saved_game_states.erase(Globals.Game.frametime)
 			Globals.Game.load_state(replay_saved_game_states[Globals.Game.frametime - 2])
 			Globals.Game.true_frametime = Globals.Game.frametime
-			Globals.Game.stimulate(false)
+			Globals.Game.simulate(false)
 			
 	if Input.is_action_just_pressed(TOGGLE_VIEWER):
 		show_hitbox = !show_hitbox

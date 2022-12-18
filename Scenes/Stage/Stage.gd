@@ -24,7 +24,7 @@ func init(): # called by unique stage code when init() is called
 			child.add_to_group("StagePause")
 
 
-func stimulate():
+func simulate():
 	for moving_platform in get_tree().get_nodes_in_group("MovingPlatforms"):
 		moving_platform.move_platform()
 		

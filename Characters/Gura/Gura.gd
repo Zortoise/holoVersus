@@ -126,7 +126,7 @@ func check_collidable():  # some characters have move that can pass through othe
 # UNIQUE INPUT CAPTURE --------------------------------------------------------------------------------------------------
 # some holdable buttons can have effect unique to the character
 	
-func stimulate():
+func simulate():
 	
 #	Character.input_state
 #	Character.dir
@@ -743,7 +743,7 @@ func being_hit(hit_data): # reaction, can change hit_data from here
 	
 # AUTO SEQUENCES --------------------------------------------------------------------------------------------------
 
-func stimulate_sequence(): # this is ran on every frame during a sequence
+func simulate_sequence(): # this is ran on every frame during a sequence
 	var Partner = get_node(Character.targeted_opponent_path)
 	
 	match Animator.to_play_animation:
@@ -764,11 +764,11 @@ func stimulate_sequence(): # this is ran on every frame during a sequence
 			Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
 		"SP6[ex]SeqD":
 			Partner.afterimage_trail()
-			if Character.grounded: end_sequence_step("ground") # secondary trigger, in case the one in Character.stimulate_sequence() fails
+			if Character.grounded: end_sequence_step("ground") # secondary trigger, in case the one in Character.simulate_sequence() fails
 		"SP6[ex]SeqE":
 			pass
 						
-func stimulate_sequence_after(): # called after moving and animating every frame, grab_point and grab_rot_dir are only updated then
+func simulate_sequence_after(): # called after moving and animating every frame, grab_point and grab_rot_dir are only updated then
 	
 	var Partner = get_node(Character.targeted_opponent_path)
 	var grab_point = Animator.query_point("grabpoint")

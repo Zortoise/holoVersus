@@ -39,7 +39,7 @@ func init(aux_data: Dictionary):
 			Entity.velocity = Vector2(150, 0)
 			Entity.velocity.x *= Entity.facing
 			
-func stimulate():
+func simulate():
 	
 	match Animator.to_play_animation: # triggering shark breach
 		"Active", "[h]Active", "Turn", "[h]Turn":

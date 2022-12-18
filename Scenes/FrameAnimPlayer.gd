@@ -49,7 +49,7 @@ func is_playing():
 	else: return true
 
 # run every physics tick
-func stimulate():
+func simulate():
 	if playing:
 		current_animation = to_play_animation
 		

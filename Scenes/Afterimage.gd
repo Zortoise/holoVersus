@@ -69,7 +69,7 @@ func apply_shader():
 			$Sprite.material.shader = Globals.white_shader
 			$Sprite.material.set_shader_param("whitening", 1.0)
 
-func stimulate():
+func simulate():
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
 	
 	if player_image and get_node(master_path).get_node("HitStopTimer").is_running():

@@ -16,7 +16,7 @@ const MOVE_DATABASE = {
 func init(_aux_data: Dictionary):
 	Animator.play("Spawn") # starting animation
 
-func stimulate():
+func simulate():
 	if Animator.to_play_animation == "Spawn" and get_node(Entity.master_path).unique_data.nibbler_cancel > 0:
 		Globals.Game.spawn_SFX("SmallSplash", [Entity.master_path, "SmallSplash"], Entity.position, {"facing":Entity.facing, "grounded":true})
 		Entity.free = true # cancel spawning if master got hit

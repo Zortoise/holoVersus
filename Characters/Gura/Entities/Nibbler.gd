@@ -63,7 +63,7 @@ func query_atk_attr(_move_name):
 	return [Globals.atk_attr.REPEATABLE]
 
 			
-func stimulate():
+func simulate():
 	Entity.velocity.y = min(Entity.velocity.y + (GRAVITY * Globals.FRAME), TERMINAL_DOWN_VELOCITY)
 	Entity.velocity.x = lerp(Entity.velocity.x, 0, AIR_RESISTANCE)
 

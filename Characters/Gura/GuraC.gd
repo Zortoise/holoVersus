@@ -5,7 +5,7 @@ extends "res://Characters/Gura/GuraBase.gd"
 ## UNIQUE INPUT CAPTURE --------------------------------------------------------------------------------------------------
 ## some holdable buttons can have effect unique to the character
 #
-#func stimulate():
+#func simulate():
 #
 ##	Character.input_state
 ##	Character.dir

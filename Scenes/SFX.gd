@@ -57,10 +57,10 @@ func palette():
 		$Sprite.material.shader = Globals.loaded_palette_shader
 		$Sprite.material.set_shader_param("swap", get_node(palette_ref).loaded_palette)
 
-func stimulate():
+func simulate():
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
 	
-	$SpritePlayer.stimulate()
+	$SpritePlayer.simulate()
 
 
 func _on_SpritePlayer_anim_finished(_anim_name):

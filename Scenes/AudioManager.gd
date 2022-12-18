@@ -8,9 +8,9 @@ var volume_target := 0
 
 var decay := false
 
-var time := -1 # so that 1st frame is 0, stimulate() will call once before the first _process()
+var time := -1 # so that 1st frame is 0, simulate() will call once before the first _process()
 # _physics_process() will not call on frame the node is created
-var processed := false # not saved, used to indicate the 1st frame not stimulated
+var processed := false # not saved, used to indicate the 1st frame not simulated
 
 
 func init(in_audio_ref: String, aux_data: Dictionary):
@@ -52,7 +52,7 @@ func _process(delta):
 				queue_free()
 			
 	else: # run only once
-		# stopped being stimulated/loaded in, start from a certain position based on time
+		# stopped being simulated/loaded in, start from a certain position based on time
 		processed = true
 		if Netplay.is_netplay():
 			if time < 0: # audio glitch
@@ -66,7 +66,7 @@ func _process(delta):
 
 
 	
-func stimulate():
+func simulate():
 	time += 1
 	if time * Globals.FRAME >= stream.get_length(): # if overshooting stream length
 		free = true

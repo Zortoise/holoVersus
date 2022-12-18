@@ -251,7 +251,7 @@ func query_atk_attr(in_move_name):
 			return [Globals.atk_attr.DRAG_KB]
 			
 			
-func stimulate():
+func simulate():
 	match Animator.to_play_animation: # afterimage trail
 		"[c2]Active", "a[c2]Active":
 			if posmod(Entity.lifetime, 3) == 0:

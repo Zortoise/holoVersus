@@ -47,7 +47,7 @@ var HUD
 var frame_viewer
 
 onready var match_input_log = Globals.match_input_log
-var true_frametime := 0 # to set target to stimulate to
+var true_frametime := 0 # to set target to simulate to
 var playback_mode := false
 var record_end_time := 0 # set end of playback, when loading set true_frame_time to it while clearing all
 							# inputs pass record_end_time within match_input_log
@@ -71,7 +71,7 @@ var captured_input_state = { # use for capturing inputs, during input delay cann
 		"old_pressed" : [],
 		"pressed" : [],
 	}
-var screenfreeze = null # when set to a player_ID, only that player will stimulate, along with any sfx/shadow spawned during screenfreeze
+var screenfreeze = null # when set to a player_ID, only that player will simulate, along with any sfx/shadow spawned during screenfreeze
 var darken := false # stage will turn dark
 
 var input_lock := true # lock inputs at start of game,  caused issue when save/loaded,
@@ -249,11 +249,11 @@ func debug():
 
 	if Input.is_action_just_pressed("frame_advance"):
 		if Globals.watching_replay:
-			stimulate(false)
+			simulate(false)
 		elif playback_mode == false:
-			stimulate()
+			simulate()
 		else:
-			stimulate(false)
+			simulate(false)
 			
 	if frame_reverse and Input.is_action_just_pressed("frame_reverse"): # reverse 1 frame by loading save state of previous frame, can do up to certain times
 		if playback_mode == false:
@@ -262,7 +262,7 @@ func debug():
 				test_saved_game_states.erase(frametime)
 				load_state(test_saved_game_states[frametime - 2])
 				true_frametime = frametime
-				stimulate(false)
+				simulate(false)
 				match_input_log.set_end_frametime(frametime)
 			
 			
@@ -308,7 +308,7 @@ func _physics_process(_delta):
 #					load_state($NetgameSetup.saved_game_states[frametime - random_frames])
 #					playback_mode = true
 #					while playback_mode:
-#						stimulate(false)
+#						simulate(false)
 
 
 	if Netplay.is_netplay(): # rollback
@@ -327,7 +327,7 @@ func _physics_process(_delta):
 				playback_mode = true
 				var rollback_frames := 0
 				while playback_mode:
-					stimulate(false)
+					simulate(false)
 					rollback_frames += 1
 				Netcode.rollback_starttime = null # rollback completed
 				Fps.set_rolled_back_frames(rollback_frames) # display latest frames rolled back
@@ -338,30 +338,30 @@ func _physics_process(_delta):
 				Netcode.lag_freezer()
 
 
-# STIMULATE FRAME --------------------------------------------------------------------------------------------------
+# simulate FRAME --------------------------------------------------------------------------------------------------
 
 	if Globals.watching_replay:
 		$ReplayControl.replay_control()
 		if !$ReplayControl.freeze_frame:
 			for x in play_speed:
-				stimulate(false)
+				simulate(false)
 		set_input_indicator()
 
 	elif !Netplay.is_netplay():
 		for x in play_speed:
 			if playback_mode == false:
-				stimulate()
+				simulate()
 			else:
-				stimulate(false)
+				simulate(false)
 	else: # netplay
 		if !Netcode.lag_freeze:
 			if Netcode.time_diff < 0:
-				stimulate()
+				simulate()
 				if posmod(frametime, 10) == 0:
-					stimulate()
+					simulate()
 					Netcode.time_diff += 1
 			else:
-				stimulate()
+				simulate()
 
 # SCREEN SHAKE --------------------------------------------------------------------------------------------------
 
@@ -410,7 +410,7 @@ func _physics_process(_delta):
 func _process(delta):
 
 # MOVE CAMERA --------------------------------------------------------------------------------------------------
-	# camera management outside of stimulation, no need to stimulate camera
+	# camera management outside of stimulation, no need to simulate camera
 	
 	var players_position := Vector2.ZERO
 	
@@ -513,10 +513,10 @@ func load_inputs():
 		pass
 			
 	
-# STIMULATE LOOP --------------------------------------------------------------------------------------------------
+# simulate LOOP --------------------------------------------------------------------------------------------------
 	
-# stimulate a physics tick, do this function multiple times a frame to stimulate without rendering
-func stimulate(rendering = true):
+# simulate a physics tick, do this function multiple times a frame to simulate without rendering
+func simulate(rendering = true):
 	# if rendering is false, will load inputs from match_input_log instead of capturing new ones
 	
 	$PolygonDrawer.extra_boxes = [] # clear the extra boxes
@@ -557,72 +557,72 @@ func stimulate(rendering = true):
 
 #	Globals.debugger.set_physics_logs(frametime, $Players.get_children())
 	
-# STIMULATE CHILDREN NODES --------------------------------------------------------------------------------------------------
+# simulate CHILDREN NODES --------------------------------------------------------------------------------------------------
 
 	to_superfreeze = null
 	to_lethalfreeze = null
 
 	# activate player's physics
 	for player in $Players.get_children():
-		player.stimulate(player_input_state)
+		player.simulate(player_input_state)
 
 	for entity in $EntitiesBack.get_children():
 		if entity.free:
 			entity.free()
 		else:
-			entity.stimulate()
+			entity.simulate()
 		
 	for entity in $EntitiesFront.get_children():
 		if entity.free:
 			entity.free()
 		else:
-			entity.stimulate()
+			entity.simulate()
 
 	if !is_stage_paused():
 		detect_hit()
 	
-	# activate player's stimulate_after()
+	# activate player's simulate_after()
 	for player in $Players.get_children():
-		player.stimulate_after()
+		player.simulate_after()
 		
 	for entity in $EntitiesBack.get_children():
-		entity.stimulate_after()
+		entity.simulate_after()
 		
 	for entity in $EntitiesFront.get_children():
-		entity.stimulate_after()
+		entity.simulate_after()
 
 
 	for afterimage in $Afterimages.get_children():
 		if afterimage.free: # Physics Tick version of queue_free()
 			afterimage.free()
 		else:
-			afterimage.stimulate()
+			afterimage.simulate()
 		
 	for SFX in $SFXFront.get_children():
 		if SFX.free:
 			SFX.free()
 		else:
-			SFX.stimulate()
+			SFX.simulate()
 			
 	for SFX in $SFXBack.get_children():
 		if SFX.free:
 			SFX.free()
 		else:
-			SFX.stimulate()
+			SFX.simulate()
 			
 	for audio in $AudioPlayers.get_children():
 		if audio.free:
 			audio.free()
 		else:
-			audio.stimulate()
+			audio.simulate()
 			
 	if Globals.static_stage == 0:
-		stage.stimulate()
+		stage.simulate()
 		
-	check_superfreeze() # only freeze after players/entites/sfx have stimulated
+	check_superfreeze() # only freeze after players/entites/sfx have simulated
 	check_lethalfreeze()
 			
-	frame_viewer.stimulate()
+	frame_viewer.simulate()
 
 # --------------------------------------------------------------------------------------------------
 

@@ -47,7 +47,7 @@ func init(_aux_data: Dictionary):
 #	Entity.absorption_value = ABSORPTION # set starting absorption_value
 
 	
-func stimulate():
+func simulate():
 	pass
 	
 func query_atk_attr(_in_move_name):
