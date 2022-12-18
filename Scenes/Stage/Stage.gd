@@ -16,6 +16,12 @@ func init(): # called by unique stage code when init() is called
 	Globals.Game.P1_facing = 1
 	Globals.Game.P2_position = $P2_Position.position
 	Globals.Game.P2_facing = -1
+	
+	add_to_group("StageDarken")
+	if has_node("ParallaxBackground"):
+		for child in $ParallaxBackground.get_children():
+			child.add_to_group("StageDarken")
+			child.add_to_group("StagePause")
 
 
 func stimulate():

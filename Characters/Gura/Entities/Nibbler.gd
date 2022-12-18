@@ -42,7 +42,12 @@ func _ready():
 func init(_aux_data: Dictionary):
 	 # starting animation
 	Animator.play("Active")
-	Entity.absorption_value = 1
+	
+	match Animator.to_play_animation:
+		"Active":
+			Entity.velocity = Vector2(START_SPEED, 0).rotated(START_ROTATION)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 1
 
 func query_move_data():
 	
@@ -104,9 +109,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
-		"Active":
-			Entity.velocity = Vector2(START_SPEED, 0).rotated(START_ROTATION)
-			Entity.velocity.x *= Entity.facing
 		"Kill":
 			Entity.velocity.x *= 0.25
 			Entity.velocity.y = -250

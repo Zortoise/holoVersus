@@ -14,7 +14,7 @@ enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE
-		QUICK_TURN_LIMIT, NON_ATTACK, CANNOT_CHAIN_INTO}
+		QUICK_TURN_LIMIT, NON_ATTACK, CANNOT_CHAIN_INTO, NOT_FROM_C_REC}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-airs, don't erase this! Needed for air specials!
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -37,6 +37,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # QUICK_TURN_LIMIT = for grounded attacks, can only quick turn on the first 3 frames
 # NON_ATTACK = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun/blockstun
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
+# NOT_FROM_C_REC = cannot use during cancellable recovery, for certain moves like command grabs
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge

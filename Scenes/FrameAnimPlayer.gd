@@ -15,8 +15,8 @@ var sfx_over
 var sfx_under
 
 var time := 0 # increase by 1 each frame, used to check for timestamps
-var to_play_animation: String # since current_animation should only be changed on render
-var current_animation: String
+var to_play_animation: = "" # since current_animation should only be changed on render
+var current_animation: = ""
 var playing := false
 var looped_back := false # if true, do not emit anim_started when starting
 
@@ -31,6 +31,10 @@ func play(anim: String):
 		to_play_animation = anim
 		time = 0
 		looped_back = false
+		if current_animation == "": # first animation
+			current_animation = to_play_animation
+			set_up_texture()
+			process_timestamp(0)
 	else:
 		print("Error: Animation " + anim + " not found.")
 		
@@ -139,6 +143,7 @@ func query_current(query_animations: Array): # return true if to_play_animation 
 	
 # request for a certain polygon, return null if no such polygon
 func query_polygon(target = "hurtbox"):
+	var owner_pos = get_parent().position
 	
 	# first, find the latest frame
 	var new_time = time
@@ -156,12 +161,15 @@ func query_polygon(target = "hurtbox"):
 		if polygon.size() == 0: # return null if empty polygon
 			return null
 		else:
+			for index in polygon.size():
+				polygon[index] += owner_pos
 			return polygon
 	else:
 		return null
 		
 # request for a certain point, return null if no such point
 func query_point(target = "kborigin"):
+	var owner_pos = get_parent().position
 	
 	# first, find the latest frame
 	var new_time = time
@@ -176,7 +184,7 @@ func query_point(target = "kborigin"):
 		if point == null: return null
 		if "facing" in get_parent(): # mirrored if facing other way
 			point.x *= get_parent().facing
-		return point
+		return (point + owner_pos)
 	else:
 		return null
 		
@@ -219,6 +227,10 @@ func load_state(state_data):
 		else:
 			set_up_texture()
 			process_timestamp(time)
+#	else: # load on 1st frame
+#		if time == 0:
+#			set_up_texture()
+#			process_timestamp(0)
 	
 #--------------------------------------------------------------------------------------------------
 

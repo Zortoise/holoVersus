@@ -15,6 +15,9 @@ func init():
 	
 
 func _physics_process(delta):
+	
+	if Globals.Game.is_stage_paused(): return
+	
 	time += delta
 	if time > period:
 		time = 0.0 # loop back

@@ -3,14 +3,13 @@ extends "res://Characters/Gura/GuraBase.gd"
 #const STYLE = 0
 
 # Steps to add an attack:
-# 1. Add it in MOVE_DATABASE and STARTERS, also in EX_MOVES/SUPERS
+# 1. Add it in MOVE_DATABASE and STARTERS, also in EX_MOVES/SUPERS, and in UP_TILTS if needed (even for EX Moves)
 # 2. Add it in state_detect()
 # 3. Add it in _on_SpritePlayer_anim_finished() to set the transitions
 # 4. Add it in _on_SpritePlayer_anim_started() to set up sfx_over, entity/sfx spawning  and other physics modifying characteristics
-# 5. Add it in process_buffered_input() for inputs
 # 6. Add it in capture_combinations() if it is a special action
+# 5. Add it in process_buffered_input() for inputs
 # 7. Add any startup/recovery animations not in MOVE_DATABASE to query_atk_attr()
-# 8. For uptilts, add it in is_grounded_uptilt() and is_aerial_uptilt(), even for EX moves
 
 # --------------------------------------------------------------------------------------------------
 
@@ -32,9 +31,6 @@ func _ready():
 
 func state_detect(anim): # for unique animations, continued from state_detect() of main character node
 	match anim:
-		
-		"AirDashU2", "AirDashD2":
-			return Globals.char_state.AIR_RECOVERY
 		
 		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", \
 			"HStartup", "H[h]Startup":
@@ -136,11 +132,6 @@ func stimulate():
 #	Character.dir
 #	Character.v_dir
 
-#	if Character.unique_data.bitten_player_path != null: # bitemark
-#		if get_node(Character.unique_data.bitten_player_path).state == Globals.char_state.DEAD:
-#			Character.unique_data.bitten_player_path = null # if marked opponent dead, ends bitemark
-#			Character.unique_data.nibbler_count = 0
-
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 
@@ -206,136 +197,6 @@ func stimulate():
 #			Character.face(1)
 #			Character.animate("Dash")
 
-# 1. Set both players into special char_states, they will cut into stimulate_sequence() from stimulate2()
-# 2. Grabber move according to their premade sequence in stimulate_sequence(), which also moves Grabbed directly via move_sequence_target_to()
-# 3. move_sequence_target_to() ignores ceiling, if either player touch the ground they trigger end_sequence_step() which can have reactions
-# 4. if Grabbed's move_sequence_target_to() hits a wall, use grab point to calculate new x-positive for the Grabber
-#		then use move_sequence_target_to() on Grabber to reach there
-#		if Grabber's move_sequence_target_to collides as well, break the grab instantly
-
-func stimulate_sequence():
-	
-	var Partner = get_node(Character.targeted_opponent_path)
-	
-	match Animator.current_animation:
-		"SP6[ex]SeqA":
-			pass
-		"SP6[ex]SeqB":
-			if Character.dir == -Character.facing: # can air strafe backwards when going up
-				Character.velocity.x += Character.dir * 10
-			else:
-				Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
-			Character.velocity.x = clamp(Character.velocity.x, -100, 100) # max air strafe speed
-			Character.velocity.y += 1000 * Globals.FRAME # gravity
-		"SP6[ex]SeqC":
-			Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
-		"SP6[ex]SeqD":
-			pass
-		"SP6[ex]SeqE":
-			pass
-							
-func start_sequence(): # easier to do it all here
-	var Partner = get_node(Character.targeted_opponent_path)
-	
-	match Animator.current_animation:
-		"SP6[ex]SeqA":
-			Character.velocity = Vector2.ZERO # freeze first
-		"SP6[ex]SeqB":
-			Character.velocity = Vector2(0, -500) # jump up
-			if Character.grounded:
-				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-		"SP6[ex]SeqC":
-			Character.face(-Character.facing)
-			Character.velocity.y = 600 # dive down
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, \
-					{"facing":Character.facing, "rot":PI/2})
-		"SP6[ex]SeqE":  # you hit ground
-			# WIP: move opponent to your feet level
-			Character.velocity.x = 0
-			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
-					{"facing":Character.facing, "back":true, "grounded":true})
-			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})
-			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			Globals.Game.set_screenshake()
-		"aSP6[ex]SeqE":  # parther hit the groun
-			Character.velocity.x = 0
-			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})
-			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			Globals.Game.set_screenshake()
-							
-func end_sequence_step(): # sequence steps that have effect when ended, like falling steps being ended when hitting the ground
-	var Partner = get_node(Character.targeted_opponent_path)
-	
-	match Animator.current_animation:
-		"SP6[ex]SeqD": # ends when either you or parther hit the ground
-			if !Character.grounded: # parther hit the ground
-				Character.animate("aSP6[ex]SeqE")
-			else: # you hit ground
-				Character.animate("SP6[ex]SeqE")
-		"SP6[ex]SeqE":
-			pass # place damage/knockback here
-		"aSP6[ex]SeqE":
-			pass # place damage/knockback here
-			
-func sequence_fallthrough(): # which step in sequence ignore soft platforms
-	match Animator.current_animation:
-		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
-			return true
-	return false
-	
-func sequence_ledgestop(): # which step in sequence are stopped by ledges
-	return false
-	
-func sequence_passthrough(): # which step in sequence ignore all platforms (for cinematic supers)
-	return false
-	
-func sequence_passfloor(): # which step in sequence ignore hard floor
-	match Animator.current_animation:
-		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
-			return true
-	return false
-			
-#	"SP6[ex]SeqE" : {
-#		"damage" : 200,
-#		"guard_drain": 2500,
-#		"guard_gain_on_combo" : 3500,
-#		"launch_power" : 500,
-#		"launch_angle" : -PI/2.2,
-#		"hitstun" : 20,
-#	}
-
-#		# get physics from current step in UniqueCharacter.SEQUENCES[sequence_name]
-#		var seq_data
-#
-#		if "gravity" in seq_data: # gravity during sequence
-#			velocity.y += seq_data.gravity * Globals.FRAME
-#
-#		if "horiz_slow" in seq_data: # friction/air resistance during sequence
-#			velocity.x = lerp(velocity.x, 0, seq_data.horiz_slow)
-#
-#		if "verti_slow" in seq_data:
-#			velocity.y = lerp(velocity.y, 0, seq_data.verti_slow)
-#
-#		if "x_vel_limit" in seq_data:	
-#			velocity.x = clamp(velocity.x, -seq_data.x_vel_limit, seq_data.x_vel_limit)
-#
-#		if "up_vel_limit" in seq_data:	
-#			velocity.y = min(velocity.y, -seq_data.up_vel_limit)
-#
-#		if "down_vel_limit" in seq_data:	
-#			velocity.y = max(velocity.y, seq_data.down_vel_limit)
-#
-#		if "sfx" in seq_data:
-#			if Animator.time in seq_data.sfx:
-#				pass
-
-#		if "lerp_x" in seq_data:
-#			velocity.x = 0.0
-#			# WIP, use move_amount to move directly without using velocity
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 
@@ -387,6 +248,8 @@ func capture_instant_actions():
 
 func process_instant_actions():
 	Character.unique_data.groundfin_trigger = false
+	Character.unique_data.nibbler_cancel = max(Character.unique_data.nibbler_cancel - 1, 0)
+	# nibbler_cancel is a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 	
 	if !Character.get_node("RespawnTimer").is_running() and !Character.get_node("HitStunTimer").is_running() and \
 			!Character.get_node("BlockStunTimer").is_running():
@@ -395,19 +258,17 @@ func process_instant_actions():
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 			
 		if "BitemarkTriggerU" in Character.instant_actions:
-			if Character.unique_data.bitten_player_path != null:
-				var spawn_point = get_node(Character.unique_data.bitten_player_path).position
+			if Character.unique_data.nibbler_count > 0:
+				var spawn_point = get_node(Character.targeted_opponent_path).position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
 					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point, {})
 					Character.play_audio("water15", {"unique_path" : Character.get_path()})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
-					if Character.unique_data.nibbler_count <= 0:
-						Character.unique_data.bitten_player_path = null
 						
 		if "BitemarkTriggerD" in Character.instant_actions:
-			if Character.unique_data.bitten_player_path != null:
+			if Character.unique_data.nibbler_count > 0:
 				var spawn_point = Character.position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
@@ -415,12 +276,10 @@ func process_instant_actions():
 					Character.play_audio("water15", {"unique_path" : Character.get_path()})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
-					if Character.unique_data.nibbler_count <= 0:
-						Character.unique_data.bitten_player_path = null
 						
 		if "BitemarkTrigger" in Character.instant_actions:
-			if Character.unique_data.bitten_player_path != null:
-				var spawn_point = (get_node(Character.unique_data.bitten_player_path).position + Character.position) * 0.5
+			if Character.unique_data.nibbler_count > 0:
+				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
 				spawn_point.x = round(spawn_point.x)
 				spawn_point.y = round(spawn_point.y)
 				var spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
@@ -431,8 +290,6 @@ func process_instant_actions():
 					Character.play_audio("water15", {"unique_path" : Character.get_path()})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
-					if Character.unique_data.nibbler_count <= 0:
-						Character.unique_data.bitten_player_path = null
 
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
@@ -474,15 +331,15 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								dash_sound()
 								
 							else: # not moving upward
-								Character.animate("AirDashTransit") # for dropping down and air dashing ASAP
+								Character.animate("aDashTransit") # for dropping down and air dashing ASAP
 						else:
-							Character.animate("AirDashTransit")
+							Character.animate("aDashTransit")
 						keep = false
 						
 				Globals.char_state.AIR_STARTUP: # cancel start of air jump into air dash
-					if Animator.query(["AirJumpTransit", "WallJumpTransit", "AirJumpTransit2", "WallJumpTransit2"]):
+					if Animator.query(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
 						if Character.air_dash > 0:
-							Character.animate("AirDashTransit")
+							Character.animate("aDashTransit")
 							keep = false
 							
 			# DASH CANCELS ---------------------------------------------------------------------------------
@@ -501,7 +358,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				Globals.char_state.AIR_ATK_RECOVERY:
 					if Character.test_dash_cancel():
 						if !Character.grounded:
-							Character.animate("AirDashTransit")
+							Character.animate("aDashTransit")
 							keep = false
 						else: # grounded
 							Character.animate("DashTransit")
@@ -511,7 +368,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					if Character.dash_cancel:
 						if !Character.grounded:
 							if Character.air_dash > 0:
-								Character.animate("AirDashTransit")
+								Character.animate("aDashTransit")
 								keep = false
 						else: # grounded
 							Character.animate("DashTransit")
@@ -627,16 +484,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 	
 	return keep # return true to keep buffered_input, false to remove buffered_input
 	# no need to return input_to_add since array is passed by reference
-		
-func is_grounded_uptilt(attack_ref):
-	if attack_ref in ["F3", "SP3", "SP3[ex]"]:
-		return true
-	return false
-	
-func is_aerial_uptilt(attack_ref):
-	if attack_ref in ["aF3", "aSP3", "aSP3[ex]"]:
-		return true
-	return false
+
 	
 func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time): # return true if button consumed
 	
@@ -656,14 +504,16 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			
 		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
 			if Character.grounded and attack_ref in STARTERS:
-				if Character.is_ex_valid(attack_ref):
+				if new_state == Globals.char_state.GROUND_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr(attack_ref):
+					continue # certain moves cannot be performed during cancellable recovery
+				elif Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
 					return true
 					
 		Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
-			if Character.grounded and is_grounded_uptilt(attack_ref) and Animator.query_to_play(["JumpTransit"]):
+			if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]):
 				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					Character.chain_memory = []
@@ -673,6 +523,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
+					if new_state == Globals.char_state.AIR_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr("a" + attack_ref):
+						continue # certain moves cannot be performed during cancellable recovery
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						Character.chain_memory = []
@@ -680,9 +532,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 						return true
 						
 		Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
-			if is_aerial_uptilt("a" + attack_ref) and !Character.button_jump in Character.input_state.pressed and \
+			if ("a" + attack_ref) in UP_TILTS and !Character.button_jump in Character.input_state.pressed and \
 					Character.test_aerial_memory("a" + attack_ref) and \
-					Animator.query_to_play(["AirJumpTransit", "AirJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
+					Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
 				if Character.is_ex_valid("a" + attack_ref):
 					Character.animate("a" + attack_ref + "Startup")
 					Character.chain_memory = []
@@ -786,7 +638,7 @@ func gain_one_air_dash(): # different characters can have different types of air
 
 func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
-		"Dash", "AirDash", "AirDashD2", "AirDashU2":
+		"Dash", "aDash", "aDashD", "aDashU":
 			Character.afterimage_trail()
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			Character.afterimage_trail()
@@ -845,7 +697,12 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 		
 	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
+	
+func query_traits(): # may have special conditions
+	return TRAITS
 
+
+# HIT REACTIONS --------------------------------------------------------------------------------------------------
 
 func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	
@@ -855,43 +712,184 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 		"L2":
 			Character.animate("L2Recovery")
 		"aSP5":
-			Character.unique_data.bitten_player_path = hit_data.defender_nodepath
 			if hit_data.sweetspotted:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			else:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 1, 3)
 			update_uniqueHUD()
-			Character.unique_data.nibbler_cancel = false
 		"aSP5[ex]":
-			Character.unique_data.bitten_player_path = hit_data.defender_nodepath
 			if hit_data.sweetspotted:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 3, 3)
 			else:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			update_uniqueHUD()
-			Character.unique_data.nibbler_cancel = false
 
-	
-	
+
 func being_hit(hit_data): # reaction, can change hit_data from here
 	var defender = get_node(hit_data.defender_nodepath)
 	
 	if !hit_data.weak_hit and hit_data.move_data.damage > 0:
 		match defender.state:
 			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
-				if Animator.query(["AirDashU2", "AirDashD2"]):
+				if Animator.query(["aDashU", "aDashD"]):
 					hit_data.punish_hit = true
 					
 	if hit_data.block_state in [Globals.block_state.UNBLOCKED, Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG]:
-		Character.unique_data.nibbler_cancel = true # cancel spawning nibblers
+		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
 		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
 		update_uniqueHUD()
-		if Character.unique_data.nibbler_count == 0:
-			Character.unique_data.bitten_player_path = null # lose bitemark if you are hit
-					
+				
 	
-func query_traits(): # may have special conditions
-	return TRAITS
+	
+# AUTO SEQUENCES --------------------------------------------------------------------------------------------------
+
+func stimulate_sequence(): # this is ran on every frame during a sequence
+	var Partner = get_node(Character.targeted_opponent_path)
+	
+	match Animator.to_play_animation:
+		"SP6[ex]SeqA":
+			if Animator.time == 10:
+				Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", Animator.query_point("grabpoint"), {"facing":-Character.facing, "palette":"blue"})
+				Character.play_audio("cut1", {"vol":-12})
+		"SP6[ex]SeqB":
+			if Character.dir != 0: # can air strafe when going up
+				Character.velocity.x += Character.dir * 10
+			else:
+				Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
+			Character.velocity.x = clamp(Character.velocity.x, -100, 100) # max air strafe speed
+			Character.velocity.y += 1000 * Globals.FRAME # gravity
+			if Animator.time in [0, 21]:
+				Character.play_audio("whoosh3", {"vol":-10})
+		"SP6[ex]SeqC":
+			Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
+		"SP6[ex]SeqD":
+			Partner.afterimage_trail()
+			if Character.grounded: end_sequence_step("ground") # secondary trigger, in case the one in Character.stimulate_sequence() fails
+		"SP6[ex]SeqE":
+			pass
+						
+func stimulate_sequence_after(): # called after moving and animating every frame, grab_point and grab_rot_dir are only updated then
+	
+	var Partner = get_node(Character.targeted_opponent_path)
+	var grab_point = Animator.query_point("grabpoint")
+	var grab_rot_dir = Animator.query_point("grabrotdir")
+	
+	match Animator.to_play_animation:
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
+			move_sequence_target(grab_point)
+			if grab_rot_dir != null:
+				if Partner.facing == -1:
+					Partner.sprite.rotation = grab_point.angle_to_point(grab_rot_dir)
+				else:
+					Partner.sprite.rotation = grab_point.angle_to_point(grab_rot_dir) + PI
+		"SP6[ex]SeqE":
+			pass
+						
+func start_sequence_step(): # this is ran at the start of every sequence_step
+	var Partner = get_node(Character.targeted_opponent_path)
+
+	match Animator.to_play_animation:
+		"SP6[ex]SeqA":
+			Globals.Game.get_node("Players").move_child(Character, 0) # move Grabber to back, some grabs move Grabbed to back
+			Character.velocity = Vector2.ZERO # freeze first
+			Partner.velocity = Vector2.ZERO
+			Partner.animate("aSeqFlinchAFreeze")
+			Partner.face(-Character.facing)
+			Partner.get_node("ModulatePlayer").play("tech_flash")
+			Character.play_audio("bling6", {"vol":-20})
+		"SP6[ex]SeqB":
+			Character.velocity = Vector2(0, -500) # jump up
+			if Character.grounded:
+				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP6[ex]SeqC":
+			Character.velocity.y = 600 # dive down
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, \
+					{"facing":Character.facing, "rot":PI/2})
+			Character.play_audio("water14", {})
+		"SP6[ex]SeqE":  # you hit ground
+			Partner.sequence_hit(0)
+			Character.velocity = Vector2.ZERO
+			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
+			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
+					{"facing":Character.facing, "back":true, "grounded":true})
+			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
+			Globals.Game.set_screenshake()
+			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
+			Character.play_audio("rock3", {})
+		"aSP6[ex]SeqE":  # parther hit the ground but not you
+			Partner.sequence_hit(0)
+			Character.velocity = Vector2.ZERO
+			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
+			Globals.Game.set_screenshake()
+			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
+			Character.play_audio("rock3", {"vol":-5})
+							
+func end_sequence_step(trigger = null): # this is ran at the start of certain sequence_step, or to end a trigger sequence_step
+	var Partner = get_node(Character.targeted_opponent_path)
+	
+	if trigger == "break": # grab break
+		Character.animate("Idle")
+		Partner.animate("Idle")
+		return true
+	
+	match Animator.to_play_animation:
+		"SP6[ex]SeqD": # ends when either you or parther hit the ground
+			if trigger == "ground": # you hit the ground
+				Character.animate("SP6[ex]SeqE")
+				return true
+			elif trigger == "target_ground": # parther hit the ground but not you
+				Character.animate("aSP6[ex]SeqE")
+				return true
+		"SP6[ex]SeqE":
+			Partner.sequence_launch()
+			return true
+		"aSP6[ex]SeqE":
+			Partner.sequence_launch()
+			return true
+	return false
+			
+func move_sequence_target(new_position): # move sequence_target to new position
+	if new_position == null: return # no grab point
+	
+	var Partner = get_node(Character.targeted_opponent_path)
+	var results = Partner.move_sequence_player_to(new_position) # [in_velocity, landing_check, collision_check, ledgedrop_check]
+	
+	if results[1]: # Grabbed hit the ground, ends sequence step if it is triggered by Grabbed being grounded
+		if end_sequence_step("target_ground"):
+			return
+			
+	if results[2]: # Grabbed hit the wall/ceiling/ground outside ground trigger, reposition Grabber
+		var reposition = Partner.position + (Character.position - Animator.query_point("grabpoint"))
+		var reposition_results = Character.move_sequence_player_to(reposition)
+		if reposition_results[2]: # fail to reposition properly
+			end_sequence_step("break") # break grab
+			
+func sequence_fallthrough(): # which step in sequence ignore soft platforms
+	match Animator.to_play_animation:
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
+			return true
+	return false
+	
+func sequence_ledgestop(): # which step in sequence are stopped by ledges
+	return false
+	
+func sequence_passthrough(): # which step in sequence ignore all platforms (for cinematic supers)
+	return false
+	
+func sequence_passfloor(): # which step in sequence ignore hard floor
+	match Animator.to_play_animation:
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
+			return true
+	return false
+	
 
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 # these are ran by main character node when it gets the signals so that the order is easier to control
@@ -905,31 +903,31 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("DashBrake")
 		"DashBrake":
 			Character.animate("Idle")
-		"AirDashTransit":
+		"aDashTransit":
 #			if Character.air_dash > 1:
 #				if Character.button_down in Character.input_state.pressed and Character.dir != 0: # downward air dash
 ##					Character.face(Character.dir)
-#					Character.animate("AirDashD")
+#					Character.animate("aDashD")
 #				elif Character.button_up in Character.input_state.pressed and Character.dir != 0: # upward air dash
 ##					Character.face(Character.dir)
-#					Character.animate("AirDashU")
+#					Character.animate("aDashU")
 #				elif Character.button_down in Character.input_state.pressed: # downward air dash
 #					Character.animate("AirDashDD")
 #				elif Character.button_up in Character.input_state.pressed: # upward air dash
 #					Character.animate("AirDashUU")
 #				else: # horizontal air dash
-#					Character.animate("AirDash")
+#					Character.animate("aDash")
 #			else:
 			if Character.v_dir == 1: # downward air dash
-				Character.animate("AirDashD2")
+				Character.animate("aDashD")
 			elif Character.v_dir == -1: # upward air dash
-				Character.animate("AirDashU2")
+				Character.animate("aDashU")
 			else: # horizontal air dash
-				Character.animate("AirDash")
-#		"AirDash", "AirDashD", "AirDashU", "AirDashUU", "AirDashDD", "AirDashD2", "AirDashU2":
-		"AirDash", "AirDashD2", "AirDashU2":
-			Character.animate("AirDashBrake")
-		"AirDashBrake":
+				Character.animate("aDash")
+#		"aDash", "aDashD", "aDashU", "AirDashUU", "AirDashDD", "AirDashD2", "AirDashU2":
+		"aDash", "aDashD", "aDashU":
+			Character.animate("aDashBrake")
+		"aDashBrake":
 			Character.animate("Fall")
 			
 		"L1Startup":
@@ -1265,12 +1263,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
-		"AirDashTransit":
+		"aDashTransit":
 			Character.aerial_memory = []
 			Character.velocity.x *= 0.2
 			Character.velocity.y *= 0.2
 			Character.gravity_mod = 0.0
-		"AirDash":
+		"aDash":
 			consume_one_air_dash()
 #			if Character.air_dash == 0:
 #				Character.velocity.x = AIR_DASH_SPEED * 1.2 * Character.facing
@@ -1280,13 +1278,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.gravity_mod = 0.0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
-#		"AirDashD":
+#		"aDashD":
 #			consume_one_air_dash()
 #			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/4 * Character.facing)
 #			Character.gravity_mod = 0.0
 #			Character.afterimage_timer = 1 # sync afterimage trail
 #			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/4})
-#		"AirDashU":
+#		"aDashU":
 #			consume_one_air_dash()
 #			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/4 * Character.facing)
 #			Character.gravity_mod = 0.0
@@ -1306,13 +1304,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			Character.gravity_mod = 0.0
 #			Character.afterimage_timer = 1 # sync afterimage trail
 #			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
-		"AirDashD2":
+		"aDashD":
 			consume_one_air_dash()
 			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/7 * Character.facing)
 			Character.gravity_mod = 0.0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
-		"AirDashU2":
+		"aDashU":
 			consume_one_air_dash()
 			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/7 * Character.facing)
 			Character.gravity_mod = 0.0
@@ -1415,36 +1413,28 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 0.2
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
 			Character.velocity.x += Character.facing * SPEED * 0.5
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 1})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
 			Character.velocity.x += Character.facing * SPEED * 0.5
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 2})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
 			Character.velocity.x += Character.facing * SPEED * 0.5
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 3})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[ex]Active":
 			Character.velocity.x += Character.facing * SPEED * 0.5
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"charge_lvl" : 4})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP1[c1]Active":
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 1})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1})
 		"aSP1[c2]Active":
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 2})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2})
 		"aSP1[c3]Active":
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 3})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3})
 		"aSP1[ex]Active":
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", spawn_point, {"aerial" : true, "charge_lvl" : 4})
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4})
 		"aSP1Recovery", "aSP1[ex]Recovery":
 			Character.velocity_limiter.x = 0.7
 			Character.velocity_limiter.down = 0.7
@@ -1526,19 +1516,17 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP4Active":
 			Character.velocity.x += Character.facing * SPEED * 0.25
 			Character.sfx_under.show()
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {})
+			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {})
 			Character.unique_data.groundfin_count += 1
 		"SP4[h]Active":
 			Character.velocity.x += Character.facing * SPEED * 0.25
 			Character.sfx_under.show()
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true})
+			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {"held" : true})
 			Character.unique_data.groundfin_count += 1
 		"SP4[ex]Active":
 			Character.velocity.x += Character.facing * SPEED * 0.25
 			Character.sfx_under.show()
-			var spawn_point = Character.position + Animator.query_point("entityspawn")
+			var spawn_point = Animator.query_point("entityspawn")
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"ex" : true})
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true, "ex" : true})
 			Character.unique_data.groundfin_count += 2
@@ -1577,14 +1565,20 @@ func _on_SpritePlayer_anim_started(anim_name):
 				Character.velocity.x = Character.facing * 100
 			Character.velocity.y = 0.0
 			Character.gravity_mod = 0.0
-		"aSP6[ex]Recovery":
+		"aSP6[ex]Recovery": # whiff grab
 			Character.velocity_limiter.x = 0.2
 			Character.gravity_mod = 0.25
-			Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
-		"SP6[ex]Recovery":
-			Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
-		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
-			start_sequence()
+			Character.play_audio("fail1", {"vol":-20})
+		"SP6[ex]Recovery": # whiff grab
+			Character.play_audio("fail1", {"vol":-20})
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
+			start_sequence_step()
+		"SP6[ex]GrabRecovery":
+			Character.face(-Character.facing)
+		"aSP6[ex]GrabRecovery":
+			Character.face(-Character.facing)
+			Character.velocity_limiter.down = 0.2
+			Character.gravity_mod = 0.25
 			
 	start_audio(anim_name)
 
@@ -1601,9 +1595,9 @@ func start_audio(anim_name):
 						Character.play_audio(sound.ref, sound.aux_data)
 	
 	match anim_name:
-		"JumpTransit2", "WallJumpTransit2", "BlockHopTransit2":
+		"JumpTransit2", "WallJumpTransit2":
 			Character.play_audio("jump1", {"bus":"PitchDown"})
-		"AirJumpTransit2":
+		"aJumpTransit2":
 			Character.play_audio("jump1", {"vol":-2})
 		"SoftLanding", "HardLanding", "BlockLanding":
 			if Character.velocity_previous_frame.y > 0:
@@ -1615,7 +1609,7 @@ func start_audio(anim_name):
 				Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
 		"Dash":
 			dash_sound()
-		"AirDash", "AirDashD2", "AirDashU2":
+		"aDash", "aDashD", "aDashU":
 			Character.play_audio("dash1", {"vol" : -6})
 
 			

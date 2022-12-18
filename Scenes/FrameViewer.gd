@@ -30,7 +30,7 @@ func is_idle(player):
 				Globals.char_state.DEAD, Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY:
 			return true
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK: # for block, block return is not considered idle
-			if !player.Animator.query_current(["BlockstunReturn", "AirBlockstunReturn"]):
+			if !player.Animator.query_current(["BlockstunReturn", "aBlockstunReturn"]):
 				return true
 	return false
 
@@ -91,7 +91,7 @@ func stimulate():
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(1.0, 0.8, 0.3)	
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK: # for BlockReturn
-								if players[player_number].Animator.query_current(["BlockstunReturn", "AirBlockstunReturn", \
+								if players[player_number].Animator.query_current(["BlockstunReturn", "aBlockstunReturn", \
 										"EXBlockstunReturn", "AirEXBlockstunReturn"]):
 									player_stopped[player_number] = false
 									pips[player_number][pip_number].modulate = Color(1.0, 0.8, 0.3)	

@@ -14,24 +14,28 @@ frame_data = {
 0: {
 "frame": 25,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 9, 22 ), Vector2( 9, 16 ), Vector2( 18, 16 ), Vector2( 18, 9 ), Vector2( 9, 9 ), Vector2( 9, 2 ), Vector2( -12, 2 ) ]
 },
 6: {
 "frame": 26,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -10, 22 ), Vector2( 12, 22 ), Vector2( 12, -3 ), Vector2( -10, -3 ) ]
 },
 12: {
 "frame": 27,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 11, 22 ), Vector2( 11, -4 ), Vector2( -12, -4 ) ]
 },
 18: {
 "frame": 28,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -9, 2 ), Vector2( -15, 2 ), Vector2( -15, 9 ), Vector2( -9, 9 ), Vector2( -9, 22 ), Vector2( 13, 22 ), Vector2( 13, -15 ), Vector2( -9, -15 ) ]
 }
@@ -47,24 +51,28 @@ frame_data = {
 0: {
 "frame": 1,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -6, 6 ), Vector2( -10, 6 ), Vector2( -10, 22 ), Vector2( 4, 22 ), Vector2( 4, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -6, -16 ) ]
 },
 8: {
 "frame": 2,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -6, 6 ), Vector2( -10, 6 ), Vector2( -10, 22 ), Vector2( 4, 22 ), Vector2( 4, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -6, -16 ) ]
 },
 16: {
 "frame": 3,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 0 ), Vector2( -18, 0 ), Vector2( -18, 7 ), Vector2( -12, 7 ), Vector2( -12, 22 ), Vector2( 11, 22 ), Vector2( 11, -4 ), Vector2( -12, -4 ) ]
 },
 24: {
 "frame": 4,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -9, 1 ), Vector2( -15, 1 ), Vector2( -15, 10 ), Vector2( -9, 10 ), Vector2( -9, 22 ), Vector2( 12, 22 ), Vector2( 12, -15 ), Vector2( -9, -15 ) ]
 }
@@ -72,32 +80,36 @@ frame_data = {
 "vframes": 6
 },
 "SP6[ex]SeqA": {
-"duration": 24,
+"duration": 23,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP6Sprite",
 "timestamps": {
 0: {
 "frame": 7,
-"grabpoint": Vector2( 28, -7 ),
+"grabpoint": Vector2( 25, -4 ),
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [  ]
 },
-9: {
+6: {
 "frame": 8,
-"grabpoint": Vector2( 36, -6 ),
+"grabpoint": Vector2( 25, -4 ),
+"grabrotdir": null,
+"hitbox": [  ],
+"hurtbox": [  ]
+},
+10: {
+"frame": 9,
+"grabpoint": Vector2( 44, -6 ),
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [  ]
 },
 14: {
-"frame": 9,
-"grabpoint": Vector2( 44, -6 ),
-"hitbox": [  ],
-"hurtbox": [  ]
-},
-18: {
 "frame": 10,
 "grabpoint": Vector2( 44, -6 ),
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [  ]
 }
@@ -105,7 +117,7 @@ frame_data = {
 "vframes": 6
 },
 "SP6[ex]SeqB": {
-"duration": 44,
+"duration": 33,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP6Sprite",
@@ -113,66 +125,77 @@ frame_data = {
 0: {
 "frame": 11,
 "grabpoint": Vector2( 36, -16 ),
+"grabrotdir": Vector2( 3, -7 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
-4: {
+3: {
 "frame": 12,
 "grabpoint": Vector2( 21, -32 ),
+"grabrotdir": Vector2( 1, -6 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
-8: {
+6: {
 "frame": 13,
 "grabpoint": Vector2( 1, -40 ),
+"grabrotdir": Vector2( 0, -6 ),
+"hitbox": [  ],
+"hurtbox": [  ]
+},
+9: {
+"frame": 14,
+"grabpoint": Vector2( -20, -33 ),
+"grabrotdir": Vector2( 1, -6 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
 12: {
-"frame": 14,
-"grabpoint": Vector2( -20, -33 ),
-"hitbox": [  ],
-"hurtbox": [  ]
-},
-16: {
 "frame": 15,
 "grabpoint": Vector2( -34, -1 ),
+"grabrotdir": Vector2( -1, -4 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
-20: {
+15: {
 "frame": 16,
 "grabpoint": Vector2( -22, 19 ),
+"grabrotdir": Vector2( -1, -5 ),
+"hitbox": [  ],
+"hurtbox": [  ]
+},
+18: {
+"frame": 17,
+"grabpoint": Vector2( 17, 17 ),
+"grabrotdir": Vector2( 5, -4 ),
+"hitbox": [  ],
+"hurtbox": [  ]
+},
+21: {
+"frame": 18,
+"grabpoint": Vector2( 36, -16 ),
+"grabrotdir": Vector2( 6, -10 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
 24: {
-"frame": 17,
-"grabpoint": Vector2( 17, 17 ),
-"hitbox": [  ],
-"hurtbox": [  ]
-},
-28: {
-"frame": 18,
-"grabpoint": Vector2( 36, -16 ),
-"hitbox": [  ],
-"hurtbox": [  ]
-},
-32: {
 "frame": 12,
 "grabpoint": Vector2( 21, -32 ),
+"grabrotdir": Vector2( 2, -9 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
-36: {
+27: {
 "frame": 13,
 "grabpoint": Vector2( 1, -40 ),
+"grabrotdir": Vector2( 0, -9 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
-40: {
+30: {
 "frame": 14,
 "grabpoint": Vector2( -20, -33 ),
+"grabrotdir": Vector2( 2, -8 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 }
@@ -187,7 +210,8 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 19,
-"grabpoint": Vector2( 34, -16 ),
+"grabpoint": Vector2( -35, -16 ),
+"grabrotdir": Vector2( -1, -15 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 }
@@ -202,25 +226,29 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 20,
-"grabpoint": Vector2( 34, -15 ),
+"grabpoint": Vector2( -35, -15 ),
+"grabrotdir": Vector2( -1, -15 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
 4: {
 "frame": 21,
-"grabpoint": Vector2( 34, -15 ),
+"grabpoint": Vector2( -35, -15 ),
+"grabrotdir": Vector2( -1, -15 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
 8: {
 "frame": 22,
-"grabpoint": Vector2( 34, -15 ),
+"grabpoint": Vector2( -35, -15 ),
+"grabrotdir": Vector2( -1, -15 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 },
 12: {
 "frame": 23,
-"grabpoint": Vector2( 34, -15 ),
+"grabpoint": Vector2( -35, -15 ),
+"grabrotdir": Vector2( -1, -15 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 }
@@ -228,14 +256,15 @@ frame_data = {
 "vframes": 6
 },
 "SP6[ex]SeqE": {
-"duration": 10,
+"duration": 2,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP6Sprite",
 "timestamps": {
 0: {
 "frame": 24,
-"grabpoint": Vector2( 34, 0 ),
+"grabpoint": Vector2( -35, 0 ),
+"grabrotdir": Vector2( -1, -1 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 }
@@ -251,6 +280,7 @@ frame_data = {
 0: {
 "frame": 0,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -3, 0 ), Vector2( -13, 0 ), Vector2( -13, 22 ), Vector2( 9, 22 ), Vector2( 9, 5 ), Vector2( 26, 5 ), Vector2( 26, -2 ), Vector2( 18, -2 ), Vector2( 18, -17 ), Vector2( -3, -17 ) ]
 }
@@ -266,6 +296,7 @@ frame_data = {
 0: {
 "frame": 0,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [ Vector2( 12, 1 ), Vector2( 21, 1 ), Vector2( 21, 0 ), Vector2( 12, 0 ) ],
 "hurtbox": [ Vector2( -3, 0 ), Vector2( -13, 0 ), Vector2( -13, 22 ), Vector2( 9, 22 ), Vector2( 9, 5 ), Vector2( 26, 5 ), Vector2( 26, -2 ), Vector2( 18, -2 ), Vector2( 18, -17 ), Vector2( -3, -17 ) ]
 }
@@ -281,24 +312,28 @@ frame_data = {
 0: {
 "frame": 30,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 11 ), Vector2( -1, 11 ), Vector2( -1, 22 ), Vector2( 6, 22 ), Vector2( 6, 4 ), Vector2( 13, 4 ), Vector2( 13, -4 ), Vector2( 6, -4 ), Vector2( 6, -22 ), Vector2( -12, -22 ) ]
 },
 6: {
 "frame": 31,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 13 ), Vector2( -6, 13 ), Vector2( -6, 22 ), Vector2( 7, 22 ), Vector2( 7, -21 ), Vector2( -12, -21 ) ]
 },
 12: {
 "frame": 32,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -7, 1 ), Vector2( -12, 1 ), Vector2( -12, 8 ), Vector2( -7, 8 ), Vector2( -7, 13 ), Vector2( 11, 13 ), Vector2( 11, -14 ), Vector2( -7, -14 ) ]
 },
 18: {
 "frame": 6,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 18 ), Vector2( 12, 18 ), Vector2( 12, -22 ), Vector2( -11, -22 ) ]
 }
@@ -314,24 +349,28 @@ frame_data = {
 0: {
 "frame": 1,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -6, 6 ), Vector2( -10, 6 ), Vector2( -10, 22 ), Vector2( 4, 22 ), Vector2( 4, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -6, -16 ) ]
 },
 8: {
 "frame": 2,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -6, 6 ), Vector2( -10, 6 ), Vector2( -10, 22 ), Vector2( 4, 22 ), Vector2( 4, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -6, -16 ) ]
 },
 16: {
 "frame": 5,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -7, -10 ), Vector2( -16, -10 ), Vector2( -16, -3 ), Vector2( -7, -3 ), Vector2( -7, 13 ), Vector2( 11, 13 ), Vector2( 11, -14 ), Vector2( -7, -14 ) ]
 },
 24: {
 "frame": 6,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 18 ), Vector2( 12, 18 ), Vector2( 12, -22 ), Vector2( -11, -22 ) ]
 }
@@ -339,14 +378,15 @@ frame_data = {
 "vframes": 6
 },
 "aSP6[ex]SeqE": {
-"duration": 10,
+"duration": 2,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP6Sprite",
 "timestamps": {
 0: {
 "frame": 29,
-"grabpoint": Vector2( 34, -1 ),
+"grabpoint": Vector2( -35, -1 ),
+"grabrotdir": Vector2( -1, 0 ),
 "hitbox": [  ],
 "hurtbox": [  ]
 }
@@ -362,6 +402,7 @@ frame_data = {
 0: {
 "frame": 0,
 "grabpoint": null,
+"grabrotdir": null,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -3, 0 ), Vector2( -13, 0 ), Vector2( -13, 22 ), Vector2( 9, 22 ), Vector2( 9, 5 ), Vector2( 26, 5 ), Vector2( 26, -2 ), Vector2( 18, -2 ), Vector2( 18, -17 ), Vector2( -3, -17 ) ]
 }

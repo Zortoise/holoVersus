@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/portrait_frame.png-2f696473b121a4ad94964184018b477c.stex"
+path="res://.import/gauges_frame_old.png-15900754abd6cc0d643cd9cb21a29e1e.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/UI/portrait_frame.png"
-dest_files=[ "res://.import/portrait_frame.png-2f696473b121a4ad94964184018b477c.stex" ]
+source_file="res://Assets/UI/gauges_frame_old.png"
+dest_files=[ "res://.import/gauges_frame_old.png-15900754abd6cc0d643cd9cb21a29e1e.stex" ]
 
 [params]
 

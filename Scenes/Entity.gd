@@ -123,6 +123,7 @@ func load_entity():
 				
 
 func stimulate():
+	if Globals.Game.is_stage_paused(): return
 	
 	hitstop = null
 	$HitStopTimer.stimulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
@@ -208,6 +209,7 @@ func stimulate2(): # only ran if not in hitstop
 	
 	
 func stimulate_after(): # do this after hit detection
+	if Globals.Game.is_stage_paused(): return
 	
 	if !$HitStopTimer.is_running():
 		$SpritePlayer.stimulate()

@@ -17,12 +17,12 @@ func init(_aux_data: Dictionary):
 	Animator.play("Spawn") # starting animation
 
 func stimulate():
-	if Animator.to_play_animation == "Spawn" and get_node(Entity.master_path).unique_data.nibbler_cancel == true:
+	if Animator.to_play_animation == "Spawn" and get_node(Entity.master_path).unique_data.nibbler_cancel > 0:
 		Globals.Game.spawn_SFX("SmallSplash", [Entity.master_path, "SmallSplash"], Entity.position, {"facing":Entity.facing, "grounded":true})
 		Entity.free = true # cancel spawning if master got hit
 		
 	elif Animator.current_animation == "Kill" and Animator.time == 5:
-		var spawn_point = Entity.position + Animator.query_point("entityspawn")
+		var spawn_point = Animator.query_point("entityspawn")
 		Globals.Game.spawn_entity(Entity.master_path, "Nibbler", spawn_point, {"facing" : Entity.facing})
 		Globals.Game.spawn_SFX("MediumSplash", [Entity.master_path, "MediumSplash"], Entity.position, {"facing":Entity.facing, "grounded":true})
 		Entity.play_audio("water6", {"unique_path" : Entity.master_path, "vol" : -20})

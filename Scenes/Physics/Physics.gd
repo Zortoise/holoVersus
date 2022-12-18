@@ -68,7 +68,7 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 			else: # non-player moving
 				position.x += sign(move_amount.x)		
 				move_amount.x -= sign(move_amount.x)
-			if check_offstage(collision_box):
+			if not_in_sequence(collision_box) and check_offstage(collision_box):
 				return [Vector2.ZERO, false, false, false]
 		else:
 			in_velocity.x = 0
@@ -83,7 +83,7 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 				position.y += sign(move_amount.y)
 				move_amount.y -= sign(move_amount.y)
 				
-				if check_offstage(collision_box):
+				if not_in_sequence(collision_box) and check_offstage(collision_box):
 					return [Vector2.ZERO, false, false, false]
 					
 				if collision_box.is_in_group("Players") and $HitStunTimer.is_running(): # check if player touched blast barrier
@@ -123,29 +123,30 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, in_velo
 	
 	
 	
-func move_sequence_target_to(new_position: Vector2): # called by grabber, also move used to move grabber if grabbed hit a wall
+func move_sequence_player_to(new_position: Vector2): # called by grabber, also move used to move grabber if grabbed hit a wall
 	
 	var move_amount = Vector2.ZERO
 	move_amount.x = round(new_position.x - position.x)
 	move_amount.y = round(new_position.y - position.y)
-	
-	while move_amount.x != 0:
-		pass
-	while move_amount.y != 0:
-		pass
 		
 	var results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
 	call("set_true_position")
 	
 	return results # [in_velocity, landing_check, collision_check, ledgedrop_check]
 	
+func move_sequence_player_by(move_amount: Vector2):
+	var results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
+	call("set_true_position")
+	return results # [in_velocity, landing_check, collision_check, ledgedrop_check]
+	
+func not_in_sequence(collision_box): # when object is in sequence, will not be killed at ceiling and sides but will die at bottom
+	if collision_box.is_in_group("Players") and get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+		return false
+	return true
 	
 func check_offstage(collision_box):
 	if collision_box.is_in_group("Players") and Globals.Game.detect_kill(collision_box):
-		if get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
-			return false
-		else:
-			return true
+		return true
 	elif collision_box.is_in_group("Entities") and collision_box.get_parent().has_node("EntitySpriteBox") and \
 			Globals.Game.detect_offstage(collision_box.get_parent().get_node("EntitySpriteBox")):
 		return true
@@ -226,8 +227,8 @@ func is_against_ceiling(collision_box, soft_platform_dbox):
 			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
 		if has_method("check_passthrough") and call("check_passthrough"):
 			return false
-		if collision_box.is_in_group("Players") and get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
-			return false # no hitting ceiling in sequences
+#		if collision_box.is_in_group("Players") and get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+#			return false # no hitting ceiling in sequences
 		return true
 	else:
 		return false

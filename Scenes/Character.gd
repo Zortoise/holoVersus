@@ -14,7 +14,7 @@ const VAR_JUMP_GRAV_MOD = 0.2 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
 const TAP_MEMORY_DURATION = 4
-const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/airdash being invulnerable
+const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/aDash being invulnerable
 const MAX_EX_GAUGE = 50000.0
 const EX_GAUGE_REGEN_RATE = 1000 # EX Gauge regened per second when idling
 const GUARD_GAUGE_FLOOR = -10000.0
@@ -37,7 +37,7 @@ const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
 const CROUCH_REDUCTION_MOD = 0.5 # reduce knockback and hitstun if opponent is crouching
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
-const EX_MOVE_COST = 0 # 10000
+const EX_MOVE_COST = 10000 # 10000
 const PosFlowSealTimer_TIME = 60 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
 
 const MIN_HITSTOP = 5
@@ -53,7 +53,7 @@ const REPEAT_GGG_MOD = 2.0 # Guard Gain on hitstunned defender is increased on d
 const DMG_REDUCTION_AT_MAX_GG = 0.5 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN_MOD = 7.0 # increased Guard Guard Regen during Postive Flow
-#const AIRBLOCK_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
+#const aBlock_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
 
 const HITSTUN_GRAV_MOD = 0.65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 0.15  # friction during hitstun
@@ -480,7 +480,7 @@ func initial_targeting(): # target random players at start, cannot do in init() 
 	var player_ids = []
 	for x in Globals.player_count:
 		if x != player_ID:
-			 player_ids.append(x)
+			player_ids.append(x)
 	targeted_opponent_path = Globals.Game.get_player_node(player_ids[rng_generate(player_ids.size())]).get_path()
 	
 
@@ -542,13 +542,9 @@ func _process(_delta):
 func stimulate(new_input_state):
 		
 	input_state = new_input_state # so that I can use it in other functions
-	
-#	for button in input_state.just_released:
-#		tap_memory.append([button, TAP_MEMORY_DURATION])
-		
-	
 			
-	if Globals.editor and Input.is_action_just_pressed("sound_test") and test:
+	if Globals.editor:
+		if Input.is_action_just_pressed("sound_test") and test:
 #		$ModulatePlayer.play("red_burst")
 #
 ##		var test_pt = Detection.ground_finder(position, facing, Vector2(100, 50), Vector2(100, 100))
@@ -563,14 +559,18 @@ func stimulate(new_input_state):
 #				play_audio("kill3", {"vol" : -12, "bus" : "Reverb"})
 #
 #		test_num += 1
-		change_ex_gauge(50000)
-		change_burst_token(true)
-		get_node(targeted_opponent_path).change_guard_gauge_percent(-0.8)
-		get_node(targeted_opponent_path).change_ex_gauge(50000)
-		get_node(targeted_opponent_path).change_burst_token(true)
-		unique_data.bitten_player_path = targeted_opponent_path
-		unique_data.nibbler_count = 3
-		UniqueCharacter.update_uniqueHUD()
+			change_ex_gauge(50000)
+			change_burst_token(true)
+			get_node(targeted_opponent_path).change_guard_gauge_percent(-0.8)
+			get_node(targeted_opponent_path).change_ex_gauge(50000)
+			get_node(targeted_opponent_path).change_burst_token(true)
+			unique_data.bitten_player_path = targeted_opponent_path
+			unique_data.nibbler_count = 3
+			UniqueCharacter.update_uniqueHUD()
+		
+		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
+			Globals.Game.superfreeze(get_path())
+
 		
 # PAUSING --------------------------------------------------------------------------------------------------
 		
@@ -584,6 +584,9 @@ func stimulate(new_input_state):
 	
 	hitstop = null
 	status_effect_to_remove = []
+	
+	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
+		return
 	
 	$HitStopTimer.stimulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -658,7 +661,7 @@ func stimulate2(): # only ran if not in hitstop
 #		change_ex_gauge(-ex_gauge_drain)
 #		if current_ex_gauge <= 0.0:
 #			match Animator.current_animation:
-#				"AirBlock":
+#				"aBlock":
 #					animate("FallTransit")
 #	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
 #		reset_modulate()
@@ -861,7 +864,7 @@ func stimulate2(): # only ran if not in hitstop
 					if Settings.dj_fastfall[player_ID] == 0 or \
 						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
 							
-						if Animator.query(["AirJumpTransit"]):
+						if Animator.query(["aJumpTransit"]):
 							animate("Fall")
 						
 							
@@ -876,8 +879,8 @@ func stimulate2(): # only ran if not in hitstop
 	
 	alt_block = false
 	if !button_up in input_state.pressed and !button_down in input_state.pressed and \
-			!button_left in input_state.pressed and !button_right in input_state.pressed:
-		if button_dash in input_state.pressed: 
+		!button_left in input_state.pressed and !button_right in input_state.pressed:
+		if button_dash in input_state.pressed:
 			alt_block = true
 		if button_dash in input_state.just_pressed and button_aux in input_state.pressed:
 			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
@@ -907,17 +910,17 @@ func stimulate2(): # only ran if not in hitstop
 		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqueCharacter.AIR_BLOCK_GG_COST:
 			match state:
 				Globals.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
-					if Animator.query_current(["AirDashTransit"]):
-						animate("AirBlockStartup")
+					if Animator.query_current(["aDashTransit"]):
+						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 				Globals.char_state.AIR_STANDBY:
 	#				if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
-					animate("AirBlockStartup")
+					animate("aBlockStartup")
 					$VarJumpTimer.stop()
 				Globals.char_state.AIR_C_RECOVERY:
-					if !Animator.query_current(["AirDashBrake", "BurstRevoke2"]): # cannot air block out of air dash
+					if !Animator.query_current(["aDashBrake", "BurstRevoke2"]): # cannot air block out of air dash
 	#					if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
-						animate("AirBlockStartup")
+						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 			
 # --------------------------------------------------------------------------------------------------
@@ -1057,9 +1060,9 @@ func stimulate2(): # only ran if not in hitstop
 	
 		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
 			# air dash into wall, stop instantly
-			if Animator.query_to_play(["AirDash", "AirDashD", "AirDashU"]) and is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, facing):
+			if Animator.query_to_play(["aDash", "aDashD", "aDashU"]) and is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, facing):
 				animate("FallTransit")
-				if Animator.current_animation == "AirDashTransit": # to fix a bug when touching a wall during AirDashTransit > AirDash
+				if Animator.current_animation == "aDashTransit": # to fix a bug when touching a wall during aDashTransit > aDash
 					UniqueCharacter.consume_one_air_dash() # reduce air_dash count by 1
 
 		Globals.char_state.GROUND_BLOCK:
@@ -1075,23 +1078,23 @@ func stimulate2(): # only ran if not in hitstop
 			
 		Globals.char_state.AIR_BLOCK:
 #			if UniqueCharacter.STYLE == 0:
-			if !button_block in input_state.pressed and !alt_block and Animator.query_to_play(["AirBlock"]):
+			if !button_block in input_state.pressed and !alt_block and Animator.query_to_play(["aBlock"]):
 				if !block_rec_cancel:
-					animate("AirBlockRecovery")
+					animate("aBlockRecovery")
 				else:
-					animate("AirBlockCRecovery")
+					animate("aBlockCRecovery")
 			air_res_this_frame *= 1.5
 #			else:
-#				if !button_dash in input_state.pressed and Animator.query_to_play(["AirBlock"]):
+#				if !button_dash in input_state.pressed and Animator.query_to_play(["aBlock"]):
 #					if !block_rec_cancel:
-#						animate("AirBlockRecovery")
+#						animate("aBlockRecovery")
 #					else:
-#						animate("AirBlockCRecovery")
+#						animate("aBlockCRecovery")
 #				air_res_this_frame *= 1.5
 			
 		Globals.char_state.AIR_BLOCKSTUN:
 			if !$BlockStunTimer.is_running():
-				animate("AirBlockstunReturn")
+				animate("aBlockstunReturn")
 			air_res_this_frame *= 1.5
 
 		Globals.char_state.AIR_ATK_STARTUP:
@@ -1114,10 +1117,10 @@ func stimulate2(): # only ran if not in hitstop
 			if velocity.y > HITSTUN_FALL_THRESHOLD and position.y > floor_level:
 				velocity.y = HITSTUN_FALL_THRESHOLD # limit downward velocity during air flinch
 			if !$HitStunTimer.is_running():
-				if Animator.query_to_play(["AirFlinchA"]):
-					animate("AirFlinchAReturn")
-				elif Animator.query_to_play(["AirFlinchB"]):
-					animate("AirFlinchBReturn")
+				if Animator.query_to_play(["aFlinchA"]):
+					animate("aFlinchAReturn")
+				elif Animator.query_to_play(["aFlinchB"]):
+					animate("aFlinchBReturn")
 				$ModulatePlayer.play("unflinch_flash")
 		
 		Globals.char_state.LAUNCHED_HITSTUN:
@@ -1212,50 +1215,22 @@ func stimulate2(): # only ran if not in hitstop
 	
 	# ends here, process hit detection in game scene, afterwards game scene will call stimulate_after() to finish up
 	
-#func sequence_step_start():
-#	var seq_data
-#
-#	if "start_vel" in seq_data:
-#		velocity = seq_data.start_vel
-		
-	
-func stimulate_sequence(): # cut into this during stimulate2() during sequences
-	
-	test0()
-	
-	if state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		pass
-		
-	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqueCharacter.SEQUENCES[sequence_name]
-		
-		UniqueCharacter.stimulate_sequence()
-		
-	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
-	velocity.y = round(velocity.y)
-	
-	if abs(velocity.x) < 5.0:
-		velocity.x = 0.0
-	if abs(velocity.y) < 5.0:
-		velocity.y = 0.0
-	
-	velocity_previous_frame = velocity
-	var results = move($PlayerCollisionBox, $SoftPlatformDBox, velocity, UniqueCharacter.sequence_ledgestop())
-	velocity = results[0]
-	
-	if results[1]: UniqueCharacter.end_sequence_step() # hit the ground
-	if results[3]: UniqueCharacter.end_sequence_step() # stopped by ledge
-	
-	
+
 func stimulate_after(): # called by game scene after hit detection to finish up the frame
 	
 	test1()
 	
-	capture_and_process_instant_actions() # can do instant actions during hitstop
 	progress_tap_and_release_memory()
 	
 	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
 										   # useful for status effects that are removed after being hit
 		remove_status_effect(effect)
+		
+	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
+		hitstop = null
+		return
+	
+	capture_and_process_instant_actions() # can do instant actions during hitstop, but not screenfreeze
 	
 	if !$RespawnTimer.is_running():
 	
@@ -1282,7 +1257,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 				if get_damage_percent() < 0.75:
 					var left_boundary = lerp(left_ledge, Globals.Game.stage_box.rect_position.x, 1.0/3.0)
 					var right_boundary = lerp(right_ledge, Globals.Game.stage_box.rect_position.x + \
-							Globals.Game.stage_box.rect_size.x, 1.0/3.0)
+						Globals.Game.stage_box.rect_size.x, 1.0/3.0)
 					if position.x < left_boundary or position.x > right_boundary or position.y > floor_level:
 						$HitStunTimer.stimulate() # hitstun decay twice as fast
 						if position.y > floor_level and velocity.y >= HITSTUN_FALL_THRESHOLD: # if falling too fast...
@@ -1297,7 +1272,7 @@ func stimulate_after(): # called by game scene after hit detection to finish up 
 			process_afterimage_trail() 	# do afterimage trails
 			
 			# spin character during launch, be sure to do this after SpritePlayer since rotation is reset at start of each animation
-			if !$HitStopTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
+			if state == Globals.char_state.LAUNCHED_HITSTUN and Animator.query_current(["LaunchTransit", "Launch"]):
 				sprite.rotation = launch_starting_rot - facing * (orig_hitstun - $HitStunTimer.time) * \
 					LAUNCH_ROT_SPEED * Globals.FRAME
 		
@@ -1390,7 +1365,7 @@ func buffer_actions():
 			Globals.char_state.GROUND_ATK_STARTUP:
 				if Animator.time <= 1 and Animator.time != 0:
 					rebuffer_actions()
-					UniqueCharacter.rebuffer_EX()	
+					UniqueCharacter.rebuffer_EX()
 			Globals.char_state.AIR_ATK_STARTUP:
 				if Animator.time <= 5 and Animator.time != 0:
 					rebuffer_actions()
@@ -1626,7 +1601,7 @@ func process_input_buffer():
 		match buffered_input[0]:
 			
 			button_jump, button_up:
-				if Animator.query(["JumpTransit", "AirJumpTransit"]): # consume buffered jumps during jump transits
+				if Animator.query(["JumpTransit", "aJumpTransit"]): # consume buffered jumps during jump transits
 					keep = false
 					continue
 				if !has_acted[0]:
@@ -1686,7 +1661,7 @@ func process_input_buffer():
 						# AIR JUMPS  --------------------------------------------------------------------------------------------------
 								
 							elif air_jump > 0 and !button_dash in input_state.pressed: # no dash for easier wavedashing
-								animate("AirJumpTransit")
+								animate("aJumpTransit")
 								keep = false
 								
 						# AERIAL AIR JUMP CANCEL ---------------------------------------------------------------------------------
@@ -1696,7 +1671,7 @@ func process_input_buffer():
 								continue
 								
 							if test_jump_cancel():
-								animate("AirJumpTransit")
+								animate("aJumpTransit")
 								keep = false
 								
 								
@@ -1723,7 +1698,7 @@ func process_input_buffer():
 						Globals.char_state.GROUND_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
 							var move_name = get_move_name()
 							if move_name in UniqueCharacter.STARTERS and !move_name in UniqueCharacter.EX_MOVES and \
-									!move_name in UniqueCharacter.SUPERS:
+								!move_name in UniqueCharacter.SUPERS:
 								if Animator.time <= 3 and Animator.time != 0:
 									animate("JumpTransit")
 									rebuffer_actions() # this buffers the attack buttons currently being pressed
@@ -1740,7 +1715,7 @@ func process_input_buffer():
 							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN, \
 							Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN:
-							if Animator.query_current(["WBlockstun", "AirWBlockstun"]): # no burst during wrongblock
+							if Animator.query_current(["WBlockstun", "aWBlockstun"]): # no burst during wrongblock
 								continue
 							if burst_counter_check():
 								animate("BurstCounterStartup")
@@ -1763,7 +1738,7 @@ func process_input_buffer():
 
 					match new_state: # so that cannot burst on last frame of recovery
 						Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
-								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
+							Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
 							var move_name = get_move_name()
 							if burst_extend_check(move_name):
 								animate("BurstExtend")
@@ -1844,38 +1819,51 @@ func state_detect(anim):
 		"SoftLanding", "DashBrake", "BlockCRecovery", "HardLanding":
 			return Globals.char_state.GROUND_C_RECOVERY
 			
-		"JumpTransit3","AirJumpTransit3", "Jump", "FallTransit", "Fall":
+		"JumpTransit3","aJumpTransit3", "Jump", "FallTransit", "Fall":
 			return Globals.char_state.AIR_STANDBY
-		"AirJumpTransit", "WallJumpTransit", "AirJumpTransit2", "WallJumpTransit2", "AirDashTransit", "JumpTransit2":
+		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "JumpTransit2":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Globals.char_state.AIR_STARTUP
-		"AirDash", "AirDashD", "AirDashU", "AirDashDD", "AirDashUU", "AirBlockRecovery":
+		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRecovery":
 			return Globals.char_state.AIR_RECOVERY
-		"AirDashBrake", "AirBlockCRecovery":
+		"aDashBrake", "aBlockCRecovery":
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		"FlinchAStop", "FlinchA", "FlinchBStop", "FlinchB":
 			return Globals.char_state.GROUND_FLINCH_HITSTUN
 		"FlinchAReturn", "FlinchBReturn":
 			return Globals.char_state.GROUND_C_RECOVERY
-		"AirFlinchAStop", "AirFlinchA", "AirFlinchBStop", "AirFlinchB":
+		"aFlinchAStop", "aFlinchA", "aFlinchBStop", "aFlinchB":
 			return Globals.char_state.AIR_FLINCH_HITSTUN
-		"AirFlinchAReturn", "AirFlinchBReturn":
+		"aFlinchAReturn", "aFlinchBReturn":
 			return Globals.char_state.AIR_C_RECOVERY
 		"LaunchAStop", "LaunchBStop", "LaunchCStop", "LaunchDStop", "LaunchEStop", "LaunchTransit", "Launch":
 			return Globals.char_state.LAUNCHED_HITSTUN
+		
+		"SeqFlinchAFreeze", "SeqFlinchBFreeze":
+			return Globals.char_state.SEQUENCE_TARGET
+		"SeqFlinchAStop", "SeqFlinchA", "SeqFlinchBStop", "SeqFlinchB":
+			return Globals.char_state.SEQUENCE_TARGET
+		"aSeqFlinchAFreeze", "aSeqFlinchBFreeze":
+			return Globals.char_state.SEQUENCE_TARGET
+		"aSeqFlinchAStop", "aSeqFlinchA", "aSeqFlinchBStop", "aSeqFlinchB":
+			return Globals.char_state.SEQUENCE_TARGET
+		"SeqLaunchAFreeze", "SeqLaunchBFreeze", "SeqLaunchCFreeze", "SeqLaunchDFreeze", "SeqLaunchEFreeze":
+			return Globals.char_state.SEQUENCE_TARGET
+		"SeqLaunchAStop", "SeqLaunchBStop", "SeqLaunchCStop", "SeqLaunchDStop", "SeqLaunchEStop", "SeqLaunchTransit", "SeqLaunch":
+			return Globals.char_state.SEQUENCE_TARGET
 			
 		"BlockStartup":
 			return Globals.char_state.GROUND_BLOCK
-		"AirBlockStartup":
+		"aBlockStartup":
 			return Globals.char_state.AIR_BLOCK
 		"Block", "BlockstunReturn", "BlockLanding":
 			return Globals.char_state.GROUND_BLOCK
-		"AirBlock", "AirBlockstunReturn":
+		"aBlock", "aBlockstunReturn":
 			return Globals.char_state.AIR_BLOCK
 		"Blockstun", "PBlockstun", "WBlockstun":
 			return Globals.char_state.GROUND_BLOCKSTUN
-		"AirBlockstun", "AirPBlockstun", "AirWBlockstun":
+		"aBlockstun", "aPBlockstun", "aWBlockstun":
 			return Globals.char_state.AIR_BLOCKSTUN
 			
 		"BurstCounterStartup", "BurstEscapeStartup":
@@ -1896,7 +1884,7 @@ func state_detect(anim):
 # ---------------------------------------------------------------------------------------------------
 
 func check_collidable(): # called by Physics.gd
-	if state == Globals.char_state.LAUNCHED_HITSTUN:
+	if state in [Globals.char_state.LAUNCHED_HITSTUN, Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 		return false
 	if new_state == Globals.char_state.GROUND_ATK_STARTUP: # cross-up attack
 		if button_dash in input_state.pressed and chain_memory.size() == 0:
@@ -2069,10 +2057,10 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			animate("SoftLanding")
 			
 		Globals.char_state.AIR_STARTUP:
-			if Animator.query(["AirJumpTransit"]):
+			if Animator.query(["aJumpTransit"]):
 				animate("SoftLanding")
 				input_buffer.append([button_jump, Settings.input_buffer_time[player_ID]])
-			elif Animator.query(["AirDashTransit"]):
+			elif Animator.query(["aDashTransit"]):
 				animate("SoftLanding")
 				input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
 				
@@ -2080,31 +2068,31 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			pass # AIR_ACTIVE not used for now
 			
 		Globals.char_state.AIR_RECOVERY:
-			if Animator.to_play_animation.begins_with("AirDash") and !Animator.to_play_animation.ends_with("DD"): # wave landing
+			if Animator.to_play_animation.begins_with("aDash") and !Animator.to_play_animation.ends_with("DD"): # wave landing
 				animate("DashBrake")
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				velocity.x = facing * UniqueCharacter.AIR_DASH_SPEED
 				
-			elif Animator.query(["AirBlockRecovery"]): # AirBlockRecovery to BlockCRecovery
+			elif Animator.query(["aBlockRecovery"]): # aBlockRecovery to BlockCRecovery
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				animate("BlockCRecovery")
 				UniqueCharacter.landing_sound()
 				
-			else: # landing during AirDashBrake or AirDashDD
+			else: # landing during aDashBrake or AirDashDD
 				animate("HardLanding")
 			
 		Globals.char_state.AIR_ATK_STARTUP: # can land cancel on the 1st few frames (unless EX/Super), will auto-buffer pressed attacks
 			var move_name = get_move_name()
 			if move_name in UniqueCharacter.STARTERS and !move_name in UniqueCharacter.EX_MOVES and !move_name in UniqueCharacter.SUPERS and \
-					velocity_previous_frame.y > 0 and Animator.time <= AERIAL_STARTUP_LAND_CANCEL_TIME and Animator.time != 0:
+				velocity_previous_frame.y > 0 and Animator.time <= AERIAL_STARTUP_LAND_CANCEL_TIME and Animator.time != 0:
 				animate("HardLanding") # this makes landing and attacking instantly easier
 
 		Globals.char_state.AIR_FLINCH_HITSTUN: # land during hitstun
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			match Animator.to_play_animation:
-				"AirFlinchAStop", "AirFlinchA":
+				"aFlinchAStop", "aFlinchA":
 					animate("FlinchA")
-				"AirFlinchBStop", "AirFlinchB":
+				"aFlinchBStop", "aFlinchB":
 					animate("FlinchB")
 			UniqueCharacter.landing_sound()
 			
@@ -2129,11 +2117,11 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			
 		Globals.char_state.AIR_BLOCKSTUN: # air blockstun to ground blockstun
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-			if Animator.query(["AirBlockstun"]):
+			if Animator.query(["aBlockstun"]):
 				animate("Blockstun")
-			elif Animator.query(["AirPBlockstun"]):
+			elif Animator.query(["aPBlockstun"]):
 				animate("PBlockstun")
-			elif Animator.query(["AirWBlockstun"]):
+			elif Animator.query(["aWBlockstun"]):
 				animate("WBlockstun")
 			UniqueCharacter.landing_sound()
 
@@ -2155,7 +2143,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			
 		Globals.char_state.GROUND_RECOVERY:
 			if Animator.query(["BlockRecovery"]):
-				animate("AirBlockCRecovery")
+				animate("aBlockCRecovery")
 			else:
 				animate("FallTransit")
 				
@@ -2165,7 +2153,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 		Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY:
 			var move_name = get_move_name()
 			if move_name in UniqueCharacter.MOVE_DATABASE and \
-					Globals.atk_attr.LEDGE_DROP in query_atk_attr(move_name):
+				Globals.atk_attr.LEDGE_DROP in query_atk_attr(move_name):
 				continue
 			else:
 				animate("FallTransit")
@@ -2173,20 +2161,20 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 		Globals.char_state.GROUND_FLINCH_HITSTUN:
 			match Animator.to_play_animation:
 				"FlinchAStop", "FlinchA":
-					animate("AirFlinchA")
+					animate("aFlinchA")
 				"FlinchBStop", "FlinchB":
-					animate("AirFlinchB")
+					animate("aFlinchB")
 			
 		Globals.char_state.GROUND_BLOCK:
-			animate("AirBlock")
+			animate("aBlock")
 			
 		Globals.char_state.GROUND_BLOCKSTUN: # ground blockstun to air blockstun
 			if Animator.query(["Blockstun"]):
-				animate("AirBlockstun")
+				animate("aBlockstun")
 			elif Animator.query(["PBlockstun"]):
-				animate("AirPBlockstun")
+				animate("aPBlockstun")
 			elif Animator.query(["WBlockstun"]):
-				animate("AirWBlockstun")
+				animate("aWBlockstun")
 
 
 		
@@ -2194,7 +2182,8 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 	if state == Globals.char_state.SEQUENCE_USER:
 		return UniqueCharacter.sequence_fallthrough()
 	elif state == Globals.char_state.SEQUENCE_TARGET:
-		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
+		return true # when being grabbed, always fall through soft platforms
+#		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
 	elif !grounded and is_attacking():
 		if button_down in input_state.pressed:
 			return true
@@ -2202,7 +2191,7 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 	
 func check_passthrough():
 	if state == Globals.char_state.SEQUENCE_USER:
-		return UniqueCharacter.sequence_fallthrough() # for cinematic supers
+		return UniqueCharacter.sequence_passthrough() # for cinematic supers
 	elif state == Globals.char_state.SEQUENCE_TARGET:
 		return get_node(targeted_opponent_path).check_passthrough() # copy passthrough state of the one grabbing you
 	return false
@@ -2237,8 +2226,8 @@ func process_VDI():
 		!Animator.query_current(["LaunchTransit"])) or \
 		(state == Globals.char_state.GROUND_FLINCH_HITSTUN and Animator.query_to_play(["FlinchA", "FlinchB"]) and \
 		!Animator.query_current(["FlinchA", "FlinchB"])) or \
-		(state == Globals.char_state.AIR_FLINCH_HITSTUN and Animator.query_to_play(["AirFlinchA", "AirFlinchB"]) and \
-		!Animator.query_current(["AirFlinchA", "AirFlinchB"]))):
+		(state == Globals.char_state.AIR_FLINCH_HITSTUN and Animator.query_to_play(["aFlinchA", "aFlinchB"]) and \
+		!Animator.query_current(["aFlinchA", "aFlinchB"]))):
 		var VDI_amount = lerp(VDI_MAX * DI_MIN_MOD, VDI_MAX, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
 #		var new_angle = Globals.navigate(velocity, Vector2(dir, v_dir), DI_amount) # this return an angle closer to the target direction
 #		velocity = Vector2(velocity.length(), 0).rotated(new_angle)
@@ -2253,12 +2242,12 @@ func bounce_dust(orig_dir):
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
 		Globals.compass.E:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
-					{"facing": 1, "rot":-PI/2})
+				{"facing": 1, "rot":-PI/2})
 		Globals.compass.S:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", get_feet_pos(), {"grounded":true})
 		Globals.compass.W:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
-					{"facing": -1, "rot":-PI/2})
+				{"facing": -1, "rot":-PI/2})
 
 func set_monochrome():
 	if !monochrome:
@@ -2315,9 +2304,9 @@ func process_afterimage_trail():# process afterimage trail
 	UniqueCharacter.afterimage_trail()
 			
 			
-func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0): # one afterimage every 2 frames
+func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime = 10.0): # one afterimage every 3 frames
 	if afterimage_timer <= 0:
-		afterimage_timer = 1
+		afterimage_timer = 2
 		
 # warning-ignore:unassigned_variable
 		var main_color_modulate: Color
@@ -2331,30 +2320,30 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 		
 		if sfx_under.visible:
 			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
-					starting_modulate_a, lifetime)
+				starting_modulate_a, lifetime)
 			
 		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), color_modulate, \
-				starting_modulate_a, lifetime)
+			starting_modulate_a, lifetime)
 #		spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 		
 		if sfx_over.visible:
 			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
-					starting_modulate_a, lifetime)
+				starting_modulate_a, lifetime)
 	else:
 		afterimage_timer -= 1
 		
-func afterimage_cancel(starting_modulate_a = 0.6, lifetime = 15.0): # no need color_modulate for now
+func afterimage_cancel(starting_modulate_a = 0.6, lifetime = 12.0): # no need color_modulate for now
 	
 	if sfx_under.visible:
 		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
-				starting_modulate_a, lifetime)
+			starting_modulate_a, lifetime)
 		
 	Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), null, \
-			starting_modulate_a, lifetime)
+		starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
 		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
-				starting_modulate_a, lifetime)
+			starting_modulate_a, lifetime)
 		
 		
 func launch_trail():
@@ -2419,7 +2408,7 @@ func check_quick_turn():
 			if Animator.query(["BlockStartup"]):
 				return true
 		Globals.char_state.AIR_BLOCK:
-			if Animator.query(["AirBlockStartup"]):
+			if Animator.query(["aBlockStartup"]):
 				return true
 	return false
 	
@@ -2494,13 +2483,13 @@ func are_inputs_too_close():
 #			if Animator.query(["BlockStartup"]):
 #				return true
 #		Globals.char_state.AIR_BLOCK:
-#			if Animator.query(["AirBlockStartup"]):
+#			if Animator.query(["aBlockStartup"]):
 #				return true
 #	return false
 		
 func check_ledge_stop(): # some animations prevent you from dropping off
 	if !grounded or new_state in [Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, \
-			Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_C_RECOVERY]:
+		Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_C_RECOVERY]:
 		return false
 	if is_attacking():
 		var move_name = get_move_name()
@@ -2512,7 +2501,7 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 				return true # no LEDGE_DROP, will stop at ledge
 		else: # during startup of ground attacks
 			if dir == facing and move_name in UniqueCharacter.STARTERS and !move_name in UniqueCharacter.EX_MOVES and \
-					!move_name in UniqueCharacter.SUPERS:
+				!move_name in UniqueCharacter.SUPERS:
 				return false # when doing moves that are not EX moves and supers, can drop off ledge on startup if you are holding forward
 			else:
 				return true
@@ -2522,15 +2511,15 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 func is_attacking():
 	match new_state:
 		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
-				Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY, \
-				Globals.char_state.SEQUENCE_USER:
+			Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY, \
+			Globals.char_state.SEQUENCE_USER:
 			return true
 	return false
 	
 func is_blocking():
 	match new_state:
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, Globals.char_state.GROUND_BLOCKSTUN, \
-				Globals.char_state.AIR_BLOCKSTUN:
+			Globals.char_state.AIR_BLOCKSTUN:
 			return true
 	return false
 	
@@ -2627,7 +2616,7 @@ func burst_extend_check(move_name): # check if have resources to do it, then tak
 	
 func burst_revoke_check(move_name):
 	if !chain_combo in [Globals.chain_combo.RESET] or move_name in UniqueCharacter.EX_MOVES or move_name in UniqueCharacter.SUPERS or \
-			get_guard_gauge_percent_true() < BURSTREVOKE_GG_COST:
+		get_guard_gauge_percent_true() < BURSTREVOKE_GG_COST:
 		return false
 	if Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
 		# for projectiles and such, cannot Burst Revoke during active frames or if opponent is in hitstun/blockstun
@@ -2778,36 +2767,38 @@ func process_status_effects_visual(): # called during hitstop as well
 	for status_effect in status_effects:
 		continue_visual_effect_of_status(status_effect[0])
 
-func process_status_effects_timer(): # reduce lifetime and remove expired status effects
-	var effect_to_erase = []
+func process_status_effects_timer(): # reduce lifetime and remove expired status effects (at end of frame)
+#	var effect_to_erase = []
 	
 	for status_effect in status_effects:
 		
 		if status_effect[1] != null: # a lifetime of "null" means no duration
 			status_effect[1] -= 1
 			if status_effect[1] < 0:
-				effect_to_erase.append(status_effect)
+				status_effect_to_remove.append(status_effect[0])
 				
 		match status_effect[0]:
 			Globals.status_effect.BREAK_RECOVER: # when recovering from a combo where a Break occur, restore Guard Gauge to 50%
 				if !$HitStunTimer.is_running():
-					effect_to_erase.append(status_effect)
+					status_effect_to_remove.append(status_effect[0])
 					if current_guard_gauge < GUARD_GAUGE_FLOOR * 0.5:
 						current_guard_gauge = GUARD_GAUGE_FLOOR * 0.5
 						Globals.Game.guard_gauge_update(self)
 			Globals.status_effect.POS_FLOW: # positive flow ends if guard gauge returns to 0
 				if current_guard_gauge >= 0:
-					effect_to_erase.append(status_effect)
+					status_effect_to_remove.append(status_effect[0])
 			
-	for status_effect in effect_to_erase:
-		status_effects.erase(status_effect)
-		clear_visual_effect_of_status(status_effect[0])
+#	for status_effect in effect_to_erase:
+#		status_effects.erase(status_effect)
+#		clear_visual_effect_of_status(status_effect[0])
 		
 func new_status_effect(effect): # run on frame the status effect is inflicted/state is loaded, for visual effects
 	match effect:
 		Globals.status_effect.POS_FLOW:
 			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
 				Globals.loaded_guard_gauge_pos
+		Globals.status_effect.LETHAL:
+			Globals.Game.lethalfreeze(get_path())
 		
 func continue_visual_effect_of_status(effect): # run every frame, will not add visual effect if there is already one of higher priority
 	match effect:
@@ -2844,6 +2835,9 @@ func remove_all_status_effects():
 		
 func clear_visual_effect_of_status(effect): # must run this when removing status effects to remove the visual effect
 	match effect:
+		Globals.status_effect.LETHAL:
+			Globals.Game.lethalfreeze("unfreeze")
+			continue
 		Globals.status_effect.LETHAL, Globals.status_effect.BREAK:
 			if $ModulatePlayer.query_current(["lethal", "break"]):
 				palette()
@@ -3259,12 +3253,15 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	if "fixed_atker_hitstop" in hit_data.move_data:
 		# multi-hit special/super moves are done by having lower atker hitstop then defender hitstop, and high "hitcount" and ignore_time
 		hitstop = hit_data.move_data.fixed_atker_hitstop
-	elif !hit_data.break_hit:
-		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
-			hitstop = hit_data.hitstop
-	else:
+	elif hit_data.break_hit:
 		if hitstop == null or hit_data.hitstop > hitstop:
 			hitstop = BREAK_HITSTOP_ATTACKER # fixed hitstop for attacking for Break Hits
+	elif hit_data.lethal_hit:
+		hitstop = null # no hitstop for attacker for lethal hit, screenfreeze already enough
+	else:
+		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
+			hitstop = hit_data.hitstop
+
 	
 	# CANCELING ----------------------------------------------------------------------------------------------
 		# only set chain_combo and dash_cancel to true if no Repeat Penalty and not perfect blocked
@@ -3283,8 +3280,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
 				# if it's a normal, allow chaining into other normals and do jump cancel (for aerial) on hit/block
 				if hit_data.block_state == Globals.block_state.UNBLOCKED or \
-						hit_data.block_state == Globals.block_state.GROUND_WRONG or \
-						hit_data.block_state == Globals.block_state.AIR_WRONG:
+					hit_data.block_state == Globals.block_state.GROUND_WRONG or \
+					hit_data.block_state == Globals.block_state.AIR_WRONG:
 					chain_combo = Globals.chain_combo.NORMAL
 				else:
 					chain_combo = Globals.chain_combo.BLOCKED_NORMAL# if blocked properly, can only chain combo into normals of higher strength or specials
@@ -3302,8 +3299,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						
 			Globals.atk_type.SPECIAL, Globals.atk_type.EX:
 				if hit_data.block_state == Globals.block_state.UNBLOCKED or \
-						hit_data.block_state == Globals.block_state.GROUND_WRONG or \
-						hit_data.block_state == Globals.block_state.AIR_WRONG:
+					hit_data.block_state == Globals.block_state.GROUND_WRONG or \
+					hit_data.block_state == Globals.block_state.AIR_WRONG:
 					chain_combo = Globals.chain_combo.SPECIAL # only some actions can chain from a connected special
 				else:
 					chain_combo = Globals.chain_combo.BLOCKED_SPECIAL # if blocked properly, cannot chain
@@ -3320,7 +3317,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		# if blocked hit, pushback
 	
 	if hit_data.block_state != Globals.block_state.UNBLOCKED and !Globals.atk_attr.NO_PUSHBACK in query_atk_attr(hit_data.move_name) and \
-			!"multihit" in hit_data:
+		!"multihit" in hit_data:
 		 # for multi-hit only last hit has pushback
 		var pushback_strength := 0.0
 		match hit_data.block_state:
@@ -3466,7 +3463,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN:
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
 			
-			if (defender.get_node("PBlockTimer").is_running() or defender.Animator.query(["PBlockstun", "AirPBlockStun"])) and \
+			if (defender.get_node("PBlockTimer").is_running() or defender.Animator.query(["PBlockstun", "aPBlockStun"])) and \
 				!Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name): # cannot p-block hard-to-block moves
 				# being in PBlockstun will continue to PBlock all attacks
 				hit_data.block_state = Globals.block_state.GROUND_PERFECT
@@ -3501,7 +3498,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.block_state = Globals.block_state.AIR_WRONG # anti-air attacks always wrongblock airborne defenders
 			
 			elif ((defender.get_node("PBlockTimer").is_running() and Globals.trait.AIR_PERFECT_BLOCK in defender.query_traits()) or \
-				defender.Animator.query(["PBlockstun", "AirPBlockStun"])) and \
+				defender.Animator.query(["PBlockstun", "aPBlockStun"])) and \
 				!Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name):
 				#  being in PBlockstun will continue to PBlock all aerial attacks
 				hit_data.block_state = Globals.block_state.AIR_PERFECT # only those with the trait can perfect block in air
@@ -3516,9 +3513,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# rare ANTI_GUARD entity, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
-			elif defender.Animator.query(["AirWBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
+			elif defender.Animator.query(["aWBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
 				hit_data.block_state = Globals.block_state.AIR_WRONG
-			elif defender.Animator.query(["AirBlockstun", "AirPBlockstun"]):
+			elif defender.Animator.query(["aBlockstun", "aPBlockstun"]):
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.AIR
 				
@@ -3544,7 +3541,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data.punish_hit = true
 			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
 				if Globals.trait.VULN_AIR_DASH in query_traits():
-					if Animator.query(["AirDashTransit", "AirDash", "AirDashU", "AirDashD", "AirDashUU", "AirDashDD"]):
+					if Animator.query(["aDashTransit", "aDash", "aDashU", "aDashD"]):
 						hit_data.punish_hit = true
 						
 	
@@ -3594,7 +3591,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		add_status_effect(Globals.status_effect.LETHAL, 0)
 		Globals.Game.set_screenshake()
 		$ModulatePlayer.play("lethal_flash")
-		play_audio("lethal1", {"vol" : -10, "bus" : "Reverb"})
+		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		
 	elif hit_data.punish_hit and hit_data.sweetspotted:
 		$ModulatePlayer.play("punish_sweet_flash")
@@ -3737,20 +3734,20 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					if grounded:
 						animate("FlinchAStop")
 					else:
-						animate("AirFlinchAStop")
+						animate("aFlinchAStop")
 				else:
 					if grounded:
 						animate("FlinchBStop")
 					else:
-						animate("AirFlinchBStop")
+						animate("aFlinchBStop")
 					
 		else: # launch
 			
 			# level 1 hit when defender is in non-passive states just push them back
 			if adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running() and \
-					!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
-					Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
-					Globals.char_state.AIR_C_RECOVERY]:
+				!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
+				Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
+				Globals.char_state.AIR_C_RECOVERY]:
 				pass
 						
 			else:
@@ -3828,14 +3825,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					animate("PBlockstun")
 					block_rec_cancel = true
 				Globals.block_state.AIR:
-					animate("AirBlockstun")
+					animate("aBlockstun")
 					block_rec_cancel = true
 				Globals.block_state.AIR_WRONG:
 					if !defender.is_atk_startup():
-						animate("AirWBlockstun")
+						animate("aWBlockstun")
 						block_rec_cancel = false
 				Globals.block_state.AIR_PERFECT:
-					animate("AirPBlockstun")
+					animate("aPBlockstun")
 					block_rec_cancel = true
 		
 		
@@ -3845,16 +3842,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		knockback_velocity.y = 0 # set to horizontal pushback on blocking defender
 		
 	velocity = knockback_velocity
-	
-	
-func landed_a_grab(hit_data):
-	animate(hit_data.move_data.sequence)
-	
-func being_grabbed(hit_data):
-	pass
-		
+
 		
 # HIT CALCULATION ---------------------------------------------------------------------------------------------------
+	
 	
 func calculate_damage(hit_data):
 	
@@ -3891,6 +3882,8 @@ func calculate_damage(hit_data):
 		
 	damage = ceil(damage) # whole numbers for damage, minimum damage is 1
 	return damage
+	
+	
 	
 	
 func calculate_guard_gauge_change(hit_data):
@@ -3951,7 +3944,7 @@ func calculate_guard_gauge_change(hit_data):
 				Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 					guard_gauge_change *= PERFECTBLOCK_GUARD_DRAIN_MOD # reduce/negate GDrain for perfect block
 #			if !defender.grounded:
-#				guard_gauge_change *= AIRBLOCK_GUARD_DRAIN_MOD # increase GDrain for airblocking opponent
+#				guard_gauge_change *= aBlock_GUARD_DRAIN_MOD # increase GDrain for aBlocking opponent
 #		else:
 #			guard_gauge_change *= FIRST_HIT_GUARD_DRAIN_MOD # 1st hit of a combo or a stray hit inflict guard drain
 		
@@ -4271,7 +4264,6 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 			aux_data["palette"] = hit_data.move_data["hitspark_palette"]
 		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, aux_data)
 	
-	
 func generate_blockspark(hit_data):
 	
 	var block_dir_enum = Globals.split_angle(hit_data.angle_to_atker, 4, facing) # this return an enum
@@ -4286,6 +4278,210 @@ func generate_blockspark(hit_data):
 		blockspark = "Blockspark"
 	Globals.Game.spawn_SFX(blockspark, "Blocksparks", hit_data.hit_center, {"rot" : block_dir})
 	
+	
+# AUTO SEQUENCES ---------------------------------------------------------------------------------------------------
+		
+func stimulate_sequence(): # cut into this during stimulate2() during sequences
+	
+	test0()
+	
+	if state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
+		if get_node(targeted_opponent_path).state != Globals.char_state.SEQUENCE_USER:
+			animate("Idle") # auto release if not released proberly, just in case
+		
+	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqueCharacter.SEQUENCES[sequence_name]
+		
+		UniqueCharacter.stimulate_sequence()
+		
+	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
+	velocity.y = round(velocity.y)
+	
+	if abs(velocity.x) < 5.0:
+		velocity.x = 0.0
+	if abs(velocity.y) < 5.0:
+		velocity.y = 0.0
+	
+	velocity_previous_frame = velocity
+	var results = move($PlayerCollisionBox, $SoftPlatformDBox, velocity, UniqueCharacter.sequence_ledgestop())
+	velocity = results[0]
+	
+	if state == Globals.char_state.SEQUENCE_USER:
+		UniqueCharacter.stimulate_sequence_after() # move grabbed target after grabber has moved
+	
+	if results[1]: UniqueCharacter.end_sequence_step("ground") # hit the ground
+	if results[3]: UniqueCharacter.end_sequence_step("ledge") # stopped by ledge
+	
+		
+func landed_a_sequence(hit_data):
+	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+	animate(hit_data.move_data.sequence)
+	UniqueCharacter.start_sequence_step()
+	
+	if !pos_flow_seal and current_guard_gauge < 0: # gain positive flow
+		add_status_effect(Globals.status_effect.POS_FLOW, null)
+		
+	chain_combo = Globals.chain_combo.NO_CHAIN
+				
+				
+func being_sequenced(hit_data):
+	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
+	status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# lose positive flow
+	
+	
+func take_seq_damage(base_damage): # return true if lethal
+	var damage = base_damage
+	
+	if current_guard_gauge > 0: # damage is reduced by Guard Gauge when it is > 100%
+		damage *= lerp(1.0, DMG_REDUCTION_AT_MAX_GG, get_guard_gauge_percent_above())
+	damage = ceil(damage) # whole numbers for damage, minimum damage is 1
+	
+	take_damage(damage)
+	if get_damage_percent() >= 1.0:
+		return true # return true if lethal
+	return false
+	
+	
+func sequence_hit(hit_key: int): # most auto sequences deal damage during the sequence outside of the launch
+	var seq_user = get_node(targeted_opponent_path)
+	var seq_hit_data = seq_user.UniqueCharacter.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
+	var lethal = take_seq_damage(seq_hit_data.damage)
+	
+	if "hitstop" in seq_hit_data:
+		if lethal:
+			hitstop = LETHAL_HITSTOP
+			add_status_effect(Globals.status_effect.LETHAL, 0)
+			Globals.Game.set_screenshake()
+			$ModulatePlayer.play("lethal_flash")
+			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+		else:
+			hitstop = seq_hit_data.hitstop
+			seq_user.hitstop = hitstop
+
+
+func sequence_launch():
+	var seq_user = get_node(targeted_opponent_path)
+	var dir_to_attacker = sign(position.x - seq_user.position.x)
+	if dir_to_attacker == 0: dir_to_attacker = facing
+	
+	if !seq_user.Animator.to_play_animation in seq_user.UniqueCharacter.MOVE_DATABASE:
+		print("Error: " + Animator.to_play_animation + " auto-sequence not found in database.")
+	var seq_data = seq_user.UniqueCharacter.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_launch
+	
+#		"sequence_launch" : { # for final hit of sequence
+#			"damage" : 0,
+#			"hitstop" : 0,
+#			"guard_gain" : 3500,
+#			"EX_gain": 2500,
+#			"launch_power" : 700,
+#			"launch_angle" : -PI/2.2,
+#			"attack_level" : 6,
+#		}
+
+	# DAMAGE
+	var damage = seq_data.damage
+	var lethal = take_seq_damage(damage)
+	if damage > 0 and seq_data.hitstop > 0:
+		if lethal:
+			hitstop = LETHAL_HITSTOP
+			add_status_effect(Globals.status_effect.LETHAL, 0)
+			Globals.Game.set_screenshake()
+			$ModulatePlayer.play("lethal_flash")
+			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+		else:
+			hitstop = seq_data.hitstop
+			seq_user.hitstop = hitstop
+		
+	# GUARD GAIN
+	var guard_gain = seq_data.guard_gain # sequences do not drain GG, only cause GG gain (cannot stun)
+	change_guard_gauge(guard_gain)
+	
+	# EX GAIN
+	seq_user.change_ex_gauge(seq_data.EX_gain)
+	change_ex_gauge(seq_data.EX_gain * 0.25)
+		
+	# HITSTUN
+	var hitstun
+	if "fixed_hitstun" in seq_data:
+		hitstun = seq_data.fixed_hitstun
+	else:
+		hitstun = ceil(lerp(15, 50, (seq_data.attack_level - 1)/7.0))
+		if lethal:
+			hitstun *= LETHAL_HITSTUN_MOD
+			if get_damage_percent() > 1.0:
+				hitstun *= get_damage_percent()
+		else:
+			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+				hitstun *= lerp(1.0, UniqueCharacter.HITSTUN_REDUCTION_AT_MAX_GG, get_guard_gauge_percent_above())
+	$HitStunTimer.time = hitstun
+	orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
+		
+	# LAUNCH POWER
+	var launch_power = seq_data.launch_power
+	if lethal: # increased knockback on a lethal hit,
+		launch_power += LETHAL_KB_MOD
+	if get_damage_percent() >= 1.0: # knockback is increased when Damage is over Damage Value Limit
+		var dmg_val_boost = min((get_damage_percent() - 1.0) / 0.125 * 0.5 + 2.0 \
+			, DMG_VAL_KB_LIMIT)
+		#	0.0 percent damage over is x2.0 knockback
+		#	0.125 percent damage over is x2.5 knockback
+		# 	0.25 percent damage over is x3.0 knockback
+		launch_power *= dmg_val_boost
+	if current_guard_gauge > 0: # knockback is increased by Guard Gauge when it is > 100%
+		launch_power *= lerp(1.0, UniqueCharacter.KB_BOOST_AT_MAX_GG, get_guard_gauge_percent_above())
+		
+	# LAUNCH ANGLE
+	var launch_angle = 2 * PI + seq_data.launch_angle
+	if seq_user.facing < 0: # if mirrored
+		launch_angle = PI - launch_angle
+		launch_angle = wrapf(launch_angle, 0, TAU)
+		
+	# LAUNCHING
+	sprite.rotation = 0
+	var segment = Globals.split_angle(launch_angle, 2)
+	match segment:
+		Globals.compass.N:
+			face(-dir_to_attacker) # turn towards attacker
+			animate("LaunchEStop")
+			if facing == 1:
+				launch_starting_rot = PI/2
+			else:
+				launch_starting_rot = 3*PI/2
+		Globals.compass.NE:
+			face(-1)
+			animate("LaunchDStop")
+			launch_starting_rot = 7*PI/4
+		Globals.compass.E:
+			face(-1)
+			animate("LaunchCStop")
+			launch_starting_rot = 0
+		Globals.compass.SE:
+			face(-1)
+			animate("LaunchBStop")
+			launch_starting_rot = 9*PI/4
+		Globals.compass.S:
+			face(-dir_to_attacker) # turn towards attacker
+			print("check")
+			animate("LaunchAStop")
+			if facing == -1:
+				launch_starting_rot = PI/2
+			else:
+				launch_starting_rot = 3*PI/2
+		Globals.compass.SW:
+			face(1)
+			animate("LaunchBStop")
+			launch_starting_rot = 7*PI/4
+		Globals.compass.W:
+			face(1)
+			animate("LaunchCStop")
+			launch_starting_rot = 0.0
+		Globals.compass.NW:
+			face(1)
+			animate("LaunchDStop")
+			launch_starting_rot = PI/4
+				
+	var launch_velocity = Vector2(launch_power, 0).rotated(launch_angle)
+	velocity = launch_velocity
+	
 		
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 	
@@ -4299,7 +4495,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"RunTransit":
 			animate("Run")
 		"CrouchTransit", "HardLanding":
-			animate("Crouch")   
+			animate("Crouch")
 		"CrouchReturn", "SoftLanding", "Brake":
 			animate("Idle")
 			
@@ -4307,13 +4503,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("JumpTransit2")
 		"JumpTransit2":
 			animate("JumpTransit3")
-		"AirJumpTransit":
-			animate("AirJumpTransit2")
+		"aJumpTransit":
+			animate("aJumpTransit2")
 		"WallJumpTransit":
 			animate("WallJumpTransit2")
-		"AirJumpTransit2", "WallJumpTransit2":
-			animate("AirJumpTransit3")
-		"JumpTransit3", "AirJumpTransit3":
+		"aJumpTransit2", "WallJumpTransit2":
+			animate("aJumpTransit3")
+		"JumpTransit3", "aJumpTransit3":
 			animate("Jump")
 		"FallTransit":
 			animate("Fall")
@@ -4325,11 +4521,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"FlinchAReturn", "FlinchBReturn":
 			animate("Idle")
 			
-		"AirFlinchAStop":
-			animate("AirFlinchA")
-		"AirFlinchBStop":
-			animate("AirFlinchB")
-		"AirFlinchAReturn", "AirFlinchBReturn":
+		"aFlinchAStop":
+			animate("aFlinchA")
+		"aFlinchBStop":
+			animate("aFlinchB")
+		"aFlinchAReturn", "aFlinchBReturn":
 			animate("FallTransit")
 			
 		"LaunchAStop", "LaunchBStop", "LaunchCStop", "LaunchDStop", "LaunchEStop":
@@ -4345,20 +4541,20 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Idle")
 		"BlockCRecovery":
 			animate("Idle")
-		"AirBlockStartup":
-			animate("AirBlock")
-		"AirBlockstunReturn":
-			animate("AirBlock")
-		"AirBlockRecovery":
+		"aBlockStartup":
+			animate("aBlock")
+		"aBlockstunReturn":
+			animate("aBlock")
+		"aBlockRecovery":
 			animate("FallTransit")
-		"AirBlockCRecovery":
+		"aBlockCRecovery":
 			animate("FallTransit")
 		"BlockLanding":
 			animate("Block")
 		"WBlockstun": # special, will return to regular blockstun after 6 frames (subjected to change)
 			animate("Blockstun")
-		"AirWBlockstun": # special, will return to regular blockstun after 6 frames (subjected to change)
-			animate("AirBlockstun")
+		"aWBlockstun": # special, will return to regular blockstun after 6 frames (subjected to change)
+			animate("aBlockstun")
 			
 		"BurstCounterStartup":
 			animate("BurstCounter")
@@ -4459,7 +4655,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 						velocity.x = clamp(velocity.x, -UniqueCharacter.SPEED, UniqueCharacter.SPEED)
 #					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-		"AirJumpTransit2":
+		"aJumpTransit2":
 			aerial_memory = []
 			if !check_wall_jump():
 				air_jump -= 1
@@ -4470,7 +4666,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 					else:
 						velocity.x = velocity.x * 0.9 # air jump is slower horizontally since no friction
 				else: # neutral air jump
-					velocity.x = velocity.x * 0.7		
+					velocity.x = velocity.x * 0.7
 				velocity.y = -UniqueCharacter.JUMP_SPEED * UniqueCharacter.AIR_JUMP_MOD
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
@@ -4483,7 +4679,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 				velocity.y = -UniqueCharacter.JUMP_SPEED
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 				var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
-						-wall_jump_dir)
+					-wall_jump_dir)
 				if wall_point != null:
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
 				else:
@@ -4499,7 +4695,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			velocity.y = -UniqueCharacter.JUMP_SPEED
 			$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 			var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
-					-wall_jump_dir)
+				-wall_jump_dir)
 			if wall_point != null:
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
 			else:
@@ -4513,15 +4709,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"BlockStartup":
 			block_rec_cancel = false
 			perfect_block()
-		"AirBlockStartup":
+		"aBlockStartup":
 			block_rec_cancel = false
 			perfect_block()
 			$ModulatePlayer.play("EX_block_flash")
 			change_guard_gauge(UniqueCharacter.AIR_BLOCK_GG_COST)
 			play_audio("bling1", {"vol" : -16,})
 			remove_status_effect(Globals.status_effect.POS_FLOW)
-		"BlockRecovery", "AirBlockRecovery", "BlockCRecovery", "AirBlockCRecovery":
-			$PBlockTimer.stop() # stop perfect blocking		
+		"BlockRecovery", "aBlockRecovery", "BlockCRecovery", "aBlockCRecovery":
+			$PBlockTimer.stop() # stop perfect blocking
 		"BurstCounterStartup", "BurstEscapeStartup":
 			velocity_limiter.x_slow = 0.2
 			velocity_limiter.y_slow = 0.2
@@ -4665,7 +4861,7 @@ func save_state():
 		"ignore_list" : ignore_list,
 		"tap_memory" : tap_memory,
 		"release_memory" : release_memory,
-		"instant_actions" : instant_actions, 
+		"instant_actions" : instant_actions,
 		
 		"sprite_scale" : sprite.scale,
 		"sprite_rotation" : sprite.rotation,

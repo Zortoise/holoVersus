@@ -173,6 +173,46 @@ func init(aux_data: Dictionary):
 				Animator.play("[c3]Spawn")
 			4:
 				Animator.play("[ex]Spawn")
+				
+	match Animator.to_play_animation:
+		"[c1]Spawn":
+			Entity.velocity = Vector2(500, 0).rotated(START_ROTATION)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 1
+			Entity.life_point = 1
+		"[c2]Spawn":
+			Entity.velocity = Vector2(650, 0).rotated(START_ROTATION)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 2
+			Entity.life_point = 2
+			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
+					{"facing":Entity.facing, "rot":START_ROTATION, "palette" : Entity.master_path})
+		"[c3]Spawn", "[ex]Spawn":
+			Entity.velocity = Vector2(800, 0).rotated(START_ROTATION)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 3
+			Entity.life_point = 3
+			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
+					{"facing":Entity.facing, "rot":START_ROTATION})
+		"a[c1]Spawn":
+			Entity.velocity = Vector2(500, 0).rotated(-START_ROTATION)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 1
+			Entity.life_point = 1
+		"a[c2]Spawn":
+			Entity.velocity = Vector2(650, 0).rotated(-START_ROTATION)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 2
+			Entity.life_point = 2
+			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
+					{"facing":Entity.facing, "rot":-START_ROTATION, "palette" : Entity.master_path})
+		"a[c3]Spawn", "a[ex]Spawn":
+			Entity.velocity = Vector2(800, 0).rotated(-START_ROTATION)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 3
+			Entity.life_point = 3
+			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
+					{"facing":Entity.facing, "rot":-START_ROTATION})
 
 #	Entity.lifespan = LIFESPAN # set starting lifespan
 #	Entity.absorption_value = ABSORPTION # set starting absorption_value
@@ -283,44 +323,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
-		"[c1]Spawn":
-			Entity.velocity = Vector2(500, 0).rotated(START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 1
-			Entity.life_point = 1
-		"[c2]Spawn":
-			Entity.velocity = Vector2(650, 0).rotated(START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 2
-			Entity.life_point = 2
-			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-					{"facing":Entity.facing, "rot":START_ROTATION, "palette" : Entity.master_path})
-		"[c3]Spawn", "[ex]Spawn":
-			Entity.velocity = Vector2(800, 0).rotated(START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 3
-			Entity.life_point = 3
-			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":START_ROTATION})
-		"a[c1]Spawn":
-			Entity.velocity = Vector2(500, 0).rotated(-START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 1
-			Entity.life_point = 1
-		"a[c2]Spawn":
-			Entity.velocity = Vector2(650, 0).rotated(-START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 2
-			Entity.life_point = 2
-			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-					{"facing":Entity.facing, "rot":-START_ROTATION, "palette" : Entity.master_path})
-		"a[c3]Spawn", "a[ex]Spawn":
-			Entity.velocity = Vector2(800, 0).rotated(-START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 3
-			Entity.life_point = 3
-			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":-START_ROTATION})
 		"Kill", "aKill":
 			Entity.velocity = Vector2.ZERO
 

@@ -5,6 +5,7 @@ var free := false
 var sfx_ref
 
 var palette_ref = null
+var ignore_freeze := false
 
 # for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
 # for unique sfx, in_sfx_ref will be a an array with master's nodepath as 1st entry and string for 2nd entry
@@ -30,6 +31,9 @@ func init(in_anim: String, in_sfx_ref, in_position: Vector2, aux_data: Dictionar
 		
 	$SpritePlayer.play(in_anim)
 	
+	if Globals.Game.is_stage_paused(): # if spawned during screenfreeze, will not be frozen during screenfreeze
+		ignore_freeze = true
+	
 	
 func load_sfx_ref(): # load frame data and spritesheet
 	if sfx_ref is String and sfx_ref in LoadedSFX.loaded_sfx: # common sfx
@@ -54,6 +58,8 @@ func palette():
 		$Sprite.material.set_shader_param("swap", get_node(palette_ref).loaded_palette)
 
 func stimulate():
+	if Globals.Game.is_stage_paused() and !ignore_freeze: return
+	
 	$SpritePlayer.stimulate()
 
 
@@ -71,7 +77,8 @@ func save_state():
 		"position" : position,
 		"scale" : scale,
 		"rotation" : rotation,
-		"palette_ref" : palette_ref
+		"palette_ref" : palette_ref,
+		"ignore_freeze" : ignore_freeze
 	}
 	return state_data
 	
@@ -88,5 +95,6 @@ func load_state(state_data):
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	free = state_data.free
+	ignore_freeze = state_data.ignore_freeze
 	
 #--------------------------------------------------------------------------------------------------

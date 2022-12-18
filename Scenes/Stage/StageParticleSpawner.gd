@@ -1,6 +1,5 @@
 extends ColorRect
 
-
 var particle_scene # set by script extending this
 var particle_data = { # set by script extending this
 }
@@ -22,10 +21,14 @@ var time := 0.0
 
 
 func _physics_process(delta):
+	
+	if Globals.Game.is_stage_paused(): return
+	
 	time += delta
 	if time >= interval:
 		time = 0.0
 		spawn()
+		
 		
 func spawn(offset = false):
 # warning-ignore:unassigned_variable
@@ -42,5 +45,6 @@ func initial_spawn():
 	var number_to_spawn = ceil(2 / float(interval))
 	for x in number_to_spawn:
 		spawn(true)
+
 	
 

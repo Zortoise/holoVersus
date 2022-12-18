@@ -42,7 +42,9 @@ func init(in_particle_data, offset = false):
 		
 		
 func _physics_process(delta):
-
+	
+	if Globals.Game.is_stage_paused(): return
+	
 	if "speed" in particle_data:
 		if !"ease" in particle_data:
 			origin += Vector2(particle_data.speed * delta, 0).rotated(particle_data.direction)

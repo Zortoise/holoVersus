@@ -1836,8 +1836,6 @@ position = Vector2( 153, 106 )
 texture = ExtResource( 11 )
 
 [node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
-modulate = Color( 0.584314, 0, 0, 1 )
-self_modulate = Color( 0, 0, 0, 1 )
 texture = ExtResource( 5 )
 
 [node name="DamageValue" type="Label" parent="HUD/P1_HUDRect/Portrait"]
@@ -2036,8 +2034,6 @@ position = Vector2( 153, 106 )
 texture = ExtResource( 11 )
 
 [node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
-modulate = Color( 0, 0.211765, 0.65098, 1 )
-self_modulate = Color( 0, 0, 0, 1 )
 texture = ExtResource( 5 )
 
 [node name="DamageValue" type="Label" parent="HUD/P2_HUDRect/Portrait"]

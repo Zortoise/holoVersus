@@ -16,6 +16,7 @@ const HUD_FADE = 0.3
 const SCREEN_SHAKE_DECAY_RATE = 0.25
 var screen_shake_amount: float
 
+const SCREEN_DARKEN = Color(0.5, 0.5, 0.5)
 const FLASHING_TIME_THRESHOLD = 10
 
 onready var stage_ref = Globals.stage_ref
@@ -70,6 +71,8 @@ var captured_input_state = { # use for capturing inputs, during input delay cann
 		"old_pressed" : [],
 		"pressed" : [],
 	}
+var screenfreeze = null # when set to a player_ID, only that player will stimulate, along with any sfx/shadow spawned during screenfreeze
+var darken := false # stage will turn dark
 
 var input_lock := true # lock inputs at start of game,  caused issue when save/loaded,
 var game_set := false # caused issue when save/loaded, need more testing
@@ -79,7 +82,8 @@ var play_speed := 1 # testing
 var orig_rng_seed: int	# saved in replay file, starting rng_seed, host must send this over to client
 
 var you_label # node
-
+var to_superfreeze = null # set superfreeze at end of frame after players/entities have animated
+var to_lethalfreeze = null # set lethalfreeze at end of frame after players/entities have animated
 
 func _ready():
 	
@@ -364,7 +368,8 @@ func _physics_process(_delta):
 	if screen_shake_amount > 0.0:
 		screen_shake_amount = max(screen_shake_amount - SCREEN_SHAKE_DECAY_RATE, 0)
 		screenshake()
-		if screen_shake_amount <= 0.0:
+		if screen_shake_amount <= 0.01:
+			screen_shake_amount = 0.0
 			set_camera_limit()
 	else: # just in case
 		$CameraRef/Camera2D.offset_h = 0
@@ -554,6 +559,8 @@ func stimulate(rendering = true):
 	
 # STIMULATE CHILDREN NODES --------------------------------------------------------------------------------------------------
 
+	to_superfreeze = null
+	to_lethalfreeze = null
 
 	# activate player's physics
 	for player in $Players.get_children():
@@ -571,7 +578,8 @@ func stimulate(rendering = true):
 		else:
 			entity.stimulate()
 
-	detect_hit()
+	if !is_stage_paused():
+		detect_hit()
 	
 	# activate player's stimulate_after()
 	for player in $Players.get_children():
@@ -610,6 +618,9 @@ func stimulate(rendering = true):
 			
 	if Globals.static_stage == 0:
 		stage.stimulate()
+		
+	check_superfreeze() # only freeze after players/entites/sfx have stimulated
+	check_lethalfreeze()
 			
 	frame_viewer.stimulate()
 
@@ -621,7 +632,7 @@ func stimulate(rendering = true):
 	elif frametime >= true_frametime: # reached back to present
 		playback_mode = false # stop playback
 		
-	if !input_lock:
+	if !input_lock and !is_stage_paused():
 		matchtime -= 1 # match time only start counting down when "BEGIN!" vanishes
 	
 	
@@ -648,6 +659,7 @@ func save_state(timestamp):
 			"input_lock" : null,
 	#		"game_set" : null
 			},
+		"current_rng_seed" : null,
 		"player_data" : {},
 		"afterimage_data" : [],
 		"entities_back_data" : [],
@@ -655,7 +667,9 @@ func save_state(timestamp):
 		"SFX_back_data" : [],
 		"SFX_front_data" : [],
 		"audio_data" : [],
-		"stage_data" : {}
+		"stage_data" : {},
+		"screenfreeze" : null,
+		"darken" : false,
 	}
 	
 	game_state.match_data.frametime = frametime
@@ -665,6 +679,8 @@ func save_state(timestamp):
 	game_state.match_data.input_lock = input_lock
 	game_state.current_rng_seed = current_rng_seed
 #	game_state.match_data.game_set = game_set
+	game_state.screenfreeze = screenfreeze
+	game_state.darken = darken
 	
 
 	for player in $Players.get_children():
@@ -708,6 +724,8 @@ func save_state(timestamp):
 		elif timestamp == "test_state2":
 			if !Globals.watching_replay:
 				test_state2 = game_state.duplicate(true)
+				
+	game_state.clear()
 
 
 func load_state(game_state, loading_autosave = true):
@@ -721,6 +739,7 @@ func load_state(game_state, loading_autosave = true):
 	input_lock = loaded_game_state.match_data.input_lock
 	current_rng_seed = loaded_game_state.current_rng_seed
 #	game_set = loaded_game_state.game_state.match_data.game_set
+
 
 	for player in $Players.get_children():
 		player.load_state(loaded_game_state.player_data[player.player_ID])
@@ -773,8 +792,16 @@ func load_state(game_state, loading_autosave = true):
 	if Globals.static_stage == 0:
 		stage.load_state(loaded_game_state.stage_data)
 		
+	# do these after re-adding the children
+	screenfreeze = loaded_game_state.screenfreeze
+	process_screenfreeze()
+	darken = loaded_game_state.darken
+	process_darken()
+		
 	if frame_reverse and !loading_autosave: # when loading manual save, erase autoload states
 		test_saved_game_states.clear()
+		
+	loaded_game_state.clear()
 	
 	
 # DETECT RINGOUT --------------------------------------------------------------------------------------------------	
@@ -869,44 +896,32 @@ func detect_hit():
 		# will not return hitbox if in hitstop or when HarmlessTimer is running or if hits_left_in_current_active = 0
 		
 		if polygons_queried.hitbox != null: # if hitbox is not empty
-			var converted_polygon = []
-			for point in polygons_queried.hitbox: # convert to global position
-				converted_polygon.append(player.position + point)
 			var move_data_and_name = player.query_move_data_and_name()
 			var hitbox = {
-				"polygon" : converted_polygon,
+				"polygon" : polygons_queried.hitbox,
 				"owner_nodepath" : player.get_path(),
 				"facing": player.facing,
 				"move_name" : move_data_and_name.move_name,
 				"move_data" : move_data_and_name.move_data, # damage, attack level, etc
 			}
 			if polygons_queried.sweetbox != null: # if sweetbox is not empty
-				var converted_polygon2 = []
-				for point in polygons_queried.sweetbox: # convert to global position
-					converted_polygon2.append(player.position + point)
-				hitbox["sweetbox"] = converted_polygon2
+				hitbox["sweetbox"] = polygons_queried.sweetbox
 			if polygons_queried.kborigin != null: # if kborigin is not null
-				hitbox["kborigin"] = player.position + polygons_queried.kborigin
+				hitbox["kborigin"] = polygons_queried.kborigin
 			if polygons_queried.vacpoint != null: # if kborigin is not null
-				hitbox["vacpoint"] = player.position + polygons_queried.vacpoint
+				hitbox["vacpoint"] = polygons_queried.vacpoint
 				
 			hitboxes.append(hitbox)
 			
 		if polygons_queried.hurtbox != null:
-			var converted_polygon = []
-			for point in polygons_queried.hurtbox: # convert to global position
-				converted_polygon.append(player.position + point)
 			var hurtbox = {
-				"polygon" : converted_polygon,
+				"polygon" : polygons_queried.hurtbox,
 				"owner_nodepath" : player.get_path(),
 				"facing": player.facing,
 #				"defensive_state" : null, # blocking, punishable state, etc
 			}
 			if polygons_queried.sdhurtbox != null:
-				var converted_polygon2 = []
-				for point in polygons_queried.sdhurtbox: # convert to global position
-					converted_polygon2.append(player.position + point)
-				hurtbox["sdhurtbox"] = converted_polygon2
+				hurtbox["sdhurtbox"] = polygons_queried.sdhurtbox
 			
 			hurtboxes.append(hurtbox)
 			
@@ -917,12 +932,9 @@ func detect_hit():
 	for entity in entities:
 		var polygons_queried = entity.query_polygons()
 		if polygons_queried.hitbox != null: # if hitbox is not empty
-			var converted_polygon = []
-			for point in polygons_queried.hitbox: # convert to global position
-				converted_polygon.append(entity.position + point)
 			var move_data = entity.query_move_data()
 			var hitbox = {
-				"polygon" : converted_polygon,
+				"polygon" : polygons_queried.hitbox,
 				"owner_nodepath" : entity.master_path,
 				"entity_nodepath" : entity.get_path(),
 				"facing": entity.facing,
@@ -930,14 +942,11 @@ func detect_hit():
 				"move_data" : move_data, # damage, attack level, etc
 			}
 			if polygons_queried.sweetbox != null: # if sweetbox is not empty
-				var converted_polygon2 = []
-				for point in polygons_queried.sweetbox: # convert to global position
-					converted_polygon2.append(entity.position + point)
-				hitbox["sweetbox"] = converted_polygon2
+				hitbox["sweetbox"] = polygons_queried.sweetbox
 			if polygons_queried.kborigin != null: # if kborigin is not null
-				hitbox["kborigin"] = entity.position + polygons_queried.kborigin
+				hitbox["kborigin"] = polygons_queried.kborigin
 			if polygons_queried.vacpoint != null: # if kborigin is not null
-				hitbox["vacpoint"] = entity.position + polygons_queried.vacpoint
+				hitbox["vacpoint"] =  polygons_queried.vacpoint
 				
 			hitboxes.append(hitbox)
 	
@@ -994,11 +1003,11 @@ func detect_hit():
 			else:
 				get_node(hit_data.entity_nodepath).landed_a_hit(hit_data)
 		else:
-			get_node(hit_data.defender_nodepath).being_grabbed(hit_data)
+			get_node(hit_data.defender_nodepath).being_sequenced(hit_data)
 			if !"entity_nodepath" in hit_data:
-				get_node(hit_data.attacker_nodepath).landed_a_grab(hit_data)
+				get_node(hit_data.attacker_nodepath).landed_a_sequence(hit_data)
 			else: # rare projectile grab
-				get_node(hit_data.entity_nodepath).landed_a_grab(hit_data)
+				get_node(hit_data.entity_nodepath).landed_a_sequence(hit_data)
 		
 						
 func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_disjoint = false):
@@ -1014,7 +1023,6 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_d
 	hit_center = sum / number_of_points
 	hit_center.x = round(hit_center.x) # remove decimals
 	hit_center.y = round(hit_center.y) # remove decimals
-	
 	
 	var sweetspotted := false
 	if semi_disjoint == false and "sweetbox" in hitbox and Geometry.is_point_in_polygon(hit_center, hitbox.sweetbox):
@@ -1109,9 +1117,9 @@ func defender_backdash(hitbox, hurtbox):
 	var attacker_attr = attacker.query_atk_attr(hitbox.move_name)
 	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
 		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
-				defender.Animator.query_to_play(["DashTransit", "AirDashTransit"]):
+				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
 			if defender.facing == sign(defender.position.x - attacker.position.x) and \
-					!defender.Animator.query_to_play(["AirDashUU", "AirDashDD"]):
+					!defender.Animator.query_to_play(["aDashUU", "aDashDD"]):
 				return true # defender's backdash succeeded
 	return false # defender's backdash failed
 
@@ -1165,11 +1173,16 @@ func handle_zoom(delta):
 	
 	Globals.change_zoom_level(change_in_zoom)
 	
-# SCREEN SHAKE --------------------------------------------------------------------------------------------------
+# SCREEN EFFECTS  --------------------------------------------------------------------------------------------------
 	
 func screenshake():
 	$CameraRef/Camera2D.offset_h = screen_shake_amount * rand_range(-0.1, 0.1)
-	$CameraRef/Camera2D.offset_v = screen_shake_amount * rand_range(-0.75, 0.75)
+	
+# warning-ignore:narrowing_conversion
+	if posmod(floor(frametime / 4.0), 2) == 0: # change offset direction every X frames
+		$CameraRef/Camera2D.offset_v = screen_shake_amount
+	else:
+		$CameraRef/Camera2D.offset_v = -screen_shake_amount
 	
 	$CameraRef/Camera2D.limit_left = stage_box.rect_global_position.x + CAMERA_MARGIN - $CameraRef/Camera2D.offset_h
 	$CameraRef/Camera2D.limit_right = stage_box.rect_global_position.x + stage_box.rect_size.x - CAMERA_MARGIN + \
@@ -1179,8 +1192,89 @@ func screenshake():
 			$CameraRef/Camera2D.offset_v
 	
 func set_screenshake(amount = 5):
-	screen_shake_amount = amount
+	if amount > screen_shake_amount:
+		screen_shake_amount = amount
 	
+func process_screenfreeze():
+	if screenfreeze != null:
+		for x in get_tree().get_nodes_in_group("StagePause"):
+			for x_child in x.get_children():
+				if x_child is AnimatedSprite:
+					x_child.playing = false
+	else:
+		for x in get_tree().get_nodes_in_group("StagePause"):
+			for x_child in x.get_children():
+				if x_child is AnimatedSprite:
+					x_child.playing = true
+					
+func process_darken():
+	if darken:
+		for x in get_tree().get_nodes_in_group("StageDarken"):
+			x.modulate = SCREEN_DARKEN
+		for x in $EntitiesBack.get_children():
+			if get_node(x.master_path).player_ID == screenfreeze: pass
+			else: x.modulate = SCREEN_DARKEN
+		for x in $SFXBack.get_children():
+			if "ignore_freeze" in x and x.ignore_freeze: pass
+			else: x.modulate = SCREEN_DARKEN
+		for x in $Afterimages.get_children():
+			if "ignore_freeze" in x and x.ignore_freeze: pass
+			else: x.modulate = SCREEN_DARKEN
+		for x in $Players.get_children():
+			if x.player_ID == screenfreeze: pass
+			else: x.modulate = SCREEN_DARKEN
+		for x in $EntitiesFront.get_children():
+			if get_node(x.master_path).player_ID == screenfreeze: pass
+			else: x.modulate = SCREEN_DARKEN
+		for x in $SFXFront.get_children():
+			if "ignore_freeze" in x and x.ignore_freeze: pass
+			else: x.modulate = SCREEN_DARKEN
+	else:
+		for x in get_tree().get_nodes_in_group("StageDarken"):
+			x.modulate = Color(1.0, 1.0, 1.0)
+		for x in $EntitiesBack.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
+		for x in $SFXBack.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
+		for x in $Afterimages.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
+		for x in $Players.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
+		for x in $EntitiesFront.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
+		for x in $SFXFront.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
+					
+func superfreeze(player_path):		
+	to_superfreeze = player_path
+					
+func check_superfreeze():
+	if to_superfreeze != null:
+		if screenfreeze == null:
+			screenfreeze = get_node(to_superfreeze).player_ID
+			darken = true
+		else:
+			screenfreeze = null
+			darken = false
+		process_screenfreeze()
+		process_darken()
+		$Players.move_child(get_node(to_superfreeze), $Players.get_child_count() - 1) # move to topmost layer
+	
+func lethalfreeze(player_path):
+	to_lethalfreeze = player_path
+	
+func check_lethalfreeze():
+	if to_lethalfreeze != null:
+		if to_lethalfreeze != "unfreeze":
+			if screenfreeze == null:
+				screenfreeze = get_node(to_lethalfreeze).player_ID
+			else:
+				screenfreeze = null
+			process_screenfreeze()
+		else:
+			screenfreeze = null
+			process_screenfreeze()
+			
+func is_stage_paused():
+	if screenfreeze != null:
+		return true
+	else: return false
+	
+
 # HUD ELEMENTS  --------------------------------------------------------------------------------------------------
 
 func set_input_indicator():

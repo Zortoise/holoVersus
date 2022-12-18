@@ -85,6 +85,8 @@ func process_aseprite_file(in_aseprite_filename: String): # output a single .tre
 			process_point_layer("EntitySpawn", frame_data, in_aseprite_filename)
 		elif layer_name.begins_with("GrabPoint"):
 			process_point_layer("GrabPoint", frame_data, in_aseprite_filename)
+		elif layer_name.begins_with("GrabRotDir"):
+			process_point_layer("GrabRotDir", frame_data, in_aseprite_filename)
 		elif layer_name.begins_with("VacPoint"):
 			process_point_layer("VacPoint", frame_data, in_aseprite_filename)
 				
