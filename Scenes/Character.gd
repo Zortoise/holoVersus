@@ -4314,6 +4314,18 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 		
 func landed_a_sequence(hit_data):
 	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+	var defender = get_node(hit_data.defender_nodepath)
+	
+	# repeat penalty, cannot grab if repeated
+	var root_move_name = hit_data.move_name
+	if hit_data.move_name in UniqueCharacter.MOVE_DATABASE and \
+		"root" in UniqueCharacter.MOVE_DATABASE[hit_data.move_name]:
+		root_move_name = UniqueCharacter.MOVE_DATABASE[hit_data.move_name].root # for move variations
+	for array in defender.move_memory:
+			if array[0] == player_ID and array[1] == root_move_name:
+				return		
+	defender.move_memory.append([player_ID, root_move_name])
+	
 	animate(hit_data.move_data.sequence)
 	UniqueCharacter.start_sequence_step()
 	

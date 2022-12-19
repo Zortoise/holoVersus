@@ -832,7 +832,8 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
 			Character.play_audio("rock3", {"vol":-5})
 							
-func end_sequence_step(trigger = null): # this is ran at the start of certain sequence_step, or to end a trigger sequence_step
+func end_sequence_step(trigger = null): # this is ran at the end of certain sequence_step, or to end a trigger sequence_step
+	# return true if sequence_step ended
 	var Partner = get_node(Character.targeted_opponent_path)
 	
 	if trigger == "break": # grab break

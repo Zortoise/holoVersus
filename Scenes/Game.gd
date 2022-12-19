@@ -963,6 +963,8 @@ func detect_hit():
 				continue # defender must not be owner of hitbox
 			if defender_semi_invul(hitbox, hurtbox):
 				continue # attacker must not be attacking a semi-invul defender unless with certain moves
+			if defender_command_grab_dodge(hitbox, hurtbox):
+				continue # attacker must not be command grabbing a defender in ground/air movement startup
 			if !"entity_nodepath" in hitbox:
 				if !test_priority(hitbox, hurtbox):
 					continue # attacker must pass the priority test
@@ -1122,6 +1124,18 @@ func defender_backdash(hitbox, hurtbox):
 					!defender.Animator.query_to_play(["aDashUU", "aDashDD"]):
 				return true # defender's backdash succeeded
 	return false # defender's backdash failed
+	
+func defender_command_grab_dodge(hitbox, hurtbox):
+	var attacker_or_entity
+	if !"entity_nodepath" in hitbox: # not entity
+		attacker_or_entity = get_node(hitbox.owner_nodepath)
+	else:
+		attacker_or_entity = get_node(hitbox.entity_nodepath) # rare entity command grab
+	var defender = get_node(hurtbox.owner_nodepath)
+	if Globals.atk_attr.COMMAND_GRAB in attacker_or_entity.query_atk_attr(hitbox.move_name):
+		if defender.new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP]:
+			return true # defender's evaded command grab
+	return false
 
 # HANDLING ZOOM --------------------------------------------------------------------------------------------------
 

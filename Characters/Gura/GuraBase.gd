@@ -637,7 +637,7 @@ const MOVE_DATABASE = {
 		"priority": 9,
 		"hitspark_type" : Globals.hitspark_type.NONE,
 		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.CANNOT_CHAIN_INTO, \
-				Globals.atk_attr.NOT_FROM_C_REC],
+				Globals.atk_attr.NOT_FROM_C_REC, Globals.atk_attr.COMMAND_GRAB]
 	},
 	
 	"SP6[ex]SeqE": {
