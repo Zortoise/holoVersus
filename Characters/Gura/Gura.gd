@@ -132,7 +132,6 @@ func simulate():
 #	Character.dir
 #	Character.v_dir
 
-
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 
 	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aL2Active"]):
@@ -306,10 +305,20 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		
 				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
 					if keep and !Character.button_light in Character.input_state.just_pressed and \
-							!Character.button_fierce in Character.input_state.just_pressed and !Animator.query(["DashBrake"]):
-						# cannot dash while pressing an attack, or during dash brake
-						Character.animate("DashTransit")
-						keep = false
+							!Character.button_fierce in Character.input_state.just_pressed:
+						if !Animator.query(["DashBrake"]):
+							# cannot dash while pressing an attack, or during dash brake
+							Character.animate("DashTransit")
+							keep = false
+						else: # during dash brake, can continue dash backwards, limited dash dancing
+							if Character.dir == -Character.facing:
+								Character.face(Character.dir)
+								Character.animate("Dash")
+								keep = false
+							elif Character.instant_dir == -Character.facing:
+								Character.face(Character.instant_dir)
+								Character.animate("Dash")
+								keep = false
 						
 			# AIR DASH ---------------------------------------------------------------------------------
 				

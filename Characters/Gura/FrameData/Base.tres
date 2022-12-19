@@ -1335,7 +1335,7 @@ frame_data = {
 "vframes": 18
 },
 "aDashTransit": {
-"duration": 1,
+"duration": 2,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
