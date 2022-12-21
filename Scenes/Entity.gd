@@ -286,13 +286,14 @@ func query_polygons(): # requested by main game node when doing hit detection
 
 	return polygons_queried
 
-
-func query_move_data(): # requested by main game node when doing hit detection
-	if UniqueEntity.has_method("query_move_data"):
-		return UniqueEntity.query_move_data()
+	
+func query_move_data_and_name(): # requested by main game node when doing hit detection
+	if UniqueEntity.has_method("query_move_data_and_name"):
+		return UniqueEntity.query_move_data_and_name()
 	elif Animator.to_play_animation in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[Animator.to_play_animation]
-	return null
+		return {"move_data" : UniqueEntity.MOVE_DATABASE[Animator.to_play_animation], "move_name" : Animator.to_play_animation}
+	print("Error: " + Animator.to_play_animation + " not found in MOVE_DATABASE for query_move_data_and_name().")
+
 
 func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
 	
@@ -301,10 +302,51 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 	
 	if UniqueEntity.has_method("query_atk_attr"):
 		return UniqueEntity.query_atk_attr(in_move_name)
-	elif in_move_name in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[in_move_name].atk_attr
 	return []
 	
+func query_move_EX_gain(move_name):
+	if UniqueEntity.has_method("query_move_EX_gain"):
+		return UniqueEntity.query_move_EX_gain(move_name)
+	elif move_name in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[move_name].EX_gain
+	else: print("Error: Cannot retrieve EX_gain for " + move_name)
+	
+func query_move_damage(move_name):
+	if UniqueEntity.has_method("query_move_damage"):
+		return UniqueEntity.query_move_damage(move_name)
+	elif move_name in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[move_name].damage
+	else: print("Error: Cannot retrieve damage for " + move_name)
+	
+func query_move_knockback(move_name):
+	if UniqueEntity.has_method("query_move_knockback"):
+		return UniqueEntity.query_move_knockback(move_name)
+	elif move_name in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[move_name].knockback
+	else: print("Error: Cannot retrieve knockback for " + move_name)
+	
+func query_move_atk_level(move_name):
+	if UniqueEntity.has_method("query_move_atk_level"):
+		return UniqueEntity.query_move_atk_level(move_name)
+	elif move_name in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[move_name].atk_level
+	else: print("Error: Cannot retrieve atk_level for " + move_name)
+	
+func query_move_guard_drain(move_name):
+	if UniqueEntity.has_method("query_move_guard_drain"):
+		return UniqueEntity.query_move_guard_drain(move_name)
+	elif move_name in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[move_name].guard_drain
+	else: print("Error: Cannot retrieve guard_drain for " + move_name)
+	
+func query_move_guard_gain_on_combo(move_name):
+	if UniqueEntity.has_method("query_move_guard_gain_on_combo"):
+		return UniqueEntity.query_move_guard_gain_on_combo(move_name)
+	elif move_name in UniqueEntity.MOVE_DATABASE:
+		return UniqueEntity.MOVE_DATABASE[move_name].guard_gain_on_combo
+	else: print("Error: Cannot retrieve guard_gain_on_combo for " + move_name)
+	
+# LANDING A HIT ---------------------------------------------------------------------------------------------- 
 
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
@@ -369,7 +411,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		var volume_change = 0
 		if hit_data.lethal_hit or hit_data.break_hit or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
-		elif hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
+		elif hit_data.move_data.atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
 
 		if !hit_data.move_data.hit_sound is Array:

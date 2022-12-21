@@ -29,7 +29,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # UNBLOCKABLE = for command grabs
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
-# SUPERARMOR = Wrongblock all attacks, set attack_level of any attack received to 1
+# SUPERARMOR = Wrongblock all attacks, set atk_level of any attack received to 1
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
 # NO_PUSHBACK = no pushback if not blocked, used mainly to make certain moves more punishable
 # NO_STRAFE = for certain aerials, prevent air strafing during active frames

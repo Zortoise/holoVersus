@@ -506,7 +506,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity) + "  grounded: " + str(grounded) + \
-		"\naerial_sp_memory: " + str(aerial_sp_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
+		"\nmove_memory: " + str(move_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state)
 			
 			
@@ -2681,32 +2681,6 @@ func test_fastfall_cancel():
 #	else: return false
 
 
-func query_traits(): # may have certain conditions
-	return UniqueCharacter.query_traits()
-	
-	
-# name should be stripped already!
-func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
-	
-	var move_name = in_move_name
-	if move_name == null:
-		move_name = get_move_name()
-		
-	if is_burst(move_name):
-		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.NO_TURN]
-	
-	return UniqueCharacter.query_atk_attr(move_name)
-	
-func query_priority(in_move_name = null):
-	var move_name = in_move_name
-	if move_name == null:
-		move_name = get_move_name()
-		
-	if is_burst(move_name):
-		return 0
-	
-	return UniqueCharacter.query_priority(move_name)
-
 func progress_tap_and_release_memory(): # remove taps and releases that expired
 	var to_erase = []
 	for tap in tap_memory:
@@ -3118,7 +3092,7 @@ func atk_startup_resets():# ran whenever an attack starts
 	hitcount_record = []
 	ignore_list = []
 	
-# -----------------------------------------------------------------------------------------------------------------------------
+# GAUGES -----------------------------------------------------------------------------------------------------------------------------
 	
 func get_damage_percent():
 	return current_damage_value / UniqueCharacter.DAMAGE_VALUE_LIMIT
@@ -3215,6 +3189,58 @@ func change_burst_token(get_burst: bool):
 	has_burst = get_burst
 	Globals.Game.burst_update(self)
 	
+	
+# QUERY UNIQUE CHARACTER DATA ---------------------------------------------------------------------------------------------- 
+	
+func query_traits(): # may have certain conditions
+	return UniqueCharacter.query_traits()
+	
+# name should be stripped already!
+func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
+	
+	var move_name = in_move_name
+	if move_name == null:
+		move_name = get_move_name()
+		
+	if is_burst(move_name):
+		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.NO_TURN]
+	
+	return UniqueCharacter.query_atk_attr(move_name)
+	
+func query_priority(in_move_name = null):
+	var move_name = in_move_name
+	if move_name == null:
+		move_name = get_move_name()
+		
+	if is_burst(move_name):
+		return 0
+	
+	return UniqueCharacter.query_priority(move_name)
+	
+func query_move_EX_gain(move_name):
+	var EX_gain = UniqueCharacter.query_move_EX_gain(move_name)
+	return EX_gain
+	
+func query_move_damage(move_name):
+	var damage = UniqueCharacter.query_move_damage(move_name)
+	return damage
+	
+func query_move_knockback(move_name):
+	var knockback = UniqueCharacter.query_move_knockback(move_name)
+	return knockback
+	
+func query_move_atk_level(move_name):
+	var atk_level = UniqueCharacter.query_move_atk_level(move_name)
+	return atk_level
+	
+func query_move_guard_drain(move_name):
+	var guard_drain = UniqueCharacter.query_move_guard_drain(move_name)
+	return guard_drain
+	
+func query_move_guard_gain_on_combo(move_name):
+	var guard_gain_on_combo = UniqueCharacter.query_move_guard_gain_on_combo(move_name)
+	return guard_gain_on_combo
+	
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 
 	
 func landed_a_hit(hit_data): # called by main game node when landing a hit
@@ -3235,17 +3261,17 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	match hit_data.block_state:
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
-				change_ex_gauge(hit_data.move_data.EX_gain)
-			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.25)
+				change_ex_gauge(query_move_EX_gain(hit_data.move_name))
+			defender.change_ex_gauge(query_move_EX_gain(hit_data.move_name) * 0.25)
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
-				change_ex_gauge(hit_data.move_data.EX_gain)
+				change_ex_gauge(query_move_EX_gain(hit_data.move_name))
 		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-			defender.change_ex_gauge(hit_data.move_data.EX_gain)
+			defender.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
 		_:  # normal block
 			if !hit_data.double_repeat:
-				change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
-				defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
+				change_ex_gauge(query_move_EX_gain(hit_data.move_name) * 0.5)
+				defender.change_ex_gauge(query_move_EX_gain(hit_data.move_name) * 0.5)
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -3351,7 +3377,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		var volume_change = 0
 		if hit_data.lethal_hit or hit_data.break_hit or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
-		elif hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
+		elif query_move_atk_level(hit_data.move_name) <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
 		
 		if !hit_data.move_data.hit_sound is Array:
@@ -3417,10 +3443,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	var double_repeat = false
 	var root_move_name = hit_data.move_name
-	
-	if hit_data.move_name in attacker.UniqueCharacter.MOVE_DATABASE and \
-		"root" in attacker.UniqueCharacter.MOVE_DATABASE[hit_data.move_name]:
-		root_move_name = attacker.UniqueCharacter.MOVE_DATABASE[hit_data.move_name].root # for move variations
+		
+	if "root" in hit_data.move_data: # for move variations
+		root_move_name = hit_data.move_data.root
 	
 	if !Globals.atk_attr.REPEATABLE in attacker_or_entity.query_atk_attr(hit_data.move_name):
 		for array in move_memory:
@@ -3438,7 +3463,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		# append repeated move to move_memory later after guard gauge change calculation
 	
 	var weak_hit
-	if hit_data.move_data.attack_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
+	if attacker_or_entity.query_move_atk_level(hit_data.move_name) <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
 		"multihit" in hit_data: # multi-hit moves cannot cause lethal/break/sweetspot/punish outside of last hit
 		weak_hit = true
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
@@ -3616,15 +3641,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !hit_data.break_hit and !hit_data.lethal_hit and Globals.atk_attr.SCREEN_SHAKE in attacker_or_entity.query_atk_attr(hit_data.move_name):
 		Globals.Game.set_screenshake()
 		
-	if hit_data.block_state == Globals.block_state.UNBLOCKED:
-		if hit_data.move_name == "BurstCounter":
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and "root" in hit_data.move_data:
+		if hit_data.move_data.root == "BurstCounter":
 			attacker.reset_jumps()
 			defender.reset_jumps()
 			attacker.reset_guard_gauge()
-		elif hit_data.move_name == "BurstEscape":
+		elif hit_data.move_data.root == "BurstEscape":
 			attacker.reset_jumps()
 			defender.reset_jumps()
-		elif hit_data.move_name == "BurstExtend":
+		elif hit_data.move_data.root == "BurstExtend":
 #			attacker.reset_jumps() # only defender resets jumps, or else too overpowered
 			defender.reset_jumps()
 			defender.current_guard_gauge = 0.0
@@ -3849,9 +3874,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 func calculate_damage(hit_data):
 	
+	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
+	if "entity_nodepath" in hit_data:
+		attacker_or_entity = get_node(hit_data.entity_nodepath)
+		
 	var defender = get_node(hit_data.defender_nodepath)
 	
-	var damage = hit_data.move_data.damage
+	var damage = attacker_or_entity.query_move_damage(hit_data.move_name)
 	
 	if hit_data.semi_disjoint:
 		if Globals.trait.VULN_LIMBS in defender.query_traits():
@@ -3912,8 +3941,8 @@ func calculate_guard_gauge_change(hit_data):
 			guard_gain_on_combo = UniqueCharacter.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
 			
 	else: # normal attack
-		guard_drain = hit_data.move_data.guard_drain
-		guard_gain_on_combo = hit_data.move_data.guard_gain_on_combo
+		guard_drain = attacker_or_entity.query_move_guard_drain(hit_data.move_name)
+		guard_gain_on_combo = attacker_or_entity.query_move_guard_gain_on_combo(hit_data.move_name)
 	
 	if hit_data.block_state == Globals.block_state.UNBLOCKED and (defender.move_memory.size() > 0 or defender.get_node("HitStunTimer").is_running()):
 		# on a successful hit while defender in hitstun or a little after, guard_gauge_change is positive
@@ -3953,15 +3982,13 @@ func calculate_guard_gauge_change(hit_data):
 	
 func calculate_knockback_strength(hit_data):
 
-#	var attacker = get_node(hit_data.attacker_nodepath)
-#
-#	var attacker_or_entity = attacker # cleaner code
-#	if "entity_nodepath" in hit_data:
-#		attacker_or_entity = get_node(hit_data.entity_nodepath)
+	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
+	if "entity_nodepath" in hit_data:
+		attacker_or_entity = get_node(hit_data.entity_nodepath)
 		
 	var defender = get_node(hit_data.defender_nodepath)
 
-	var knockback_strength = hit_data.move_data.knockback
+	var knockback_strength = attacker_or_entity.query_move_knockback(hit_data.move_name)
 	
 	# for certain multi-hit attacks (not autochain), fixed KB or drag KB till the last hit
 	if "multihit" in hit_data:
@@ -4086,21 +4113,25 @@ func calculate_knockback_dir(hit_data):
 func adjusted_atk_level(hit_data): # mostly for hitstun and blockstun
 	# atk_level = 1 are weak hits and cannot do a lot of stuff, cannot cause hitstun
 	
-	var attack_level = hit_data.move_data.attack_level
+	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
+	if "entity_nodepath" in hit_data:
+		attacker_or_entity = get_node(hit_data.entity_nodepath)
+	
+	var atk_level = attacker_or_entity.query_move_atk_level(hit_data.move_name)
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
-		attack_level -= 1 # atk lvl 2 become weak hit
-		attack_level = clamp(attack_level, 1, 2)
+		atk_level -= 1 # atk lvl 2 become weak hit
+		atk_level = clamp(atk_level, 1, 2)
 	elif hit_data.double_repeat:
 		return 1 # double repeat is forced attack level 1
 	else:
 		if hit_data.sweetspotted: # sweetspotted and Punish Hits give more hitstun
-			attack_level += 2
-			attack_level = clamp(attack_level, 1, 8)
+			atk_level += 2
+			atk_level = clamp(atk_level, 1, 8)
 		if hit_data.punish_hit:
-			attack_level += 2
-			attack_level = clamp(attack_level, 1, 8)
+			atk_level += 2
+			atk_level = clamp(atk_level, 1, 8)
 		
-	return attack_level
+	return atk_level
 	
 	
 func calculate_hitstun(hit_data): # hitstun and blockstun determined by attack level and defender's Guard Gauge
@@ -4208,10 +4239,11 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
 	var hitspark_level
 	
-	if hit_data.move_name == "BurstRevoke":
-		hitspark_level = 1
-	elif is_burst(hit_data.move_name):
-		hitspark_level = 5
+	if "root" in hit_data.move_data and hit_data.move_data.root.begins_with("Burst"):
+		if hit_data.move_data.root == "BurstRevoke":
+			hitspark_level = 1
+		else:
+			hitspark_level = 5
 	elif hit_data.break_hit:
 		hitspark_level = 5 # max size for Break
 	else:
@@ -4318,9 +4350,10 @@ func landed_a_sequence(hit_data):
 	
 	# repeat penalty, cannot grab if repeated
 	var root_move_name = hit_data.move_name
-	if hit_data.move_name in UniqueCharacter.MOVE_DATABASE and \
-		"root" in UniqueCharacter.MOVE_DATABASE[hit_data.move_name]:
-		root_move_name = UniqueCharacter.MOVE_DATABASE[hit_data.move_name].root # for move variations
+		
+	if "root" in hit_data.move_data: # for move variations
+		root_move_name = hit_data.move_data.root
+		
 	for array in defender.move_memory:
 			if array[0] == player_ID and array[1] == root_move_name:
 				return		
@@ -4386,7 +4419,7 @@ func sequence_launch():
 #			"EX_gain": 2500,
 #			"launch_power" : 700,
 #			"launch_angle" : -PI/2.2,
-#			"attack_level" : 6,
+#			"atk_level" : 6,
 #		}
 
 	# DAMAGE
@@ -4416,7 +4449,7 @@ func sequence_launch():
 	if "fixed_hitstun" in seq_data:
 		hitstun = seq_data.fixed_hitstun
 	else:
-		hitstun = ceil(lerp(15, 50, (seq_data.attack_level - 1)/7.0))
+		hitstun = ceil(lerp(15, 50, (seq_data.atk_level - 1)/7.0))
 		if lethal:
 			hitstun *= LETHAL_HITSTUN_MOD
 			if get_damage_percent() > 1.0:

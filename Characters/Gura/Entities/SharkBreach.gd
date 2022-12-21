@@ -12,13 +12,13 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
-		"move_name" : "SharkBreach", # for entities, keep move_name in move_data, for checking repeat
+		"root" : "SharkBreach", # for entities, keep move_name in move_data, for checking repeat
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 90,
 		"knockback" : 475,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 5,
+		"atk_level" : 5,
 		"fixed_hitstop" : 10,
 		"guard_drain": 1750,
 		"guard_gain_on_combo" : 2500,

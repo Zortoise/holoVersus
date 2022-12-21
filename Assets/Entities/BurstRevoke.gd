@@ -15,13 +15,13 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
-		"move_name" : "BurstRevoke", # for entities, keep move_name in move_data, for checking repeat_penalty
+		"root" : "BurstRevoke", 
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 0,
 		"knockback" : 500,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"attack_level" : 1,
+		"atk_level" : 1,
 		"fixed_hitstop": 0,
 		"fixed_hitstun" : 0,
 		"fixed_blockstun" : 0,

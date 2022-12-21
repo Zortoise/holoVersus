@@ -19,13 +19,13 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Active" : {
-		"move_name" : "Nibbler",
+		"root" : "Nibbler",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 40,
 		"knockback" : 300,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 2,
+		"atk_level" : 2,
 		"guard_drain": 1500,
 		"guard_gain_on_combo" : 1500,
 		"EX_gain": 1200,
@@ -49,7 +49,7 @@ func init(_aux_data: Dictionary):
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 
-func query_move_data():
+func query_move_data_and_name():
 	
 	var move_ref = Animator.to_play_animation
 	match move_ref:
@@ -57,7 +57,8 @@ func query_move_data():
 			move_ref = "Active"
 	
 	if move_ref in MOVE_DATABASE:
-		return MOVE_DATABASE[move_ref]
+		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
+		
 		
 func query_atk_attr(_move_name):
 	return [Globals.atk_attr.REPEATABLE]

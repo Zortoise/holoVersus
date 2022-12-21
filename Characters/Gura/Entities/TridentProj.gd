@@ -16,13 +16,13 @@ var sprite
 
 const MOVE_DATABASE = {
 	"[c1]Active" : {
-		"move_name" : "TridentProj",
+		"root" : "TridentProj",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 70,
 		"knockback" : 400,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 2,
+		"atk_level" : 2,
 		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
@@ -32,13 +32,13 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c2]Active" : {
-		"move_name" : "TridentProj",
+		"root" : "TridentProj",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 2,
 		"damage" : 50,
 		"knockback" : 450,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 3,
+		"atk_level" : 3,
 		"guard_drain": 1750,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1250,
@@ -48,13 +48,13 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c3]Active" : {
-		"move_name" : "TridentProj",
+		"root" : "TridentProj",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 3,
 		"damage" : 60,
 		"knockback" : 500,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 4,
+		"atk_level" : 4,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1000,
@@ -64,13 +64,13 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
-		"move_name" : "TridentProjEX",
+		"root" : "TridentProjEX",
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 3,
 		"damage" : 60,
 		"knockback" : 500,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 4,
+		"atk_level" : 4,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 0,
@@ -80,13 +80,13 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c1]Active" : {
-		"move_name" : "TridentProj2", # upwards and downwards trident can be done once each before incurring repeat penalty
+		"root" : "TridentProj2", # upwards and downwards trident can be done once each before incurring repeat penalty
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 70,
 		"knockback" : 400,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 2,
+		"atk_level" : 2,
 		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
@@ -96,13 +96,13 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c2]Active" : {
-		"move_name" : "TridentProj2",
+		"root" : "TridentProj2",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 2,
 		"damage" : 50,
 		"knockback" : 450,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 3,
+		"atk_level" : 3,
 		"guard_drain": 1750,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1250,
@@ -112,13 +112,13 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c3]Active" : {
-		"move_name" : "TridentProj2",
+		"root" : "TridentProj2",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 3,
 		"damage" : 60,
 		"knockback" : 500,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 4,
+		"atk_level" : 4,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1000,
@@ -128,13 +128,13 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[ex]Active" : {
-		"move_name" : "TridentProj2EX",
+		"root" : "TridentProj2EX",
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 3,
 		"damage" : 60,
 		"knockback" : 500,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"attack_level" : 4,
+		"atk_level" : 4,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 0,
@@ -217,7 +217,7 @@ func init(aux_data: Dictionary):
 #	Entity.lifespan = LIFESPAN # set starting lifespan
 #	Entity.absorption_value = ABSORPTION # set starting absorption_value
 
-func query_move_data():
+func query_move_data_and_name():
 	
 	var move_ref = Animator.to_play_animation
 	
@@ -240,15 +240,14 @@ func query_move_data():
 			move_ref = "a[ex]Active"
 	
 	if move_ref in MOVE_DATABASE:
-		return MOVE_DATABASE[move_ref]
+		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
 
 
-func query_atk_attr(in_move_name):
+func query_atk_attr(_in_move_name):
 	if Animator.query_to_play(["[c3]Active", "a[c3]Active", "[c3]Spawn", "a[c3]Spawn"]):
 		return [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB]
-	match in_move_name:
-		"TridentProj", "TridentProj2", "TridentProjEX", "TridentProj2EX":
-			return [Globals.atk_attr.DRAG_KB]
+	else:
+		return [Globals.atk_attr.DRAG_KB]
 			
 			
 func simulate():

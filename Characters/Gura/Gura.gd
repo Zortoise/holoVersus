@@ -710,6 +710,29 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 func query_traits(): # may have special conditions
 	return TRAITS
 
+func query_move_EX_gain(move_name):
+	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].EX_gain
+	else: print("Error: Cannot retrieve EX_gain for " + move_name)
+	
+func query_move_damage(move_name):
+	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].damage
+	else: print("Error: Cannot retrieve damage for " + move_name)
+	
+func query_move_knockback(move_name):
+	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].knockback
+	else: print("Error: Cannot retrieve knockback for " + move_name)
+	
+func query_move_atk_level(move_name):
+	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].atk_level
+	else: print("Error: Cannot retrieve atk_level for " + move_name)
+	
+func query_move_guard_drain(move_name):
+	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_drain
+	else: print("Error: Cannot retrieve guard_drain for " + move_name)
+	
+func query_move_guard_gain_on_combo(move_name):
+	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_gain_on_combo
+	else: print("Error: Cannot retrieve guard_gain_on_combo for " + move_name)
 
 # HIT REACTIONS --------------------------------------------------------------------------------------------------
 

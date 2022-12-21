@@ -932,14 +932,14 @@ func detect_hit():
 	for entity in entities:
 		var polygons_queried = entity.query_polygons()
 		if polygons_queried.hitbox != null: # if hitbox is not empty
-			var move_data = entity.query_move_data()
+			var move_data_and_name = entity.query_move_data_and_name()
 			var hitbox = {
 				"polygon" : polygons_queried.hitbox,
 				"owner_nodepath" : entity.master_path,
 				"entity_nodepath" : entity.get_path(),
 				"facing": entity.facing,
-				"move_name" : move_data.move_name,
-				"move_data" : move_data, # damage, attack level, etc
+				"move_name" : move_data_and_name.move_name,
+				"move_data" : move_data_and_name.move_data, # damage, attack level, etc
 			}
 			if polygons_queried.sweetbox != null: # if sweetbox is not empty
 				hitbox["sweetbox"] = polygons_queried.sweetbox
@@ -964,7 +964,7 @@ func detect_hit():
 			if defender_semi_invul(hitbox, hurtbox):
 				continue # attacker must not be attacking a semi-invul defender unless with certain moves
 			if defender_command_grab_dodge(hitbox, hurtbox):
-				continue # attacker must not be command grabbing a defender in ground/air movement startup
+				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
 			if !"entity_nodepath" in hitbox:
 				if !test_priority(hitbox, hurtbox):
 					continue # attacker must pass the priority test
@@ -1133,7 +1133,8 @@ func defender_command_grab_dodge(hitbox, hurtbox):
 		attacker_or_entity = get_node(hitbox.entity_nodepath) # rare entity command grab
 	var defender = get_node(hurtbox.owner_nodepath)
 	if Globals.atk_attr.COMMAND_GRAB in attacker_or_entity.query_atk_attr(hitbox.move_name):
-		if defender.new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP]:
+		if defender.new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_BLOCKSTUN, \
+				Globals.char_state.AIR_BLOCKSTUN]:
 			return true # defender's evaded command grab
 	return false
 
