@@ -1,6 +1,6 @@
 extends Node
 
-const VERSION = "Test Build 4"
+const VERSION = "Test Build 6"
 
 enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_RECOVERY,
 		GROUND_C_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, GROUND_FLINCH_HITSTUN,
@@ -140,6 +140,15 @@ var replay_input_log: Dictionary = {} # not a resource
 var replay_is_netgame := false # flag
 var replay_profiles := ["", ""] # names of players when watching replay
 
+var training_mode := false # flag
+var training_settings := {
+	"gganchor" : 0,
+	"regen" : 1,
+	"input_viewer" : 0,
+	"hitbox_viewer" : 0,
+	"frame_viewer" : 0,
+}
+
 #onready var debugger = load("res://Scenes/Debugger.gd").new()
 
 
@@ -176,7 +185,6 @@ onready var INPUTS = [ # acts like a const, need "onready var" since using enums
 	},
 ]
 
-
 func _ready():
 	self.set_pause_mode(2)
 	
@@ -189,13 +197,20 @@ func _ready():
 	
 
 func _process(_delta):
-	if !Netplay.is_netplay() and !watching_replay:
+	if Globals.editor:
 		if Input.is_action_just_pressed("debug"):
 			debug_mode = !debug_mode
-	if Globals.editor:
 		if Input.is_action_just_pressed("debug2"):
 			debug_mode2 = !debug_mode2
+			
+#func _physics_process(delta):
+#	if Input.is_action_just_pressed("sound_test"):
+#		print(match_input_log.input_log)
 
+#	var target_var = 0.0
+#	test_life += delta * 2
+#	test_var = sin_lerp(target_var, -80.0, test_life)
+#	print(test_var)
 
 #func d_lerp(start, end, weight):
 #	return start + weight * (end - start)

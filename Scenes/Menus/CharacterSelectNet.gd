@@ -325,23 +325,23 @@ func move_picker(dir):
 	if my_phase == 0:
 		if dir.x == 1:
 			my_picker_pos += 1
-			if my_picker_pos == 11: my_picker_pos = 0
-			elif my_picker_pos == 22: my_picker_pos = 22
-			elif my_picker_pos == 33: my_picker_pos = 33
+			if my_picker_pos == 12: my_picker_pos = 0
+			elif my_picker_pos == 24: my_picker_pos = 12
+			elif my_picker_pos == 36: my_picker_pos = 24
 			changed_character()
 		elif dir.x == -1:
 			my_picker_pos -= 1
-			if my_picker_pos == -1: my_picker_pos = 10
-			elif my_picker_pos == 10: my_picker_pos = 21
-			elif my_picker_pos == 21: my_picker_pos = 32
+			if my_picker_pos == -1: my_picker_pos = 11
+			elif my_picker_pos == 11: my_picker_pos = 23
+			elif my_picker_pos == 23: my_picker_pos = 35
 			changed_character()
 		if dir.y == 1:
-			my_picker_pos += 11
-			if my_picker_pos >= 33: my_picker_pos -= 33
+			my_picker_pos += 12
+			if my_picker_pos >= 36: my_picker_pos -= 36
 			changed_character()
 		elif dir.y == -1:
-			my_picker_pos -= 11
-			if my_picker_pos < 0: my_picker_pos += 33
+			my_picker_pos -= 12
+			if my_picker_pos < 0: my_picker_pos += 36
 			changed_character()
 	
 func changed_character():

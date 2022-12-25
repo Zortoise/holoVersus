@@ -262,7 +262,9 @@ func _process(_delta):
 				play_audio("ui_back", {})
 				$ControlsListExtra/RemoveButton.initial_focus()
 			elif !selected_mode:
-				play_audio("ui_back", {})
+				update_player_input()
+				Settings.save_input_map(input_map)
+				play_audio("ui_accept", {"vol":-8})
 				$Transition.play("transit_to_main")
 			else:
 				switch_mode(false)

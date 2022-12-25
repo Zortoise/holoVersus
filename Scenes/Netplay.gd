@@ -49,6 +49,13 @@ func _ready():
 #	get_tree().connect("server_disconnected", self, "_server_disconnected")
 	
 	
+#func _physics_process(_delta):
+#	if Input.is_action_just_pressed("sound_test"):
+#		print(is_netplay())
+#		print(player_list)
+#		print(get_tree().network_peer)
+#		print(get_tree().get_network_connected_peers())
+	
 func close_connection():
 	if get_tree().has_network_peer():
 		get_tree().set_refuse_new_network_connections(true)

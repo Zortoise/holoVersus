@@ -39,6 +39,7 @@ const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can la
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
 const EX_MOVE_COST = 10000 # 10000
 const PosFlowSealTimer_TIME = 60 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
+const TrainingRegenTimer_TIME = 60 # number of frames before GG/Damage Value start regening
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -81,7 +82,7 @@ const BREAK_STUN_TIME = 75 # number of frames stun time last for Break
 const BREAK_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Break
 
 const BASE_BLOCK_PUSHBACK_MOD = 0.7 # % of base knockback of attack
-const BASE_BLOCK_ATKER_PUSHBACK = 300 # how much the attacker is pushed away, fixed
+const BASE_BLOCK_ATKER_PUSHBACK = 400 # how much the attacker is pushed away, fixed
 const DOWNWARD_KB_REDUCTION_ON_BLOCK = 0.25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
 const MIN_BASE_BLOCKSTUN = 8
 
@@ -258,21 +259,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	
 	player_push_slowdown = PLAYER_PUSH_SLOWDOWN # used by Physics.gd
 	
-	player_ID = in_player_ID
-	
-	button_up = Globals.INPUTS[player_ID].up[1] # each button is an int variable enum
-	button_down = Globals.INPUTS[player_ID].down[1]
-	button_left = Globals.INPUTS[player_ID].left[1]
-	button_right = Globals.INPUTS[player_ID].right[1]
-	button_jump = Globals.INPUTS[player_ID].jump[1]
-	button_light = Globals.INPUTS[player_ID].light[1]
-	button_fierce = Globals.INPUTS[player_ID].fierce[1]
-	button_dash = Globals.INPUTS[player_ID].dash[1]
-	button_block = Globals.INPUTS[player_ID].block[1]
-	button_aux = Globals.INPUTS[player_ID].aux[1]
-	button_special = Globals.INPUTS[player_ID].special[1]
-	button_unique = Globals.INPUTS[player_ID].unique[1]
-	button_pause = Globals.INPUTS[player_ID].pause[1]
+	set_player_id(in_player_ID)
 	
 	# remove test character node and add the real character node
 	var test_character = get_child(0) # test character node should be directly under this node
@@ -326,7 +313,11 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 		Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").self_modulate = \
 			UniqueCharacter.PALETTE_TO_PORTRAIT[palette_number]
 	
-	stock_points_left = Globals.Game.starting_stock_pts
+	if Globals.training_mode:
+		stock_points_left = 10000
+		has_burst = true
+	else:
+		stock_points_left = Globals.Game.starting_stock_pts
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
@@ -335,6 +326,22 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	
 	unique_data = UniqueCharacter.UNIQUE_DATA_REF.duplicate(true)
 	
+func set_player_id(in_player_ID): # can use this to change player you are controlling during training mode
+	player_ID = in_player_ID
+	
+	button_up = Globals.INPUTS[player_ID].up[1] # each button is an int variable enum
+	button_down = Globals.INPUTS[player_ID].down[1]
+	button_left = Globals.INPUTS[player_ID].left[1]
+	button_right = Globals.INPUTS[player_ID].right[1]
+	button_jump = Globals.INPUTS[player_ID].jump[1]
+	button_light = Globals.INPUTS[player_ID].light[1]
+	button_fierce = Globals.INPUTS[player_ID].fierce[1]
+	button_dash = Globals.INPUTS[player_ID].dash[1]
+	button_block = Globals.INPUTS[player_ID].block[1]
+	button_aux = Globals.INPUTS[player_ID].aux[1]
+	button_special = Globals.INPUTS[player_ID].special[1]
+	button_unique = Globals.INPUTS[player_ID].unique[1]
+	button_pause = Globals.INPUTS[player_ID].pause[1]
 
 func setup_boxes(ref_rect): # set up detection boxes
 	
@@ -531,6 +538,12 @@ func _process(_delta):
 			$PlayerCollisionBox.show()
 		else:
 			$PlayerCollisionBox.hide()
+			
+	elif Globals.training_mode:
+		if Globals.training_settings.hitbox_viewer == 1:
+			$PlayerCollisionBox.show()
+		else:
+			$PlayerCollisionBox.hide()
 
 	if test:
 		if Globals.debug_mode2:
@@ -616,33 +629,6 @@ func simulate2(): # only ran if not in hitstop
 	if abs(velocity.y) < 5.0:
 		velocity.y = 0.0
 		
-	ignore_list_progress_timer()
-	process_status_effects_timer() # remove expired status effects before running hit detection since that can add effects
-	
-	# clearing move memory, has a time between hitstun/blockstun ending and move memory being cleared
-	if move_memory.size() > 0 and !$HitStunGraceTimer.is_running():
-		move_memory = []
-		
-	# regen/degen GG
-	if move_memory.size() == 0:
-		if current_guard_gauge < 0 and !is_blocking():
-			var guard_gauge_regen = UniqueCharacter.GUARD_GAUGE_REGEN_RATE * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME
-			if query_status_effect(Globals.status_effect.POS_FLOW):
-				guard_gauge_regen *= POS_FLOW_REGEN_MOD # increased regen during positive flow
-			guard_gauge_regen = round(guard_gauge_regen)
-			current_guard_gauge = min(0, current_guard_gauge + guard_gauge_regen) # don't use change_guard_gauge() since it stops at 0
-			Globals.Game.guard_gauge_update(self)
-		elif current_guard_gauge > 0:
-			var guard_gauge_degen = UniqueCharacter.GUARD_GAUGE_DEGEN_RATE * GUARD_GAUGE_CEIL * Globals.FRAME
-			guard_gauge_degen = round(guard_gauge_degen)
-			current_guard_gauge = max(0, current_guard_gauge + guard_gauge_degen)
-			Globals.Game.guard_gauge_update(self)
-		
-	# regen EX Gauge when standing still
-	if !Globals.Game.input_lock and state == Globals.char_state.GROUND_STANDBY:
-		change_ex_gauge(EX_GAUGE_REGEN_RATE * Globals.FRAME)
-		
-
 	if is_on_ground($SoftPlatformDBox, velocity):
 		grounded = true
 		reset_jumps() # reset air jumps and air dashes here
@@ -653,6 +639,63 @@ func simulate2(): # only ran if not in hitstop
 		soft_grounded = true
 	else:
 		soft_grounded = false
+		
+	ignore_list_progress_timer()
+	process_status_effects_timer() # remove expired status effects before running hit detection since that can add effects
+	
+	# clearing move memory, has a time between hitstun/blockstun ending and move memory being cleared
+	if move_memory.size() > 0 and !$HitStunGraceTimer.is_running():
+		move_memory = []
+
+	# regen/degen GG
+	if move_memory.size() == 0:
+		
+		if !Globals.training_mode or player_ID == 0 or Globals.training_settings.gganchor == 5:
+			
+			if current_guard_gauge < 0 and !is_blocking(): # regen GG when GG is under 100%
+				var guard_gauge_regen = UniqueCharacter.GUARD_GAUGE_REGEN_RATE * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME
+				if query_status_effect(Globals.status_effect.POS_FLOW):
+					guard_gauge_regen *= POS_FLOW_REGEN_MOD # increased regen during positive flow
+				guard_gauge_regen = round(guard_gauge_regen)
+				current_guard_gauge = min(0, current_guard_gauge + guard_gauge_regen) # don't use change_guard_gauge() since it stops at 0
+				Globals.Game.guard_gauge_update(self)
+			elif current_guard_gauge > 0: # degen GG when GG is over 100%
+				var guard_gauge_degen = UniqueCharacter.GUARD_GAUGE_DEGEN_RATE * GUARD_GAUGE_CEIL * Globals.FRAME
+				guard_gauge_degen = round(guard_gauge_degen)
+				current_guard_gauge = max(0, current_guard_gauge + guard_gauge_degen)
+				Globals.Game.guard_gauge_update(self)
+		
+		else: # training mode
+			if current_guard_gauge > 0:
+				var guard_gauge_degen = UniqueCharacter.GUARD_GAUGE_DEGEN_RATE * GUARD_GAUGE_CEIL * Globals.FRAME
+				guard_gauge_degen = round(guard_gauge_degen)
+				current_guard_gauge = max(0, current_guard_gauge + guard_gauge_degen)
+				Globals.Game.guard_gauge_update(self)
+			elif !$TrainingRegenTimer.is_running(): # training mode regen GG
+				var guard_gauge_regen = round(0.2 * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME * POS_FLOW_REGEN_MOD)
+				var target = 0.0
+				match Globals.training_settings.gganchor:
+					0: pass
+					1: target = -2500
+					2: target = -5000
+					3: target = -7500
+					4: target = -10000
+				if current_guard_gauge < target:
+					current_guard_gauge = min(target, current_guard_gauge + guard_gauge_regen)
+				elif current_guard_gauge > target:
+					current_guard_gauge = max(target, current_guard_gauge - guard_gauge_regen)
+				Globals.Game.guard_gauge_update(self)
+		
+	# regen EX Gauge when standing still
+	if !Globals.training_mode or Globals.training_settings.regen == 0:
+		if !Globals.Game.input_lock and state == Globals.char_state.GROUND_STANDBY and current_ex_gauge < 50000:
+			change_ex_gauge(EX_GAUGE_REGEN_RATE * Globals.FRAME)
+	else: # training mode regen EX Gauge
+		if current_ex_gauge < 50000:
+			change_ex_gauge(20000 * Globals.FRAME)
+		if !$TrainingRegenTimer.is_running() and current_damage_value > 0:
+			take_damage(-1000 * Globals.FRAME)
+	
 		
 	
 	# drain EX Gauge when air blocking
@@ -772,6 +815,8 @@ func simulate2(): # only ran if not in hitstop
 				if !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
 					impulse_used = true
 					var impulse = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
+					if move_name in UniqueCharacter.MOVE_DATABASE and "impulse_mod" in UniqueCharacter.MOVE_DATABASE[move_name]:
+						impulse *= UniqueCharacter.MOVE_DATABASE[move_name].impulse_mod
 					velocity.x += impulse
 					velocity.x = clamp(velocity.x, -abs(impulse), abs(impulse))
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
@@ -923,16 +968,6 @@ func simulate2(): # only ran if not in hitstop
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 			
-# --------------------------------------------------------------------------------------------------
-
-	UniqueCharacter.simulate() # some holdable buttons can have effect unique to the character
-	
-	buffer_actions()
-	
-	test0()
-	
-	if input_buffer.size() > 0:
-		process_input_buffer()
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
 	
@@ -1174,6 +1209,16 @@ func simulate2(): # only ran if not in hitstop
 	else: # apply air resistance if in air
 		velocity.x = lerp(velocity.x, 0, air_res_this_frame * gravity_mod) # gravity_mod reduces air resistance as well
 	
+# --------------------------------------------------------------------------------------------------
+
+	UniqueCharacter.simulate() # some holdable buttons can have effect unique to the character
+	
+	buffer_actions()
+	
+	test0()
+	
+	if input_buffer.size() > 0:
+		process_input_buffer()
 
 # --------------------------------------------------------------------------------------------------
 	
@@ -1252,6 +1297,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$PosFlowSealTimer.simulate()
 				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running():
 					$HitStunGraceTimer.simulate()
+					if Globals.training_mode:
+						$TrainingRegenTimer.simulate()
 				
 				# offstage protection before 75% damage
 				if get_damage_percent() < 0.75:
@@ -1736,20 +1783,22 @@ func process_input_buffer():
 #								has_acted[0] = true
 #								keep = false
 
-					match new_state: # so that cannot burst on last frame of recovery
 						Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
-							Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
-							var move_name = get_move_name()
-							if burst_extend_check(move_name):
-								animate("BurstExtend")
-								chain_memory = []
-								has_acted[0] = true
-								keep = false
-							elif burst_revoke_check(move_name):
-								animate("BurstRevoke")
-								chain_memory = []
-								has_acted[0] = true
-								keep = false
+								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
+							if new_state in [Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
+							Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE]:
+								# new state must not be standby, so landed moves cannot burst revoke on last frame of recovery
+								var move_name = get_move_name()
+								if burst_extend_check(move_name):
+									animate("BurstExtend")
+									chain_memory = []
+									has_acted[0] = true
+									keep = false
+								elif burst_revoke_check(move_name):
+									animate("BurstRevoke")
+									chain_memory = []
+									has_acted[0] = true
+									keep = false
 		
 			_:
 				# pass to process_buffered_input() in unique character node, it returns a bool of whether input should be kept
@@ -2332,7 +2381,7 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 	else:
 		afterimage_timer -= 1
 		
-func afterimage_cancel(starting_modulate_a = 0.6, lifetime = 12.0): # no need color_modulate for now
+func afterimage_cancel(starting_modulate_a = 0.5, lifetime = 12.0): # no need color_modulate for now
 	
 	if sfx_under.visible:
 		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
@@ -3118,7 +3167,7 @@ func get_guard_gauge_percent_true(): # from 0.0 to 2.0
 		return 1.0 + get_guard_gauge_percent_above()
 		
 func take_damage(damage): # called by attacker
-	current_damage_value += damage
+	current_damage_value = max(current_damage_value + damage, 0)
 	current_damage_value = round(current_damage_value)
 	Globals.Game.damage_update(self, damage)
 	
@@ -3180,14 +3229,16 @@ func change_ex_gauge(ex_gauge_change):
 	Globals.Game.ex_gauge_update(self)
 
 func change_stock_points(stock_points_change):
-	stock_points_left += stock_points_change
-	stock_points_left = max(stock_points_left, 0.0)
-	stock_points_left = round(stock_points_left)
+	if !Globals.training_mode:
+		stock_points_left += stock_points_change
+		stock_points_left = max(stock_points_left, 0.0)
+		stock_points_left = round(stock_points_left)
 	Globals.Game.stock_points_update(self, stock_points_change)
 	
 func change_burst_token(get_burst: bool):
-	has_burst = get_burst
-	Globals.Game.burst_update(self)
+	if !Globals.training_mode:
+		has_burst = get_burst
+		Globals.Game.burst_update(self)
 	
 	
 # QUERY UNIQUE CHARACTER DATA ---------------------------------------------------------------------------------------------- 
@@ -3348,11 +3399,13 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		var pushback_strength := 0.0
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-				pushback_strength = WRONGBLOCK_ATKER_PUSHBACK
+				if !"autochain" in hit_data:
+					pushback_strength = WRONGBLOCK_ATKER_PUSHBACK
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				pushback_strength = PERFECTBLOCK_ATKER_PUSHBACK
 			_:
-				pushback_strength = BASE_BLOCK_ATKER_PUSHBACK # normal block
+				if !"autochain" in hit_data:
+					pushback_strength = BASE_BLOCK_ATKER_PUSHBACK # normal block
 		var pushback_dir = hit_data.angle_to_atker
 		var pushback_dir_enum = Globals.split_angle(pushback_dir, 4, facing) # this return an enum
 		pushback_dir = Globals.compass_to_angle(pushback_dir_enum)
@@ -3404,6 +3457,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 func being_hit(hit_data): # called by main game node when taking a hit
 	
 	$HitStunGraceTimer.time = HitStunGraceTimer_TIME # reset HitStunGraceTimer which only ticks down out of hitstun/blockstun
+	if Globals.training_mode:
+		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
 
 	var attacker = get_node(hit_data.attacker_nodepath)
 	var defender = get_node(hit_data.defender_nodepath)
@@ -3572,9 +3627,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
-	defender.change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
+	var guard_gauge_change = calculate_guard_gauge_change(hit_data)
+	defender.change_guard_gauge(guard_gauge_change) # do GG calculation
 
-	if defender.get_guard_gauge_percent_below() <= 0.01 and !hit_data.weak_hit and !"autochain" in hit_data:  # check for break hit
+	if guard_gauge_change < 0 and defender.get_guard_gauge_percent_below() <= 0.01 and !hit_data.weak_hit and \
+			!"autochain" in hit_data:  # check for break hit
 		# setting to 0.01 instead of 0 allow multi-hit moves to cause break_hits on the last attack
 		hit_data.break_hit = true
 		hit_data.block_state = Globals.block_state.UNBLOCKED
@@ -4635,11 +4692,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 					impulse_used = true
 					if instant_dir != 0:
 						var impulse = instant_dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD * PERFECT_IMPULSE_MOD
+						if move_name in UniqueCharacter.MOVE_DATABASE and "impulse_mod" in UniqueCharacter.MOVE_DATABASE[move_name]:
+							impulse *= UniqueCharacter.MOVE_DATABASE[move_name].impulse_mod
 						velocity.x += impulse
 						velocity.x = clamp(velocity.x, -abs(impulse), abs(impulse))
 						Globals.Game.spawn_SFX("SpecialDust", "DustClouds", get_feet_pos(), {"facing":instant_dir, "grounded":true})
 					else:
 						var impulse = dir * UniqueCharacter.SPEED * UniqueCharacter.IMPULSE_MOD
+						if move_name in UniqueCharacter.MOVE_DATABASE and "impulse_mod" in UniqueCharacter.MOVE_DATABASE[move_name]:
+							impulse *= UniqueCharacter.MOVE_DATABASE[move_name].impulse_mod
 						velocity.x += impulse
 						velocity.x = clamp(velocity.x, -abs(impulse), abs(impulse))
 						Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
@@ -4832,14 +4893,12 @@ func reset_fade():
 	
 # aux_data contain "vol", "bus" and "unique_path" (added by this function)
 func play_audio(audio_ref: String, aux_data: Dictionary):
-	var new_audio = Globals.loaded_audio_scene.instance()
-	Globals.Game.get_node("AudioPlayers").add_child(new_audio)
 	
-	if audio_ref in LoadedSFX.loaded_audio: # common audio
-		new_audio.init(audio_ref, aux_data)
-	else: # custom audio, have the audioplayer search this node's unique_audio dictionary
+	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
 		aux_data["unique_path"] = get_path() # add a new key to aux_data
-		new_audio.init(audio_ref, aux_data)
+		
+	Globals.Game.play_audio(audio_ref, aux_data)
+
 		
 
 # triggered by SpritePlayer at start of each animation
@@ -4929,6 +4988,9 @@ func save_state():
 		"BurstLockTimer_time" : $BurstLockTimer.time,
 		"PosFlowSealTimer_time" : $PosFlowSealTimer.time,
 	}
+	
+	if Globals.training_mode:
+		state_data["TrainingRegenTimer_time"] = $TrainingRegenTimer.time
 
 	return state_data
 	
@@ -5012,6 +5074,9 @@ func load_state(state_data):
 	$HitStunGraceTimer.time = state_data.HitStunGraceTimer_time
 	$BurstLockTimer.time = state_data.BurstLockTimer_time
 	$PosFlowSealTimer.time = state_data.PosFlowSealTimer_time
+	
+	if Globals.training_mode:
+		$TrainingRegenTimer.time = state_data.TrainingRegenTimer_time
 
 
 	

@@ -58,6 +58,8 @@ var test_state2 # save state for testing
 var test_saved_game_states: Dictionary
 var frame_reverse := true
 
+var training_save_state # save state used for training mode
+
 # GameState, these are to be saved
 var frametime := 0
 var matchtime
@@ -73,8 +75,8 @@ var captured_input_state = { # use for capturing inputs, during input delay cann
 	}
 var screenfreeze = null # when set to a player_ID, only that player will simulate, along with any sfx/shadow spawned during screenfreeze
 var darken := false # stage will turn dark
+var input_lock := true
 
-var input_lock := true # lock inputs at start of game,  caused issue when save/loaded,
 var game_set := false # caused issue when save/loaded, need more testing
 
 var play_speed := 1 # testing
@@ -84,6 +86,10 @@ var orig_rng_seed: int	# saved in replay file, starting rng_seed, host must send
 var you_label # node
 var to_superfreeze = null # set superfreeze at end of frame after players/entities have animated
 var to_lethalfreeze = null # set lethalfreeze at end of frame after players/entities have animated
+
+var audio_queue := [] # contain audio created while the game is being simulated without rendering
+const AUDIO_QUEUE_LIFE = 5
+var rollback_start_frametime = null
 
 func _ready():
 	
@@ -241,6 +247,7 @@ func debug():
 		if test_state != null:
 			load_state(test_state)
 			playback_mode = true # begin playback
+			rollback_start_frametime = null
 			true_frametime = record_end_time
 			match_input_log.set_end_frametime(record_end_time)
 			emit_signal("playback_started") # to tell text to show message
@@ -299,16 +306,29 @@ func _physics_process(_delta):
 		else:
 			$PolygonDrawer.hide()
 			
+	if Globals.training_mode:
+		set_input_indicator()
+		if Globals.training_settings.hitbox_viewer == 1:
+			$PolygonDrawer.show()
+		else:
+			$PolygonDrawer.hide()
+		if Globals.training_settings.frame_viewer == 1:
+			frame_viewer.show()
+		else:
+			frame_viewer.hide()
+			
 #	ROLLBACK TESTER
 #	if Netplay.is_netplay():
-#		var random_frames = Globals.random.randi_range(1, 5)
-#		if playback_mode == false:
-#			if posmod(frametime, Globals.random.randi_range(1, 10)) == 0:
-#				if frametime - random_frames in $NetgameSetup.saved_game_states:
-#					load_state($NetgameSetup.saved_game_states[frametime - random_frames])
-#					playback_mode = true
-#					while playback_mode:
-#						simulate(false)
+
+#	var random_frames = Globals.random.randi_range(1, 5)
+#	if playback_mode == false:
+#		if posmod(frametime, Globals.random.randi_range(1, 10)) == 0:
+#			if frametime - random_frames in test_saved_game_states:
+#				load_state(test_saved_game_states[frametime - random_frames])
+#				playback_mode = true
+#				rollback_start_frametime = frametime
+#				while playback_mode:
+#					simulate(false)
 
 
 	if Netplay.is_netplay(): # rollback
@@ -326,6 +346,7 @@ func _physics_process(_delta):
 				load_state($NetgameSetup.saved_game_states[Netcode.rollback_starttime])
 				playback_mode = true
 				var rollback_frames := 0
+				rollback_start_frametime = frametime
 				while playback_mode:
 					simulate(false)
 					rollback_frames += 1
@@ -358,7 +379,7 @@ func _physics_process(_delta):
 			if Netcode.time_diff < 0:
 				simulate()
 				if posmod(frametime, 10) == 0:
-					simulate()
+					simulate() # rendering = true to capture inputs
 					Netcode.time_diff += 1
 			else:
 				simulate()
@@ -518,6 +539,9 @@ func load_inputs():
 # simulate a physics tick, do this function multiple times a frame to simulate without rendering
 func simulate(rendering = true):
 	# if rendering is false, will load inputs from match_input_log instead of capturing new ones
+
+	if frametime == 126:
+		get_node("../../..").start_battle()
 	
 	$PolygonDrawer.extra_boxes = [] # clear the extra boxes
 
@@ -610,11 +634,12 @@ func simulate(rendering = true):
 		else:
 			SFX.simulate()
 			
-	for audio in $AudioPlayers.get_children():
-		if audio.free:
-			audio.free()
-		else:
-			audio.simulate()
+#	for audio in $AudioPlayers.get_children():
+#		if audio.free:
+#			audio.free()
+#		else:
+#			audio.simulate()
+
 			
 	if Globals.static_stage == 0:
 		stage.simulate()
@@ -630,7 +655,13 @@ func simulate(rendering = true):
 	if playback_mode == false:
 		true_frametime += 1 # true_frametime marks the "present" will not advance during playback mode
 	elif frametime >= true_frametime: # reached back to present
+		if playback_mode == true:
+			if rollback_start_frametime != null:
+				load_queued_audio()
+				rollback_start_frametime = null
 		playback_mode = false # stop playback
+	else:
+		progress_audio_queue()
 		
 	if !input_lock and !is_stage_paused():
 		matchtime -= 1 # match time only start counting down when "BEGIN!" vanishes
@@ -701,9 +732,9 @@ func save_state(timestamp):
 	for SFX in $SFXBack.get_children():
 		game_state.SFX_back_data.append(SFX.save_state())
 
-	for AudioManager in $AudioPlayers.get_children():
-		game_state.audio_data.append(AudioManager.save_state())
-
+#	for AudioManager in $AudioPlayers.get_children():
+#		game_state.audio_data.append(AudioManager.save_state())
+		
 	if Globals.static_stage == 0:
 		game_state.stage_data = stage.save_state()
 
@@ -716,16 +747,21 @@ func save_state(timestamp):
 		elif frame_reverse and Globals.editor:
 			test_saved_game_states[timestamp] = game_state.duplicate(true)
 	else:
-		if timestamp == "test_state":
-			if !Globals.watching_replay:
-				test_state = game_state.duplicate(true)
+		if Globals.editor:
+			if timestamp == "test_state":
+				if !Globals.watching_replay:
+					test_state = game_state.duplicate(true)
+				else:
+					$ReplayControl.test_state = game_state.duplicate(true)
+			elif timestamp == "test_state2":
+				if !Globals.watching_replay:
+					test_state2 = game_state.duplicate(true)
 			else:
-				$ReplayControl.test_state = game_state.duplicate(true)
-		elif timestamp == "test_state2":
-			if !Globals.watching_replay:
-				test_state2 = game_state.duplicate(true)
+				training_save_state = game_state.duplicate(true)
+		else:
+			training_save_state = game_state.duplicate(true)
 				
-	game_state.clear()
+#	game_state.clear()
 
 
 func load_state(game_state, loading_autosave = true):
@@ -755,8 +791,8 @@ func load_state(game_state, loading_autosave = true):
 		SFX.free()
 	for SFX in $SFXBack.get_children():
 		SFX.free()
-	for AudioManager in $AudioPlayers.get_children():
-		AudioManager.kill()
+#	for AudioManager in $AudioPlayers.get_children():
+#		AudioManager.kill()
 		
 	# re-add children
 	for state_data in loaded_game_state.afterimage_data:
@@ -783,11 +819,11 @@ func load_state(game_state, loading_autosave = true):
 		var new_SFX = Globals.loaded_SFX_scene.instance()
 		$SFXBack.add_child(new_SFX)
 		new_SFX.load_state(state_data)
-	
-	for state_data in loaded_game_state.audio_data:
-		var new_audio = Globals.loaded_audio_scene.instance()
-		$AudioPlayers.add_child(new_audio)
-		new_audio.load_state(state_data)
+		
+#	for state_data in loaded_game_state.audio_data:
+#		var new_audio = Globals.loaded_audio_scene.instance()
+#		$AudioPlayers.add_child(new_audio)
+#		new_audio.load_state(state_data)
 		
 	if Globals.static_stage == 0:
 		stage.load_state(loaded_game_state.stage_data)
@@ -801,7 +837,7 @@ func load_state(game_state, loading_autosave = true):
 	if frame_reverse and !loading_autosave: # when loading manual save, erase autoload states
 		test_saved_game_states.clear()
 		
-	loaded_game_state.clear()
+#	loaded_game_state.clear()
 	
 	
 # DETECT RINGOUT --------------------------------------------------------------------------------------------------	
@@ -1069,12 +1105,6 @@ func test_priority(hitbox, hurtbox): # return false if attacker fail the priorit
 		elif attacker.Animator.time <= 1:
 			if hitbox.move_data.priority < defender.query_priority():
 				return false
-	# Rule 3: jabs cannot hit an opponent during THEIR startup animation on 1st _ frames of YOUR active frame
-	# this means that jabs should lose to 8-framers (clash if same priority)
-	# moves with Held variations have 8-frame startup on minimum, this allow Held Superarmor moves to beat jabs
-	elif defender.is_atk_startup():
-		if "active_delay" in hitbox.move_data and attacker.Animator.time < hitbox.move_data.active_delay:
-			return false
 	return true
 	
 	
@@ -1295,9 +1325,8 @@ func is_stage_paused():
 func set_input_indicator():
 	for player in $Players.get_children():
 		var indicator = HUD.get_node("P" + str(player.player_ID + 1) + "_HUDRect/Inputs")
-		if !$ReplayControl.input_indicators:
-			indicator.hide()
-		else:
+		if (Globals.watching_replay and $ReplayControl.input_indicators) or \
+				(Globals.training_mode and Globals.training_settings.input_viewer == 1):
 			indicator.show()
 			for input in indicator.get_children():
 				if input.name != "InputFrame":
@@ -1327,7 +1356,11 @@ func set_input_indicator():
 					player.button_aux:
 						indicator.get_node("InputAux").show()
 					player.button_block:
-						indicator.get_node("InputBlock").show()
+						indicator.get_node("InputBlock").show()	
+		else:
+			indicator.hide()
+			
+
 				
 
 func damage_update(character, damage = 0):
@@ -1408,8 +1441,13 @@ func ex_gauge_update(character):
 	
 	
 func stock_points_update(character, stock_points_change = 0):
+	
 	var stock_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints")
-	stock_indicator.text = str(character.stock_points_left)
+	if !Globals.training_mode:
+		stock_indicator.text = str(character.stock_points_left)
+	else:
+		stock_indicator.text = "INF"
+		
 	
 	if stock_points_change < 0:
 		var stock_loss_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints/StockLoss")
@@ -1535,8 +1573,67 @@ func spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modu
 	
 # aux_data contain "vol", "bus"
 func play_audio(audio_ref: String, aux_data: Dictionary):
-	if audio_ref in LoadedSFX.loaded_audio: # main game node can only load common audio
+	if rollback_start_frametime == null:
 		var new_audio = Globals.loaded_audio_scene.instance()
 		$AudioPlayers.add_child(new_audio)
 		new_audio.init(audio_ref, aux_data)
+	else:
+		audio_queue.append({"audio_ref" : audio_ref, "aux_data" : aux_data, "time" : 0})
+		
+func progress_audio_queue():
+	var to_erase = []
+	for audio in audio_queue:
+		audio.time += 1
+		if audio.time >= AUDIO_QUEUE_LIFE:
+			to_erase.append(audio)
+	for x in to_erase:
+		audio_queue.erase(x)
+		
+func load_queued_audio():
+	
+	# first, look for AudioPlayers that do not have matching queued audio, these are to be removed since they no longer happened
+	# second, look for queued audios that do not have matching AudioPlayer, these are to be played since they are what actually happened
+	
+	var to_retain := []
+	for audio_manager in $AudioPlayers.get_children():
+#			print(frametime - rollback_start_frametime)
+		if audio_manager.time <= frametime - rollback_start_frametime - 1:
+			for queued_audio in audio_queue: # found a queued audio same as existing audio when rollbacking
+#				print("audio_time: " + str(audio_manager.time))
+#				print("queue_time: " + str(queued_audio.time))
+				if audio_manager.audio_ref == queued_audio.audio_ref and audio_manager.time == queued_audio.time:
+					to_retain.append(audio_manager)
+					audio_manager.confirmed = true
+					break
+		else:
+			audio_manager.confirmed = true
+				
+	for audio_manager in $AudioPlayers.get_children():
+		if audio_manager.time <= frametime - rollback_start_frametime - 1:
+			if !audio_manager in to_retain and !audio_manager.confirmed:
+				audio_manager.kill()
+			
+			
+	var to_exclude := []
+	for queued_audio in audio_queue:
+		
+		for audio_manager in $AudioPlayers.get_children():
+			if audio_manager.audio_ref == queued_audio.audio_ref and audio_manager.time == queued_audio.time:
+#				print("audio_time: " + str(audio_manager.time))
+#				print("queue_time: " + str(queued_audio.time))
+				to_exclude.append(queued_audio)
+				break
+				
+	for queued_audio in audio_queue:
+		if !queued_audio in to_exclude:
+			var new_audio = Globals.loaded_audio_scene.instance()
+			$AudioPlayers.add_child(new_audio)
+			new_audio.init(queued_audio.audio_ref, queued_audio.aux_data)
+			new_audio.confirmed = true
+			
+	audio_queue.clear()
+			
+		
+		
+		
 

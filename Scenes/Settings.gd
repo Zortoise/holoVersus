@@ -278,6 +278,57 @@ func load_game_config():
 			"custom_playlist" : 0,
 		}		
 
+func save_training_config(training_config: Dictionary):
+	var training_config_data = load("res://Scenes/Menus/GameConfig.gd").new() # save config data
+	training_config_data.game_config = training_config.duplicate()
+# warning-ignore:return_value_discarded
+	ResourceSaver.save("user://training_config.tres", training_config_data)
+	
+func load_training_config():
+	var training_config: Dictionary
+	if ResourceLoader.exists("user://training_config.tres"):
+		training_config = ResourceLoader.load("user://training_config.tres").game_config
+		
+		var valid := true # check if game_config has all needed keys, if not, use default game_config
+		for check in ["assists", "static_stage", "custom_playlist"]:
+			if !check in training_config:
+				valid = false
+		if valid:
+			return training_config
+		
+	# default training_config
+	return {
+			"assists" : 0,
+			"static_stage" : 1,
+			"custom_playlist" : 0,
+		}	
+		
+func save_training_settings(training_settings: Dictionary):
+	var training_settings_data = load("res://Scenes/Menus/GameConfig.gd").new() # save config data
+	training_settings_data.game_config = training_settings.duplicate()
+# warning-ignore:return_value_discarded
+	ResourceSaver.save("user://training_settings.tres", training_settings_data)
+	
+func load_training_settings():
+	var training_settings: Dictionary
+	if ResourceLoader.exists("user://training_settings.tres"):
+		training_settings = ResourceLoader.load("user://training_settings.tres").game_config
+		
+		var valid := true # check if game_config has all needed keys, if not, use default game_config
+		for check in ["gganchor", "regen", "input_viewer", "hitbox_viewer", "frame_viewer"]:
+			if !check in training_settings:
+				valid = false
+		if valid:
+			return training_settings
+		
+	# default training_settings
+	return {
+			"gganchor" : 0,
+			"regen" : 1,
+			"input_viewer" : 0,
+			"hitbox_viewer" : 0,
+			"frame_viewer" : 0,
+		}	
 	
 # save last picked characters/stages, so you don't have to keep resetting them
 func save_last_picked(last_picked: Dictionary):

@@ -16,6 +16,8 @@ func init():
 	get_tree().paused = true
 	get_node("../../../../Synchro").show()
 	my_tapjump_and_buffer = change_inputs()
+	Netcode.opponent_payload = null
+	Netcode.opponent_latest_correct_time = 0
 	Netcode.rollback_starttime = null
 	Netcode.time_diff = 0
 	Fps.rolled_back_frames = 0

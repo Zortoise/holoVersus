@@ -68,11 +68,15 @@ func _physics_process(_delta):
 		$Test/Playback.hide()
 		
 	# pausing game
-	if !Netplay.is_netplay():
-		if Globals.pausing and !$HUD/HoldToPause/AnimationPlayer.is_playing():
-			$HUD/HoldToPause/AnimationPlayer.play("hold")
-		elif !Globals.pausing and $HUD/HoldToPause/AnimationPlayer.is_playing():
-			$HUD/HoldToPause/AnimationPlayer.play("RESET")
+	if !Globals.training_mode:
+		if !Netplay.is_netplay():
+			if Globals.pausing and !$HUD/HoldToPause/AnimationPlayer.is_playing():
+				$HUD/HoldToPause/AnimationPlayer.play("hold")
+			elif !Globals.pausing and $HUD/HoldToPause/AnimationPlayer.is_playing():
+				$HUD/HoldToPause/AnimationPlayer.play("RESET")
+	else:
+		if Input.is_action_just_pressed("P1_pause"):
+			$PauseMenu.open()
 		
 	# 
 	if fade_sound: # fade out sound when transiting to other scenes
@@ -84,11 +88,8 @@ func _physics_process(_delta):
 	if Globals.Game.frametime == 36:
 		$HUD/Announcer/AnimationPlayer.play("start_battle")
 	
-	if Globals.Game.frametime == 126:
-		start_battle()
 
-
-func start_battle():
+func start_battle(): # called from game, as need to be called when during simulation
 	Globals.Game.input_lock = false
 	if Globals.Game.you_label != null and is_instance_valid(Globals.Game.you_label):
 		Globals.Game.you_label.free()
@@ -144,6 +145,11 @@ func change_scene(new_scene: String): # called by animation
 		if new_scene == "res://Scenes/Menus/VictoryScreen.tscn":
 			new_scene = "res://Scenes/Menus/VictoryScreenReplay.tscn" # route to VictoryScreenReplay for relays
 		Globals.watching_replay = false
+		
+	elif Globals.training_mode:
+		Settings.save_training_settings(Globals.training_settings)
+		
+	Globals.training_mode = false
 		
 	get_tree().change_scene(new_scene)
 	

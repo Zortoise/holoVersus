@@ -38,12 +38,11 @@ var stage_array
 var sound := false
 var battle_lock := false # set to true after starting battle, prevent certain actions like cancelling during the fade to black
 
-var P1_phase := 0 # 0 is picking characters, 1 is picking stage, 2 is finishing picking and waiting for opponent
+var phase := 0 # 0 is picking characters, 1 is dummy picking character, 2 is picking stage
 var P1_picker_pos := 5
 var P1_palette_picked := 1
 #var P1_input_style := 0
 
-var P2_phase := 0
 var P2_picker_pos := 5
 var P2_palette_picked := 1
 #var P2_input_style := 0
@@ -96,10 +95,10 @@ func _ready():
 	stage_array = stage_data.keys()
 	populate_stage_lists()
 	$P1_StageSelect.hide()
-	$P2_StageSelect.hide()
 	
 	P1_changed_character()
 	P2_changed_character()
+	$P2_Picker.hide()
 	
 #	change_input_style($P1_InputStyle, 0)
 #	change_input_style($P2_InputStyle, 0)
@@ -152,24 +151,10 @@ func load_last_picked(last_picked):
 				$P2_Sprite.get_child(0).material.set_shader_param("swap", \
 						character_data[CHAR_GRID[P2_picker_pos]]["palettes"][str(P2_palette_picked)])
 
-
-#	if last_picked.P1_input_style != null:
-#		P1_input_style = last_picked.P1_input_style
-#		change_input_style($P1_InputStyle, last_picked.P1_input_style)
-		
-#	if last_picked.P2_input_style != null:
-#		P2_input_style = last_picked.P2_input_style
-#		change_input_style($P2_InputStyle, last_picked.P2_input_style)
-		
-
 	if last_picked.P1_stage != null:
 		if last_picked.P1_stage in stage_array:
 			while $P1_StageSelect/StageList.get_child(3).text != last_picked.P1_stage:
-				shift_stage_list(0, 1)
-	if last_picked.P2_stage != null:
-		if last_picked.P2_stage in stage_array:
-			while $P2_StageSelect/StageList.get_child(3).text != last_picked.P2_stage:
-				shift_stage_list(1, 1)
+				shift_stage_list(1)
 			
 	
 func populate_char_grid():
@@ -184,42 +169,25 @@ func populate_stage_lists():
 	# remove test children
 	for x in $P1_StageSelect/StageList.get_children():
 		x.free()
-	for x in $P2_StageSelect/StageList.get_children():
-		x.free()
 	
 	for x in STAGE_LIST_SIZE:
 		# add new labels
 		var new_stagelabel = loaded_stagelabel.instance()
 		$P1_StageSelect/StageList.add_child(new_stagelabel)
-		var new_stagelabel2 = loaded_stagelabel.instance()
-		$P2_StageSelect/StageList.add_child(new_stagelabel2)
 		# change text
 		new_stagelabel.text = stage_array[stage_array_pointer]
-		new_stagelabel2.text = stage_array[stage_array_pointer]
 		# next stage, wrap around
 		stage_array_pointer += 1
 		stage_array_pointer = wrapi(stage_array_pointer, 0, stage_array.size())
 	
 	# shift lists so that get_child(3) points to the first stage
 	for x in 3:
-		shift_stage_list(0, 1)
-	for x in 3:
-		shift_stage_list(1, 1)
-		
-		
-#func change_input_style(input_style_node, input_style):
-#	if input_style == 0:
-#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("flashing")
-#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("gray")
-#	else:
-#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("gray")
-#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("flashing")
+		shift_stage_list(1)
 		
 		
 func load_buttoncheck():
 	
 	$P1_ButtonCheck.hide()
-	$P2_ButtonCheck.hide()
 	
 	var input_map = Settings.load_input_map()
 	var TAP_JUMP_OPTIONS = ["off", "on"]
@@ -227,7 +195,7 @@ func load_buttoncheck():
 			, "7 frames", "8 frames", "9 frames", "10 frames"]
 	var DJ_FASTFALL_OPTIONS = ["off", "on"]
 	
-	for player_ID in [0, 1]:
+	for player_ID in [0]:
 		var player_index = str(player_ID + 1)
 		var grid = get_node("P" + player_index + "_ButtonCheck/ButtonCheckGrid")
 
@@ -252,143 +220,91 @@ func load_buttoncheck():
 
 func _physics_process(_delta):
 	
-	if P1_phase == 0:
+	if phase == 0:
 		if Input.is_action_just_pressed("P1_fierce"):
-			Globals.pausing = true
-		if Input.is_action_just_released("P1_fierce"):
-			Globals.pausing = false
-		
-	if P2_phase == 0:
-		if Input.is_action_just_pressed("P2_fierce"):
-			Globals.pausing = true
-		if Input.is_action_just_released("P2_fierce"):
-			Globals.pausing = false
-		
-	# quitting
-	if Globals.pausing and !$HoldToQuit/AnimationPlayer.is_playing():
-		$HoldToQuit/AnimationPlayer.play("hold")
-	elif !Globals.pausing and $HoldToQuit/AnimationPlayer.is_playing():
-		$HoldToQuit/AnimationPlayer.play("RESET")
+			play_audio("ui_back", {})
+			$Transition.play("transit_to_training")
 		
 	if Input.is_action_pressed("P1_special"): # reveal/hide button check
 		$P1_ButtonCheck.show()
 	else:
 		$P1_ButtonCheck.hide()
-	if Input.is_action_pressed("P2_special"):
-		$P2_ButtonCheck.show()
-	else:
-		$P2_ButtonCheck.hide()
 		
-	
 	# directional keys
-	var P1_dir = $P1DirInputs.P1_dir
-		
-	var P2_dir = $P2DirInputs.P2_dir
+	var dir = $P1DirInputs.P1_dir
 	
-	move_pickers(P1_dir, P2_dir)
-	move_stage_picker(P1_dir, P2_dir)
+	move_pickers(dir)
+	move_stage_picker(dir)
 
 	# change palette, in phase 0 only
-	var P1_p_dir = 0
+	var p_dir = 0
 	if Input.is_action_just_pressed("P1_aux"):
-		P1_p_dir -= 1
+		p_dir -= 1
 	if Input.is_action_just_pressed("P1_block"):
-		P1_p_dir += 1
-
-	var P2_p_dir = 0
-	if Input.is_action_just_pressed("P2_aux"):
-		P2_p_dir -= 1
-	if Input.is_action_just_pressed("P2_block"):
-		P2_p_dir += 1
+		p_dir += 1
 	
-	change_palette(P1_p_dir, P2_p_dir)
+	change_palette(p_dir)
 		
-	
 	if Input.is_action_just_pressed("P1_light"): # select character/stage
-		if P1_phase == 0:
+		if phase == 0:
 			P1_picked_character()
-		if P1_phase == 1:
-			P1_picked_stage()
-	if Input.is_action_just_pressed("P2_light"): # select character/stage
-		if P2_phase == 0:
+		if phase == 1:
 			P2_picked_character()
-		if P2_phase == 1:
-			P2_picked_stage()
+		if phase == 2 and !battle_lock:
+			picked_stage()
 		
 	if Input.is_action_just_pressed("P1_fierce"): # unselect character/stage
-		if P1_phase == 1:
+		if phase == 1:
 			P1_unpicked_character()
-		if P1_phase == 2:
-			P1_unpicked_stage()
-	if Input.is_action_just_pressed("P2_fierce"): # unselect character/stage
-		if P2_phase == 1:
+		if phase == 2 and !battle_lock:
 			P2_unpicked_character()
-		if P2_phase == 2:
-			P2_unpicked_stage()
 			
-#	if Input.is_action_just_pressed("P1_dash"): # unselect character/stage
-#		play_audio("ui_accept", {"vol":-8})
-#		if P1_input_style == 0:
-#			P1_input_style = 1
-#			change_input_style($P1_InputStyle, 1)
-#		else:
-#			P1_input_style = 0
-#			change_input_style($P1_InputStyle, 0)
-#	if Input.is_action_just_pressed("P2_dash"): # unselect character/stage
-#		play_audio("ui_accept", {"vol":-8})
-#		if P2_input_style == 0:
-#			P2_input_style = 1
-#			change_input_style($P2_InputStyle, 1)
-#		else:
-#			P2_input_style = 0
-#			change_input_style($P2_InputStyle, 0)
-			
-	if P1_phase == 2 and P2_phase == 2: # both players have picked characters and stages
-		start_battle()
+#	if P1_phase == 2 and P2_phase == 2: # both players have picked characters and stages
+#		start_battle()
 	
 	
-func move_pickers(P1_dir, P2_dir):
+func move_pickers(dir):
 	
-	if P1_phase == 0:
-		if P1_dir.x == 1:
+	if phase == 0:
+		if dir.x == 1:
 			P1_picker_pos += 1
 			if P1_picker_pos == 12: P1_picker_pos = 0
 			elif P1_picker_pos == 24: P1_picker_pos = 12
 			elif P1_picker_pos == 36: P1_picker_pos = 24
 			P1_changed_character()
-		elif P1_dir.x == -1:
+		elif dir.x == -1:
 			P1_picker_pos -= 1
 			if P1_picker_pos == -1: P1_picker_pos = 11
 			elif P1_picker_pos == 11: P1_picker_pos = 23
 			elif P1_picker_pos == 23: P1_picker_pos = 35
 			P1_changed_character()
-		if P1_dir.y == 1:
+		if dir.y == 1:
 			P1_picker_pos += 12
 			if P1_picker_pos >= 36: P1_picker_pos -= 36
 			P1_changed_character()
-		elif P1_dir.y == -1:
+		elif dir.y == -1:
 			P1_picker_pos -= 12
 			if P1_picker_pos < 0: P1_picker_pos += 36
 			P1_changed_character()
 		
-	if P2_phase == 0:
-		if P2_dir.x == 1:
+	if phase == 1:
+		if dir.x == 1:
 			P2_picker_pos += 1
 			if P2_picker_pos == 12: P2_picker_pos = 0
 			elif P2_picker_pos == 24: P2_picker_pos = 12
 			elif P2_picker_pos == 36: P2_picker_pos = 24
 			P2_changed_character()
-		elif P2_dir.x == -1:
+		elif dir.x == -1:
 			P2_picker_pos -= 1
 			if P2_picker_pos == -1: P2_picker_pos = 11
 			elif P2_picker_pos == 11: P2_picker_pos = 23
 			elif P2_picker_pos == 23: P2_picker_pos = 35
 			P2_changed_character()
-		if P2_dir.y == 1:
+		if dir.y == 1:
 			P2_picker_pos += 12
 			if P2_picker_pos >= 36: P2_picker_pos -= 36
 			P2_changed_character()
-		elif P2_dir.y == -1:
+		elif dir.y == -1:
 			P2_picker_pos -= 12
 			if P2_picker_pos < 0: P2_picker_pos += 36
 			P2_changed_character()		
@@ -434,10 +350,10 @@ func P2_changed_character():
 		$P2_Name.text = ""
 	
 
-func change_palette(P1_p_dir, P2_p_dir):
+func change_palette(p_dir):
 	
-	if P1_phase == 0 and P1_p_dir != 0 and P1_picker_pos in CHAR_GRID and $P1_Sprite.get_child_count() > 0: # last one is just in case
-		P1_palette_picked += P1_p_dir # move pointer
+	if phase == 0 and p_dir != 0 and P1_picker_pos in CHAR_GRID and $P1_Sprite.get_child_count() > 0: # last one is just in case
+		P1_palette_picked += p_dir # move pointer
 		play_audio("ui_move2", {"vol":-12})
 		var char_name: String = CHAR_GRID[P1_picker_pos]
 		P1_palette_picked = wrapi(P1_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
@@ -448,8 +364,8 @@ func change_palette(P1_p_dir, P2_p_dir):
 			$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
 			$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P1_palette_picked)])
 			
-	if P2_phase == 0 and P2_p_dir != 0 and P2_picker_pos in CHAR_GRID and $P2_Sprite.get_child_count() > 0: # last one is just in case
-		P2_palette_picked += P2_p_dir # move pointer
+	if phase == 1 and p_dir != 0 and P2_picker_pos in CHAR_GRID and $P2_Sprite.get_child_count() > 0: # last one is just in case
+		P2_palette_picked += p_dir # move pointer
 		play_audio("ui_move2", {"vol":-12})
 		var char_name: String = CHAR_GRID[P2_picker_pos]
 		P2_palette_picked = wrapi(P2_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
@@ -468,20 +384,8 @@ func P1_picked_character():
 		$P1_Picker/AnimationPlayer.play("RESET")
 		$P1_FullArt/AnimationPlayer.play("flash")
 		yield(get_tree(),"idle_frame")
-		P1_phase = 1
-		$P1_StageSelect.show()
-		
-		# if same character and palette, change palette automatically
-		if CHAR_GRID[P1_picker_pos] != "Random":
-			if P2_phase != 0 and CHAR_GRID[P1_picker_pos] == CHAR_GRID[P2_picker_pos] and P1_palette_picked == P2_palette_picked:
-				var char_name: String = CHAR_GRID[P1_picker_pos]
-				P1_palette_picked = wrapi(P1_palette_picked + 1, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
-				if P1_palette_picked == 1:
-					$P1_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
-				else:
-					$P1_Sprite.get_child(0).material = ShaderMaterial.new()
-					$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
-					$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P1_palette_picked)])
+		phase = 1
+		$P2_Picker.show()
 	
 func P2_picked_character():
 	if P2_picker_pos in CHAR_GRID:
@@ -489,12 +393,12 @@ func P2_picked_character():
 		$P2_Picker/AnimationPlayer.play("RESET")
 		$P2_FullArt/AnimationPlayer.play("flash")
 		yield(get_tree(),"idle_frame")
-		P2_phase = 1
-		$P2_StageSelect.show()
+		phase = 2
+		$P1_StageSelect.show()
 		
 		# if same character and palette, change palette automatically
 		if CHAR_GRID[P2_picker_pos] != "Random":
-			if P1_phase != 0 and CHAR_GRID[P1_picker_pos] == CHAR_GRID[P2_picker_pos] and P1_palette_picked == P2_palette_picked:
+			if CHAR_GRID[P1_picker_pos] == CHAR_GRID[P2_picker_pos] and P1_palette_picked == P2_palette_picked:
 				var char_name: String = CHAR_GRID[P1_picker_pos]
 				P2_palette_picked = wrapi(P2_palette_picked + 1, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 				if P2_palette_picked == 1:
@@ -504,115 +408,65 @@ func P2_picked_character():
 					$P2_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
 					$P2_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P2_palette_picked)])
 		
-		
 func P1_unpicked_character():
 	play_audio("ui_back", {})
 	$P1_Picker/AnimationPlayer.play("flashing")
 	yield(get_tree(),"idle_frame")
-	P1_phase = 0
-	$P1_StageSelect.hide()
+	phase = 0
+	$P2_Picker.hide()
 	
 func P2_unpicked_character():
 	play_audio("ui_back", {})
 	$P2_Picker/AnimationPlayer.play("flashing")
 	yield(get_tree(),"idle_frame")
-	P2_phase = 0
-	$P2_StageSelect.hide()
-	
-	
-func move_stage_picker(P1_dir, P2_dir):
-	if P1_phase == 1 and P1_dir.y != 0:
-		shift_stage_list(0, P1_dir.y)
-	if P2_phase == 1 and P2_dir.y != 0:
-		shift_stage_list(1, P2_dir.y)
-
-	
-func shift_stage_list(player_ID, v_dir):
-	if player_ID == 0: # player 1
-		var first_child = $P1_StageSelect/StageList.get_child(0)
-		var last_child = $P1_StageSelect/StageList.get_child(STAGE_LIST_SIZE - 1)
-		
-		if v_dir == 1: # move down, shift list upward
-			if sound:
-				play_audio("ui_move2", {"vol":-12})
-			first_child.free() # remove 1st child
-			var index = stage_array.find(last_child.text) # find index of last child in stage_array
-			index = wrapi(index + 1, 0, stage_array.size()) # get index of next stage in stage_array, wraparound
-			var new_stagelabel = loaded_stagelabel.instance() # add new child
-			$P1_StageSelect/StageList.add_child(new_stagelabel)
-			new_stagelabel.text = stage_array[index]
-		elif v_dir == -1: # move up, shift list downward
-			if sound:
-				play_audio("ui_move2", {"vol":-12})
-			last_child.free() # remove last child
-			var index = stage_array.find(first_child.text) # find index of first child in stage_array
-			index = wrapi(index - 1, 0, stage_array.size()) # get index of previous stage in stage_array, wraparound
-			var new_stagelabel = loaded_stagelabel.instance() # add new child
-			$P1_StageSelect/StageList.add_child(new_stagelabel)
-			$P1_StageSelect/StageList.move_child(new_stagelabel, 0) # make child the new first child
-			new_stagelabel.text = stage_array[index]
-			
-		$P1_Stage.texture = stage_data[$P1_StageSelect/StageList.get_child(3).text].select_L # update stage texture
-		for x in $P1_StageSelect/StageList.get_children(): # return color to normal
-			x.modulate = Color(1.0, 1.0, 1.0)
-		$P1_StageSelect/StageList.get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at
-			
-	elif player_ID == 1:
-		var first_child = $P2_StageSelect/StageList.get_child(0)
-		var last_child = $P2_StageSelect/StageList.get_child(STAGE_LIST_SIZE - 1)
-		
-		if v_dir == 1: # move down, shift list upward
-			if sound:
-				play_audio("ui_move2", {"vol":-12})
-			first_child.free() # remove 1st child
-			var index = stage_array.find(last_child.text) # find index of last child in stage_array
-			index = wrapi(index + 1, 0, stage_array.size()) # get index of next stage in stage_array, wraparound
-			var new_stagelabel = loaded_stagelabel.instance() # add new child
-			$P2_StageSelect/StageList.add_child(new_stagelabel)
-			new_stagelabel.text = stage_array[index]
-		elif v_dir == -1: # move up, shift list downward
-			if sound:
-				play_audio("ui_move2", {"vol":-12})
-			last_child.free() # remove last child
-			var index = stage_array.find(first_child.text) # find index of first child in stage_array
-			index = wrapi(index - 1, 0, stage_array.size()) # get index of previous stage in stage_array, wraparound
-			var new_stagelabel = loaded_stagelabel.instance() # add new child
-			$P2_StageSelect/StageList.add_child(new_stagelabel)
-			$P2_StageSelect/StageList.move_child(new_stagelabel, 0) # make child the new first child
-			new_stagelabel.text = stage_array[index]
-			
-		$P2_Stage.texture = stage_data[$P2_StageSelect/StageList.get_child(3).text].select_R # update stage texture
-		for x in $P2_StageSelect/StageList.get_children(): # return color to normal
-			x.modulate = Color(1.0, 1.0, 1.0)
-		$P2_StageSelect/StageList.get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at
-	
-func P1_picked_stage():
-	play_audio("ui_accept2", {"vol":-5})
-	$P1_Stage/AnimationPlayer.play("flash")
-	yield(get_tree(),"idle_frame")
-	P1_phase = 2
+	phase = 1
 	$P1_StageSelect.hide()
 	
-func P2_picked_stage():
+	
+func move_stage_picker(dir):
+	if phase == 2 and dir.y != 0:
+		shift_stage_list(dir.y)
+
+	
+func shift_stage_list(v_dir):
+	var first_child = $P1_StageSelect/StageList.get_child(0)
+	var last_child = $P1_StageSelect/StageList.get_child(STAGE_LIST_SIZE - 1)
+	
+	if v_dir == 1: # move down, shift list upward
+		if sound:
+			play_audio("ui_move2", {"vol":-12})
+		first_child.free() # remove 1st child
+		var index = stage_array.find(last_child.text) # find index of last child in stage_array
+		index = wrapi(index + 1, 0, stage_array.size()) # get index of next stage in stage_array, wraparound
+		var new_stagelabel = loaded_stagelabel.instance() # add new child
+		$P1_StageSelect/StageList.add_child(new_stagelabel)
+		new_stagelabel.text = stage_array[index]
+	elif v_dir == -1: # move up, shift list downward
+		if sound:
+			play_audio("ui_move2", {"vol":-12})
+		last_child.free() # remove last child
+		var index = stage_array.find(first_child.text) # find index of first child in stage_array
+		index = wrapi(index - 1, 0, stage_array.size()) # get index of previous stage in stage_array, wraparound
+		var new_stagelabel = loaded_stagelabel.instance() # add new child
+		$P1_StageSelect/StageList.add_child(new_stagelabel)
+		$P1_StageSelect/StageList.move_child(new_stagelabel, 0) # make child the new first child
+		new_stagelabel.text = stage_array[index]
+		
+	$P1_Stage.texture = stage_data[$P1_StageSelect/StageList.get_child(3).text].select_L # update stage texture
+	$P2_Stage.texture = stage_data[$P1_StageSelect/StageList.get_child(3).text].select_R # update stage texture
+	for x in $P1_StageSelect/StageList.get_children(): # return color to normal
+		x.modulate = Color(1.0, 1.0, 1.0)
+	$P1_StageSelect/StageList.get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at
+
+func picked_stage():
 	play_audio("ui_accept2", {"vol":-5})
+	$P1_Stage/AnimationPlayer.play("flash")
 	$P2_Stage/AnimationPlayer.play("flash")
-	yield(get_tree(),"idle_frame")
-	P2_phase = 2
-	$P2_StageSelect.hide()
-	
-func P1_unpicked_stage():
-	if !battle_lock:
-		play_audio("ui_back", {})
-		yield(get_tree(),"idle_frame")
-		P1_phase = 1
-		$P1_StageSelect.show()
-	
-func P2_unpicked_stage():
-	if !battle_lock:
-		play_audio("ui_back", {})
-		yield(get_tree(),"idle_frame")
-		P2_phase = 1
-		$P2_StageSelect.show()
+	$P1_StageSelect.hide()
+	battle_lock = true
+	yield(get_tree().create_timer(0.5), "timeout") # wait a short while before starting
+	start_battle()
+
 
 # ------------------------------------------------------------------------------------------------------------------------
 
@@ -622,33 +476,22 @@ func play_audio(audio_ref, aux_data):
 	new_audio.init(audio_ref, aux_data)
 	
 func start_battle():
-	battle_lock = true
-	
-	# 50% chance of either stage picked
-	if Globals.random.randi_range(0, 1) == 0:
-		Globals.stage_ref = $P1_StageSelect/StageList.get_child(3).text
-	else:
-		Globals.stage_ref = $P2_StageSelect/StageList.get_child(3).text
-#	Globals.stage_ref = selected_stage
+
+	Globals.stage_ref = $P1_StageSelect/StageList.get_child(3).text
 
 	Globals.P1_char_ref = CHAR_GRID[P1_picker_pos]
 	Globals.P1_palette = P1_palette_picked
-#	Globals.P1_input_style = P1_input_style
 	Globals.P2_char_ref = CHAR_GRID[P2_picker_pos]
 	Globals.P2_palette = P2_palette_picked
-#	Globals.P2_input_style = P2_input_style
-	
 	
 	# saving last picked characters and stages
 	var last_picked = {
 		"P1_character" : P1_picker_pos,
 		"P1_palette" : P1_palette_picked,
 		"P1_stage" : $P1_StageSelect/StageList.get_child(3).text,
-#		"P1_input_style" : P1_input_style,
 		"P2_character" : P2_picker_pos,
 		"P2_palette" : P2_palette_picked,
-		"P2_stage" : $P2_StageSelect/StageList.get_child(3).text,
-#		"P2_input_style" : P2_input_style,
+		"P2_stage" : $P1_StageSelect/StageList.get_child(3).text,
 	}
 	Settings.save_last_picked(last_picked)
 	
@@ -680,6 +523,8 @@ func start_battle():
 		new_stage_array.shuffle()
 		Globals.stage_ref = new_stage_array[0]
 	
+	Globals.time_limit = 0
+	Globals.training_mode = true
 	$Transition.play("transit_to_battle")
 	
 	

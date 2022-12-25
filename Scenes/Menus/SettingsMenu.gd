@@ -37,8 +37,19 @@ func _ready():
 func _process(_delta):
 	if Input.is_action_just_pressed("ui_cancel"):
 		if $SettingsList2.get_focus_owner().get_parent().name == "SettingsList2":
-#			Settings.load_settings()
-			play_audio("ui_back", {})
+			var new_config = {
+				"fullscreen" : $SettingsList/Fullscreen.option_pointer,
+				"window_size" : $SettingsList/WindowSize.option_pointer,
+				"borderless" : $SettingsList/Borderless.option_pointer,
+				"vsync" : $SettingsList/Vsync.option_pointer,
+				"fps_lock" : $SettingsList/FPSLock.option_pointer,
+				"fps_and_ping" : $SettingsList/FPSandPing.option_pointer,
+				"game_volume" : $SettingsList/GameVolume.value,
+				"music_volume" : $SettingsList/MusicVolume.value,
+				"ui_volume" : $SettingsList/UIVolume.value,
+			}
+			Settings.save_settings(new_config)
+			play_audio("ui_accept", {"vol":-8})
 			$Transition.play("transit_to_main")
 		else:
 			$SettingsList2/Change.initial_focus()

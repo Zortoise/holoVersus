@@ -79,7 +79,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP3Recovery", "aSP3bRecovery", "aSP3[ex]Recovery":
+		"aSP3Recovery", "SP3Recovery":
 			return Globals.char_state.AIR_ATK_RECOVERY
 			
 		"SP4Startup", "SP4[ex]Startup":
@@ -140,10 +140,13 @@ func simulate():
 			landing_sound()
 		elif !Character.button_light in Character.input_state.pressed:
 			Character.animate("aL2bRecovery")
-	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["SP3bRecovery"]):
+			
+	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["aSP3Recovery"]):
 		if Character.grounded:
-			Character.animate("HardLanding")
+			Character.animate("SP3Recovery")
 			landing_sound()
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
+						{"facing":Character.facing, "grounded":true})
 			
 	# RELEASING HELD INPUTS --------------------------------------------------------------------------------------------------
 			
@@ -1199,9 +1202,9 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP3bActive", "aSP3b[h]Active":
 			Character.animate("aSP3Recovery")
 		"aSP3Recovery":
-			Character.animate("aSP3bRecovery")
-		"aSP3bRecovery":
 			Character.animate("FallTransit")
+		"SP3Recovery":
+			Character.animate("Idle")
 			
 		"SP3[ex]Startup":
 			Character.animate("aSP3[ex]Active")
@@ -1216,9 +1219,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
-			Character.animate("aSP3[ex]Recovery")
-		"aSP3[ex]Recovery":
-			Character.animate("aSP3bRecovery")
+			Character.animate("aSP3Recovery")
 			
 		"SP4Startup":
 			if Character.button_fierce in Character.input_state.pressed:
@@ -1540,7 +1541,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.sfx_under.show()
 		"aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			Character.sfx_under.show()
-		"aSP3Recovery", "aSP3[ex]Recovery", "aSP3bRecovery":
+		"aSP3Recovery":
 			Character.velocity_limiter.x = 0.7
 			Character.sfx_under.show()
 			

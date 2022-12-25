@@ -29,6 +29,10 @@ func triggered(triggered_node):
 				Globals.main_menu_focus = triggered_node.name
 				play_audio("ui_accept", {"vol":-8})
 				$Transition.play("transit_to_netplay")
+			"Training":
+				Globals.main_menu_focus = triggered_node.name
+				play_audio("ui_accept", {"vol":-8})
+				$Transition.play("transit_to_training")
 			"Settings":
 				Globals.main_menu_focus = triggered_node.name
 				play_audio("ui_accept", {"vol":-8})

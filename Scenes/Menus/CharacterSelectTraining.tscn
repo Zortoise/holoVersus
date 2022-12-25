@@ -1,4 +1,4 @@
-[gd_scene load_steps=70 format=2]
+[gd_scene load_steps=48 format=2]
 
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/UI/character_picker_P1.png" type="Texture" id=2]
@@ -13,7 +13,7 @@
 [ext_resource path="res://Stages/Aurora/Resources/select_R.png" type="Texture" id=11]
 [ext_resource path="res://Scenes/Shaders/Palette.gdshader" type="Shader" id=12]
 [ext_resource path="res://Characters/Gura/Palettes/2.png" type="Texture" id=13]
-[ext_resource path="res://Scenes/Menus/CharacterSelectNet.gd" type="Script" id=14]
+[ext_resource path="res://Scenes/Menus/CharacterSelectTraining.gd" type="Script" id=14]
 [ext_resource path="res://Scenes/Menus/ButtonCheck.tres" type="Theme" id=15]
 [ext_resource path="res://Scenes/Menus/UIFrameTimer.gd" type="Script" id=16]
 [ext_resource path="res://Characters/Gura/SelectSprite.tscn" type="PackedScene" id=17]
@@ -56,6 +56,7 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id=32]
 resource_name = "transit_to_battle"
+length = 0.35
 step = 0.05
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:modulate")
@@ -64,10 +65,10 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.75, 0.95 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
 }
 tracks/1/type = "method"
 tracks/1/path = NodePath(".")
@@ -76,7 +77,7 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 1 ),
+"times": PoolRealArray( 0.35 ),
 "transitions": PoolRealArray( 1 ),
 "values": [ {
 "args": [ "res://Scenes/GameViewport.tscn" ],
@@ -84,8 +85,8 @@ tracks/1/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=31]
-resource_name = "transit_to_netplay"
+[sub_resource type="Animation" id=59]
+resource_name = "transit_to_training"
 length = 0.15
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:modulate")
@@ -109,7 +110,7 @@ tracks/1/keys = {
 "times": PoolRealArray( 0.15 ),
 "transitions": PoolRealArray( 1 ),
 "values": [ {
-"args": [ "res://Scenes/Menus/NetplayMenu.tscn" ],
+"args": [ "res://Scenes/Menus/TrainingMenu.tscn" ],
 "method": "change_scene"
 } ]
 }
@@ -203,148 +204,6 @@ Button/styles/focus = SubResource( 6 )
 Button/styles/hover = null
 Button/styles/normal = null
 Button/styles/pressed = null
-
-[sub_resource type="DynamicFont" id=69]
-size = 40
-outline_size = 3
-outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
-use_filter = true
-font_data = ExtResource( 19 )
-
-[sub_resource type="Theme" id=70]
-default_font = SubResource( 69 )
-
-[sub_resource type="Animation" id=71]
-resource_name = "flashing"
-length = 0.2
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 1,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1.2, 1.2, 1.2, 1 ), Color( 1, 1, 1, 1 ) ]
-}
-
-[sub_resource type="Animation" id=72]
-resource_name = "gray"
-length = 0.001
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Color( 0.3, 0.3, 0.3, 1 ) ]
-}
-
-[sub_resource type="Animation" id=73]
-resource_name = "flashing"
-length = 0.2
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 1,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1.2, 1.2, 1.2, 1 ), Color( 1, 1, 1, 1 ) ]
-}
-
-[sub_resource type="Animation" id=74]
-resource_name = "gray"
-length = 0.001
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Color( 0.3, 0.3, 0.3, 1 ) ]
-}
-
-[sub_resource type="Animation" id=75]
-resource_name = "flashing"
-length = 0.2
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 1,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1.2, 1.2, 1.2, 1 ), Color( 1, 1, 1, 1 ) ]
-}
-
-[sub_resource type="Animation" id=76]
-resource_name = "gray"
-length = 0.001
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Color( 0.3, 0.3, 0.3, 1 ) ]
-}
-
-[sub_resource type="Animation" id=77]
-resource_name = "flashing"
-length = 0.2
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 1,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1.2, 1.2, 1.2, 1 ), Color( 1, 1, 1, 1 ) ]
-}
-
-[sub_resource type="Animation" id=78]
-resource_name = "gray"
-length = 0.001
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Color( 0.3, 0.3, 0.3, 1 ) ]
-}
 
 [sub_resource type="ShaderMaterial" id=28]
 shader = ExtResource( 12 )
@@ -446,38 +305,6 @@ tracks/0/keys = {
 "values": [ Color( 0.584314, 0, 0, 1 ), Color( 1, 0.5, 0.5, 1 ), Color( 0.584314, 0, 0, 1 ) ]
 }
 
-[sub_resource type="Animation" id=40]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Color( 0, 0.211765, 0.65098, 1 ) ]
-}
-
-[sub_resource type="Animation" id=41]
-resource_name = "flashing"
-length = 0.2
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 0,
-"values": [ Color( 0, 0.211765, 0.65098, 1 ), Color( 0, 0.5, 1, 1 ), Color( 0, 0.211765, 0.65098, 1 ) ]
-}
-
 [sub_resource type="DynamicFont" id=57]
 size = 24
 outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
@@ -501,168 +328,7 @@ Button/styles/hover = null
 Button/styles/normal = null
 Button/styles/pressed = null
 
-[sub_resource type="DynamicFont" id=59]
-size = 45
-use_filter = true
-extra_spacing_top = 8
-extra_spacing_bottom = -2
-font_data = ExtResource( 1 )
-
-[sub_resource type="StyleBoxEmpty" id=60]
-
-[sub_resource type="DynamicFont" id=61]
-size = 70
-outline_size = 8
-outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
-use_filter = true
-extra_spacing_top = 8
-extra_spacing_bottom = -2
-font_data = ExtResource( 1 )
-
-[sub_resource type="Theme" id=62]
-default_font = SubResource( 61 )
-Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
-Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/constants/hseparation = 2
-Button/fonts/font = SubResource( 59 )
-Button/styles/disabled = null
-Button/styles/focus = SubResource( 60 )
-Button/styles/hover = null
-Button/styles/normal = null
-Button/styles/pressed = null
-
-[sub_resource type="Animation" id=63]
-resource_name = "fading"
-length = 0.4
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.2, 0.4 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 0.5, 0.5, 0.5, 1 ), Color( 1, 1, 1, 1 ) ]
-}
-
-[sub_resource type="DynamicFont" id=64]
-size = 120
-outline_size = 10
-outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
-use_filter = true
-extra_spacing_top = 8
-extra_spacing_bottom = -2
-font_data = ExtResource( 19 )
-
-[sub_resource type="Theme" id=65]
-default_font = SubResource( 64 )
-Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
-Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
-Button/constants/hseparation = 2
-Button/fonts/font = SubResource( 59 )
-Button/styles/disabled = null
-Button/styles/focus = SubResource( 60 )
-Button/styles/hover = null
-Button/styles/normal = null
-Button/styles/pressed = null
-
-[sub_resource type="Animation" id=66]
-resource_name = "flashing"
-length = 0.2
-loop = true
-tracks/0/type = "bezier"
-tracks/0/path = NodePath(".:modulate:r")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 0.1, 0.2 )
-}
-tracks/1/type = "bezier"
-tracks/1/path = NodePath(".:modulate:g")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/keys = {
-"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 0.1, 0.2 )
-}
-tracks/2/type = "bezier"
-tracks/2/path = NodePath(".:modulate:b")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/keys = {
-"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 0.1, 0.2 )
-}
-
-[sub_resource type="Animation" id=67]
-resource_name = "fading"
-length = 0.4
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.2, 0.4 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 0.5, 0.5, 0.5, 1 ), Color( 1, 1, 1, 1 ) ]
-}
-
-[sub_resource type="Animation" id=68]
-resource_name = "flashing"
-length = 0.2
-loop = true
-tracks/0/type = "bezier"
-tracks/0/path = NodePath(".:modulate:r")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 0.1, 0.2 )
-}
-tracks/1/type = "bezier"
-tracks/1/path = NodePath(".:modulate:g")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/keys = {
-"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 0.1, 0.2 )
-}
-tracks/2/type = "bezier"
-tracks/2/path = NodePath(".:modulate:b")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/keys = {
-"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 1.5, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 0.1, 0.2 )
-}
-
-[node name="CharacterSelectNet" type="Node2D"]
+[node name="CharacterSelectTraining" type="Node2D"]
 script = ExtResource( 14 )
 
 [node name="P1DirInputs" type="Node" parent="."]
@@ -685,7 +351,7 @@ autoplay = "transit_in"
 anims/RESET = SubResource( 29 )
 anims/transit_in = SubResource( 30 )
 anims/transit_to_battle = SubResource( 32 )
-anims/transit_to_netplay = SubResource( 31 )
+anims/transit_to_training = SubResource( 59 )
 
 [node name="Background" type="TextureRect" parent="."]
 material = SubResource( 23 )
@@ -752,75 +418,6 @@ theme = SubResource( 8 )
 text = "Gura"
 align = 1
 valign = 2
-
-[node name="P1_InputStyle" type="VBoxContainer" parent="."]
-visible = false
-margin_left = 88.0
-margin_top = 472.0
-margin_right = 233.0
-margin_bottom = 547.0
-custom_constants/separation = -5
-
-[node name="HybridStyle" type="Label" parent="P1_InputStyle"]
-modulate = Color( 1.2, 1.2, 1.2, 1 )
-margin_right = 145.0
-margin_bottom = 40.0
-theme = SubResource( 70 )
-custom_colors/font_color = Color( 0.686275, 0.345098, 1, 1 )
-text = "HYBRID"
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P1_InputStyle/HybridStyle"]
-autoplay = "gray"
-anims/flashing = SubResource( 71 )
-anims/gray = SubResource( 72 )
-
-[node name="ClassicStyle" type="Label" parent="P1_InputStyle"]
-margin_top = 35.0
-margin_right = 145.0
-margin_bottom = 75.0
-theme = SubResource( 70 )
-custom_colors/font_color = Color( 0.25098, 0.843137, 1, 1 )
-text = "Classic"
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P1_InputStyle/ClassicStyle"]
-autoplay = "gray"
-anims/flashing = SubResource( 73 )
-anims/gray = SubResource( 74 )
-
-[node name="P2_InputStyle" type="VBoxContainer" parent="."]
-visible = false
-margin_left = 1688.0
-margin_top = 472.0
-margin_right = 1833.0
-margin_bottom = 547.0
-custom_constants/separation = -5
-
-[node name="HybridStyle" type="Label" parent="P2_InputStyle"]
-modulate = Color( 1.2, 1.2, 1.2, 1 )
-margin_right = 145.0
-margin_bottom = 40.0
-theme = SubResource( 70 )
-custom_colors/font_color = Color( 0.686275, 0.345098, 1, 1 )
-text = "HYBRID"
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_InputStyle/HybridStyle"]
-autoplay = "gray"
-anims/flashing = SubResource( 75 )
-anims/gray = SubResource( 76 )
-
-[node name="ClassicStyle" type="Label" parent="P2_InputStyle"]
-modulate = Color( 1.2, 1.2, 1.2, 1 )
-margin_top = 35.0
-margin_right = 145.0
-margin_bottom = 75.0
-theme = SubResource( 70 )
-custom_colors/font_color = Color( 0.25098, 0.843137, 1, 1 )
-text = "Classic"
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_InputStyle/ClassicStyle"]
-autoplay = "gray"
-anims/flashing = SubResource( 77 )
-anims/gray = SubResource( 78 )
 
 [node name="P1_Sprite" type="Node2D" parent="."]
 position = Vector2( 640, 576 )
@@ -1365,6 +962,7 @@ anims/RESET = SubResource( 26 )
 anims/flashing = SubResource( 27 )
 
 [node name="P1_StageSelect" type="ColorRect" parent="."]
+visible = false
 light_mask = 2
 margin_left = 688.0
 margin_top = 8.0
@@ -1422,66 +1020,6 @@ texture = ExtResource( 20 )
 autoplay = "flashing"
 anims/RESET = SubResource( 38 )
 anims/flashing = SubResource( 39 )
-
-[node name="P2_StageSelect" type="ColorRect" parent="."]
-light_mask = 2
-margin_left = 1008.0
-margin_top = 8.0
-margin_right = 1232.0
-margin_bottom = 328.0
-color = Color( 0.121569, 0.121569, 0.121569, 1 )
-
-[node name="Light2D" type="Light2D" parent="P2_StageSelect"]
-position = Vector2( 112.25, 160 )
-scale = Vector2( 1.07416, 0.555556 )
-texture = ExtResource( 18 )
-mode = 3
-range_item_cull_mask = 2
-
-[node name="StageList" type="VBoxContainer" parent="P2_StageSelect"]
-margin_left = 0.249695
-margin_top = 32.0
-margin_right = 208.25
-margin_bottom = 284.0
-custom_constants/separation = 7
-
-[node name="StageLabel" parent="P2_StageSelect/StageList" instance=ExtResource( 21 )]
-margin_bottom = 30.0
-
-[node name="StageLabel2" parent="P2_StageSelect/StageList" instance=ExtResource( 21 )]
-margin_top = 37.0
-margin_bottom = 67.0
-
-[node name="StageLabel3" parent="P2_StageSelect/StageList" instance=ExtResource( 21 )]
-margin_top = 74.0
-margin_bottom = 104.0
-
-[node name="StageLabel4" parent="P2_StageSelect/StageList" instance=ExtResource( 21 )]
-margin_top = 111.0
-margin_bottom = 141.0
-
-[node name="StageLabel5" parent="P2_StageSelect/StageList" instance=ExtResource( 21 )]
-margin_top = 148.0
-margin_bottom = 178.0
-
-[node name="StageLabel6" parent="P2_StageSelect/StageList" instance=ExtResource( 21 )]
-margin_top = 185.0
-margin_bottom = 215.0
-
-[node name="StageLabel7" parent="P2_StageSelect/StageList" instance=ExtResource( 21 )]
-margin_top = 222.0
-margin_bottom = 252.0
-
-[node name="Arrow" type="Sprite" parent="P2_StageSelect"]
-modulate = Color( 0, 0.211765, 0.65098, 1 )
-position = Vector2( 212.25, 159 )
-scale = Vector2( -1, 1 )
-texture = ExtResource( 20 )
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_StageSelect/Arrow"]
-autoplay = "flashing"
-anims/RESET = SubResource( 40 )
-anims/flashing = SubResource( 41 )
 
 [node name="P1_ButtonCheck" type="Control" parent="."]
 margin_left = 64.0
@@ -1666,263 +1204,3 @@ margin_bottom = 391.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "5 frames"
-
-[node name="P2_ButtonCheck" type="Control" parent="."]
-margin_left = 1280.0
-margin_top = 64.0
-margin_right = 1280.0
-margin_bottom = 64.0
-
-[node name="ButtonCheckFrame" type="ColorRect" parent="P2_ButtonCheck"]
-modulate = Color( 1, 1, 1, 0.7 )
-margin_right = 576.0
-margin_bottom = 448.0
-color = Color( 0, 0, 0, 1 )
-
-[node name="ButtonCheckGrid" type="GridContainer" parent="P2_ButtonCheck"]
-margin_left = 24.0
-margin_top = 24.0
-margin_right = 552.0
-margin_bottom = 398.0
-custom_constants/vseparation = 9
-custom_constants/hseparation = 0
-columns = 2
-
-[node name="Header" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_right = 264.0
-margin_bottom = 25.0
-theme = SubResource( 58 )
-custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
-text = "Button Check"
-
-[node name="Blank6" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_left = 264.0
-margin_top = 5.0
-margin_right = 528.0
-margin_bottom = 19.0
-
-[node name="Blank7" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 34.0
-margin_right = 264.0
-margin_bottom = 48.0
-
-[node name="Blank5" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_left = 264.0
-margin_top = 34.0
-margin_right = 528.0
-margin_bottom = 48.0
-
-[node name="Up" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 57.0
-margin_right = 264.0
-margin_bottom = 81.0
-
-[node name="Light" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_left = 264.0
-margin_top = 57.0
-margin_right = 528.0
-margin_bottom = 81.0
-
-[node name="Down" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 90.0
-margin_right = 264.0
-margin_bottom = 114.0
-
-[node name="Fierce" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_left = 264.0
-margin_top = 90.0
-margin_right = 528.0
-margin_bottom = 114.0
-
-[node name="Left" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 123.0
-margin_right = 264.0
-margin_bottom = 147.0
-
-[node name="Dash" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_left = 264.0
-margin_top = 123.0
-margin_right = 528.0
-margin_bottom = 147.0
-
-[node name="Right" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 156.0
-margin_right = 264.0
-margin_bottom = 180.0
-
-[node name="Aux" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_left = 264.0
-margin_top = 156.0
-margin_right = 528.0
-margin_bottom = 180.0
-
-[node name="Jump" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 189.0
-margin_right = 264.0
-margin_bottom = 213.0
-
-[node name="Block" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_left = 264.0
-margin_top = 189.0
-margin_right = 528.0
-margin_bottom = 213.0
-
-[node name="Blank" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 222.0
-margin_right = 264.0
-margin_bottom = 236.0
-
-[node name="Blank3" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_left = 264.0
-margin_top = 222.0
-margin_right = 528.0
-margin_bottom = 236.0
-
-[node name="Unique" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_top = 245.0
-margin_right = 264.0
-margin_bottom = 269.0
-
-[node name="Special" parent="P2_ButtonCheck/ButtonCheckGrid" instance=ExtResource( 7 )]
-margin_left = 264.0
-margin_top = 245.0
-margin_right = 528.0
-margin_bottom = 269.0
-
-[node name="Blank2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 278.0
-margin_right = 264.0
-margin_bottom = 292.0
-
-[node name="Blank4" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_left = 264.0
-margin_top = 278.0
-margin_right = 528.0
-margin_bottom = 292.0
-
-[node name="TapJump" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 301.0
-margin_right = 264.0
-margin_bottom = 325.0
-theme = ExtResource( 15 )
-custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "Up to Jump:"
-
-[node name="TapJump2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_left = 264.0
-margin_top = 301.0
-margin_right = 528.0
-margin_bottom = 325.0
-theme = ExtResource( 15 )
-custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "off"
-
-[node name="DJFastfall" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 334.0
-margin_right = 264.0
-margin_bottom = 358.0
-theme = ExtResource( 15 )
-custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "DJ Fastfall:"
-
-[node name="DJFastfall2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_left = 264.0
-margin_top = 334.0
-margin_right = 528.0
-margin_bottom = 358.0
-theme = ExtResource( 15 )
-custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "off"
-
-[node name="InputBuffer" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_top = 367.0
-margin_right = 264.0
-margin_bottom = 391.0
-theme = ExtResource( 15 )
-custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "Input Buffer:"
-
-[node name="InputBuffer2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
-margin_left = 264.0
-margin_top = 367.0
-margin_right = 528.0
-margin_bottom = 391.0
-theme = ExtResource( 15 )
-custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-text = "5 frames"
-
-[node name="P1_Waiting" type="Label" parent="."]
-visible = false
-modulate = Color( 0.55835, 0.55835, 0.55835, 1 )
-margin_left = 1264.0
-margin_top = 320.0
-margin_right = 1730.0
-margin_bottom = 477.0
-theme = SubResource( 62 )
-custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
-text = "Waiting for
-opponent..."
-align = 1
-valign = 1
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P1_Waiting"]
-autoplay = "fading"
-anims/fading = SubResource( 63 )
-
-[node name="P1_Ready" type="Label" parent="."]
-visible = false
-modulate = Color( 1.0001, 1.0001, 1.0001, 1 )
-margin_left = 1192.0
-margin_top = 272.0
-margin_right = 1804.0
-margin_bottom = 527.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = SubResource( 65 )
-custom_colors/font_color = Color( 0.376471, 0.694118, 1, 1 )
-text = "Opponent
-Ready!"
-align = 1
-valign = 1
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P1_Ready"]
-autoplay = "flashing"
-anims/flashing = SubResource( 66 )
-
-[node name="P2_Waiting" type="Label" parent="."]
-visible = false
-modulate = Color( 0.728899, 0.728899, 0.728899, 1 )
-margin_left = 192.0
-margin_top = 320.0
-margin_right = 658.0
-margin_bottom = 477.0
-theme = SubResource( 62 )
-custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
-text = "Waiting for
-opponent..."
-align = 1
-valign = 1
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_Waiting"]
-autoplay = "fading"
-anims/fading = SubResource( 67 )
-
-[node name="P2_Ready" type="Label" parent="."]
-visible = false
-modulate = Color( 1.00095, 1.00095, 1.00095, 1 )
-margin_left = 120.0
-margin_top = 272.0
-margin_right = 732.0
-margin_bottom = 527.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = SubResource( 65 )
-custom_colors/font_color = Color( 0.376471, 0.694118, 1, 1 )
-text = "Opponent
-Ready!"
-align = 1
-valign = 1
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_Ready"]
-autoplay = "flashing"
-anims/flashing = SubResource( 68 )

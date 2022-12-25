@@ -1,4 +1,4 @@
-[gd_scene load_steps=122 format=2]
+[gd_scene load_steps=124 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -35,6 +35,7 @@
 [ext_resource path="res://Assets/UI/inputs/input_special.png" type="Texture" id=33]
 [ext_resource path="res://Assets/UI/inputs/input_down.png" type="Texture" id=34]
 [ext_resource path="res://Assets/UI/inputs/input_left.png" type="Texture" id=35]
+[ext_resource path="res://Scenes/Menus/ButtonTypeC4.tscn" type="PackedScene" id=36]
 [ext_resource path="res://Scenes/Shaders/Monochrome.gdshader" type="Shader" id=37]
 
 [sub_resource type="Animation" id=5]
@@ -97,6 +98,39 @@ tracks/1/keys = {
 "method": "set_fade_sound"
 }, {
 "args": [ "res://Scenes/Menus/CharacterSelect.tscn" ],
+"method": "change_scene"
+} ]
+}
+
+[sub_resource type="Animation" id=108]
+resource_name = "transit_to_char_select_training"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "set_fade_sound"
+}, {
+"args": [ "res://Scenes/Menus/CharacterSelectTraining.tscn" ],
 "method": "change_scene"
 } ]
 }
@@ -1797,6 +1831,7 @@ playback_process_mode = 0
 anims/RESET = SubResource( 5 )
 anims/start_transit_in = SubResource( 14 )
 anims/transit_to_char_select = SubResource( 36 )
+anims/transit_to_char_select_training = SubResource( 108 )
 anims/transit_to_main = SubResource( 8 )
 anims/transit_to_netplay = SubResource( 67 )
 anims/transit_to_replays = SubResource( 101 )
@@ -2408,7 +2443,6 @@ script = ExtResource( 18 )
 [node name="CanvasLayer" type="CanvasLayer" parent="PauseMenu"]
 
 [node name="Control" type="Control" parent="PauseMenu/CanvasLayer"]
-visible = false
 margin_left = 632.0
 margin_top = 352.0
 margin_right = 632.0
@@ -2468,18 +2502,141 @@ margin_bottom = 176.0
 focus_neighbour_bottom = NodePath("../Resume")
 text = "return to main menu"
 
-[node name="Cursor" type="Sprite" parent="PauseMenu/CanvasLayer/Control"]
-position = Vector2( 55.5, 156 )
+[node name="TrainingControl" type="Control" parent="PauseMenu/CanvasLayer"]
+margin_left = 632.0
+margin_top = 248.0
+margin_right = 632.0
+margin_bottom = 248.0
+
+[node name="ColorRect" type="ColorRect" parent="PauseMenu/CanvasLayer/TrainingControl"]
+margin_left = -160.0
+margin_right = 816.0
+margin_bottom = 584.0
+color = Color( 0.941176, 0.941176, 0.941176, 1 )
+
+[node name="ColorRect2" type="ColorRect" parent="PauseMenu/CanvasLayer/TrainingControl"]
+margin_left = -152.0
+margin_top = 8.0
+margin_right = 808.0
+margin_bottom = 576.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+
+[node name="Header" type="Label" parent="PauseMenu/CanvasLayer/TrainingControl"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 648.0
+margin_bottom = 104.0
+theme = ExtResource( 15 )
+custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+text = "Training Menu"
+align = 1
+valign = 1
+
+[node name="ColorRect" type="ColorRect" parent="PauseMenu/CanvasLayer/TrainingControl/Header"]
+margin_left = 136.0
+margin_top = 80.0
+margin_right = 504.0
+margin_bottom = 88.0
+color = Color( 0.941176, 0.941176, 0.941176, 1 )
+
+[node name="TrainingList" type="VBoxContainer" parent="PauseMenu/CanvasLayer/TrainingControl"]
+margin_left = -56.0
+margin_top = 128.0
+margin_right = 442.0
+margin_bottom = 544.0
+
+[node name="Resume" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingList" instance=ExtResource( 17 )]
+margin_right = 498.0
+focus_neighbour_top = NodePath("../ReturnToMainMenu")
+text = "Resume"
+
+[node name="SaveState" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingList" instance=ExtResource( 17 )]
+margin_top = 60.0
+margin_right = 498.0
+margin_bottom = 116.0
+text = "Save State"
+
+[node name="LoadState" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingList" instance=ExtResource( 17 )]
+margin_top = 120.0
+margin_right = 498.0
+margin_bottom = 176.0
+text = "Load State"
+
+[node name="SwapControls" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingList" instance=ExtResource( 17 )]
+margin_top = 180.0
+margin_right = 498.0
+margin_bottom = 236.0
+text = "Swap Controls"
+
+[node name="TrainingSettings" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingList" instance=ExtResource( 17 )]
+margin_top = 240.0
+margin_right = 498.0
+margin_bottom = 296.0
+text = "Training Settings"
+
+[node name="ReturnToCharSelect" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingList" instance=ExtResource( 17 )]
+margin_top = 300.0
+margin_right = 498.0
+margin_bottom = 356.0
+text = "Return to character select"
+
+[node name="ReturnToMainMenu" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingList" instance=ExtResource( 17 )]
+margin_top = 360.0
+margin_right = 498.0
+margin_bottom = 416.0
+focus_neighbour_bottom = NodePath("../Resume")
+text = "return to main menu"
+
+[node name="TrainingSettings" type="VBoxContainer" parent="PauseMenu/CanvasLayer/TrainingControl"]
+visible = false
+margin_left = -56.0
+margin_top = 128.0
+margin_right = 712.0
+margin_bottom = 544.0
+
+[node name="GuardGaugeAnchor" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+margin_right = 768.0
+focus_neighbour_top = NodePath("../Return")
+
+[node name="Regeneration" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+margin_top = 60.0
+margin_right = 768.0
+margin_bottom = 116.0
+
+[node name="InputViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+margin_top = 120.0
+margin_right = 768.0
+margin_bottom = 176.0
+
+[node name="HitboxViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+margin_top = 180.0
+margin_right = 768.0
+margin_bottom = 236.0
+
+[node name="FrameDataViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+margin_top = 240.0
+margin_right = 768.0
+margin_bottom = 296.0
+
+[node name="Return" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 17 )]
+margin_top = 300.0
+margin_right = 768.0
+margin_bottom = 356.0
+focus_neighbour_bottom = NodePath("../GuardGaugeAnchor")
+text = "Return"
+
+[node name="Cursor" type="Sprite" parent="PauseMenu/CanvasLayer"]
+position = Vector2( 687.5, 508 )
 scale = Vector2( 0.75, 0.75 )
 texture = ExtResource( 16 )
 offset = Vector2( 10, 0 )
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="PauseMenu/CanvasLayer/Control/Cursor"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="PauseMenu/CanvasLayer/Cursor"]
 autoplay = "default"
 anims/RESET = SubResource( 32 )
 anims/default = SubResource( 33 )
 
-[node name="AnimationPlayer2" type="AnimationPlayer" parent="PauseMenu/CanvasLayer/Control/Cursor"]
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="PauseMenu/CanvasLayer/Cursor"]
 autoplay = "default"
 anims/RESET = SubResource( 34 )
 anims/default = SubResource( 35 )

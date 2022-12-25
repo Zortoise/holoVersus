@@ -12,6 +12,7 @@ var entity_ref
 var facing := 1
 var v_facing := 1
 var master_path: NodePath
+var creator_path: NodePath
 #var master_ID: int
 var true_position := Vector2.ZERO # int*1000 instead of int, needed for slow and precise movement
 var velocity := Vector2.ZERO
@@ -27,10 +28,10 @@ var unique_data = {} # data unique for the entity, stored as a dictionary
 var hitstop = null
 
 
-# for common entities, aux_data contain "common", loaded scene stored in Globals.common_entity_data
 func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary):
 	
 	master_path = in_master_path
+	creator_path = in_master_path
 #	master_ID = get_node(master_path).player_ID
 	entity_ref = in_entity_ref
 	position = in_position
@@ -72,7 +73,7 @@ func load_entity():
 		$Sprite.texture = Globals.common_entity_data[entity_ref].spritesheet # load spritesheet
 		
 	else: # character-unique entity with loaded data stored in master's node
-		var entity_data = get_node(master_path).entity_data[entity_ref]
+		var entity_data = get_node(creator_path).entity_data[entity_ref]
 		UniqueEntity = entity_data.scene.instance() # load UniqueEntity scene
 		$SpritePlayer.init_with_loaded_frame_data($Sprite, entity_data.frame_data) # load frame data
 		$Sprite.texture = entity_data.spritesheet # load spritesheet
@@ -116,10 +117,10 @@ func load_entity():
 				$Sprite.material.shader = Globals.loaded_palette_shader
 				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqueEntity.PALETTE])
 				
-		elif get_node(master_path).loaded_palette != null: # same palette as master, just set UniqueEntity.PALETTE to null
+		elif get_node(creator_path).loaded_palette != null: # same palette as creator, just set UniqueEntity.PALETTE to null
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", get_node(master_path).loaded_palette)
+			$Sprite.material.set_shader_param("swap", get_node(creator_path).loaded_palette)
 				
 
 func simulate():
@@ -387,9 +388,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
 			hitstop = hit_data.hitstop
 			
-	# WIP, change to screen freeze later
-	if hit_data.lethal_hit: # on lethal hit, hitstop this entity's master as well
-		get_node(master_path).get_node("HitStopTimer").time = hit_data.hitstop
+#	# WIP, change to screen freeze later
+#	if hit_data.lethal_hit: # on lethal hit, hitstop this entity's master as well
+#		get_node(master_path).get_node("HitStopTimer").time = hit_data.hitstop
 			
 
 	# AUDIO ----------------------------------------------------------------------------------------------
@@ -520,14 +521,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 	
 
 func play_audio(audio_ref: String, aux_data: Dictionary):
-	var new_audio = Globals.loaded_audio_scene.instance()
-	Globals.Game.get_node("AudioPlayers").add_child(new_audio)
 	
-	if audio_ref in LoadedSFX.loaded_audio: # common audio
-		new_audio.init(audio_ref, aux_data)
-	else: # custom audio, have the audioplayer search this node's owner's unique_audio dictionary in their main character node
-		aux_data["unique_path"] = master_path # add a new key to aux_data
-		new_audio.init(audio_ref, aux_data)
+	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
+		aux_data["unique_path"] = creator_path # add a new key to aux_data
+		
+	Globals.Game.play_audio(audio_ref, aux_data)
 
 # SAVE/LOAD STATE --------------------------------------------------------------------------------------------------
 
@@ -543,6 +541,7 @@ func save_state():
 		
 		"free" : free,
 		"master_path" : master_path,
+		"creator_path" : creator_path,
 		"true_position" : true_position,
 		"velocity" : velocity,
 		"lifetime" : lifetime,
@@ -567,6 +566,7 @@ func load_state(state_data):
 
 	entity_ref = state_data.entity_ref
 	master_path = state_data.master_path
+	creator_path = state_data.creator_path
 	load_entity()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)

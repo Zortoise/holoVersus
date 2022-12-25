@@ -1,7 +1,7 @@
 extends Node
 
 var replay_saved_game_states: Dictionary
-const MAX_REPLAY_SAVE_STATES = 61
+const MAX_REPLAY_SAVE_STATES = 181
 
 var test_state # a single save state
 var freeze_frame := false

@@ -14,7 +14,7 @@ const JUMP_HORIZONTAL_SPEED = 100.0
 const AIR_JUMP_MOD = 0.9 # reduce height of air jumps
 const GRAVITY_MOD = 1.0 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 7.2 # affect terminal velocity downward
-const FASTFALL_MOD = 1.35 # fastfall speed, mod of terminal velocity
+const FASTFALL_MOD = 1.25 # fastfall speed, mod of terminal velocity
 const FRICTION = 0.15 # between 0.0 and 1.0
 const ACCELERATION = 0.15 # between 0.0 and 1.0
 const AIR_RESISTANCE = 0.03 # between 0.0 and 1.0
@@ -80,13 +80,13 @@ const MOVE_DATABASE = {
 		"atk_level" : 2,
 		"fixed_hitstop" : 1,
 		"priority": 2,
-		"active_delay": 2, # cannot hit opponents during their attack startup on first _ frames of your active animation
 		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/5,
+		"impulse_mod" : 0.5,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
 		"move_sound" : { ref = "whoosh2", aux_data = {"vol" : -12} },
 		"hit_sound" : { ref = "cut1", aux_data = {"vol" : -15} },

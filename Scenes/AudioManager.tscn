@@ -6,3 +6,5 @@
 mix_target = 2
 bus = "Game"
 script = ExtResource( 1 )
+
+[connection signal="finished" from="." to="." method="_on_AudioManager_finished"]

@@ -111,6 +111,8 @@ func retrieve_inputs(): # every frame, send the last [Netcode.max_rollback] fram
 						payload[1][frame] = [key]
 					else:
 						payload[1][frame].append(key)
+						
+#	print(payload)
 
 	rpc_unreliable("receive_payload", payload) # send payload to opponent
 	
