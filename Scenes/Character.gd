@@ -650,7 +650,7 @@ func simulate2(): # only ran if not in hitstop
 	# regen/degen GG
 	if move_memory.size() == 0:
 		
-		if !Globals.training_mode or player_ID == 0 or Globals.training_settings.gganchor == 5:
+		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.gganchor == 5):
 			
 			if current_guard_gauge < 0 and !is_blocking(): # regen GG when GG is under 100%
 				var guard_gauge_regen = UniqueCharacter.GUARD_GAUGE_REGEN_RATE * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME
@@ -671,20 +671,28 @@ func simulate2(): # only ran if not in hitstop
 				guard_gauge_degen = round(guard_gauge_degen)
 				current_guard_gauge = max(0, current_guard_gauge + guard_gauge_degen)
 				Globals.Game.guard_gauge_update(self)
-			elif !$TrainingRegenTimer.is_running(): # training mode regen GG
-				var guard_gauge_regen = round(0.2 * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME * POS_FLOW_REGEN_MOD)
-				var target = 0.0
-				match Globals.training_settings.gganchor:
-					0: pass
-					1: target = -2500
-					2: target = -5000
-					3: target = -7500
-					4: target = -10000
-				if current_guard_gauge < target:
-					current_guard_gauge = min(target, current_guard_gauge + guard_gauge_regen)
-				elif current_guard_gauge > target:
-					current_guard_gauge = max(target, current_guard_gauge - guard_gauge_regen)
-				Globals.Game.guard_gauge_update(self)
+				
+			else:
+				if player_ID == 0:
+					if current_guard_gauge < 0:
+						var guard_gauge_regen = round(0.2 * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME * POS_FLOW_REGEN_MOD)
+						current_guard_gauge = min(0, current_guard_gauge + guard_gauge_regen)
+						Globals.Game.guard_gauge_update(self)
+				if player_ID == 1:
+					if !$TrainingRegenTimer.is_running(): # training mode regen GG
+						var guard_gauge_regen = round(0.2 * abs(GUARD_GAUGE_FLOOR) * Globals.FRAME * POS_FLOW_REGEN_MOD)
+						var target = 0.0
+						match Globals.training_settings.gganchor:
+							0: pass
+							1: target = -2500
+							2: target = -5000
+							3: target = -7500
+							4: target = -10000
+						if current_guard_gauge < target:
+							current_guard_gauge = min(target, current_guard_gauge + guard_gauge_regen)
+						elif current_guard_gauge > target:
+							current_guard_gauge = max(target, current_guard_gauge - guard_gauge_regen)
+						Globals.Game.guard_gauge_update(self)
 		
 	# regen EX Gauge when standing still
 	if !Globals.training_mode:
