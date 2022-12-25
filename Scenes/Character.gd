@@ -687,13 +687,13 @@ func simulate2(): # only ran if not in hitstop
 				Globals.Game.guard_gauge_update(self)
 		
 	# regen EX Gauge when standing still
-	if !Globals.training_mode or Globals.training_settings.regen == 0:
+	if !Globals.training_mode:
 		if !Globals.Game.input_lock and state == Globals.char_state.GROUND_STANDBY and current_ex_gauge < 50000:
 			change_ex_gauge(EX_GAUGE_REGEN_RATE * Globals.FRAME)
 	else: # training mode regen EX Gauge
 		if current_ex_gauge < 50000:
 			change_ex_gauge(20000 * Globals.FRAME)
-		if !$TrainingRegenTimer.is_running() and current_damage_value > 0:
+		if Globals.training_settings.regen == 1 and !$TrainingRegenTimer.is_running() and current_damage_value > 0:
 			take_damage(-1000 * Globals.FRAME)
 	
 		
@@ -3627,11 +3627,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
-	var guard_gauge_change = calculate_guard_gauge_change(hit_data)
-	defender.change_guard_gauge(guard_gauge_change) # do GG calculation
+	defender.change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 
-	if guard_gauge_change < 0 and defender.get_guard_gauge_percent_below() <= 0.01 and !hit_data.weak_hit and \
-			!"autochain" in hit_data:  # check for break hit
+	if defender.get_guard_gauge_percent_below() <= 0.01 and !hit_data.weak_hit and \
+			!"autochain" in hit_data and !defender.query_status_effect(Globals.status_effect.BREAK_RECOVER):  # check for break hit
 		# setting to 0.01 instead of 0 allow multi-hit moves to cause break_hits on the last attack
 		hit_data.break_hit = true
 		hit_data.block_state = Globals.block_state.UNBLOCKED
