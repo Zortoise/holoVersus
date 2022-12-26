@@ -131,6 +131,14 @@ func simulate():
 #	Character.input_state
 #	Character.dir
 #	Character.v_dir
+	
+	# QUICK CANCEL AIR DASH FROM AIR BLOCK ------------------------------------------------------------------------------------
+	
+	if Character.state == Globals.char_state.AIR_BLOCK:
+		if Character.button_dash in Character.input_state.pressed and (Character.dir != 0 or Character.v_dir != 0):
+			if Animator.query_to_play(["aBlockStartup"]):
+				if Character.air_dash > 0:
+					Character.animate("aDashTransit")
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 
@@ -309,7 +317,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
 					if keep and !Character.button_light in Character.input_state.just_pressed and \
 							!Character.button_fierce in Character.input_state.just_pressed:
-						if !Animator.query(["DashBrake"]):
+						if !Animator.query(["DashBrake", "WaveDashBrake"]):
 							# cannot dash while pressing an attack, or during dash brake
 							Character.animate("DashTransit")
 							keep = false
@@ -336,10 +344,11 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								
 							elif Character.velocity_previous_frame.y < 0: # moving upward
 								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
-								Character.animate("DashBrake")
+								Character.animate("WaveDashBrake")
 								Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 									{"facing":Character.facing, "grounded":true})
-								Character.velocity.x = Character.facing * AIR_DASH_SPEED
+								if Character.dir == Character.facing:
+									Character.velocity.x = Character.facing * GROUND_DASH_SPEED * WAVE_DASH_SPEED_MOD
 								dash_sound()
 								
 							else: # not moving upward
@@ -353,6 +362,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 						if Character.air_dash > 0:
 							Character.animate("aDashTransit")
 							keep = false
+
 							
 			# DASH CANCELS ---------------------------------------------------------------------------------
 				# if land a sweetspot hit, can dash cancel afterward
@@ -952,7 +962,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Dash")
 		"Dash":
 			Character.animate("DashBrake")
-		"DashBrake":
+		"DashBrake", "WaveDashBrake":
 			Character.animate("Idle")
 		"aDashTransit":
 #			if Character.air_dash > 1:

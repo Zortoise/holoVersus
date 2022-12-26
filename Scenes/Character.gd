@@ -940,7 +940,7 @@ func simulate2(): # only ran if not in hitstop
 			
 	
 #	if UniqueCharacter.STYLE == 0:
-	if alt_block or (button_block in input_state.pressed and !button_aux in input_state.pressed):
+	if (alt_block or button_block in input_state.pressed) and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
 		match state:
 			
 		# ground blocking
@@ -971,8 +971,14 @@ func simulate2(): # only ran if not in hitstop
 					animate("aBlockStartup")
 					$VarJumpTimer.stop()
 				Globals.char_state.AIR_C_RECOVERY:
-					if !Animator.query_current(["aDashBrake", "BurstRevoke2"]): # cannot air block out of air dash
-	#					if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
+					if Animator.query(["BurstRevoke2"]): # cannot block out of BurstRevoke
+						continue
+					if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
+						if Globals.trait.AIR_DASH_BLOCK in query_traits(): # only heavyweights can block out of air dashes
+							animate("aBlockStartup")
+							$VarJumpTimer.stop()
+					else:
+			#					continue
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 			
@@ -1109,7 +1115,7 @@ func simulate2(): # only ran if not in hitstop
 					UniqueCharacter.consume_one_air_dash() # reduce air_dash count by 1
 
 		Globals.char_state.GROUND_BLOCK:
-			if !button_block in input_state.pressed and !alt_block and Animator.query_to_play(["Block"]):
+			if !button_block in input_state.pressed and !alt_block and Animator.query_current(["Block"]):
 				if !block_rec_cancel:
 					animate("BlockRecovery")
 				else:
@@ -1121,7 +1127,7 @@ func simulate2(): # only ran if not in hitstop
 			
 		Globals.char_state.AIR_BLOCK:
 #			if UniqueCharacter.STYLE == 0:
-			if !button_block in input_state.pressed and !alt_block and Animator.query_to_play(["aBlock"]):
+			if !button_block in input_state.pressed and !alt_block and Animator.query_current(["aBlock"]): # don't use to_play
 				if !block_rec_cancel:
 					animate("aBlockRecovery")
 				else:
@@ -1873,7 +1879,7 @@ func state_detect(anim):
 			return Globals.char_state.GROUND_STARTUP
 		"Dash", "BlockRecovery":
 			return Globals.char_state.GROUND_RECOVERY
-		"SoftLanding", "DashBrake", "BlockCRecovery", "HardLanding":
+		"SoftLanding", "DashBrake", "WaveDashBrake", "BlockCRecovery", "HardLanding":
 			return Globals.char_state.GROUND_C_RECOVERY
 			
 		"JumpTransit3","aJumpTransit3", "Jump", "FallTransit", "Fall":
@@ -2126,9 +2132,10 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			
 		Globals.char_state.AIR_RECOVERY:
 			if Animator.to_play_animation.begins_with("aDash") and !Animator.to_play_animation.ends_with("DD"): # wave landing
-				animate("DashBrake")
+				animate("WaveDashBrake")
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-				velocity.x = facing * UniqueCharacter.AIR_DASH_SPEED
+				if dir == facing:
+					velocity.x = facing * UniqueCharacter.GROUND_DASH_SPEED * UniqueCharacter.WAVE_DASH_SPEED_MOD
 				
 			elif Animator.query(["aBlockRecovery"]): # aBlockRecovery to BlockCRecovery
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
@@ -3627,11 +3634,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.punish_hit = true
 			# check for Punish Hits for dashes
 			Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_RECOVERY:
-				if Globals.trait.VULN_GRD_DASH in query_traits():
+				if Globals.trait.VULN_GRD_DASH in query_traits(): # all chain dashers have VULN_GRD_DASH
 					if Animator.query(["DashTransit", "Dash"]):
 						hit_data.punish_hit = true
 			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
-				if Globals.trait.VULN_AIR_DASH in query_traits():
+				if Globals.trait.VULN_AIR_DASH in query_traits(): # most characters except heavyweights have VULN_AIR_DASH
 					if Animator.query(["aDashTransit", "aDash", "aDashU", "aDashD"]):
 						hit_data.punish_hit = true
 						
@@ -4833,6 +4840,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aBlockStartup":
 			block_rec_cancel = false
 			perfect_block()
+		"aBlock":
 			$ModulatePlayer.play("EX_block_flash")
 			change_guard_gauge(UniqueCharacter.AIR_BLOCK_GG_COST)
 			play_audio("bling1", {"vol" : -16,})

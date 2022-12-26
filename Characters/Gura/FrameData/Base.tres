@@ -1193,6 +1193,27 @@ frame_data = {
 },
 "vframes": 18
 },
+"WaveDashBrake": {
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 43,
+"hurtbox": [ Vector2( 1, -7 ), Vector2( -13, -7 ), Vector2( -13, 22 ), Vector2( 6, 22 ), Vector2( 6, 5 ), Vector2( 20, 5 ), Vector2( 20, -19 ), Vector2( 1, -19 ) ]
+},
+3: {
+"frame": 51,
+"hurtbox": [ Vector2( -5, -16 ), Vector2( -12, -16 ), Vector2( -12, 22 ), Vector2( 11, 22 ), Vector2( 11, 3 ), Vector2( 16, 3 ), Vector2( 16, -23 ), Vector2( -5, -23 ) ]
+},
+6: {
+"frame": 46,
+"hurtbox": [ Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, -24 ), Vector2( -11, -24 ) ]
+}
+},
+"vframes": 18
+},
 "aBlock": {
 "duration": 27,
 "hframes": 6,

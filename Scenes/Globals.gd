@@ -44,8 +44,8 @@ enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLO
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFECT, AIR_PERFECT}
-enum trait {CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BLOCK
-		DASH_BLOCK}
+enum trait {CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BLOCK,
+		DASH_BLOCK, AIR_DASH_BLOCK}
 enum entity_trait {GROUNDED, LEDGE_STOP}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 
