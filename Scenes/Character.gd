@@ -1303,7 +1303,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$PBlockCDTimer.simulate()
 				$BurstLockTimer.simulate()
 				$PosFlowSealTimer.simulate()
-				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running():
+				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running() and state != Globals.char_state.SEQUENCE_TARGET:
 					$HitStunGraceTimer.simulate()
 					if Globals.training_mode:
 						$TrainingRegenTimer.simulate()
@@ -2673,7 +2673,10 @@ func burst_extend_check(move_name): # check if have resources to do it, then tak
 	
 func burst_revoke_check(move_name):
 	if !chain_combo in [Globals.chain_combo.RESET] or move_name in UniqueCharacter.EX_MOVES or move_name in UniqueCharacter.SUPERS or \
-		get_guard_gauge_percent_true() < BURSTREVOKE_GG_COST:
+			get_guard_gauge_percent_true() < BURSTREVOKE_GG_COST:
+		return false
+	if move_name in UniqueCharacter.MOVE_DATABASE and UniqueCharacter.MOVE_DATABASE[move_name].atk_type in \
+			[Globals.atk_type.EX, Globals.atk_type.SUPER]:
 		return false
 	if Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
 		# for projectiles and such, cannot Burst Revoke during active frames or if opponent is in hitstun/blockstun
@@ -4438,6 +4441,11 @@ func being_sequenced(hit_data):
 	
 	
 func take_seq_damage(base_damage): # return true if lethal
+	
+	$HitStunGraceTimer.time = HitStunGraceTimer_TIME # reset HitStunGraceTimer which only ticks down out of hitstun/blockstun
+	if Globals.training_mode:
+		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
+	
 	var damage = base_damage
 	
 	if current_guard_gauge > 0: # damage is reduced by Guard Gauge when it is > 100%
