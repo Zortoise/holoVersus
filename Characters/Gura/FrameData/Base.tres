@@ -505,11 +505,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 70,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 12: {
 "frame": 71,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -522,11 +522,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 72,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 3: {
 "frame": 73,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -539,7 +539,7 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 69,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -552,11 +552,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 75,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 12: {
 "frame": 76,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -569,11 +569,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 77,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 3: {
 "frame": 78,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -586,7 +586,20 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 74,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+}
+},
+"vframes": 18
+},
+"Frozen": {
+"duration": 1,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 79,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -977,6 +990,19 @@ frame_data = {
 },
 "vframes": 18
 },
+"SeqInvis": {
+"duration": 1,
+"hframes": 6,
+"loop": true,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 47,
+"hurtbox": [  ]
+}
+},
+"vframes": 18
+},
 "SeqLaunch": {
 "duration": 6,
 "hframes": 6,
@@ -1150,6 +1176,19 @@ frame_data = {
 3: {
 "frame": 17,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -13 ), Vector2( -12, -13 ) ]
+}
+},
+"vframes": 18
+},
+"Transformed": {
+"duration": 1,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 47,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -1393,11 +1432,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 80,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 12: {
 "frame": 81,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -1410,11 +1449,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 82,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 3: {
 "frame": 83,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -1427,7 +1466,7 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 79,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -1440,11 +1479,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 85,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 12: {
 "frame": 86,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -1457,11 +1496,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 87,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 },
 3: {
 "frame": 88,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18
@@ -1474,7 +1513,7 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 84,
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 18

@@ -940,7 +940,7 @@ func simulate2(): # only ran if not in hitstop
 			
 	
 #	if UniqueCharacter.STYLE == 0:
-	if (alt_block or button_block in input_state.pressed) and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
+	if (alt_block or button_block in input_state.pressed) and !button_aux in input_state.pressed:
 		match state:
 			
 		# ground blocking
@@ -1115,7 +1115,7 @@ func simulate2(): # only ran if not in hitstop
 					UniqueCharacter.consume_one_air_dash() # reduce air_dash count by 1
 
 		Globals.char_state.GROUND_BLOCK:
-			if !button_block in input_state.pressed and !alt_block and Animator.query_current(["Block"]):
+			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
 				if !block_rec_cancel:
 					animate("BlockRecovery")
 				else:
@@ -1127,7 +1127,7 @@ func simulate2(): # only ran if not in hitstop
 			
 		Globals.char_state.AIR_BLOCK:
 #			if UniqueCharacter.STYLE == 0:
-			if !button_block in input_state.pressed and !alt_block and Animator.query_current(["aBlock"]): # don't use to_play
+			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["aBlock"]): # don't use to_play
 				if !block_rec_cancel:
 					animate("aBlockRecovery")
 				else:
@@ -1372,7 +1372,6 @@ func move_true_position(in_velocity):
 	
 		
 # BUFFERING BUTTONs --------------------------------------------------------------------------------------------------	
-	# directional keys, Block, Special and EX buttons should NEVER be buffered, since they can just be held down
 	
 func buffer_actions():
 
