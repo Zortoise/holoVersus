@@ -61,5 +61,38 @@ func f_cos(angle_int: int) -> int: # returns a fraction scaled up by 10000
 	return f_sin(angle_int + 90)
 
 
+func f_lerp(start: int, end: int, weight_percent: int) -> int:
+	if weight_percent <= 0: return start
+	if weight_percent >= 100: return end
 	
+	var diff: int = end - start
+	diff = percent(diff, weight_percent)
+	return start + diff
+	
+	
+func sin_lerp(start: int, end: int, weight_percent: int) -> int: # starts and ends slow
+	if weight_percent <= 0: return start
+	if weight_percent >= 100: return end
+	
+# warning-ignore:integer_division
+	var weight2: int = percent(f_sin(percent(180, weight_percent) - 90) + 10000, 50)/ 100
+	return f_lerp(start, end , weight2)
+	
+	
+func ease_out_lerp(start: int, end: int, weight_percent: int) -> int: # starts fast and ends slow
+	if weight_percent <= 0: return start
+	if weight_percent >= 100: return end
+
+# warning-ignore:integer_division
+	var weight2: int = (f_sin(percent(percent(180, weight_percent), 50))) / 100
+	return f_lerp(start, end , weight2)
+
+
+func ease_in_lerp(start: int, end: int, weight_percent: int) -> int: # starts slow and ends fast
+	if weight_percent <= 0: return start
+	if weight_percent >= 100: return end
+
+# warning-ignore:integer_division
+	var weight2: int = (f_sin(percent(percent(180, weight_percent), 50) - 90) + 10000) / 100
+	return f_lerp(start, end , weight2)
 	

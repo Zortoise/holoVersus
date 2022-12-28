@@ -16,7 +16,7 @@ enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPEC
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE
 		QUICK_TURN_LIMIT, NON_ATTACK, CANNOT_CHAIN_INTO, NOT_FROM_C_REC, COMMAND_GRAB}
-# AIR_ATTACK = for all aerial Normals/Specials, used for anti-airs, don't erase this! Needed for air specials!
+# AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
@@ -224,20 +224,20 @@ func sin_lerp(start, end, weight):
 	return lerp(start, end , weight2)
 	
 	
-func ease_in_lerp(start, end, weight, factor = 2): # low weight changes a less, high weight changes a lot
-	if weight <= 0: return start
-	if weight >= 1: return end
-	
-	var weight2 = pow(weight, factor)
-	return lerp(start, end , weight2)
-	
-	
-func ease_out_lerp(start, end, weight, factor = 2): # low weight changes a lot, high weight changes less
-	if weight <= 0: return start
-	if weight >= 1: return end
-	
-	var weight2 = pow(weight, 1.0 / factor)
-	return lerp(start, end , weight2)
+#func ease_in_lerp(start, end, weight, factor = 2): # low weight changes a less, high weight changes a lot
+#	if weight <= 0: return start
+#	if weight >= 1: return end
+#
+#	var weight2 = pow(weight, factor)
+#	return lerp(start, end , weight2)
+#
+#
+#func ease_out_lerp(start, end, weight, factor = 2): # low weight changes a lot, high weight changes less
+#	if weight <= 0: return start
+#	if weight >= 1: return end
+#
+#	var weight2 = pow(weight, 1.0 / factor)
+#	return lerp(start, end , weight2)
 	
 
 func input_to_string(input, player_ID):
@@ -322,32 +322,109 @@ func change_zoom_level(change):
 
 # ANGLE SPLITTER ---------------------------------------------------------------------------------------------------
 
-#func split_angle2(angle: int, split_type, bias = 1):
-#	# for angle, 0 is straight right, positive is turning clockwise
-#	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
-#	# for 8 way split, the ranges would be
-#	# 338 ~ 23, 23 ~ 68, 68 ~ 113, 113 ~ 158, 158 ~ 203, 203 ~ 248, 248 ~ 293, 293 ~ 338
-#	# biased towards sideways and upward
-#	# can be biased towards left/right for straight up and straight down angles
-#
-#	angle = posmod(angle, 360)
-#
-#	var segment: float
-#
-#	match split_type:
-#		angle_split.FOUR:
-#			if angle <= 45 or angle >= 315:
-#				return compass.E
-#			if angle < 135:
-#				return compass.S
-#			if angle <= 225:
-#				return compass.W
-#			return compass.N
-#
-#		angle_split.FOUR_X:
+func split_angle2(angle: int, split_type = angle_split.FOUR, bias = 1):
+	# for angle, 0 is straight right, positive is turning clockwise
+	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
+	# for 4 way split cross, the ranges would be 270 ~ 0, 0 ~ 90, 90 ~ 180 , 180 ~ 270
+	# for 8 way split, the ranges would be
+	# 	338 ~ 23, 23 ~ 68, 68 ~ 113, 113 ~ 158, 158 ~ 203, 203 ~ 248, 248 ~ 293, 293 ~ 338
+	# for 8 way split cross, the ranges would be
+	# 	0 ~ 45, 45 ~ 90, 90 ~ 135, 135 ~ 180, 180 ~ 225, 225 ~ 270, 270 ~ 315, 315 ~ 0
+	# for 6 way split, the ranges would be
+	#	330 ~ 30, 30 ~ 90, 90 ~ 150, 150 ~ 210, 210 ~ 270, 270 ~ 330
+	# biased towards sideways and upward
+	# can be biased towards left/right for straight up and straight down angles
+
+	angle = posmod(angle, 360)
+
+	match split_type:
+		angle_split.FOUR:
+			if angle <= 45 or angle >= 315:
+				return compass.E
+			if angle < 135:
+				return compass.S
+			if angle <= 225:
+				return compass.W
+			return compass.N
+
+		angle_split.FOUR_X:
+			if angle == 90:
+				if bias == 1: return compass.SE
+				else: return compass.SW
+			if angle == 270:
+				if bias == 1: return compass.NE
+				else: return compass.NW
+			if angle <= 0 or angle > 270:
+				return compass.NE
+			if angle < 90:
+				return compass.SE
+			if angle < 180:
+				return compass.SW
+			return compass.SE 
+
+		angle_split.EIGHT:
+			if angle <= 22 or angle >= 338:
+				return compass.E
+			if angle <= 67:
+				return compass.SE
+			if angle <= 112:
+				return compass.S
+			if angle <= 157:
+				return compass.SW	
+			if angle <= 202:
+				return compass.W	
+			if angle <= 247:
+				return compass.NW	
+			if angle <= 292:
+				return compass.N
+			return compass.NE
+
+		angle_split.EIGHT_X:
+			if angle == 90:
+				if bias == 1: return compass.SSE
+				else: return compass.SSW
+			if angle == 270:
+				if bias == 1: return compass.NNE
+				else: return compass.NNW
+			if angle <= 0 and angle >= 315:
+				return compass.ENE
+			if angle <= 45:
+				return compass.ESE
+			if angle < 90:
+				return compass.SSE
+			if angle < 135:
+				return compass.SSW
+			if angle < 180:
+				return compass.WSW	
+			if angle <= 225:
+				return compass.WNW	
+			if angle < 270:
+				return compass.NNW	
+			return compass.NNE
+
+		angle_split.SIX: # 12 segments
+			if angle == 90:
+				if bias == 1: return compass.SSE2
+				else: return compass.SSW2
+			if angle == 270:
+				if bias == 1: return compass.NNE2
+				else: return compass.NNW2
+			if angle <= 30 or angle >= 330:
+				return compass.E
+			if angle < 90:
+				return compass.SSE2
+			if angle < 150:
+				return compass.SSW2
+			if angle <= 210:
+				return compass.W
+			if angle < 270:
+				return compass.NNW2
+			return compass.NNE2
+
+	return null
 			
 
-func split_angle(angle: int, split_type, bias = 1):
+func split_angle(angle: float, split_type = 0, bias = 1):
 	# for angle, 0 is straight right, positive is turning clockwise
 	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
 	# for 8 way split, the ranges would be
@@ -360,7 +437,7 @@ func split_angle(angle: int, split_type, bias = 1):
 	var segment: float
 	
 	match split_type:
-		angle_split.FOUR:
+		0:
 			segment = angle / (PI/4)
 			if segment <= 1 or segment >= 7:
 				return compass.E
@@ -370,7 +447,7 @@ func split_angle(angle: int, split_type, bias = 1):
 				return compass.W
 			return compass.N
 
-		angle_split.FOUR_X:
+		1:
 			segment = angle / (PI/2)
 			if segment == 1:
 				if bias == 1: return compass.SE
@@ -386,7 +463,7 @@ func split_angle(angle: int, split_type, bias = 1):
 				return compass.NW
 			return compass.NE
 
-		angle_split.EIGHT:
+		2:
 			segment = angle / (PI/8)
 			if segment <= 1 or segment >= 15:
 				return compass.E
@@ -404,7 +481,7 @@ func split_angle(angle: int, split_type, bias = 1):
 				return compass.N
 			return compass.NE
 
-		angle_split.EIGHT_X:
+		3:
 			segment = angle / (PI/4)
 			if segment == 2:
 				if bias == 1: return compass.SSE
@@ -428,7 +505,7 @@ func split_angle(angle: int, split_type, bias = 1):
 				return compass.NNE
 			return compass.ENE
 				
-		angle_split.SIX: # 12 segments
+		4: # 12 segments
 			segment = angle / (PI/6)
 			if segment == 3:
 				if bias == 1: return compass.SSE2
@@ -455,7 +532,7 @@ func f_compass_to_angle(compass):
 		Globals.compass.E:
 			return 0
 		Globals.compass.ESE:
-			return 23
+			return 22
 		Globals.compass.SE:
 			return 45
 		Globals.compass.SSE2:
@@ -465,7 +542,7 @@ func f_compass_to_angle(compass):
 		Globals.compass.S:
 			return 90
 		Globals.compass.SSW:
-			return 123
+			return 112
 		Globals.compass.SSW2:
 			return 120
 		Globals.compass.SW:
@@ -475,23 +552,23 @@ func f_compass_to_angle(compass):
 		Globals.compass.W:
 			return 180
 		Globals.compass.WNW:
-			return -158
+			return 202
 		Globals.compass.NW:
-			return -135
+			return 225
 		Globals.compass.NNW2:
-			return -120
+			return 240
 		Globals.compass.NNW:
-			return -123
+			return 248
 		Globals.compass.N:
-			return -90
+			return 270
 		Globals.compass.NNE:
-			return -68
+			return 292
 		Globals.compass.NNE2:
-			return -60
+			return 300
 		Globals.compass.NE:
-			return -45
+			return 315
 		Globals.compass.ENE:
-			return -23
+			return 338
 
 func compass_to_angle(compass):
 	match compass:

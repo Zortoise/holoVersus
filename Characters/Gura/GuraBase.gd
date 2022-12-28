@@ -357,26 +357,32 @@ const MOVE_DATABASE = {
 		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 	},
 	"SP1[c1]": {
+		"atk_type" : Globals.atk_type.SPECIAL, # needed to check atk_type for Burst Revoke
 		"root" : "SP1", # needed for aerial memory
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
 	},
 	"SP1[c2]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "SP1",
 		"move_sound" : { ref = "whoosh12", aux_data = {} },
 	},
 	"SP1[c3]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "SP1",
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
 	},
 	"aSP1[c1]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP1",
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
 	},
 	"aSP1[c2]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP1",
 		"move_sound" : { ref = "whoosh12", aux_data = {} },
 	},
 	"aSP1[c3]": {
+		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP1",
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
 	},
@@ -410,7 +416,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/4,
-		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE],
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE, Globals.atk_attr.AIR_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},
@@ -430,7 +436,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -PI/2,
-		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE],
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE, Globals.atk_attr.AIR_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},

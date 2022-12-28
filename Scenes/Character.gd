@@ -514,7 +514,7 @@ func test2():
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity) + "  grounded: " + str(grounded) + \
 		"\nmove_memory: " + str(move_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
-		str(input_buffer) + "\n" + str(input_state)
+		str(input_buffer) + "\n" + str(input_state) + "\nHitstun: " + str($HitStunTimer.time)
 			
 			
 func _process(_delta):
@@ -2702,7 +2702,8 @@ func test_jump_cancel():
 		if chain_combo != Globals.chain_combo.NORMAL: return false # can only jump cancel on hit (not block)
 	else:
 		if air_jump == 0: return false # if in air, need >1 air jump left
-		if chain_combo == Globals.chain_combo.BLOCKED_NORMAL: return false # if in air, can jump cancel on blocking opponents
+		if chain_combo != Globals.chain_combo.NORMAL and chain_combo != Globals.chain_combo.BLOCKED_NORMAL: 
+			return false # if in air, can jump cancel on blocking opponents
 		
 	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
 	if !is_normal_attack(move_name): return false # can only jump cancel Normals
@@ -3566,8 +3567,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.block_state = Globals.block_state.GROUND_PERFECT
 				
 			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
+				!Globals.atk_attr.AIR_ATTACK in attacker.query_atk_attr(hit_data.move_name) and \
 				attacker.chain_memory.size() == 0 and !defender.get_node("BlockStunTimer").is_running():
 				# ANTI_GUARD attacks cannot work if opponent is in blockstun or you chain into it
+				# ANTI_GUARD attacks with AIR_ATTACK cannot work on grounded opponents
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
@@ -3745,8 +3748,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
 	else:
 		$BlockStunTimer.time = calculate_blockstun(hit_data)
-	
-#	print($HitStunTimer.time)
 	
 	$VarJumpTimer.stop()
 	

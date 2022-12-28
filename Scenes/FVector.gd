@@ -41,14 +41,14 @@ func rotate(angle_int: int): # rotate vector by a certain angle, angle is in int
 func angle() -> int: # get angle of a vector by using reverse lookup on TANGENT_TABLE
 	if x == 0 and y == 0: return 0 # zero vector, just in case
 	
-	if abs(y) > abs(x * FMath.TANGENT_INF_REF): # x is too small and approaches infinity, do not divide y by x
+	if abs(y) > abs(x * FMath.TANGENT_INF_REF): # x is too small and y/x approaches infinity, do not divide y by x
 		if y >= 0:
 			return 90
 		else:
 			return 270
 			
 # warning-ignore:integer_division
-	var z: int = (y * FMath.S_FACTOR) / x
+	var z: int = (y / x) * FMath.S_FACTOR
 #	TANGENT_TABLE gives z (scaled by 10000) values for each angle in tan(angle), find closest one to your z to get the angle
 	
 	if z >= 0: # angle is 0~90 or 180~270
@@ -92,7 +92,7 @@ func _find_closest_tangent_table_key(z: int) -> int:
 func _find_closest_tangent_table_key_inverted(z: int) -> int:
 	
 	if z < -FMath.TANGENT_TABLE[FMath.TANGENT_TABLE.size() - 1]: # should not be possible but just in case
-		if z < -FMath.TANGENT_INF_REF: # -TANGENT_INF_REF is for tan(90.5)
+		if z > -FMath.TANGENT_INF_REF: # -TANGENT_INF_REF is for tan(90.5)
 			return 91
 		else: # z is under tan(90.5), return 90
 			return 90
