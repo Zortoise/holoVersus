@@ -57,6 +57,9 @@ func simulate():
 						pips[player_number][pip_number].modulate = Color(1.0, 0.0, 0.0)
 					else:
 						match players[player_number].state:
+							Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER:
+								player_stopped[player_number] = false
+								pips[player_number][pip_number].modulate = Color(1.0, 0.0, 0.0)
 							Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.3, 1.0, 1.0)

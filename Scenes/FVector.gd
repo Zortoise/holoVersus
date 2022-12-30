@@ -2,12 +2,18 @@ extends Node
 
 class_name FVector
 
-var x : int = 0
-var y : int = 0
+var x : int = 0 # scaled by FMath.S
+var y : int = 0 # scaled by FMath.S
 
 func set_vector(in_x: int, in_y: int):
 	x = in_x
 	y = in_y
+	
+func set_from_vec(in_vector:Vector2):
+# warning-ignore:narrowing_conversion
+	x = in_vector.x * FMath.S
+# warning-ignore:narrowing_conversion
+	y = in_vector.y * FMath.S
 
 func convert_to_vec() -> Vector2: # for going from scaled true_position to node position
 	return Vector2(FMath.round_and_descale(x), FMath.round_and_descale(y))
@@ -18,7 +24,7 @@ func length() -> int:
 	if angle == 0 or angle == 180:
 		return int(abs(x))
 # warning-ignore:integer_division
-	return y * FMath.S_FACTOR / FMath.f_sin(angle) # use sine to find the length of the hypotenuse
+	return y * FMath.S / FMath.f_sin(angle) # use sine to find the length of the hypotenuse
 	
 	
 func percent(percent: int): # multiply a vector's length by a percent
@@ -31,9 +37,13 @@ func rotate(angle_int: int): # rotate vector by a certain angle, angle is in int
 	var cos_angle: int = FMath.f_cos(angle_int)
 	
 # warning-ignore:integer_division
-	x = (cos_angle * x - sin_angle * y) / FMath.S_FACTOR
+	var new_x: int = (cos_angle * x - sin_angle * y) / FMath.S # place result in temp variable first!
 # warning-ignore:integer_division
-	y = (sin_angle * x + cos_angle * y) / FMath.S_FACTOR
+	var new_y: int = (sin_angle * x + cos_angle * y) / FMath.S
+	
+	x = new_x
+	y = new_y
+
 	
 	
 # ------------------------------------------------------------------------------------------------------------------------------
@@ -48,17 +58,23 @@ func angle() -> int: # get angle of a vector by using reverse lookup on TANGENT_
 			return 270
 			
 # warning-ignore:integer_division
-	var z: int = (y / x) * FMath.S_FACTOR
+	var z: int = (y * FMath.S) / x  # multiply by scaling factor first before division!
 #	TANGENT_TABLE gives z (scaled by 10000) values for each angle in tan(angle), find closest one to your z to get the angle
 	
 	if z >= 0: # angle is 0~90 or 180~270
 		var angle: int = _find_closest_tangent_table_key(z)
+		if angle == 0 or angle == 180: # special case
+			if x > 0: return 0
+			else: return 180
 		if y >= 0: # 1st half of the circle
 			return angle
 		else: # 2nd half
 			return angle + 180
 	else: # angle is 90~180 or 270~360
 		var angle: int = _find_closest_tangent_table_key_inverted(z)
+		if angle == 0 or angle == 180: # special case
+			if x > 0: return 0
+			else: return 180
 		if y >= 0: # 1st half of the circle
 			return angle
 		else: # 2nd half

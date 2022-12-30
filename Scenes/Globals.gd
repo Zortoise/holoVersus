@@ -9,7 +9,7 @@ enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, G
 		SEQUENCE_USER, SEQUENCE_TARGET}
 enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
-enum angle_split {FOUR, FOUR_X, SIX, EIGHT, EIGHT_X}
+enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
@@ -49,6 +49,7 @@ enum trait {CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BL
 		DASH_BLOCK, AIR_DASH_BLOCK}
 enum entity_trait {GROUNDED, LEDGE_STOP}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
+enum moving_platform {MOVING, WARPING}
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
 		P1_UNIQUE, P1_PAUSE,
@@ -322,7 +323,7 @@ func change_zoom_level(change):
 
 # ANGLE SPLITTER ---------------------------------------------------------------------------------------------------
 
-func split_angle2(angle: int, split_type = angle_split.FOUR, bias = 1):
+func split_angle(angle: int, split_type = angle_split.FOUR, bias = 1):
 	# for angle, 0 is straight right, positive is turning clockwise
 	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
 	# for 4 way split cross, the ranges would be 270 ~ 0, 0 ~ 90, 90 ~ 180 , 180 ~ 270
@@ -338,6 +339,17 @@ func split_angle2(angle: int, split_type = angle_split.FOUR, bias = 1):
 	angle = posmod(angle, 360)
 
 	match split_type:
+		angle_split.TWO:
+			if angle == 90:
+				if bias == 1: return compass.E
+				else: return compass.W
+			if angle == 270:
+				if bias == 1: return compass.E
+				else: return compass.W
+			if angle > 270 or angle < 90:
+				return compass.E
+			return compass.W
+			
 		angle_split.FOUR:
 			if angle <= 45 or angle >= 315:
 				return compass.E
@@ -424,110 +436,110 @@ func split_angle2(angle: int, split_type = angle_split.FOUR, bias = 1):
 	return null
 			
 
-func split_angle(angle: float, split_type = 0, bias = 1):
-	# for angle, 0 is straight right, positive is turning clockwise
-	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
-	# for 8 way split, the ranges would be
-	# 338 ~ 23, 23 ~ 68, 68 ~ 113, 113 ~ 158, 158 ~ 203, 203 ~ 248, 248 ~ 293, 293 ~ 338
-	# biased towards sideways and upward
-	# can be biased towards left/right for straight up and straight down angles
-	
-	angle = wrapf(angle, 0, TAU) # just in case
-	
-	var segment: float
-	
-	match split_type:
-		0:
-			segment = angle / (PI/4)
-			if segment <= 1 or segment >= 7:
-				return compass.E
-			if segment < 3:
-				return compass.S
-			if segment <= 5:
-				return compass.W
-			return compass.N
+#func split_angle2(angle: float, split_type = 0, bias = 1):
+#	# for angle, 0 is straight right, positive is turning clockwise
+#	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
+#	# for 8 way split, the ranges would be
+#	# 338 ~ 23, 23 ~ 68, 68 ~ 113, 113 ~ 158, 158 ~ 203, 203 ~ 248, 248 ~ 293, 293 ~ 338
+#	# biased towards sideways and upward
+#	# can be biased towards left/right for straight up and straight down angles
+#
+#	angle = wrapf(angle, 0, TAU) # just in case
+#
+#	var segment: float
+#
+#	match split_type:
+#		0:
+#			segment = angle / (PI/4)
+#			if segment <= 1 or segment >= 7:
+#				return compass.E
+#			if segment < 3:
+#				return compass.S
+#			if segment <= 5:
+#				return compass.W
+#			return compass.N
+#
+#		1:
+#			segment = angle / (PI/2)
+#			if segment == 1:
+#				if bias == 1: return compass.SE
+#				else: return compass.SW
+#			if segment == 3:
+#				if bias == 1: return compass.NE
+#				else: return compass.NW
+#			if segment > 0 and segment < 1:
+#				return compass.SE
+#			if segment < 2:
+#				return compass.SW
+#			if segment < 3:
+#				return compass.NW
+#			return compass.NE
+#
+#		2:
+#			segment = angle / (PI/8)
+#			if segment <= 1 or segment >= 15:
+#				return compass.E
+#			if segment < 3:
+#				return compass.SE
+#			if segment <= 5:
+#				return compass.S
+#			if segment < 7:
+#				return compass.SW	
+#			if segment <= 9:
+#				return compass.W	
+#			if segment < 11:
+#				return compass.NW	
+#			if segment <= 13:
+#				return compass.N
+#			return compass.NE
+#
+#		3:
+#			segment = angle / (PI/4)
+#			if segment == 2:
+#				if bias == 1: return compass.SSE
+#				else: return compass.SSW
+#			if segment == 6:
+#				if bias == 1: return compass.NNE
+#				else: return compass.NNW
+#			if segment > 0 and segment <= 1:
+#				return compass.ESE
+#			if segment < 2:
+#				return compass.SSE
+#			if segment < 3:
+#				return compass.SSW
+#			if segment < 4:
+#				return compass.WSW	
+#			if segment <= 5:
+#				return compass.WNW	
+#			if segment < 6:
+#				return compass.NNW	
+#			if segment < 7:
+#				return compass.NNE
+#			return compass.ENE
+#
+#		4: # 12 segments
+#			segment = angle / (PI/6)
+#			if segment == 3:
+#				if bias == 1: return compass.SSE2
+#				else: return compass.SSW2
+#			if segment == 9:
+#				if bias == 1: return compass.NNE2
+#				else: return compass.NNW2
+#			if segment <= 1 or segment >= 11:
+#				return compass.E
+#			if segment < 3:
+#				return compass.SSE2
+#			if segment < 5:
+#				return compass.SSW2
+#			if segment <= 7:
+#				return compass.W
+#			if segment < 9:
+#				return compass.NNW2
+#			return compass.NNE2
+#
+#	return null
 
-		1:
-			segment = angle / (PI/2)
-			if segment == 1:
-				if bias == 1: return compass.SE
-				else: return compass.SW
-			if segment == 3:
-				if bias == 1: return compass.NE
-				else: return compass.NW
-			if segment > 0 and segment < 1:
-				return compass.SE
-			if segment < 2:
-				return compass.SW
-			if segment < 3:
-				return compass.NW
-			return compass.NE
-
-		2:
-			segment = angle / (PI/8)
-			if segment <= 1 or segment >= 15:
-				return compass.E
-			if segment < 3:
-				return compass.SE
-			if segment <= 5:
-				return compass.S
-			if segment < 7:
-				return compass.SW	
-			if segment <= 9:
-				return compass.W	
-			if segment < 11:
-				return compass.NW	
-			if segment <= 13:
-				return compass.N
-			return compass.NE
-
-		3:
-			segment = angle / (PI/4)
-			if segment == 2:
-				if bias == 1: return compass.SSE
-				else: return compass.SSW
-			if segment == 6:
-				if bias == 1: return compass.NNE
-				else: return compass.NNW
-			if segment > 0 and segment <= 1:
-				return compass.ESE
-			if segment < 2:
-				return compass.SSE
-			if segment < 3:
-				return compass.SSW
-			if segment < 4:
-				return compass.WSW	
-			if segment <= 5:
-				return compass.WNW	
-			if segment < 6:
-				return compass.NNW	
-			if segment < 7:
-				return compass.NNE
-			return compass.ENE
-				
-		4: # 12 segments
-			segment = angle / (PI/6)
-			if segment == 3:
-				if bias == 1: return compass.SSE2
-				else: return compass.SSW2
-			if segment == 9:
-				if bias == 1: return compass.NNE2
-				else: return compass.NNW2
-			if segment <= 1 or segment >= 11:
-				return compass.E
-			if segment < 3:
-				return compass.SSE2
-			if segment < 5:
-				return compass.SSW2
-			if segment <= 7:
-				return compass.W
-			if segment < 9:
-				return compass.NNW2
-			return compass.NNE2
-
-	return null
-
-func f_compass_to_angle(compass):
+func compass_to_angle(compass):
 	match compass:
 		Globals.compass.E:
 			return 0
@@ -570,48 +582,48 @@ func f_compass_to_angle(compass):
 		Globals.compass.ENE:
 			return 338
 
-func compass_to_angle(compass):
-	match compass:
-		Globals.compass.E:
-			return 0.0
-		Globals.compass.ESE:
-			return PI/8
-		Globals.compass.SE:
-			return PI/4
-		Globals.compass.SSE2:
-			return PI/3
-		Globals.compass.SSE:
-			return 3*PI/8
-		Globals.compass.S:
-			return PI/2
-		Globals.compass.SSW:
-			return 5*PI/8
-		Globals.compass.SSW2:
-			return 2*PI/3
-		Globals.compass.SW:
-			return 3*PI/4
-		Globals.compass.WSW:
-			return 7*PI/8
-		Globals.compass.W:
-			return PI
-		Globals.compass.WNW:
-			return -7*PI/8
-		Globals.compass.NW:
-			return -3*PI/4
-		Globals.compass.NNW2:
-			return -2*PI/3
-		Globals.compass.NNW:
-			return -5*PI/8
-		Globals.compass.N:
-			return -PI/2
-		Globals.compass.NNE:
-			return -3*PI/8
-		Globals.compass.NNE2:
-			return -PI/3
-		Globals.compass.NE:
-			return -PI/4
-		Globals.compass.ENE:
-			return -PI/8
+#func compass_to_angle(compass):
+#	match compass:
+#		Globals.compass.E:
+#			return 0.0
+#		Globals.compass.ESE:
+#			return PI/8
+#		Globals.compass.SE:
+#			return PI/4
+#		Globals.compass.SSE2:
+#			return PI/3
+#		Globals.compass.SSE:
+#			return 3*PI/8
+#		Globals.compass.S:
+#			return PI/2
+#		Globals.compass.SSW:
+#			return 5*PI/8
+#		Globals.compass.SSW2:
+#			return 2*PI/3
+#		Globals.compass.SW:
+#			return 3*PI/4
+#		Globals.compass.WSW:
+#			return 7*PI/8
+#		Globals.compass.W:
+#			return PI
+#		Globals.compass.WNW:
+#			return -7*PI/8
+#		Globals.compass.NW:
+#			return -3*PI/4
+#		Globals.compass.NNW2:
+#			return -2*PI/3
+#		Globals.compass.NNW:
+#			return -5*PI/8
+#		Globals.compass.N:
+#			return -PI/2
+#		Globals.compass.NNE:
+#			return -3*PI/8
+#		Globals.compass.NNE2:
+#			return -PI/3
+#		Globals.compass.NE:
+#			return -PI/4
+#		Globals.compass.ENE:
+#			return -PI/8
 
 ## TURNING CLOCKWISE/COUNTERCLOCKWISE USING DIRECTIONAL KEYS -------------------------------------------------------------------
 ## turn a direction towards a target direction
@@ -692,7 +704,7 @@ func status_effect_priority(effect):
 func trait_lookup(trait):
 	match trait:
 		Globals.trait.VULN_LIMBS: # 50% damage on SD hits
-			return 0.5
+			return 50
 			
 func atk_attr_lookup(atk_attr):
 	match atk_attr:

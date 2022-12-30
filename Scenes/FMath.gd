@@ -1,9 +1,8 @@
 extends Node
 
-# variables like angles, Damage Value and EX Gauge will use FMath as well
 # angles will be limited to increments of 1 degree
 
-const S_FACTOR = 10000
+const S = 10000
 
 const SINE_TABLE = PoolIntArray([ # 0 degrees to 90 degrees
 	0, 175, 349, 523, 698, 872, 1045, 1219, 1392, 1564, 1736, 1908, 2079, 2250, 2419, 2588, 2756, 2924, 3090,
@@ -27,8 +26,8 @@ const TANGENT_INF_REF = 1145887 # if over 1145887 or under -1145887, the angle i
 func round_and_descale(in_int: int) -> int:
 	var out_int: int
 # warning-ignore:integer_division
-	var quotient: int = in_int / S_FACTOR
-	var remainder: int = in_int - (quotient * S_FACTOR)
+	var quotient: int = in_int / S
+	var remainder: int = in_int - (quotient * S)
 	if remainder >= 5000:
 		out_int = quotient + 1
 	else:
@@ -40,6 +39,12 @@ func percent(in_int: int, percent: int) -> int: # for multiplication/division (t
 	var out_int: int
 # warning-ignore:integer_division
 	out_int = (in_int * percent) / 100
+	return out_int
+	
+func get_fraction_percent(numerator: int, denominator: int) -> int: # turn a fraction into a 0~100 percent
+	var out_int: int
+# warning-ignore:integer_division
+	out_int = (numerator * 100) / denominator
 	return out_int
 
 
@@ -79,12 +84,21 @@ func sin_lerp(start: int, end: int, weight_percent: int) -> int: # starts and en
 	return f_lerp(start, end , weight2)
 	
 	
+func n_lerp(start: int, end: int, weight_percent: int) -> int: # moves in a n-shape
+	if weight_percent <= 0: return start
+	if weight_percent >= 100: return start
+	
+# warning-ignore:integer_division
+	var weight2: int = f_sin(percent(180, weight_percent)) / 100
+	return f_lerp(start, end , weight2)
+	
+	
 func ease_out_lerp(start: int, end: int, weight_percent: int) -> int: # starts fast and ends slow
 	if weight_percent <= 0: return start
 	if weight_percent >= 100: return end
 
 # warning-ignore:integer_division
-	var weight2: int = (f_sin(percent(percent(180, weight_percent), 50))) / 100
+	var weight2: int = f_sin(percent(percent(180, weight_percent), 50)) / 100
 	return f_lerp(start, end , weight2)
 
 
@@ -95,4 +109,19 @@ func ease_in_lerp(start: int, end: int, weight_percent: int) -> int: # starts sl
 # warning-ignore:integer_division
 	var weight2: int = (f_sin(percent(percent(180, weight_percent), 50) - 90) + 10000) / 100
 	return f_lerp(start, end , weight2)
+	
+	
+func find_center(array: Array) -> Vector2:
+	var total_x := 0
+	var total_y := 0
+	for point in array:
+		total_x += point.x * S
+		total_y += point.y * S
+		
+# warning-ignore:integer_division
+	var average_x: int = total_x / array.size()
+# warning-ignore:integer_division
+	var average_y: int = total_y / array.size()
+	
+	return Vector2(round_and_descale(average_x), round_and_descale(average_y))
 	

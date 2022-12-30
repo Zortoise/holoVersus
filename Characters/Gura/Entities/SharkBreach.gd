@@ -16,7 +16,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 90,
-		"knockback" : 475,
+		"knockback" : 475 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 5,
 		"fixed_hitstop" : 10,
@@ -25,7 +25,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -PI/3,
+		"KB_angle" : -60,
 		"hit_sound" : { ref = "water1", aux_data = {"vol" : -6} },
 	}
 }

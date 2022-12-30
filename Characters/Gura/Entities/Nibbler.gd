@@ -1,10 +1,10 @@
 extends Node2D
 
-const START_SPEED = 500
-const START_ROTATION = -PI/2.6 # radians, negative for upward
-const GRAVITY = 1000
-const TERMINAL_DOWN_VELOCITY = 300
-const AIR_RESISTANCE = 0.01
+const START_SPEED = 500 * FMath.S
+const START_ROTATION = -70 # integer degree, negative for upward
+const GRAVITY = 18 * FMath.S
+const TERMINAL_DOWN_VELOCITY = 300 * FMath.S
+const AIR_RESISTANCE = 1
 const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 #const LIFESPAN = null
 
@@ -23,7 +23,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 40,
-		"knockback" : 300,
+		"knockback" : 300 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
 		"guard_drain": 1500,
@@ -31,7 +31,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 1200,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -PI/4,
+		"KB_angle" : -45,
 		"hit_sound" : { ref = "cut1", aux_data = {"vol" : -12} },
 	},
 }
@@ -45,7 +45,8 @@ func init(_aux_data: Dictionary):
 	
 	match Animator.to_play_animation:
 		"Active":
-			Entity.velocity = Vector2(START_SPEED, 0).rotated(START_ROTATION)
+			Entity.velocity.set_vector(START_SPEED, 0)
+			Entity.velocity.rotate(START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 
@@ -65,8 +66,8 @@ func query_atk_attr(_move_name):
 
 			
 func simulate():
-	Entity.velocity.y = min(Entity.velocity.y + (GRAVITY * Globals.FRAME), TERMINAL_DOWN_VELOCITY)
-	Entity.velocity.x = lerp(Entity.velocity.x, 0, AIR_RESISTANCE)
+	Entity.velocity.y = int(min(Entity.velocity.y + GRAVITY, TERMINAL_DOWN_VELOCITY))
+	Entity.velocity.x = FMath.f_lerp(Entity.velocity.x, 0, AIR_RESISTANCE)
 
 	match Animator.to_play_animation: # afterimage trail
 		"Active", "bActive":
@@ -111,6 +112,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
 		"Kill":
-			Entity.velocity.x *= 0.25
-			Entity.velocity.y = -250
+			Entity.velocity.x = FMath.percent(Entity.velocity.x, 25)
+			Entity.velocity.y = -250 * FMath.S
 

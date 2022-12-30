@@ -14,8 +14,8 @@ var v_facing := 1
 var master_path: NodePath
 var creator_path: NodePath
 #var master_ID: int
-var true_position := Vector2.ZERO # int*1000 instead of int, needed for slow and precise movement
-var velocity := Vector2.ZERO
+var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
+var velocity := FVector.new()
 var lifetime := 0
 var lifespan = null
 var absorption_value = null
@@ -136,10 +136,10 @@ func simulate():
 
 func simulate2(): # only ran if not in hitstop
 	
-	if abs(velocity.x) < 5.0: # do this at the start too
-		velocity.x = 0.0
-	if abs(velocity.y) < 5.0:
-		velocity.y = 0.0
+#	if abs(velocity.x) < 5.0: # do this at the start too
+#		velocity.x = 0.0
+#	if abs(velocity.y) < 5.0:
+#		velocity.y = 0.0
 		
 	# clashing projectiles, clash with their EntityCollisionBoxes
 	if absorption_value != null and absorption_value > 0 and has_node("EntityCollisionBox"):
@@ -174,39 +174,36 @@ func simulate2(): # only ran if not in hitstop
 		$Sprite.hide()
 		return
 	
-	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
-	velocity.y = round(velocity.y)
+#	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
+#	velocity.y = round(velocity.y)
 	
-	if abs(velocity.x) < 5.0:
-		velocity.x = 0.0
-	if abs(velocity.y) < 5.0:
-		velocity.y = 0.0
+	if abs(velocity.x) < 5 * FMath.S:
+		velocity.x = 0
+	if abs(velocity.y) < 5 * FMath.S:
+		velocity.y = 0
 	
-
 	# movement
 	if has_node("EntityCollisionBox"):
 	
-		var results # [in_velocity, landing_check, collision_check, ledgedrop_check]
+		var results #  # [landing_check, collision_check, ledgedrop_check]
 		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS:
-			results = move($EntityCollisionBox, $SoftPlatformDBox, velocity, Globals.entity_trait.LEDGE_STOP in UniqueEntity.TRAITS)
+			results = move($EntityCollisionBox, $SoftPlatformDBox, Globals.entity_trait.LEDGE_STOP in UniqueEntity.TRAITS)
 		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
-			results = move($EntityCollisionBox, $EntityCollisionBox, velocity)
-			
-		velocity = results[0]
+			results = move($EntityCollisionBox, $EntityCollisionBox)
 		
 		if UniqueEntity.has_method("collision"): # entity can collide with solid platforms
 			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
 				UniqueEntity.kill()
-			elif results[2] == true: # if colliding with a solid platform, runs collision() which can kill it or bounce it
+			elif results[1]: # if colliding with a solid platform, runs collision() which can kill it or bounce it
 				UniqueEntity.collision()
 		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS and UniqueEntity.has_method("ledge_stop"):
-			if !is_on_ground($SoftPlatformDBox, velocity): # spawned in the air, kill it
+			if !is_on_ground($SoftPlatformDBox): # spawned in the air, kill it
 				UniqueEntity.kill()
-			elif (results[3] == true): # reached a ledge
+			elif results[2]: # reached a ledge
 				UniqueEntity.ledge_stop()
 		
 	else: # no collision with platforms
-		position += velocity
+		position += velocity.convert_to_vec()
 	
 	
 func simulate_after(): # do this after hit detection
@@ -226,25 +223,22 @@ func simulate_after(): # do this after hit detection
 		
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
-	# record the position to 0.001 of a pixel as integers, needed for slow and precise movements
-	# to move an object, first do move_true_position(), then get_true_position()
-	# round off the results and compare it to integer position to get move_amount and plug it in move_amount()
-	# on collision, or anything that manipulate position directly (fallthrough, moving platforms), reset true_position to integer position
+	# to move an object, first do move_true_position(), then get_rounded_position()
+	# compare it to node position to get move_amount and plug it in move_amount()
+	# on collision, or anything that manipulate position directly (fallthrough, moving platforms), reset true_position to node position
 		
 func set_true_position():
-	true_position.x = round(position.x * 1000)
-	true_position.y = round(position.y * 1000)
+	true_position.x = int(position.x * FMath.S)
+	true_position.y = int(position.y * FMath.S)
 	
-func get_true_position():
-# warning-ignore:unassigned_variable
-	var float_position: Vector2
-	float_position.x = true_position.x / 1000
-	float_position.y = true_position.y / 1000
-	return float_position
+func get_rounded_position() -> Vector2:
+	return true_position.convert_to_vec()
 	
-func move_true_position(in_velocity):
-	true_position.x = round(true_position.x + (in_velocity.x * Globals.FRAME * 1000 ))
-	true_position.y = round(true_position.y + (in_velocity.y * Globals.FRAME * 1000))
+func move_true_position(in_velocity: FVector):
+# warning-ignore:integer_division
+	true_position.x += int(in_velocity.x / 60)
+# warning-ignore:integer_division
+	true_position.y += int(in_velocity.y / 60)
 	
 # --------------------------------------------------------------------------------------------------
 		
@@ -366,17 +360,17 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	match hit_data.block_state:
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
-			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.25)
+				attacker.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
+			defender.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 25))
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
+				attacker.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
 		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-			defender.change_ex_gauge(hit_data.move_data.EX_gain)
+			defender.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
 		_:  # normal block
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
-			defender.change_ex_gauge(hit_data.move_data.EX_gain * 0.5)
+				attacker.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 50))
+			defender.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 50))
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -542,8 +536,10 @@ func save_state():
 		"free" : free,
 		"master_path" : master_path,
 		"creator_path" : creator_path,
-		"true_position" : true_position,
-		"velocity" : velocity,
+		"true_position_x" : true_position.x,
+		"true_position_y" : true_position.y,
+		"velocity_x" : velocity.x,
+		"velocity_y" : velocity.y,
 		"lifetime" : lifetime,
 		"lifespan" : lifespan,
 		"absorption_value" : absorption_value,
@@ -572,8 +568,10 @@ func load_state(state_data):
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	
 	free = state_data.free
-	true_position = state_data.true_position
-	velocity = state_data.velocity
+	true_position.x = state_data.true_position_x
+	true_position.y = state_data.true_position_y
+	velocity.x = state_data.velocity_x
+	velocity.y = state_data.velocity_y
 	lifetime = state_data.lifetime
 	lifespan = state_data.lifespan
 	absorption_value = state_data.absorption_value

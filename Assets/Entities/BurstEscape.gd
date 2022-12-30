@@ -19,7 +19,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 0,
-		"knockback" : 550,
+		"knockback" : 550 * FMath.S,
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"atk_level" : 8,
 		"fixed_entity_hitstop" : 0,
@@ -31,7 +31,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : 0.0,
+		"KB_angle" : 0,
 		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
 	}
 }

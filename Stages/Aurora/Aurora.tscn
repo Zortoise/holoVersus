@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=2]
+[gd_scene load_steps=40 format=2]
 
 [ext_resource path="res://Scenes/Stage/Stage.gd" type="Script" id=1]
 [ext_resource path="res://Stages/Aurora/Resources/main_platform.png" type="Texture" id=3]
@@ -33,9 +33,9 @@
 [ext_resource path="res://Stages/Aurora/Wisp2Spawner.gd" type="Script" id=32]
 [ext_resource path="res://Stages/Aurora/Resources/soft_platform.png" type="Texture" id=33]
 [ext_resource path="res://Scenes/Stage/SoftPlatform.tscn" type="PackedScene" id=34]
-[ext_resource path="res://Stages/Aurora/SoftPlatformLeft.gd" type="Script" id=35]
-[ext_resource path="res://Stages/Aurora/SoftPlatformRight.gd" type="Script" id=36]
-[ext_resource path="res://Stages/Aurora/SoftPlatformMiddle.gd" type="Script" id=37]
+[ext_resource path="res://Stages/Aurora/MPlatform1.gd" type="Script" id=35]
+[ext_resource path="res://Stages/Aurora/MPlatform2.gd" type="Script" id=36]
+[ext_resource path="res://Stages/Aurora/MPlatform3.gd" type="Script" id=37]
 
 [sub_resource type="CanvasItemMaterial" id=3]
 blend_mode = 1
@@ -50,21 +50,6 @@ animations = [ {
 
 [sub_resource type="CanvasItemMaterial" id=1]
 blend_mode = 1
-
-[sub_resource type="Curve2D" id=4]
-_data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128, 0 )
-}
-
-[sub_resource type="Curve2D" id=5]
-_data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 0, -24, 0, 0, 0, 0, -128, -24 )
-}
-
-[sub_resource type="Curve2D" id=6]
-_data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 0, -24, 0, 0, 0, 0, 0, -104 )
-}
 
 [node name="Aurora" type="Node2D"]
 script = ExtResource( 1 )
@@ -81,7 +66,7 @@ texture = ExtResource( 5 )
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 5
+frame = 18
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]
@@ -163,61 +148,77 @@ position = Vector2( -158, 67 )
 texture = ExtResource( 9 )
 script = ExtResource( 6 )
 
-[node name="SoftPlatformLeft" type="Path2D" parent="."]
-position = Vector2( -256, 48 )
-curve = SubResource( 4 )
+[node name="MPlatform1" type="Node2D" parent="."]
 script = ExtResource( 35 )
 
-[node name="PathFollow2D" type="PathFollow2D" parent="SoftPlatformLeft"]
-rotate = false
+[node name="MPlatform" type="Node2D" parent="MPlatform1"]
+position = Vector2( -256, 48 )
 
-[node name="Sprite" type="Sprite" parent="SoftPlatformLeft/PathFollow2D"]
+[node name="Sprite" type="Sprite" parent="MPlatform1/MPlatform"]
 position = Vector2( 0, 24 )
 texture = ExtResource( 33 )
 
-[node name="SoftPlatform" parent="SoftPlatformLeft/PathFollow2D" instance=ExtResource( 34 )]
+[node name="SoftPlatform" parent="MPlatform1/MPlatform" instance=ExtResource( 34 )]
 margin_left = -64.0
 margin_top = -8.0
 margin_right = 64.0
 margin_bottom = 8.0
 
-[node name="SoftPlatformRight" type="Path2D" parent="."]
-position = Vector2( 256, 72 )
-curve = SubResource( 5 )
+[node name="Waypoints" type="Node" parent="MPlatform1"]
+
+[node name="A" type="Position2D" parent="MPlatform1/Waypoints"]
+position = Vector2( -256, 48 )
+
+[node name="B" type="Position2D" parent="MPlatform1/Waypoints"]
+position = Vector2( -128, 48 )
+
+[node name="MPlatform2" type="Node2D" parent="."]
 script = ExtResource( 36 )
 
-[node name="PathFollow2D" type="PathFollow2D" parent="SoftPlatformRight"]
-position = Vector2( 0, -24 )
-rotate = false
+[node name="MPlatform" type="Node2D" parent="MPlatform2"]
+position = Vector2( 256, 48 )
 
-[node name="Sprite" type="Sprite" parent="SoftPlatformRight/PathFollow2D"]
+[node name="Sprite" type="Sprite" parent="MPlatform2/MPlatform"]
 position = Vector2( 3.05176e-05, 24 )
 texture = ExtResource( 33 )
 
-[node name="SoftPlatform" parent="SoftPlatformRight/PathFollow2D" instance=ExtResource( 34 )]
+[node name="SoftPlatform" parent="MPlatform2/MPlatform" instance=ExtResource( 34 )]
 margin_left = -64.0
 margin_top = -8.0
 margin_right = 64.0
 margin_bottom = 8.0
 
-[node name="SoftPlatformMiddle" type="Path2D" parent="."]
-position = Vector2( 0, 72 )
-curve = SubResource( 6 )
+[node name="Waypoints" type="Node" parent="MPlatform2"]
+
+[node name="A" type="Position2D" parent="MPlatform2/Waypoints"]
+position = Vector2( 256, 48 )
+
+[node name="B" type="Position2D" parent="MPlatform2/Waypoints"]
+position = Vector2( 128, 48 )
+
+[node name="MPlatform3" type="Node2D" parent="."]
 script = ExtResource( 37 )
 
-[node name="PathFollow2D" type="PathFollow2D" parent="SoftPlatformMiddle"]
-position = Vector2( 0, -24 )
-rotate = false
+[node name="MPlatform" type="Node2D" parent="MPlatform3"]
+position = Vector2( 0, 48 )
 
-[node name="Sprite" type="Sprite" parent="SoftPlatformMiddle/PathFollow2D"]
+[node name="Sprite" type="Sprite" parent="MPlatform3/MPlatform"]
 position = Vector2( 0, 24 )
 texture = ExtResource( 33 )
 
-[node name="SoftPlatform" parent="SoftPlatformMiddle/PathFollow2D" instance=ExtResource( 34 )]
+[node name="SoftPlatform" parent="MPlatform3/MPlatform" instance=ExtResource( 34 )]
 margin_left = -64.0
 margin_top = -8.0
 margin_right = 64.0
 margin_bottom = 8.0
+
+[node name="Waypoints" type="Node" parent="MPlatform3"]
+
+[node name="A" type="Position2D" parent="MPlatform3/Waypoints"]
+position = Vector2( 0, 48 )
+
+[node name="B" type="Position2D" parent="MPlatform3/Waypoints"]
+position = Vector2( 0, -32 )
 
 [node name="P1_Position" type="Position2D" parent="."]
 position = Vector2( -128, 128 )

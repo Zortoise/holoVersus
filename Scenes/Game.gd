@@ -62,7 +62,7 @@ var training_save_state # save state used for training mode
 
 # GameState, these are to be saved
 var frametime := 0
-var matchtime
+var matchtime: int
 var current_rng_seed: int # changed after each random number generation
 var player_input_state = { # in int form
 		"pressed" : [],
@@ -409,7 +409,7 @@ func _physics_process(_delta):
 		else:
 			HUD.get_node("MatchTime/AnimationPlayer").play("RESET")
 			
-		if matchtime_floor == 0 and !game_set:
+		if matchtime == 0 and !game_set:
 			game_set = true
 			emit_signal("time_over")
 			
@@ -534,7 +534,7 @@ func load_inputs():
 		pass
 			
 	
-# simulate LOOP --------------------------------------------------------------------------------------------------
+# SIMULATE LOOP --------------------------------------------------------------------------------------------------
 	
 # simulate a physics tick, do this function multiple times a frame to simulate without rendering
 func simulate(rendering = true):
@@ -697,7 +697,7 @@ func save_state(timestamp):
 		"entities_front_data" : [],
 		"SFX_back_data" : [],
 		"SFX_front_data" : [],
-		"audio_data" : [],
+#		"audio_data" : [],
 		"stage_data" : {},
 		"screenfreeze" : null,
 		"darken" : false,
@@ -1051,17 +1051,22 @@ func detect_hit():
 func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_disjoint = false):
 	
 	# calculate hit_center (used for emitting hitspark and sweetspotting)
-	var sum := Vector2.ZERO
-	var number_of_points := 0.0
+	var point_array := []
 	for intersect_polygon in intersect_polygons:
-		for point in intersect_polygon:
-			sum += point
-			number_of_points += 1.0
-	var hit_center: Vector2
-	hit_center = sum / number_of_points
-	hit_center.x = round(hit_center.x) # remove decimals
-	hit_center.y = round(hit_center.y) # remove decimals
+		point_array.append_array(intersect_polygon)
+	var hit_center: Vector2 = FMath.find_center(point_array)
 	
+#	var sum := Vector2.ZERO
+#	var number_of_points := 0.0
+#	for intersect_polygon in intersect_polygons:
+#		for point in intersect_polygon:
+#			sum += point
+#			number_of_points += 1.0
+#	var hit_center: Vector2
+#	hit_center = sum / number_of_points
+#	hit_center.x = round(hit_center.x) # remove decimals
+#	hit_center.y = round(hit_center.y) # remove decimals
+
 	var sweetspotted := false
 	if semi_disjoint == false and "sweetbox" in hitbox and Geometry.is_point_in_polygon(hit_center, hitbox.sweetbox):
 		sweetspotted = true # cannot sweetspot on SD hits
@@ -1094,12 +1099,12 @@ func test_priority(hitbox, hurtbox): # return false if attacker fail the priorit
 	var attacker = get_node(hitbox.owner_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
 	if defender.is_atk_active():
-		# Rule 1: you cannot hit an opponent on the 1st frame of THEIR active frame
-		# you are invincible on the 1st frame of your active frame!
+		# Rule 1: you cannot hit an opponent on the 1st frame of THEIR active frames
+		# you are invincible on the 1st frame of your active frames!
 		# this allow at least the 1st frame of the attack to be shown during clashes
 		if defender.Animator.time == 0:
 			return false
-		# Rule 2: you cannot hit an opponent using a move of higher priority on the 1st 2 frames of YOUR active frame
+		# Rule 2: you cannot hit an opponent using a move of higher priority on the 1st 2 frames of YOUR active frames
 		# this allow higher priority attack to beat lower priority ones after the frame 1 invincibility of Rule 1
 		# sweetspots should at least be 3 frames long (50ms)
 		elif attacker.Animator.time <= 1:
@@ -1363,25 +1368,25 @@ func set_input_indicator():
 
 				
 
-func damage_update(character, damage = 0):
+func damage_update(character, damage: int = 0):
 	var dmg_val_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageValue")
 	dmg_val_indicator.text = str(character.current_damage_value)
 	
 	# change color
 	var dmg_percent = character.get_damage_percent()
-	if dmg_percent < 0.25:
+	if dmg_percent < 25:
 		dmg_val_indicator.get_node("AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 1.0, 1.0)
-	elif dmg_percent >= 0.25 and dmg_percent < 0.50:
+	elif dmg_percent < 50:
 		dmg_val_indicator.get_node("AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 1.0, 0.5)
-	elif dmg_percent >= 0.50 and dmg_percent < 0.75:
+	elif dmg_percent < 75:
 		dmg_val_indicator.get_node("AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 0.5, 0.2)
-	elif dmg_percent >= 0.75 and dmg_percent < 1.0:
+	elif dmg_percent < 100:
 		dmg_val_indicator.get_node("AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 0.0, 0.0)
-	elif dmg_percent >= 1.0:
+	else:
 		dmg_val_indicator.get_node("AnimationPlayer2").play("flashing")
 		
 	if damage > 0:
@@ -1394,15 +1399,15 @@ func guard_gauge_update(character):
 	var gg_indicator1 = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1")
 	var gg_indicator2 = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge2")
 	
-	var guard_gauge_percent
+	var guard_gauge_percent: int
 	if character.current_guard_gauge <= 0:
 		guard_gauge_percent = character.get_guard_gauge_percent_below()
-		gg_indicator1.value = guard_gauge_percent * 100
+		gg_indicator1.value = guard_gauge_percent
 		gg_indicator2.value = 0
 	else:
 		guard_gauge_percent = character.get_guard_gauge_percent_above()
 		gg_indicator1.value = 100
-		gg_indicator2.value = guard_gauge_percent * 100
+		gg_indicator2.value = guard_gauge_percent
 		
 	
 func ex_gauge_update(character):
@@ -1410,12 +1415,12 @@ func ex_gauge_update(character):
 	var ex_gauge_bar = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXGauge")
 	var ex_lvl_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXLevel")
 
-	var current_ex_level = int(floor(character.current_ex_gauge / 10000.0))
-	var leftover_ex_gauge
+	var current_ex_level: int = int(character.current_ex_gauge / 10000)
+	var leftover_ex_gauge: int
 	if current_ex_level >= 5:
 		leftover_ex_gauge = 100
 	else:
-		leftover_ex_gauge = (character.current_ex_gauge - (current_ex_level * 10000.0)) / 100.0
+		leftover_ex_gauge = FMath.get_fraction_percent(character.current_ex_gauge - (current_ex_level * 10000), 10000)
 	
 	ex_gauge_bar.value = leftover_ex_gauge
 	ex_lvl_indicator.text = str(current_ex_level)
@@ -1440,7 +1445,7 @@ func ex_gauge_update(character):
 			ex_gauge_bar.get_node("AnimationPlayer").play("rainbow")
 	
 	
-func stock_points_update(character, stock_points_change = 0):
+func stock_points_update(character, stock_points_change: int = 0):
 	
 	var stock_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints")
 	if !Globals.training_mode:
@@ -1449,7 +1454,7 @@ func stock_points_update(character, stock_points_change = 0):
 		stock_indicator.text = "INF"
 		
 	
-	if stock_points_change < 0:
+	if stock_points_change < 0: # loss points
 		var stock_loss_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints/StockLoss")
 		stock_loss_indicator.text = str(stock_points_change)
 		stock_loss_indicator.get_node("AnimationPlayer").play("stock_loss")
@@ -1464,20 +1469,24 @@ func stock_points_update(character, stock_points_change = 0):
 			1:
 				Globals.winner = [0, get_player_node(0).UniqueCharacter.NAME]
 				
+				
 func burst_update(character):
 	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/BurstToken")
 	if character.has_burst:
 		burst_token.show()
 	else:
 		burst_token.hide()
+		
 				
 func set_uniqueHUD(player_ID, uniqueHUD):
 	HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Unique").add_child(uniqueHUD)
+				
 				
 func get_player_node(player_ID):
 	for player in $Players.get_children():
 		if player.player_ID == player_ID:
 			return player
+
 
 # fade out HUD elements if there is a player behind them
 func HUD_fade():
@@ -1536,8 +1545,8 @@ func HUD_fade():
 			
 # RNG GENERATOR --------------------------------------------------------------------------------------------------
 
-func rng_generate(upper_limit: int): # will return a number from 0 to (upper_limit - 1)
-	var result = current_rng_seed + posmod(frametime, 10000)
+func rng_generate(upper_limit: int) -> int: # will return a number from 0 to (upper_limit - 1)
+	var result: int = current_rng_seed + posmod(frametime, 10000)
 	current_rng_seed = wrapi(result, 1, 10000) # each call to generate a number changes the current seed
 	return posmod(result, upper_limit)
 			
@@ -1565,7 +1574,7 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary)
 	
 	
 func spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, \
-		lifetime = 10.0, afterimage_shader = Globals.afterimage_shader.MASTER):
+		lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
 	var afterimage = Globals.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
 	afterimage.init(master_path, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader)
@@ -1577,8 +1586,9 @@ func play_audio(audio_ref: String, aux_data: Dictionary):
 		var new_audio = Globals.loaded_audio_scene.instance()
 		$AudioPlayers.add_child(new_audio)
 		new_audio.init(audio_ref, aux_data)
-	else:
+	else: # during rollback, add the audio to the audio_queue instead of playing it, remove audio after AUDIO_QUEUE_LIFE frames
 		audio_queue.append({"audio_ref" : audio_ref, "aux_data" : aux_data, "time" : 0})
+		
 		
 func progress_audio_queue():
 	var to_erase = []
@@ -1588,6 +1598,7 @@ func progress_audio_queue():
 			to_erase.append(audio)
 	for x in to_erase:
 		audio_queue.erase(x)
+		
 		
 func load_queued_audio():
 	

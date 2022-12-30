@@ -2,12 +2,27 @@ extends Node
 
 
 
-#func _ready():
+func _ready():
+
+	print(FMath.get_fraction_percent(5000, 10000))
+
 #	var vector = FVector.new()
-#	vector.set_vector(10000, 20000)
-#	vector.f_rotate(-30)
-#	print(vector.x)
-#	print(vector.y)
+#	vector.set_vector(45000, 1000)
+#	print(vector.angle())
+#	vector.set_vector(45000, 1)
+#	print(vector.angle())
+#	vector.set_vector(45000, 0)
+#	print(vector.angle())
+#	vector.set_vector(45000, -1)
+#	print(vector.angle())
+#	vector.set_vector(45000, -1000)
+#	print(vector.angle())
+	
+#	for x in [0, 45, 90, 135, 180, 225, 270, 315, 360]:
+#		vector.set_vector(10000, 0)
+#		vector.rotate(x)
+#		print(str(vector.x) + " " + str(vector.y))
+
 #	vector.f_vec_percent(150)
 #	print(vector.x)
 #	print(vector.y)

@@ -1,7 +1,7 @@
 extends Node2D
 
 #const START_SPEED = 500
-const START_ROTATION = -0.245 # radians, negative for upward
+const START_ROTATION = -14 # integer degrees, negative for upward
 const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 #const LIFESPAN = null
 
@@ -20,7 +20,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 70,
-		"knockback" : 400,
+		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
 		"guard_drain": 1500,
@@ -28,7 +28,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -PI/4,
+		"KB_angle" : -45,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c2]Active" : {
@@ -36,7 +36,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 2,
 		"damage" : 50,
-		"knockback" : 450,
+		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 3,
 		"guard_drain": 1750,
@@ -44,7 +44,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 1250,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -PI/4,
+		"KB_angle" : -45,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c3]Active" : {
@@ -52,7 +52,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 3,
 		"damage" : 60,
-		"knockback" : 500,
+		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"guard_drain": 2000,
@@ -60,7 +60,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -PI/4,
+		"KB_angle" : -45,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
@@ -68,7 +68,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 3,
 		"damage" : 60,
-		"knockback" : 500,
+		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"guard_drain": 2000,
@@ -76,7 +76,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -PI/4,
+		"KB_angle" : -45,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c1]Active" : {
@@ -84,7 +84,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 70,
-		"knockback" : 400,
+		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
 		"guard_drain": 1500,
@@ -92,7 +92,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -0.295,
+		"KB_angle" : -17,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c2]Active" : {
@@ -100,7 +100,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 2,
 		"damage" : 50,
-		"knockback" : 450,
+		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 3,
 		"guard_drain": 1750,
@@ -108,7 +108,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 1250,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -0.295,
+		"KB_angle" : -17,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[c3]Active" : {
@@ -116,7 +116,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 3,
 		"damage" : 60,
-		"knockback" : 500,
+		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"guard_drain": 2000,
@@ -124,7 +124,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -0.295,
+		"KB_angle" : -17,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"a[ex]Active" : {
@@ -132,7 +132,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 3,
 		"damage" : 60,
-		"knockback" : 500,
+		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"guard_drain": 2000,
@@ -140,7 +140,7 @@ const MOVE_DATABASE = {
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
-		"KB_angle" : -0.295,
+		"KB_angle" : -17,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	}
 }
@@ -176,43 +176,49 @@ func init(aux_data: Dictionary):
 				
 	match Animator.to_play_animation:
 		"[c1]Spawn":
-			Entity.velocity = Vector2(500, 0).rotated(START_ROTATION)
+			Entity.velocity.set_vector(500 * FMath.S, 0)
+			Entity.velocity.rotate(START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 			Entity.life_point = 1
 		"[c2]Spawn":
-			Entity.velocity = Vector2(650, 0).rotated(START_ROTATION)
+			Entity.velocity.set_vector(650 * FMath.S, 0)
+			Entity.velocity.rotate(START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 2
 			Entity.life_point = 2
 			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-					{"facing":Entity.facing, "rot":START_ROTATION, "palette" : Entity.master_path})
+					{"facing":Entity.facing, "rot":deg2rad(START_ROTATION), "palette" : Entity.master_path})
 		"[c3]Spawn", "[ex]Spawn":
-			Entity.velocity = Vector2(800, 0).rotated(START_ROTATION)
+			Entity.velocity.set_vector(800 * FMath.S, 0)
+			Entity.velocity.rotate(START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 3
 			Entity.life_point = 3
 			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":START_ROTATION})
+					{"facing":Entity.facing, "rot":deg2rad(START_ROTATION)})
 		"a[c1]Spawn":
-			Entity.velocity = Vector2(500, 0).rotated(-START_ROTATION)
+			Entity.velocity.set_vector(500 * FMath.S, 0)
+			Entity.velocity.rotate(-START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 			Entity.life_point = 1
 		"a[c2]Spawn":
-			Entity.velocity = Vector2(650, 0).rotated(-START_ROTATION)
+			Entity.velocity.set_vector(650 * FMath.S, 0)
+			Entity.velocity.rotate(-START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 2
 			Entity.life_point = 2
 			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-					{"facing":Entity.facing, "rot":-START_ROTATION, "palette" : Entity.master_path})
+					{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION), "palette" : Entity.master_path})
 		"a[c3]Spawn", "a[ex]Spawn":
-			Entity.velocity = Vector2(800, 0).rotated(-START_ROTATION)
+			Entity.velocity.set_vector(800 * FMath.S, 0)
+			Entity.velocity.rotate(-START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 3
 			Entity.life_point = 3
 			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":-START_ROTATION})
+					{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION)})
 
 #	Entity.lifespan = LIFESPAN # set starting lifespan
 #	Entity.absorption_value = ABSORPTION # set starting absorption_value
@@ -262,14 +268,14 @@ func simulate():
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-						{"facing":Entity.facing, "rot":START_ROTATION, "palette" : Entity.master_path})
+						{"facing":Entity.facing, "rot": deg2rad(START_ROTATION), "palette" : Entity.master_path})
 						
 		"a[c3]Active", "a[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-						{"facing":Entity.facing, "rot":-START_ROTATION, "palette" : Entity.master_path})
+						{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION), "palette" : Entity.master_path})
 	
 	
 func kill(sound = true):
@@ -323,5 +329,5 @@ func _on_SpritePlayer_anim_finished(anim_name):
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
 		"Kill", "aKill":
-			Entity.velocity = Vector2.ZERO
+			Entity.velocity.set_vector(0, 0)
 

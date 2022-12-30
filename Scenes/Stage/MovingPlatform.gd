@@ -1,34 +1,32 @@
-extends Path2D
+extends Node2D
 
 
-onready var box = $PathFollow2D/SoftPlatform
+onready var box = $MPlatform/SoftPlatform
 
 	
 # move all movable entities on it too, no momentum, called by script extending this
 func move_platform():
 	# in_unit_offset is float between 0.0 and 1.0 for moving platform, bool for vanishing platform
 	
-	var unit_offset = call("movement_pattern")
+	var new_position: Vector2 = call("movement_pattern")
 	
-	if !unit_offset is bool: # actual moving platform
+	if get("TYPE") == Globals.moving_platform.MOVING: # actual moving platform
 		# get all riding entities
 		var rider_boxes = []
 		# get collision boxes of all grounded entities
-		var character_boxes = get_tree().get_nodes_in_group("Grounded")
-		for character_box in character_boxes:
-			if is_riding(character_box): # check if riding
-				rider_boxes.append(character_box)
+		var collision_boxes = get_tree().get_nodes_in_group("Grounded")
+		for collision_box in collision_boxes:
+			if is_riding(collision_box): # check if riding
+				rider_boxes.append(collision_box)
 		
-		var old_position = $PathFollow2D.position # store old position
-		$PathFollow2D.unit_offset = unit_offset # change offset
-		$PathFollow2D.position.x = round($PathFollow2D.position.x) # round position into integer or hell awaits
-		$PathFollow2D.position.y = round($PathFollow2D.position.y)
-		var position_change = $PathFollow2D.position - old_position # use new position to calculate position_change vector
+		var old_position = $MPlatform.position # store old position
+		$MPlatform.position = new_position # move platform
+		var position_change: Vector2 = new_position - old_position # use new position to calculate position_change vector
 		
 		# apply position_change vector to all riding entities
 		for rider_box in rider_boxes:
 			if rider_box.is_in_group("Players") or rider_box.is_in_group("Entities"):
-				 # rider is player character
+				 # rider is player character/grounded entity
 				# position_change need to be in integer!'
 				var rider = rider_box.get_parent()
 				rider.move_amount(position_change, rider_box, rider.get_node("SoftPlatformDBox"))
@@ -36,17 +34,11 @@ func move_platform():
 					rider.call("set_true_position")
 				# no need the velocity, grounded Entities always have SoftPlatformDBox
 			else:
-				rider_box.get_parent().position += position_change # for most other grounded entities, don't need to check for collision
+				rider_box.get_parent().position += position_change # for grounded sfx, don't need to check for collision
 						
-	else: # vanishing platform
-		
-#		var old_position = $PathFollow2D.position # store old position
-		if unit_offset:
-			$PathFollow2D.unit_offset = 0.0
-		elif !unit_offset:
-			$PathFollow2D.unit_offset = 1.0
-		$PathFollow2D.position.x = round($PathFollow2D.position.x)
-		$PathFollow2D.position.y = round($PathFollow2D.position.y)
+	elif get("TYPE") == Globals.moving_platform.WARPING: # teleporting platform, vanishing platforms just warp offstage
+		$MPlatform.position = new_position # move platform
+
 
 					
 func is_riding(character_box):
@@ -73,20 +65,16 @@ func is_riding(character_box):
 		
 # SAVE/LOAD STATE --------------------------------------------------------------------------------------------------
 
+#func load_state():
+#	$MPlatform.position = call("movement_pattern")
+
 func save_state():
 	var state_data = {
-		"offset" : $PathFollow2D.unit_offset, # calculating it again from movement_pattern() can cause issues
+		"position" : $MPlatform.position, # must save and not recalculate, or could cause desync
 	}
 	return state_data
 
 func load_state(stage_state_data): # move platform without moving riders
-	$PathFollow2D.unit_offset = stage_state_data[name].offset # change offset to loaded one
-	$PathFollow2D.position.x = round($PathFollow2D.position.x)
-	$PathFollow2D.position.y = round($PathFollow2D.position.y)
+	$MPlatform.position = stage_state_data[name].position
 	
-#	var loaded_unit_offset = call("movement_pattern") # calculate with script extending this
-#
-#	$PathFollow2D.unit_offset = loaded_unit_offset # change offset to loaded one
-#	$PathFollow2D.position.x = round($PathFollow2D.position.x)
-#	$PathFollow2D.position.y = round($PathFollow2D.position.y)
 

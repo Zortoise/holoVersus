@@ -33,10 +33,10 @@ func init(aux_data: Dictionary):
 		
 	match Animator.to_play_animation:
 		"Spawn":
-			Entity.velocity = Vector2(250, 0)
+			Entity.velocity.set_vector(250 * FMath.S, 0)
 			Entity.velocity.x *= Entity.facing
 		"[h]Spawn":
-			Entity.velocity = Vector2(150, 0)
+			Entity.velocity.set_vector(150 * FMath.S, 0)
 			Entity.velocity.x *= Entity.facing
 			
 func simulate():
@@ -90,11 +90,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 		"Turn":
 			Animator.play("Active")
-			Entity.velocity = Vector2(250, 0)
+			Entity.velocity.set_vector(250 * FMath.S, 0)
 			Entity.velocity.x *= Entity.facing
 		"[h]Turn":
 			Animator.play("[h]Active")
-			Entity.velocity = Vector2(150, 0)
+			Entity.velocity.set_vector(150 * FMath.S, 0)
 			Entity.velocity.x *= Entity.facing
 			
 func _on_SpritePlayer_anim_started(anim_name):
@@ -103,5 +103,5 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Entity.velocity.x = 0
 			Entity.face(-Entity.facing)
 		"Kill":
-			Entity.velocity = Vector2.ZERO
+			Entity.velocity.set_vector(0, 0)
 

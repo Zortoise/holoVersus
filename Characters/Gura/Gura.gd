@@ -289,9 +289,10 @@ func process_instant_actions():
 						
 		if "BitemarkTrigger" in Character.instant_actions:
 			if Character.unique_data.nibbler_count > 0:
-				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
-				spawn_point.x = round(spawn_point.x)
-				spawn_point.y = round(spawn_point.y)
+#				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
+#				spawn_point.x = round(spawn_point.x)
+#				spawn_point.y = round(spawn_point.y)
+				var spawn_point = FMath.find_center([get_node(Character.targeted_opponent_path).position, Character.position])
 				var spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point2 == null: # if no ground found below, check above a little
 					spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
@@ -680,6 +681,9 @@ func afterimage_trail():# process afterimage trail
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			Character.afterimage_trail()
 			
+func get_speed(): # later can have effects that increase SPEED
+	return SPEED
+			
 func query_move_data(move_name) -> Dictionary: # can only be called during active frames
 	# move data may change for certain moves under certain conditions, unique to character
 	var move_data = MOVE_DATABASE[move_name]
@@ -813,15 +817,15 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 				Character.play_audio("cut1", {"vol":-12})
 		"SP6[ex]SeqB":
 			if Character.dir != 0: # can air strafe when going up
-				Character.velocity.x += Character.dir * 10
+				Character.velocity.x += Character.dir * 10 * FMath.S
 			else:
-				Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
-			Character.velocity.x = clamp(Character.velocity.x, -100, 100) # max air strafe speed
-			Character.velocity.y += 1000 * Globals.FRAME # gravity
+				Character.velocity.x = FMath.f_lerp(Character.velocity.x, 0, 20) # air res
+			Character.velocity.x = clamp(Character.velocity.x, -100 * FMath.S, 100 * FMath.S) # max air strafe speed
+			Character.velocity.y += 18 * FMath.S # gravity
 			if Animator.time in [0, 21]:
 				Character.play_audio("whoosh3", {"vol":-10})
 		"SP6[ex]SeqC":
-			Character.velocity.x = lerp(Character.velocity.x, 0, 0.2) # air res
+			Character.velocity.x = FMath.f_lerp(Character.velocity.x, 0, 20) # air res
 		"SP6[ex]SeqD":
 			Partner.afterimage_trail()
 			if Character.grounded: end_sequence_step("ground") # secondary trigger, in case the one in Character.simulate_sequence() fails
@@ -851,25 +855,25 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 	match Animator.to_play_animation:
 		"SP6[ex]SeqA":
 			Globals.Game.get_node("Players").move_child(Character, 0) # move Grabber to back, some grabs move Grabbed to back
-			Character.velocity = Vector2.ZERO # freeze first
-			Partner.velocity = Vector2.ZERO
+			Character.velocity.set_vector(0, 0) # freeze first
+			Partner.velocity.set_vector(0, 0)
 			Partner.animate("aSeqFlinchAFreeze")
 			Partner.face(-Character.facing)
 			Partner.get_node("ModulatePlayer").play("tech_flash")
 			Character.play_audio("bling6", {"vol":-20})
 		"SP6[ex]SeqB":
-			Character.velocity = Vector2(0, -500) # jump up
+			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
 			if Character.grounded:
 				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP6[ex]SeqC":
-			Character.velocity.y = 600 # dive down
+			Character.velocity.set_vector(0, 600 * FMath.S)  # dive down
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, \
 					{"facing":Character.facing, "rot":PI/2})
 			Character.play_audio("water14", {})
 		"SP6[ex]SeqE":  # you hit ground
 			Partner.sequence_hit(0)
-			Character.velocity = Vector2.ZERO
+			Character.velocity.set_vector(0, 0)
 			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "back":true, "grounded":true})
@@ -883,7 +887,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Character.play_audio("rock3", {})
 		"aSP6[ex]SeqE":  # parther hit the ground but not you
 			Partner.sequence_hit(0)
-			Character.velocity = Vector2.ZERO
+			Character.velocity.set_vector(0, 0)
 			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
@@ -929,7 +933,7 @@ func move_sequence_target(new_position): # move sequence_target to new position
 			
 	if results[2]: # Grabbed hit the wall/ceiling/ground outside ground trigger, reposition Grabber
 		var reposition = Partner.position + (Character.position - Animator.query_point("grabpoint"))
-		var reposition_results = Character.move_sequence_player_to(reposition)
+		var reposition_results = Character.move_sequence_player_to(reposition) # [in_velocity, landing_check, collision_check, ledgedrop_check]
 		if reposition_results[2]: # fail to reposition properly
 			end_sequence_step("break") # break grab
 			
@@ -1316,86 +1320,58 @@ func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
 		"Dash":
 			Character.velocity.x = GROUND_DASH_SPEED * Character.facing
-			Character.friction_mod = 0.0
+			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 		"aDashTransit":
 			Character.aerial_memory = []
-			Character.velocity.x *= 0.2
-			Character.velocity.y *= 0.2
-			Character.gravity_mod = 0.0
+			Character.velocity.percent(20)
+			Character.anim_gravity_mod = 0
 		"aDash":
 			consume_one_air_dash()
-#			if Character.air_dash == 0:
-#				Character.velocity.x = AIR_DASH_SPEED * 1.2 * Character.facing
-#			else:
-			Character.velocity.x = AIR_DASH_SPEED * Character.facing
-			Character.velocity.y = 0
-			Character.gravity_mod = 0.0
+			Character.velocity.set_vector(AIR_DASH_SPEED * Character.facing, 0)
+			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
-#		"aDashD":
-#			consume_one_air_dash()
-#			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/4 * Character.facing)
-#			Character.gravity_mod = 0.0
-#			Character.afterimage_timer = 1 # sync afterimage trail
-#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/4})
-#		"aDashU":
-#			consume_one_air_dash()
-#			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/4 * Character.facing)
-#			Character.gravity_mod = 0.0
-#			Character.afterimage_timer = 1 # sync afterimage trail
-#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/4})	
-#		"AirDashDD":
-#			consume_one_air_dash()
-##			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/2 * Character.facing)
-#			Character.velocity.y = AIR_DASH_SPEED
-#			Character.gravity_mod = 0.0
-#			Character.afterimage_timer = 1 # sync afterimage trail
-#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/2})
-#		"AirDashUU":
-#			consume_one_air_dash()
-##			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/2 * Character.facing)
-#			Character.velocity.y = -AIR_DASH_SPEED
-#			Character.gravity_mod = 0.0
-#			Character.afterimage_timer = 1 # sync afterimage trail
-#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/2})	
 		"aDashD":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(PI/7 * Character.facing)
-			Character.gravity_mod = 0.0
+			Character.velocity.set_vector(AIR_DASH_SPEED * Character.facing, 0)
+			Character.velocity.rotate(26 * Character.facing)
+			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 		"aDashU":
 			consume_one_air_dash()
-			Character.velocity = Vector2(AIR_DASH_SPEED * Character.facing, 0).rotated(-PI/7 * Character.facing)
-			Character.gravity_mod = 0.0
+			Character.velocity.set_vector(AIR_DASH_SPEED * Character.facing, 0)
+			Character.velocity.rotate(-26 * Character.facing)
+			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})
 			
 		"L2Startup":
-			Character.velocity.x += Character.facing * SPEED * 0.8
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 80)
 		"L2Active":
-			Character.velocity.x += Character.facing * SPEED * 1.2
-			Character.friction_mod = 0.0
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 120)
+			Character.anim_friction_mod = 0
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 		"L2Recovery":
-			Character.velocity = Vector2(500 * Character.facing, 0).rotated(-PI/2.3 * Character.facing)
+			Character.velocity.set_vector(500 * FMath.S * Character.facing, 0)
+			Character.velocity.rotate(-78 * Character.facing)
 		"F1Startup":
-			Character.velocity.x += Character.facing * SPEED * 0.25
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
 		"F1Active":
-			Character.velocity.x += Character.facing * SPEED * 0.5
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
 			Character.sfx_over.show()
 		"F2bStartup":
-			Character.velocity.x += Character.facing * SPEED * 0.5
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
 		"F3[h]Startup":
 			Character.get_node("ModulatePlayer").play("armor_flash")
 		"F1Recovery", "F2Active", "F2Recovery", "F3Active", "F3Recovery":
 			Character.sfx_over.show()
 		"HStartup":
-			Character.velocity.x += Character.facing * SPEED * 0.5
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
 		"HActive", "HbActive", "HbRecovery":
 			Character.sfx_under.show()
 			Character.sfx_over.show()
@@ -1404,84 +1380,85 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.sfx_over.show()
 			
 		"aL1Startup":
-			Character.velocity_limiter.x = 0.85
-			Character.gravity_mod = 0.75
+			Character.velocity_limiter.x = 85
+			Character.anim_gravity_mod = 75
 		"aL1Active":
-			Character.velocity_limiter.x = 0.85
-			Character.gravity_mod = 0.75
+			Character.velocity_limiter.x = 85
+			Character.anim_gravity_mod = 75
 			Character.sfx_under.show()
 		"aL1Recovery":
-			Character.velocity_limiter.x = 0.85
+			Character.velocity_limiter.x = 85
 			Character.sfx_under.show()
 		"aL2Active":
-			Character.velocity_limiter.x = 0.85
-			Character.velocity_limiter.down = 1.2
+			Character.velocity_limiter.x = 85
+			Character.velocity_limiter.down = 120
 		"aL2Recovery":
-			Character.velocity.y = -600
+			Character.velocity.y = -600 * FMath.S
 			Character.sfx_over.show()
 		"aF1Startup":
-			Character.velocity_limiter.x = 0.85
-			Character.gravity_mod = 0.75
+			Character.velocity_limiter.x = 85
+			Character.anim_gravity_mod = 75
 		"aF1[h]Startup":
-			Character.velocity_limiter.x = 0.85
+			Character.velocity_limiter.x = 85
 		"aF1Active":
-			Character.velocity_limiter.x = 0.85
-			Character.velocity_limiter.down = 1.0
-			Character.gravity_mod = 0.75
+			Character.velocity_limiter.x = 85
+			Character.velocity_limiter.down = 100
+			Character.anim_gravity_mod = 75
 			Character.sfx_over.show()
 		"aF1Recovery":
-			Character.velocity_limiter.x = 0.85
-			Character.velocity_limiter.down = 1.0
+			Character.velocity_limiter.x = 85
+			Character.velocity_limiter.down = 100
 			Character.sfx_over.show()
 		"aF3Startup":
-			Character.velocity_limiter.x = 0.85
-			Character.velocity_limiter.down = 0.0
-			Character.velocity_limiter.up = 1.0
-			Character.gravity_mod = 0.0
+			Character.velocity_limiter.x = 85
+			Character.velocity_limiter.down = 0
+			Character.velocity_limiter.up = 100
+			Character.anim_gravity_mod = 0
 		"aF3Active":
-			Character.velocity = Vector2(200 * Character.facing, 0).rotated(-PI/2.5 * Character.facing)
-			Character.gravity_mod = 0.0
+			Character.velocity.set_vector(200 * FMath.S * Character.facing, 0)
+			Character.velocity.rotate(-72 * Character.facing)
+			Character.anim_gravity_mod = 0
 			Character.sfx_over.show()
 		"aF3Recovery":
-			Character.velocity_limiter.x = 0.75
-			Character.velocity_limiter.down = 1.0
+			Character.velocity_limiter.x = 75
+			Character.velocity_limiter.down = 100
 			Character.sfx_over.show()
 		"aHStartup":
-			Character.velocity_limiter.x_slow = 0.2
-			Character.velocity_limiter.y_slow = 0.2
-			Character.gravity_mod = 0.0
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
 			Character.sfx_over.show()
 		"aHActive":
-			Character.velocity = Vector2.ZERO
+			Character.velocity.set_vector(0, 0)
 			Character.velocity_limiter.x = 0
-			Character.gravity_mod = 0.0
+			Character.anim_gravity_mod = 0
 			Character.sfx_over.show()
 		"aHRecovery":
-			Character.velocity_limiter.x = 0.7
-			Character.velocity_limiter.down = 0.7
+			Character.velocity_limiter.x = 70
+			Character.velocity_limiter.down = 70
 			Character.sfx_over.show()
 			
 		"aSP1Startup", "aSP1[ex]Startup":
-			Character.velocity_limiter.x_slow = 0.2
-			Character.velocity_limiter.y_slow = 0.2
-			Character.gravity_mod = 0.0
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
 		"aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup":
-			Character.velocity_limiter.x = 0.2
-			Character.velocity_limiter.down = 0.2
+			Character.velocity_limiter.x = 20
+			Character.velocity_limiter.down = 20
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
-			Character.velocity.x += Character.facing * SPEED * 0.5
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
-			Character.velocity.x += Character.facing * SPEED * 0.5
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
-			Character.velocity.x += Character.facing * SPEED * 0.5
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[ex]Active":
-			Character.velocity.x += Character.facing * SPEED * 0.5
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP1[c1]Active":
@@ -1493,95 +1470,92 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aSP1[ex]Active":
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4})
 		"aSP1Recovery", "aSP1[ex]Recovery":
-			Character.velocity_limiter.x = 0.7
-			Character.velocity_limiter.down = 0.7
+			Character.velocity_limiter.x = 70
+			Character.velocity_limiter.down = 70
 			
 		"aSP2Startup", "aSP2[ex]Startup":
-			Character.velocity_limiter.x_slow = 0.2
-			Character.velocity_limiter.y_slow = 0.2
-			Character.gravity_mod = 0.0
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
 			Character.sfx_under.show()
 		"aSP2Active":
-			Character.velocity.x = Character.facing * 400
-			Character.velocity.y = 0
-			Character.gravity_mod = 0.0
-			Character.friction_mod = 0.0
+			Character.velocity.set_vector(Character.facing * 400 * FMath.S, 0)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
 			Character.sfx_under.show()
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
 		"aSP2[h]Active":
-			Character.velocity.x = Character.facing * 500
-			Character.velocity.y = 0
-			Character.gravity_mod = 0.0
-			Character.friction_mod = 0.0
+			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
 			Character.sfx_under.show()
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
 		"aSP2[ex]Active":
-			Character.velocity.x = Character.facing * 500
-			Character.velocity.y = 0
-			Character.gravity_mod = 0.0
-			Character.friction_mod = 0.0
+			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
 			Character.sfx_under.show()
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
 		"aSP2[h]Recovery":
-			Character.velocity_limiter.down = 0.2
-			Character.velocity.x *= 0.5
-			Character.gravity_mod = 0.25
-			Character.friction_mod = 0.0
+			Character.velocity_limiter.down = 20
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.anim_gravity_mod = 25
+			Character.anim_friction_mod = 0
 			Character.sfx_under.show()
 		"aSP2Recovery", "aSP2CRecovery":
-			Character.velocity_limiter.down = 0.7
-			Character.velocity.x *= 0.5
-			Character.gravity_mod = 0.25
+			Character.velocity_limiter.down = 70
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.anim_gravity_mod = 25
 			Character.sfx_under.show()
 		
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			Character.sfx_under.show()
 		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
-			Character.velocity.x *= 0.5
-			Character.velocity_limiter.y_slow = 0.2
-			Character.gravity_mod = 0.0
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
 			Character.sfx_under.show()
 #		"aSP3bStartup":
 #			Character.velocity.x *= 0.5
 #			Character.velocity.y = -500
-#			Character.gravity_mod = 0.0
+#			Character.anim_gravity_mod = 0.0
 #			Character.sfx_under.show()
 		"aSP3Active":
-			Character.velocity.x *= 0.5
-			Character.velocity.y = -500
-			Character.gravity_mod = 0.0
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.velocity.y = -500 * FMath.S
+			Character.anim_gravity_mod = 0
 			Character.sfx_under.show()
 #		"aSP3b[h]Startup", "aSP3b[ex]Startup":
 #			Character.velocity.x *= 0.5
 #			Character.velocity.y = -700
-#			Character.gravity_mod = 0.0
+#			Character.anim_gravity_mod = 0.0
 #			Character.sfx_under.show()
 		"aSP3[h]Active", "aSP3[ex]Active":
-			Character.velocity.x *= 0.5
-			Character.velocity.y = -700
-			Character.gravity_mod = 0.0
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.velocity.y = -700 * FMath.S
+			Character.anim_gravity_mod = 0
 			Character.sfx_under.show()
 		"aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			Character.sfx_under.show()
 		"aSP3Recovery", "aSP3[ex]Recovery":
-			Character.velocity_limiter.x = 0.7
+			Character.velocity_limiter.x = 70
 			Character.sfx_under.show()
 			
 		"SP4Startup", "SP4[ex]Startup":
 			Character.sfx_under.show()
 		"SP4Active":
-			Character.velocity.x += Character.facing * SPEED * 0.25
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
 			Character.sfx_under.show()
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {})
 			Character.unique_data.groundfin_count += 1
 		"SP4[h]Active":
-			Character.velocity.x += Character.facing * SPEED * 0.25
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
 			Character.sfx_under.show()
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {"held" : true})
 			Character.unique_data.groundfin_count += 1
 		"SP4[ex]Active":
-			Character.velocity.x += Character.facing * SPEED * 0.25
+			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
 			Character.sfx_under.show()
 			var spawn_point = Animator.query_point("entityspawn")
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"ex" : true})
@@ -1593,38 +1567,37 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP5Startup", "SP5[ex]Startup":
 			Character.sfx_under.show()
 		"aSP5Startup", "aSP5[ex]Startup":
-			Character.velocity_limiter.x_slow = 0.2
-			Character.velocity_limiter.y_slow = 0.2
-			Character.gravity_mod = 0.0
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
 			Character.sfx_under.show()
 		"aSP5Active", "aSP5[ex]Active":
-			Character.velocity.x = Character.facing * 200
-			Character.velocity.y = 0
-			Character.gravity_mod = 0.0
-			Character.friction_mod = 0.0
+			Character.velocity.set_vector(Character.facing * 200 * FMath.S, 0)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
 			Character.sfx_under.show()
 			if Character.grounded:
 				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP5Recovery", "aSP5[ex]Recovery":
-			Character.velocity_limiter.down = 0.2
-			Character.velocity.x *= 0.5
-			Character.gravity_mod = 0.25
+			Character.velocity_limiter.down = 20
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.anim_gravity_mod = 25
 			Character.sfx_under.show()
 			
 		"SP6[ex]Startup":
-			Character.velocity.x = 0.0
+			Character.velocity.x = 0
 		"aSP6[ex]Startup":
-			Character.velocity_limiter.x_slow = 0.2
-			Character.velocity_limiter.y_slow = 0.2
-			Character.gravity_mod = 0.0
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
 		"aSP6[ex]Active":
 			if Character.grounded:
-				Character.velocity.x = Character.facing * 100
-			Character.velocity.y = 0.0
-			Character.gravity_mod = 0.0
+				Character.velocity.x = Character.facing * 100 * FMath.S
+			Character.velocity.y = 0
+			Character.anim_gravity_mod = 0
 		"aSP6[ex]Recovery": # whiff grab
-			Character.velocity_limiter.x = 0.2
-			Character.gravity_mod = 0.25
+			Character.velocity_limiter.x = 20
+			Character.anim_gravity_mod = 25
 			Character.play_audio("fail1", {"vol":-20})
 		"SP6[ex]Recovery": # whiff grab
 			Character.play_audio("fail1", {"vol":-20})
@@ -1634,8 +1607,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.face(-Character.facing)
 		"aSP6[ex]GrabRecovery":
 			Character.face(-Character.facing)
-			Character.velocity_limiter.down = 0.2
-			Character.gravity_mod = 0.25
+			Character.velocity_limiter.down = 20
+			Character.anim_gravity_mod = 25
 			
 	start_audio(anim_name)
 
@@ -1660,7 +1633,7 @@ func start_audio(anim_name):
 			if Character.velocity_previous_frame.y > 0:
 				landing_sound()
 		"LaunchTransit":
-			if Character.grounded and abs(Character.velocity.y) < 1:
+			if Character.grounded and abs(Character.velocity.y) < 1 * FMath.S:
 				Character.play_audio("launch2", {"vol" : -3, "bus":"LowPass"})
 			else:
 				Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
