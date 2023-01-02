@@ -349,7 +349,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 									{"facing":Character.facing, "grounded":true})
 								if Character.dir == Character.facing:
-									Character.velocity.x = Character.facing * GROUND_DASH_SPEED * WAVE_DASH_SPEED_MOD
+									Character.velocity.x = Character.facing * GROUND_DASH_SPEED
 								dash_sound()
 								
 							else: # not moving upward

@@ -7,7 +7,7 @@ var game_ongoing := false
 
 var opponent_payload = null
 var opponent_latest_correct_time := 0
-var rollback_starttime = null # tells the game to frame to load and start stimulating
+var rollback_starttime = null # tells the game which frame to load and start stimulating
 var time_diff := 0 # number of frames to speed up for, set to non-zero if behind in time
 
 var INPUTS_PACKET_CHECKER = [[],[]] # used for checking if a toggled key belongs to player 1/2
