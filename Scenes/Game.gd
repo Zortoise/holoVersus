@@ -76,6 +76,8 @@ var captured_input_state = { # use for capturing inputs, during input delay cann
 var screenfreeze = null # when set to a player_ID, only that player will simulate, along with any sfx/shadow spawned during screenfreeze
 var darken := false # stage will turn dark
 var input_lock := true
+var screenstop := 0 # when set to a number pause game for that number of frames, used mostly for non-lethal last hit of supers
+					# (especially projectile and beam supers), often used with screenshake
 
 var game_set := false # caused issue when save/loaded, need more testing
 
@@ -646,6 +648,7 @@ func simulate(rendering = true):
 		
 	check_superfreeze() # only freeze after players/entites/sfx have simulated
 	check_lethalfreeze()
+	process_screenstop()
 			
 	frame_viewer.simulate()
 
@@ -701,6 +704,7 @@ func save_state(timestamp):
 		"stage_data" : {},
 		"screenfreeze" : null,
 		"darken" : false,
+		"screenstop" : 0,
 	}
 	
 	game_state.match_data.frametime = frametime
@@ -712,6 +716,7 @@ func save_state(timestamp):
 #	game_state.match_data.game_set = game_set
 	game_state.screenfreeze = screenfreeze
 	game_state.darken = darken
+	game_state.screenstop = screenstop
 	
 
 	for player in $Players.get_children():
@@ -830,6 +835,7 @@ func load_state(game_state, loading_autosave = true):
 		
 	# do these after re-adding the children
 	screenfreeze = loaded_game_state.screenfreeze
+	screenstop = loaded_game_state.screenstop
 	process_screenfreeze()
 	darken = loaded_game_state.darken
 	process_darken()
@@ -1244,9 +1250,19 @@ func screenshake():
 func set_screenshake(amount = 5):
 	if amount > screen_shake_amount:
 		screen_shake_amount = amount
+		
+func set_screenstop(amount = 20):
+	screenstop = amount
+	process_screenfreeze()
+	
+func process_screenstop():
+	if screenstop > 0:
+		screenstop = max(screenstop - 1, 0)
+		if screenstop == 0:
+			process_screenfreeze()
 	
 func process_screenfreeze():
-	if screenfreeze != null:
+	if screenfreeze != null or screenstop != 0:
 		for x in get_tree().get_nodes_in_group("StagePause"):
 			for x_child in x.get_children():
 				if x_child is AnimatedSprite:
@@ -1320,7 +1336,7 @@ func check_lethalfreeze():
 			process_screenfreeze()
 			
 func is_stage_paused():
-	if screenfreeze != null:
+	if screenfreeze != null or screenstop != 0:
 		return true
 	else: return false
 	

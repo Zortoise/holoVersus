@@ -582,7 +582,9 @@ func simulate(new_input_state):
 			UniqueCharacter.update_uniqueHUD()
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
-			Globals.Game.superfreeze(get_path())
+#			Globals.Game.superfreeze(get_path())
+			Globals.Game.set_screenstop()
+			Globals.Game.set_screenshake()
 
 		
 # PAUSING --------------------------------------------------------------------------------------------------
@@ -4825,15 +4827,16 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Run":
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"JumpTransit2":
-			if button_down in input_state.pressed: # down and jump to hop, cannot hop on soft platforms
+			if button_jump in input_state.pressed and (button_down in input_state.pressed or button_up in input_state.pressed):
+				# down/up and jump to hop
 				velocity.y = -FMath.percent(UniqueCharacter.JUMP_SPEED, HOP_JUMP_MOD)
 				if dir != 0: # when hopping can press left/right for a long hop
 					var boost: int = dir * FMath.percent(UniqueCharacter.get_speed(), UniqueCharacter.LONG_HOP_JUMP_MOD)
 					velocity.x += boost
 					velocity.x = int(clamp(velocity.x, -abs(boost), abs(boost)))
-			elif button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to super jump, cannot adjust height
-				velocity.y = -FMath.percent(UniqueCharacter.JUMP_SPEED, UniqueCharacter.SUPER_JUMP_MOD)
-				velocity.x = 0
+#			elif button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to super jump, cannot adjust height
+#				velocity.y = -FMath.percent(UniqueCharacter.JUMP_SPEED, UniqueCharacter.SUPER_JUMP_MOD)
+#				velocity.x = 0
 			else:
 				velocity.y = -UniqueCharacter.JUMP_SPEED
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME

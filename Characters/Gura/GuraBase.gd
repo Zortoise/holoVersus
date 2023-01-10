@@ -25,7 +25,7 @@ const GROUND_DASH_SPEED = 480 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 390 * FMath.S # duration in animation data
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
-const SUPER_JUMP_MOD = 150
+#const SUPER_JUMP_MOD = 150
 const WAVE_DASH_SPEED_MOD = 150 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
 const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have higher
