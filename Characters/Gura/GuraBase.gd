@@ -6,7 +6,7 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 360 * FMath.S # ground speed
+const SPEED = 340 * FMath.S # ground speed
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
@@ -16,12 +16,12 @@ const GRAVITY_MOD = 100 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 720 # affect terminal velocity downward
 const FASTFALL_MOD = 125 # fastfall speed, mod of terminal velocity
 const FRICTION = 15 # between 0.0 and 1.0
-const ACCELERATION = 15 # between 0.0 and 1.0
+const ACCELERATION = 10 # between 0.0 and 1.0
 const AIR_RESISTANCE = 3 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 100 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const GROUND_DASH_SPEED = 480 * FMath.S # duration in animation data
+const GROUND_DASH_SPEED = 420 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 390 * FMath.S # duration in animation data
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
@@ -486,6 +486,7 @@ const MOVE_DATABASE = {
 	"aSP3b" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"chain_starter" : "aSP3",
+		"no_revoke_time" : 0, # time after which you cannot use burst revoke
 		"hitcount" : 1,
 		"damage" : 70,
 		"knockback" : 475 * FMath.S,
@@ -526,6 +527,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP3b",
 		"chain_starter" : "aSP3[h]",
+		"no_revoke_time" : 0, 
 		"hitcount" : 1,
 		"damage" : 70,
 		"knockback" : 500 * FMath.S,

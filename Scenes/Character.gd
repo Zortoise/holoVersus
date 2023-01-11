@@ -2695,21 +2695,28 @@ func burst_revoke_check(move_name):
 	if !chain_combo in [Globals.chain_combo.RESET] or move_name in UniqueCharacter.EX_MOVES or move_name in UniqueCharacter.SUPERS or \
 			(current_guard_gauge + 10000) < BURSTREVOKE_GG_COST:
 		return false
-	if move_name in UniqueCharacter.MOVE_DATABASE and UniqueCharacter.MOVE_DATABASE[move_name].atk_type in \
-			[Globals.atk_type.EX, Globals.atk_type.SUPER]:
-		return false
-	if Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
-		# for projectiles and such, cannot Burst Revoke during active frames or if opponent is in hitstun/blockstun
-		if is_atk_active():
+	if is_atk_active(): # for active frames, only attacking specials can be revoked
+		if move_name in UniqueCharacter.MOVE_DATABASE and UniqueCharacter.MOVE_DATABASE[move_name].atk_type == Globals.atk_type.SPECIAL and \
+				!Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
+			if "no_revoke_time" in UniqueCharacter.MOVE_DATABASE[move_name] and \
+					Animator.time >= UniqueCharacter.MOVE_DATABASE[move_name].no_revoke_time: # some moves cannot be revoked after a specific time
+				return false
+		else:
 			return false
-		var target = get_node(targeted_opponent_path)
-		if target.get_node("HitStunTimer").is_running() or target.get_node("BlockStunTimer").is_running():
+	else: # for recovery frames, only non-attack specials can be revoked, and only if opponent is not in hitstun/blockstun
+		if Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
+			var target = get_node(targeted_opponent_path)
+			if target.get_node("HitStunTimer").is_running() or target.get_node("BlockStunTimer").is_running():
+				return false
+		else:
 			return false
+			
 	change_guard_gauge(-BURSTREVOKE_GG_COST)
 	status_effect_to_remove.append(Globals.status_effect.POS_FLOW)
 	pos_flow_seal = true
 	$PosFlowSealTimer.time = PosFlowSealTimer_TIME
 	return true
+	
 	
 func test_jump_cancel():
 	if grounded:
@@ -4328,8 +4335,10 @@ func check_if_crossed_up(angle_to_atker: int):
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
 		
 	if hit_data.block_state != Globals.block_state.UNBLOCKED:
+		if "multihit" in hit_data: return 5 # blocked multihit attack has less blockstop
 		match hit_data.block_state:
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
+				if "entity_nodepath" in hit_data: return 0 # perfect blocking entities cause 0 blockstop
 				return PERFECTBLOCK_HITSTOP # increase hitstop for perfect block
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 				return WRONGBLOCK_HITSTOP
