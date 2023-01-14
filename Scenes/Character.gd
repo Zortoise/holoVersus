@@ -40,6 +40,7 @@ const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape aft
 const EX_MOVE_COST = 10000 # 10000
 const PosFlowSealTimer_TIME = 60 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
 const TrainingRegenTimer_TIME = 60 # number of frames before GG/Damage Value start regening
+const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -3592,8 +3593,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN:
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
+			var crossed_up: bool = check_if_crossed_up(attacker, hit_data.angle_to_atker)
 			
-			if (defender.get_node("PBlockTimer").is_running() or defender.Animator.query(["PBlockstun", "aPBlockStun"])) and \
+			if !crossed_up and (defender.get_node("PBlockTimer").is_running() or defender.Animator.query(["PBlockstun", "aPBlockStun"])) and \
 				!Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name): # cannot p-block hard-to-block moves
 				# being in PBlockstun will continue to PBlock all attacks
 				hit_data.block_state = Globals.block_state.GROUND_PERFECT
@@ -3616,8 +3618,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.GROUND
 				
-			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-				check_if_crossed_up(hit_data.angle_to_atker): # entities cannot cross-up
+			elif crossed_up and !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name):
+				# entities cannot cross-up
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			else:
@@ -3625,11 +3627,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 		Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN:
 			hit_data.sweetspotted = false  # blocking will not cause sweetspot hits
+			var crossed_up: bool = check_if_crossed_up(attacker, hit_data.angle_to_atker)
 
 			if Globals.atk_attr.ANTI_AIR in attacker_or_entity.query_atk_attr(hit_data.move_name):
 				hit_data.block_state = Globals.block_state.AIR_WRONG # anti-air attacks always wrongblock airborne defenders
 			
-			elif ((defender.get_node("PBlockTimer").is_running() and Globals.trait.AIR_PERFECT_BLOCK in defender.query_traits()) or \
+			elif !crossed_up and ((defender.get_node("PBlockTimer").is_running() and Globals.trait.AIR_PERFECT_BLOCK in defender.query_traits()) or \
 				defender.Animator.query(["PBlockstun", "aPBlockStun"])) and \
 				!Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name):
 				#  being in PBlockstun will continue to PBlock all aerial attacks
@@ -3651,8 +3654,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.AIR
 				
-			elif !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name) and \
-				check_if_crossed_up(hit_data.angle_to_atker): # entities cannot cross-up
+			elif crossed_up and !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name):
+				# entities cannot cross-up
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
 			else:
@@ -4210,6 +4213,8 @@ func calculate_knockback_dir(hit_data) -> int:
 	var ref_vector := FVector.new() # vector from KBOrigin to hit_center
 	if KBOrigin:
 		ref_vector.set_from_vec(hit_data.hit_center - KBOrigin)
+	else:
+		ref_vector.set_from_vec(hit_data.hit_center - attacker_or_entity.position)
 	
 	match knockback_type:
 		Globals.knockback_type.FIXED, Globals.knockback_type.MIRRORED:
@@ -4221,16 +4226,16 @@ func calculate_knockback_dir(hit_data) -> int:
 				knockback_dir = posmod(180 - hit_data.move_data.KB_angle, 360) # mirror knockback angle horizontally if facing other way
 				
 			if knockback_type == Globals.knockback_type.MIRRORED: # mirror it again if wrong way
-				if KBOrigin:
-					var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, hit_data.attack_facing)
-					match segment:
-						Globals.compass.E:
-							if ref_vector.x < 0:
-								knockback_dir = posmod(180 - knockback_dir, 360)
-						Globals.compass.W:
-							if ref_vector.x > 0:
-								knockback_dir = posmod(180 - knockback_dir, 360)
-				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
+#				if KBOrigin:
+				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, hit_data.attack_facing)
+				match segment:
+					Globals.compass.E:
+						if ref_vector.x < 0:
+							knockback_dir = posmod(180 - knockback_dir, 360)
+					Globals.compass.W:
+						if ref_vector.x > 0:
+							knockback_dir = posmod(180 - knockback_dir, 360)
+#				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
 		Globals.knockback_type.RADIAL:
 			if KBOrigin:
@@ -4328,7 +4333,11 @@ func calculate_blockstun(hit_data) -> int:
 	return FMath.round_and_descale(scaled_blockstun)
 	
 	
-func check_if_crossed_up(angle_to_atker: int):
+func check_if_crossed_up(attacker, angle_to_atker: int):
+# warning-ignore:narrowing_conversion
+	var x_dist: int = abs(attacker.position.x - position.x)
+	if x_dist <= CROSS_UP_MIN_DIST: return false
+	
 	var segment = Globals.split_angle(angle_to_atker, Globals.angle_split.FOUR)
 	if segment == Globals.compass.N or segment == Globals.compass.S:
 		return false
