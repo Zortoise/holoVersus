@@ -75,7 +75,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup", "aSP3bStartup", "aSP3b[h]Startup", "aSP3b[ex]Startup":
+		"aSP3Startup", "aSP3[h]Startup", "aSP3bStartup", "aSP3b[h]Startup", "aSP3b[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
@@ -349,7 +349,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 									{"facing":Character.facing, "grounded":true})
 								if Character.dir == Character.facing:
-									Character.velocity.x = Character.facing * GROUND_DASH_SPEED
+									Character.velocity.x = Character.facing * get_stat("GROUND_DASH_SPEED")
 								dash_sound()
 								
 							else: # not moving upward
@@ -671,7 +671,7 @@ func consume_one_air_dash(): # different characters can have different types of 
 	Character.air_dash = max(Character.air_dash - 1, 0)
 	
 func gain_one_air_dash(): # different characters can have different types of air_dash consumption
-	if Character.air_dash < MAX_AIR_DASH: # cannot go over
+	if Character.air_dash < get_stat("MAX_AIR_DASH"): # cannot go over
 		Character.air_dash += 1
 
 func afterimage_trail():# process afterimage trail
@@ -681,26 +681,39 @@ func afterimage_trail():# process afterimage trail
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			Character.afterimage_trail()
 			
-func get_speed(): # later can have effects that increase SPEED
-	return SPEED
+#func get_speed(): # later can have effects that increase SPEED
+#	return SPEED
+	
+func get_stat(stat: String):
+	
+	match stat: # later can have effects that changes stats
+		_:
+			pass
+	
+	return get(stat)
+	
 			
 func query_move_data(move_name) -> Dictionary: # can only be called during active frames
-	# move data may change for certain moves under certain conditions, unique to character
+	
+	if !move_name in MOVE_DATABASE:
+		print("Error: Cannot retrieve move_data for " + move_name)
+		return {}
+	
 	var move_data = MOVE_DATABASE[move_name]
 	
-	match move_data:
+	match move_data: # move data may change for certain moves under certain conditions, unique to character
 		_ :
 			pass
 	
 	return move_data
 	
-func query_priority(move_name) -> int: # can only be called during active frames
-			
-	if move_name in MOVE_DATABASE and "priority" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].priority
-		
-	print("Error: Cannot retrieve priority for " + move_name)
-	return 0
+#func query_priority(move_name) -> int: # can only be called during active frames
+#
+#	if move_name in MOVE_DATABASE and "priority" in MOVE_DATABASE[move_name]:
+#		return MOVE_DATABASE[move_name].priority
+#
+#	print("Error: Cannot retrieve priority for " + move_name)
+#	return 0
 	
 func query_atk_attr(move_name) -> Array: # may have certain conditions
 
@@ -742,29 +755,29 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 func query_traits(): # may have special conditions
 	return TRAITS
 
-func query_move_EX_gain(move_name):
-	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].EX_gain
-	else: print("Error: Cannot retrieve EX_gain for " + move_name)
-	
-func query_move_damage(move_name):
-	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].damage
-	else: print("Error: Cannot retrieve damage for " + move_name)
-	
-func query_move_knockback(move_name):
-	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].knockback
-	else: print("Error: Cannot retrieve knockback for " + move_name)
-	
-func query_move_atk_level(move_name):
-	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].atk_level
-	else: print("Error: Cannot retrieve atk_level for " + move_name)
-	
-func query_move_guard_drain(move_name):
-	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_drain
-	else: print("Error: Cannot retrieve guard_drain for " + move_name)
-	
-func query_move_guard_gain_on_combo(move_name):
-	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_gain_on_combo
-	else: print("Error: Cannot retrieve guard_gain_on_combo for " + move_name)
+#func query_move_EX_gain(move_name):
+#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].EX_gain
+#	else: print("Error: Cannot retrieve EX_gain for " + move_name)
+#
+#func query_move_damage(move_name):
+#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].damage
+#	else: print("Error: Cannot retrieve damage for " + move_name)
+#
+#func query_move_knockback(move_name):
+#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].knockback
+#	else: print("Error: Cannot retrieve knockback for " + move_name)
+#
+#func query_move_atk_level(move_name):
+#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].atk_level
+#	else: print("Error: Cannot retrieve atk_level for " + move_name)
+#
+#func query_move_guard_drain(move_name):
+#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_drain
+#	else: print("Error: Cannot retrieve guard_drain for " + move_name)
+#
+#func query_move_guard_gain_on_combo(move_name):
+#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_gain_on_combo
+#	else: print("Error: Cannot retrieve guard_gain_on_combo for " + move_name)
 
 # HIT REACTIONS --------------------------------------------------------------------------------------------------
 
@@ -1237,10 +1250,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP3[ex]Active")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
-		"aSP3[ex]Startup":
-			Character.animate("aSP3[ex]Active")
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
-					{"facing":Character.facing, "rot":-PI/2})
+#		"aSP3[ex]Startup":
+#			Character.animate("aSP3[ex]Active")
+#			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
+#					{"facing":Character.facing, "rot":-PI/2})
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1319,7 +1332,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 
 	match anim_name:
 		"Dash":
-			Character.velocity.x = GROUND_DASH_SPEED * Character.facing
+			Character.velocity.x = get_stat("GROUND_DASH_SPEED") * Character.facing
 			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
@@ -1330,29 +1343,29 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 		"aDash":
 			consume_one_air_dash()
-			Character.velocity.set_vector(AIR_DASH_SPEED * Character.facing, 0)
+			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 		"aDashD":
 			consume_one_air_dash()
-			Character.velocity.set_vector(AIR_DASH_SPEED * Character.facing, 0)
+			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 		"aDashU":
 			consume_one_air_dash()
-			Character.velocity.set_vector(AIR_DASH_SPEED * Character.facing, 0)
+			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})
 			
 		"L2Startup":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 80)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 80)
 		"L2Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 120)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 120)
 			Character.anim_friction_mod = 0
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
@@ -1360,18 +1373,18 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.set_vector(500 * FMath.S * Character.facing, 0)
 			Character.velocity.rotate(-78 * Character.facing)
 		"F1Startup":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
 		"F1Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Character.sfx_over.show()
 		"F2bStartup":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 		"F3[h]Startup":
 			Character.get_node("ModulatePlayer").play("armor_flash")
 		"F1Recovery", "F2Active", "F2Recovery", "F3Active", "F3Recovery":
 			Character.sfx_over.show()
 		"HStartup":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 		"HActive", "HbActive", "HbRecovery":
 			Character.sfx_under.show()
 			Character.sfx_over.show()
@@ -1446,19 +1459,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 20
 			Character.velocity_limiter.down = 20
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[ex]Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 50)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP1[c1]Active":
@@ -1511,7 +1524,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			Character.sfx_under.show()
-		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
+		"aSP3Startup", "aSP3[h]Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
@@ -1545,17 +1558,17 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP4Startup", "SP4[ex]Startup":
 			Character.sfx_under.show()
 		"SP4Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
 			Character.sfx_under.show()
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {})
 			Character.unique_data.groundfin_count += 1
 		"SP4[h]Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
 			Character.sfx_under.show()
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {"held" : true})
 			Character.unique_data.groundfin_count += 1
 		"SP4[ex]Active":
-			Character.velocity.x += Character.facing * FMath.percent(SPEED, 25)
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
 			Character.sfx_under.show()
 			var spawn_point = Animator.query_point("entityspawn")
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"ex" : true})

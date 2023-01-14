@@ -1257,6 +1257,7 @@ func set_screenstop(amount = 20):
 	
 func process_screenstop():
 	if screenstop > 0:
+# warning-ignore:narrowing_conversion
 		screenstop = max(screenstop - 1, 0)
 		if screenstop == 0:
 			process_screenfreeze()

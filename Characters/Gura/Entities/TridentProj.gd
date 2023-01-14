@@ -223,30 +223,63 @@ func init(aux_data: Dictionary):
 #	Entity.lifespan = LIFESPAN # set starting lifespan
 #	Entity.absorption_value = ABSORPTION # set starting absorption_value
 
-func query_move_data_and_name():
+#func query_move_data_and_name():
+#
+#	var move_ref = Animator.to_play_animation
+#
+#	match move_name:
+#		"[c1]Spawn":
+#			move_name = "[c1]Active"
+#		"[c2]Spawn":
+#			move_name = "[c2]Active"
+#		"[c3]Spawn":
+#			move_name = "[c3]Active"
+#		"[ex]Spawn":
+#			move_name = "[ex]Active"
+#		"a[c1]Spawn":
+#			move_name = "a[c1]Active"
+#		"a[c2]Spawn":
+#			move_name = "a[c2]Active"
+#		"a[c3]Spawn":
+#			move_name = "a[c3]Active"
+#		"a[ex]Spawn":
+#			move_name = "a[ex]Active"
+#
+#	if move_ref in MOVE_DATABASE:
+#		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
+
+
+func query_move_data(move_name) -> Dictionary:
 	
-	var move_ref = Animator.to_play_animation
-	
-	match move_ref:
+	match move_name:
 		"[c1]Spawn":
-			move_ref = "[c1]Active"
+			move_name = "[c1]Active"
 		"[c2]Spawn":
-			move_ref = "[c2]Active"
+			move_name = "[c2]Active"
 		"[c3]Spawn":
-			move_ref = "[c3]Active"
+			move_name = "[c3]Active"
 		"[ex]Spawn":
-			move_ref = "[ex]Active"
+			move_name = "[ex]Active"
 		"a[c1]Spawn":
-			move_ref = "a[c1]Active"
+			move_name = "a[c1]Active"
 		"a[c2]Spawn":
-			move_ref = "a[c2]Active"
+			move_name = "a[c2]Active"
 		"a[c3]Spawn":
-			move_ref = "a[c3]Active"
+			move_name = "a[c3]Active"
 		"a[ex]Spawn":
-			move_ref = "a[ex]Active"
+			move_name = "a[ex]Active"
 	
-	if move_ref in MOVE_DATABASE:
-		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
+	if !move_name in MOVE_DATABASE:
+		print("Error: Cannot retrieve move_data for " + move_name)
+		return {}
+	
+	var move_data = MOVE_DATABASE[move_name]
+	
+	match move_data: # move data may change for certain moves under certain conditions, unique to character
+		_ :
+			pass
+	
+	return move_data
 
 
 func query_atk_attr(_in_move_name):

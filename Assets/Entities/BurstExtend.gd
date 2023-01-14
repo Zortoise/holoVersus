@@ -50,6 +50,22 @@ func init(_aux_data: Dictionary):
 func simulate():
 	pass
 	
+	
+func query_move_data(move_name) -> Dictionary:
+	
+	if !move_name in MOVE_DATABASE:
+		print("Error: Cannot retrieve move_data for " + move_name)
+		return {}
+	
+	var move_data = MOVE_DATABASE[move_name]
+	
+	match move_data: # move data may change for certain moves under certain conditions, unique to character
+		_ :
+			pass
+	
+	return move_data
+	
+	
 func query_atk_attr(_in_move_name):
 	return [Globals.atk_attr.SCREEN_SHAKE]
 	

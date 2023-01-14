@@ -27,7 +27,7 @@ const AIRBLOCK_TERMINAL_MOD = 70 # multiply to get terminal velocity during air 
 const MAX_WALL_JUMP = 5
 const HITSTUN_TERMINAL_VELOCITY_MOD = 750 # multiply to GRAVITY to get terminal velocity during hitstun
 const HOP_JUMP_MOD = 80 # can hop by using up + jump
-const PERFECT_IMPULSE_MOD = 140 # multiply by UniqueCharacter.get_speed() and  UniqueCharacter.IMPULSE MOD to get perfect impulse velocity
+const PERFECT_IMPULSE_MOD = 140 # multiply by UniqChar.get_stat("SPEED") and UniqChar.get_stat("IMPULSE MOD") to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
 #const GRAVITY_UP_STRAFE_MOD = 0.9 # can reduce gravity if holding up during aerial startup/active
 #const GRAVITY_DOWN_STRAFE_MOD = 1.3 # can increase gravity if holding down during aerial startup/active
@@ -130,7 +130,7 @@ onready var Animator = $SpritePlayer # clean code
 onready var sprite = $Sprites/Sprite # clean code
 onready var sfx_under = $Sprites/SfxUnder # clean code
 onready var sfx_over = $Sprites/SfxOver # clean code
-var UniqueCharacter # unique character node
+var UniqChar # unique character node
 var directory_name
 var palette_number
 var spritesheets = { # filled up at initialization via set_up_spritesheets()
@@ -265,21 +265,21 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	var test_character = get_child(0) # test character node should be directly under this node
 	test_character.free()
 	
-	UniqueCharacter = in_character
-	add_child(UniqueCharacter)
-	move_child(UniqueCharacter, 0)
-	directory_name = "res://Characters/" + UniqueCharacter.NAME + "/"
+	UniqChar = in_character
+	add_child(UniqChar)
+	move_child(UniqChar, 0)
+	directory_name = "res://Characters/" + UniqChar.NAME + "/"
 	
 	set_up_spritesheets() # scan all .png files within Spritesheet folder and add them to "spritesheets" dictionary
 	set_up_unique_audio() # scan all .wav files within Audio folder and add them to "unique_audio" dictionary
 	set_up_entities() # scan all .tscn files within Entities folder and add them to "entities_data" dictionary
 	set_up_sfx() # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
 	
-	UniqueCharacter.sprite = sprite
+	UniqChar.sprite = sprite
 	sprite.texture = spritesheets["BaseSprite"]
 	
 	# set up animators
-	UniqueCharacter.Animator = $SpritePlayer
+	UniqChar.Animator = $SpritePlayer
 	Animator.init(sprite, sfx_over, sfx_under, directory_name + "FrameData/")
 	animate("Idle")
 	$ModulatePlayer.sprite = sprite
@@ -287,7 +287,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	
 	# overwrite default movement stats
 	
-	setup_boxes(UniqueCharacter.get_node("DefaultCollisionBox"))
+	setup_boxes(UniqChar.get_node("DefaultCollisionBox"))
 	reset_jumps()
 	
 	# incoming start position points at the floor
@@ -309,9 +309,9 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	sfx_under.hide()
 	sfx_over.hide()
 	
-	if palette_number in UniqueCharacter.PALETTE_TO_PORTRAIT:
+	if palette_number in UniqChar.PALETTE_TO_PORTRAIT:
 		Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").self_modulate = \
-			UniqueCharacter.PALETTE_TO_PORTRAIT[palette_number]
+			UniqChar.PALETTE_TO_PORTRAIT[palette_number]
 	
 	if Globals.training_mode:
 		stock_points_left = 10000
@@ -324,7 +324,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	Globals.Game.stock_points_update(self)
 	Globals.Game.burst_update(self)
 	
-	unique_data = UniqueCharacter.UNIQUE_DATA_REF.duplicate(true)
+	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
 	
 func set_player_id(in_player_ID): # can use this to change player you are controlling during training mode
 	player_ID = in_player_ID
@@ -579,7 +579,7 @@ func simulate(new_input_state):
 			get_node(targeted_opponent_path).change_burst_token(true)
 			unique_data.bitten_player_path = targeted_opponent_path
 			unique_data.nibbler_count = 3
-			UniqueCharacter.update_uniqueHUD()
+			UniqChar.update_uniqueHUD()
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
 #			Globals.Game.superfreeze(get_path())
@@ -655,18 +655,18 @@ func simulate2(): # only ran if not in hitstop
 		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.gganchor == 5):
 			
 			if current_guard_gauge < 0 and !is_blocking(): # regen GG when GG is under 100%
-				var guard_gauge_regen: int = UniqueCharacter.GUARD_GAUGE_REGEN_AMOUNT
+				var guard_gauge_regen: int = UniqChar.get_stat("GUARD_GAUGE_REGEN_AMOUNT")
 				if query_status_effect(Globals.status_effect.POS_FLOW):
 					guard_gauge_regen = FMath.percent(guard_gauge_regen, POS_FLOW_REGEN_MOD) # increased regen during positive flow
 				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen)) # don't use change_guard_gauge() since it stops at 0
 				Globals.Game.guard_gauge_update(self)
 			elif current_guard_gauge > 0: # degen GG when GG is over 100%
-				current_guard_gauge = int(max(0, current_guard_gauge - UniqueCharacter.GUARD_GAUGE_DEGEN_AMOUNT))
+				current_guard_gauge = int(max(0, current_guard_gauge - UniqChar.get_stat("GUARD_GAUGE_DEGEN_AMOUNT")))
 				Globals.Game.guard_gauge_update(self)
 		
 		else: # training mode
 			if current_guard_gauge > 0:
-				current_guard_gauge = int(max(0, current_guard_gauge - UniqueCharacter.GUARD_GAUGE_DEGEN_AMOUNT))
+				current_guard_gauge = int(max(0, current_guard_gauge - UniqChar.get_stat("GUARD_GAUGE_DEGEN_AMOUNT")))
 				Globals.Game.guard_gauge_update(self)
 			else:
 				if player_ID == 0: # player 1 rapidly regen GG when GG < 0 during training mode
@@ -702,7 +702,7 @@ func simulate2(): # only ran if not in hitstop
 	
 	# drain EX Gauge when air blocking
 #	if !grounded and is_blocking():
-#		var ex_gauge_drain = round(UniqueCharacter.AIR_BLOCK_DRAIN_RATE * Globals.FRAME)
+#		var ex_gauge_drain = round(UniqChar.AIR_BLOCK_DRAIN_RATE * Globals.FRAME)
 #		change_ex_gauge(-ex_gauge_drain)
 #		if current_ex_gauge <= 0.0:
 #			match Animator.current_animation:
@@ -758,7 +758,7 @@ func simulate2(): # only ran if not in hitstop
 				if !Animator.query(["Run", "RunTransit"]):
 					animate("RunTransit")
 						
-				velocity.x = FMath.f_lerp(velocity.x, dir * UniqueCharacter.get_speed(), UniqueCharacter.ACCELERATION)
+				velocity.x = FMath.f_lerp(velocity.x, dir * UniqChar.get_stat("SPEED"), UniqChar.get_stat("ACCELERATION"))
 	
 	# AIR STRAFE --------------------------------------------------------------------------------------------------
 		# can air strafe during aerials at reduced speed
@@ -774,8 +774,8 @@ func simulate2(): # only ran if not in hitstop
 					if state == Globals.char_state.AIR_STANDBY and dir != facing: # flipping over
 						face(dir)
 					
-					var air_strafe_speed_temp: int = FMath.percent(UniqueCharacter.get_speed(), UniqueCharacter.AIR_STRAFE_SPEED_MOD)
-					var air_strafe_limit_temp: int = FMath.percent(air_strafe_speed_temp, UniqueCharacter.AIR_STRAFE_LIMIT_MOD)
+					var air_strafe_speed_temp: int = FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("AIR_STRAFE_SPEED_MOD"))
+					var air_strafe_limit_temp: int = FMath.percent(air_strafe_speed_temp, UniqChar.get_stat("AIR_STRAFE_LIMIT_MOD"))
 					
 					# reduce air_strafe_speed and air_strafe_limit during AIR_ATK_STARTUP
 					if state != Globals.char_state.AIR_STANDBY:
@@ -813,12 +813,14 @@ func simulate2(): # only ran if not in hitstop
 		# quick impulse
 		if state == Globals.char_state.GROUND_ATK_STARTUP and !impulse_used and Animator.time <= 1:
 			var move_name = Animator.to_play_animation.trim_suffix("Startup")
-			if move_name in UniqueCharacter.STARTERS:
+			if move_name in UniqChar.STARTERS:
 				if !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
 					impulse_used = true
-					var impulse: int = dir * FMath.percent(UniqueCharacter.get_speed(), UniqueCharacter.IMPULSE_MOD)
-					if move_name in UniqueCharacter.MOVE_DATABASE and "impulse_mod" in UniqueCharacter.MOVE_DATABASE[move_name]:
-						impulse = FMath.percent(impulse, UniqueCharacter.MOVE_DATABASE[move_name].impulse_mod)
+					var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
+					# some moves have their own impulse mod
+					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
+						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
+						impulse = FMath.percent(impulse, impulse_mod)
 					velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 
@@ -842,13 +844,13 @@ func simulate2(): # only ran if not in hitstop
 #	if button_left in input_state.pressed or button_right in input_state.pressed: # don't use dir for this one...
 #		if new_state == Globals.char_state.GROUND_ATK_STARTUP and Animator.time == QUICK_CANCEL_TIME: # only possible on frame 1
 #			var move_name = Animator.to_play_animation.trim_suffix("Startup")
-#			if move_name in UniqueCharacter.MOVE_DATABASE and \
+#			if move_name in UniqChar.MOVE_DATABASE and \
 #					!Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
 #				if button_left in input_state.just_pressed or button_right in input_state.just_pressed:
-#					velocity.x = facing * UniqueCharacter.get_speed() * PERFECT_IMPULSE_MOD
+#					velocity.x = facing * UniqChar.get_speed() * PERFECT_IMPULSE_MOD
 #					Globals.Game.spawn_SFX("SpecialDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 #				else:
-#					velocity.x = facing * UniqueCharacter.get_speed() * IMPULSE_MOD
+#					velocity.x = facing * UniqChar.get_speed() * IMPULSE_MOD
 #					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 
 
@@ -895,13 +897,13 @@ func simulate2(): # only ran if not in hitstop
 							(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
 	#						if Settings.dt_fastfall[player_ID] == 1:
 	#							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
-							velocity.y = FMath.f_lerp(velocity.y, FMath.percent(FMath.percent(GRAVITY, UniqueCharacter.TERMINAL_VELOCITY_MOD), \
-								UniqueCharacter.FASTFALL_MOD), 30)
+							velocity.y = FMath.f_lerp(velocity.y, FMath.percent(FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD")), \
+								UniqChar.get_stat("FASTFALL_MOD")), 30)
 							if Animator.query(["FallTransit"]): # go straight to fall animation
 								animate("Fall")
 					
 							# fastfall reduce horizontal speed limit
-							var ff_speed_limit: int = FMath.percent(UniqueCharacter.get_speed(), 70)
+							var ff_speed_limit: int = FMath.percent(UniqChar.get_stat("SPEED"), 70)
 							if velocity.x < -ff_speed_limit:
 								velocity.x = FMath.f_lerp(velocity.x, -ff_speed_limit, 50)
 							elif velocity.x > ff_speed_limit:
@@ -933,7 +935,7 @@ func simulate2(): # only ran if not in hitstop
 			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
 			
 	
-#	if UniqueCharacter.STYLE == 0:
+#	if UniqChar.STYLE == 0:
 	if (alt_block or button_block in input_state.pressed) and !button_aux in input_state.pressed:
 		match state:
 			
@@ -954,14 +956,14 @@ func simulate2(): # only ran if not in hitstop
 					animate("BlockStartup")
 					
 		# air blocking
-		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqueCharacter.AIR_BLOCK_GG_COST:
+		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqChar.get_stat("AIR_BLOCK_GG_COST"):
 			match state:
 				Globals.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
 					if Animator.query_current(["aDashTransit"]):
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 				Globals.char_state.AIR_STANDBY:
-	#				if current_ex_gauge >= UniqueCharacter.AIR_BLOCK_DRAIN_RATE * 0.5:
+	#				if current_ex_gauge >= UniqChar.AIR_BLOCK_DRAIN_RATE * 0.5:
 					animate("aBlockStartup")
 					$VarJumpTimer.stop()
 				Globals.char_state.AIR_C_RECOVERY:
@@ -1001,7 +1003,7 @@ func simulate2(): # only ran if not in hitstop
 	if $HitStunTimer.is_running(): # fix and lower gravity during hitstun
 		gravity_temp = FMath.percent(GRAVITY, HITSTUN_GRAV_MOD)
 	else:
-		gravity_temp = FMath.percent(GRAVITY, UniqueCharacter.GRAVITY_MOD) # each character are affected by gravity differently out of hitstun
+		gravity_temp = FMath.percent(GRAVITY, UniqChar.get_stat("GRAVITY_MOD")) # each character are affected by gravity differently out of hitstun
 	
 	if $VarJumpTimer.is_running() and (button_jump in input_state.pressed or button_up in input_state.pressed):
 		# variable jump system reduces gravity if you hold down the jump button
@@ -1029,7 +1031,7 @@ func simulate2(): # only ran if not in hitstop
 					
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
-				gravity_temp = FMath.percent(gravity_temp, UniqueCharacter.FALL_GRAV_MOD)
+				gravity_temp = FMath.percent(gravity_temp, UniqChar.get_stat("FALL_GRAV_MOD"))
 				if state == Globals.char_state.AIR_BLOCK: # air blocking reduce gravity
 					gravity_temp = FMath.percent(gravity_temp, AIRBLOCK_GRAV_MOD)
 					
@@ -1051,11 +1053,11 @@ func simulate2(): # only ran if not in hitstop
 			velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
 			
 	else:
-		terminal = FMath.percent(GRAVITY, UniqueCharacter.TERMINAL_VELOCITY_MOD)
+		terminal = FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD"))
 	
 		if state == Globals.char_state.AIR_STANDBY and button_down in input_state.pressed:
 			if Settings.dj_fastfall[player_ID] == 0 or (Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
-				terminal = FMath.percent(terminal, UniqueCharacter.FASTFALL_MOD) # increase terminal velocity when fastfalling
+				terminal = FMath.percent(terminal, UniqChar.get_stat("FASTFALL_MOD")) # increase terminal velocity when fastfalling
 		if state == Globals.char_state.AIR_BLOCK: # air blocking reduce terminal velocity
 			terminal = FMath.percent(terminal, AIRBLOCK_TERMINAL_MOD)
 
@@ -1069,12 +1071,14 @@ func simulate2(): # only ran if not in hitstop
 	# query() check animation at either start/end of frame, query_to_play() only check final animation
 	
 	var friction_this_frame: int # 15
-	var air_res_this_frame: int = HITSTUN_AIR_RES # 3
+	var air_res_this_frame: int
 	
 	if !$HitStunTimer.is_running():
-		friction_this_frame = UniqueCharacter.FRICTION
+		friction_this_frame = UniqChar.get_stat("FRICTION")
+		air_res_this_frame = UniqChar.get_stat("AIR_RESISTANCE")
 	else:
 		friction_this_frame = HITSTUN_FRICTION # 15
+		air_res_this_frame = HITSTUN_AIR_RES # 3
 	
 	match state:
 		Globals.char_state.GROUND_STANDBY:
@@ -1106,7 +1110,7 @@ func simulate2(): # only ran if not in hitstop
 			if Animator.query_to_play(["aDash", "aDashD", "aDashU"]) and is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, facing):
 				animate("FallTransit")
 				if Animator.current_animation == "aDashTransit": # to fix a bug when touching a wall during aDashTransit > aDash
-					UniqueCharacter.consume_one_air_dash() # reduce air_dash count by 1
+					UniqChar.consume_one_air_dash() # reduce air_dash count by 1
 
 		Globals.char_state.GROUND_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
@@ -1120,7 +1124,7 @@ func simulate2(): # only ran if not in hitstop
 				animate("BlockstunReturn")
 			
 		Globals.char_state.AIR_BLOCK:
-#			if UniqueCharacter.STYLE == 0:
+#			if UniqChar.STYLE == 0:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["aBlock"]): # don't use to_play
 				if !block_rec_cancel:
 					animate("aBlockRecovery")
@@ -1228,7 +1232,7 @@ func simulate2(): # only ran if not in hitstop
 	
 # --------------------------------------------------------------------------------------------------
 
-	UniqueCharacter.simulate() # some holdable buttons can have effect unique to the character
+	UniqChar.simulate() # some holdable buttons can have effect unique to the character
 	
 	buffer_actions()
 	
@@ -1243,12 +1247,12 @@ func simulate2(): # only ran if not in hitstop
 
 	# limit velocity if velocity limiter is not null, "if velocity_limiter.x" will not pass if it is zero!
 	if velocity_limiter.x != null:
-		var limit: int = FMath.percent(UniqueCharacter.get_speed(), velocity_limiter.x)
+		var limit: int = FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.x)
 		velocity.x = int(clamp(velocity.x, -limit, limit))
-	if velocity_limiter.up != null and velocity.y < -FMath.percent(UniqueCharacter.get_speed(), velocity_limiter.up):
-		velocity.y = -FMath.percent(UniqueCharacter.get_speed(), velocity_limiter.up)
-	if velocity_limiter.down != null and velocity.y > FMath.percent(UniqueCharacter.get_speed(), velocity_limiter.down):
-		velocity.y = FMath.percent(UniqueCharacter.get_speed(), velocity_limiter.down)
+	if velocity_limiter.up != null and velocity.y < -FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.up):
+		velocity.y = -FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.up)
+	if velocity_limiter.down != null and velocity.y > FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.down):
+		velocity.y = FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.down)
 	if velocity_limiter.x_slow != null:
 		velocity.x = FMath.f_lerp(velocity.x, 0, velocity_limiter.x_slow)
 	if velocity_limiter.y_slow != null:
@@ -1432,11 +1436,11 @@ func buffer_actions():
 			Globals.char_state.GROUND_ATK_STARTUP:
 				if Animator.time <= 1 and Animator.time != 0:
 					rebuffer_actions()
-					UniqueCharacter.rebuffer_EX()
+					UniqChar.rebuffer_EX()
 			Globals.char_state.AIR_ATK_STARTUP:
 				if Animator.time <= 5 and Animator.time != 0:
 					rebuffer_actions()
-					UniqueCharacter.rebuffer_EX()
+					UniqChar.rebuffer_EX()
 		
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 		
@@ -1453,7 +1457,7 @@ func capture_combinations():
 #	combination(button_block, button_special, "Burst") # place this here since button_special is never buffered
 		
 	if !button_unique in input_state.pressed:
-		UniqueCharacter.capture_combinations()
+		UniqChar.capture_combinations()
 
 
 #func combination_single(button1, action, back = false): # useful for Special/EX/Super Moves
@@ -1614,8 +1618,8 @@ func is_button_released(button):
 func capture_and_process_instant_actions(): # capture instant actions after directional keys are read
 	instant_actions_temp = [] # clear captured instant actions last frame
 	if button_unique in input_state.pressed:
-		UniqueCharacter.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
-	UniqueCharacter.process_instant_actions() # process stored instant actions in instant_actions array last frame
+		UniqChar.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
+	UniqChar.process_instant_actions() # process stored instant actions in instant_actions array last frame
 	instant_actions = [] # stored instant_actions last frame are removed
 	instant_actions.append_array(instant_actions_temp) # store instant actions captured this frame into instant_actions array
 	
@@ -1764,8 +1768,8 @@ func process_input_buffer():
 								
 						Globals.char_state.GROUND_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
 							var move_name = get_move_name()
-							if move_name in UniqueCharacter.STARTERS and !move_name in UniqueCharacter.EX_MOVES and \
-								!move_name in UniqueCharacter.SUPERS:
+							if move_name in UniqChar.STARTERS and !move_name in UniqChar.EX_MOVES and \
+								!move_name in UniqChar.SUPERS:
 								if Animator.time <= 3 and Animator.time != 0:
 									animate("JumpTransit")
 									rebuffer_actions() # this buffers the attack buttons currently being pressed
@@ -1823,7 +1827,7 @@ func process_input_buffer():
 			_:
 				# pass to process_buffered_input() in unique character node, it returns a bool of whether input should be kept
 				# some special buttons can also add new buffered inputs, this are added at the end
-				if !UniqueCharacter.process_buffered_input(new_state, buffered_input, input_to_add, has_acted):
+				if !UniqChar.process_buffered_input(new_state, buffered_input, input_to_add, has_acted):
 					keep = false
 				
 		# remove expired
@@ -1865,7 +1869,7 @@ func rebuffer_actions():
 	if button_aux in input_state.pressed:
 		input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
 	
-	UniqueCharacter.rebuffer_actions()
+	UniqChar.rebuffer_actions()
 	
 
 func query_state(query_states: Array):
@@ -1947,7 +1951,7 @@ func state_detect(anim):
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		_: # unique animations
-			return UniqueCharacter.state_detect(anim)
+			return UniqChar.state_detect(anim)
 			
 	
 # ---------------------------------------------------------------------------------------------------
@@ -1959,7 +1963,7 @@ func check_collidable(): # called by Physics.gd
 		if button_dash in input_state.pressed and chain_memory.size() == 0:
 			return false
 			
-	return UniqueCharacter.check_collidable()
+	return UniqChar.check_collidable()
 
 func perfect_block():
 	if $PBlockCDTimer.is_running():
@@ -2085,18 +2089,18 @@ func face(in_dir):
 	sfx_under.scale.x = facing
 	
 func reset_jumps():
-	air_jump = UniqueCharacter.MAX_AIR_JUMP # reset jump count on ground
+	air_jump = UniqChar.get_stat("MAX_AIR_JUMP") # reset jump count on ground
 	wall_jump = MAX_WALL_JUMP # reset wall jump count on ground
-	air_dash = UniqueCharacter.MAX_AIR_DASH
+	air_dash = UniqChar.get_stat("MAX_AIR_DASH")
 	aerial_memory = []
 	aerial_sp_memory = []
 	
 func reset_jumps_except_walljumps():
-	air_jump = UniqueCharacter.MAX_AIR_JUMP # reset jump count on wall
-	air_dash = UniqueCharacter.MAX_AIR_DASH
+	air_jump = UniqChar.get_stat("MAX_AIR_JUMP") # reset jump count on wall
+	air_dash = UniqChar.get_stat("MAX_AIR_DASH")
 	
 func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock) give you +1 air jump
-	if air_jump < UniqueCharacter.MAX_AIR_JUMP: # cannot go over
+	if air_jump < UniqChar.get_stat("MAX_AIR_JUMP"): # cannot go over
 		air_jump += 1
 	
 func reset_cancels(): # done whenever you use an attack
@@ -2141,19 +2145,19 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("WaveDashBrake")
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				if dir == facing:
-					velocity.x = facing * FMath.percent(UniqueCharacter.GROUND_DASH_SPEED, UniqueCharacter.WAVE_DASH_SPEED_MOD)
+					velocity.x = facing * FMath.percent(UniqChar.get_stat("GROUND_DASH_SPEED"), UniqChar.get_stat("WAVE_DASH_SPEED_MOD"))
 				
 			elif Animator.query(["aBlockRecovery"]): # aBlockRecovery to BlockCRecovery
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				animate("BlockCRecovery")
-				UniqueCharacter.landing_sound()
+				UniqChar.landing_sound()
 				
 			else: # landing during aDashBrake or AirDashDD
 				animate("HardLanding")
 			
 		Globals.char_state.AIR_ATK_STARTUP: # can land cancel on the 1st few frames (unless EX/Super), will auto-buffer pressed attacks
 			var move_name = get_move_name()
-			if move_name in UniqueCharacter.STARTERS and !move_name in UniqueCharacter.EX_MOVES and !move_name in UniqueCharacter.SUPERS and \
+			if move_name in UniqChar.STARTERS and !move_name in UniqChar.EX_MOVES and !move_name in UniqChar.SUPERS and \
 				velocity_previous_frame.y > 0 and Animator.time <= AERIAL_STARTUP_LAND_CANCEL_TIME and Animator.time != 0:
 				animate("HardLanding") # this makes landing and attacking instantly easier
 
@@ -2164,7 +2168,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 					animate("FlinchA")
 				"aFlinchBStop", "aFlinchB":
 					animate("FlinchB")
-			UniqueCharacter.landing_sound()
+			UniqChar.landing_sound()
 			
 		Globals.char_state.LAUNCHED_HITSTUN: # land during launch_hitstun, can bounce or tech land
 			if new_state == Globals.char_state.LAUNCHED_HITSTUN:
@@ -2196,7 +2200,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("PBlockstun")
 			elif Animator.query(["aWBlockstun"]):
 				animate("WBlockstun")
-			UniqueCharacter.landing_sound()
+			UniqChar.landing_sound()
 
 			
 func check_drop(): # called when character becomes airborne while in a grounded state
@@ -2225,7 +2229,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 				
 		Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY:
 			var move_name = get_move_name()
-			if move_name in UniqueCharacter.MOVE_DATABASE and \
+			if move_name in UniqChar.MOVE_DATABASE and \
 				Globals.atk_attr.LEDGE_DROP in query_atk_attr(move_name):
 				continue
 			else:
@@ -2253,7 +2257,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 		
 func check_fallthrough(): # during aerials, can drop through platforms if down is held
 	if state == Globals.char_state.SEQUENCE_USER:
-		return UniqueCharacter.sequence_fallthrough()
+		return UniqChar.sequence_fallthrough()
 	elif state == Globals.char_state.SEQUENCE_TARGET:
 		return true # when being grabbed, always fall through soft platforms
 #		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
@@ -2264,7 +2268,7 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 	
 func check_passthrough():
 	if state == Globals.char_state.SEQUENCE_USER:
-		return UniqueCharacter.sequence_passthrough() # for cinematic supers
+		return UniqChar.sequence_passthrough() # for cinematic supers
 	elif state == Globals.char_state.SEQUENCE_TARGET:
 		return get_node(targeted_opponent_path).check_passthrough() # copy passthrough state of the one grabbing you
 	return false
@@ -2352,8 +2356,8 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 			Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data)
 			
 func ex_flash():# process ex flash
-	if is_attacking(): 	# if current movename in UniqueCharacter.EX_FLASH_ANIM, will ex flash during startup/active/recovery
-		if get_move_name() in UniqueCharacter.EX_FLASH_ANIM:
+	if is_attacking(): 	# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active/recovery
+		if get_move_name() in UniqChar.EX_FLASH_ANIM:
 			if $ModulatePlayer.playing and $ModulatePlayer.query(["EX_flash", "EX_flash2"]):
 				return
 			else:
@@ -2378,7 +2382,7 @@ func process_afterimage_trail():# process afterimage trail
 			afterimage_trail()
 			return
 			
-	UniqueCharacter.afterimage_trail()
+	UniqChar.afterimage_trail()
 			
 			
 func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime: int = 10): # one afterimage every 3 frames
@@ -2465,7 +2469,7 @@ func check_quick_turn():
 	match new_state:
 		Globals.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on any startup frame
 			var move_name = get_move_name()
-			if move_name == null or !move_name in UniqueCharacter.STARTERS:
+			if move_name == null or !move_name in UniqChar.STARTERS:
 				return false
 			if Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
 				return false
@@ -2476,7 +2480,7 @@ func check_quick_turn():
 		Globals.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st frame
 			if Animator.time <= 1 and Animator.time != 0:
 				var move_name = get_move_name()
-				if move_name == null or !move_name in UniqueCharacter.STARTERS:
+				if move_name == null or !move_name in UniqChar.STARTERS:
 					return false
 				if Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
 					return false
@@ -2492,14 +2496,14 @@ func check_quick_turn():
 func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	var move_name = get_move_name()
 	if move_name == null: return false
-	if !move_name in UniqueCharacter.STARTERS or move_name in UniqueCharacter.SUPERS: return false
+	if !move_name in UniqChar.STARTERS or move_name in UniqChar.SUPERS: return false
 	
-	if move_name in UniqueCharacter.EX_MOVES: # cancelling from ex move, only other ex moves are possible
-		if attack_ref in UniqueCharacter.EX_MOVES: # cancelling into another ex move
+	if move_name in UniqChar.EX_MOVES: # cancelling from ex move, only other ex moves are possible
+		if attack_ref in UniqChar.EX_MOVES: # cancelling into another ex move
 			if Animator.time <= 2 and Animator.time != 0:
 				return true # EX and Supers have a wider window to quick cancel into
 	else: # cancelling from a normal move
-		if attack_ref in UniqueCharacter.EX_MOVES: # cancelling into an ex move from normal move has wider window
+		if attack_ref in UniqChar.EX_MOVES: # cancelling into an ex move from normal move has wider window
 			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
 			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed):
 				if !are_inputs_too_close():
@@ -2577,8 +2581,8 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 			else:
 				return true # no LEDGE_DROP, will stop at ledge
 		else: # during startup of ground attacks
-			if dir == facing and move_name in UniqueCharacter.STARTERS and !move_name in UniqueCharacter.EX_MOVES and \
-				!move_name in UniqueCharacter.SUPERS:
+			if dir == facing and move_name in UniqChar.STARTERS and !move_name in UniqChar.EX_MOVES and \
+				!move_name in UniqChar.SUPERS:
 				return false # when doing moves that are not EX moves and supers, can drop off ledge on startup if you are holding forward
 			else:
 				return true
@@ -2625,24 +2629,24 @@ func is_atk_recovery():
 	return false
 	
 func is_normal_attack(move_name):
-	if UniqueCharacter.MOVE_DATABASE.has(move_name):
-		match UniqueCharacter.MOVE_DATABASE[move_name].atk_type:
+	if UniqChar.MOVE_DATABASE.has(move_name):
+		match UniqChar.MOVE_DATABASE[move_name].atk_type:
 			Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY: # can only chain combo into a Normal
 				return true
 	return false
 	
 func is_special_move(move_name):
-	if move_name in UniqueCharacter.SPECIALS or move_name in UniqueCharacter.EX_MOVES:
+	if move_name in UniqChar.SPECIALS or move_name in UniqChar.EX_MOVES:
 		return true # not all special moves are in MOVE_DATABASE
-	if UniqueCharacter.MOVE_DATABASE.has(move_name):
-		match UniqueCharacter.MOVE_DATABASE[move_name].atk_type:
+	if UniqChar.MOVE_DATABASE.has(move_name):
+		match UniqChar.MOVE_DATABASE[move_name].atk_type:
 			Globals.atk_type.SPECIAL, Globals.atk_type.EX: # can only chain combo into a Normal
 				return true
 	return false
 	
 # called by unique character to check if there is an EX version and if it is valid
 func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
-	if !attack_ref in UniqueCharacter.EX_MOVES: return true # not ex move
+	if !attack_ref in UniqChar.STARTERS or !attack_ref in UniqChar.EX_MOVES: return true # not ex move or starter
 	if !quick_cancel: # not quick cancelling, must afford it
 		if current_ex_gauge >= EX_MOVE_COST:
 			change_ex_gauge(-EX_MOVE_COST)
@@ -2651,7 +2655,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		else:
 			return false
 	else:
-		if get_move_name() in UniqueCharacter.EX_MOVES: # can quick cancel from 1 EX move to another, no cost and no chime if so
+		if get_move_name() in UniqChar.EX_MOVES: # can quick cancel from 1 EX move to another, no cost and no chime if so
 			return true
 		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
 			change_ex_gauge(-EX_MOVE_COST)
@@ -2686,20 +2690,20 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 	return true
 	
 func burst_extend_check(move_name): # check if have resources to do it, then take away those resources and return a bool
-	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL] or move_name in UniqueCharacter.SUPERS:
+	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL] or move_name in UniqChar.SUPERS:
 		return false
 	change_burst_token(false)
 	return true
 	
 func burst_revoke_check(move_name):
-	if !chain_combo in [Globals.chain_combo.RESET] or move_name in UniqueCharacter.EX_MOVES or move_name in UniqueCharacter.SUPERS or \
+	if !chain_combo in [Globals.chain_combo.RESET] or move_name in UniqChar.EX_MOVES or move_name in UniqChar.SUPERS or \
 			(current_guard_gauge + 10000) < BURSTREVOKE_GG_COST:
 		return false
 	if is_atk_active(): # for active frames, only attacking specials can be revoked
-		if move_name in UniqueCharacter.MOVE_DATABASE and UniqueCharacter.MOVE_DATABASE[move_name].atk_type == Globals.atk_type.SPECIAL and \
+		if move_name in UniqChar.MOVE_DATABASE and UniqChar.MOVE_DATABASE[move_name].atk_type == Globals.atk_type.SPECIAL and \
 				!Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
-			if "no_revoke_time" in UniqueCharacter.MOVE_DATABASE[move_name] and \
-					Animator.time >= UniqueCharacter.MOVE_DATABASE[move_name].no_revoke_time: # some moves cannot be revoked after a specific time
+			if "no_revoke_time" in UniqChar.MOVE_DATABASE[move_name] and \
+					Animator.time >= UniqChar.MOVE_DATABASE[move_name].no_revoke_time: # some moves cannot be revoked after a specific time
 				return false
 		else:
 			return false
@@ -2983,8 +2987,8 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 	
 	if Animator.to_play_animation.ends_with("Active"):
 		var move_name = Animator.to_play_animation.trim_suffix("Active")
-		if UniqueCharacter.MOVE_DATABASE.has(move_name):
-			return {"move_data" : UniqueCharacter.query_move_data(move_name), "move_name" : move_name}
+		if UniqChar.MOVE_DATABASE.has(move_name):
+			return {"move_data" : UniqChar.query_move_data(move_name), "move_name" : move_name}
 		else:
 			print("Error: " + move_name + " not found in MOVE_DATABASE for query_move_data_and_name().")
 	else:
@@ -2994,8 +2998,8 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 	
 func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aerial normals
 	
-	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
-		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
+	if attack_ref in UniqChar.MOVE_DATABASE and "root" in UniqChar.MOVE_DATABASE[attack_ref]:
+		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
 		
 	if attack_ref in aerial_memory or attack_ref in aerial_sp_memory:
 		return false
@@ -3009,20 +3013,20 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	
 	if chain_combo in [Globals.chain_combo.RESET, Globals.chain_combo.NO_CHAIN]: return false # can only chain combo on hit
 	
-	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
-		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
+	if attack_ref in UniqChar.MOVE_DATABASE and "root" in UniqChar.MOVE_DATABASE[attack_ref]:
+		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
 	if attack_ref in chain_memory: return false # cannot chain into moves already done
 	
 	var move_name = Animator.current_animation.trim_suffix("Recovery")
 	move_name = move_name.trim_suffix("Active")
 	
-#	if !move_name in UniqueCharacter.MOVE_DATABASE:
+#	if !move_name in UniqChar.MOVE_DATABASE:
 #		return false # just in case
 		
 #	# test if chaining into itself
 #	if move_name == attack_ref:
 #		return false # can only chain combo into a different move
-#	if "root" in UniqueCharacter.MOVE_DATABASE[move_name] and UniqueCharacter.MOVE_DATABASE[move_name].root == attack_ref:
+#	if "root" in UniqChar.MOVE_DATABASE[move_name] and UniqChar.MOVE_DATABASE[move_name].root == attack_ref:
 #		return false # for move variations/auto-chains with a root move
 
 	if Globals.atk_attr.NO_CHAIN in query_atk_attr(move_name) or Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
@@ -3052,8 +3056,8 @@ func test_qc_chain_combo(attack_ref):
 	if chain_combo != Globals.chain_combo.RESET and Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
 		return false # if you are chain comboing and trying to quick cancel a valid move into one with CANNOT_CHAIN_INTO
 	
-	if attack_ref in UniqueCharacter.MOVE_DATABASE and "root" in UniqueCharacter.MOVE_DATABASE[attack_ref]:
-		attack_ref = UniqueCharacter.MOVE_DATABASE[attack_ref].root # get the root attack
+	if attack_ref in UniqChar.MOVE_DATABASE and "root" in UniqChar.MOVE_DATABASE[attack_ref]:
+		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
 	
 	if attack_ref in chain_memory:
 		return false # cannot quick cancel into moves already done
@@ -3079,15 +3083,15 @@ func test_qc_chain_combo(attack_ref):
 	
 	
 func get_atk_strength(move):
-	if !move in UniqueCharacter.MOVE_DATABASE:
-		if move in UniqueCharacter.SPECIALS:
+	if !move in UniqChar.MOVE_DATABASE:
+		if move in UniqChar.SPECIALS:
 			return 3
-		elif move in UniqueCharacter.EX_MOVES:
+		elif move in UniqChar.EX_MOVES:
 			return 4
-		elif move in UniqueCharacter.SUPERS:
+		elif move in UniqChar.SUPERS:
 			return 5
 		return 0 # just in case
-	match UniqueCharacter.MOVE_DATABASE[move].atk_type:
+	match UniqChar.MOVE_DATABASE[move].atk_type:
 		Globals.atk_type.LIGHT:
 			return 0
 		Globals.atk_type.FIERCE:
@@ -3135,15 +3139,15 @@ func is_hitcount_last_hit(in_ID, move_data):
 #	var move_name = Animator.current_animation.trim_suffix("Startup") # check current 1st
 #	move_name = move_name.trim_suffix("Active")
 #	move_name = move_name.trim_suffix("Recovery")
-#	if move_name in UniqueCharacter.MOVE_DATABASE:
-#		if recorded_hitcount >= UniqueCharacter.MOVE_DATABASE[move_name].hitcount - 1:
+#	if move_name in UniqChar.MOVE_DATABASE:
+#		if recorded_hitcount >= UniqChar.MOVE_DATABASE[move_name].hitcount - 1:
 #			return true
 #	else:
 #		move_name = get_move_name().trim_suffix("Startup") # check to_play next
 #		move_name = move_name.trim_suffix("Active")
 #		move_name = move_name.trim_suffix("Recovery")
-#		if move_name in UniqueCharacter.MOVE_DATABASE:
-#			if recorded_hitcount >= UniqueCharacter.MOVE_DATABASE[move_name].hitcount - 1:
+#		if move_name in UniqChar.MOVE_DATABASE:
+#			if recorded_hitcount >= UniqChar.MOVE_DATABASE[move_name].hitcount - 1:
 #				return true
 #	return false
 	
@@ -3183,7 +3187,7 @@ func atk_startup_resets():# ran whenever an attack starts
 # GAUGES -----------------------------------------------------------------------------------------------------------------------------
 	
 func get_damage_percent() -> int:
-	return FMath.get_fraction_percent(current_damage_value, UniqueCharacter.DAMAGE_VALUE_LIMIT)
+	return FMath.get_fraction_percent(current_damage_value, UniqChar.get_stat("DAMAGE_VALUE_LIMIT"))
 	
 func get_guard_gauge_percent_below() -> int:
 	if current_guard_gauge <= GUARD_GAUGE_FLOOR:
@@ -3279,7 +3283,7 @@ func change_burst_token(get_burst: bool):
 # QUERY UNIQUE CHARACTER DATA ---------------------------------------------------------------------------------------------- 
 	
 func query_traits(): # may have certain conditions
-	return UniqueCharacter.query_traits()
+	return UniqChar.query_traits()
 	
 # name should be stripped already!
 func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
@@ -3291,7 +3295,7 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 	if is_burst(move_name):
 		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.NO_TURN]
 	
-	return UniqueCharacter.query_atk_attr(move_name)
+	return UniqChar.query_atk_attr(move_name)
 	
 func query_priority(in_move_name = null):
 	var move_name = in_move_name
@@ -3301,37 +3305,44 @@ func query_priority(in_move_name = null):
 	if is_burst(move_name):
 		return 0
 	
-	return UniqueCharacter.query_priority(move_name)
+	var move_data = UniqChar.query_move_data(move_name)
+	if "priority" in move_data:
+		return move_data.priority
+	else: return 0
 	
-func query_move_EX_gain(move_name):
-	var EX_gain = UniqueCharacter.query_move_EX_gain(move_name)
-	return EX_gain
+func query_move_data(move_name):
+	var move_data = UniqChar.query_move_data(move_name)
+	return move_data
 	
-func query_move_damage(move_name):
-	var damage = UniqueCharacter.query_move_damage(move_name)
-	return damage
-	
-func query_move_knockback(move_name):
-	var knockback = UniqueCharacter.query_move_knockback(move_name)
-	return knockback
-	
-func query_move_atk_level(move_name):
-	var atk_level = UniqueCharacter.query_move_atk_level(move_name)
-	return atk_level
-	
-func query_move_guard_drain(move_name):
-	var guard_drain = UniqueCharacter.query_move_guard_drain(move_name)
-	return guard_drain
-	
-func query_move_guard_gain_on_combo(move_name):
-	var guard_gain_on_combo = UniqueCharacter.query_move_guard_gain_on_combo(move_name)
-	return guard_gain_on_combo
+#func query_move_EX_gain(move_name):
+#	var EX_gain = UniqChar.query_move_EX_gain(move_name)
+#	return EX_gain
+#
+#func query_move_damage(move_name):
+#	var damage = UniqChar.query_move_damage(move_name)
+#	return damage
+#
+#func query_move_knockback(move_name):
+#	var knockback = UniqChar.query_move_knockback(move_name)
+#	return knockback
+#
+#func query_move_atk_level(move_name):
+#	var atk_level = UniqChar.query_move_atk_level(move_name)
+#	return atk_level
+#
+#func query_move_guard_drain(move_name):
+#	var guard_drain = UniqChar.query_move_guard_drain(move_name)
+#	return guard_drain
+#
+#func query_move_guard_gain_on_combo(move_name):
+#	var guard_gain_on_combo = UniqChar.query_move_guard_gain_on_combo(move_name)
+#	return guard_gain_on_combo
 	
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 
 	
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	UniqueCharacter.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
+	UniqChar.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
 	
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
@@ -3347,17 +3358,17 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	match hit_data.block_state:
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
-				change_ex_gauge(query_move_EX_gain(hit_data.move_name))
-			defender.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 25))
+				change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
+			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 25))
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
-				change_ex_gauge(query_move_EX_gain(hit_data.move_name))
+				change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
 		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-			defender.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
+			defender.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
 		_:  # normal block
 			if !hit_data.double_repeat:
-				change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 50))
-			defender.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 50))
+				change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
+			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -3407,7 +3418,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					Globals.block_state.AIR_WRONG]:
 					gain_one_air_jump() # for unblocked/wrongblocked aerial you regain 1 air jump
 					if hit_data.sweetspotted:
-						UniqueCharacter.gain_one_air_dash() # for unblocked sweetspotted aerial you regain 1 air dash
+						UniqChar.gain_one_air_dash() # for unblocked sweetspotted aerial you regain 1 air dash
 						
 			Globals.atk_type.SPECIAL, Globals.atk_type.EX:
 				if hit_data.block_state == Globals.block_state.UNBLOCKED or \
@@ -3468,7 +3479,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		var volume_change = 0
 		if hit_data.lethal_hit or hit_data.break_hit or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
-		elif query_move_atk_level(hit_data.move_name) <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
+		elif query_move_data(hit_data.move_name).atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
 		
 		if !hit_data.move_data.hit_sound is Array:
@@ -3558,7 +3569,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		# append repeated move to move_memory later after guard gauge change calculation
 	
 	var weak_hit := false
-	if attacker_or_entity.query_move_atk_level(hit_data.move_name) <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
+	if attacker_or_entity.query_move_data(hit_data.move_name).atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
 		"multihit" in hit_data: # multi-hit moves cannot cause lethal/break/sweetspot/punish outside of last hit
 		weak_hit = true
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
@@ -3568,8 +3579,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 	
-	
-	match defender.state:
+	match defender.state: # not new_state, cannot block on exact frame attack is detected
 		
 		Globals.char_state.GROUND_ATK_STARTUP:
 			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
@@ -3691,7 +3701,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 	# ---------------------------------------------------------------------------------
 				
-	UniqueCharacter.being_hit(hit_data) # reaction, can change hit_data from there
+	UniqChar.being_hit(hit_data) # reaction, can change hit_data from there
 	
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------
 	
@@ -3998,7 +4008,7 @@ func calculate_damage(hit_data) -> int:
 		
 	var defender = get_node(hit_data.defender_nodepath)
 	
-	var scaled_damage: int = attacker_or_entity.query_move_damage(hit_data.move_name) * FMath.S
+	var scaled_damage: int = attacker_or_entity.query_move_data(hit_data.move_name).damage * FMath.S
 	if scaled_damage == 0: return 0
 	
 	if hit_data.semi_disjoint:
@@ -4021,7 +4031,7 @@ func calculate_damage(hit_data) -> int:
 
 	if hit_data.block_state != Globals.block_state.UNBLOCKED:
 		# each character take different amount of chip damage
-		scaled_damage = FMath.percent(scaled_damage, defender.UniqueCharacter.BASE_BLOCK_CHIP_DAMAGE_MOD)
+		scaled_damage = FMath.percent(scaled_damage, defender.UniqChar.get_stat("BASE_BLOCK_CHIP_DAMAGE_MOD"))
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 				scaled_damage = FMath.percent(scaled_damage, WRONGBLOCK_CHIP_DMG_MOD) # increase chip damage for wrongblock
@@ -4052,12 +4062,12 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		if (defender.get_node("HitStunTimer").is_running() or defender.get_node("BlockStunTimer").is_running()):
 			return 0
 		else: # follow the starter's stats
-			guard_drain = UniqueCharacter.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_drain
-			guard_gain_on_combo = UniqueCharacter.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
+			guard_drain = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_drain
+			guard_gain_on_combo = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
 			
 	else: # normal attack
-		guard_drain = attacker_or_entity.query_move_guard_drain(hit_data.move_name)
-		guard_gain_on_combo = attacker_or_entity.query_move_guard_gain_on_combo(hit_data.move_name)
+		guard_drain = attacker_or_entity.query_move_data(hit_data.move_name).guard_drain
+		guard_gain_on_combo = attacker_or_entity.query_move_data(hit_data.move_name).guard_gain_on_combo
 	
 	if hit_data.block_state == Globals.block_state.UNBLOCKED and (defender.move_memory.size() > 0 or defender.get_node("HitStunTimer").is_running()):
 		# on a successful hit while defender in hitstun or a little after, guard_gauge_change is positive
@@ -4103,7 +4113,7 @@ func calculate_knockback_strength(hit_data) -> int:
 		
 	var defender = get_node(hit_data.defender_nodepath)
 
-	var knockback_strength: int = attacker_or_entity.query_move_knockback(hit_data.move_name) # scaled by FMath.S
+	var knockback_strength: int = attacker_or_entity.query_move_data(hit_data.move_name).knockback # scaled by FMath.S
 	
 	# for certain multi-hit attacks (not autochain), fixed KB or drag KB till the last hit
 	if "multihit" in hit_data:
@@ -4145,7 +4155,7 @@ func calculate_knockback_strength(hit_data) -> int:
 	elif defender.state == Globals.char_state.CROUCHING: # reduce knockback if opponent is crouching
 		knockback_strength = FMath.percent(knockback_strength, CROUCH_REDUCTION_MOD)
 			
-#	knockback_strength *= defender.UniqueCharacter.KB_MOD # defender's weight
+#	knockback_strength *= defender.UniqChar.KB_MOD # defender's weight
 	
 	if !hit_data.weak_hit:  # no KB boost for multi-hit attacks (weak hits) till the last hit
 		if defender.get_damage_percent() >= 100: # knockback is increased by defender's Damage Value when it is > 100%
@@ -4158,8 +4168,8 @@ func calculate_knockback_strength(hit_data) -> int:
 					FMath.percent(knockback_strength, DMG_VAL_KB_LIMIT), weight)
 			
 		if defender.current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
-#			knockback_strength *= lerp(1.0, UniqueCharacter.KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
-			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, UniqueCharacter.KB_BOOST_AT_MAX_GG), \
+#			knockback_strength *= lerp(1.0, UniqChar.KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
+			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \
 					defender.get_guard_gauge_percent_above())
 	
 	return knockback_strength # lethal knockback is around 2000
@@ -4252,7 +4262,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun and blockstun
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
 	
-	var atk_level: int = attacker_or_entity.query_move_atk_level(hit_data.move_name)
+	var atk_level: int = attacker_or_entity.query_move_data(hit_data.move_name).atk_level
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
 		atk_level -= 1 # atk lvl 2 become weak hit
 		atk_level = int(clamp(atk_level, 1, 2))
@@ -4288,7 +4298,7 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 			scaled_hitstun = FMath.percent(scaled_hitstun, defender.get_damage_percent())
 	else:
 		if defender.current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqueCharacter.HITSTUN_REDUCTION_AT_MAX_GG), \
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
 					defender.get_guard_gauge_percent_above())
 			
 		if defender.state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
@@ -4380,8 +4390,8 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		var out_facing := 1
 		if rng_generate(2) == 0: out_facing = -1
 		var aux_data = {"facing":out_facing, "v_mirror":v_mirror}
-		if UniqueCharacter.SDHitspark_COLOR != "red":
-			aux_data["palette"] = UniqueCharacter.SDHitspark_COLOR
+		if UniqChar.SDHitspark_COLOR != "red":
+			aux_data["palette"] = UniqChar.SDHitspark_COLOR
 		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data.hit_center, aux_data)
 		return
 	
@@ -4471,8 +4481,8 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 		if get_node(targeted_opponent_path).state != Globals.char_state.SEQUENCE_USER:
 			animate("Idle") # auto release if not released proberly, just in case
 		
-	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqueCharacter.SEQUENCES[sequence_name]
-		UniqueCharacter.simulate_sequence()
+	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
+		UniqChar.simulate_sequence()
 		
 		
 	if abs(velocity.x) < 5 * FMath.S:
@@ -4483,15 +4493,15 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	velocity_previous_frame.x = velocity.x
 	velocity_previous_frame.y = velocity.y
 	
-	var results = move($PlayerCollisionBox, $SoftPlatformDBox, UniqueCharacter.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
+	var results = move($PlayerCollisionBox, $SoftPlatformDBox, UniqChar.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
 #	velocity.x = results[0].x
 #	velocity.y = results[0].y
 	
 	if state == Globals.char_state.SEQUENCE_USER:
-		UniqueCharacter.simulate_sequence_after() # move grabbed target after grabber has moved
+		UniqChar.simulate_sequence_after() # move grabbed target after grabber has moved
 	
-	if results[0]: UniqueCharacter.end_sequence_step("ground") # hit the ground, no effect if simulate_sequence_after() broke grab and animated "Idle"
-	if results[2]: UniqueCharacter.end_sequence_step("ledge") # stopped by ledge
+	if results[0]: UniqChar.end_sequence_step("ground") # hit the ground, no effect if simulate_sequence_after() broke grab and animated "Idle"
+	if results[2]: UniqChar.end_sequence_step("ledge") # stopped by ledge
 	
 		
 func landed_a_sequence(hit_data):
@@ -4510,7 +4520,7 @@ func landed_a_sequence(hit_data):
 	defender.move_memory.append([player_ID, root_move_name])
 	
 	animate(hit_data.move_data.sequence)
-	UniqueCharacter.start_sequence_step()
+	UniqChar.start_sequence_step()
 	
 	if !pos_flow_seal and current_guard_gauge < 0: # gain positive flow
 		add_status_effect(Globals.status_effect.POS_FLOW, null)
@@ -4545,7 +4555,7 @@ func take_seq_damage(base_damage: int) -> bool: # return true if lethal
 	
 func sequence_hit(hit_key: int): # most auto sequences deal damage during the sequence outside of the launch
 	var seq_user = get_node(targeted_opponent_path)
-	var seq_hit_data = seq_user.UniqueCharacter.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
+	var seq_hit_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
 	var lethal = take_seq_damage(seq_hit_data.damage)
 	
 	if "hitstop" in seq_hit_data:
@@ -4565,9 +4575,9 @@ func sequence_launch():
 	var dir_to_attacker = sign(position.x - seq_user.position.x)
 	if dir_to_attacker == 0: dir_to_attacker = facing
 	
-	if !seq_user.Animator.to_play_animation in seq_user.UniqueCharacter.MOVE_DATABASE:
+	if !seq_user.Animator.to_play_animation in seq_user.UniqChar.MOVE_DATABASE:
 		print("Error: " + Animator.to_play_animation + " auto-sequence not found in database.")
-	var seq_data = seq_user.UniqueCharacter.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_launch
+	var seq_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_launch
 	
 #		"sequence_launch" : { # for final hit of sequence
 #			"damage" : 0,
@@ -4612,7 +4622,7 @@ func sequence_launch():
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 		else:
 			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqueCharacter.HITSTUN_REDUCTION_AT_MAX_GG), \
+				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
 						get_guard_gauge_percent_above())
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
@@ -4629,7 +4639,7 @@ func sequence_launch():
 		launch_power = FMath.f_lerp(FMath.percent(launch_power, 200), FMath.percent(launch_power, DMG_VAL_KB_LIMIT), weight)
 		
 	if current_guard_gauge > 0: # knockback is increased by Guard Gauge when it is > 100%
-		launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, UniqueCharacter.KB_BOOST_AT_MAX_GG), \
+		launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \
 				get_guard_gauge_percent_above())
 		
 	# LAUNCH ANGLE
@@ -4777,7 +4787,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"BurstRevoke2":
 			animate("FallTransit")
 
-	UniqueCharacter._on_SpritePlayer_anim_finished(anim_name)
+	UniqChar._on_SpritePlayer_anim_finished(anim_name)
 
 
 func _on_SpritePlayer_anim_started(anim_name):
@@ -4790,13 +4800,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 		if dir != 0: # impulse
 			if state == Globals.char_state.GROUND_ATK_STARTUP:
 #				var move_name = Animator.to_play_animation.trim_suffix("Startup")
-				if !impulse_used and move_name in UniqueCharacter.STARTERS and !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
+				if !impulse_used and move_name in UniqChar.STARTERS and !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
 					impulse_used = true
-					var impulse: int = dir * FMath.percent(UniqueCharacter.get_speed(), UniqueCharacter.IMPULSE_MOD)
+					var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
 					if instant_dir != 0: # perfect impulse
 						impulse = FMath.percent(impulse, PERFECT_IMPULSE_MOD)
-					if move_name in UniqueCharacter.MOVE_DATABASE and "impulse_mod" in UniqueCharacter.MOVE_DATABASE[move_name]:
-						impulse = FMath.percent(impulse, UniqueCharacter.MOVE_DATABASE[move_name].impulse_mod)
+					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
+						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
+						impulse = FMath.percent(impulse, impulse_mod)
 					velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 						
@@ -4805,14 +4816,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 		
 		if is_atk_active():
 			var move_name = anim_name.trim_suffix("Active")
-			if move_name in UniqueCharacter.MOVE_DATABASE:
-				if "root" in UniqueCharacter.MOVE_DATABASE[move_name]:
-					chain_memory.append(UniqueCharacter.MOVE_DATABASE[move_name].root) # add move to chain memory
+			if move_name in UniqChar.MOVE_DATABASE:
+				if "root" in UniqChar.MOVE_DATABASE[move_name]:
+					chain_memory.append(UniqChar.MOVE_DATABASE[move_name].root) # add move to chain memory
 					if !grounded: # add move to aerial memory
-						if is_normal_attack(UniqueCharacter.MOVE_DATABASE[move_name].root):
-							aerial_memory.append(UniqueCharacter.MOVE_DATABASE[move_name].root)
-						elif is_special_move(UniqueCharacter.MOVE_DATABASE[move_name].root):
-							aerial_sp_memory.append(UniqueCharacter.MOVE_DATABASE[move_name].root)
+						if is_normal_attack(UniqChar.MOVE_DATABASE[move_name].root):
+							aerial_memory.append(UniqChar.MOVE_DATABASE[move_name].root)
+						elif is_special_move(UniqChar.MOVE_DATABASE[move_name].root):
+							aerial_sp_memory.append(UniqChar.MOVE_DATABASE[move_name].root)
 				else:
 					chain_memory.append(move_name)
 					if !grounded:
@@ -4838,21 +4849,21 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"JumpTransit2":
 			if button_jump in input_state.pressed and (button_down in input_state.pressed or button_up in input_state.pressed):
 				# down/up and jump to hop
-				velocity.y = -FMath.percent(UniqueCharacter.JUMP_SPEED, HOP_JUMP_MOD)
+				velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), HOP_JUMP_MOD)
 				if dir != 0: # when hopping can press left/right for a long hop
-					var boost: int = dir * FMath.percent(UniqueCharacter.get_speed(), UniqueCharacter.LONG_HOP_JUMP_MOD)
+					var boost: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("LONG_HOP_JUMP_MOD"))
 					velocity.x += boost
 					velocity.x = int(clamp(velocity.x, -abs(boost), abs(boost)))
 #			elif button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to super jump, cannot adjust height
-#				velocity.y = -FMath.percent(UniqueCharacter.JUMP_SPEED, UniqueCharacter.SUPER_JUMP_MOD)
+#				velocity.y = -FMath.percent(UniqChar.JUMP_SPEED, UniqChar.SUPER_JUMP_MOD)
 #				velocity.x = 0
 			else:
-				velocity.y = -UniqueCharacter.JUMP_SPEED
+				velocity.y = -UniqChar.get_stat("JUMP_SPEED")
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 				if dir != 0: # when jumping can press left/right for a long jump
-					if abs(velocity.x) < UniqueCharacter.get_speed(): # cannot surpass SPEED
-						velocity.x += dir * UniqueCharacter.JUMP_HORIZONTAL_SPEED
-						velocity.x = int(clamp(velocity.x, -UniqueCharacter.get_speed(), UniqueCharacter.get_speed()))
+					if abs(velocity.x) < UniqChar.get_stat("SPEED"): # cannot surpass SPEED
+						velocity.x += dir * UniqChar.get_stat("JUMP_HORIZONTAL_SPEED")
+						velocity.x = int(clamp(velocity.x, -UniqChar.get_stat("SPEED"), UniqChar.get_stat("SPEED")))
 #					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"aJumpTransit2":
@@ -4862,21 +4873,21 @@ func _on_SpritePlayer_anim_started(anim_name):
 				# air jump directional boost
 				if dir != 0:
 					if dir * velocity.x < 0: # air jump change direction (no change in velocity if same direction)
-						velocity.x += dir * FMath.percent(UniqueCharacter.get_speed(), 70)
+						velocity.x += dir * FMath.percent(UniqChar.get_stat("SPEED"), 70)
 					else:
 						velocity.x = FMath.percent(velocity.x, 90) # air jump is slower horizontally since no friction
 				else: # neutral air jump
 					velocity.x = FMath.percent(velocity.x, 70)
-				velocity.y = -FMath.percent(UniqueCharacter.JUMP_SPEED, UniqueCharacter.AIR_JUMP_MOD)
+				velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), UniqChar.get_stat("AIR_JUMP_MOD"))
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
 			else: # if next to wall when starting an air jump, do wall jump instead
 				if wall_jump_dir != 0:
-					velocity.x = wall_jump_dir * FMath.percent(UniqueCharacter.get_speed(), 50)
+					velocity.x = wall_jump_dir * FMath.percent(UniqChar.get_stat("SPEED"), 50)
 				else:
 					velocity.x = 0 # walls on both side
 					wall_jump_dir = facing # for the dash dust effect
-				velocity.y = -UniqueCharacter.JUMP_SPEED
+				velocity.y = -UniqChar.get_stat("JUMP_SPEED")
 				$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 				var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 					-wall_jump_dir)
@@ -4888,11 +4899,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"WallJumpTransit2":
 			aerial_memory = []
 			if wall_jump_dir != 0:
-				velocity.x = wall_jump_dir * FMath.percent(UniqueCharacter.get_speed(), 50)
+				velocity.x = wall_jump_dir * FMath.percent(UniqChar.get_stat("SPEED"), 50)
 			else:
 				velocity.x = 0 # walls on both side
 				wall_jump_dir = facing # for the dash dust effect
-			velocity.y = -UniqueCharacter.JUMP_SPEED
+			velocity.y = -UniqChar.get_stat("JUMP_SPEED")
 			$VarJumpTimer.time = VarJumpTimer_WAIT_TIME
 			var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 				-wall_jump_dir)
@@ -4914,7 +4925,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			perfect_block()
 		"aBlock":
 			$ModulatePlayer.play("EX_block_flash")
-			change_guard_gauge(UniqueCharacter.AIR_BLOCK_GG_COST)
+			change_guard_gauge(UniqChar.get_stat("AIR_BLOCK_GG_COST"))
 			play_audio("bling1", {"vol" : -16,})
 			remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
 		"BlockRecovery", "aBlockRecovery", "BlockCRecovery", "aBlockCRecovery":
@@ -4952,11 +4963,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"BurstRevoke2":
 			anim_gravity_mod = 0
 			
-	UniqueCharacter._on_SpritePlayer_anim_started(anim_name)
+	UniqChar._on_SpritePlayer_anim_started(anim_name)
 	
 	
 func _on_SpritePlayer_frame_update(): # emitted after every frame update, useful for staggering audio
-	UniqueCharacter.stagger_anim()
+	UniqChar.stagger_anim()
 
 # return modulate to normal after ModulatePlayer finishes playing
 # may do follow-up modulate animation
@@ -5137,7 +5148,7 @@ func load_state(state_data):
 	Globals.Game.burst_update(self)
 	
 	unique_data = state_data.unique_data
-	if UniqueCharacter.has_method("update_uniqueHUD"): UniqueCharacter.update_uniqueHUD()
+	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
 	move_memory = state_data.move_memory
 	aerial_memory = state_data.aerial_memory
 	aerial_sp_memory = state_data.aerial_sp_memory

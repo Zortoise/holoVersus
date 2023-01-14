@@ -50,15 +50,34 @@ func init(_aux_data: Dictionary):
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 
-func query_move_data_and_name():
+#func query_move_data_and_name():
+#
+#	var move_ref = Animator.to_play_animation
+#	match move_ref:
+#		"bActive":
+#			move_ref = "Active"
+#
+#	if move_ref in MOVE_DATABASE:
+#		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
+		
+		
+func query_move_data(move_name) -> Dictionary:
 	
-	var move_ref = Animator.to_play_animation
-	match move_ref:
+	match move_name:
 		"bActive":
-			move_ref = "Active"
+			move_name = "Active"
 	
-	if move_ref in MOVE_DATABASE:
-		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
+	if !move_name in MOVE_DATABASE:
+		print("Error: Cannot retrieve move_data for " + move_name)
+		return {}
+	
+	var move_data = MOVE_DATABASE[move_name]
+	
+	match move_data: # move data may change for certain moves under certain conditions, unique to character
+		_ :
+			pass
+	
+	return move_data
 		
 		
 func query_atk_attr(_move_name):

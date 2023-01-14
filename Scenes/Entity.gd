@@ -1,6 +1,6 @@
 extends "res://Scenes/Physics/Physics.gd"
 
-var UniqueEntity
+var UniqEntity
 onready var Animator = $SpritePlayer
 
 const STRONG_HIT_AUDIO_BOOST = 3
@@ -57,40 +57,40 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 	
 	load_entity()
 		
-	if "UNIQUE_DATA_REF" in UniqueEntity:
-		unique_data = UniqueEntity.UNIQUE_DATA_REF.duplicate(true)
+	if "UNIQUE_DATA_REF" in UniqEntity:
+		unique_data = UniqEntity.UNIQUE_DATA_REF.duplicate(true)
 		
-	UniqueEntity.init(aux_data)
+	UniqEntity.init(aux_data)
 	
 		
 func load_entity():
 
-	var is_common = entity_ref in Globals.common_entity_data # check if UniqueEntity scene is common or character-unique
+	var is_common = entity_ref in Globals.common_entity_data # check if UniqEntity scene is common or character-unique
 	
 	if is_common: # common entity with loaded data stored in Globals.gb
-		UniqueEntity = Globals.common_entity_data[entity_ref].scene.instance() # load UniqueEntity scene
+		UniqEntity = Globals.common_entity_data[entity_ref].scene.instance() # load UniqEntity scene
 		$SpritePlayer.init_with_loaded_frame_data($Sprite, Globals.common_entity_data[entity_ref].frame_data) # load frame data
 		$Sprite.texture = Globals.common_entity_data[entity_ref].spritesheet # load spritesheet
 		
 	else: # character-unique entity with loaded data stored in master's node
 		var entity_data = get_node(creator_path).entity_data[entity_ref]
-		UniqueEntity = entity_data.scene.instance() # load UniqueEntity scene
+		UniqEntity = entity_data.scene.instance() # load UniqEntity scene
 		$SpritePlayer.init_with_loaded_frame_data($Sprite, entity_data.frame_data) # load frame data
 		$Sprite.texture = entity_data.spritesheet # load spritesheet
 		
-	add_child(UniqueEntity)
-	move_child(UniqueEntity, 0)
-	UniqueEntity.sprite = $Sprite
-	UniqueEntity.Animator = $SpritePlayer
+	add_child(UniqEntity)
+	move_child(UniqEntity, 0)
+	UniqEntity.sprite = $Sprite
+	UniqEntity.Animator = $SpritePlayer
 	
 	# set up collision box dimensions
-	if UniqueEntity.has_node("DefaultCollisionBox"):
-		var ref_rect = UniqueEntity.get_node("DefaultCollisionBox")
+	if UniqEntity.has_node("DefaultCollisionBox"):
+		var ref_rect = UniqEntity.get_node("DefaultCollisionBox")
 		$EntityCollisionBox.rect_position = ref_rect.rect_position
 		$EntityCollisionBox.rect_size = ref_rect.rect_size
 		$EntityCollisionBox.add_to_group("Entities")
 		
-		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS:
+		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
 			$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
 			$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
@@ -103,21 +103,21 @@ func load_entity():
 		$EntityCollisionBox.free()
 		$SoftPlatformDBox.free()
 		
-	if UniqueEntity.has_node("DefaultSpriteBox"): # for an entity to go offstage, the entire sprite must be offstage
-		var ref_rect = UniqueEntity.get_node("DefaultSpriteBox")
+	if UniqEntity.has_node("DefaultSpriteBox"): # for an entity to go offstage, the entire sprite must be offstage
+		var ref_rect = UniqEntity.get_node("DefaultSpriteBox")
 		$EntitySpriteBox.rect_position = ref_rect.rect_position
 		$EntitySpriteBox.rect_size = ref_rect.rect_size
 	else:
 		$EntitySpriteBox.free()
 		
-	if "PALETTE" in UniqueEntity: # load palette
+	if "PALETTE" in UniqEntity: # load palette
 		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palette
-			if UniqueEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
+			if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
 				$Sprite.material = ShaderMaterial.new()
 				$Sprite.material.shader = Globals.loaded_palette_shader
-				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqueEntity.PALETTE])
+				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqEntity.PALETTE])
 				
-		elif get_node(creator_path).loaded_palette != null: # same palette as creator, just set UniqueEntity.PALETTE to null
+		elif get_node(creator_path).loaded_palette != null: # same palette as creator, just set UniqEntity.PALETTE to null
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Globals.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", get_node(creator_path).loaded_palette)
@@ -158,15 +158,15 @@ func simulate2(): # only ran if not in hitstop
 						
 				absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
 				if absorption_value <= 0:
-					UniqueEntity.kill()
+					UniqEntity.kill()
 				for x in interact_array2:
 					x.absorption_value -= lowest_AV
 					if x.absorption_value <= 0:
-						x.UniqueEntity.kill()
+						x.UniqEntity.kill()
 		
 				
 			
-	UniqueEntity.simulate()
+	UniqEntity.simulate()
 	
 	ignore_list_progress_timer()
 	
@@ -186,21 +186,21 @@ func simulate2(): # only ran if not in hitstop
 	if has_node("EntityCollisionBox"):
 	
 		var results #  # [landing_check, collision_check, ledgedrop_check]
-		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS:
-			results = move($EntityCollisionBox, $SoftPlatformDBox, Globals.entity_trait.LEDGE_STOP in UniqueEntity.TRAITS)
+		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+			results = move($EntityCollisionBox, $SoftPlatformDBox, Globals.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
 		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
 			results = move($EntityCollisionBox, $EntityCollisionBox)
 		
-		if UniqueEntity.has_method("collision"): # entity can collide with solid platforms
+		if UniqEntity.has_method("collision"): # entity can collide with solid platforms
 			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
-				UniqueEntity.kill()
+				UniqEntity.kill()
 			elif results[1]: # if colliding with a solid platform, runs collision() which can kill it or bounce it
-				UniqueEntity.collision()
-		if Globals.entity_trait.GROUNDED in UniqueEntity.TRAITS and UniqueEntity.has_method("ledge_stop"):
+				UniqEntity.collision()
+		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
 			if !is_on_ground($SoftPlatformDBox): # spawned in the air, kill it
-				UniqueEntity.kill()
+				UniqEntity.kill()
 			elif results[2]: # reached a ledge
-				UniqueEntity.ledge_stop()
+				UniqEntity.ledge_stop()
 		
 	else: # no collision with platforms
 		position += velocity.convert_to_vec()
@@ -214,7 +214,7 @@ func simulate_after(): # do this after hit detection
 		
 		lifetime += 1
 		if lifespan != null and lifetime >= lifespan:
-			UniqueEntity.kill()
+			UniqEntity.kill()
 				
 	# start hitstop timer at end of frame after SpritePlayer.simulate() by setting hitstop to a number other than null for the frame
 	# new hitstops override old ones
@@ -248,21 +248,21 @@ func face(in_dir):
 		$Sprite.scale.x = facing
 		
 func check_fallthrough(): # return true if entity falls through soft platforms
-	if UniqueEntity.has_method("check_fallthrough"): # some entities may interact with soft platforms
-		return UniqueEntity.check_fallthrough()
+	if UniqEntity.has_method("check_fallthrough"): # some entities may interact with soft platforms
+		return UniqEntity.check_fallthrough()
 	else:
 		return true
 		
 func check_passthrough(): # return true if entity ignore walls/floors
-	if UniqueEntity.has_method("check_passthrough"):
-		return UniqueEntity.check_passthrough()
+	if UniqEntity.has_method("check_passthrough"):
+		return UniqEntity.check_passthrough()
 	else:
 		return false
 
 
 func on_offstage(): # what to do if entity leaves stage
-	if UniqueEntity.has_method("on_offstage"):
-		UniqueEntity.on_offstage()
+	if UniqEntity.has_method("on_offstage"):
+		UniqEntity.on_offstage()
 
 func query_polygons(): # requested by main game node when doing hit detection
 
@@ -283,10 +283,10 @@ func query_polygons(): # requested by main game node when doing hit detection
 
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
-	if UniqueEntity.has_method("query_move_data_and_name"):
-		return UniqueEntity.query_move_data_and_name()
-	elif Animator.to_play_animation in UniqueEntity.MOVE_DATABASE:
-		return {"move_data" : UniqueEntity.MOVE_DATABASE[Animator.to_play_animation], "move_name" : Animator.to_play_animation}
+	if UniqEntity.has_method("query_move_data"):
+		return {"move_data" : UniqEntity.query_move_data(Animator.to_play_animation), "move_name" : Animator.to_play_animation}
+#	elif Animator.to_play_animation in UniqEntity.MOVE_DATABASE:
+#		return {"move_data" : UniqEntity.MOVE_DATABASE[Animator.to_play_animation], "move_name" : Animator.to_play_animation}
 	print("Error: " + Animator.to_play_animation + " not found in MOVE_DATABASE for query_move_data_and_name().")
 
 
@@ -295,51 +295,14 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 	if in_move_name == null:
 		in_move_name = Animator.to_play_animation
 	
-	if UniqueEntity.has_method("query_atk_attr"):
-		return UniqueEntity.query_atk_attr(in_move_name)
+	if UniqEntity.has_method("query_atk_attr"):
+		return UniqEntity.query_atk_attr(in_move_name)
 	return []
 	
-func query_move_EX_gain(move_name):
-	if UniqueEntity.has_method("query_move_EX_gain"):
-		return UniqueEntity.query_move_EX_gain(move_name)
-	elif move_name in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[move_name].EX_gain
-	else: print("Error: Cannot retrieve EX_gain for " + move_name)
+func query_move_data(move_name):
+	var move_data = UniqEntity.query_move_data(move_name)
+	return move_data
 	
-func query_move_damage(move_name):
-	if UniqueEntity.has_method("query_move_damage"):
-		return UniqueEntity.query_move_damage(move_name)
-	elif move_name in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[move_name].damage
-	else: print("Error: Cannot retrieve damage for " + move_name)
-	
-func query_move_knockback(move_name):
-	if UniqueEntity.has_method("query_move_knockback"):
-		return UniqueEntity.query_move_knockback(move_name)
-	elif move_name in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[move_name].knockback
-	else: print("Error: Cannot retrieve knockback for " + move_name)
-	
-func query_move_atk_level(move_name):
-	if UniqueEntity.has_method("query_move_atk_level"):
-		return UniqueEntity.query_move_atk_level(move_name)
-	elif move_name in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[move_name].atk_level
-	else: print("Error: Cannot retrieve atk_level for " + move_name)
-	
-func query_move_guard_drain(move_name):
-	if UniqueEntity.has_method("query_move_guard_drain"):
-		return UniqueEntity.query_move_guard_drain(move_name)
-	elif move_name in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[move_name].guard_drain
-	else: print("Error: Cannot retrieve guard_drain for " + move_name)
-	
-func query_move_guard_gain_on_combo(move_name):
-	if UniqueEntity.has_method("query_move_guard_gain_on_combo"):
-		return UniqueEntity.query_move_guard_gain_on_combo(move_name)
-	elif move_name in UniqueEntity.MOVE_DATABASE:
-		return UniqueEntity.MOVE_DATABASE[move_name].guard_gain_on_combo
-	else: print("Error: Cannot retrieve guard_gain_on_combo for " + move_name)
 	
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 
 
@@ -360,17 +323,17 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	match hit_data.block_state:
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
-			defender.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 25))
+				attacker.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
+			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 25))
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
+				attacker.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
 		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-			defender.change_ex_gauge(query_move_EX_gain(hit_data.move_name))
+			defender.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
 		_:  # normal block
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 50))
-			defender.change_ex_gauge(FMath.percent(query_move_EX_gain(hit_data.move_name), 50))
+				attacker.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
+			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -427,8 +390,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					aux_data["vol"] = volume_change
 				play_audio(sound.ref, aux_data)
 				
-	if UniqueEntity.has_method("landed_a_hit"):
-		UniqueEntity.landed_a_hit(hit_data) # reaction
+	if UniqEntity.has_method("landed_a_hit"):
+		UniqEntity.landed_a_hit(hit_data) # reaction
 	
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------
@@ -504,14 +467,14 @@ func _on_SpritePlayer_anim_finished(anim_name):
 #		"Kill":
 #			free = true # don't use queue_free!
 			
-	UniqueEntity._on_SpritePlayer_anim_finished(anim_name)
+	UniqEntity._on_SpritePlayer_anim_finished(anim_name)
 	
 func _on_SpritePlayer_anim_started(anim_name):
 #	match anim_name:
 #		_:
 #			pass
 			
-	UniqueEntity._on_SpritePlayer_anim_started(anim_name)
+	UniqEntity._on_SpritePlayer_anim_started(anim_name)
 	
 
 func play_audio(audio_ref: String, aux_data: Dictionary):

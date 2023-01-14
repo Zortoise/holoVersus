@@ -52,7 +52,7 @@ func palette():
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Globals.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[palette_ref])
-	elif get_node(palette_ref).loaded_palette != null: # same palette as master, just set UniqueEntity.PALETTE to null
+	elif get_node(palette_ref).loaded_palette != null: # same palette as master
 		$Sprite.material = ShaderMaterial.new()
 		$Sprite.material.shader = Globals.loaded_palette_shader
 		$Sprite.material.set_shader_param("swap", get_node(palette_ref).loaded_palette)
