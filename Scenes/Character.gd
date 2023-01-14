@@ -1280,6 +1280,14 @@ func simulate2(): # only ran if not in hitstop
 #	velocity.y = results[0].y
 	
 	if results[0]: check_landing()
+	
+	# get overlapping characters, all grounded overlapping characters above you get sent to the back
+	var overlapping = Detection.detect_return([$PlayerCollisionBox], ["Players"])
+	if overlapping.size() > 0:
+		for overlapper in overlapping:
+			if overlapper.grounded and overlapper.get_position_in_parent() > get_position_in_parent() and \
+					overlapper.get_feet_pos().y < get_feet_pos().y:
+				Globals.Game.get_node("Players").move_child(overlapper, 0)
 		
 	# must process hitbox/hurtboxes after calculation (since need to use to_play_animation after it is calculated)
 	# however, must process before running the animation and advancing the time counter
@@ -1411,19 +1419,18 @@ func buffer_actions():
 	if button_unique in input_state.just_released:
 		release_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
-	if !query_status_effect(Globals.status_effect.RESPAWN_GRACE): # no attacking during respawn grace
-		if button_light in input_state.just_pressed:
-			if !button_unique in input_state.pressed:
-				input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
-			tap_memory.append([button_light, TAP_MEMORY_DURATION])
-		if button_fierce in input_state.just_pressed:
-			if !button_unique in input_state.pressed:
-				input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
-			tap_memory.append([button_fierce, TAP_MEMORY_DURATION])
-		if button_aux in input_state.just_pressed:
-			if !button_unique in input_state.pressed:
-				input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
-			tap_memory.append([button_aux, TAP_MEMORY_DURATION])
+	if button_light in input_state.just_pressed:
+		if !button_unique in input_state.pressed:
+			input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
+		tap_memory.append([button_light, TAP_MEMORY_DURATION])
+	if button_fierce in input_state.just_pressed:
+		if !button_unique in input_state.pressed:
+			input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
+		tap_memory.append([button_fierce, TAP_MEMORY_DURATION])
+	if button_aux in input_state.just_pressed:
+		if !button_unique in input_state.pressed:
+			input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
+		tap_memory.append([button_aux, TAP_MEMORY_DURATION])
 	
 	if input_state.just_pressed.size() > 0 or release_memory.size() > 0:
 		capture_combinations() # look for combinations
@@ -1846,6 +1853,10 @@ func process_input_buffer():
 # STATE DETECT ---------------------------------------------------------------------------------------------------
 
 func animate(anim):
+	
+	 # no attacking during respawn grace
+	if query_status_effect(Globals.status_effect.RESPAWN_GRACE) and anim.trim_suffix("Startup") in UniqChar.STARTERS:
+		return
 	
 	var old_new_state = new_state
 	

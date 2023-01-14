@@ -57,10 +57,10 @@ const UNIQUE_DATA_REF = {
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
 		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
-const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
+const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 const SUPERS = []
 
-const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
+const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aF3", "aSP3"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
 const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
