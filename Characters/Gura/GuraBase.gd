@@ -16,7 +16,7 @@ const GRAVITY_MOD = 100 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 720 # affect terminal velocity downward
 const FASTFALL_MOD = 125 # fastfall speed, mod of terminal velocity
 const FRICTION = 15 # between 0.0 and 1.0
-const ACCELERATION = 10 # between 0.0 and 1.0
+const ACCELERATION = 15 # between 0.0 and 1.0
 const AIR_RESISTANCE = 3 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 100 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
@@ -470,7 +470,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
 		"fixed_blockstun" : 5,
-		"burstlock": 8,
+#		"burstlock": 8,
 		"priority": 8,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
@@ -510,7 +510,6 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
 		"fixed_blockstun" : 5,
-		"burstlock": 8,
 		"priority": 8,
 		"guard_drain": 2000,
 		"guard_gain_on_combo" : 3500,
@@ -550,7 +549,6 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
 		"fixed_blockstun" : 5,
-		"burstlock": 8,
 		"priority": 11,
 		"guard_drain": 2500,
 		"guard_gain_on_combo" : 3500,

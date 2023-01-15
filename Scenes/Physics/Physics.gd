@@ -192,7 +192,9 @@ func get_colliding_characters_side(collision_box, direction):
 		# check if you are moving toward them or away, only collide if moving towards them
 		if ((direction == 1 and character.position.x > tester.position.x) or \
 				(direction == -1 and character.position.x < tester.position.x)):
-			if character.has_method("check_collidable") and character.call("check_collidable"): # detected character must be collidable
+			if character.state == Globals.char_state.CROUCHING and !get("grounded") and character.position.y > position.y:
+				continue # if you are airborne, will not collide with opponents that are crouching and under you
+			elif character.has_method("check_collidable") and character.call("check_collidable"): # detected character must be collidable
 				colliding_characters.append(character)
 			
 	return colliding_characters

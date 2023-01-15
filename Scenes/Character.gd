@@ -37,6 +37,7 @@ const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
 const CROUCH_REDUCTION_MOD = 50 # reduce knockback and hitstun if opponent is crouching
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
+const AC_BurstLockTimer_TIME = 10 # number of frames you cannot use Burst Escape after being hit with an autochain move
 const EX_MOVE_COST = 10000 # 10000
 const PosFlowSealTimer_TIME = 60 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
 const TrainingRegenTimer_TIME = 60 # number of frames before GG/Damage Value start regening
@@ -1322,7 +1323,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			$SpritePlayer.simulate()
 			$FadePlayer.simulate() # ModulatePlayer ignore hitstop but FadePlayer doesn't
 			
-			if !hitstop: # timers do not run on exact frame frame hitstop starts
+			if !hitstop: # timers do not run on exact frame hitstop starts
 				$VarJumpTimer.simulate()
 				$HitStunTimer.simulate()
 				$BlockStunTimer.simulate()
@@ -3823,6 +3824,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !double_repeat: # lock Burst Escape for a few frames afterwards, some moves like Autochain moves lock for more
 		if "burstlock" in hit_data.move_data:
 			$BurstLockTimer.time = hit_data.move_data.burstlock
+		elif "autochain" in hit_data: # autochain moves will lock Burst/DI for 10 frames minimum
+			$BurstLockTimer.time = AC_BurstLockTimer_TIME
 		elif "multihit" in hit_data and "ignore_time" in hit_data.move_data and hit_data.move_data.ignore_time > BurstLockTimer_TIME:
 			$BurstLockTimer.time = hit_data.move_data.ignore_time
 		else:
