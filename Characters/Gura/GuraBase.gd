@@ -6,7 +6,7 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 350 * FMath.S # ground speed
+const SPEED = 340 * FMath.S # ground speed
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
@@ -26,7 +26,7 @@ const AIR_DASH_SPEED = 390 * FMath.S # duration in animation data
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
 #const SUPER_JUMP_MOD = 150
-const WAVE_DASH_SPEED_MOD = 150 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
+const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
 const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have higher
 const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
@@ -600,7 +600,7 @@ const MOVE_DATABASE = {
 	
 	"aSP5" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
-		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
+#		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		"hitcount" : 1,
 		"damage" : 100,
 		"knockback" : 475 * FMath.S,
@@ -614,13 +614,13 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.QUICK_TURN_LIMIT],
+		"atk_attr" : [],
 		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
 	},
 	"aSP5[ex]" : {
 		"atk_type" : Globals.atk_type.EX,
-		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
+#		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		"hitcount" : 1,
 		"damage" : 150,
 		"knockback" : 500 * FMath.S,
@@ -634,7 +634,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.QUICK_TURN_LIMIT],
+		"atk_attr" : [],
 		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
 	},

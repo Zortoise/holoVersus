@@ -41,7 +41,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"F2Recovery": {
+"F2Rec": {
 "SfxOver_hframes": 5,
 "SfxOver_spritesheet": "F2SfxOver",
 "SfxOver_vframes": 1,

@@ -35,7 +35,7 @@ frame_data = {
 },
 "vframes": 1
 },
-"aL1Recovery": {
+"aL1Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "aL1SfxUnder",
 "SfxUnder_vframes": 1,

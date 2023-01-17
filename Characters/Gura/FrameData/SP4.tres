@@ -23,7 +23,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"SP4Recovery": {
+"SP4Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP4SfxUnder",
 "SfxUnder_vframes": 2,
@@ -119,7 +119,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"SP4[ex]Recovery": {
+"SP4[ex]Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP4SfxUnder",
 "SfxUnder_vframes": 2,

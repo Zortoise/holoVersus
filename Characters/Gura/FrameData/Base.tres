@@ -26,7 +26,7 @@ frame_data = {
 },
 "vframes": 18
 },
-"BlockCRecovery": {
+"BlockCRec": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -52,7 +52,7 @@ frame_data = {
 },
 "vframes": 18
 },
-"BlockRecovery": {
+"BlockRec": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -290,7 +290,7 @@ frame_data = {
 },
 "vframes": 18
 },
-"BurstRecovery": {
+"BurstRec": {
 "duration": 7,
 "hframes": 6,
 "loop": false,
@@ -1274,7 +1274,7 @@ frame_data = {
 },
 "vframes": 18
 },
-"aBlockCRecovery": {
+"aBlockCRec": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -1287,7 +1287,7 @@ frame_data = {
 },
 "vframes": 18
 },
-"aBlockRecovery": {
+"aBlockRec": {
 "duration": 4,
 "hframes": 6,
 "loop": false,

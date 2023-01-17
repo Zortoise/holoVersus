@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"SP3Recovery": {
+"SP3Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
@@ -145,7 +145,7 @@ frame_data = {
 },
 "vframes": 3
 },
-"aSP3Recovery": {
+"aSP3Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
@@ -253,7 +253,7 @@ frame_data = {
 },
 "vframes": 3
 },
-"aSP3[ex]Recovery": {
+"aSP3[ex]Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,

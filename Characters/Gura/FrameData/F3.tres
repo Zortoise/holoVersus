@@ -44,7 +44,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"F3Recovery": {
+"F3Rec": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "F3SfxOver",
 "SfxOver_vframes": 1,

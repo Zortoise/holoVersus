@@ -37,40 +37,40 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"L1Recovery", "L1bRecovery", "L2bRecovery", "F1Recovery", "F2Recovery", "F3Recovery", "HbRecovery", "Hb[h]Recovery":
+		"L1Rec", "L1bRec", "L2bRec", "F1Rec", "F2Rec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
-		"L1bCRecovery", "F1CRecovery":
+		"L1bCRec", "F1CRec":
 			return Globals.char_state.GROUND_C_RECOVERY
 			
 		"aL1Startup", "aL2Startup", "aF1Startup", "aF1[h]Startup", "aF3Startup", "aHStartup":
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aL1Active", "aL2Active", "aF1Active", "aF3Active", "aHActive":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"L2Recovery", "aL1Recovery", "aL2Recovery", "aL2bRecovery", "aF1Recovery", "aF3Recovery", "aHRecovery":
+		"L2Rec", "aL1Rec", "aL2Rec", "aL2bRec", "aF1Rec", "aF3Rec", "aHRec":
 			return Globals.char_state.AIR_ATK_RECOVERY
-		"L2cCRecovery", "aF1CRecovery", "aF3CRecovery":
+		"L2cCRec", "aF1CRec", "aF3CRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		"SP1Startup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", "SP1[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active", "SP1[ex]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"SP1Recovery", "SP1[ex]Recovery":
+		"SP1Rec", "SP1[ex]Rec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		"aSP1Startup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", "aSP1[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active", "aSP1[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP1Recovery", "aSP1[ex]Recovery":
+		"aSP1Rec", "aSP1[ex]Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 			
 		"aSP2Startup", "aSP2[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP2Active", "aSP2[h]Active", "aSP2[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP2Recovery", "aSP2[h]Recovery":
+		"aSP2Rec", "aSP2[h]Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
-		"aSP2CRecovery":
+		"aSP2CRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
@@ -79,14 +79,14 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP3Recovery", "aSP3[ex]Recovery", "SP3Recovery":
+		"aSP3Rec", "aSP3[ex]Rec", "SP3Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 			
 		"SP4Startup", "SP4[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"SP4Active", "SP4[h]Active", "SP4[ex]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"SP4Recovery", "SP4[ex]Recovery":
+		"SP4Rec", "SP4[ex]Rec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 			
 		"SP5Startup", "SP5[ex]Startup":
@@ -95,9 +95,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP5Active", "aSP5[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP5Recovery", "aSP5bRecovery", "aSP5[ex]Recovery", "aSP5b[ex]Recovery":
+		"aSP5Rec", "aSP5bRec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
-		"SP5bRecovery", "SP5b[ex]Recovery":
+		"SP5bRec", "SP5b[ex]Rec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 			
 		"SP6[ex]Startup":
@@ -106,9 +106,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP6[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"SP6[ex]Recovery", "SP6[ex]GrabRecovery":
+		"SP6[ex]Rec", "SP6[ex]GrabRec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
-		"aSP6[ex]Recovery", "aSP6[ex]GrabRecovery":
+		"aSP6[ex]Rec", "aSP6[ex]GrabRec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
 			return Globals.char_state.SEQUENCE_USER
@@ -144,14 +144,19 @@ func simulate():
 
 	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aL2Active"]):
 		if Character.grounded:
-			Character.animate("HardLanding")
+			Character.animate("aL2LandRec")
 			landing_sound()
 		elif !Character.button_light in Character.input_state.pressed:
-			Character.animate("aL2bRecovery")
+			Character.animate("aL2bRec")
 			
-	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["aSP3Recovery", "aSP3[ex]Recovery"]):
+	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["aL2bRec"]):
 		if Character.grounded:
-			Character.animate("SP3Recovery")
+			Character.animate("aL2LandRec")
+			landing_sound()
+			
+	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["aSP3Rec", "aSP3[ex]Rec"]):
+		if Character.grounded:
+			Character.animate("SP3Rec")
 			landing_sound()
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
 						{"facing":Character.facing, "grounded":true})
@@ -346,16 +351,24 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							elif Character.velocity_previous_frame.y < 0: # moving upward
 								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
 								Character.animate("WaveDashBrake")
-								Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-									{"facing":Character.facing, "grounded":true})
-								if Character.dir == Character.facing:
-									Character.velocity.x = Character.facing * get_stat("GROUND_DASH_SPEED")
-								dash_sound()
-								
+								if Character.dir != 0: # if holding direction, dash towards it
+									if Character.facing != Character.dir:
+										Character.face(Character.dir)
+									Character.velocity.x = Character.dir * get_stat("GROUND_DASH_SPEED")
+									Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
+										{"facing":Character.facing, "grounded":true})
+									dash_sound()
+								else:
+									Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
+												{"facing":Character.facing, "grounded":true})
+									landing_sound()
+									
 							else: # not moving upward
 								Character.animate("aDashTransit") # for dropping down and air dashing ASAP
 						else:
 							Character.animate("aDashTransit")
+							if Animator.query_current(["JumpTransit2"]): # if starting an air dash on the 1st frame after a ground jump
+								Character.velocity.y = FMath.percent(Character.velocity.y, 50)
 						keep = false
 						
 				Globals.char_state.AIR_STARTUP: # cancel start of air jump into air dash
@@ -516,9 +529,16 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 	
 	match Character.state:
 		Globals.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
-			if Animator.query_current(["DashTransit"]):
+			if Animator.query_current(["DashTransit"]) and attack_ref in STARTERS:
 				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
+					Character.chain_memory = []
+					has_acted[0] = true
+					return true
+		Globals.char_state.AIR_STARTUP: # can attack on 1st frames of air dash
+			if Animator.query_current(["aDashTransit"]) and ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
+				if Character.is_ex_valid("a" + attack_ref):
+					Character.animate("a" + attack_ref + "Startup")
 					Character.chain_memory = []
 					has_acted[0] = true
 					return true
@@ -578,7 +598,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 						return true
 						
 #				# EX Target Chain
-#				if attack_ref == "SP3[ex]" and Animator.query_to_play(["SP6[ex]GrabRecovery"]):
+#				if attack_ref == "SP3[ex]" and Animator.query_to_play(["SP6[ex]GrabRec"]):
 #					if Character.is_ex_valid(attack_ref):
 #						Character.animate(attack_ref + "Startup")
 #						has_acted[0] = true
@@ -608,7 +628,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 							return true
 							
 #					# EX Target Chain
-#					if attack_ref == "SP3[ex]" and Animator.query_to_play(["aSP6[ex]GrabRecovery"]):
+#					if attack_ref == "SP3[ex]" and Animator.query_to_play(["aSP6[ex]GrabRec"]):
 #						if Character.is_ex_valid("a" + attack_ref):
 #							Character.animate("a" + attack_ref + "Startup")
 #							has_acted[0] = true
@@ -727,7 +747,7 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 			return MOVE_DATABASE["F3"].atk_attr
 		"F3[h]":
 			return [Globals.atk_attr.SUPERARMOR]
-		"aL2b":
+		"aL2b", "aL2Land":
 			return MOVE_DATABASE["aL2"].atk_attr
 		"aF1[h]":
 			return MOVE_DATABASE["aF1"].atk_attr
@@ -785,9 +805,9 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	
 	match hit_data.move_name:
 		"aL2":
-			Character.animate("aL2Recovery")
+			Character.animate("aL2Rec")
 		"L2":
-			Character.animate("L2Recovery")
+			Character.animate("L2Rec")
 		"aSP5":
 			if hit_data.sweetspotted:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
@@ -1011,37 +1031,37 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1Startup":
 			Character.animate("L1Active")
 		"L1Active":
-			Character.animate("L1Recovery")
-		"L1Recovery":
+			Character.animate("L1Rec")
+		"L1Rec":
 			Character.animate("L1bActive")
 		"L1bActive":
-			Character.animate("L1bRecovery")
-		"L1bRecovery":
-			Character.animate("L1bCRecovery")
-		"L1bCRecovery":
+			Character.animate("L1bRec")
+		"L1bRec":
+			Character.animate("L1bCRec")
+		"L1bCRec":
 			Character.animate("Idle")
 			
 		"L2Startup":
 			Character.animate("L2Active")
 		"L2Active":
 			if Character.grounded:
-				Character.animate("L2bRecovery")
+				Character.animate("L2bRec")
 			else:
-				Character.animate("L2cCRecovery")
-		"L2Recovery":
+				Character.animate("L2cCRec")
+		"L2Rec":
 			Character.animate("FallTransit")
-		"L2bRecovery":
+		"L2bRec":
 			Character.animate("Idle")
-		"L2cCRecovery":
+		"L2cCRec":
 			Character.animate("FallTransit")
 			
 		"F1Startup":
 			Character.animate("F1Active")
 		"F1Active":
-			Character.animate("F1Recovery")
-		"F1Recovery":
-			Character.animate("F1CRecovery")
-		"F1CRecovery":
+			Character.animate("F1Rec")
+		"F1Rec":
+			Character.animate("F1CRec")
+		"F1CRec":
 			Character.animate("Idle")
 			
 		"F2Startup":
@@ -1049,8 +1069,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"F2bStartup":
 			Character.animate("F2Active")
 		"F2Active":
-			Character.animate("F2Recovery")
-		"F2Recovery":
+			Character.animate("F2Rec")
+		"F2Rec":
 			Character.animate("Idle")
 			
 		"F3Startup":
@@ -1069,8 +1089,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"F3[h]Startup":
 			Character.animate("F3Active")
 		"F3Active":
-			Character.animate("F3Recovery")
-		"F3Recovery":
+			Character.animate("F3Rec")
+		"F3Rec":
 			Character.animate("Idle")
 
 		"HStartup":
@@ -1081,32 +1101,34 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"HActive":
 			Character.animate("HbActive")
 		"HbActive":
-			Character.animate("HbRecovery")
+			Character.animate("HbRec")
 		"H[h]Startup":
 			Character.animate("H[h]Active")
 		"H[h]Active":
 			Character.animate("Hb[h]Active")
 		"Hb[h]Active":
-			Character.animate("Hb[h]Recovery")
-		"HbRecovery", "Hb[h]Recovery":
+			Character.animate("Hb[h]Rec")
+		"HbRec", "Hb[h]Rec":
 			Character.animate("Idle")
 
 		"aL1Startup":
 			Character.animate("aL1Active")
 		"aL1Active":
-			Character.animate("aL1Recovery")
-		"aL1Recovery":
+			Character.animate("aL1Rec")
+		"aL1Rec":
 			Character.animate("FallTransit")
 
 		"aL2Startup":
 			Character.animate("aL2Active")
-		"aL2Recovery":
+		"aL2Rec":
 			if Character.button_light in Character.input_state.pressed:
 				Character.animate("aL2Startup")
 			else:
-				Character.animate("aL2bRecovery")
-		"aL2bRecovery":
+				Character.animate("aL2bRec")
+		"aL2bRec":
 			Character.animate("FallTransit")
+		"aL2LandRec":
+			Character.animate("Crouch")
 
 		"aF1Startup":
 #			if get("STYLE") == 0:
@@ -1122,26 +1144,26 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aF1[h]Startup":
 			Character.animate("aF1Active")
 		"aF1Active":
-			Character.animate("aF1Recovery")
-		"aF1Recovery":
-			Character.animate("aF1CRecovery")
-		"aF1CRecovery":
+			Character.animate("aF1Rec")
+		"aF1Rec":
+			Character.animate("aF1CRec")
+		"aF1CRec":
 			Character.animate("FallTransit")
 
 		"aF3Startup":
 			Character.animate("aF3Active")
 		"aF3Active":
-			Character.animate("aF3Recovery")
-		"aF3Recovery":
-			Character.animate("aF3CRecovery")
-		"aF3CRecovery":
+			Character.animate("aF3Rec")
+		"aF3Rec":
+			Character.animate("aF3CRec")
+		"aF3CRec":
 			Character.animate("FallTransit")
 	
 		"aHStartup":
 			Character.animate("aHActive")
 		"aHActive":
-			Character.animate("aHRecovery")
-		"aHRecovery":
+			Character.animate("aHRec")
+		"aHRec":
 			Character.animate("FallTransit")
 			
 		"SP1Startup":
@@ -1157,8 +1179,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP1[c3]Startup":
 			Character.animate("SP1[c3]Active")
 		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active":
-			Character.animate("SP1Recovery")
-		"SP1Recovery":
+			Character.animate("SP1Rec")
+		"SP1Rec":
 			Character.animate("Idle")
 		"aSP1Startup":
 			Character.animate("aSP1[c1]Startup")
@@ -1173,21 +1195,21 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP1[c3]Startup":
 			Character.animate("aSP1[c3]Active")
 		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active":
-			Character.animate("aSP1Recovery")
-		"aSP1Recovery":
+			Character.animate("aSP1Rec")
+		"aSP1Rec":
 			Character.animate("FallTransit")
 			
 		"SP1[ex]Startup":
 			Character.animate("SP1[ex]Active")
 		"SP1[ex]Active":
-			Character.animate("SP1[ex]Recovery")
-		"SP1[ex]Recovery":
+			Character.animate("SP1[ex]Rec")
+		"SP1[ex]Rec":
 			Character.animate("Idle")
 		"aSP1[ex]Startup":
 			Character.animate("aSP1[ex]Active")
 		"aSP1[ex]Active":
-			Character.animate("aSP1[ex]Recovery")
-		"aSP1[ex]Recovery":
+			Character.animate("aSP1[ex]Rec")
+		"aSP1[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"aSP2Startup":
@@ -1196,20 +1218,20 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			else:
 				Character.animate("aSP2Active")
 		"aSP2Active":
-			Character.animate("aSP2Recovery")
+			Character.animate("aSP2Rec")
 		"aSP2[h]Active":
-			Character.animate("aSP2[h]Recovery")
-		"aSP2[h]Recovery":
-			Character.animate("aSP2Recovery")
-		"aSP2Recovery":
-			Character.animate("aSP2CRecovery")
-		"aSP2CRecovery":
+			Character.animate("aSP2[h]Rec")
+		"aSP2[h]Rec":
+			Character.animate("aSP2Rec")
+		"aSP2Rec":
+			Character.animate("aSP2CRec")
+		"aSP2CRec":
 			Character.animate("FallTransit")
 				
 		"aSP2[ex]Startup":
 			Character.animate("aSP2[ex]Active")
 		"aSP2[ex]Active":
-			Character.animate("aSP2Recovery")
+			Character.animate("aSP2Rec")
 			
 		"SP3Startup":
 			if Character.button_fierce in Character.input_state.pressed:
@@ -1240,10 +1262,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP3[h]Active":
 			Character.animate("aSP3b[h]Active")
 		"aSP3bActive", "aSP3b[h]Active":
-			Character.animate("aSP3Recovery")
-		"aSP3Recovery":
+			Character.animate("aSP3Rec")
+		"aSP3Rec":
 			Character.animate("FallTransit")
-		"SP3Recovery":
+		"SP3Rec":
 			Character.animate("Idle")
 			
 		"SP3[ex]Startup":
@@ -1257,8 +1279,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
-			Character.animate("aSP3[ex]Recovery")
-		"aSP3[ex]Recovery":
+			Character.animate("aSP3[ex]Rec")
+		"aSP3[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"SP4Startup":
@@ -1269,10 +1291,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP4[ex]Startup":
 			Character.animate("SP4[ex]Active")
 		"SP4Active", "SP4[h]Active":
-			Character.animate("SP4Recovery")
+			Character.animate("SP4Rec")
 		"SP4[ex]Active":
-			Character.animate("SP4[ex]Recovery")
-		"SP4Recovery", "SP4[ex]Recovery":
+			Character.animate("SP4[ex]Rec")
+		"SP4Rec", "SP4[ex]Rec":
 			Character.animate("Idle")
 			
 		"SP5Startup", "aSP5Startup":
@@ -1280,34 +1302,34 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP5[ex]Startup", "aSP5[ex]Startup":
 			Character.animate("aSP5[ex]Active")
 		"aSP5Active":
-			Character.animate("aSP5Recovery")
+			Character.animate("aSP5Rec")
 		"aSP5[ex]Active":
-			Character.animate("aSP5[ex]Recovery")
-		"aSP5Recovery":
+			Character.animate("aSP5[ex]Rec")
+		"aSP5Rec":
 			if Character.grounded:
-				Character.animate("SP5bRecovery")
+				Character.animate("SP5bRec")
 			else:
-				Character.animate("aSP5bRecovery")
-		"aSP5[ex]Recovery":
+				Character.animate("aSP5bRec")
+		"aSP5[ex]Rec":
 			if Character.grounded:
-				Character.animate("SP5b[ex]Recovery")
+				Character.animate("SP5b[ex]Rec")
 			else:
-				Character.animate("aSP5b[ex]Recovery")
-		"SP5bRecovery", "SP5b[ex]Recovery":
+				Character.animate("aSP5b[ex]Rec")
+		"SP5bRec", "SP5b[ex]Rec":
 			Character.animate("Idle")
-		"aSP5bRecovery", "aSP5b[ex]Recovery":
+		"aSP5bRec", "aSP5b[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"SP6[ex]Startup", "aSP6[ex]Startup":
 			Character.animate("aSP6[ex]Active")
 		"aSP6[ex]Active":
 			if Character.grounded:
-				Character.animate("SP6[ex]Recovery")
+				Character.animate("SP6[ex]Rec")
 			else:
-				Character.animate("aSP6[ex]Recovery")
-		"SP6[ex]Recovery":
+				Character.animate("aSP6[ex]Rec")
+		"SP6[ex]Rec":
 			Character.animate("Idle")
-		"aSP6[ex]Recovery":
+		"aSP6[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"SP6[ex]SeqA":
@@ -1318,13 +1340,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("SP6[ex]SeqD")
 		"SP6[ex]SeqE":
 			end_sequence_step()
-			Character.animate("SP6[ex]GrabRecovery")
-		"SP6[ex]GrabRecovery":
+			Character.animate("SP6[ex]GrabRec")
+		"SP6[ex]GrabRec":
 			Character.animate("Idle")
 		"aSP6[ex]SeqE":
 			end_sequence_step()
-			Character.animate("aSP6[ex]GrabRecovery")
-		"aSP6[ex]GrabRecovery":
+			Character.animate("aSP6[ex]GrabRec")
+		"aSP6[ex]GrabRec":
 			Character.animate("FallTransit")
 			
 
@@ -1337,18 +1359,20 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
-		"aDashTransit":
-			Character.aerial_memory = []
-			Character.velocity.percent(20)
-			Character.anim_gravity_mod = 0
+#		"aDashTransit":
+#			Character.aerial_memory = []
+#			Character.velocity.percent(20)
+#			Character.anim_gravity_mod = 0
 		"aDash":
 			consume_one_air_dash()
+			Character.aerial_memory = []
 			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 		"aDashD":
 			consume_one_air_dash()
+			Character.aerial_memory = []
 			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
@@ -1356,6 +1380,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 		"aDashU":
 			consume_one_air_dash()
+			Character.aerial_memory = []
 			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0
@@ -1369,7 +1394,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_friction_mod = 0
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
-		"L2Recovery":
+		"L2Rec":
 			Character.velocity.set_vector(500 * FMath.S * Character.facing, 0)
 			Character.velocity.rotate(-78 * Character.facing)
 		"F1Startup":
@@ -1381,14 +1406,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 		"F3[h]Startup":
 			Character.get_node("ModulatePlayer").play("armor_flash")
-		"F1Recovery", "F2Active", "F2Recovery", "F3Active", "F3Recovery":
+		"F1Rec", "F2Active", "F2Rec", "F3Active", "F3Rec":
 			Character.sfx_over.show()
 		"HStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-		"HActive", "HbActive", "HbRecovery":
+		"HActive", "HbActive", "HbRec":
 			Character.sfx_under.show()
 			Character.sfx_over.show()
-		"H[h]Active", "Hb[h]Active", "Hb[h]Recovery":
+		"H[h]Active", "Hb[h]Active", "Hb[h]Rec":
 			Character.sfx_under.show()
 			Character.sfx_over.show()
 			
@@ -1399,15 +1424,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
 			Character.sfx_under.show()
-		"aL1Recovery":
+		"aL1Rec":
 			Character.velocity_limiter.x = 85
 			Character.sfx_under.show()
+		"aL2Startup":
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 		"aL2Active":
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 120
-		"aL2Recovery":
+		"aL2Rec":
 			Character.velocity.y = -600 * FMath.S
 			Character.sfx_over.show()
+		"aL2LandRec":
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aF1Startup":
 			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
@@ -1418,7 +1447,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 100
 			Character.anim_gravity_mod = 75
 			Character.sfx_over.show()
-		"aF1Recovery":
+		"aF1Rec":
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 100
 			Character.sfx_over.show()
@@ -1432,7 +1461,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.rotate(-72 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.sfx_over.show()
-		"aF3Recovery":
+		"aF3Rec":
 			Character.velocity_limiter.x = 75
 			Character.velocity_limiter.down = 100
 			Character.sfx_over.show()
@@ -1446,7 +1475,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 0
 			Character.anim_gravity_mod = 0
 			Character.sfx_over.show()
-		"aHRecovery":
+		"aHRec":
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
 			Character.sfx_over.show()
@@ -1482,7 +1511,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3})
 		"aSP1[ex]Active":
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4})
-		"aSP1Recovery", "aSP1[ex]Recovery":
+		"aSP1Rec", "aSP1[ex]Rec":
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
 			
@@ -1509,13 +1538,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_friction_mod = 0
 			Character.sfx_under.show()
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
-		"aSP2[h]Recovery":
+		"aSP2[h]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25
 			Character.anim_friction_mod = 0
 			Character.sfx_under.show()
-		"aSP2Recovery", "aSP2CRecovery":
+		"aSP2Rec", "aSP2CRec":
 			Character.velocity_limiter.down = 70
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25
@@ -1551,7 +1580,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.sfx_under.show()
 		"aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			Character.sfx_under.show()
-		"aSP3Recovery", "aSP3[ex]Recovery":
+		"aSP3Rec", "aSP3[ex]Rec":
 			Character.velocity_limiter.x = 70
 			Character.sfx_under.show()
 			
@@ -1574,7 +1603,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"ex" : true})
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true, "ex" : true})
 			Character.unique_data.groundfin_count += 2
-		"SP4Recovery", "SP4[ex]Recovery":
+		"SP4Rec", "SP4[ex]Rec":
 			Character.sfx_under.show()
 			
 		"SP5Startup", "SP5[ex]Startup":
@@ -1591,7 +1620,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.sfx_under.show()
 			if Character.grounded:
 				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-		"aSP5Recovery", "aSP5[ex]Recovery":
+		"aSP5Rec", "aSP5[ex]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25
@@ -1608,17 +1637,17 @@ func _on_SpritePlayer_anim_started(anim_name):
 				Character.velocity.x = Character.facing * 100 * FMath.S
 			Character.velocity.y = 0
 			Character.anim_gravity_mod = 0
-		"aSP6[ex]Recovery": # whiff grab
+		"aSP6[ex]Rec": # whiff grab
 			Character.velocity_limiter.x = 20
 			Character.anim_gravity_mod = 25
 			Character.play_audio("fail1", {"vol":-20})
-		"SP6[ex]Recovery": # whiff grab
+		"SP6[ex]Rec": # whiff grab
 			Character.play_audio("fail1", {"vol":-20})
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
 			start_sequence_step()
-		"SP6[ex]GrabRecovery":
+		"SP6[ex]GrabRec":
 			Character.face(-Character.facing)
-		"aSP6[ex]GrabRecovery":
+		"aSP6[ex]GrabRec":
 			Character.face(-Character.facing)
 			Character.velocity_limiter.down = 20
 			Character.anim_gravity_mod = 25

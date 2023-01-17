@@ -33,7 +33,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"aF3CRecovery": {
+"aF3CRec": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "aF3SfxOver",
 "SfxOver_vframes": 1,
@@ -61,7 +61,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"aF3Recovery": {
+"aF3Rec": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "aF3SfxOver",
 "SfxOver_vframes": 1,

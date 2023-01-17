@@ -44,7 +44,7 @@ frame_data = {
 },
 "vframes": 1
 },
-"aF1CRecovery": {
+"aF1CRec": {
 "SfxOver_hframes": 5,
 "SfxOver_spritesheet": "aF1SfxOver",
 "SfxOver_vframes": 1,
@@ -65,7 +65,7 @@ frame_data = {
 },
 "vframes": 1
 },
-"aF1Recovery": {
+"aF1Rec": {
 "SfxOver_hframes": 5,
 "SfxOver_spritesheet": "aF1SfxOver",
 "SfxOver_vframes": 1,

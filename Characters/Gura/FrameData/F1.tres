@@ -33,7 +33,7 @@ frame_data = {
 },
 "vframes": 1
 },
-"F1CRecovery": {
+"F1CRec": {
 "SfxOver_hframes": 4,
 "SfxOver_spritesheet": "F1SfxOver",
 "SfxOver_vframes": 1,
@@ -53,7 +53,7 @@ frame_data = {
 },
 "vframes": 1
 },
-"F1Recovery": {
+"F1Rec": {
 "SfxOver_hframes": 4,
 "SfxOver_spritesheet": "F1SfxOver",
 "SfxOver_vframes": 1,

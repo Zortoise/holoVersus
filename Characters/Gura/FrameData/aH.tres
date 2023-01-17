@@ -38,7 +38,7 @@ frame_data = {
 },
 "vframes": 1
 },
-"aHRecovery": {
+"aHRec": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "aHSfxOver",
 "SfxOver_vframes": 2,

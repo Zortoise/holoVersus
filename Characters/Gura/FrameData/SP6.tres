@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"SP6[ex]GrabRecovery": {
+"SP6[ex]GrabRec": {
 "duration": 24,
 "hframes": 6,
 "loop": false,
@@ -42,7 +42,7 @@ frame_data = {
 },
 "vframes": 6
 },
-"SP6[ex]Recovery": {
+"SP6[ex]Rec": {
 "duration": 32,
 "hframes": 6,
 "loop": false,
@@ -303,7 +303,7 @@ frame_data = {
 },
 "vframes": 6
 },
-"aSP6[ex]GrabRecovery": {
+"aSP6[ex]GrabRec": {
 "duration": 24,
 "hframes": 6,
 "loop": false,
@@ -340,7 +340,7 @@ frame_data = {
 },
 "vframes": 6
 },
-"aSP6[ex]Recovery": {
+"aSP6[ex]Rec": {
 "duration": 32,
 "hframes": 6,
 "loop": false,

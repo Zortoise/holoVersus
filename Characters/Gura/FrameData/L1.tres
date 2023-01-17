@@ -20,7 +20,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"L1Recovery": {
+"L1Rec": {
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -77,7 +77,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"L1bCRecovery": {
+"L1bCRec": {
 "duration": 6,
 "hframes": 6,
 "loop": false,
@@ -92,7 +92,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"L1bRecovery": {
+"L1bRec": {
 "duration": 9,
 "hframes": 6,
 "loop": false,

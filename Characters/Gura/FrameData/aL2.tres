@@ -45,7 +45,40 @@ frame_data = {
 },
 "vframes": 2
 },
-"aL2Recovery": {
+"aL2LandRec": {
+"SfxOver_hframes": 3,
+"SfxOver_spritesheet": "aL2SfxOver",
+"SfxOver_vframes": 1,
+"duration": 12,
+"hframes": 6,
+"loop": false,
+"spritesheet": "aL2Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 0,
+"frame": 7,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -15, 22 ), Vector2( 12, 22 ), Vector2( 12, -4 ), Vector2( -15, -4 ) ],
+"sdhurtbox": [  ]
+},
+4: {
+"SfxOver_frame": 0,
+"frame": 8,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -15, 22 ), Vector2( 12, 22 ), Vector2( 12, -4 ), Vector2( -15, -4 ) ],
+"sdhurtbox": [  ]
+},
+8: {
+"SfxOver_frame": 0,
+"frame": 9,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -15, 22 ), Vector2( 12, 22 ), Vector2( 12, -4 ), Vector2( -15, -4 ) ],
+"sdhurtbox": [  ]
+}
+},
+"vframes": 2
+},
+"aL2Rec": {
 "SfxOver_hframes": 3,
 "SfxOver_spritesheet": "aL2SfxOver",
 "SfxOver_vframes": 1,
@@ -75,7 +108,7 @@ frame_data = {
 "SfxOver_hframes": 3,
 "SfxOver_spritesheet": "aL2SfxOver",
 "SfxOver_vframes": 1,
-"duration": 6,
+"duration": 7,
 "hframes": 6,
 "loop": false,
 "spritesheet": "aL2Sprite",
@@ -90,11 +123,11 @@ frame_data = {
 },
 "vframes": 2
 },
-"aL2bRecovery": {
+"aL2bRec": {
 "SfxOver_hframes": 3,
 "SfxOver_spritesheet": "aL2SfxOver",
 "SfxOver_vframes": 1,
-"duration": 6,
+"duration": 9,
 "hframes": 6,
 "loop": false,
 "spritesheet": "aL2Sprite",

@@ -160,7 +160,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"HbRecovery": {
+"HbRec": {
 "SfxOver_hframes": 4,
 "SfxOver_spritesheet": "HSfxOver",
 "SfxOver_vframes": 1,
@@ -262,7 +262,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"Hb[h]Recovery": {
+"Hb[h]Rec": {
 "SfxOver_hframes": 4,
 "SfxOver_spritesheet": "HSfxOver",
 "SfxOver_vframes": 1,

@@ -85,7 +85,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"SP5bRecovery": {
+"SP5bRec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,
@@ -111,7 +111,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"SP5b[ex]Recovery": {
+"SP5b[ex]Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,
@@ -170,7 +170,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"aSP5Recovery": {
+"aSP5Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,
@@ -283,7 +283,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"aSP5[ex]Recovery": {
+"aSP5[ex]Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,
@@ -363,7 +363,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"aSP5bRecovery": {
+"aSP5bRec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,
@@ -389,7 +389,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"aSP5b[ex]Recovery": {
+"aSP5b[ex]Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,

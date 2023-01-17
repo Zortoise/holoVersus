@@ -29,7 +29,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"L2Recovery": {
+"L2Rec": {
 "duration": 18,
 "hframes": 6,
 "loop": false,
@@ -82,7 +82,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"L2bRecovery": {
+"L2bRec": {
 "duration": 18,
 "hframes": 6,
 "loop": false,
@@ -106,7 +106,7 @@ frame_data = {
 },
 "vframes": 2
 },
-"L2cCRecovery": {
+"L2cCRec": {
 "duration": 18,
 "hframes": 6,
 "loop": false,

@@ -15,7 +15,7 @@ extends "res://Characters/Gura/GuraBase.gd"
 #		if Character.grounded:
 #			Character.animate("HardLanding")
 #		if !Character.button_light in Character.input_state.pressed:
-#			Character.animate("aL2bRecovery")
+#			Character.animate("aL2bRec")
 #
 #	if Character.state == Globals.char_state.AIR_ATK_STARTUP and Animator.query(["aF1[h]Startup"]):
 #		if !Character.button_light in Character.input_state.pressed:

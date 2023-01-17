@@ -772,6 +772,10 @@ func simulate2(): # only ran if not in hitstop
 				if state == Globals.char_state.AIR_ATK_ACTIVE and Globals.atk_attr.NO_STRAFE in query_atk_attr():
 					continue # cannot strafe during some aerials
 				
+				if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
+						button_dash in input_state.pressed:
+					continue # if pressing attack + dash in the air, will not turn
+				
 				if !grounded:
 					if state == Globals.char_state.AIR_STANDBY and dir != facing: # flipping over
 						face(dir)
@@ -834,8 +838,14 @@ func simulate2(): # only ran if not in hitstop
 
 	if instant_dir != 0 and facing != instant_dir: # this allow for quick turns when you tap a direction while holding another direction
 		match state:
-			Globals.char_state.GROUND_STANDBY, 	Globals.char_state.AIR_STANDBY:
+			Globals.char_state.GROUND_STANDBY:
 				face(instant_dir)
+			Globals.char_state.AIR_STANDBY:
+				if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
+						button_dash in input_state.pressed:
+					pass  # if pressing attack + dash in the air, will not turn
+				else:
+					face(instant_dir)
 			_:
 				if check_quick_turn():
 					face(instant_dir)
@@ -1117,9 +1127,9 @@ func simulate2(): # only ran if not in hitstop
 		Globals.char_state.GROUND_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
 				if !block_rec_cancel:
-					animate("BlockRecovery")
+					animate("BlockRec")
 				else:
-					animate("BlockCRecovery")
+					animate("BlockCRec")
 			
 		Globals.char_state.GROUND_BLOCKSTUN:
 			if !$BlockStunTimer.is_running():
@@ -1129,18 +1139,18 @@ func simulate2(): # only ran if not in hitstop
 #			if UniqChar.STYLE == 0:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["aBlock"]): # don't use to_play
 				if !block_rec_cancel:
-					animate("aBlockRecovery")
+					animate("aBlockRec")
 				else:
-					animate("aBlockCRecovery")
+					animate("aBlockCRec")
 					
 			air_res_this_frame = 5
 			
 #			else:
 #				if !button_dash in input_state.pressed and Animator.query_to_play(["aBlock"]):
 #					if !block_rec_cancel:
-#						animate("aBlockRecovery")
+#						animate("aBlockRec")
 #					else:
-#						animate("aBlockCRecovery")
+#						animate("aBlockCRec")
 #				air_res_this_frame *= 1.5
 			
 		Globals.char_state.AIR_BLOCKSTUN:
@@ -1328,7 +1338,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$HitStunTimer.simulate()
 				$BlockStunTimer.simulate()
 				$PBlockTimer.simulate()
-				$PBlockCDTimer.simulate()
+				if !is_blocking(): $PBlockCDTimer.simulate()
 				$BurstLockTimer.simulate()
 				$PosFlowSealTimer.simulate()
 				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running() and state != Globals.char_state.SEQUENCE_TARGET:
@@ -1900,9 +1910,9 @@ func state_detect(anim):
 			return Globals.char_state.CROUCHING
 		"JumpTransit", "DashTransit":
 			return Globals.char_state.GROUND_STARTUP
-		"Dash", "BlockRecovery":
+		"Dash", "BlockRec":
 			return Globals.char_state.GROUND_RECOVERY
-		"SoftLanding", "DashBrake", "WaveDashBrake", "BlockCRecovery", "HardLanding":
+		"SoftLanding", "DashBrake", "WaveDashBrake", "BlockCRec", "HardLanding":
 			return Globals.char_state.GROUND_C_RECOVERY
 			
 		"JumpTransit3","aJumpTransit3", "Jump", "FallTransit", "Fall":
@@ -1910,9 +1920,9 @@ func state_detect(anim):
 		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "JumpTransit2":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Globals.char_state.AIR_STARTUP
-		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRecovery":
+		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRec":
 			return Globals.char_state.AIR_RECOVERY
-		"aDashBrake", "aBlockCRecovery":
+		"aDashBrake", "aBlockCRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		"FlinchAStop", "FlinchA", "FlinchBStop", "FlinchB":
@@ -1956,7 +1966,7 @@ func state_detect(anim):
 			return Globals.char_state.AIR_ATK_STARTUP
 		"BurstCounter", "BurstEscape", "BurstExtend":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"BurstRecovery":
+		"BurstRec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"BurstRevoke":
 			return Globals.char_state.AIR_ATK_ACTIVE
@@ -1979,7 +1989,7 @@ func check_collidable(): # called by Physics.gd
 	return UniqChar.check_collidable()
 
 func perfect_block():
-	if $PBlockCDTimer.is_running():
+	if $PBlockCDTimer.is_running(): # to do a perfect block, you must not be blocking for 15 frames straight
 		$PBlockCDTimer.time = PBlockCDTimer_WAIT_TIME
 	else:
 		$PBlockCDTimer.time = PBlockCDTimer_WAIT_TIME
@@ -2156,13 +2166,14 @@ func check_landing(): # called by physics.gd when character stopped by floor
 		Globals.char_state.AIR_RECOVERY:
 			if Animator.to_play_animation.begins_with("aDash") and !Animator.to_play_animation.ends_with("DD"): # wave landing
 				animate("WaveDashBrake")
+				UniqChar.dash_sound()
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				if dir == facing:
 					velocity.x = facing * FMath.percent(UniqChar.get_stat("GROUND_DASH_SPEED"), UniqChar.get_stat("WAVE_DASH_SPEED_MOD"))
 				
-			elif Animator.query(["aBlockRecovery"]): # aBlockRecovery to BlockCRecovery
+			elif Animator.query(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-				animate("BlockCRecovery")
+				animate("BlockCRec")
 				UniqChar.landing_sound()
 				
 			else: # landing during aDashBrake or AirDashDD
@@ -2232,8 +2243,8 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			pass # GROUND_ACTIVE not used for now
 			
 		Globals.char_state.GROUND_RECOVERY:
-			if Animator.query(["BlockRecovery"]):
-				animate("aBlockCRecovery")
+			if Animator.query(["BlockRec"]):
+				animate("aBlockCRec")
 			else:
 				animate("FallTransit")
 				
@@ -2472,26 +2483,33 @@ func launch_trail():
 func get_move_name():
 	var move_name = Animator.to_play_animation.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
-	move_name = move_name.trim_suffix("Recovery")
+	move_name = move_name.trim_suffix("Rec")
 	return move_name
 	
 func check_quick_turn():
 	match state:
-		Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
+		Globals.char_state.GROUND_STARTUP:
 			return true
+		Globals.char_state.AIR_STARTUP:
+			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
+					button_dash in input_state.pressed:
+				return false  # if attacking + holding dash, will not turn on 1st frame
+			else:
+				return true
 	match new_state:
 		Globals.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on any startup frame
-			var move_name = get_move_name()
-			if move_name == null or !move_name in UniqChar.STARTERS:
-				return false
-			if Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
-				return false
-			if Globals.atk_attr.QUICK_TURN_LIMIT in query_atk_attr(move_name): # some moves lock quick turn after a few (3) frames
-				if Animator.time > 3:
+			if Animator.time <= 3 and Animator.time != 0:
+				var move_name = get_move_name()
+				if move_name == null or !move_name in UniqChar.STARTERS:
 					return false
-			return true
-		Globals.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st frame
-			if Animator.time <= 1 and Animator.time != 0:
+				if Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
+					return false
+#				if Globals.atk_attr.QUICK_TURN_LIMIT in query_atk_attr(move_name): # some moves lock quick turn after a few (3) frames
+#					if Animator.time > 3:
+#						return false
+				return true
+		Globals.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st 3 frames and if dash is not held
+			if Animator.time <= 3 and Animator.time != 0 and !button_dash in input_state.pressed:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqChar.STARTERS:
 					return false
@@ -2743,7 +2761,7 @@ func test_jump_cancel():
 		if chain_combo != Globals.chain_combo.NORMAL and chain_combo != Globals.chain_combo.BLOCKED_NORMAL: 
 			return false # if in air, can jump cancel on blocking opponents
 		
-	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
+	var move_name = Animator.to_play_animation.trim_suffix("Rec")
 	if !is_normal_attack(move_name): return false # can only jump cancel Normals
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be jump cancelled
 	
@@ -2754,7 +2772,7 @@ func test_dash_cancel():
 	if chain_combo != Globals.chain_combo.NORMAL: return false # can only dash cancel on hit (not block)
 	if !grounded and air_dash == 0: return false # if in air, need >1 air dash left
 	
-	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
+	var move_name = Animator.to_play_animation.trim_suffix("Rec")
 	if !is_normal_attack(move_name): return false # can only dash cancel Normals
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be dash cancelled
 	
@@ -2764,7 +2782,7 @@ func test_dash_cancel():
 func test_fastfall_cancel():
 	if chain_combo != Globals.chain_combo.NORMAL: return false # can only fastfall cancel on hit (not block)
 	
-	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
+	var move_name = Animator.to_play_animation.trim_suffix("Rec")
 	if !is_normal_attack(move_name): return false # can only fastfall cancel Normals
 	if !move_name.begins_with("a"): return false # can only fastfall cancel aerials
 	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be fastfall cancelled
@@ -2776,7 +2794,7 @@ func test_fastfall_cancel():
 #	if grounded or chain_combo == 0 or chain_combo == 2: return false # must be in air and have hitted an opponent with the aerial
 #	# can only jump cancel on unblock or wrongblock
 #
-#	var move_name = Animator.to_play_animation.trim_suffix("Recovery")
+#	var move_name = Animator.to_play_animation.trim_suffix("Rec")
 #	# must be an aerial normal
 #	if is_normal_attack(move_name) and move_name.begins_with("a"): # note: some specials/supers may begin with "a"
 #		if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name):
@@ -3030,7 +3048,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
 	if attack_ref in chain_memory: return false # cannot chain into moves already done
 	
-	var move_name = Animator.current_animation.trim_suffix("Recovery")
+	var move_name = Animator.current_animation.trim_suffix("Rec")
 	move_name = move_name.trim_suffix("Active")
 	
 #	if !move_name in UniqChar.MOVE_DATABASE:
@@ -3063,6 +3081,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
 	
 func test_qc_chain_combo(attack_ref):
+	
+	if chain_memory.size() == 0: return true # just in case
 	
 	if chain_combo == Globals.chain_combo.NO_CHAIN: return false # just in case
 	
@@ -3151,14 +3171,14 @@ func is_hitcount_last_hit(in_ID, move_data):
 #	# test record to see if hit the hitcount limit of the current move
 #	var move_name = Animator.current_animation.trim_suffix("Startup") # check current 1st
 #	move_name = move_name.trim_suffix("Active")
-#	move_name = move_name.trim_suffix("Recovery")
+#	move_name = move_name.trim_suffix("Rec")
 #	if move_name in UniqChar.MOVE_DATABASE:
 #		if recorded_hitcount >= UniqChar.MOVE_DATABASE[move_name].hitcount - 1:
 #			return true
 #	else:
 #		move_name = get_move_name().trim_suffix("Startup") # check to_play next
 #		move_name = move_name.trim_suffix("Active")
-#		move_name = move_name.trim_suffix("Recovery")
+#		move_name = move_name.trim_suffix("Rec")
 #		if move_name in UniqChar.MOVE_DATABASE:
 #			if recorded_hitcount >= UniqChar.MOVE_DATABASE[move_name].hitcount - 1:
 #				return true
@@ -3791,8 +3811,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		# remove it at end of frame, this way both players loses positive flow during clashes
 	
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
-		$HitStunTimer.time = calculate_hitstun(hit_data)
-		orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
+		if adjusted_atk_level <= 1 and $HitStunTimer.is_running(): # for atk level 1 hits on hitstunned opponent, add their hitstun to existing hitstun
+			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
+		else:
+			$HitStunTimer.time = calculate_hitstun(hit_data)
+			orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
 	else:
 		$BlockStunTimer.time = calculate_blockstun(hit_data)
 	
@@ -3853,12 +3876,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# ---------------------------------------------------------------------------------------------------
 			
 #	var knockback_unit_vec := Vector2(1, 0).rotated(knockback_dir)
+
+	var no_impact_and_vel_change := false
 		
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if knockback_strength <= LAUNCH_THRESHOLD:
-			
+		if knockback_strength <= LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
+
 #			if !"entity_nodepath" in hit_data:
 #				face(dir_to_attacker) # turn towards attacker
 #			else:
@@ -3866,15 +3891,27 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #					face(dir_to_attacker) # face towards entity if it is not moving horizontally
 #				else:
 #					face(-attacker_or_entity.velocity.x) # face same direction as entity if it is moving horizontally
+
+			var no_impact := false
+			
+			if adjusted_atk_level <= 1: # for attack level 1 attacks
+				if knockback_strength > LAUNCH_THRESHOLD: knockback_strength = LAUNCH_THRESHOLD # just in case
 				
-			if adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running() and \
-				!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
-				Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
-				Globals.char_state.AIR_C_RECOVERY]:
-				pass # level 1 hit when defender is in non-passive states just push them back, no turn
+				if $HitStunTimer.is_running(): # for hitstunned defender
+					if state == Globals.char_state.LAUNCHED_HITSTUN:
+						no_impact_and_vel_change = true
+						# if defender is hit by atk level 1 attack while in launched state, no impact/velocity change (just added hitstun)
+						# if they are flinched, will enter new flinch animation with added hitstun and has velocity change
 						
-			else:
-				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, dir_to_attacker)
+				# for atk level 1 attack on non-passive state, just push them back, no turn
+				# if is in passive state, will enter impact animation but 0 hitstun
+				elif !state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
+					Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
+					Globals.char_state.AIR_C_RECOVERY]:
+					no_impact = true
+						
+			if !no_impact and !no_impact_and_vel_change:
+				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
 				match segment:
 					Globals.compass.E:
 						face(-1) # face other way
@@ -3899,62 +3936,54 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 		else: # launch
 			
-			# level 1 hit when defender is in non-passive states just push them back
-			if adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running() and \
-				!state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
-				Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
-				Globals.char_state.AIR_C_RECOVERY]:
-				pass
-						
-			else:
-				knockback_strength += LAUNCH_BOOST
-				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.EIGHT, dir_to_attacker)
-				match segment:
-					Globals.compass.N:
-						face(dir_to_attacker) # turn towards attacker
-						animate("LaunchEStop")
-						if facing == 1:
-							launch_starting_rot = PI/2
-						else:
-							launch_starting_rot = 3*PI/2
-					Globals.compass.NE:
-						face(-1)
-						animate("LaunchDStop")
-						launch_starting_rot = 7*PI/4
-					Globals.compass.E:
-						face(-1)
-						animate("LaunchCStop")
-						launch_starting_rot = 0
-					Globals.compass.SE:
-						face(-1)
-						animate("LaunchBStop")
-						launch_starting_rot = 9*PI/4
-					Globals.compass.S:
-						face(dir_to_attacker) # turn towards attacker
-						animate("LaunchAStop")
-						if facing == -1:
-							launch_starting_rot = PI/2
-						else:
-							launch_starting_rot = 3*PI/2
-					Globals.compass.SW:
-						face(1)
-						animate("LaunchBStop")
-						launch_starting_rot = 7*PI/4
-					Globals.compass.W:
-						face(1)
-						animate("LaunchCStop")
-						launch_starting_rot = 0.0
-					Globals.compass.NW:
-						face(1)
-						animate("LaunchDStop")
-						launch_starting_rot = PI/4
+			knockback_strength += LAUNCH_BOOST
+			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.EIGHT, dir_to_attacker)
+			match segment:
+				Globals.compass.N:
+					face(dir_to_attacker) # turn towards attacker
+					animate("LaunchEStop")
+					if facing == 1:
+						launch_starting_rot = PI/2
+					else:
+						launch_starting_rot = 3*PI/2
+				Globals.compass.NE:
+					face(-1)
+					animate("LaunchDStop")
+					launch_starting_rot = 7*PI/4
+				Globals.compass.E:
+					face(-1)
+					animate("LaunchCStop")
+					launch_starting_rot = 0
+				Globals.compass.SE:
+					face(-1)
+					animate("LaunchBStop")
+					launch_starting_rot = 9*PI/4
+				Globals.compass.S:
+					face(dir_to_attacker) # turn towards attacker
+					animate("LaunchAStop")
+					if facing == -1:
+						launch_starting_rot = PI/2
+					else:
+						launch_starting_rot = 3*PI/2
+				Globals.compass.SW:
+					face(1)
+					animate("LaunchBStop")
+					launch_starting_rot = 7*PI/4
+				Globals.compass.W:
+					face(1)
+					animate("LaunchCStop")
+					launch_starting_rot = 0.0
+				Globals.compass.NW:
+					face(1)
+					animate("LaunchDStop")
+					launch_starting_rot = PI/4
 					
 	else: # blocking
 		
 		if !"entity_nodepath" in hit_data:
 			if !"multihit" in hit_data: # for multi-hit move only the last hit turns blocking defender for cross-ups
 					
-				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, dir_to_attacker)
+				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
 				match segment:
 					Globals.compass.E:
 						face(-1) # face other way
@@ -3962,7 +3991,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						face(1)
 				
 		else: # multi-hit entities turn on 1st hit
-			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, dir_to_attacker)
+			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
 			match segment:
 				Globals.compass.E:
 					face(-1) # face other way
@@ -3995,12 +4024,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					animate("aPBlockstun")
 					block_rec_cancel = true
 		
-
-	velocity.set_vector(knockback_strength, 0)  # reset momentum
-	velocity.rotate(knockback_dir)
-	
-	if hit_data.block_state != Globals.block_state.UNBLOCKED and grounded:
-		velocity.y = 0 # set to horizontal pushback on blocking defender
+	if !no_impact_and_vel_change:
+		velocity.set_vector(knockback_strength, 0)  # reset momentum
+		velocity.rotate(knockback_dir)
+		
+		if hit_data.block_state != Globals.block_state.UNBLOCKED and grounded:
+			velocity.y = 0 # set to horizontal pushback on blocking defender
 		
 #	print(knockback_dir)
 #	print(velocity.x)
@@ -4774,17 +4803,17 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Block")
 		"BlockstunReturn":
 			animate("Block")
-		"BlockRecovery":
+		"BlockRec":
 			animate("Idle")
-		"BlockCRecovery":
+		"BlockCRec":
 			animate("Idle")
 		"aBlockStartup":
 			animate("aBlock")
 		"aBlockstunReturn":
 			animate("aBlock")
-		"aBlockRecovery":
+		"aBlockRec":
 			animate("FallTransit")
-		"aBlockCRecovery":
+		"aBlockCRec":
 			animate("FallTransit")
 		"BlockLanding":
 			animate("Block")
@@ -4796,14 +4825,14 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"BurstCounterStartup":
 			animate("BurstCounter")
 		"BurstCounter":
-			animate("BurstRecovery")
+			animate("BurstRec")
 		"BurstEscapeStartup":
 			animate("BurstEscape")
 		"BurstEscape":
-			animate("BurstRecovery")
+			animate("BurstRec")
 		"BurstExtend":
-			animate("BurstRecovery")
-		"BurstRecovery":
+			animate("BurstRec")
+		"BurstRec":
 			animate("FallTransit")
 		"BurstRevoke":
 			animate("BurstRevoke2")
@@ -4951,7 +4980,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			change_guard_gauge(UniqChar.get_stat("AIR_BLOCK_GG_COST"))
 			play_audio("bling1", {"vol" : -16,})
 			remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
-		"BlockRecovery", "aBlockRecovery", "BlockCRecovery", "aBlockCRecovery":
+		"BlockRec", "aBlockRec", "BlockCRec", "aBlockCRec":
 			$PBlockTimer.stop() # stop perfect blocking
 		"BurstCounterStartup", "BurstEscapeStartup":
 			velocity_limiter.x_slow = 20

@@ -73,7 +73,7 @@ frame_data = {
 },
 "vframes": 3
 },
-"aSP2CRecovery": {
+"aSP2CRec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP2SfxUnder",
 "SfxUnder_vframes": 3,
@@ -101,7 +101,7 @@ frame_data = {
 },
 "vframes": 3
 },
-"aSP2Recovery": {
+"aSP2Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP2SfxUnder",
 "SfxUnder_vframes": 3,
@@ -297,7 +297,7 @@ frame_data = {
 },
 "vframes": 3
 },
-"aSP2[h]Recovery": {
+"aSP2[h]Rec": {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP2SfxUnder",
 "SfxUnder_vframes": 3,
