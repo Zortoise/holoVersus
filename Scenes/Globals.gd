@@ -9,7 +9,7 @@ enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, G
 		SEQUENCE_USER, SEQUENCE_TARGET}
 enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
-enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X}
+enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
@@ -434,6 +434,39 @@ func split_angle(angle: int, split_type = angle_split.FOUR, bias = 1):
 			if angle < 270:
 				return compass.NNW2
 			return compass.NNE2
+			
+		angle_split.SIXTEEN:
+			if angle <= 11 or angle >= 349:
+				return compass.E
+			if angle <= 33:
+				return compass.ESE
+			if angle <= 56:
+				return compass.SE
+			if angle <= 78:
+				return compass.SSE	
+			if angle <= 101:
+				return compass.S	
+			if angle <= 123:
+				return compass.SSW	
+			if angle <= 146:
+				return compass.SW
+			if angle <= 168:
+				return compass.WSW
+			if angle <= 191:
+				return compass.W
+			if angle <= 213:
+				return compass.WNW
+			if angle <= 236:
+				return compass.NW	
+			if angle <= 258:
+				return compass.NNW	
+			if angle <= 281:
+				return compass.N	
+			if angle <= 303:
+				return compass.NNE
+			if angle <= 326:
+				return compass.NE
+			return compass.ENE	
 
 	return null
 			

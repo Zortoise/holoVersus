@@ -78,10 +78,10 @@ const MOVE_DATABASE = {
 		"damage" : 20,
 		"knockback" : 0,
 		"knockback_type": Globals.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
-		"atk_level" : 2,
+		"atk_level" : 3,
 		"fixed_hitstop" : 1,
 		"priority": 2,
-		"guard_drain": 1500,
+		"guard_drain": 1000,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,

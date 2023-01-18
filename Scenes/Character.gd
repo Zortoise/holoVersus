@@ -84,6 +84,7 @@ const BREAK_DMG_MOD = 150 # damage modifier on break_hit
 const BREAK_STUN_TIME = 75 # number of frames stun time last for Break
 const BREAK_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Break
 
+const BASE_BLOCK_GUARD_DRAIN_MOD = 70 # reduced guard drain for base blocking
 const BASE_BLOCK_PUSHBACK_MOD = 70 # % of base knockback of attack
 const BASE_BLOCK_ATKER_PUSHBACK = 400 * FMath.S # how much the attacker is pushed away, fixed
 const DOWNWARD_KB_REDUCTION_ON_BLOCK = 25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
@@ -91,14 +92,14 @@ const BLOCKSTUN_MOD_FROM_HITSTUN = 40 # blockstun is 40% of calculated hitstun
 const MIN_BASE_BLOCKSTUN = 8
 
 const WRONGBLOCK_CHIP_DMG_MOD = 200 # increased chip damage for wrongblocking
-const WRONGBLOCK_GUARD_DRAIN_MOD = 250 # increased guard drain for wrongblocking
+const WRONGBLOCK_GUARD_DRAIN_MOD = 400 # increased guard drain for wrongblocking
 const WRONGBLOCK_BLOCKSTUN_MOD = 200 # increased blockstun for wrongblocking
 const WRONGBLOCK_PUSHBACK_MOD = 100 # % of base knockback of attack
 const WRONGBLOCK_AERIAL_PUSHBACK_MOD = 200 # increase knockback on aerial wrongblock
 const WRONGBLOCK_ATKER_PUSHBACK = 200 * FMath.S # how much the attacker is pushed away, fixed
 const WRONGBLOCK_HITSTOP = 7
 
-const PERFECTBLOCK_GUARD_DRAIN_MOD = 15 # reduced guard drain for perfect blocking
+const PERFECTBLOCK_GUARD_DRAIN_MOD = 0 # reduced guard drain for perfect blocking
 const PERFECTBLOCK_BLOCKSTUN_MOD = 50 # reduced blockstun for perfect blocking
 const PERFECTBLOCK_PUSHBACK_MOD = 25 # % of base knockback of attack
 const PERFECTBLOCK_ATKER_PUSHBACK = 700 * FMath.S # how much the attacker is pushed away, fixed
@@ -515,7 +516,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity) + "  grounded: " + str(grounded) + \
-		"\naerial_memory: " + str(aerial_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
+		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + "\nHitstun: " + str($HitStunTimer.time)
 			
 			
@@ -1982,7 +1983,7 @@ func state_detect(anim):
 func check_collidable(): # called by Physics.gd
 	if state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 		return false
-	if new_state == Globals.char_state.GROUND_ATK_STARTUP: # cross-up attack
+	if new_state == Globals.char_state.GROUND_ATK_STARTUP: # crossover attack
 		if button_dash in input_state.pressed and chain_memory.size() == 0:
 			return false
 			
@@ -3628,10 +3629,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
 				Globals.atk_attr.SUPERARMOR in defender.query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
+				hit_data["superarmored"] = true
 		Globals.char_state.AIR_ATK_STARTUP:
 			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
 				Globals.atk_attr.SUPERARMOR in defender.query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.AIR_WRONG
+				hit_data["superarmored"] = true
 		
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN:
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
@@ -3992,23 +3995,25 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 	else: # blocking
 		
-		if !"entity_nodepath" in hit_data:
-			if !"multihit" in hit_data: # for multi-hit move only the last hit turns blocking defender for cross-ups
+		if !"superarmored" in hit_data: # no turning for superarmored hits
+			
+			if !"entity_nodepath" in hit_data:
+				if !"multihit" in hit_data: # for multi-hit move only the last hit turns blocking defender for cross-ups
+						
+					var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
+					match segment:
+						Globals.compass.E:
+							face(-1) # face other way
+						Globals.compass.W:
+							face(1)
 					
+			else: # multi-hit entities turn on 1st hit
 				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
 				match segment:
 					Globals.compass.E:
 						face(-1) # face other way
 					Globals.compass.W:
 						face(1)
-				
-		else: # multi-hit entities turn on 1st hit
-			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
-			match segment:
-				Globals.compass.E:
-					face(-1) # face other way
-				Globals.compass.W:
-					face(1)
 		
 		if adjusted_atk_level <= 1:
 			pass # level 1 hit when defender is blocking just push them back
@@ -4119,6 +4124,9 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		# if already hit the opponent with a previous move, deal no guard gauge change
 		if (defender.get_node("HitStunTimer").is_running() or defender.get_node("BlockStunTimer").is_running()):
 			return 0
+#		elif hit_data.block_state != Globals.block_state.UNBLOCKED:  # no guard gauge change for autochain followup on blocking opponent
+#			print(attacker.chain_memory)
+#			return 0
 		else: # follow the starter's stats
 			guard_drain = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_drain
 			guard_gain_on_combo = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
@@ -4155,6 +4163,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 					guard_gauge_change = FMath.percent(guard_gauge_change, WRONGBLOCK_GUARD_DRAIN_MOD)
 				Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:  # reduce/negate GDrain for perfect block
 					guard_gauge_change = FMath.percent(guard_gauge_change, PERFECTBLOCK_GUARD_DRAIN_MOD)
+				_:
+					guard_gauge_change = FMath.percent(guard_gauge_change, BASE_BLOCK_GUARD_DRAIN_MOD)
 #			if !defender.grounded:
 #				guard_gauge_change *= aBlock_GUARD_DRAIN_MOD # increase GDrain for aBlocking opponent
 #		else:
@@ -4373,6 +4383,7 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 func calculate_blockstun(hit_data) -> int:
 	
 	var scaled_blockstun: int # 40% (BLOCKSTUN_MOD_FROM_HITSTUN) of hitstun, but has a minimum value
+	scaled_blockstun = int(max(FMath.percent(calculate_hitstun(hit_data, true), BLOCKSTUN_MOD_FROM_HITSTUN), MIN_BASE_BLOCKSTUN * FMath.S))
 	
 	if hit_data.block_state == Globals.block_state.AIR_WRONG or hit_data.block_state == Globals.block_state.GROUND_WRONG:
 		scaled_blockstun = int(max(FMath.percent(calculate_hitstun(hit_data, true), BLOCKSTUN_MOD_FROM_HITSTUN), MIN_BASE_BLOCKSTUN * FMath.S))
@@ -4381,11 +4392,19 @@ func calculate_blockstun(hit_data) -> int:
 		if hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
 			scaled_blockstun = int(max(FMath.percent(calculate_hitstun(hit_data, true), BLOCKSTUN_MOD_FROM_HITSTUN), MIN_BASE_BLOCKSTUN * FMath.S))
 			scaled_blockstun = FMath.percent(scaled_blockstun, PERFECTBLOCK_BLOCKSTUN_MOD)
-		
-		if "fixed_blockstun" in hit_data.move_data: # fixed blockstun does not apply on wrongblocked hits
+			
+	var blockstun: int = FMath.round_and_descale(scaled_blockstun)
+	
+	# fixed blockstun does not apply on wrongblocked hits
+	if hit_data.block_state != Globals.block_state.AIR_WRONG and hit_data.block_state != Globals.block_state.GROUND_WRONG:
+		if "fixed_blockstun" in hit_data.move_data:
+			# for perfect block will choose the lesser of the 2 blockstuns
+			if hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
+				return int(min(blockstun, hit_data.move_data.fixed_blockstun))
+			# normal block
 			return hit_data.move_data.fixed_blockstun
 	
-	return FMath.round_and_descale(scaled_blockstun)
+	return blockstun
 	
 	
 func check_if_crossed_up(attacker, angle_to_atker: int):
