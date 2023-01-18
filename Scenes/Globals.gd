@@ -15,7 +15,7 @@ enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE
-		NON_ATTACK, CANNOT_CHAIN_INTO, NOT_FROM_C_REC, COMMAND_GRAB}
+		NON_ATTACK, CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, COMMAND_GRAB}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -37,7 +37,10 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # REPEATABLE = will not incur repeat penalty, use for multi-entities
 # NON_ATTACK = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun/blockstun
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
+# CANNOT_CHAIN_INTO_ON_BLOCK = fails test_chain_combo() if chain combo == BLOCKED_NORMAL or BLOCKED_SPECIAL
 # NOT_FROM_C_REC = cannot use during cancellable recovery, for certain moves like command grabs
+# LATE_CHAIN = can only chain into other moves during recovery and not active frames
+# LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
 # COMMAND_GRAB = cannot hit opponents during ground/air movement startup
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}

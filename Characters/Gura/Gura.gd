@@ -1689,7 +1689,7 @@ func start_audio(anim_name):
 
 
 func landing_sound(): # can be called by main node
-	Character.play_audio("land1", {"vol" : -2})
+	Character.play_audio("land1", {"vol" : -3})
 	
 func dash_sound(): # can be called by snap-up wavelanding
 	Character.play_audio("dash1", {"vol" : -5, "bus":"PitchDown"})

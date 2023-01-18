@@ -104,7 +104,7 @@ const PERFECTBLOCK_PUSHBACK_MOD = 25 # % of base knockback of attack
 const PERFECTBLOCK_ATKER_PUSHBACK = 700 * FMath.S # how much the attacker is pushed away, fixed
 const PERFECTBLOCK_HITSTOP = 10
 const PBlockTimer_WAIT_TIME = 5
-const PBlockCDTimer_WAIT_TIME = 15
+const PBlockCDTimer_WAIT_TIME = 30
 
 
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
@@ -515,7 +515,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity) + "  grounded: " + str(grounded) + \
-		"\nmove_memory: " + str(move_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
+		"\naerial_memory: " + str(aerial_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + "\nHitstun: " + str($HitStunTimer.time)
 			
 			
@@ -2192,7 +2192,8 @@ func check_landing(): # called by physics.gd when character stopped by floor
 					animate("FlinchA")
 				"aFlinchBStop", "aFlinchB":
 					animate("FlinchB")
-			UniqChar.landing_sound()
+			if velocity_previous_frame.y > 300 * FMath.S:
+				UniqChar.landing_sound() # only make landing sound if landed fast enough, or very annoying
 			
 		Globals.char_state.LAUNCHED_HITSTUN: # land during launch_hitstun, can bounce or tech land
 			if new_state == Globals.char_state.LAUNCHED_HITSTUN:
@@ -3034,7 +3035,7 @@ func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aeri
 		
 	if attack_ref in aerial_memory or attack_ref in aerial_sp_memory:
 		return false
-	
+		
 	return true
 	
 	
@@ -3061,7 +3062,13 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #		return false # for move variations/auto-chains with a root move
 
 	if Globals.atk_attr.NO_CHAIN in query_atk_attr(move_name) or Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
-		return false
+		return false # some moves cannnot be chained from, some moves cannot be chained into
+		
+	if is_atk_active():
+		if Globals.atk_attr.LATE_CHAIN in query_atk_attr(move_name):
+			return false  # some moves cannot be chained from during active frames
+		if Globals.atk_attr.LATE_CHAIN_INTO in query_atk_attr(attack_ref):
+			return false # some moves cannot be chained into from other moves during their active frames
 		
 	match chain_combo:
 		Globals.chain_combo.NORMAL: # landed an unblocked/wrongblocked normal attack on opponent
@@ -3069,6 +3076,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		Globals.chain_combo.BLOCKED_NORMAL: # landed a normal attack on blocking opponent, can only chain into moves of higher strength
 			if get_atk_strength(move_name) >= get_atk_strength(attack_ref):
 				return false
+			if Globals.atk_attr.CANNOT_CHAIN_INTO_ON_BLOCK in query_atk_attr(attack_ref):
+				return false  # some specials cannot be chained into on block, like command dashes
 		Globals.chain_combo.SPECIAL: # landed a special move (hit/block), can only chain under certain conditions, WIP
 			return false
 		Globals.chain_combo.BLOCKED_SPECIAL:
@@ -3081,8 +3090,6 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
 	
 func test_qc_chain_combo(attack_ref):
-	
-	if chain_memory.size() == 0: return true # just in case
 	
 	if chain_combo == Globals.chain_combo.NO_CHAIN: return false # just in case
 	
@@ -3103,8 +3110,11 @@ func test_qc_chain_combo(attack_ref):
 		Globals.chain_combo.NORMAL: # landed an unblocked/wrongblocked normal attack on opponent
 			pass
 		Globals.chain_combo.BLOCKED_NORMAL: # landed a normal attack on blocking opponent, can only chain into moves of higher strength
+			if chain_memory.size() == 0: return true # just in case
 			if get_atk_strength(chain_memory.back()) >= get_atk_strength(attack_ref):
 				return false
+			if Globals.atk_attr.CANNOT_CHAIN_INTO_ON_BLOCK in query_atk_attr(attack_ref):
+				return false  # some specials cannot be chained into on block, like command dashes, cannot quick cancel into it
 		Globals.chain_combo.SPECIAL: # landed a special move (hit/block), can only chain under certain conditions, WIP
 			return false
 		Globals.chain_combo.BLOCKED_SPECIAL:
@@ -3818,6 +3828,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
 	else:
 		$BlockStunTimer.time = calculate_blockstun(hit_data)
+		if hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
+			$PBlockCDTimer.time = 0 # reset cooldown for perfect block on a perfect block
 	
 	$VarJumpTimer.stop()
 	
