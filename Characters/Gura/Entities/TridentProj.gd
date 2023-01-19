@@ -1,5 +1,7 @@
 extends Node2D
 
+const ID = "trident" # for master to find it
+
 #const START_SPEED = 500
 const START_ROTATION = -14 # integer degrees, negative for upward
 const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
@@ -79,70 +81,70 @@ const MOVE_DATABASE = {
 		"KB_angle" : -45,
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
-	"a[c1]Active" : {
-		"root" : "TridentProj2", # upwards and downwards trident can be done once each before incurring repeat penalty
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 1,
-		"damage" : 70,
-		"knockback" : 400 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 2,
-		"guard_drain": 1500,
-		"guard_gain_on_combo" : 2500,
-		"EX_gain": 2000,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
-		"KB_angle" : -17,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-	},
-	"a[c2]Active" : {
-		"root" : "TridentProj2",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 2,
-		"damage" : 50,
-		"knockback" : 450 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 3,
-		"guard_drain": 1750,
-		"guard_gain_on_combo" : 2500,
-		"EX_gain": 1250,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
-		"KB_angle" : -17,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-	},
-	"a[c3]Active" : {
-		"root" : "TridentProj2",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 3,
-		"damage" : 60,
-		"knockback" : 500 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"guard_drain": 2000,
-		"guard_gain_on_combo" : 2500,
-		"EX_gain": 1000,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
-		"KB_angle" : -17,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-	},
-	"a[ex]Active" : {
-		"root" : "TridentProj2EX",
-		"atk_type" : Globals.atk_type.EX,
-		"hitcount" : 3,
-		"damage" : 60,
-		"knockback" : 500 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"guard_drain": 2000,
-		"guard_gain_on_combo" : 2500,
-		"EX_gain": 0,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
-		"KB_angle" : -17,
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-	}
+#	"a[c1]Active" : {
+#		"root" : "TridentProj2", # upwards and downwards trident can be done once each before incurring repeat penalty
+#		"atk_type" : Globals.atk_type.ENTITY,
+#		"hitcount" : 1,
+#		"damage" : 70,
+#		"knockback" : 400 * FMath.S,
+#		"knockback_type": Globals.knockback_type.FIXED,
+#		"atk_level" : 2,
+#		"guard_drain": 1500,
+#		"guard_gain_on_combo" : 2500,
+#		"EX_gain": 2000,
+#		"hitspark_type" : Globals.hitspark_type.HIT,
+#		"hitspark_palette" : "blue",
+#		"KB_angle" : -17,
+#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+#	},
+#	"a[c2]Active" : {
+#		"root" : "TridentProj2",
+#		"atk_type" : Globals.atk_type.ENTITY,
+#		"hitcount" : 2,
+#		"damage" : 50,
+#		"knockback" : 450 * FMath.S,
+#		"knockback_type": Globals.knockback_type.FIXED,
+#		"atk_level" : 3,
+#		"guard_drain": 1750,
+#		"guard_gain_on_combo" : 2500,
+#		"EX_gain": 1250,
+#		"hitspark_type" : Globals.hitspark_type.HIT,
+#		"hitspark_palette" : "blue",
+#		"KB_angle" : -17,
+#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+#	},
+#	"a[c3]Active" : {
+#		"root" : "TridentProj2",
+#		"atk_type" : Globals.atk_type.ENTITY,
+#		"hitcount" : 3,
+#		"damage" : 60,
+#		"knockback" : 500 * FMath.S,
+#		"knockback_type": Globals.knockback_type.FIXED,
+#		"atk_level" : 4,
+#		"guard_drain": 2000,
+#		"guard_gain_on_combo" : 2500,
+#		"EX_gain": 1000,
+#		"hitspark_type" : Globals.hitspark_type.HIT,
+#		"hitspark_palette" : "blue",
+#		"KB_angle" : -17,
+#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+#	},
+#	"a[ex]Active" : {
+#		"root" : "TridentProj2EX",
+#		"atk_type" : Globals.atk_type.EX,
+#		"hitcount" : 3,
+#		"damage" : 60,
+#		"knockback" : 500 * FMath.S,
+#		"knockback_type": Globals.knockback_type.FIXED,
+#		"atk_level" : 4,
+#		"guard_drain": 2000,
+#		"guard_gain_on_combo" : 2500,
+#		"EX_gain": 0,
+#		"hitspark_type" : Globals.hitspark_type.HIT,
+#		"hitspark_palette" : "blue",
+#		"KB_angle" : -17,
+#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+#	}
 }
 
 func _ready():
@@ -151,6 +153,7 @@ func _ready():
 func init(aux_data: Dictionary):
 	
 	# set up starting data
+	Entity.unique_data = {"new_facing" : null, "new_v_facing" : null, "reset_rot" : null}
 	
 	 # starting animation
 	if "aerial" in aux_data:
@@ -248,36 +251,151 @@ func init(aux_data: Dictionary):
 #	if move_ref in MOVE_DATABASE:
 #		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
 
+func spin():
+	match Animator.to_play_animation:
+		"[c2]Active", "a[c2]Active", "[ex]Active", "a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE":
+			Animator.play("[c1]Spin")
+		"[c3]Active", "a[c3]Active":
+			Animator.play("[c2]Spin")
+
+func turn_to_enemy():
+	
+	Entity.hitcount_record = []
+	
+	var master_node = get_node(Entity.master_path)
+	var enemy_node = get_node(master_node.targeted_opponent_path)
+	
+	var angle_finder := FVector.new()
+	angle_finder.set_from_vec(enemy_node.position - Entity.position)
+	var angle = angle_finder.angle()
+	var segment = Globals.split_angle(angle, Globals.angle_split.SIXTEEN)
+	
+	var new_facing := 1
+	var new_v_facing := 1
+	var new_angle := 0
+	
+	var charge_level: String = "1"
+	if Animator.current_animation == "[c2]Spin":
+		charge_level = "2"
+		Entity.life_point = 2
+		Entity.velocity.set_vector(650 * FMath.S, 0)
+	else:
+		Entity.life_point = 1
+		Entity.velocity.set_vector(500 * FMath.S, 0)
+	
+	match segment:
+		Globals.compass.E:
+			Animator.play("[c"+ charge_level + "]TurnE")
+		Globals.compass.ESE:
+			Animator.play("a[c"+ charge_level + "]Active")
+			new_angle = -14
+		Globals.compass.SE:
+			Animator.play("[c"+ charge_level + "]TurnSE")
+			new_angle = -45
+		Globals.compass.SSE:
+			Animator.play("[c"+ charge_level + "]TurnSSE")
+			new_angle = -76
+			
+		Globals.compass.S:
+			Animator.play("[c"+ charge_level + "]TurnS")
+			new_angle = -90
+		Globals.compass.SSW:
+			Animator.play("[c"+ charge_level + "]TurnSSE")
+			new_facing = -1
+			new_angle = -104
+		Globals.compass.SW:
+			Animator.play("[c"+ charge_level + "]TurnSE")
+			new_facing = -1
+			new_angle = -135
+		Globals.compass.WSW:
+			Animator.play("a[c"+ charge_level + "]Active")
+			new_facing = -1
+			new_angle = -166
+			
+		Globals.compass.W:
+			Animator.play("[c"+ charge_level + "]TurnE")
+			new_facing = -1
+			new_angle = 180
+		Globals.compass.WNW:
+			Animator.play("[c"+ charge_level + "]Active")
+			new_facing = -1
+			new_angle = 166
+		Globals.compass.NW:
+			Animator.play("[c"+ charge_level + "]TurnSE")
+			new_facing = -1
+			new_v_facing = -1
+			new_angle = 135
+		Globals.compass.NNW:
+			Animator.play("[c"+ charge_level + "]TurnSSE")
+			new_facing = -1
+			new_v_facing = -1
+			new_angle = 104
+			
+		Globals.compass.N:
+			Animator.play("[c"+ charge_level + "]TurnS")
+			new_v_facing = -1
+			new_angle = 90
+		Globals.compass.NNE:
+			Animator.play("[c"+ charge_level + "]TurnSSE")
+			new_v_facing = -1
+			new_angle = 76
+		Globals.compass.NE:
+			Animator.play("[c"+ charge_level + "]TurnSE")
+			new_v_facing = -1
+			new_angle = 45
+		Globals.compass.ENE:
+			Animator.play("[c"+ charge_level + "]Active")
+			new_angle = 14
+			
+	Entity.velocity.rotate(-new_angle)
+	Entity.unique_data.new_facing = new_facing
+	Entity.unique_data.new_v_facing = new_v_facing
+	Entity.unique_data.reset_rot = true
+	
 
 func query_move_data(move_name) -> Dictionary:
 	
+	var rotated_KB_angle = null
+	if move_name.begins_with("a"):
+		rotated_KB_angle = -17
+	else:
+		match move_name:
+			"[c1]TurnE", "[c2]TurnE":
+				rotated_KB_angle = -31
+			"[c1]TurnS", "[c2]TurnS":
+				if Entity.v_facing == 1:
+					rotated_KB_angle = 90
+				else:
+					rotated_KB_angle = -90
+			"[c1]TurnSE", "[c2]TurnSE":
+				if Entity.v_facing == 1:
+					rotated_KB_angle = 0
+				else:
+					rotated_KB_angle = -76
+			"[c1]TurnSSE", "[c2]TurnSSE":
+				if Entity.v_facing == 1:
+					rotated_KB_angle = 31
+				else:
+					rotated_KB_angle = -83
+	
 	match move_name:
-		"[c1]Spawn":
+		"[c1]Spawn", "a[c1]Spawn", "a[c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE":
 			move_name = "[c1]Active"
-		"[c2]Spawn":
+		"[c2]Spawn", "a[c2]Spawn", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE":
 			move_name = "[c2]Active"
-		"[c3]Spawn":
+		"[c3]Spawn", "a[c3]Spawn", "a[c3]Active":
 			move_name = "[c3]Active"
-		"[ex]Spawn":
+		"[ex]Spawn", "a[ex]Spawn", "a[ex]Active":
 			move_name = "[ex]Active"
-		"a[c1]Spawn":
-			move_name = "a[c1]Active"
-		"a[c2]Spawn":
-			move_name = "a[c2]Active"
-		"a[c3]Spawn":
-			move_name = "a[c3]Active"
-		"a[ex]Spawn":
-			move_name = "a[ex]Active"
 	
 	if !move_name in MOVE_DATABASE:
 		print("Error: Cannot retrieve move_data for " + move_name)
 		return {}
 	
-	var move_data = MOVE_DATABASE[move_name]
+	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	
-	match move_data: # move data may change for certain moves under certain conditions, unique to character
-		_ :
-			pass
+	if rotated_KB_angle != null:
+		move_data.KB_angle = rotated_KB_angle
 	
 	return move_data
 
@@ -290,8 +408,26 @@ func query_atk_attr(_in_move_name):
 			
 			
 func simulate():
+	
+	if Entity.unique_data.new_facing != null: # turn here
+		Entity.face(Entity.unique_data.new_facing)
+		Entity.unique_data.new_facing = null
+	if Entity.unique_data.new_v_facing != null:
+		Entity.v_face(Entity.unique_data.new_v_facing)
+		Entity.unique_data.new_v_facing = null
+	if Entity.unique_data.reset_rot != null:
+		Entity.get_node("Sprite").rotation = 0
+		Entity.unique_data.reset_rot = null
+	
 	match Animator.to_play_animation: # afterimage trail
-		"[c2]Active", "a[c2]Active":
+		
+		"[c1]Spin", "[c2]Spin":
+			Entity.velocity.percent(80)
+			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
+			if posmod(Entity.lifetime, 2) == 0:
+				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+		
+		"[c2]Active", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE":
 			if posmod(Entity.lifetime, 3) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
@@ -315,13 +451,23 @@ func kill(sound = true):
 	match Animator.to_play_animation:
 		"[c1]Spawn", "[c2]Spawn", "[c3]Spawn", "[ex]Spawn", "[c1]Active", "[c2]Active", "[c3]Active", "[ex]Active":
 			Animator.play("Kill")
-			if sound:
-				Entity.play_audio("break2", {"vol" : -15})
+			if sound: Entity.play_audio("break2", {"vol" : -15}) # don't put this outside, Spin animation has no kill()
 		"a[c1]Spawn", "a[c2]Spawn", "a[c3]Spawn", "a[ex]Spawn", "a[c1]Active", "a[c2]Active", "a[c3]Active", "a[ex]Active":
 			Animator.play("aKill")
-			if sound:
-				Entity.play_audio("break2", {"vol" : -15})
-	
+			if sound: Entity.play_audio("break2", {"vol" : -15})
+		"[c1]TurnE", "[c2]TurnE":
+			Animator.play("EKill")
+			if sound: Entity.play_audio("break2", {"vol" : -15})
+		"[c1]TurnS", "[c2]TurnS":
+			Animator.play("SKill")
+			if sound: Entity.play_audio("break2", {"vol" : -15})
+		"[c1]TurnSE", "[c2]TurnSE":
+			Animator.play("SEKill")
+			if sound: Entity.play_audio("break2", {"vol" : -15})
+		"[c1]TurnSSE", "[c2]TurnSSE":
+			Animator.play("SSEKill")
+			if sound: Entity.play_audio("break2", {"vol" : -15})
+
 	
 func collision(): # collided with a platform
 	kill()
@@ -358,9 +504,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Animator.play("a[c3]Active")
 		"a[ex]Spawn":
 			Animator.play("a[ex]Active")
+		"[c1]Spin", "[c2]Spin":
+			turn_to_enemy()
 			
 func _on_SpritePlayer_anim_started(anim_name):
-	match anim_name:
-		"Kill", "aKill":
-			Entity.velocity.set_vector(0, 0)
+	if anim_name.ends_with("Kill"):
+		Entity.velocity.set_vector(0, 0)
 

@@ -247,6 +247,11 @@ func face(in_dir):
 		facing = in_dir
 		$Sprite.scale.x = facing
 		
+func v_face(in_dir):
+	if in_dir != 0:
+		v_facing = in_dir
+		$Sprite.scale.y = v_facing
+		
 func check_fallthrough(): # return true if entity falls through soft platforms
 	if UniqEntity.has_method("check_fallthrough"): # some entities may interact with soft platforms
 		return UniqEntity.check_fallthrough()
@@ -491,7 +496,7 @@ func save_state():
 		"position" : position,
 		"facing" : facing,
 		"v_facing" : v_facing,
-		"rotation" : rotation,
+		"rotation" : $Sprite.rotation,
 		
 		"entity_ref" : entity_ref,
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
@@ -521,7 +526,7 @@ func load_state(state_data):
 	$Sprite.scale.x = facing
 	v_facing = state_data.v_facing
 	$Sprite.scale.y = v_facing
-	rotation = state_data.rotation
+	$Sprite.rotation = state_data.rotation
 
 	entity_ref = state_data.entity_ref
 	master_path = state_data.master_path

@@ -14,8 +14,9 @@ enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
-		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE
-		NON_ATTACK, CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, COMMAND_GRAB}
+		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, DRAG_KB
+		NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK, CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN
+		LATE_CHAIN_INTO, COMMAND_GRAB}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -30,7 +31,8 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # UNBLOCKABLE = for command grabs
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
-# SUPERARMOR = Wrongblock all attacks, set atk_level of any attack received to 1
+# SUPERARMOR_STARTUP = Wrongblock all attacks during startup
+# SUPERARMOR_ACTIVE = Wrongblock all attacks during startup
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
 # NO_PUSHBACK = no pushback if not blocked, used mainly to make certain moves more punishable
 # NO_STRAFE = for certain aerials, prevent air strafing during active frames

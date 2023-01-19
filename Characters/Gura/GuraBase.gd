@@ -155,7 +155,7 @@ const MOVE_DATABASE = {
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"priority": 4,
+		"priority": 3,
 		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,

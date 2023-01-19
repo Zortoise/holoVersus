@@ -71,9 +71,9 @@ func query_move_data(move_name) -> Dictionary:
 		print("Error: Cannot retrieve move_data for " + move_name)
 		return {}
 	
-	var move_data = MOVE_DATABASE[move_name]
+	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	
-	match move_data: # move data may change for certain moves under certain conditions, unique to character
+	match move_name: # move data may change for certain moves under certain conditions, unique to character
 		_ :
 			pass
 	

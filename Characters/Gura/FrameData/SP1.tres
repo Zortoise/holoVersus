@@ -225,7 +225,7 @@ frame_data = {
 "vframes": 5
 },
 "SP1[ex]Rec": {
-"duration": 27,
+"duration": 30,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
@@ -250,12 +250,12 @@ frame_data = {
 "frame": 9,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -23 ), Vector2( -12, -23 ) ]
 },
-17: {
+18: {
 "entityspawn": null,
 "frame": 10,
 "hurtbox": [ Vector2( -16, 22 ), Vector2( 11, 22 ), Vector2( 11, -26 ), Vector2( -16, -26 ) ]
 },
-22: {
+24: {
 "entityspawn": null,
 "frame": 11,
 "hurtbox": [ Vector2( -13, 22 ), Vector2( 11, 22 ), Vector2( 11, -24 ), Vector2( -13, -24 ) ]
@@ -264,7 +264,7 @@ frame_data = {
 "vframes": 5
 },
 "SP1[ex]Startup": {
-"duration": 9,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
@@ -284,7 +284,7 @@ frame_data = {
 "frame": 3,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
-7: {
+8: {
 "entityspawn": null,
 "frame": 4,
 "hurtbox": [ Vector2( -4, 1 ), Vector2( -14, 1 ), Vector2( -14, 22 ), Vector2( 10, 22 ), Vector2( 10, 9 ), Vector2( 22, 9 ), Vector2( 22, -17 ), Vector2( -4, -17 ) ]
@@ -512,7 +512,7 @@ frame_data = {
 "vframes": 5
 },
 "aSP1[ex]Rec": {
-"duration": 27,
+"duration": 30,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
@@ -537,12 +537,12 @@ frame_data = {
 "frame": 24,
 "hurtbox": [ Vector2( -9, 18 ), Vector2( 15, 18 ), Vector2( 15, -19 ), Vector2( -9, -19 ) ]
 },
-17: {
+18: {
 "entityspawn": null,
 "frame": 25,
 "hurtbox": [ Vector2( -13, 18 ), Vector2( 10, 18 ), Vector2( 10, -20 ), Vector2( -13, -20 ) ]
 },
-22: {
+24: {
 "entityspawn": null,
 "frame": 26,
 "hurtbox": [ Vector2( -11, 14 ), Vector2( 11, 14 ), Vector2( 11, -21 ), Vector2( -11, -21 ) ]
@@ -551,7 +551,7 @@ frame_data = {
 "vframes": 5
 },
 "aSP1[ex]Startup": {
-"duration": 9,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
@@ -571,7 +571,7 @@ frame_data = {
 "frame": 18,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
-7: {
+8: {
 "entityspawn": null,
 "frame": 19,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]

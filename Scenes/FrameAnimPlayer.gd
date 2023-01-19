@@ -158,6 +158,9 @@ func query_polygon(target = "hurtbox"):
 		if "facing" in get_parent(): # mirrored if facing other way
 			for index in polygon.size():
 				polygon[index].x *= get_parent().facing
+		if "v_facing" in get_parent():
+			for index in polygon.size():
+				polygon[index].y *= get_parent().v_facing
 		if polygon.size() == 0: # return null if empty polygon
 			return null
 		else:
@@ -184,6 +187,8 @@ func query_point(target = "kborigin"):
 		if point == null: return null
 		if "facing" in get_parent(): # mirrored if facing other way
 			point.x *= get_parent().facing
+		if "v_facing" in get_parent():
+			point.y *= get_parent().v_facing
 		return (point + owner_pos)
 	else:
 		return null

@@ -577,12 +577,14 @@ func simulate(new_input_state):
 #		test_num += 1
 			change_ex_gauge(50000)
 			change_burst_token(true)
-			get_node(targeted_opponent_path).change_guard_gauge_percent(-80)
+			get_node(targeted_opponent_path).change_guard_gauge(-8000)
 			get_node(targeted_opponent_path).change_ex_gauge(50000)
 			get_node(targeted_opponent_path).change_burst_token(true)
 			unique_data.bitten_player_path = targeted_opponent_path
 			unique_data.nibbler_count = 3
 			UniqChar.update_uniqueHUD()
+			
+			UniqChar.instinct()
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
 #			Globals.Game.superfreeze(get_path())
@@ -3044,14 +3046,18 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	
 	if !is_atk_recovery() and !is_atk_active(): return false
 	
+	var move_name = Animator.current_animation.trim_suffix("Rec")
+	move_name = move_name.trim_suffix("Active")
+	
+	if UniqChar.has_method("unique_chaining_rules") and UniqChar.unique_chaining_rules(move_name, attack_ref): # will use Character.chain_combo
+		afterimage_cancel()
+		return true
+	
 	if chain_combo in [Globals.chain_combo.RESET, Globals.chain_combo.NO_CHAIN]: return false # can only chain combo on hit
 	
 	if attack_ref in UniqChar.MOVE_DATABASE and "root" in UniqChar.MOVE_DATABASE[attack_ref]:
 		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
 	if attack_ref in chain_memory: return false # cannot chain into moves already done
-	
-	var move_name = Animator.current_animation.trim_suffix("Rec")
-	move_name = move_name.trim_suffix("Active")
 	
 #	if !move_name in UniqChar.MOVE_DATABASE:
 #		return false # just in case
@@ -3627,12 +3633,22 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		Globals.char_state.GROUND_ATK_STARTUP:
 			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				Globals.atk_attr.SUPERARMOR in defender.query_atk_attr(): # defender has superarmor
+				Globals.atk_attr.SUPERARMOR_STARTUP in defender.query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				hit_data["superarmored"] = true
 		Globals.char_state.AIR_ATK_STARTUP:
 			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				Globals.atk_attr.SUPERARMOR in defender.query_atk_attr(): # defender has superarmor
+				Globals.atk_attr.SUPERARMOR_STARTUP in defender.query_atk_attr(): # defender has superarmor
+				hit_data.block_state = Globals.block_state.AIR_WRONG
+				hit_data["superarmored"] = true
+		Globals.char_state.GROUND_ATK_ACTIVE:
+			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
+				Globals.atk_attr.SUPERARMOR_ACTIVE in defender.query_atk_attr(): # defender has superarmor
+				hit_data.block_state = Globals.block_state.GROUND_WRONG
+				hit_data["superarmored"] = true
+		Globals.char_state.AIR_ATK_ACTIVE:
+			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
+				Globals.atk_attr.SUPERARMOR_ACTIVE in defender.query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				hit_data["superarmored"] = true
 		
@@ -3812,6 +3828,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Globals.Game.guard_gauge_update(defender)
 #			defender.move_memory = []
 		# BurstRevoke does not reset anything
+		
+	if "superarmored" in hit_data:
+		$ModulatePlayer.play("armor_flash")
 			
 	# -------------------------------------------------------------------------------------------
 	

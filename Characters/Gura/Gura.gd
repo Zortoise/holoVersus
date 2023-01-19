@@ -719,9 +719,9 @@ func query_move_data(move_name) -> Dictionary: # can only be called during activ
 		print("Error: Cannot retrieve move_data for " + move_name)
 		return {}
 	
-	var move_data = MOVE_DATABASE[move_name]
+	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	
-	match move_data: # move data may change for certain moves under certain conditions, unique to character
+	match move_name: # move data may change for certain moves under certain conditions, unique to character
 		_ :
 			pass
 	
@@ -746,7 +746,7 @@ func query_atk_attr(move_name) -> Array: # may have certain conditions
 		"F3b":
 			return MOVE_DATABASE["F3"].atk_attr
 		"F3[h]":
-			return [Globals.atk_attr.SUPERARMOR]
+			return [Globals.atk_attr.SUPERARMOR_STARTUP]
 		"aL2b", "aL2Land":
 			return MOVE_DATABASE["aL2"].atk_attr
 		"aF1[h]":
@@ -988,6 +988,42 @@ func sequence_passfloor(): # which step in sequence ignore hard floor
 			return true
 	return false
 	
+	
+# CODE FOR CERTAIN MOVES ---------------------------------------------------------------------------------------------------
+
+#func unique_chaining_rules(move_name, attack_ref):
+#	if Character.is_atk_recovery() and attack_ref == "SP7" and move_name in ["SP1", "aSP1", "SP1[ex]", "aSP1[ex]"]:
+#		return true # can chain Akontio: Instinct from recovery of Akontio
+#	return false
+	
+func get_trident_array(): # return array of all spinnable tridents
+	var trident_array := []
+	for entity in Globals.Game.get_node("EntitiesFront").get_children():
+		if get_node(entity.master_path).player_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
+			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "a[c2]Active", "[ex]Active", \
+					"a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c3]Active", "a[c3]Active"]:
+				trident_array.append(entity)
+	return trident_array
+			
+func test_instinct(): # to determine if move is usable
+	if get_trident_array().size() > 0: return true
+	return false
+	
+func instinct():
+	var trident_array = get_trident_array()
+	
+	var to_spin = null
+	var lowest_lifetime = null
+	for trident in trident_array: # get youngest trident
+		if lowest_lifetime == null or trident.lifetime < lowest_lifetime:
+			to_spin = trident
+			lowest_lifetime = trident.lifetime
+			
+	if to_spin != null:
+		to_spin.UniqEntity.spin()
+			
+
+
 
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 # these are ran by main character node when it gets the signals so that the order is easier to control

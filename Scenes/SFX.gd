@@ -18,11 +18,11 @@ func init(in_anim: String, in_sfx_ref, in_position: Vector2, aux_data: Dictionar
 	
 	position = in_position
 	if "facing" in aux_data:
-		scale.x = aux_data.facing
+		$Sprite.scale.x = aux_data.facing
 	if "v_mirror" in aux_data and aux_data.v_mirror: # mirror vertically, for hitsparks
-		scale.y = -1
+		$Sprite.scale.y = -1
 	if "rot" in aux_data:
-		rotation = aux_data.rot * scale.x
+		$Sprite.rotation = aux_data.rot * $Sprite.scale.x
 	if "grounded" in aux_data:
 		$GroundedBox.add_to_group("Grounded")
 	if "palette" in aux_data:
@@ -75,8 +75,8 @@ func save_state():
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
 		"free" : free,
 		"position" : position,
-		"scale" : scale,
-		"rotation" : rotation,
+		"scale" : $Sprite.scale,
+		"rotation" : $Sprite.rotation,
 		"palette_ref" : palette_ref,
 		"ignore_freeze" : ignore_freeze
 	}
@@ -84,8 +84,8 @@ func save_state():
 	
 func load_state(state_data):
 	position = state_data.position
-	scale = state_data.scale
-	rotation = state_data.rotation
+	$Sprite.scale = state_data.scale
+	$Sprite.rotation = state_data.rotation
 	palette_ref = state_data.palette_ref
 	if state_data.palette_ref != null:
 		palette()
