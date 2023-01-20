@@ -530,18 +530,20 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 	match Character.state:
 		Globals.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
 			if Animator.query_current(["DashTransit"]) and attack_ref in STARTERS:
-				if Character.is_ex_valid(attack_ref):
-					Character.animate(attack_ref + "Startup")
-					Character.chain_memory = []
-					has_acted[0] = true
-					return true
+				if Character.test_qc_chain_combo(attack_ref):
+					if Character.is_ex_valid(attack_ref):
+						Character.animate(attack_ref + "Startup")
+						Character.chain_memory = []
+						has_acted[0] = true
+						return true
 		Globals.char_state.AIR_STARTUP: # can attack on 1st frames of air dash
 			if Animator.query_current(["aDashTransit"]) and ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-				if Character.is_ex_valid("a" + attack_ref):
-					Character.animate("a" + attack_ref + "Startup")
-					Character.chain_memory = []
-					has_acted[0] = true
-					return true
+				if Character.test_qc_chain_combo("a" + attack_ref):
+					if Character.is_ex_valid("a" + attack_ref):
+						Character.animate("a" + attack_ref + "Startup")
+						Character.chain_memory = []
+						has_acted[0] = true
+						return true
 						
 	match new_state:
 			
@@ -757,6 +759,7 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 	
 func query_atk_attr(move_name, skip_refine := false) -> Array: # can change under conditions
 
+	var orig_move_name = move_name
 	if !skip_refine:
 		move_name = refine_move_name(move_name)
 
@@ -766,10 +769,10 @@ func query_atk_attr(move_name, skip_refine := false) -> Array: # can change unde
 	else:
 		print("Error: Cannot retrieve atk_attr for " + move_name)
 		return []
-		
-	match move_name: # can add various atk_attr to certain animations under under conditions
+	
+	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		"F3[h]":
-			atk_attr.append_array(Globals.atk_attr.SUPERARMOR_STARTUP)
+			atk_attr.append(Globals.atk_attr.SUPERARMOR_STARTUP)
 		
 	return atk_attr
 	

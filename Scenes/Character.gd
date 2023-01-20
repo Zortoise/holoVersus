@@ -107,6 +107,8 @@ const PERFECTBLOCK_HITSTOP = 10
 const PBlockTimer_WAIT_TIME = 5
 const PBlockCDTimer_WAIT_TIME = 30
 
+const SUPERARMOR_GUARD_DRAIN_MOD = 250
+
 
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
 const LAUNCH_BOOST = 250 * FMath.S # increased knockback strength when a flinch becomes a launch
@@ -716,8 +718,9 @@ func simulate2(): # only ran if not in hitstop
 #	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
 #		reset_modulate()
 		
-	if !is_attacking():
+	if !is_attacking() and state != Globals.char_state.AIR_STARTUP and state != Globals.char_state.GROUND_STARTUP:
 		reset_cancels()
+		chain_memory = []
 		
 	startup_cancel_flag = false # to cancel startup without incurring auto-buffer
 	
@@ -2386,13 +2389,13 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 func ex_flash():# process ex flash
 	if is_attacking(): 	# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active/recovery
 		if get_move_name() in UniqChar.EX_FLASH_ANIM:
-			if $ModulatePlayer.playing and $ModulatePlayer.query(["EX_flash", "EX_flash2"]):
+			if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["EX_flash", "EX_flash2"]):
 				return
 			else:
 				$ModulatePlayer.play("EX_flash")
 				return
 				
-	if $ModulatePlayer.playing and $ModulatePlayer.query(["EX_flash", "EX_flash2"]): # not doing an ex move, stop ex flash if ex flashing
+	if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["EX_flash", "EX_flash2"]): # not doing an ex move, stop ex flash if ex flashing
 		reset_modulate()
 		
 func get_spritesheets():
@@ -2527,6 +2530,7 @@ func check_quick_turn():
 			if Animator.query(["aBlockStartup"]):
 				return true
 	return false
+
 	
 func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	var move_name = get_move_name()
@@ -2685,7 +2689,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 	if !quick_cancel: # not quick cancelling, must afford it
 		if current_ex_gauge >= EX_MOVE_COST:
 			change_ex_gauge(-EX_MOVE_COST)
-			play_audio("bling6", {"vol" : -6, "bus" : "HighPass"}) # EX chime
+			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
 			return true
 		else:
 			return false
@@ -2694,7 +2698,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 			return true
 		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
 			change_ex_gauge(-EX_MOVE_COST)
-			play_audio("bling6", {"vol" : -6, "bus" : "HighPass"}) # EX chime
+			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
 			return true
 		else:
 			return false
@@ -3095,7 +3099,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	afterimage_cancel()
 	return true
 #	return is_normal_attack(move_name) # can only chain combo if chaining from a Normal Attack, just in case
-	
+
+
 func test_qc_chain_combo(attack_ref):
 	
 	if chain_combo == Globals.chain_combo.NO_CHAIN: return false # just in case
@@ -3495,7 +3500,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	if hit_data.block_state != Globals.block_state.UNBLOCKED: # block sound
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-				play_audio("block3", {"vol" : -15})
+				if !"superarmored" in hit_data:
+					play_audio("block3", {"vol" : -15})
+				else:
+					play_audio("bling6", {"vol" : -6})
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				play_audio("bling2", {"vol" : -3, "bus" : "PitchDown"})
 			_: # normal block
@@ -3612,7 +3620,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	match state: # not new_state, cannot block on exact frame attack is detected
 		
-		Globals.char_state.GROUND_ATK_STARTUP:
+		Globals.char_state.GROUND_ATK_STARTUP: # can sweetspot superarmor
 			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
 				Globals.atk_attr.SUPERARMOR_STARTUP in query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
@@ -4129,10 +4137,12 @@ func calculate_guard_gauge_change(hit_data) -> int:
 #			return 0
 		else: # follow the starter's stats
 			guard_drain = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_drain
+			guard_drain = FMath.percent(guard_drain, UniqChar.get_stat("GUARD_DRAIN_MOD"))
 			guard_gain_on_combo = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
 			
 	else: # normal attack
 		guard_drain = hit_data.move_data.guard_drain
+		guard_drain = FMath.percent(guard_drain, UniqChar.get_stat("GUARD_DRAIN_MOD"))
 		guard_gain_on_combo = hit_data.move_data.guard_gain_on_combo
 	
 	if hit_data.block_state == Globals.block_state.UNBLOCKED and (move_memory.size() > 0 or $HitStunTimer.is_running()):
@@ -4160,7 +4170,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		if hit_data.block_state != Globals.block_state.UNBLOCKED:
 			match hit_data.block_state:
 				Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG: # increase GDrain for wrongblock
-					guard_gauge_change = FMath.percent(guard_gauge_change, WRONGBLOCK_GUARD_DRAIN_MOD)
+					if !"superarmored" in hit_data:
+						guard_gauge_change = FMath.percent(guard_gauge_change, WRONGBLOCK_GUARD_DRAIN_MOD)
+					else:
+						guard_gauge_change = FMath.percent(guard_gauge_change, SUPERARMOR_GUARD_DRAIN_MOD)
 				Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:  # reduce/negate GDrain for perfect block
 					guard_gauge_change = FMath.percent(guard_gauge_change, PERFECTBLOCK_GUARD_DRAIN_MOD)
 				_:
@@ -4542,7 +4555,10 @@ func generate_blockspark(hit_data):
 	
 	var blockspark
 	if hit_data.block_state == Globals.block_state.AIR_WRONG or hit_data.block_state == Globals.block_state.GROUND_WRONG:
-		blockspark = "WBlockspark"
+		if !"superarmored" in hit_data:
+			blockspark = "WBlockspark"
+		else:
+			blockspark = "Superarmorspark"
 	elif hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
 		blockspark = "PBlockspark"
 	else:

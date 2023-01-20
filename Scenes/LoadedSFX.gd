@@ -239,23 +239,23 @@ var modulate_animations = {
 		"timestamps" : {
 			0 :
 			{
-				"modulate" : Color(0.3, 0.0, 0.0),
+				"modulate" : Color(0.5, 0.2, 0.5),
 			},
 			2 :
 			{
-				"modulate" : Color(0.5, 0.2, 0.2),
+				"modulate" : Color(0.8, 0.3, 0.8),
 			},
 			4 :
 			{
-				"modulate" : Color(0.7, 0.4, 0.4),
+				"modulate" : Color(0.75, 0.5, 0.75),
 			},
 			6 :
 			{
-				"modulate" : Color(0.9, 0.6, 0.6),
+				"modulate" : Color(0.9, 0.7, 0.9),
 			},
 			8 :
 			{
-				"modulate" : Color(1.0, 0.8, 0.8),
+				"modulate" : Color(1.0, 0.9, 1.0),
 			},
 		}
 	},

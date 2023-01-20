@@ -36,7 +36,7 @@ const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
 const GUARD_GAUGE_DEGEN_AMOUNT = 90 # exact GG degened per frame when GG > 100%
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 35 # % of damage taken as chip damage when blocking (average is 0.25)
 #const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
-#const GUARD_GAUGE_LOSS_MOD = 1.2 # modify Guard Loss, tankier characters have lower GUARD_GAUGE_LOSS_MOD
+const GUARD_DRAIN_MOD = 120 # modify Guard Drain when blocking attacks/taking stray hits, tankier characters have lower GUARD_GAUGE_LOSS_MOD
 const AIR_BLOCK_GG_COST = -2000 # Guard Gauge drain when starting an Air Block
 const TRAITS = [Globals.trait.CHAIN_DASH, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
 
@@ -656,9 +656,9 @@ const MOVE_DATABASE = {
 			"hitstop" : 0,
 			"guard_gain" : 3500,
 			"EX_gain": 0,
-			"launch_power" : 700 * FMath.S,
+			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103, # launch backwards
-			"atk_level" : 6,
+			"atk_level" : 4,
 		}
 	},
 	"aSP6[ex]SeqE": { # if Grabbed hit a ledge while Grabber doesn't
@@ -668,9 +668,9 @@ const MOVE_DATABASE = {
 			"hitstop" : 0,
 			"guard_gain" : 3500,
 			"EX_gain": 0,
-			"launch_power" : 700 * FMath.S,
+			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103,
-			"atk_level" : 6,
+			"atk_level" : 4,
 		}
 	},
 

@@ -293,34 +293,8 @@ func refine_move_name(move_name):
 
 func query_move_data(move_name) -> Dictionary:
 	
-	var rotated_KB_angle = null # set knockback
-	if move_name.begins_with("a"):
-		rotated_KB_angle = -17
-	else:
-		match move_name:
-			"[c1]TurnE", "[c2]TurnE":
-				rotated_KB_angle = -31
-			"[c1]TurnS", "[c2]TurnS":
-				if Entity.v_facing == 1:
-					rotated_KB_angle = 90
-				else:
-					rotated_KB_angle = -90
-			"[c1]TurnSE", "[c2]TurnSE":
-				if Entity.v_facing == 1:
-					rotated_KB_angle = 0
-				else:
-					rotated_KB_angle = -76
-			"[c1]TurnSSE", "[c2]TurnSSE":
-				if Entity.v_facing == 1:
-					rotated_KB_angle = 31
-				else:
-					rotated_KB_angle = -83
-			"[c1]TurnESE", "[c2]TurnESE":
-				if Entity.v_facing == 1:
-					rotated_KB_angle = -17
-				else:
-					rotated_KB_angle = -55
-	
+	var orig_move_name = move_name
+
 	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
@@ -330,8 +304,32 @@ func query_move_data(move_name) -> Dictionary:
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 #	move_data["atk_attr"] = query_atk_attr(move_name, true)
 	
-	if rotated_KB_angle != null:
-		move_data.KB_angle = rotated_KB_angle
+	if orig_move_name.begins_with("a"):
+		move_data.KB_angle = -17
+	else:
+		match orig_move_name:
+			"[c1]TurnE", "[c2]TurnE":
+				move_data.KB_angle = -31
+			"[c1]TurnS", "[c2]TurnS":
+				if Entity.v_facing == 1:
+					move_data.KB_angle = 90
+				else:
+					move_data.KB_angle = -90
+			"[c1]TurnSE", "[c2]TurnSE":
+				if Entity.v_facing == 1:
+					move_data.KB_angle = 0
+				else:
+					move_data.KB_angle = -76
+			"[c1]TurnSSE", "[c2]TurnSSE":
+				if Entity.v_facing == 1:
+					move_data.KB_angle = 31
+				else:
+					move_data.KB_angle = -83
+			"[c1]TurnESE", "[c2]TurnESE":
+				if Entity.v_facing == 1:
+					move_data.KB_angle = -17
+				else:
+					move_data.KB_angle = -55
 	
 	return move_data
 	
