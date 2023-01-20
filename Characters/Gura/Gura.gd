@@ -701,103 +701,78 @@ func afterimage_trail():# process afterimage trail
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			Character.afterimage_trail()
 			
-#func get_speed(): # later can have effects that increase SPEED
-#	return SPEED
-	
-func get_stat(stat: String):
-	
-	match stat: # later can have effects that changes stats
-		_:
-			pass
-	
+			
+# GET DATA --------------------------------------------------------------------------------------------------
+
+func get_stat(stat: String): # later can have effects that changes stats
 	return get(stat)
 	
+func query_traits(): # may have special conditions
+	return TRAITS
 			
-func query_move_data(move_name) -> Dictionary: # can only be called during active frames
+func refine_move_name(move_name):
+	match move_name:
+		"L2b":
+			return "L2"
+		"F2b":
+			return "F2"
+		"F3b":
+			return "F3"
+		"F3[h]":
+			return "F3"
+		"aL2b", "aL2Land":
+			return "aL2"
+		"aF1[h]":
+			return "aF1"
+		"SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]":
+			return "SP1"
+		"SP3":
+			return "aSP3"
+		"SP3[h]": 
+			return "aSP3[h]"
+		"SP3[ex]": 
+			return "aSP3[ex]"
+		"SP5", "SP5b", "aSP5b":
+			return "aSP5"
+		"SP5[ex]", "SP5b[ex]", "aSP5b[ex]":
+			return "aSP5[ex]"
+		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
+			return "aSP6[ex]"
+	return move_name
+			
+			
+func query_move_data(move_name) -> Dictionary: # can change under conditions
+	
+	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
 		print("Error: Cannot retrieve move_data for " + move_name)
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-	
-	match move_name: # move data may change for certain moves under certain conditions, unique to character
-		_ :
-			pass
+	move_data["atk_attr"] = query_atk_attr(move_name, true)
 	
 	return move_data
 	
-#func query_priority(move_name) -> int: # can only be called during active frames
-#
-#	if move_name in MOVE_DATABASE and "priority" in MOVE_DATABASE[move_name]:
-#		return MOVE_DATABASE[move_name].priority
-#
-#	print("Error: Cannot retrieve priority for " + move_name)
-#	return 0
 	
-func query_atk_attr(move_name) -> Array: # may have certain conditions
+func query_atk_attr(move_name, skip_refine := false) -> Array: # can change under conditions
 
-	# return atk attr for startup and recovery animations not in MOVE_DATABASE
-	match move_name: # can add various atk_attr to certain animations under under conditions
-		"L2b":
-			return MOVE_DATABASE["L2"].atk_attr
-		"F2b":
-			return MOVE_DATABASE["F2"].atk_attr
-		"F3b":
-			return MOVE_DATABASE["F3"].atk_attr
-		"F3[h]":
-			return [Globals.atk_attr.SUPERARMOR_STARTUP]
-		"aL2b", "aL2Land":
-			return MOVE_DATABASE["aL2"].atk_attr
-		"aF1[h]":
-			return MOVE_DATABASE["aF1"].atk_attr
-		"SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]":
-			return MOVE_DATABASE["SP1"].atk_attr
-		"SP3":
-			return MOVE_DATABASE["aSP3"].atk_attr
-		"SP3[h]": 
-			return MOVE_DATABASE["aSP3[h]"].atk_attr
-		"SP3[ex]": 
-			return MOVE_DATABASE["aSP3[ex]"].atk_attr
-		"SP5", "SP5b", "aSP5b":
-			return MOVE_DATABASE["aSP5"].atk_attr
-		"SP5[ex]", "SP5b[ex]", "aSP5b[ex]":
-			return MOVE_DATABASE["aSP5[ex]"].atk_attr
-		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
-			return MOVE_DATABASE["aSP6[ex]"].atk_attr
-			
+	if !skip_refine:
+		move_name = refine_move_name(move_name)
+
+	var atk_attr := []
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].atk_attr
+		atk_attr = MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	else:
+		print("Error: Cannot retrieve atk_attr for " + move_name)
+		return []
 		
-	print("Error: Cannot retrieve atk_attr for " + move_name)
-	return []
+	match move_name: # can add various atk_attr to certain animations under under conditions
+		"F3[h]":
+			atk_attr.append_array(Globals.atk_attr.SUPERARMOR_STARTUP)
+		
+	return atk_attr
 	
-func query_traits(): # may have special conditions
-	return TRAITS
-
-#func query_move_EX_gain(move_name):
-#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].EX_gain
-#	else: print("Error: Cannot retrieve EX_gain for " + move_name)
-#
-#func query_move_damage(move_name):
-#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].damage
-#	else: print("Error: Cannot retrieve damage for " + move_name)
-#
-#func query_move_knockback(move_name):
-#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].knockback
-#	else: print("Error: Cannot retrieve knockback for " + move_name)
-#
-#func query_move_atk_level(move_name):
-#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].atk_level
-#	else: print("Error: Cannot retrieve atk_level for " + move_name)
-#
-#func query_move_guard_drain(move_name):
-#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_drain
-#	else: print("Error: Cannot retrieve guard_drain for " + move_name)
-#
-#func query_move_guard_gain_on_combo(move_name):
-#	if move_name in MOVE_DATABASE: return MOVE_DATABASE[move_name].guard_gain_on_combo
-#	else: print("Error: Cannot retrieve guard_gain_on_combo for " + move_name)
 
 # HIT REACTIONS --------------------------------------------------------------------------------------------------
 

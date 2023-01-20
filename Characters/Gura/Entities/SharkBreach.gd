@@ -26,6 +26,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -60,
+		"atk_attr" : [Globals.atk_attr.REPEATABLE],
 		"hit_sound" : { ref = "water1", aux_data = {"vol" : -6} },
 	}
 }
@@ -44,16 +45,18 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-	
-	match move_name: # move data may change for certain moves under certain conditions, unique to character
-		_ :
-			pass
-	
+
 	return move_data
 	
 	
-func query_atk_attr(_in_move_name):
-	return [Globals.atk_attr.REPEATABLE]
+func query_atk_attr(move_name):
+	
+	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+		
+	print("Error: Cannot retrieve atk_attr for " + move_name)
+	return []
+	
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:

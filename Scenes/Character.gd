@@ -3338,6 +3338,8 @@ func query_traits(): # may have certain conditions
 # name should be stripped already!
 func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
 	
+	if in_move_name == null and !is_attacking(): return []
+	
 	var move_name = in_move_name
 	if move_name == null:
 		move_name = get_move_name()
@@ -3346,6 +3348,7 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.NO_TURN]
 	
 	return UniqChar.query_atk_attr(move_name)
+	
 	
 func query_priority(in_move_name = null):
 	var move_name = in_move_name
@@ -3364,29 +3367,6 @@ func query_move_data(move_name):
 	var move_data = UniqChar.query_move_data(move_name)
 	return move_data
 	
-#func query_move_EX_gain(move_name):
-#	var EX_gain = UniqChar.query_move_EX_gain(move_name)
-#	return EX_gain
-#
-#func query_move_damage(move_name):
-#	var damage = UniqChar.query_move_damage(move_name)
-#	return damage
-#
-#func query_move_knockback(move_name):
-#	var knockback = UniqChar.query_move_knockback(move_name)
-#	return knockback
-#
-#func query_move_atk_level(move_name):
-#	var atk_level = UniqChar.query_move_atk_level(move_name)
-#	return atk_level
-#
-#func query_move_guard_drain(move_name):
-#	var guard_drain = UniqChar.query_move_guard_drain(move_name)
-#	return guard_drain
-#
-#func query_move_guard_gain_on_combo(move_name):
-#	var guard_gain_on_combo = UniqChar.query_move_guard_gain_on_combo(move_name)
-#	return guard_gain_on_combo
 	
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 
 	
@@ -3408,17 +3388,17 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	match hit_data.block_state:
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
-				change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
-			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 25))
+				change_ex_gauge(hit_data.move_data.EX_gain)
+			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 25))
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
-				change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
+				change_ex_gauge(hit_data.move_data.EX_gain)
 		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-			defender.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
+			defender.change_ex_gauge(hit_data.move_data.EX_gain)
 		_:  # normal block
 			if !hit_data.double_repeat:
-				change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
-			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
+				change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
+			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -3439,7 +3419,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	# CANCELING ----------------------------------------------------------------------------------------------
 		# only set chain_combo and dash_cancel to true if no Repeat Penalty and not perfect blocked
 		
-	if Globals.atk_attr.NO_CHAIN_ON_BLOCK in query_atk_attr(hit_data.move_name) and hit_data.block_state != Globals.block_state.UNBLOCKED and \
+	if Globals.atk_attr.NO_CHAIN_ON_BLOCK in hit_data.move_data.atk_attr and hit_data.block_state != Globals.block_state.UNBLOCKED and \
 		hit_data.block_state != Globals.block_state.GROUND_WRONG and hit_data.block_state != Globals.block_state.AIR_WRONG:
 		
 		chain_combo = Globals.chain_combo.NO_CHAIN # no chain combo if a move with NO_CHAIN_ON_BLOCK is blocked, unless it's wrongblocked
@@ -3483,13 +3463,13 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				
 				
 		if hit_data.block_state == Globals.block_state.UNBLOCKED and \
-			Globals.atk_attr.JUMP_CANCEL in query_atk_attr(hit_data.move_name):
+			Globals.atk_attr.JUMP_CANCEL in hit_data.move_data.atk_attr:
 			jump_cancel = true
 				
 	# BLOCK PUSHBACK ----------------------------------------------------------------------------------------------
 		# if blocked hit, pushback
 	
-	if hit_data.block_state != Globals.block_state.UNBLOCKED and !Globals.atk_attr.NO_PUSHBACK in query_atk_attr(hit_data.move_name) and \
+	if hit_data.block_state != Globals.block_state.UNBLOCKED and !Globals.atk_attr.NO_PUSHBACK in hit_data.move_data.atk_attr and \
 		!"multihit" in hit_data:
 		 # for multi-hit only last hit has pushback
 		var pushback_strength: int = 0
@@ -3521,7 +3501,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			_: # normal block
 				play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
 
-	elif hit_data.semi_disjoint and !Globals.trait.VULN_LIMBS in defender.query_traits(): # SD Hit sound
+	elif hit_data.semi_disjoint and !Globals.atk_attr.VULN_LIMBS in defender.query_atk_attr(): # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
 		
 	elif "hit_sound" in hit_data.move_data:
@@ -3529,9 +3509,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		var volume_change = 0
 		if hit_data.lethal_hit or hit_data.break_hit or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
-		elif query_move_data(hit_data.move_name).atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
+#		elif hit_data.adjusted_atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
+		elif hit_data.double_repeat:
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
-		
+			
 		if !hit_data.move_data.hit_sound is Array:
 			
 			var aux_data = hit_data.move_data.hit_sound.aux_data.duplicate(true)
@@ -3560,7 +3541,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
 
 	var attacker = get_node(hit_data.attacker_nodepath)
-	var defender = get_node(hit_data.defender_nodepath)
+#	var defender = get_node(hit_data.defender_nodepath)
 	
 	var attacker_or_entity = attacker # cleaner code
 	if "entity_nodepath" in hit_data:
@@ -3569,7 +3550,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
 	
 	# get direction to attacker
-	var vec_to_attacker: Vector2 = attacker_or_entity.position - defender.position
+	var vec_to_attacker: Vector2 = attacker_or_entity.position - position
 	if vec_to_attacker.x == 0: # rare case of attacker directly on defender
 		vec_to_attacker.x = hit_data.attack_facing
 	var dir_to_attacker := sign(vec_to_attacker.x) # for setting facing on defender
@@ -3586,14 +3567,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data["repeat"] = false
 	hit_data["double_repeat"] = false
 	
-	if !attacker_or_entity.is_hitcount_last_hit(defender.player_ID, hit_data.move_data):
+	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data):
 		hit_data["multihit"] = true
-	if Globals.atk_attr.AUTOCHAIN in attacker_or_entity.query_atk_attr(hit_data.move_name):
+	if Globals.atk_attr.AUTOCHAIN in hit_data.move_data.atk_attr:
 		hit_data["autochain"] = true
 		
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
-		attacker_or_entity.append_ignore_list(defender.player_ID, hit_data.move_data.ignore_time)
+		attacker_or_entity.append_ignore_list(player_ID, hit_data.move_data.ignore_time)
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -3603,7 +3584,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if "root" in hit_data.move_data: # for move variations
 		root_move_name = hit_data.move_data.root
 	
-	if !Globals.atk_attr.REPEATABLE in attacker_or_entity.query_atk_attr(hit_data.move_name):
+	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
 		for array in move_memory:
 			if array[0] == attacker.player_ID and array[1] == root_move_name:
 				if !hit_data.repeat:
@@ -3619,7 +3600,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		# append repeated move to move_memory later after guard gauge change calculation
 	
 	var weak_hit := false
-	if attacker_or_entity.query_move_data(hit_data.move_name).atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
+	if hit_data.move_data.atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
 		"multihit" in hit_data: # multi-hit moves cannot cause lethal/break/sweetspot/punish outside of last hit
 		weak_hit = true
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
@@ -3629,26 +3610,26 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 	
-	match defender.state: # not new_state, cannot block on exact frame attack is detected
+	match state: # not new_state, cannot block on exact frame attack is detected
 		
 		Globals.char_state.GROUND_ATK_STARTUP:
-			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				Globals.atk_attr.SUPERARMOR_STARTUP in defender.query_atk_attr(): # defender has superarmor
+			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				Globals.atk_attr.SUPERARMOR_STARTUP in query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				hit_data["superarmored"] = true
 		Globals.char_state.AIR_ATK_STARTUP:
-			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				Globals.atk_attr.SUPERARMOR_STARTUP in defender.query_atk_attr(): # defender has superarmor
+			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				Globals.atk_attr.SUPERARMOR_STARTUP in query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				hit_data["superarmored"] = true
 		Globals.char_state.GROUND_ATK_ACTIVE:
-			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				Globals.atk_attr.SUPERARMOR_ACTIVE in defender.query_atk_attr(): # defender has superarmor
+			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				hit_data["superarmored"] = true
 		Globals.char_state.AIR_ATK_ACTIVE:
-			if !Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				Globals.atk_attr.SUPERARMOR_ACTIVE in defender.query_atk_attr(): # defender has superarmor
+			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr(): # defender has superarmor
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				hit_data["superarmored"] = true
 		
@@ -3656,30 +3637,30 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
 			var crossed_up: bool = check_if_crossed_up(attacker, hit_data.angle_to_atker)
 			
-			if !crossed_up and (defender.get_node("PBlockTimer").is_running() or defender.Animator.query(["PBlockstun", "aPBlockStun"])) and \
-				!Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name): # cannot p-block hard-to-block moves
+			if !crossed_up and ($PBlockTimer.is_running() or Animator.query(["PBlockstun", "aPBlockStun"])) and \
+				!Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr: # cannot p-block hard-to-block moves
 				# being in PBlockstun will continue to PBlock all attacks
 				hit_data.block_state = Globals.block_state.GROUND_PERFECT
 				
-			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
-				!Globals.atk_attr.AIR_ATTACK in attacker.query_atk_attr(hit_data.move_name) and \
-				attacker.chain_memory.size() == 0 and !defender.get_node("BlockStunTimer").is_running():
+			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				!Globals.atk_attr.AIR_ATTACK in hit_data.move_data.atk_attr and \
+				attacker.chain_memory.size() == 0 and !$BlockStunTimer.is_running():
 				# ANTI_GUARD attacks cannot work if opponent is in blockstun or you chain into it
 				# ANTI_GUARD attacks with AIR_ATTACK cannot work on grounded opponents
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
-			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				!defender.get_node("BlockStunTimer").is_running():
+			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				!$BlockStunTimer.is_running():
 				# rare ANTI_GUARD entity, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
-			elif defender.Animator.query(["WBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
+			elif Animator.query(["WBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
-			elif defender.Animator.query(["Blockstun", "PBlockstun"]):
+			elif Animator.query(["Blockstun", "PBlockstun"]):
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.GROUND
 				
-			elif crossed_up and !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name):
+			elif crossed_up and !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in hit_data.move_data.atk_attr:
 				# entities cannot cross-up
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
@@ -3690,32 +3671,31 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data.sweetspotted = false  # blocking will not cause sweetspot hits
 			var crossed_up: bool = check_if_crossed_up(attacker, hit_data.angle_to_atker)
 
-			if Globals.atk_attr.ANTI_AIR in attacker_or_entity.query_atk_attr(hit_data.move_name):
+			if Globals.atk_attr.ANTI_AIR in hit_data.move_data.atk_attr:
 				hit_data.block_state = Globals.block_state.AIR_WRONG # anti-air attacks always wrongblock airborne defenders
 			
-			elif !crossed_up and ((defender.get_node("PBlockTimer").is_running() and Globals.trait.AIR_PERFECT_BLOCK in defender.query_traits()) or \
-				defender.Animator.query(["PBlockstun", "aPBlockStun"])) and \
-				!Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name):
+			elif !crossed_up and (($PBlockTimer.is_running() and Globals.trait.AIR_PERFECT_BLOCK in query_traits()) or \
+				Animator.query(["PBlockstun", "aPBlockStun"])) and !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr:
 				#  being in PBlockstun will continue to PBlock all aerial attacks
 				hit_data.block_state = Globals.block_state.AIR_PERFECT # only those with the trait can perfect block in air
 				
-			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker.query_atk_attr(hit_data.move_name) and \
-				attacker.chain_memory.size() == 0 and !defender.get_node("BlockStunTimer").is_running():
+			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				attacker.chain_memory.size() == 0 and !$BlockStunTimer.is_running():
 				# ANTI_GUARD attacks cannot work if opponent is in blockstun or you chain into it
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
-			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in attacker_or_entity.query_atk_attr(hit_data.move_name) and \
-				!defender.get_node("BlockStunTimer").is_running():
+			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
+				!$BlockStunTimer.is_running():
 				# rare ANTI_GUARD entity, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
-			elif defender.Animator.query(["aWBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
+			elif Animator.query(["aWBlockstun"]): # being in WBlockstun will continye to WBlock all attacks
 				hit_data.block_state = Globals.block_state.AIR_WRONG
-			elif defender.Animator.query(["aBlockstun", "aPBlockstun"]):
+			elif Animator.query(["aBlockstun", "aPBlockstun"]):
 				# being in non-WrongBlock Blockstun will contine to block normally even wrong attacks, no unblockable setups
 				hit_data.block_state = Globals.block_state.AIR
 				
-			elif crossed_up and !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in attacker.query_atk_attr(hit_data.move_name):
+			elif crossed_up and !"entity_nodepath" in hit_data and !Globals.atk_attr.EASY_BLOCK in hit_data.move_data.atk_attr:
 				# entities cannot cross-up
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
@@ -3726,7 +3706,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
 	
 	if !hit_data.weak_hit and hit_data.move_data.damage > 0: # cannot Punish Hit for weak hits and non-damaging moves like Burst
-		match defender.state:
+		match state:
 			Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
 				Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
 				hit_data.punish_hit = true
@@ -3743,16 +3723,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
-	defender.change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
+	change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 
-	if defender.get_guard_gauge_percent_below() <= 1 and !hit_data.weak_hit and hit_data.move_data.damage > 0 and \
-			!"autochain" in hit_data and !defender.query_status_effect(Globals.status_effect.BREAK_RECOVER):  # check for break hit
+	if get_guard_gauge_percent_below() <= 1 and !hit_data.weak_hit and hit_data.move_data.damage > 0 and \
+			!"autochain" in hit_data and !query_status_effect(Globals.status_effect.BREAK_RECOVER):  # check for break hit
 		# setting to 0.01 instead of 0 allow multi-hit moves to cause break_hits on the last attack
 		hit_data.break_hit = true
 		hit_data.block_state = Globals.block_state.UNBLOCKED
 		
-	defender.take_damage(calculate_damage(hit_data)) # do damage calculation
-	if defender.get_damage_percent() >= 100 and !hit_data.weak_hit and hit_data.move_data.damage > 0: # check for lethal
+	take_damage(calculate_damage(hit_data)) # do damage calculation
+	if get_damage_percent() >= 100 and !hit_data.weak_hit and hit_data.move_data.damage > 0: # check for lethal
 		if hit_data.block_state == Globals.block_state.UNBLOCKED or hit_data.block_state == Globals.block_state.AIR_WRONG or \
 			hit_data.block_state == Globals.block_state.GROUND_WRONG:
 			hit_data.lethal_hit = true
@@ -3779,7 +3759,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif hit_data.break_hit:
 		add_status_effect(Globals.status_effect.BREAK, 0)
 		add_status_effect(Globals.status_effect.BREAK_RECOVER, null) # null means no duration
-		defender.move_memory = [] # reset move memory for getting a Break
+		move_memory = [] # reset move memory for getting a Break
 		Globals.Game.set_screenshake() # screenshake
 		$ModulatePlayer.play("break_flash")
 		play_audio("break1", {"vol" : -18})
@@ -3810,22 +3790,22 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				$ModulatePlayer.play("perfectblock_flash")
 				
-	if !hit_data.break_hit and !hit_data.lethal_hit and Globals.atk_attr.SCREEN_SHAKE in attacker_or_entity.query_atk_attr(hit_data.move_name):
+	if !hit_data.break_hit and !hit_data.lethal_hit and Globals.atk_attr.SCREEN_SHAKE in hit_data.move_data.atk_attr:
 		Globals.Game.set_screenshake()
 		
 	if hit_data.block_state == Globals.block_state.UNBLOCKED and "root" in hit_data.move_data:
 		if hit_data.move_data.root == "BurstCounter":
 			attacker.reset_jumps()
-			defender.reset_jumps()
+			reset_jumps()
 			attacker.reset_guard_gauge()
 		elif hit_data.move_data.root == "BurstEscape":
 			attacker.reset_jumps()
-			defender.reset_jumps()
+			reset_jumps()
 		elif hit_data.move_data.root == "BurstExtend":
 #			attacker.reset_jumps() # only defender resets jumps, or else too overpowered
-			defender.reset_jumps()
-			defender.current_guard_gauge = 0
-			Globals.Game.guard_gauge_update(defender)
+			reset_jumps()
+			current_guard_gauge = 0
+			Globals.Game.guard_gauge_update(self)
 #			defender.move_memory = []
 		# BurstRevoke does not reset anything
 		
@@ -3839,7 +3819,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if adjusted_atk_level > 1 and !hit_data.block_state in [Globals.block_state.GROUND_PERFECT, Globals.block_state.AIR_PERFECT]:
 		 # loses Positive Flow for atk_level > 1 if not perfect blocked
-		defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)
+		status_effect_to_remove.append(Globals.status_effect.POS_FLOW)
 		# remove it at end of frame, this way both players loses positive flow during clashes
 	
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
@@ -4043,7 +4023,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					animate("Blockstun")
 					block_rec_cancel = true
 				Globals.block_state.GROUND_WRONG:
-					if !defender.is_atk_startup():
+					if !is_atk_startup():
 						animate("WBlockstun")
 						block_rec_cancel = false
 				Globals.block_state.GROUND_PERFECT:
@@ -4053,7 +4033,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					animate("aBlockstun")
 					block_rec_cancel = true
 				Globals.block_state.AIR_WRONG:
-					if !defender.is_atk_startup():
+					if !is_atk_startup():
 						animate("aWBlockstun")
 						block_rec_cancel = false
 				Globals.block_state.AIR_PERFECT:
@@ -4084,18 +4064,19 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 func calculate_damage(hit_data) -> int:
 	
-	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
-	if "entity_nodepath" in hit_data:
-		attacker_or_entity = get_node(hit_data.entity_nodepath)
-		
-	var defender = get_node(hit_data.defender_nodepath)
+#	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
+#	if "entity_nodepath" in hit_data:
+#		attacker_or_entity = get_node(hit_data.entity_nodepath)
+#
+#	var defender = get_node(hit_data.defender_nodepath)
 	
-	var scaled_damage: int = attacker_or_entity.query_move_data(hit_data.move_name).damage * FMath.S
+	var scaled_damage: int = hit_data.move_data.damage * FMath.S
 	if scaled_damage == 0: return 0
 	
 	if hit_data.semi_disjoint:
-		if Globals.trait.VULN_LIMBS in defender.query_traits():
-			scaled_damage = FMath.percent(scaled_damage, Globals.trait_lookup(Globals.trait.VULN_LIMBS)) # VULN_LIMBS trait cause SD hits to do more damage
+		if Globals.atk_attr.VULN_LIMBS in query_atk_attr():
+			pass # VULN_LIMBS trait cause SD hits to do damage
+#			scaled_damage = FMath.percent(scaled_damage, 100)
 		else:
 			return 0
 	elif hit_data.double_repeat:
@@ -4108,12 +4089,12 @@ func calculate_damage(hit_data) -> int:
 		if hit_data.punish_hit:
 			scaled_damage = FMath.percent(scaled_damage, PUNISH_DMG_MOD)
 
-	if defender.current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
-		scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), defender.get_guard_gauge_percent_above())
+	if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
+		scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
 
 	if hit_data.block_state != Globals.block_state.UNBLOCKED:
 		# each character take different amount of chip damage
-		scaled_damage = FMath.percent(scaled_damage, defender.UniqChar.get_stat("BASE_BLOCK_CHIP_DAMAGE_MOD"))
+		scaled_damage = FMath.percent(scaled_damage, UniqChar.get_stat("BASE_BLOCK_CHIP_DAMAGE_MOD"))
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 				scaled_damage = FMath.percent(scaled_damage, WRONGBLOCK_CHIP_DMG_MOD) # increase chip damage for wrongblock
@@ -4129,9 +4110,9 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
 		
-	var defender = get_node(hit_data.defender_nodepath)
+#	var defender = get_node(hit_data.defender_nodepath)
 	
-	if !attacker_or_entity.is_hitcount_first_hit(defender.player_ID): # for multi-hit moves, only 1st hit affect GG
+	if !attacker_or_entity.is_hitcount_first_hit(player_ID): # for multi-hit moves, only 1st hit affect GG
 		return 0
 		
 	var guard_gauge_change := 0
@@ -4140,8 +4121,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		
 	# for autochain followup
 	if "chain_starter" in hit_data.move_data:
-		# if already hit the opponent with a previous move, deal no guard gauge change
-		if (defender.get_node("HitStunTimer").is_running() or defender.get_node("BlockStunTimer").is_running()):
+		# if already hit the defender with a previous move, deal no guard gauge change
+		if $HitStunTimer.is_running() or $BlockStunTimer.is_running():
 			return 0
 #		elif hit_data.block_state != Globals.block_state.UNBLOCKED:  # no guard gauge change for autochain followup on blocking opponent
 #			print(attacker.chain_memory)
@@ -4151,10 +4132,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 			guard_gain_on_combo = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
 			
 	else: # normal attack
-		guard_drain = attacker_or_entity.query_move_data(hit_data.move_name).guard_drain
-		guard_gain_on_combo = attacker_or_entity.query_move_data(hit_data.move_name).guard_gain_on_combo
+		guard_drain = hit_data.move_data.guard_drain
+		guard_gain_on_combo = hit_data.move_data.guard_gain_on_combo
 	
-	if hit_data.block_state == Globals.block_state.UNBLOCKED and (defender.move_memory.size() > 0 or defender.get_node("HitStunTimer").is_running()):
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and (move_memory.size() > 0 or $HitStunTimer.is_running()):
 		# on a successful hit while defender in hitstun or a little after, guard_gauge_change is positive
 		guard_gauge_change = guard_gain_on_combo
 		if hit_data.double_repeat: # Guard Gain on hitstunned defender is increased on double_repeat
@@ -4194,13 +4175,13 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	
 func calculate_knockback_strength(hit_data) -> int:
 
-	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
-	if "entity_nodepath" in hit_data:
-		attacker_or_entity = get_node(hit_data.entity_nodepath)
-		
-	var defender = get_node(hit_data.defender_nodepath)
+#	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
+#	if "entity_nodepath" in hit_data:
+#		attacker_or_entity = get_node(hit_data.entity_nodepath)
+#
+#	var defender = get_node(hit_data.defender_nodepath)
 
-	var knockback_strength: int = attacker_or_entity.query_move_data(hit_data.move_name).knockback # scaled by FMath.S
+	var knockback_strength: int = hit_data.move_data.knockback # scaled by FMath.S
 	
 	# for certain multi-hit attacks (not autochain), fixed KB or drag KB till the last hit
 	if "multihit" in hit_data:
@@ -4220,7 +4201,7 @@ func calculate_knockback_strength(hit_data) -> int:
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 				knockback_strength = FMath.percent(knockback_strength, WRONGBLOCK_PUSHBACK_MOD) # increase KB for wrongblock
-				if !defender.grounded:
+				if !grounded:
 					knockback_strength = FMath.percent(knockback_strength, WRONGBLOCK_AERIAL_PUSHBACK_MOD) # increase KB for aerial wrongblock
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				knockback_strength = FMath.percent(knockback_strength, PERFECTBLOCK_PUSHBACK_MOD) # reduce/negate KB for perfect block
@@ -4239,25 +4220,25 @@ func calculate_knockback_strength(hit_data) -> int:
 			knockback_strength += LAUNCH_THRESHOLD
 		knockback_strength = FMath.percent(knockback_strength, LETHAL_KB_MOD)
 		
-	elif defender.state == Globals.char_state.CROUCHING: # reduce knockback if opponent is crouching
+	elif state == Globals.char_state.CROUCHING: # reduce knockback if defender is crouching
 		knockback_strength = FMath.percent(knockback_strength, CROUCH_REDUCTION_MOD)
 			
 #	knockback_strength *= defender.UniqChar.KB_MOD # defender's weight
 	
 	if !hit_data.weak_hit:  # no KB boost for multi-hit attacks (weak hits) till the last hit
-		if defender.get_damage_percent() >= 100: # knockback is increased by defender's Damage Value when it is > 100%
+		if get_damage_percent() >= 100: # knockback is increased by defender's Damage Value when it is > 100%
 #			var dmg_val_boost = min((defender.get_damage_percent() - 1.0) / 0.125 * 0.5 + 2.0 \
 #				, DMG_VAL_KB_LIMIT)
-			var weight: int = int(min(FMath.get_fraction_percent(defender.get_damage_percent() - 100, 25), 100))
+			var weight: int = int(min(FMath.get_fraction_percent(get_damage_percent() - 100, 25), 100))
 			#	0 percent damage over is x2.0 knockback
 			# 	25 percent damage over is x3.0 knockback
 			knockback_strength = FMath.f_lerp(FMath.percent(knockback_strength, 200), \
 					FMath.percent(knockback_strength, DMG_VAL_KB_LIMIT), weight)
 			
-		if defender.current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
+		if current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
 #			knockback_strength *= lerp(1.0, UniqChar.KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
 			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \
-					defender.get_guard_gauge_percent_above())
+					get_guard_gauge_percent_above())
 	
 	return knockback_strength # lethal knockback is around 2000
 	
@@ -4265,12 +4246,12 @@ func calculate_knockback_strength(hit_data) -> int:
 func calculate_knockback_dir(hit_data) -> int:
 	
 	var attacker = get_node(hit_data.attacker_nodepath)
-	
+
 	var attacker_or_entity = attacker # cleaner code
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
-		
-	var defender = get_node(hit_data.defender_nodepath)
+#
+#	var defender = get_node(hit_data.defender_nodepath)
 	
 	var knockback_dir := 0
 	
@@ -4278,7 +4259,7 @@ func calculate_knockback_dir(hit_data) -> int:
 	
 	# for certain multi-hit attacks and autochain, can be drag KB till the last hit
 	if "multihit" in hit_data or "autochain" in hit_data:
-		if Globals.atk_attr.DRAG_KB in attacker_or_entity.query_atk_attr(hit_data.move_name):
+		if Globals.atk_attr.DRAG_KB in hit_data.move_data.atk_attr:
 			return attacker_or_entity.velocity.angle()
 		elif "vacpoint" in hit_data: # or vacuum towards VacPoint
 			var vac_vector := FVector.new()
@@ -4332,7 +4313,7 @@ func calculate_knockback_dir(hit_data) -> int:
 			else: print("Error: No KBOrigin found for knockback_type.RADIAL")
 			
 	# for weak hit and grounded defender, or grounded blocking defender, if the hit is towards left/right instead of up/down, level it
-	if defender.grounded and (hit_data.adjusted_atk_level <= 1 or \
+	if grounded and (hit_data.adjusted_atk_level <= 1 or \
 		hit_data.block_state != Globals.block_state.UNBLOCKED):
 		var segment = Globals.split_angle(knockback_dir, Globals.angle_split.FOUR, hit_data.attack_facing)
 		match segment:
@@ -4347,11 +4328,11 @@ func calculate_knockback_dir(hit_data) -> int:
 func adjusted_atk_level(hit_data) -> int: # mostly for hitstun and blockstun
 	# atk_level = 1 are weak hits and cannot do a lot of stuff, cannot cause hitstun
 	
-	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
-	if "entity_nodepath" in hit_data:
-		attacker_or_entity = get_node(hit_data.entity_nodepath)
+#	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
+#	if "entity_nodepath" in hit_data:
+#		attacker_or_entity = get_node(hit_data.entity_nodepath)
 	
-	var atk_level: int = attacker_or_entity.query_move_data(hit_data.move_name).atk_level
+	var atk_level: int = hit_data.move_data.atk_level
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
 		atk_level -= 1 # atk lvl 2 become weak hit
 		atk_level = int(clamp(atk_level, 1, 2))
@@ -4372,10 +4353,8 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 	
 	if "fixed_hitstun" in hit_data.move_data:
 		return hit_data.move_data.fixed_hitstun
-	
-	var defender = get_node(hit_data.defender_nodepath)
 		
-	if hit_data.adjusted_atk_level <= 1 and !defender.get_node("HitStunTimer").is_running():
+	if hit_data.adjusted_atk_level <= 1 and !$HitStunTimer.is_running():
 		return 0 # weak hit on opponent not in hitstun
 
 	var scaled_hitstun: int = ATK_LEVEL_TO_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
@@ -4383,14 +4362,14 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 	if hit_data.lethal_hit:
 		# increased hitstun on a lethal hit and no reduction from high Guard Gauge
 		scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
-		if defender.get_damage_percent() > 1.0:
-			scaled_hitstun = FMath.percent(scaled_hitstun, defender.get_damage_percent())
+		if get_damage_percent() > 1.0:
+			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 	else:
-		if defender.current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+		if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
 			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
-					defender.get_guard_gauge_percent_above())
+					get_guard_gauge_percent_above())
 			
-		if defender.state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
+		if state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
 			scaled_hitstun = FMath.percent(scaled_hitstun, CROUCH_REDUCTION_MOD)
 		
 	if !blocking:
@@ -4483,10 +4462,8 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 
 func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
-	var defender = get_node(hit_data.defender_nodepath)
-	
 	# SD hits have special hitspark, unless has VULN_LIMBS
-	if hit_data.semi_disjoint and !Globals.trait.VULN_LIMBS in defender.query_traits():
+	if hit_data.semi_disjoint and !Globals.atk_attr.VULN_LIMBS in query_atk_attr():
 		var v_mirror := false
 		if rng_generate(2) == 0: v_mirror = true
 		var out_facing := 1

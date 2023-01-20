@@ -32,6 +32,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
+		"atk_attr" : [Globals.atk_attr.REPEATABLE],
 		"hit_sound" : { ref = "cut1", aux_data = {"vol" : -12} },
 	},
 }
@@ -50,22 +51,16 @@ func init(_aux_data: Dictionary):
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 
-#func query_move_data_and_name():
-#
-#	var move_ref = Animator.to_play_animation
-#	match move_ref:
-#		"bActive":
-#			move_ref = "Active"
-#
-#	if move_ref in MOVE_DATABASE:
-#		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
 		
+func refine_move_name(move_name):
+	match move_name:
+		"bActive":
+			return "Active"
+	return move_name
 		
 func query_move_data(move_name) -> Dictionary:
 	
-	match move_name:
-		"bActive":
-			move_name = "Active"
+	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
 		print("Error: Cannot retrieve move_data for " + move_name)
@@ -73,15 +68,18 @@ func query_move_data(move_name) -> Dictionary:
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	
-	match move_name: # move data may change for certain moves under certain conditions, unique to character
-		_ :
-			pass
-	
 	return move_data
 		
 		
-func query_atk_attr(_move_name):
-	return [Globals.atk_attr.REPEATABLE]
+func query_atk_attr(move_name):
+	
+	move_name = refine_move_name(move_name)
+
+	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+		
+	print("Error: Cannot retrieve atk_attr for " + move_name)
+	return []
 
 			
 func simulate():

@@ -16,7 +16,7 @@ enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPEC
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, DRAG_KB
 		NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK, CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN
-		LATE_CHAIN_INTO, COMMAND_GRAB}
+		LATE_CHAIN_INTO, COMMAND_GRAB, VULN_LIMBS}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -44,12 +44,13 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # LATE_CHAIN = can only chain into other moves during recovery and not active frames
 # LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
 # COMMAND_GRAB = cannot hit opponents during ground/air movement startup
+# VULN_LIMBS = take full damage from SDHits
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFECT, AIR_PERFECT}
-enum trait {CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, VULN_LIMBS, AIR_PERFECT_BLOCK,
+enum trait {CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK,
 		DASH_BLOCK, AIR_DASH_BLOCK}
 enum entity_trait {GROUNDED, LEDGE_STOP}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
@@ -738,12 +739,12 @@ func status_effect_priority(effect):
 			return 1	
 	return 0 # no visual effect
 			
-func trait_lookup(trait):
-	match trait:
-		Globals.trait.VULN_LIMBS: # 50% damage on SD hits
-			return 50
-			
-func atk_attr_lookup(atk_attr):
-	match atk_attr:
-		_:
-			return
+#func trait_lookup(trait):
+#	match trait:
+#		Globals.trait.VULN_LIMBS: # 50% damage on SD hits
+#			return 50
+#
+#func atk_attr_lookup(atk_attr):
+#	match atk_attr:
+#		_:
+#			return

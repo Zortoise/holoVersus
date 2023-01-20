@@ -36,7 +36,40 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
+},
+"ESEKill": {
+"duration": 17,
+"hframes": 6,
+"loop": false,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 94,
+"hitbox": [  ]
+},
+2: {
+"frame": 95,
+"hitbox": [  ]
+},
+5: {
+"frame": 96,
+"hitbox": [  ]
+},
+8: {
+"frame": 97,
+"hitbox": [  ]
+},
+11: {
+"frame": 98,
+"hitbox": [  ]
+},
+14: {
+"frame": 99,
+"hitbox": [  ]
+}
+},
+"vframes": 17
 },
 "Kill": {
 "duration": 17,
@@ -69,7 +102,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "SEKill": {
 "duration": 17,
@@ -102,7 +135,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "SKill": {
 "duration": 17,
@@ -135,7 +168,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "SSEKill": {
 "duration": 17,
@@ -168,7 +201,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c1]Active": {
 "duration": 12,
@@ -201,7 +234,7 @@ frame_data = {
 "hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c1]Spawn": {
 "duration": 4,
@@ -214,7 +247,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c1]Spin": {
 "duration": 30,
@@ -227,7 +260,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c1]TurnE": {
 "duration": 12,
@@ -260,7 +293,40 @@ frame_data = {
 "hitbox": [ Vector2( -5, 14 ), Vector2( 37, 14 ), Vector2( 37, -15 ), Vector2( -5, -15 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
+},
+"[c1]TurnESE": {
+"duration": 12,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 88,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+2: {
+"frame": 89,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+4: {
+"frame": 90,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+6: {
+"frame": 91,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+8: {
+"frame": 92,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+10: {
+"frame": 93,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+}
+},
+"vframes": 17
 },
 "[c1]TurnS": {
 "duration": 12,
@@ -293,7 +359,7 @@ frame_data = {
 "hitbox": [ Vector2( -14, 37 ), Vector2( 15, 37 ), Vector2( 15, -5 ), Vector2( -14, -5 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c1]TurnSE": {
 "duration": 12,
@@ -326,7 +392,7 @@ frame_data = {
 "hitbox": [ Vector2( -8, 17 ), Vector2( -1, 17 ), Vector2( -1, 28 ), Vector2( 28, 28 ), Vector2( 28, -1 ), Vector2( 17, -1 ), Vector2( 17, -8 ), Vector2( -8, -8 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c1]TurnSSE": {
 "duration": 12,
@@ -359,7 +425,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c2]Active": {
 "duration": 12,
@@ -392,7 +458,7 @@ frame_data = {
 "hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c2]Spawn": {
 "duration": 4,
@@ -405,7 +471,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c2]Spin": {
 "duration": 30,
@@ -418,7 +484,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c2]TurnE": {
 "duration": 12,
@@ -451,7 +517,40 @@ frame_data = {
 "hitbox": [ Vector2( -5, 14 ), Vector2( 37, 14 ), Vector2( 37, -15 ), Vector2( -5, -15 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
+},
+"[c2]TurnESE": {
+"duration": 12,
+"hframes": 6,
+"loop": true,
+"spritesheet": "TridentProjSprite",
+"timestamps": {
+0: {
+"frame": 88,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+2: {
+"frame": 89,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+4: {
+"frame": 90,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+6: {
+"frame": 91,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+8: {
+"frame": 92,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+},
+10: {
+"frame": 93,
+"hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
+}
+},
+"vframes": 17
 },
 "[c2]TurnS": {
 "duration": 12,
@@ -484,7 +583,7 @@ frame_data = {
 "hitbox": [ Vector2( -14, 37 ), Vector2( 15, 37 ), Vector2( 15, -5 ), Vector2( -14, -5 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c2]TurnSE": {
 "duration": 12,
@@ -517,7 +616,7 @@ frame_data = {
 "hitbox": [ Vector2( -8, 17 ), Vector2( -1, 17 ), Vector2( -1, 28 ), Vector2( 28, 28 ), Vector2( 28, -1 ), Vector2( 17, -1 ), Vector2( 17, -8 ), Vector2( -8, -8 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c2]TurnSSE": {
 "duration": 12,
@@ -550,7 +649,7 @@ frame_data = {
 "hitbox": [ Vector2( -12, 21 ), Vector2( -7, 21 ), Vector2( -7, 37 ), Vector2( 19, 37 ), Vector2( 19, 8 ), Vector2( 15, 8 ), Vector2( 15, -5 ), Vector2( -12, -5 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c3]Active": {
 "duration": 12,
@@ -583,7 +682,7 @@ frame_data = {
 "hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[c3]Spawn": {
 "duration": 4,
@@ -596,7 +695,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[ex]Active": {
 "duration": 12,
@@ -629,7 +728,7 @@ frame_data = {
 "hitbox": [ Vector2( 8, -15 ), Vector2( -5, -15 ), Vector2( -5, 12 ), Vector2( 21, 12 ), Vector2( 21, 7 ), Vector2( 37, 7 ), Vector2( 37, -19 ), Vector2( 8, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "[ex]Spawn": {
 "duration": 4,
@@ -642,7 +741,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, -4 ), Vector2( -34, -4 ), Vector2( -34, 12 ), Vector2( 37, 12 ), Vector2( 37, -19 ), Vector2( -5, -19 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "aKill": {
 "duration": 17,
@@ -675,7 +774,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[c1]Active": {
 "duration": 12,
@@ -708,7 +807,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[c1]Spawn": {
 "duration": 4,
@@ -721,7 +820,7 @@ frame_data = {
 "hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[c2]Active": {
 "duration": 12,
@@ -754,7 +853,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[c2]Spawn": {
 "duration": 4,
@@ -767,7 +866,7 @@ frame_data = {
 "hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[c3]Active": {
 "duration": 12,
@@ -800,7 +899,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[c3]Spawn": {
 "duration": 4,
@@ -813,7 +912,7 @@ frame_data = {
 "hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[ex]Active": {
 "duration": 12,
@@ -846,7 +945,7 @@ frame_data = {
 "hitbox": [ Vector2( -5, 15 ), Vector2( 8, 15 ), Vector2( 8, 19 ), Vector2( 37, 19 ), Vector2( 37, -7 ), Vector2( 21, -7 ), Vector2( 21, -12 ), Vector2( -5, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 },
 "a[ex]Spawn": {
 "duration": 4,
@@ -859,6 +958,6 @@ frame_data = {
 "hitbox": [ Vector2( -34, 4 ), Vector2( -5, 4 ), Vector2( -5, 19 ), Vector2( 37, 19 ), Vector2( 37, -12 ), Vector2( -34, -12 ) ]
 }
 },
-"vframes": 15
+"vframes": 17
 }
 }

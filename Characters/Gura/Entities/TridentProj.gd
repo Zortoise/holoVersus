@@ -31,6 +31,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
+		"atk_attr" : [],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c2]Active" : {
@@ -47,6 +48,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
+		"atk_attr" : [Globals.atk_attr.DRAG_KB],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c3]Active" : {
@@ -63,6 +65,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
+		"atk_attr" : [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
@@ -79,72 +82,9 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
+		"atk_attr" : [Globals.atk_attr.DRAG_KB],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
-#	"a[c1]Active" : {
-#		"root" : "TridentProj2", # upwards and downwards trident can be done once each before incurring repeat penalty
-#		"atk_type" : Globals.atk_type.ENTITY,
-#		"hitcount" : 1,
-#		"damage" : 70,
-#		"knockback" : 400 * FMath.S,
-#		"knockback_type": Globals.knockback_type.FIXED,
-#		"atk_level" : 2,
-#		"guard_drain": 1500,
-#		"guard_gain_on_combo" : 2500,
-#		"EX_gain": 2000,
-#		"hitspark_type" : Globals.hitspark_type.HIT,
-#		"hitspark_palette" : "blue",
-#		"KB_angle" : -17,
-#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-#	},
-#	"a[c2]Active" : {
-#		"root" : "TridentProj2",
-#		"atk_type" : Globals.atk_type.ENTITY,
-#		"hitcount" : 2,
-#		"damage" : 50,
-#		"knockback" : 450 * FMath.S,
-#		"knockback_type": Globals.knockback_type.FIXED,
-#		"atk_level" : 3,
-#		"guard_drain": 1750,
-#		"guard_gain_on_combo" : 2500,
-#		"EX_gain": 1250,
-#		"hitspark_type" : Globals.hitspark_type.HIT,
-#		"hitspark_palette" : "blue",
-#		"KB_angle" : -17,
-#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-#	},
-#	"a[c3]Active" : {
-#		"root" : "TridentProj2",
-#		"atk_type" : Globals.atk_type.ENTITY,
-#		"hitcount" : 3,
-#		"damage" : 60,
-#		"knockback" : 500 * FMath.S,
-#		"knockback_type": Globals.knockback_type.FIXED,
-#		"atk_level" : 4,
-#		"guard_drain": 2000,
-#		"guard_gain_on_combo" : 2500,
-#		"EX_gain": 1000,
-#		"hitspark_type" : Globals.hitspark_type.HIT,
-#		"hitspark_palette" : "blue",
-#		"KB_angle" : -17,
-#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-#	},
-#	"a[ex]Active" : {
-#		"root" : "TridentProj2EX",
-#		"atk_type" : Globals.atk_type.EX,
-#		"hitcount" : 3,
-#		"damage" : 60,
-#		"knockback" : 500 * FMath.S,
-#		"knockback_type": Globals.knockback_type.FIXED,
-#		"atk_level" : 4,
-#		"guard_drain": 2000,
-#		"guard_gain_on_combo" : 2500,
-#		"EX_gain": 0,
-#		"hitspark_type" : Globals.hitspark_type.HIT,
-#		"hitspark_palette" : "blue",
-#		"KB_angle" : -17,
-#		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
-#	}
 }
 
 func _ready():
@@ -253,7 +193,7 @@ func init(aux_data: Dictionary):
 
 func spin():
 	match Animator.to_play_animation:
-		"[c2]Active", "a[c2]Active", "[ex]Active", "a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE":
+		"[c2]Active", "a[c2]Active", "[ex]Active", "a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			Animator.play("[c1]Spin")
 		"[c3]Active", "a[c3]Active":
 			Animator.play("[c2]Spin")
@@ -272,7 +212,6 @@ func turn_to_enemy():
 	
 	var new_facing := 1
 	var new_v_facing := 1
-	var new_angle := 0
 	
 	var charge_level: String = "1"
 	if Animator.current_animation == "[c2]Spin":
@@ -287,75 +226,74 @@ func turn_to_enemy():
 		Globals.compass.E:
 			Animator.play("[c"+ charge_level + "]TurnE")
 		Globals.compass.ESE:
-			Animator.play("a[c"+ charge_level + "]Active")
-			new_angle = -14
+			Animator.play("[c"+ charge_level + "]TurnESE")
 		Globals.compass.SE:
 			Animator.play("[c"+ charge_level + "]TurnSE")
-			new_angle = -45
 		Globals.compass.SSE:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
-			new_angle = -76
 			
 		Globals.compass.S:
 			Animator.play("[c"+ charge_level + "]TurnS")
-			new_angle = -90
 		Globals.compass.SSW:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
 			new_facing = -1
-			new_angle = -104
 		Globals.compass.SW:
 			Animator.play("[c"+ charge_level + "]TurnSE")
 			new_facing = -1
-			new_angle = -135
 		Globals.compass.WSW:
-			Animator.play("a[c"+ charge_level + "]Active")
+			Animator.play("[c"+ charge_level + "]TurnESE")
 			new_facing = -1
-			new_angle = -166
 			
 		Globals.compass.W:
 			Animator.play("[c"+ charge_level + "]TurnE")
 			new_facing = -1
-			new_angle = 180
 		Globals.compass.WNW:
-			Animator.play("[c"+ charge_level + "]Active")
+			Animator.play("[c"+ charge_level + "]TurnESE")
 			new_facing = -1
-			new_angle = 166
+			new_v_facing = -1
 		Globals.compass.NW:
 			Animator.play("[c"+ charge_level + "]TurnSE")
 			new_facing = -1
 			new_v_facing = -1
-			new_angle = 135
 		Globals.compass.NNW:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
 			new_facing = -1
 			new_v_facing = -1
-			new_angle = 104
 			
 		Globals.compass.N:
 			Animator.play("[c"+ charge_level + "]TurnS")
 			new_v_facing = -1
-			new_angle = 90
 		Globals.compass.NNE:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
 			new_v_facing = -1
-			new_angle = 76
 		Globals.compass.NE:
 			Animator.play("[c"+ charge_level + "]TurnSE")
 			new_v_facing = -1
-			new_angle = 45
 		Globals.compass.ENE:
-			Animator.play("[c"+ charge_level + "]Active")
-			new_angle = 14
+			Animator.play("[c"+ charge_level + "]TurnESE")
+			new_v_facing = -1
 			
-	Entity.velocity.rotate(-new_angle)
+	Entity.velocity.rotate(Globals.compass_to_angle(segment))
 	Entity.unique_data.new_facing = new_facing
 	Entity.unique_data.new_v_facing = new_v_facing
 	Entity.unique_data.reset_rot = true
 	
 
+func refine_move_name(move_name):
+	match move_name:
+		"[c1]Spawn", "a[c1]Spawn", "a[c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE", "[c1]TurnESE":
+			return "[c1]Active"
+		"[c2]Spawn", "a[c2]Spawn", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
+			return "[c2]Active"
+		"[c3]Spawn", "a[c3]Spawn", "a[c3]Active":
+			return "[c3]Active"
+		"[ex]Spawn", "a[ex]Spawn", "a[ex]Active":
+			return "[ex]Active"
+	return move_name
+
 func query_move_data(move_name) -> Dictionary:
 	
-	var rotated_KB_angle = null
+	var rotated_KB_angle = null # set knockback
 	if move_name.begins_with("a"):
 		rotated_KB_angle = -17
 	else:
@@ -377,35 +315,38 @@ func query_move_data(move_name) -> Dictionary:
 					rotated_KB_angle = 31
 				else:
 					rotated_KB_angle = -83
+			"[c1]TurnESE", "[c2]TurnESE":
+				if Entity.v_facing == 1:
+					rotated_KB_angle = -17
+				else:
+					rotated_KB_angle = -55
 	
-	match move_name:
-		"[c1]Spawn", "a[c1]Spawn", "a[c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE":
-			move_name = "[c1]Active"
-		"[c2]Spawn", "a[c2]Spawn", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE":
-			move_name = "[c2]Active"
-		"[c3]Spawn", "a[c3]Spawn", "a[c3]Active":
-			move_name = "[c3]Active"
-		"[ex]Spawn", "a[ex]Spawn", "a[ex]Active":
-			move_name = "[ex]Active"
+	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
 		print("Error: Cannot retrieve move_data for " + move_name)
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
+#	move_data["atk_attr"] = query_atk_attr(move_name, true)
 	
 	if rotated_KB_angle != null:
 		move_data.KB_angle = rotated_KB_angle
 	
 	return move_data
+	
 
+func query_atk_attr(move_name, skip_refine := false):
+	
+	if !skip_refine:
+		move_name = refine_move_name(move_name)
 
-func query_atk_attr(_in_move_name):
-	if Animator.query_to_play(["[c3]Active", "a[c3]Active", "[c3]Spawn", "a[c3]Spawn"]):
-		return [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB]
-	else:
-		return [Globals.atk_attr.DRAG_KB]
-			
+	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+		
+	print("Error: Cannot retrieve atk_attr for " + move_name)
+	return []
+	
 			
 func simulate():
 	
@@ -422,12 +363,12 @@ func simulate():
 	match Animator.to_play_animation: # afterimage trail
 		
 		"[c1]Spin", "[c2]Spin":
-			Entity.velocity.percent(80)
+			Entity.velocity.percent(85)
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 		
-		"[c2]Active", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE":
+		"[c2]Active", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			if posmod(Entity.lifetime, 3) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
@@ -466,6 +407,9 @@ func kill(sound = true):
 			if sound: Entity.play_audio("break2", {"vol" : -15})
 		"[c1]TurnSSE", "[c2]TurnSSE":
 			Animator.play("SSEKill")
+			if sound: Entity.play_audio("break2", {"vol" : -15})
+		"[c1]TurnESE", "[c2]TurnESE":
+			Animator.play("ESEKill")
 			if sound: Entity.play_audio("break2", {"vol" : -15})
 
 	

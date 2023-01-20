@@ -304,8 +304,12 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 		return UniqEntity.query_atk_attr(in_move_name)
 	return []
 	
-func query_move_data(move_name):
-	var move_data = UniqEntity.query_move_data(move_name)
+func query_move_data(in_move_name = null):
+	
+	if in_move_name == null:
+		in_move_name = Animator.to_play_animation
+		
+	var move_data = UniqEntity.query_move_data(in_move_name)
 	return move_data
 	
 	
@@ -328,17 +332,17 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	match hit_data.block_state:
 		Globals.block_state.UNBLOCKED:
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
-			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 25))
+				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
+			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 25))
 		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
+				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
 		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-			defender.change_ex_gauge(query_move_data(hit_data.move_name).EX_gain)
+			defender.change_ex_gauge(hit_data.move_data.EX_gain)
 		_:  # normal block
 			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
-			defender.change_ex_gauge(FMath.percent(query_move_data(hit_data.move_name).EX_gain, 50))
+				attacker.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
+			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -366,7 +370,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			_: # normal block
 				play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
 
-	elif hit_data.semi_disjoint and !Globals.trait.VULN_LIMBS in defender.query_traits(): # SD Hit sound
+	elif hit_data.semi_disjoint and !Globals.atk_attr.VULN_LIMBS in defender.query_atk_attr(): # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
 
 	elif "hit_sound" in hit_data.move_data:
@@ -374,9 +378,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		var volume_change = 0
 		if hit_data.lethal_hit or hit_data.break_hit or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
-		elif hit_data.move_data.atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
+#		elif hit_data.adjusted_atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
+		elif hit_data.double_repeat:
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
-
+			
 		if !hit_data.move_data.hit_sound is Array:
 
 			var aux_data = hit_data.move_data.hit_sound.aux_data.duplicate(true)
