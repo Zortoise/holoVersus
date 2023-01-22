@@ -589,9 +589,9 @@ func simulate(new_input_state):
 			UniqChar.instinct()
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
-#			Globals.Game.superfreeze(get_path())
-			Globals.Game.set_screenstop()
-			Globals.Game.set_screenshake()
+			Globals.Game.superfreeze(get_path())
+#			Globals.Game.set_screenstop()
+#			Globals.Game.set_screenshake()
 
 		
 # PAUSING --------------------------------------------------------------------------------------------------
@@ -3265,7 +3265,8 @@ func get_guard_gauge_percent_above() -> int:
 #		return 1.0 + get_guard_gauge_percent_above()
 		
 func take_damage(damage: int): # called by attacker
-	current_damage_value = int(max(current_damage_value + damage, 0)) # cannot go under zero (take_damage is also used for healing)
+	current_damage_value += damage
+	current_damage_value = int(clamp(current_damage_value, 0, 9999)) # cannot go under zero (take_damage is also used for healing)
 	Globals.Game.damage_update(self, damage)
 	
 func change_guard_gauge(guard_gauge_change: int): # called by attacker
@@ -3376,8 +3377,6 @@ func query_move_data(move_name):
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 
 	
 func landed_a_hit(hit_data): # called by main game node when landing a hit
-	
-	UniqChar.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
 	
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
@@ -3597,7 +3596,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if array[0] == attacker.player_ID and array[1] == root_move_name:
 				if !hit_data.repeat:
 					hit_data.repeat = true # found a repeat
-					if !hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE]:
+					if !hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] or \
+							Globals.atk_attr.NO_REPEAT_NORMAL in hit_data.move_data.atk_attr:
 						double_repeat = true # if attack is not light/fierce, can only repeat once
 						hit_data["double_repeat"] = true
 						break
@@ -3752,7 +3752,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 				
 	# ---------------------------------------------------------------------------------
-				
+	
+	attacker_or_entity.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	UniqChar.being_hit(hit_data) # reaction, can change hit_data from there
 	
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------
@@ -3880,6 +3881,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		DI_seal = true
 	else:
 		DI_seal = false
+		
+#	# ---------------------------------------------------------------------------------
+#
+#	UniqChar.being_hit2(hit_data) # reaction, can change stuff like knockback here
 	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
@@ -3934,11 +3939,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 			if !no_impact and !no_impact_and_vel_change:
 				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
-				match segment:
-					Globals.compass.E:
-						face(-1) # face other way
-					Globals.compass.W:
-						face(1)
+				if !"pull" in hit_data:
+					match segment:
+						Globals.compass.E:
+							face(-1) # face other way
+						Globals.compass.W:
+							face(1)
+				else: # flip facing direction if pulling attack on flinch
+					match segment:
+						Globals.compass.E:
+							face(1)
+						Globals.compass.W:
+							face(-1)
 				
 #				if knockback_dir == 90 or knockback_dir == 270:
 #					face(dir_to_attacker) # turn towards attacker/entity if hit straight up/down
@@ -4542,6 +4554,7 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		var v_mirror := false
 		if rng_generate(2) == 0: v_mirror = true # 50% change of mirror the hitspark
 		var rot_rad : float = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
+		if "pull" in hit_data: rot_rad += PI # flip if pulling
 		var aux_data = {"rot": rot_rad, "v_mirror":v_mirror}
 		if hit_data.move_data["hitspark_palette"] != "red":
 			aux_data["palette"] = hit_data.move_data["hitspark_palette"]

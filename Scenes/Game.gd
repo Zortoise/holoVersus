@@ -1470,6 +1470,7 @@ func stock_points_update(character, stock_points_change: int = 0):
 	else:
 		stock_indicator.text = "INF"
 		
+	stock_points_change = int(min(stock_points_change, 9999))
 	
 	if stock_points_change < 0: # loss points
 		var stock_loss_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints/StockLoss")

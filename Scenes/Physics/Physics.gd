@@ -39,8 +39,8 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, ledge_s
 		elif !is_against_wall(collision_box, soft_platform_dbox, sign(move_amount.x)):
 			# for players, has to test collision with other players as well
 			if collision_box.is_in_group("Players"):
-				# no collision with other players during hitstun or while being non-collidable
-				if $HitStunTimer.is_running() or (has_method("check_collidable") and !call("check_collidable")):
+				# no collision with other players during launched hitstun or while being non-collidable
+				if get("state") == Globals.char_state.LAUNCHED_HITSTUN or (has_method("check_collidable") and !call("check_collidable")):
 					position.x += sign(move_amount.x)
 #					if sign(move_amount.x) > 0: # check if player touched blast barrier
 #						var result = check_blast_barriers(collision_box, Globals.compass.E, in_velocity)

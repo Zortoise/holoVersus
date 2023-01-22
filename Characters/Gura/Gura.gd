@@ -9,7 +9,7 @@ extends "res://Characters/Gura/GuraBase.gd"
 # 4. Add it in _on_SpritePlayer_anim_started() to set up sfx_over, entity/sfx spawning  and other physics modifying characteristics
 # 6. Add it in capture_combinations() if it is a special action
 # 5. Add it in process_buffered_input() for inputs
-# 7. Add any startup/recovery animations not in MOVE_DATABASE to query_atk_attr()
+# 7. Add any startup/recovery animations not in MOVE_DATABASE to refine_move_name()
 
 # --------------------------------------------------------------------------------------------------
 
@@ -35,9 +35,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", \
 			"HStartup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
+		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"L1Rec", "L1bRec", "L2bRec", "F1Rec", "F2Rec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
+		"L1Rec", "L1bRec", "L2bRec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		"L1bCRec", "F1CRec":
 			return Globals.char_state.GROUND_C_RECOVERY
@@ -718,6 +718,8 @@ func refine_move_name(move_name):
 			return "L2"
 		"F2b":
 			return "F2"
+		"F2[h]P":
+			return "F2[h]"
 		"F3b":
 			return "F3"
 		"F3[h]":
@@ -798,21 +800,28 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			else:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			update_uniqueHUD()
+		"F2[h]":
+			if hit_data.sweetspotted and !hit_data.break_hit and !hit_data.lethal_hit:
+				hit_data.move_data.KB_angle = 180
+				hit_data.move_data.knockback = 130 * FMath.S
+				hit_data["pull"] = true
+				Character.animate("F2[h]PRec")
 
 
 func being_hit(hit_data): # reaction, can change hit_data from here
-	var defender = get_node(hit_data.defender_nodepath)
+#	var defender = get_node(hit_data.defender_nodepath)
 	
-	if !hit_data.weak_hit and hit_data.move_data.damage > 0:
-		match defender.state:
-			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
-				if Animator.query(["aDashU", "aDashD"]):
-					hit_data.punish_hit = true
+#	if !hit_data.weak_hit and hit_data.move_data.damage > 0:
+#		match defender.state:
+#			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
+#				if Animator.query(["aDashU", "aDashD"]):
+#					hit_data.punish_hit = true
 					
 	if hit_data.block_state in [Globals.block_state.UNBLOCKED, Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG]:
 		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
 		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
 		update_uniqueHUD()
+		
 				
 	
 	
@@ -979,7 +988,7 @@ func get_trident_array(): # return array of all spinnable tridents
 	for entity in Globals.Game.get_node("EntitiesFront").get_children():
 		if get_node(entity.master_path).player_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
 			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "a[c2]Active", "[ex]Active", \
-					"a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c3]Active", "a[c3]Active"]:
+					"a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE", "[c3]Active", "a[c3]Active"]:
 				trident_array.append(entity)
 	return trident_array
 			
@@ -1081,23 +1090,26 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"F2Startup":
 			Character.animate("F2bStartup")
 		"F2bStartup":
-			Character.animate("F2Active")
+			if Character.button_fierce in Character.input_state.pressed:
+				Character.animate("F2[h]Active")
+			else:
+				Character.animate("F2Active")
 		"F2Active":
 			Character.animate("F2Rec")
+		"F2[h]Active":
+			Character.animate("F2[h]Rec")
 		"F2Rec":
+			Character.animate("Idle")
+		"F2[h]Rec":
+			Character.animate("Idle")
+		"F2[h]PRec":
 			Character.animate("Idle")
 			
 		"F3Startup":
-#			if get("STYLE") == 0:
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("F3[h]Startup")
 			else:
 				Character.animate("F3bStartup")
-#			else:
-#				if Character.button_light in Character.input_state.pressed:
-#					Character.animate("F3[h]Startup")
-#				else:
-#					Character.animate("F3bStartup")
 		"F3bStartup":
 			Character.animate("F3Active")
 		"F3[h]Startup":
@@ -1420,7 +1432,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 		"F3[h]Startup":
 			Character.get_node("ModulatePlayer").play("armor_flash")
-		"F1Rec", "F2Active", "F2Rec", "F3Active", "F3Rec":
+		"F1Rec", "F2Active", "F2Rec", "F2[h]Active", "F2[h]Rec", "F2[h]PRec", "F3Active", "F3Rec":
 			Character.sfx_over.show()
 		"HStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
