@@ -3753,7 +3753,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 	# ---------------------------------------------------------------------------------
 	
-	attacker_or_entity.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
+	if "entity_nodepath" in hit_data:
+		if attacker_or_entity.UniqEntity.has_method("landed_a_hit"):
+			attacker_or_entity.UniqEntity.landed_a_hit(hit_data) # reaction, can change hit_data from there
+	else:
+		attacker.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	UniqChar.being_hit(hit_data) # reaction, can change hit_data from there
 	
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------

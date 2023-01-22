@@ -400,8 +400,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					aux_data["vol"] = volume_change
 				play_audio(sound.ref, aux_data)
 				
-	if UniqEntity.has_method("landed_a_hit"):
-		UniqEntity.landed_a_hit(hit_data) # reaction
+#	if UniqEntity.has_method("landed_a_hit"):
+#		UniqEntity.landed_a_hit(hit_data) # reaction
 	
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------

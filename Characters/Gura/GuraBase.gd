@@ -462,7 +462,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 5,
 		"ignore_time" : 5,
-		"damage" : 40,
+		"damage" : 35,
 		"knockback" : 600 * FMath.S,
 		"fixed_knockback_multi" : 300 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
