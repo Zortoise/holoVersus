@@ -1427,21 +1427,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
 		"F1Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Character.sfx_over.show()
 		"F2bStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 		"F3[h]Startup":
 			Character.get_node("ModulatePlayer").play("armor_flash")
-		"F1Rec", "F2Active", "F2Rec", "F2[h]Active", "F2[h]Rec", "F2[h]PRec", "F3Active", "F3Rec":
-			Character.sfx_over.show()
 		"HStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-		"HActive", "HbActive", "HbRec":
-			Character.sfx_under.show()
-			Character.sfx_over.show()
-		"H[h]Active", "Hb[h]Active", "Hb[h]Rec":
-			Character.sfx_under.show()
-			Character.sfx_over.show()
 			
 		"aL1Startup":
 			Character.velocity_limiter.x = 85
@@ -1449,10 +1440,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aL1Active":
 			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
-			Character.sfx_under.show()
 		"aL1Rec":
 			Character.velocity_limiter.x = 85
-			Character.sfx_under.show()
 		"aL2Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 		"aL2Active":
@@ -1460,7 +1449,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 120
 		"aL2Rec":
 			Character.velocity.y = -600 * FMath.S
-			Character.sfx_over.show()
 		"aL2LandRec":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aF1Startup":
@@ -1472,11 +1460,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 100
 			Character.anim_gravity_mod = 75
-			Character.sfx_over.show()
 		"aF1Rec":
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 100
-			Character.sfx_over.show()
 		"aF3Startup":
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 0
@@ -1486,25 +1472,20 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.set_vector(200 * FMath.S * Character.facing, 0)
 			Character.velocity.rotate(-72 * Character.facing)
 			Character.anim_gravity_mod = 0
-			Character.sfx_over.show()
 		"aF3Rec":
 			Character.velocity_limiter.x = 75
 			Character.velocity_limiter.down = 100
-			Character.sfx_over.show()
 		"aHStartup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-			Character.sfx_over.show()
 		"aHActive":
 			Character.velocity.set_vector(0, 0)
 			Character.velocity_limiter.x = 0
 			Character.anim_gravity_mod = 0
-			Character.sfx_over.show()
 		"aHRec":
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
-			Character.sfx_over.show()
 			
 		"aSP1Startup", "aSP1[ex]Startup":
 			Character.velocity_limiter.x_slow = 20
@@ -1545,112 +1526,84 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-			Character.sfx_under.show()
 		"aSP2Active":
 			Character.velocity.set_vector(Character.facing * 400 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Character.sfx_under.show()
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
 		"aSP2[h]Active":
 			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Character.sfx_under.show()
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
 		"aSP2[ex]Active":
 			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Character.sfx_under.show()
 			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
 		"aSP2[h]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25
 			Character.anim_friction_mod = 0
-			Character.sfx_under.show()
 		"aSP2Rec", "aSP2CRec":
 			Character.velocity_limiter.down = 70
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25
-			Character.sfx_under.show()
 		
 			
-		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
-			Character.sfx_under.show()
 		"aSP3Startup", "aSP3[h]Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-			Character.sfx_under.show()
 #		"aSP3bStartup":
 #			Character.velocity.x *= 0.5
 #			Character.velocity.y = -500
 #			Character.anim_gravity_mod = 0.0
-#			Character.sfx_under.show()
 		"aSP3Active":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = -500 * FMath.S
 			Character.anim_gravity_mod = 0
-			Character.sfx_under.show()
 #		"aSP3b[h]Startup", "aSP3b[ex]Startup":
 #			Character.velocity.x *= 0.5
 #			Character.velocity.y = -700
 #			Character.anim_gravity_mod = 0.0
-#			Character.sfx_under.show()
 		"aSP3[h]Active", "aSP3[ex]Active":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = -700 * FMath.S
 			Character.anim_gravity_mod = 0
-			Character.sfx_under.show()
-		"aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
-			Character.sfx_under.show()
 		"aSP3Rec", "aSP3[ex]Rec":
 			Character.velocity_limiter.x = 70
-			Character.sfx_under.show()
 			
-		"SP4Startup", "SP4[ex]Startup":
-			Character.sfx_under.show()
 		"SP4Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
-			Character.sfx_under.show()
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {})
 			Character.unique_data.groundfin_count += 1
 		"SP4[h]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
-			Character.sfx_under.show()
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {"held" : true})
 			Character.unique_data.groundfin_count += 1
 		"SP4[ex]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
-			Character.sfx_under.show()
 			var spawn_point = Animator.query_point("entityspawn")
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"ex" : true})
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true, "ex" : true})
 			Character.unique_data.groundfin_count += 2
-		"SP4Rec", "SP4[ex]Rec":
-			Character.sfx_under.show()
 			
-		"SP5Startup", "SP5[ex]Startup":
-			Character.sfx_under.show()
 		"aSP5Startup", "aSP5[ex]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-			Character.sfx_under.show()
 		"aSP5Active", "aSP5[ex]Active":
 			Character.velocity.set_vector(Character.facing * 200 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Character.sfx_under.show()
 			if Character.grounded:
 				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP5Rec", "aSP5[ex]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25
-			Character.sfx_under.show()
 			
 		"SP6[ex]Startup":
 			Character.velocity.x = 0

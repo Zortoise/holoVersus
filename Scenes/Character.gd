@@ -3560,7 +3560,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var vec_to_attacker: Vector2 = attacker_or_entity.position - position
 	if vec_to_attacker.x == 0: # rare case of attacker directly on defender
 		vec_to_attacker.x = hit_data.attack_facing
-	var dir_to_attacker := sign(vec_to_attacker.x) # for setting facing on defender
+	var dir_to_attacker := int(sign(vec_to_attacker.x)) # for setting facing on defender
 		
 	var angle_finder := FVector.new()
 	angle_finder.set_from_vec(vec_to_attacker)
@@ -4022,15 +4022,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 			if !"entity_nodepath" in hit_data:
 				if !"multihit" in hit_data: # for multi-hit move only the last hit turns blocking defender for cross-ups
-						
-					var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
-					match segment:
-						Globals.compass.E:
-							face(-1) # face other way
-						Globals.compass.W:
-							face(1)
+					face(dir_to_attacker) # blocking non-entities always turn towards attacker only
+#					var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
+#					match segment:
+#						Globals.compass.E:
+#							face(-1) # face other way
+#						Globals.compass.W:
+#							face(1)
 					
 			else: # multi-hit entities turn on 1st hit
+#				face(dir_to_attacker)
 				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
 				match segment:
 					Globals.compass.E:
@@ -5125,12 +5126,20 @@ func _on_change_spritesheet(spritesheet_filename):
 	sprite_texture_ref.sprite = spritesheet_filename
 	
 func _on_change_SfxOver_spritesheet(SfxOver_spritesheet_filename):
+	sfx_over.show()
 	sfx_over.texture = spritesheets[SfxOver_spritesheet_filename]
 	sprite_texture_ref.sfx_over = SfxOver_spritesheet_filename
 	
+func hide_SfxOver():
+	sfx_over.hide()
+	
 func _on_change_SfxUnder_spritesheet(SfxUnder_spritesheet_filename):
+	sfx_under.show()
 	sfx_under.texture = spritesheets[SfxUnder_spritesheet_filename]
 	sprite_texture_ref.sfx_under = SfxUnder_spritesheet_filename
+	
+func hide_SfxUnder():
+	sfx_under.hide()
 
 
 # SAVE/LOAD STATE --------------------------------------------------------------------------------------------------

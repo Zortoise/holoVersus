@@ -6,8 +6,8 @@
 script = ExtResource( 1 )
 frame_data = {
 "TridentRing": {
-"duration": 8,
-"hframes": 4,
+"duration": 12,
+"hframes": 6,
 "loop": false,
 "spritesheet": "TridentRingSprite",
 "timestamps": {
@@ -22,6 +22,12 @@ frame_data = {
 },
 6: {
 "frame": 3
+},
+8: {
+"frame": 4
+},
+10: {
+"frame": 5
 }
 },
 "vframes": 1

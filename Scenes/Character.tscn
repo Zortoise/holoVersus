@@ -127,5 +127,7 @@ valign = 1
 [connection signal="change_SfxUnder_spritesheet" from="SpritePlayer" to="." method="_on_change_SfxUnder_spritesheet"]
 [connection signal="change_spritesheet" from="SpritePlayer" to="." method="_on_change_spritesheet"]
 [connection signal="frame_update" from="SpritePlayer" to="." method="_on_SpritePlayer_frame_update"]
+[connection signal="hide_SfxOver" from="SpritePlayer" to="." method="hide_SfxOver"]
+[connection signal="hide_SfxUnder" from="SpritePlayer" to="." method="hide_SfxUnder"]
 [connection signal="anim_finished" from="ModulatePlayer" to="." method="_on_ModulatePlayer_anim_finished"]
 [connection signal="anim_finished" from="FadePlayer" to="." method="_on_FadePlayer_anim_finished"]

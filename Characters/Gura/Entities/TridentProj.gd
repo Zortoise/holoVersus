@@ -24,8 +24,8 @@ const MOVE_DATABASE = {
 		"damage" : 70,
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 2,
-		"guard_drain": 1500,
+		"atk_level" : 4,
+		"guard_drain": 1000,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -41,8 +41,8 @@ const MOVE_DATABASE = {
 		"damage" : 55,
 		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 3,
-		"guard_drain": 1750,
+		"atk_level" : 4,
+		"guard_drain": 1250,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1250,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -55,11 +55,11 @@ const MOVE_DATABASE = {
 		"root" : "TridentProj",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 3,
-		"damage" : 50,
+		"damage" : 55,
 		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"guard_drain": 2000,
+		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -72,11 +72,11 @@ const MOVE_DATABASE = {
 		"root" : "TridentProjEX",
 		"atk_type" : Globals.atk_type.EX,
 		"hitcount" : 2,
-		"damage" : 65,
+		"damage" : 70,
 		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"guard_drain": 2000,
+		"guard_drain": 1500,
 		"guard_gain_on_combo" : 2500,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
@@ -125,7 +125,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 1
 			Entity.life_point = 1
 		"[c2]Spawn":
-			Entity.velocity.set_vector(650 * FMath.S, 0)
+			Entity.velocity.set_vector(600 * FMath.S, 0)
 			Entity.velocity.rotate(START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 2
@@ -133,7 +133,7 @@ func init(aux_data: Dictionary):
 			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
 					{"facing":Entity.facing, "rot":deg2rad(START_ROTATION), "palette" : Entity.master_path})
 		"[c3]Spawn", "[ex]Spawn":
-			Entity.velocity.set_vector(800 * FMath.S, 0)
+			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 3
@@ -147,7 +147,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 1
 			Entity.life_point = 1
 		"a[c2]Spawn":
-			Entity.velocity.set_vector(650 * FMath.S, 0)
+			Entity.velocity.set_vector(600 * FMath.S, 0)
 			Entity.velocity.rotate(-START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 2
@@ -155,7 +155,7 @@ func init(aux_data: Dictionary):
 			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
 					{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION), "palette" : Entity.master_path})
 		"a[c3]Spawn", "a[ex]Spawn":
-			Entity.velocity.set_vector(800 * FMath.S, 0)
+			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(-START_ROTATION)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 3
@@ -217,7 +217,7 @@ func turn_to_enemy():
 	if Animator.current_animation == "[c2]Spin":
 		charge_level = "2"
 		Entity.life_point = 2
-		Entity.velocity.set_vector(650 * FMath.S, 0)
+		Entity.velocity.set_vector(600 * FMath.S, 0)
 	else:
 		Entity.life_point = 1
 		Entity.velocity.set_vector(500 * FMath.S, 0)

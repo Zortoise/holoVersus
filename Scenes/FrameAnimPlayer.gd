@@ -7,7 +7,9 @@ signal anim_started (anim_name)
 signal anim_finished (anim_name)
 signal change_spritesheet(spritesheet_filename) # only connect this if needed
 signal change_SfxOver_spritesheet(SfxOver_spritesheet_filename)
+signal hide_SfxOver ()
 signal change_SfxUnder_spritesheet(SfxUnder_spritesheet_filename)
+signal hide_SfxUnder ()
 signal frame_update () # currently used for staggering audio
 
 var sprite # sprite to animate
@@ -108,13 +110,17 @@ func set_up_texture():
 		
 	if "SfxOver_spritesheet" in animations[current_animation]:
 		emit_signal("change_SfxOver_spritesheet", animations[current_animation].SfxOver_spritesheet)
+	else:
+		emit_signal("hide_SfxOver")
 	if "SfxOver_hframes" in animations[current_animation]:
 		sfx_over.hframes = animations[current_animation].SfxOver_hframes
 	if "SfxOver_vframes" in animations[current_animation]:
 		sfx_over.vframes = animations[current_animation].SfxOver_vframes
 		
 	if "SfxUnder_spritesheet" in animations[current_animation]:
-		emit_signal("change_SfxUnder_spritesheet", animations[current_animation].SfxUnder_spritesheet)		
+		emit_signal("change_SfxUnder_spritesheet", animations[current_animation].SfxUnder_spritesheet)	
+	else:
+		emit_signal("hide_SfxUnder")	
 	if "SfxUnder_hframes" in animations[current_animation]:
 		sfx_under.hframes = animations[current_animation].SfxUnder_hframes
 	if "SfxUnder_vframes" in animations[current_animation]:
