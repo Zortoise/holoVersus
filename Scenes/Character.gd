@@ -239,6 +239,7 @@ var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout
 var instant_actions := [] # when an instant action is inputed it is stored here for 1 frame, only process next frame
 						 # this allows for quick cancels and triggering entities
 var pos_flow_seal := false # some moves (BurstRevoke) will prevent you from gaining Positive Flow till targeted opponent's HitStunGraceTimer is over
+var last_dir := 0 # dir last frame
 
 # controls
 var button_up
@@ -738,6 +739,19 @@ func simulate2(): # only ran if not in hitstop
 		v_dir -= 1
 	if button_down in input_state.pressed:
 		v_dir += 1
+		
+	if button_right in input_state.just_pressed:
+		instant_dir += 1
+	if button_left in input_state.just_pressed:
+		instant_dir -= 1
+		
+	if instant_dir != 0 and dir == 0:
+		dir = instant_dir
+		
+	if dir == 0 and button_right in input_state.pressed and button_left in input_state.pressed:
+		dir = last_dir
+		
+	last_dir = dir
 
 #	if button_right in input_state.just_pressed:
 #		if button_left in input_state.just_pressed:
@@ -837,24 +851,20 @@ func simulate2(): # only ran if not in hitstop
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 
 
-	if button_right in input_state.just_pressed:
-		instant_dir += 1
-	if button_left in input_state.just_pressed:
-		instant_dir -= 1
 
-	if instant_dir != 0 and facing != instant_dir: # this allow for quick turns when you tap a direction while holding another direction
-		match state:
-			Globals.char_state.GROUND_STANDBY:
-				face(instant_dir)
-			Globals.char_state.AIR_STANDBY:
-				if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
-						button_dash in input_state.pressed:
-					pass  # if pressing attack + dash in the air, will not turn
-				else:
-					face(instant_dir)
-			_:
-				if check_quick_turn():
-					face(instant_dir)
+#	if instant_dir != 0 and facing != instant_dir: # this allow for quick turns when you tap a direction while holding another direction
+#		match state:
+#			Globals.char_state.GROUND_STANDBY:
+#				face(instant_dir)
+#			Globals.char_state.AIR_STANDBY:
+#				if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
+#						button_dash in input_state.pressed:
+#					pass  # if pressing attack + dash in the air, will not turn
+#				else:
+#					face(instant_dir)
+#			_:
+#				if check_quick_turn():
+#					face(instant_dir)
 				
 
 	# IMPULSE --------------------------------------------------------------------------------------------------
@@ -5177,6 +5187,7 @@ func save_state():
 		"impulse_used" : impulse_used,
 		"DI_seal" : DI_seal,
 		"pos_flow_seal" : pos_flow_seal,
+		"last_dir": last_dir,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -5255,6 +5266,7 @@ func load_state(state_data):
 	impulse_used = state_data.impulse_used
 	DI_seal = state_data.DI_seal
 	pos_flow_seal = state_data.pos_flow_seal
+	last_dir = state_data.last_dir
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	
