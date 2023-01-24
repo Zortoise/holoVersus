@@ -305,7 +305,7 @@ func query_move_data(move_name) -> Dictionary:
 #	move_data["atk_attr"] = query_atk_attr(move_name, true)
 	
 	if orig_move_name.begins_with("a"):
-		move_data.KB_angle = -17
+		move_data.KB_angle = -25
 	else:
 		match orig_move_name:
 			"[c1]TurnE", "[c2]TurnE":
@@ -327,7 +327,7 @@ func query_move_data(move_name) -> Dictionary:
 					move_data.KB_angle = -83
 			"[c1]TurnESE", "[c2]TurnESE":
 				if Entity.v_facing == 1:
-					move_data.KB_angle = -17
+					move_data.KB_angle = -25
 				else:
 					move_data.KB_angle = -55
 	

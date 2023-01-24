@@ -518,7 +518,7 @@ func test0():
 func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
-		"\n" + str(velocity) + "  grounded: " + str(grounded) + \
+		"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + "\nHitstun: " + str($HitStunTimer.time)
 			
@@ -908,49 +908,55 @@ func simulate2(): # only ran if not in hitstop
 		# FASTFALL --------------------------------------------------------------------------------------------------
 			# cannot fastfall right after jumping
 			
-		if Settings.dj_fastfall[player_ID] == 0 and (button_special in input_state.pressed or button_unique in input_state.pressed):
+#		if Settings.dj_fastfall[player_ID] == 0 and (button_special in input_state.pressed or button_unique in input_state.pressed):
+#
+#			# if normal fastfall, cannot fastfall when button_special/button_unique are held down
+#			# this makes aerial EX move down-tilts not fastfall too easily
+#
+#			pass
+#		else:
 			
-			# if normal fastfall, cannot fastfall when button_special/button_unique are held down
-			# this makes aerial EX move down-tilts not fastfall too easily
-			
-			pass
-		else:
-			
-			match state:
-				Globals.char_state.AIR_STANDBY:
-					if !Animator.query(["JumpTransit2", "JumpTransit3"]):
+			Globals.char_state.AIR_STANDBY:
+				if !Animator.query(["JumpTransit2", "JumpTransit3", "FastFallTransit", "FastFall"]):
 
 
-						if Settings.dj_fastfall[player_ID] == 0 or \
-							(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
-	#						if Settings.dt_fastfall[player_ID] == 1:
-	#							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
-							velocity.y = FMath.f_lerp(velocity.y, FMath.percent(FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD")), \
-								UniqChar.get_stat("FASTFALL_MOD")), 30)
-							if Animator.query(["FallTransit"]): # go straight to fall animation
-								animate("Fall")
-					
-							# fastfall reduce horizontal speed limit
-							var ff_speed_limit: int = FMath.percent(UniqChar.get_stat("SPEED"), 70)
-							if velocity.x < -ff_speed_limit:
-								velocity.x = FMath.f_lerp(velocity.x, -ff_speed_limit, 50)
-							elif velocity.x > ff_speed_limit:
-								velocity.x = FMath.f_lerp(velocity.x, ff_speed_limit, 50)
-								
-				Globals.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall
 					if Settings.dj_fastfall[player_ID] == 0 or \
 						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
 							
-						if Animator.query(["aJumpTransit"]):
-							animate("Fall")
+						animate("FastFallTransit")
 						
+#						if Settings.dt_fastfall[player_ID] == 1:
+##							tap_memory.append([button_down, 2]) # allow you to double tap then hold down
+#						velocity.y = FMath.f_lerp(velocity.y, FMath.percent(FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD")), \
+#							UniqChar.get_stat("FASTFALL_MOD")), 30)
+#						if Animator.query(["FallTransit"]): # go straight to fall animation
+#							animate("Fall")
+				
+				elif Animator.query(["FastFall"]): # hold down while in fastfall animation to fast fall
+#					velocity.y = FMath.f_lerp(velocity.y, FMath.percent(FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD")), \
+#						UniqChar.get_stat("FASTFALL_MOD")), 30)
+					velocity.y = FMath.percent(FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD")), UniqChar.get_stat("FASTFALL_MOD"))
+					# fastfall reduce horizontal speed limit
+					var ff_speed_limit: int = FMath.percent(UniqChar.get_stat("SPEED"), 70)
+					if velocity.x < -ff_speed_limit:
+						velocity.x = FMath.f_lerp(velocity.x, -ff_speed_limit, 50)
+					elif velocity.x > ff_speed_limit:
+						velocity.x = FMath.f_lerp(velocity.x, ff_speed_limit, 50)
 							
-				Globals.char_state.AIR_ATK_RECOVERY: # fastfall cancel from aerial hits
-					if Settings.dj_fastfall[player_ID] == 0 or \
-						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
-							
-						if test_fastfall_cancel():
-							animate("Fall")
+			Globals.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall
+				if Settings.dj_fastfall[player_ID] == 0 or \
+					(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+						
+					if Animator.query(["aJumpTransit"]):
+						animate("FastFallTransit")
+					
+						
+			Globals.char_state.AIR_ATK_RECOVERY: # fastfall cancel from aerial hits
+				if Settings.dj_fastfall[player_ID] == 0 or \
+					(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+						
+					if test_fastfall_cancel():
+						animate("FastFallTransit")
 
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
@@ -1132,6 +1138,9 @@ func simulate2(): # only ran if not in hitstop
 			# just in case, fall animation if falling downwards without slowing down
 			if velocity.y > 0 and Animator.query_to_play(["Jump"]):
 				animate("FallTransit")
+				
+			if Animator.query_to_play(["FastFallTransit", "FastFall"]) and !button_down in input_state.pressed:
+				animate("Fall")
 	
 		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
 			# air dash into wall, stop instantly
@@ -1931,7 +1940,7 @@ func state_detect(anim):
 		"SoftLanding", "DashBrake", "WaveDashBrake", "BlockCRec", "HardLanding":
 			return Globals.char_state.GROUND_C_RECOVERY
 			
-		"JumpTransit3","aJumpTransit3", "Jump", "FallTransit", "Fall":
+		"JumpTransit3","aJumpTransit3", "Jump", "FallTransit", "Fall", "FastFallTransit", "FastFall":
 			return Globals.char_state.AIR_STANDBY
 		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "JumpTransit2":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
@@ -4850,6 +4859,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Jump")
 		"FallTransit":
 			animate("Fall")
+		"FastFallTransit":
+			animate("FastFall")
 			
 		"FlinchAStop":
 			animate("FlinchA")
@@ -4963,8 +4974,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 	anim_gravity_mod = 100
 	velocity_limiter = {"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null}
 	sprite.rotation = 0
-	sfx_under.hide()
-	sfx_over.hide()
+#	sfx_under.hide()
+#	sfx_over.hide()
 	
 	match anim_name:
 		"Run":

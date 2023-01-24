@@ -497,6 +497,48 @@ frame_data = {
 },
 "vframes": 18
 },
+"FastFall": {
+"duration": 30,
+"hframes": 6,
+"loop": true,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 28,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+},
+6: {
+"frame": 29,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+},
+12: {
+"frame": 30,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+},
+18: {
+"frame": 31,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+},
+24: {
+"frame": 32,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+}
+},
+"vframes": 18
+},
+"FastFallTransit": {
+"duration": 3,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 32,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -21 ), Vector2( -12, -21 ) ]
+}
+},
+"vframes": 18
+},
 "FlinchA": {
 "duration": 24,
 "hframes": 6,
@@ -708,7 +750,7 @@ frame_data = {
 "vframes": 18
 },
 "JumpTransit": {
-"duration": 2,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1519,7 +1561,7 @@ frame_data = {
 "vframes": 18
 },
 "aJumpTransit": {
-"duration": 2,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
