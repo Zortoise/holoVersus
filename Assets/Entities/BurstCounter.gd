@@ -32,7 +32,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "yellow",
 		"KB_angle" : 0,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DESTROY_ENTITIES],
 		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
 	}
 }
@@ -68,8 +68,12 @@ func query_move_data(move_name) -> Dictionary:
 	return move_data
 	
 	
-func query_atk_attr(_in_move_name):
-	return [Globals.atk_attr.SCREEN_SHAKE]
+func query_atk_attr(move_name):
+	
+	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	return []
+	
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:

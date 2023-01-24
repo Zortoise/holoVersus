@@ -78,7 +78,7 @@ func query_atk_attr(move_name):
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
 		
-	print("Error: Cannot retrieve atk_attr for " + move_name)
+#	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
 
 			

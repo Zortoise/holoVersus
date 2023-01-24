@@ -16,7 +16,8 @@ enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPEC
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE, SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, DRAG_KB
 		NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK, CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN
-		LATE_CHAIN_INTO, COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_NORMAL}
+		LATE_CHAIN_INTO, COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_NORMAL, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY
+		HARMLESS_ENTITY}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -46,6 +47,10 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # COMMAND_GRAB = cannot hit opponents during ground/air movement startup
 # VULN_LIMBS = take full damage from SDHits
 # NO_REPEAT_NORMAL = a Light/Fierce that can only be repeated once
+# DESTROY_ENTITIES = hitbox destroys entities
+# DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
+# INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
+# HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge

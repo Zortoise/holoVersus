@@ -124,9 +124,10 @@ func load_entity():
 				
 
 func simulate():
+	hitstop = null
+	
 	if Globals.Game.is_stage_paused(): return
 	
-	hitstop = null
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
 	
@@ -140,32 +141,7 @@ func simulate2(): # only ran if not in hitstop
 #		velocity.x = 0.0
 #	if abs(velocity.y) < 5.0:
 #		velocity.y = 0.0
-		
-	# clashing projectiles, clash with their EntityCollisionBoxes
-	if absorption_value != null and absorption_value > 0 and has_node("EntityCollisionBox"):
-		var interact_array = Detection.detect_return([$EntityCollisionBox], ["Entities"])
-		if interact_array.size() > 0: # detected other entities
-			var interact_array2 = []
-			for x in interact_array: # filter out entities with no absorption value or about to be killed or share this entity's master
-				if x.absorption_value != null and x.absorption_value > 0 and \
-						x.get_node(master_path).player_ID != get_node(x.master_path).player_ID:
-					interact_array2.append(x)
-			if interact_array2.size() > 0:
-				var lowest_AV = absorption_value # find lowest absorption_value
-				for x in interact_array2:
-					if x.absorption_value < lowest_AV:
-						lowest_AV = x.absorption_value
-						
-				absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
-				if absorption_value <= 0:
-					UniqEntity.kill()
-				for x in interact_array2:
-					x.absorption_value -= lowest_AV
-					if x.absorption_value <= 0:
-						x.UniqEntity.kill()
-		
-				
-			
+
 	UniqEntity.simulate()
 	
 	ignore_list_progress_timer()
@@ -204,6 +180,74 @@ func simulate2(): # only ran if not in hitstop
 		
 	else: # no collision with platforms
 		position += velocity.convert_to_vec()
+		
+	interactions() # do this after movement!
+	
+	
+func interactions():
+	
+	if UniqEntity.has_method("kill"):
+		var my_hitbox = Animator.query_polygon("hitbox")
+		if my_hitbox != null:
+			
+			var to_destroy := false
+
+			 # get characters that can destroy this entity
+			var character_array = Globals.Game.get_node("Players").get_children()
+			var destroyer_array = []
+			for character in character_array:
+				if character.player_ID != get_node(master_path).player_ID and character.is_atk_active() and \
+					(Globals.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or \
+					Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
+					destroyer_array.append(character)
+					
+			 # get entities that can destroy or clash with this entity
+			var entity_array = Globals.Game.get_node("EntitiesFront").get_children()
+			entity_array.append_array(Globals.Game.get_node("EntitiesBack").get_children())
+			var clash_array := []
+			for entity in entity_array:
+				if get_node(entity.master_path).player_ID != get_node(master_path).player_ID:
+					if Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
+						destroyer_array.append(entity)
+					elif entity.absorption_value != null and entity.absorption_value > 0:
+						clash_array.append(entity)
+			
+			# check for entity destroyers
+			if !Globals.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr():
+				for destroyer in destroyer_array:
+					var second_hitbox = destroyer.Animator.query_polygon("hitbox")
+					if second_hitbox != null:
+						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+						if intersect_polygons.size() > 0: # detected intersection
+							UniqEntity.kill()
+							to_destroy = true
+							break
+					
+			# check for clashes
+			if !to_destroy and absorption_value != null and absorption_value > 0:
+				var clash_array2 = []
+				for entity in clash_array:
+					var second_hitbox = entity.Animator.query_polygon("hitbox")
+					if second_hitbox != null:
+						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+						if intersect_polygons.size() > 0: # detected intersection
+							clash_array2.append(entity) 
+		
+				if clash_array2.size() > 0:
+					var lowest_AV = absorption_value # find lowest absorption_value
+					for x in clash_array2:
+						if x.absorption_value < lowest_AV:
+							lowest_AV = x.absorption_value
+							
+					absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
+					if absorption_value <= 0:
+						UniqEntity.kill()
+						to_destroy = true
+					for x in clash_array2:
+						x.absorption_value -= lowest_AV
+						if x.absorption_value <= 0:
+							x.UniqEntity.kill()	
+							x.to_destroy = true
 	
 	
 func simulate_after(): # do this after hit detection
@@ -279,7 +323,8 @@ func query_polygons(): # requested by main game node when doing hit detection
 	}
 
 	if !$HitStopTimer.is_running(): # no hitbox during hitstop
-		polygons_queried.hitbox = Animator.query_polygon("hitbox")
+		if !Globals.atk_attr.HARMLESS_ENTITY in query_atk_attr():
+			polygons_queried.hitbox = Animator.query_polygon("hitbox")
 		polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
 		polygons_queried.kborigin = Animator.query_point("kborigin")
 		polygons_queried.vacpoint = Animator.query_point("vacpoint")

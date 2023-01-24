@@ -65,7 +65,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB],
+		"atk_attr" : [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
@@ -82,7 +82,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.DRAG_KB],
+		"atk_attr" : [Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 }
@@ -217,9 +217,11 @@ func turn_to_enemy():
 	if Animator.current_animation == "[c2]Spin":
 		charge_level = "2"
 		Entity.life_point = 2
+		Entity.absorption_value = 2
 		Entity.velocity.set_vector(600 * FMath.S, 0)
 	else:
 		Entity.life_point = 1
+		Entity.absorption_value = 1
 		Entity.velocity.set_vector(500 * FMath.S, 0)
 	
 	match segment:
@@ -342,7 +344,7 @@ func query_atk_attr(move_name, skip_refine := false):
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
 		
-	print("Error: Cannot retrieve atk_attr for " + move_name)
+#	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
 	
 			

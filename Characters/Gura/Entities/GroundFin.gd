@@ -62,6 +62,10 @@ func simulate():
 				# reduce ground fin count
 				get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
 				Entity.free = true
+				
+				
+func query_atk_attr(_move_name):
+	return [Globals.atk_attr.HARMLESS_ENTITY, Globals.atk_attr.DESTRUCTIBLE_ENTITY]
 
 	
 func kill(_sound = true):
