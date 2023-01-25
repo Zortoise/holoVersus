@@ -35,9 +35,10 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", \
 			"HStartup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"L1Active", "L1bActive", "L2Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
+		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
+				"HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"L1Rec", "L1bRec", "L2bRec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
+		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 		"L1bCRec", "F1CRec":
 			return Globals.char_state.GROUND_C_RECOVERY
@@ -233,10 +234,10 @@ func capture_combinations():
 	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
 	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
 	
+	Character.ex_combination_trio(Character.button_special, Character.button_down, Character.button_fierce, "ExSp.dF")
+	
 	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	Character.ex_combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
-	
-	Character.ex_combination(Character.button_special, Character.button_aux, "ExSp.A")
 
 
 func rebuffer_actions():
@@ -494,16 +495,19 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				keep = !process_move(new_state, "SP3[ex]", has_acted, buffered_input[1])
 				if keep:
 					keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
-					
+			
+		"ExSp.dF":
+			if !has_acted[0]:
+				if !Character.is_static():
+					keep = false
+				else:
+					keep = !process_move(new_state, "SP6[ex]", has_acted, buffered_input[1])
+				
 		"ExSp.H":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP5[ex]", has_acted, buffered_input[1])
 				if keep:
 					keep = !process_move(new_state, "SP5", has_acted, buffered_input[1])
-					
-		"ExSp.A":
-			if !has_acted[0]:
-				keep = !process_move(new_state, "SP6[ex]", has_acted, buffered_input[1])
 						
 		# ---------------------------------------------------------------------------------
 		
@@ -1056,13 +1060,24 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1Active":
 			Character.animate("L1Rec")
 		"L1Rec":
-			Character.animate("L1bActive")
+			if Character.button_light in Character.input_state.pressed:
+				Character.animate("L1b[h]Active")
+			else:
+				Character.animate("L1bActive")
 		"L1bActive":
 			Character.animate("L1bRec")
 		"L1bRec":
 			Character.animate("L1bCRec")
 		"L1bCRec":
 			Character.animate("Idle")
+		"L1b[h]Active":
+			Character.animate("L1b[h]Rec")
+		"L1b[h]Rec":
+			Character.animate("L1cActive")
+		"L1cActive":
+			Character.animate("L1cRec")
+		"L1cRec":
+			Character.animate("L1bCRec")
 			
 		"L2Startup":
 			Character.animate("L2Active")

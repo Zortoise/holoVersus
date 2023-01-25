@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "L1Active": {
-"duration": 6,
+"duration": 5,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L1Sprite",
@@ -69,7 +69,7 @@ frame_data = {
 "vframes": 2
 },
 "L1bActive": {
-"duration": 6,
+"duration": 5,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L1Sprite",
@@ -115,6 +115,90 @@ frame_data = {
 "hitbox": [  ],
 "hurtbox": [ Vector2( 0, 5 ), Vector2( -11, 5 ), Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, 5 ), Vector2( 28, 5 ), Vector2( 28, 0 ), Vector2( 23, 0 ), Vector2( 23, -19 ), Vector2( 0, -19 ) ],
 "sdhurtbox": [ Vector2( 28, 15 ), Vector2( 52, 15 ), Vector2( 52, 1 ), Vector2( 28, 1 ) ]
+}
+},
+"vframes": 2
+},
+"L1b[h]Active": {
+"duration": 5,
+"hframes": 6,
+"loop": false,
+"spritesheet": "L1Sprite",
+"timestamps": {
+0: {
+"frame": 6,
+"hitbox": [ Vector2( 9, 9 ), Vector2( 28, 9 ), Vector2( 28, 17 ), Vector2( 58, 17 ), Vector2( 58, -2 ), Vector2( 9, -2 ) ],
+"hurtbox": [ Vector2( 0, 5 ), Vector2( -11, 5 ), Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, 5 ), Vector2( 28, 5 ), Vector2( 28, 0 ), Vector2( 23, 0 ), Vector2( 23, -19 ), Vector2( 0, -19 ) ],
+"sdhurtbox": [ Vector2( 28, 17 ), Vector2( 58, 17 ), Vector2( 58, -2 ), Vector2( 28, -2 ) ]
+},
+2: {
+"frame": 7,
+"hitbox": [ Vector2( 9, 9 ), Vector2( 28, 9 ), Vector2( 28, 17 ), Vector2( 58, 17 ), Vector2( 58, -2 ), Vector2( 9, -2 ) ],
+"hurtbox": [ Vector2( 0, 5 ), Vector2( -11, 5 ), Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, 5 ), Vector2( 28, 5 ), Vector2( 28, 0 ), Vector2( 23, 0 ), Vector2( 23, -19 ), Vector2( 0, -19 ) ],
+"sdhurtbox": [ Vector2( 28, 17 ), Vector2( 58, 17 ), Vector2( 58, -2 ), Vector2( 28, -2 ) ]
+}
+},
+"vframes": 2
+},
+"L1b[h]Rec": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "L1Sprite",
+"timestamps": {
+0: {
+"frame": 8,
+"hitbox": [  ],
+"hurtbox": [ Vector2( 0, 5 ), Vector2( -11, 5 ), Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, 5 ), Vector2( 28, 5 ), Vector2( 28, 0 ), Vector2( 23, 0 ), Vector2( 23, -19 ), Vector2( 0, -19 ) ],
+"sdhurtbox": [ Vector2( 28, 15 ), Vector2( 52, 15 ), Vector2( 52, 1 ), Vector2( 28, 1 ) ]
+},
+2: {
+"frame": 1,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -5, 3 ), Vector2( -10, 3 ), Vector2( -10, 22 ), Vector2( 17, 22 ), Vector2( 17, -19 ), Vector2( -5, -19 ) ],
+"sdhurtbox": [ Vector2( 17, -1 ), Vector2( 31, -1 ), Vector2( 31, -15 ), Vector2( 17, -15 ) ]
+}
+},
+"vframes": 2
+},
+"L1cActive": {
+"duration": 5,
+"hframes": 6,
+"loop": false,
+"spritesheet": "L1Sprite",
+"timestamps": {
+0: {
+"frame": 2,
+"hitbox": [ Vector2( 32, -10 ), Vector2( 9, -10 ), Vector2( 9, 4 ), Vector2( 32, 4 ), Vector2( 32, -1 ), Vector2( 58, -1 ), Vector2( 58, -19 ), Vector2( 32, -19 ) ],
+"hurtbox": [ Vector2( 0, 2 ), Vector2( -11, 2 ), Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, 2 ), Vector2( 32, 2 ), Vector2( 32, -7 ), Vector2( 23, -7 ), Vector2( 23, -19 ), Vector2( 0, -19 ) ],
+"sdhurtbox": [ Vector2( 32, -1 ), Vector2( 58, -1 ), Vector2( 58, -19 ), Vector2( 32, -19 ) ]
+},
+2: {
+"frame": 3,
+"hitbox": [ Vector2( 32, -10 ), Vector2( 9, -10 ), Vector2( 9, 4 ), Vector2( 32, 4 ), Vector2( 32, -1 ), Vector2( 58, -1 ), Vector2( 58, -19 ), Vector2( 32, -19 ) ],
+"hurtbox": [ Vector2( 0, 2 ), Vector2( -11, 2 ), Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, 2 ), Vector2( 32, 2 ), Vector2( 32, -7 ), Vector2( 23, -7 ), Vector2( 23, -19 ), Vector2( 0, -19 ) ],
+"sdhurtbox": [ Vector2( 32, -1 ), Vector2( 58, -1 ), Vector2( 58, -19 ), Vector2( 32, -19 ) ]
+}
+},
+"vframes": 2
+},
+"L1cRec": {
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "L1Sprite",
+"timestamps": {
+0: {
+"frame": 4,
+"hitbox": [  ],
+"hurtbox": [ Vector2( 0, 2 ), Vector2( -11, 2 ), Vector2( -11, 22 ), Vector2( 13, 22 ), Vector2( 13, 2 ), Vector2( 32, 2 ), Vector2( 32, -7 ), Vector2( 23, -7 ), Vector2( 23, -19 ), Vector2( 0, -19 ) ],
+"sdhurtbox": [ Vector2( 32, -4 ), Vector2( 54, -4 ), Vector2( 54, -18 ), Vector2( 32, -18 ) ]
+},
+6: {
+"frame": 1,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -5, 3 ), Vector2( -10, 3 ), Vector2( -10, 22 ), Vector2( 17, 22 ), Vector2( 17, -19 ), Vector2( -5, -19 ) ],
+"sdhurtbox": [ Vector2( 17, -1 ), Vector2( 31, -1 ), Vector2( 31, -15 ), Vector2( 17, -15 ) ]
 }
 },
 "vframes": 2
