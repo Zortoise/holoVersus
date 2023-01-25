@@ -93,6 +93,7 @@ func triggered(triggered_node):
 				$ReplayMenu/ReplayList/Rename.initial_focus()
 			"ReturnToCharSelect":
 				play_audio("ui_accept", {"vol":-8})
+				BGM.fade()
 				$Transition.play("transit_to_char_select")
 			"ReturnToMainMenu":
 				play_audio("ui_accept", {"vol":-8})

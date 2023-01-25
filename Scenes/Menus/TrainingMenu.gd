@@ -7,6 +7,8 @@ var custom_playlist_options = ["none"] # can be added to
 
 func _ready():
 	
+	BGM.bgm(BGM.common_music["title_theme"])
+	
 	# WIP, load custom playlists here
 	
 	$LocalList/Assists.disable()
@@ -56,6 +58,7 @@ func triggered(triggered_node):
 				}
 				Settings.save_training_config(training_config)
 				play_audio("ui_accept2", {"vol":-5})
+				BGM.fade()
 				$Transition.play("transit_to_char_select")
 				Globals.assists = training_config.assists
 				Globals.static_stage = training_config.static_stage

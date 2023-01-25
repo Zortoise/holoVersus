@@ -12,6 +12,8 @@ var custom_playlist_options = ["none"] # can be added to
 
 func _ready():
 	
+	BGM.bgm(BGM.common_music["title_theme"])
+	
 	# WIP, load custom playlists here
 	
 	$LocalList/GameMode.disable() # HBoxContainer buttons have to be disabled in code
@@ -74,6 +76,7 @@ func triggered(triggered_node):
 				}
 				Settings.save_game_config(game_config)
 				play_audio("ui_accept2", {"vol":-5})
+				BGM.fade()
 				$Transition.play("transit_to_char_select")
 				Globals.starting_stock_pts = STOCKPOINTS_OPTIONS[game_config.stock_points]
 				Globals.time_limit = TIMELIMIT_OPTIONS[game_config.time_limit]

@@ -3,6 +3,9 @@ extends Node2D
 var searching := false
 
 func _ready():
+	
+	BGM.bgm(BGM.common_music["title_theme"])
+	
 	for node in $SearchList.get_children():
 		if node.is_in_group("has_focus"):
 			node.connect("focused", self, "focused")

@@ -75,6 +75,7 @@ func _process(_delta):
 			returning = false
 			break
 	if returning:
+		BGM.fade()
 		$Transition.play("transit_to_char_select_net")
 
 

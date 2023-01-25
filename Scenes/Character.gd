@@ -54,7 +54,7 @@ const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is a
 const PERFECTCHAIN_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on perfect chains
 const REPEAT_GGG_MOD = 200 # Guard Gain on hitstunned defender is increased on double_repeat
 const DMG_REDUCTION_AT_MAX_GG = 50 # max reduction in damage when defender's Guard Gauge is at 200%
-#const FIRST_HIT_GUARD_DRAIN_MOD = 0.7 # % of listed Guard Drain on 1st hit of combo or stray hits
+#const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN_MOD = 700 # increased Guard Guard Regen during Postive Flow
 #const aBlock_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
 const ATK_LEVEL_TO_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
@@ -84,15 +84,16 @@ const BREAK_DMG_MOD = 150 # damage modifier on break_hit
 const BREAK_STUN_TIME = 75 # number of frames stun time last for Break
 const BREAK_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Break
 
-const BASE_BLOCK_GUARD_DRAIN_MOD = 70 # reduced guard drain for base blocking
+const BASE_BLOCK_GUARD_DRAIN_MOD = 150 # guard drain for base blocking
+const BLOCKSTRING_GUARD_DRAIN_MOD = 50 # reduced guard drain for base blocking during blockstrings
 const BASE_BLOCK_PUSHBACK_MOD = 70 # % of base knockback of attack
 const BASE_BLOCK_ATKER_PUSHBACK = 400 * FMath.S # how much the attacker is pushed away, fixed
 const DOWNWARD_KB_REDUCTION_ON_BLOCK = 25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
-const BLOCKSTUN_MOD_FROM_HITSTUN = 40 # blockstun is 40% of calculated hitstun
+const BLOCKSTUN_MOD_FROM_HITSTUN = 40 # blockstun is 50% of calculated hitstun
 const MIN_BASE_BLOCKSTUN = 8
 
 const WRONGBLOCK_CHIP_DMG_MOD = 200 # increased chip damage for wrongblocking
-const WRONGBLOCK_GUARD_DRAIN_MOD = 400 # increased guard drain for wrongblocking
+const WRONGBLOCK_GUARD_DRAIN_MOD = 350 # increased guard drain for wrongblocking
 const WRONGBLOCK_BLOCKSTUN_MOD = 200 # increased blockstun for wrongblocking
 const WRONGBLOCK_PUSHBACK_MOD = 100 # % of base knockback of attack
 const WRONGBLOCK_AERIAL_PUSHBACK_MOD = 200 # increase knockback on aerial wrongblock
@@ -229,7 +230,7 @@ var aerial_memory = [] # appended whenever an air normal attack is made, cannot 
 					   # reset on landing or air jump
 var aerial_sp_memory = [] # appended whenever an air normal attack is made, cannot do the same air normal twice before landing
 						  # reset on landing
-var block_rec_cancel := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
+var success_block := false # set to true after blocking an attack, reduce GDrain and allow block recovery to be cancellable, reset on block startup
 var targeted_opponent_path: NodePath # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
 var has_burst := false # gain burst by ringing out opponent
 var tap_memory = []
@@ -1151,7 +1152,7 @@ func simulate2(): # only ran if not in hitstop
 
 		Globals.char_state.GROUND_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
-				if !block_rec_cancel:
+				if !success_block:
 					animate("BlockRec")
 				else:
 					animate("BlockCRec")
@@ -1163,7 +1164,7 @@ func simulate2(): # only ran if not in hitstop
 		Globals.char_state.AIR_BLOCK:
 #			if UniqChar.STYLE == 0:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["aBlock"]): # don't use to_play
-				if !block_rec_cancel:
+				if !success_block:
 					animate("aBlockRec")
 				else:
 					animate("aBlockCRec")
@@ -1172,7 +1173,7 @@ func simulate2(): # only ran if not in hitstop
 			
 #			else:
 #				if !button_dash in input_state.pressed and Animator.query_to_play(["aBlock"]):
-#					if !block_rec_cancel:
+#					if !success_block:
 #						animate("aBlockRec")
 #					else:
 #						animate("aBlockCRec")
@@ -2662,6 +2663,12 @@ func is_blocking():
 			return true
 	return false
 	
+func is_blockstunned():
+	match state: # use non-new state
+		Globals.char_state.GROUND_BLOCKSTUN, Globals.char_state.AIR_BLOCKSTUN:
+			return true
+	return false
+	
 func is_aerial():
 	match new_state:
 		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
@@ -3671,13 +3678,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
 				!Globals.atk_attr.AIR_ATTACK in hit_data.move_data.atk_attr and \
-				attacker.chain_memory.size() == 0 and !$BlockStunTimer.is_running():
+				attacker.chain_memory.size() == 0 and !is_blockstunned():
 				# ANTI_GUARD attacks cannot work if opponent is in blockstun or you chain into it
 				# ANTI_GUARD attacks with AIR_ATTACK cannot work on grounded opponents
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
 			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
-				!$BlockStunTimer.is_running():
+				!is_blockstunned():
 				# rare ANTI_GUARD entity, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.GROUND_WRONG
 				
@@ -3707,12 +3714,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.block_state = Globals.block_state.AIR_PERFECT # only those with the trait can perfect block in air
 				
 			elif !"entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
-				attacker.chain_memory.size() == 0 and !$BlockStunTimer.is_running():
+				attacker.chain_memory.size() == 0 and !is_blockstunned():
 				# ANTI_GUARD attacks cannot work if opponent is in blockstun or you chain into it
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
 			elif "entity_nodepath" in hit_data and Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
-				!$BlockStunTimer.is_running():
+				!is_blockstunned():
 				# rare ANTI_GUARD entity, ignore chaining requirement
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				
@@ -4065,24 +4072,24 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			match hit_data.block_state:
 				Globals.block_state.GROUND:
 					animate("Blockstun")
-					block_rec_cancel = true
+					success_block = true
 				Globals.block_state.GROUND_WRONG:
 					if !is_atk_startup():
 						animate("WBlockstun")
-						block_rec_cancel = false
+						success_block = false
 				Globals.block_state.GROUND_PERFECT:
 					animate("PBlockstun")
-					block_rec_cancel = true
+					success_block = true
 				Globals.block_state.AIR:
 					animate("aBlockstun")
-					block_rec_cancel = true
+					success_block = true
 				Globals.block_state.AIR_WRONG:
 					if !is_atk_startup():
 						animate("aWBlockstun")
-						block_rec_cancel = false
+						success_block = false
 				Globals.block_state.AIR_PERFECT:
 					animate("aPBlockstun")
-					block_rec_cancel = true
+					success_block = true
 		
 	if !no_impact_and_vel_change:
 		velocity.set_vector(knockback_strength, 0)  # reset momentum
@@ -4166,7 +4173,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	# for autochain followup
 	if "chain_starter" in hit_data.move_data:
 		# if already hit the defender with a previous move, deal no guard gauge change
-		if $HitStunTimer.is_running() or $BlockStunTimer.is_running():
+		if $HitStunTimer.is_running() or is_blockstunned():
 			return 0
 #		elif hit_data.block_state != Globals.block_state.UNBLOCKED:  # no guard gauge change for autochain followup on blocking opponent
 #			print(attacker.chain_memory)
@@ -4213,11 +4220,16 @@ func calculate_guard_gauge_change(hit_data) -> int:
 				Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:  # reduce/negate GDrain for perfect block
 					guard_gauge_change = FMath.percent(guard_gauge_change, PERFECTBLOCK_GUARD_DRAIN_MOD)
 				_:
-					guard_gauge_change = FMath.percent(guard_gauge_change, BASE_BLOCK_GUARD_DRAIN_MOD)
+					if success_block: # on base block, reduce GDrain if already blocked an attack
+						guard_gauge_change = FMath.percent(guard_gauge_change, BLOCKSTRING_GUARD_DRAIN_MOD)
+					else:
+						guard_gauge_change = FMath.percent(guard_gauge_change, BASE_BLOCK_GUARD_DRAIN_MOD)
+						
 #			if !defender.grounded:
 #				guard_gauge_change *= aBlock_GUARD_DRAIN_MOD # increase GDrain for aBlocking opponent
 #		else:
-#			guard_gauge_change *= FIRST_HIT_GUARD_DRAIN_MOD # 1st hit of a combo or a stray hit inflict guard drain
+#			guard_gauge_change = FMath.percent(guard_gauge_change, FIRST_HIT_GUARD_DRAIN_MOD)
+#			 # 1st hit of a combo or a stray hit inflict moreguard drain
 		
 	return guard_gauge_change
 	
@@ -5052,10 +5064,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			
 		"BlockStartup":
-			block_rec_cancel = false
+			success_block = false
 			perfect_block()
 		"aBlockStartup":
-			block_rec_cancel = false
+			success_block = false
 			perfect_block()
 		"aBlock":
 			$ModulatePlayer.play("EX_block_flash")
@@ -5192,7 +5204,7 @@ func save_state():
 		"dash_cancel" : dash_cancel,
 		"jump_cancel" : jump_cancel,
 		"perfect_chain" : perfect_chain,
-		"block_rec_cancel" : block_rec_cancel,
+		"success_block" : success_block,
 		"targeted_opponent_path" : targeted_opponent_path,
 		"has_burst": has_burst,
 		"impulse_used" : impulse_used,
@@ -5271,7 +5283,7 @@ func load_state(state_data):
 	dash_cancel = state_data.dash_cancel
 	jump_cancel = state_data.jump_cancel
 	perfect_chain = state_data.perfect_chain
-	block_rec_cancel = state_data.block_rec_cancel
+	success_block = state_data.success_block
 	targeted_opponent_path = state_data.targeted_opponent_path
 	has_burst = state_data.has_burst
 	impulse_used = state_data.impulse_used

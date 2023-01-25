@@ -8,6 +8,9 @@ var selected_replay := 0
 
 
 func _ready():
+	
+	BGM.bgm(BGM.common_music["title_theme"])
+	
 	for node in $ReplaysList.get_children():
 		if node.is_in_group("has_focus"):
 			node.connect("focused", self, "focused")

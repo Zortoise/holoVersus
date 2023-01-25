@@ -20,6 +20,8 @@ var guest_readied := false
 
 func _ready():
 	
+	BGM.bgm(BGM.common_music["title_theme"])
+	
 	Netplay.lobby = self
 	
 	# WIP, load custom playlists here
@@ -79,6 +81,7 @@ func _process(_delta):
 		
 		
 func start_game():
+	BGM.fade()
 	$Transition.play("transit_to_char_select_net")
 	
 	Netcode.input_delay = host_net_game_config.input_delay

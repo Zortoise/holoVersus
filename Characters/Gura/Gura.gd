@@ -75,7 +75,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"aSP3Startup", "aSP3[h]Startup", "aSP3bStartup", "aSP3b[h]Startup", "aSP3b[ex]Startup":
+		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
@@ -1298,10 +1298,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP3[ex]Active")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
-#		"aSP3[ex]Startup":
-#			Character.animate("aSP3[ex]Active")
-#			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
-#					{"facing":Character.facing, "rot":-PI/2})
+		"aSP3[ex]Startup":
+			Character.animate("aSP3[ex]Active")
+			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
+					{"facing":Character.facing, "rot":-PI/2})
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1552,7 +1552,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 25
 		
 			
-		"aSP3Startup", "aSP3[h]Startup":
+		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0

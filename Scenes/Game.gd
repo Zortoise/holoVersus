@@ -1144,7 +1144,8 @@ func defender_semi_invul(hitbox, hurtbox):
 		attacker_or_entity = get_node(hitbox.entity_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
 	if defender.new_state in [Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP]:
-		if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr():
+		if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr() or \
+				(defender.grounded and Globals.atk_attr.SEMI_INVUL_GROUND_STARTUP in defender.query_atk_attr()):
 			if Globals.atk_attr.UNBLOCKABLE in attacker_or_entity.query_atk_attr(hitbox.move_name) or \
 					hitbox.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
 				return false # defender's semi-invul failed

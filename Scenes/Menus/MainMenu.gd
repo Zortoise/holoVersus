@@ -1,6 +1,7 @@
 extends Node2D
 
 func _ready():
+	BGM.bgm(BGM.common_music["title_theme"])
 	
 	$Background/Title/Version.text = Globals.VERSION
 	
@@ -14,6 +15,7 @@ func _ready():
 		if node.is_in_group("has_trigger"):
 			node.connect("triggered", self, "triggered")
 	$MainMenuList.get_node(Globals.main_menu_focus).initial_focus()
+
 	
 func focused(focused_node):
 	$Cursor.position = Vector2(focused_node.rect_global_position.x - 48, focused_node.rect_global_position.y + focused_node.rect_size.y / 2.0)
