@@ -28,12 +28,12 @@ const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gai
 #const SUPER_JUMP_MOD = 150
 const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
-const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have higher
+const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
 const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 950
-const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
-const GUARD_GAUGE_DEGEN_AMOUNT = 90 # exact GG degened per frame when GG > 100%
+const GUARD_GAUGE_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
+#const GUARD_GAUGE_DEGEN_AMOUNT = 90 # exact GG degened per frame when GG > 100%
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 35 # % of damage taken as chip damage when blocking (average is 0.25)
 #const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
 const GUARD_DRAIN_MOD = 120 # modify Guard Drain when blocking attacks/taking stray hits, tankier characters have lower GUARD_GAUGE_LOSS_MOD
@@ -83,7 +83,7 @@ const MOVE_DATABASE = {
 		"fixed_atker_hitstop" : 1,
 		"priority": 2,
 		"guard_drain": 1000,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -155,7 +155,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 3,
 		"priority": 2,
 		"guard_drain": 1000,
-		"guard_gain_on_combo" : 2000,
+#		"guard_gain_on_combo" : 2000,
 		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -174,7 +174,7 @@ const MOVE_DATABASE = {
 		"priority": 4, # aL < L < aF < F < aH < H < Specials (depend on move) < EX (depend on move), Super, but some moves are different
 		"guard_drain": 1500, # on blocking opponent and opponent in neutral (multiplied), affect how well the move can guardcrush/break
 		# Supers have 0 Guard Drain
-		"guard_gain_on_combo" : 2500, # affect comboability
+#		"guard_gain_on_combo" : 2500, # affect comboability
 		"EX_gain": 2000, # EX Gain on block is a certain % of EX Gain on hit, defenders blocking this attack will gain a certain % as well
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -194,7 +194,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"priority": 3,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -213,7 +213,7 @@ const MOVE_DATABASE = {
 		"fixed_ss_hitstop" : 12,
 		"priority": 3,
 		"guard_drain": 1200,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -232,7 +232,7 @@ const MOVE_DATABASE = {
 		"fixed_blockstun" : 5,
 		"priority": 4,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -250,7 +250,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 2,
 		"priority": 5,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -285,7 +285,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 2,
 		"priority": 5,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -320,7 +320,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 2,
 		"priority": 1,
 		"guard_drain": 1000,
-		"guard_gain_on_combo" : 2000,
+#		"guard_gain_on_combo" : 2000,
 		"EX_gain": 1600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -338,7 +338,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 2,
 		"priority": 1,
 		"guard_drain": 750,
-		"guard_gain_on_combo" : 1500,
+#		"guard_gain_on_combo" : 1500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -356,7 +356,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 3,
 		"priority": 3,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -374,7 +374,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"priority": 3,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -392,7 +392,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"priority": 5,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 2500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -466,7 +466,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"priority": 7,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -485,7 +485,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"priority": 7,
 		"guard_drain": 1500,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 2500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -505,7 +505,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 5,
 		"priority": 10,
 		"guard_drain": 2000,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -526,7 +526,7 @@ const MOVE_DATABASE = {
 #		"burstlock": 8,
 		"priority": 8,
 		"guard_drain": 2000,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -565,7 +565,7 @@ const MOVE_DATABASE = {
 		"fixed_blockstun" : 5,
 		"priority": 8,
 		"guard_drain": 2000,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -604,7 +604,7 @@ const MOVE_DATABASE = {
 		"fixed_blockstun" : 5,
 		"priority": 11,
 		"guard_drain": 2500,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -662,7 +662,7 @@ const MOVE_DATABASE = {
 		"fixed_blockstun" : 19,
 		"priority": 8,
 		"guard_drain": 2000,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 2500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
@@ -683,7 +683,7 @@ const MOVE_DATABASE = {
 		"fixed_atker_hitstop" : 1,
 		"priority": 7,
 		"guard_drain": 2000,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
@@ -721,7 +721,7 @@ const MOVE_DATABASE = {
 		"fixed_blockstun" : 30,
 		"priority": 11,
 		"guard_drain": 2500,
-		"guard_gain_on_combo" : 3500,
+#		"guard_gain_on_combo" : 3500,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
@@ -746,7 +746,7 @@ const MOVE_DATABASE = {
 		"sequence_launch" : { # for final hit of sequence
 			"damage" : 0,
 			"hitstop" : 0,
-			"guard_gain" : 3500,
+#			"guard_gain" : 3500,
 			"EX_gain": 0,
 			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103, # launch backwards
@@ -758,7 +758,7 @@ const MOVE_DATABASE = {
 		"sequence_launch" : {
 			"damage" : 0,
 			"hitstop" : 0,
-			"guard_gain" : 3500,
+#			"guard_gain" : 3500,
 			"EX_gain": 0,
 			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103,

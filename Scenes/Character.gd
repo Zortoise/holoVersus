@@ -14,11 +14,13 @@ const VAR_JUMP_GRAV_MOD = 20 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
 const TAP_MEMORY_DURATION = 4
-const HitStunGraceTimer_TIME = 10 # number of frames that move_memory will be cleared after hitstun/blockstun ends and dash/aDash being invulnerable
+const HitStunGraceTimer_TIME = 10 # number of frames that repeat_memory will be cleared after hitstun/blockstun ends and dash/aDash being invulnerable
 const MAX_EX_GAUGE = 50000
 const EX_GAUGE_REGEN_AMOUNT = 18 # EX Gauge regened per second when idling
 const GUARD_GAUGE_FLOOR = -10000
 const GUARD_GAUGE_CEIL = 10000
+const GUARD_GAUGE_SWELL_RATE = 150 # exact GG gain per frame during hitstun
+const GUARD_GAUGE_DEGEN_AMOUNT = 100 # exact GG degened per frame when GG > 100% out of hitstun
 const BURSTCOUNTER_EX_COST = 10000
 const BURSTESCAPE_GG_COST = 5000
 const BURSTREVOKE_GG_COST = 5000
@@ -51,13 +53,13 @@ const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is a
 #const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
 # const DMG_BOOST_AT_DMG_VAL_LIMIT = 1.5 # increase in damage taken when damage percent is at 100%, goes pass it when damage percent goes >100%
 # const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
-const PERFECTCHAIN_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on perfect chains
-const REPEAT_GGG_MOD = 200 # Guard Gain on hitstunned defender is increased on double_repeat
+#const PERFECTCHAIN_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on perfect chains
+#const REPEAT_GGG_MOD = 200 # Guard Gain on hitstunned defender is increased on double_repeat
 const DMG_REDUCTION_AT_MAX_GG = 50 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
-const POS_FLOW_REGEN_MOD = 700 # increased Guard Guard Regen during Postive Flow
+const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
 #const aBlock_GUARD_DRAIN_MOD = 1.5 # increased Guard Drain when blocking in air
-const ATK_LEVEL_TO_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
+const ATK_LEVEL_TO_HITSTUN = [20, 25, 30, 35, 40, 45, 50, 55]
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 15  # friction during hitstun
@@ -74,7 +76,7 @@ const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
 const SWEETSTOP_GUARD_DRAIN_MOD = 150 # Guard Drain on non-hitstunned defender is increased on sweetspotted hit
 const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
-const SWEETSPOT_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on sweetspotted hit
+#const SWEETSPOT_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on sweetspotted hit
 
 const PUNISH_DMG_MOD = 150 # damage modifier on punish_hit
 const PUNISH_GUARD_DRAIN_MOD = 150 # Guard Drain on non-hitstunned defender is increased on a punish hit
@@ -223,8 +225,8 @@ var chain_memory = [] # appended whenever you attack, reset when starting an att
 #var chaining := false # set to true when chaining any attack, false when starting an attack not from a chain, chained heavies loses ANTI_GUARD
 var dash_cancel := false # set to true when landing a Sweetspotted Normal, set to false when starting any attack
 var jump_cancel := false # set to true when landing any unblocked hit, set to false when starting any attack
-var perfect_chain := false # set to true when doing a 1 frame cancel, set to false when not in active frames
-var move_memory = [] # appended whenever hit by a move, cleared whenever you recover from hitstun, to incur Repeat Penalty on attacker
+#var perfect_chain := false # set to true when doing a 1 frame cancel, set to false when not in active frames
+var repeat_memory = [] # appended whenever hit by a move, cleared whenever you recover from hitstun, to incur Repeat Penalty on attacker
 					# each entry is an array with [0] being the move name and [1] being the player_ID
 var aerial_memory = [] # appended whenever an air normal attack is made, cannot do the same air normal twice in a jump
 					   # reset on landing or air jump
@@ -236,11 +238,13 @@ var has_burst := false # gain burst by ringing out opponent
 var tap_memory = []
 var release_memory = []
 var impulse_used := false
-var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout the duration of BurstLockTimer
+var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout the duration of BurstLockTimer, also lock GG Swell
 var instant_actions := [] # when an instant action is inputed it is stored here for 1 frame, only process next frame
 						 # this allows for quick cancels and triggering entities
 var pos_flow_seal := false # some moves (BurstRevoke) will prevent you from gaining Positive Flow till targeted opponent's HitStunGraceTimer is over
 var last_dir := 0 # dir last frame
+var GG_swell_flag := false # set to true after 1st attack taken during a combo
+var first_hit_flag := false # will not swell GG during hitstun of 1st attack taken during combo
 
 # controls
 var button_up
@@ -520,8 +524,9 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
-		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
-		str(input_buffer) + "\n" + str(input_state) + "\nHitstunGrace: " + str($HitStunGraceTimer.time)
+		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
+		str(input_buffer) + "\n" + str(input_state) + "\nHitstunGrace: " + str($HitStunGraceTimer.time) + " " + str(GG_swell_flag) + \
+		" " + str(first_hit_flag)
 			
 			
 func _process(_delta):
@@ -654,28 +659,40 @@ func simulate2(): # only ran if not in hitstop
 	ignore_list_progress_timer()
 	process_status_effects_timer() # remove expired status effects before running hit detection since that can add effects
 	
-	# clearing move memory, has a time between hitstun/blockstun ending and move memory being cleared
-	if move_memory.size() > 0 and !$HitStunGraceTimer.is_running():
-		move_memory = []
+	# clearing repeat memory, has a time between hitstun/blockstun ending and repeat memory being cleared
+	if !$HitStunGraceTimer.is_running():
+		repeat_memory = []
+		first_hit_flag = false
+		GG_swell_flag = false
+		$BurstLockTimer.time = 0
+		DI_seal = false
+		
+	# GG Swell during hitstun
+	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and GG_swell_flag and !first_hit_flag and \
+			!state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER] and !(DI_seal and $BurstLockTimer.is_running()):
+		current_guard_gauge = int(min(GUARD_GAUGE_CEIL, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
+		Globals.Game.guard_gauge_update(self)
 
 	# regen/degen GG
-	if move_memory.size() == 0:
+	elif !$HitStunGraceTimer.is_running():
 		
 		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.gganchor == 5):
 			
 			if current_guard_gauge < 0 and !is_blocking(): # regen GG when GG is under 100%
-				var guard_gauge_regen: int = UniqChar.get_stat("GUARD_GAUGE_REGEN_AMOUNT")
+				var guard_gauge_regen: int = 0
 				if query_status_effect(Globals.status_effect.POS_FLOW):
-					guard_gauge_regen = FMath.percent(guard_gauge_regen, POS_FLOW_REGEN_MOD) # increased regen during positive flow
+					guard_gauge_regen = POS_FLOW_REGEN # increased regen during positive flow
+				else:
+					guard_gauge_regen = UniqChar.get_stat("GUARD_GAUGE_REGEN_AMOUNT")
 				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen)) # don't use change_guard_gauge() since it stops at 0
 				Globals.Game.guard_gauge_update(self)
 			elif current_guard_gauge > 0: # degen GG when GG is over 100%
-				current_guard_gauge = int(max(0, current_guard_gauge - UniqChar.get_stat("GUARD_GAUGE_DEGEN_AMOUNT")))
+				current_guard_gauge = int(max(0, current_guard_gauge - GUARD_GAUGE_DEGEN_AMOUNT))
 				Globals.Game.guard_gauge_update(self)
 		
 		else: # training mode
 			if current_guard_gauge > 0:
-				current_guard_gauge = int(max(0, current_guard_gauge - UniqChar.get_stat("GUARD_GAUGE_DEGEN_AMOUNT")))
+				current_guard_gauge = int(max(0, current_guard_gauge - GUARD_GAUGE_DEGEN_AMOUNT))
 				Globals.Game.guard_gauge_update(self)
 			else:
 				if player_ID == 0: # player 1 rapidly regen GG when GG < 0 during training mode
@@ -2045,7 +2062,7 @@ func on_kill():
 		$Sprites.hide()
 		state = Globals.char_state.DEAD
 		velocity.set_vector(0, 0)
-		move_memory = []
+		repeat_memory = []
 		input_buffer = []
 		hitcount_record = []
 		ignore_list = []
@@ -2149,9 +2166,9 @@ func reset_jumps_except_walljumps():
 	air_jump = UniqChar.get_stat("MAX_AIR_JUMP") # reset jump count on wall
 	air_dash = UniqChar.get_stat("MAX_AIR_DASH")
 	
-func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock) give you +1 air jump
-	if air_jump < UniqChar.get_stat("MAX_AIR_JUMP"): # cannot go over
-		air_jump += 1
+#func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock) give you +1 air jump
+#	if air_jump < UniqChar.get_stat("MAX_AIR_JUMP"): # cannot go over
+#		air_jump += 1
 	
 func reset_cancels(): # done whenever you use an attack
 	chain_combo = Globals.chain_combo.RESET
@@ -2772,18 +2789,27 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 	return true
 	
 func burst_extend_check(move_name): # check if have resources to do it, then take away those resources and return a bool
-	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL] or move_name in UniqChar.SUPERS:
+	if !is_atk_active(): # active frames only
+		return false
+	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL]:
+		return false
+	if move_name in UniqChar.MOVE_DATABASE and UniqChar.MOVE_DATABASE[move_name].atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
 		return false
 	change_burst_token(false)
 	return true
 	
 func burst_revoke_check(move_name):
-	if !chain_combo in [Globals.chain_combo.RESET] or move_name in UniqChar.EX_MOVES or move_name in UniqChar.SUPERS or \
-		(current_guard_gauge + 10000) < BURSTREVOKE_GG_COST:
+	move_name = UniqChar.refine_move_name(move_name)
+	if move_name in UniqChar.MOVE_DATABASE and UniqChar.MOVE_DATABASE[move_name].atk_type == Globals.atk_type.SPECIAL:
+		pass # only special moves can be burst revoked
+	else:
 		return false
+		
+	if !chain_combo in [Globals.chain_combo.RESET] or (current_guard_gauge + 10000) < BURSTREVOKE_GG_COST:
+		return false
+		
 	if is_atk_active(): # for active frames, only attacking specials can be revoked
-		if move_name in UniqChar.MOVE_DATABASE and UniqChar.MOVE_DATABASE[move_name].atk_type == Globals.atk_type.SPECIAL and \
-			!Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
+		if !Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
 			if "no_revoke_time" in UniqChar.MOVE_DATABASE[move_name] and \
 				Animator.time >= UniqChar.MOVE_DATABASE[move_name].no_revoke_time: # some moves cannot be revoked after a specific time
 				return false
@@ -3491,11 +3517,11 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					dash_cancel = true # for sweetspotted/punish hit, allow dash_cancel
 					jump_cancel = true
 					
-				if is_aerial() and hit_data.block_state in [Globals.block_state.UNBLOCKED, Globals.block_state.GROUND_WRONG, \
-					Globals.block_state.AIR_WRONG]:
-					gain_one_air_jump() # for unblocked/wrongblocked aerial you regain 1 air jump
-					if hit_data.sweetspotted:
-						UniqChar.gain_one_air_dash() # for unblocked sweetspotted aerial you regain 1 air dash
+#				if is_aerial() and hit_data.block_state in [Globals.block_state.UNBLOCKED, Globals.block_state.GROUND_WRONG, \
+#					Globals.block_state.AIR_WRONG]:
+#					gain_one_air_jump() # for unblocked/wrongblocked aerial you regain 1 air jump
+#					if hit_data.sweetspotted:
+#						UniqChar.gain_one_air_dash() # for unblocked sweetspotted aerial you regain 1 air dash
 						
 			Globals.atk_type.SPECIAL, Globals.atk_type.EX:
 				if hit_data.block_state == Globals.block_state.UNBLOCKED or \
@@ -3587,7 +3613,6 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 func being_hit(hit_data): # called by main game node when taking a hit
 	
-	$HitStunGraceTimer.time = HitStunGraceTimer_TIME # reset HitStunGraceTimer which only ticks down out of hitstun/blockstun
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
 
@@ -3623,6 +3648,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Globals.atk_attr.AUTOCHAIN in hit_data.move_data.atk_attr:
 		hit_data["autochain"] = true
 		
+	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
+		if !"multihit" in hit_data and !"autochain" in hit_data:
+			GG_swell_flag = true
+			first_hit_flag = true
+	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
+		first_hit_flag = false
+	
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
 		attacker_or_entity.append_ignore_list(player_ID, hit_data.move_data.ignore_time)
@@ -3636,7 +3668,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		root_move_name = hit_data.move_data.root
 	
 	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
-		for array in move_memory:
+		for array in repeat_memory:
 			if array[0] == attacker.player_ID and array[1] == root_move_name:
 				if !hit_data.repeat:
 					hit_data.repeat = true # found a repeat
@@ -3649,7 +3681,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					double_repeat = true
 					hit_data["double_repeat"] = true # found multiple repeats
 					break
-		# append repeated move to move_memory later after guard gauge change calculation
+		# append repeated move to repeat_memory later after guard gauge change calculation
 	
 	var weak_hit := false
 	if hit_data.move_data.atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
@@ -3793,8 +3825,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 	# append repeated move to move memory here since calculation for guard_gauge change uses it
 	if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit count
-		move_memory.append([attacker.player_ID, root_move_name])
+		repeat_memory.append([attacker.player_ID, root_move_name])
 				
+	$HitStunGraceTimer.time = HitStunGraceTimer_TIME # reset HitStunGraceTimer after GG calculation, only ticks down out of hitstun/blockstun
 				
 	# ---------------------------------------------------------------------------------
 	
@@ -3817,7 +3850,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif hit_data.break_hit:
 		add_status_effect(Globals.status_effect.BREAK, 0)
 		add_status_effect(Globals.status_effect.BREAK_RECOVER, null) # null means no duration
-		move_memory = [] # reset move memory for getting a Break
+		repeat_memory = [] # reset move memory for getting a Break
 		Globals.Game.set_screenshake() # screenshake
 		$ModulatePlayer.play("break_flash")
 		play_audio("break1", {"vol" : -18})
@@ -3864,7 +3897,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			reset_jumps()
 			current_guard_gauge = 0
 			Globals.Game.guard_gauge_update(self)
-#			defender.move_memory = []
+#			defender.repeat_memory = []
 		# BurstRevoke does not reset anything
 		
 	if "superarmored" in hit_data:
@@ -3933,9 +3966,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		DI_seal = false
 		
+	if Globals.atk_attr.DI_MANUAL_SEAL in hit_data.move_data.atk_attr:
+		$BurstLockTimer.time = 9999
+		DI_seal = true
+		
 #	# ---------------------------------------------------------------------------------
-#
-#	UniqChar.being_hit2(hit_data) # reaction, can change stuff like knockback here
+
+	if "entity_nodepath" in hit_data:
+		if attacker_or_entity.UniqEntity.has_method("landed_a_hit2"):
+			attacker_or_entity.UniqEntity.landed_a_hit2(hit_data) # reaction, can change hit_data from there
+	else:
+		attacker.UniqChar.landed_a_hit2(hit_data) # reaction, can change hit_data from there
+	UniqChar.being_hit2(hit_data) # reaction, can change hit_data from there
 	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
@@ -4206,7 +4248,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		
 	var guard_gauge_change := 0
 	var guard_drain: int
-	var guard_gain_on_combo: int
+#	var guard_gain_on_combo: int
 		
 	# for autochain followup
 	if "chain_starter" in hit_data.move_data:
@@ -4219,24 +4261,26 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		else: # follow the starter's stats
 			guard_drain = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_drain
 			guard_drain = FMath.percent(guard_drain, UniqChar.get_stat("GUARD_DRAIN_MOD"))
-			guard_gain_on_combo = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
+#			guard_gain_on_combo = UniqChar.MOVE_DATABASE[hit_data.move_data.chain_starter].guard_gain_on_combo
 			
 	else: # normal attack
 		guard_drain = hit_data.move_data.guard_drain
 		guard_drain = FMath.percent(guard_drain, UniqChar.get_stat("GUARD_DRAIN_MOD"))
-		guard_gain_on_combo = hit_data.move_data.guard_gain_on_combo
+#		guard_gain_on_combo = hit_data.move_data.guard_gain_on_combo
 	
-	if hit_data.block_state == Globals.block_state.UNBLOCKED and (move_memory.size() > 0 or $HitStunTimer.is_running()):
-		# on a successful hit while defender in hitstun or a little after, guard_gauge_change is positive
-		guard_gauge_change = guard_gain_on_combo
-		if hit_data.double_repeat: # Guard Gain on hitstunned defender is increased on double_repeat
-			guard_gauge_change = FMath.percent(guard_gauge_change, REPEAT_GGG_MOD)
-		if hit_data.sweetspotted: # Guard Gain on hitstunned defender is reduced on sweetspotted hit
-			guard_gauge_change = FMath.percent(guard_gauge_change, SWEETSPOT_GGG_MOD)
-		if !"entity_nodepath" in hit_data and attacker_or_entity.perfect_chain: # Guard Gain on hitstunned defender is reduced on perfect chains
-			guard_gauge_change = FMath.percent(guard_gauge_change, PERFECTCHAIN_GGG_MOD)
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and $HitStunGraceTimer.is_running():
+		pass
+		
+		# on a successful hit while defender in hitstun, guard_gauge_change is positive
+#		guard_gauge_change = guard_gain_on_combo
+#		if hit_data.double_repeat: # Guard Gain on hitstunned defender is increased on double_repeat
+#			guard_gauge_change = FMath.percent(guard_gauge_change, REPEAT_GGG_MOD)
+#		if hit_data.sweetspotted: # Guard Gain on hitstunned defender is reduced on sweetspotted hit
+#			guard_gauge_change = FMath.percent(guard_gauge_change, SWEETSPOT_GGG_MOD)
+#		if !"entity_nodepath" in hit_data and attacker_or_entity.perfect_chain: # Guard Gain on hitstunned defender is reduced on perfect chains
+#			guard_gauge_change = FMath.percent(guard_gauge_change, PERFECTCHAIN_GGG_MOD)
 	
-	else: # defender NOT in hitstun or just recovered from one, or blocking, guard_gauge_change is negative
+	else: # defender NOT in hitstun, or blocking, guard_gauge_change is negative
 		guard_gauge_change = -guard_drain
 		if hit_data.semi_disjoint:
 			guard_gauge_change = FMath.percent(guard_gauge_change, SD_HIT_GUARD_DRAIN_MOD) # may lower/rise it, or let whiff punishes drain GG?
@@ -4698,10 +4742,10 @@ func landed_a_sequence(hit_data):
 	if "root" in hit_data.move_data: # for move variations
 		root_move_name = hit_data.move_data.root
 		
-	for array in defender.move_memory:
+	for array in defender.repeat_memory:
 		if array[0] == player_ID and array[1] == root_move_name:
 			return
-	defender.move_memory.append([player_ID, root_move_name])
+	defender.repeat_memory.append([player_ID, root_move_name])
 	
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
@@ -4788,8 +4832,8 @@ func sequence_launch():
 			seq_user.hitstop = hitstop
 		
 	# GUARD GAIN
-	var guard_gain = seq_data.guard_gain # sequences do not drain GG, only cause GG gain (cannot stun)
-	change_guard_gauge(guard_gain)
+#	var guard_gain = seq_data.guard_gain # sequences do not drain GG, only cause GG gain (cannot stun)
+#	change_guard_gauge(guard_gain)
 	
 	# EX GAIN
 	seq_user.change_ex_gauge(seq_data.EX_gain)
@@ -5018,8 +5062,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 						elif is_special_move(move_name):
 							aerial_sp_memory.append(move_name)
 					
-		else:
-			perfect_chain = false # change to false if neither startup nor active
+#		else:
+#			perfect_chain = false # change to false if neither startup nor active
 
 	
 	anim_friction_mod = 100
@@ -5243,7 +5287,7 @@ func save_state():
 		"chain_memory" : chain_memory,
 		"dash_cancel" : dash_cancel,
 		"jump_cancel" : jump_cancel,
-		"perfect_chain" : perfect_chain,
+#		"perfect_chain" : perfect_chain,
 		"success_block" : success_block,
 		"targeted_opponent_path" : targeted_opponent_path,
 		"has_burst": has_burst,
@@ -5251,6 +5295,8 @@ func save_state():
 		"DI_seal" : DI_seal,
 		"pos_flow_seal" : pos_flow_seal,
 		"last_dir": last_dir,
+		"first_hit_flag" : first_hit_flag,
+		"GG_swell_flag" : GG_swell_flag,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -5260,7 +5306,7 @@ func save_state():
 		"stock_points_left" : stock_points_left,
 		
 		"unique_data" : unique_data,
-		"move_memory" : move_memory,
+		"repeat_memory" : repeat_memory,
 		"aerial_memory" : aerial_memory,
 		"aerial_sp_memory" : aerial_sp_memory,
 		"status_effects" : status_effects,
@@ -5322,7 +5368,7 @@ func load_state(state_data):
 	chain_memory = state_data.chain_memory
 	dash_cancel = state_data.dash_cancel
 	jump_cancel = state_data.jump_cancel
-	perfect_chain = state_data.perfect_chain
+#	perfect_chain = state_data.perfect_chain
 	success_block = state_data.success_block
 	targeted_opponent_path = state_data.targeted_opponent_path
 	has_burst = state_data.has_burst
@@ -5330,6 +5376,8 @@ func load_state(state_data):
 	DI_seal = state_data.DI_seal
 	pos_flow_seal = state_data.pos_flow_seal
 	last_dir = state_data.last_dir
+	first_hit_flag = state_data.first_hit_flag
+	GG_swell_flag = state_data.GG_swell_flag
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	
@@ -5345,7 +5393,7 @@ func load_state(state_data):
 	
 	unique_data = state_data.unique_data
 	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
-	move_memory = state_data.move_memory
+	repeat_memory = state_data.repeat_memory
 	aerial_memory = state_data.aerial_memory
 	aerial_sp_memory = state_data.aerial_sp_memory
 	remove_all_status_effects()

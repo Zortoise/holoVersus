@@ -51,7 +51,7 @@ func set_physics_logs(timestamp: int, players):
 #		gg_logs[timestamp][player.player_ID] = {}
 #		gg_logs[timestamp][player.player_ID]["gg"] = player.current_guard_gauge
 #		mm_logs[timestamp][player.player_ID] = {}
-#		mm_logs[timestamp][player.player_ID]["mm"] = player.move_memory.duplicate(true)
+#		mm_logs[timestamp][player.player_ID]["mm"] = player.repeat_memory.duplicate(true)
 		
 func rng_logs(timestamp: int, data):
 	rng_logs[timestamp] = data

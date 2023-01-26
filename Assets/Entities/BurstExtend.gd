@@ -26,12 +26,12 @@ const MOVE_DATABASE = {
 		"fixed_hitstun" : 50,
 		"fixed_blockstun" : 5,
 		"guard_drain": 0,
-		"guard_gain_on_combo" : 0,
+#		"guard_gain_on_combo" : 0,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -90,
-		"atk_attr" : [Globals.atk_attr.SCREEN_SHAKE],
+		"atk_attr" : [Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DI_MANUAL_SEAL],
 		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
 	}
 }

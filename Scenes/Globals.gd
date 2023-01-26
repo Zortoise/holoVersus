@@ -15,7 +15,7 @@ enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, SEMI_INVUL_GROUND_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
-		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK
+		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK, DI_MANUAL_SEAL
 		CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO
 		COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_NORMAL, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
@@ -40,6 +40,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # NO_STRAFE = for certain aerials, prevent air strafing during active frames
 # REPEATABLE = will not incur repeat penalty, use for multi-entities
 # NON_ATTACK = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun/blockstun
+# DI_MANUAL_SEAL = seal DI for certain duration set by "burstlock" in move_data, for Burst Extend
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
 # CANNOT_CHAIN_INTO_ON_BLOCK = fails test_chain_combo() if chain combo == BLOCKED_NORMAL or BLOCKED_SPECIAL
 # NOT_FROM_C_REC = cannot use during cancellable recovery, for certain moves like command grabs

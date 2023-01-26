@@ -21,7 +21,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 5,
 		"fixed_hitstop" : 10,
 		"guard_drain": 1750,
-		"guard_gain_on_combo" : 2500,
+#		"guard_gain_on_combo" : 2500,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",

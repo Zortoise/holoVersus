@@ -418,7 +418,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 #				if Character.button_down in Character.input_state.pressed:
 #					keep = !process_move(new_state, "L2", has_acted, buffered_input[1])
 #				if keep:
-				keep = !process_move(new_state, "L1", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "L1", has_acted)
 		
 		Character.button_fierce:
 			if !has_acted[0]:
@@ -427,87 +427,87 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 #				elif Character.button_down in Character.input_state.pressed:
 #					keep = !process_move(new_state, "F2", has_acted, buffered_input[1])
 #				if keep:
-				keep = !process_move(new_state, "F1", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "F1", has_acted)
 
 		# SPECIAL ACTIONS ---------------------------------------------------------------------------------
 		# buffered_input_action can be a string instead of int, for heavy attacks and special moves
 
 		"uL":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "L3", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "L3", has_acted)
 				
 		"dL":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "L2", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "L2", has_acted)
 
 		"uF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "F3", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "F3", has_acted)
 				
 		"dF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "F2", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "F2", has_acted)
 				
 		"H":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "H", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "H", has_acted)
 				
 		"Sp.L":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP1", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "SP1", has_acted)
 	
 		"Sp.F":
 			if !has_acted[0]:
 				if !Character.grounded:
-					keep = !process_move(new_state, "SP2", has_acted, buffered_input[1])
+					keep = !process_move(new_state, "SP2", has_acted)
 				else:
 					if Character.unique_data.groundfin_count == 0:
-						keep = !process_move(new_state, "SP4", has_acted, buffered_input[1])
+						keep = !process_move(new_state, "SP4", has_acted)
 						
 		"Sp.uF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "SP3", has_acted)
 				
 		"Sp.H":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP5", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "SP5", has_acted)
 				
 		"ExSp.L":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP1[ex]", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "SP1[ex]", has_acted)
 				if keep:
-					keep = !process_move(new_state, "SP1", has_acted, buffered_input[1])
+					keep = !process_move(new_state, "SP1", has_acted)
 
 		"ExSp.F":
 			if !has_acted[0]:
 				if !Character.grounded:
-					keep = !process_move(new_state, "SP2[ex]", has_acted, buffered_input[1])
+					keep = !process_move(new_state, "SP2[ex]", has_acted)
 					if keep:
-						keep = !process_move(new_state, "SP2", has_acted, buffered_input[1])
+						keep = !process_move(new_state, "SP2", has_acted)
 				else:
 					if Character.unique_data.groundfin_count <= 1:
-						keep = !process_move(new_state, "SP4[ex]", has_acted, buffered_input[1])	
+						keep = !process_move(new_state, "SP4[ex]", has_acted)	
 						if keep:
-							keep = !process_move(new_state, "SP4", has_acted, buffered_input[1])
+							keep = !process_move(new_state, "SP4", has_acted)
 							
 		"ExSp.uF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP3[ex]", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "SP3[ex]", has_acted)
 				if keep:
-					keep = !process_move(new_state, "SP3", has_acted, buffered_input[1])
+					keep = !process_move(new_state, "SP3", has_acted)
 			
 		"ExSp.dF":
 			if !has_acted[0]:
 				if !Character.is_static():
 					keep = false
 				else:
-					keep = !process_move(new_state, "SP6[ex]", has_acted, buffered_input[1])
+					keep = !process_move(new_state, "SP6[ex]", has_acted)
 				
 		"ExSp.H":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP5[ex]", has_acted, buffered_input[1])
+				keep = !process_move(new_state, "SP5[ex]", has_acted)
 				if keep:
-					keep = !process_move(new_state, "SP5", has_acted, buffered_input[1])
+					keep = !process_move(new_state, "SP5", has_acted)
 						
 		# ---------------------------------------------------------------------------------
 		
@@ -526,7 +526,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 	# no need to return input_to_add since array is passed by reference
 
 	
-func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time): # return true if button consumed
+func process_move(new_state, attack_ref: String, has_acted: Array): # return true if button consumed
 	
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
 		return false # since this will trigger instant aerial
@@ -595,9 +595,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 			if attack_ref in STARTERS:
 				if Character.test_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
-						if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
-							Character.get_node("ModulatePlayer").play("unflinch_flash")
-							Character.perfect_chain = true
+#						if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
+#							Character.get_node("ModulatePlayer").play("unflinch_flash")
+#							Character.perfect_chain = true
 							
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
@@ -626,9 +626,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 					if Character.test_chain_combo("a" + attack_ref):
 						if Character.is_ex_valid("a" + attack_ref):
-							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
-								Character.get_node("ModulatePlayer").play("unflinch_flash")
-								Character.perfect_chain = true
+#							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
+#								Character.get_node("ModulatePlayer").play("unflinch_flash")
+#								Character.perfect_chain = true
 							Character.animate("a" + attack_ref + "Startup")
 							has_acted[0] = true
 							return true
@@ -644,9 +644,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array, buffer_time):
 				if attack_ref in STARTERS:
 					if Character.test_chain_combo(attack_ref): # grounded
 						if Character.is_ex_valid(attack_ref):
-							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
-								Character.get_node("ModulatePlayer").play("unflinch_flash")
-								Character.perfect_chain = true
+#							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
+#								Character.get_node("ModulatePlayer").play("unflinch_flash")
+#								Character.perfect_chain = true
 							Character.animate(attack_ref + "Startup")
 							has_acted[0] = true
 							return true
@@ -696,9 +696,9 @@ func update_uniqueHUD():
 func consume_one_air_dash(): # different characters can have different types of air_dash consumption
 	Character.air_dash = max(Character.air_dash - 1, 0)
 	
-func gain_one_air_dash(): # different characters can have different types of air_dash consumption
-	if Character.air_dash < get_stat("MAX_AIR_DASH"): # cannot go over
-		Character.air_dash += 1
+#func gain_one_air_dash(): # different characters can have different types of air_dash consumption
+#	if Character.air_dash < get_stat("MAX_AIR_DASH"): # cannot go over
+#		Character.air_dash += 1
 
 func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
@@ -809,8 +809,13 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 				hit_data.move_data.KB_angle = 180
 				hit_data.move_data.knockback = 130 * FMath.S
 				hit_data["pull"] = true
+				hit_data.move_data.atk_attr.append(Globals.atk_attr.DI_MANUAL_SEAL)
 				Character.animate("F2[h]PRec")
 
+
+func landed_a_hit2(_hit_data): # right before the end
+	pass
+	
 
 func being_hit(hit_data): # reaction, can change hit_data from here
 #	var defender = get_node(hit_data.defender_nodepath)
@@ -826,6 +831,9 @@ func being_hit(hit_data): # reaction, can change hit_data from here
 		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
 		update_uniqueHUD()
 		
+func being_hit2(_hit_data): # right before the end
+	pass
+
 				
 	
 	

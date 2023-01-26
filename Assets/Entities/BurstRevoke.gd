@@ -27,7 +27,7 @@ const MOVE_DATABASE = {
 		"fixed_blockstun" : 0,
 		"fixed_entity_hitstop" : 0,
 		"guard_drain": 0,
-		"guard_gain_on_combo" : 0,
+#		"guard_gain_on_combo" : 0,
 		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "pink",
