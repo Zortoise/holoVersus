@@ -94,8 +94,7 @@ func simulate():
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(1.0, 0.8, 0.3)	
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK: # for BlockReturn
-								if players[player_number].Animator.query_current(["BlockstunReturn", "aBlockstunReturn", \
-										"EXBlockstunReturn", "AirEXBlockstunReturn"]):
+								if players[player_number].Animator.query_current(["BlockstunReturn", "aBlockstunReturn"]):
 									player_stopped[player_number] = false
 									pips[player_number][pip_number].modulate = Color(1.0, 0.8, 0.3)	
 								else: continue

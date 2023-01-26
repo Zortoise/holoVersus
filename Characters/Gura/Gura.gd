@@ -94,9 +94,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"aSP5Startup", "aSP5[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"aSP5Active", "aSP5[ex]Active":
+		"aSP5Active", "aSP5[h]Active", "aSP5[h]bActive", "aSP5[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"aSP5Rec", "aSP5bRec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
+		"aSP5Rec", "aSP5bRec", "aSP5[h]Rec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"SP5bRec", "SP5b[ex]Rec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
@@ -792,7 +792,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			Character.animate("aL2Rec")
 		"L2":
 			Character.animate("L2Rec")
-		"aSP5":
+		"aSP5", "aSP5[h]b":
 			if hit_data.sweetspotted:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			else:
@@ -1339,10 +1339,19 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"SP5Startup", "aSP5Startup":
-			Character.animate("aSP5Active")
+			if Character.button_light in Character.input_state.pressed and Character.button_fierce in Character.input_state.pressed:
+				Character.animate("aSP5[h]Active")
+			else:
+				Character.animate("aSP5Active")
 		"SP5[ex]Startup", "aSP5[ex]Startup":
 			Character.animate("aSP5[ex]Active")
 		"aSP5Active":
+			Character.animate("aSP5Rec")
+		"aSP5[h]Active":
+			Character.animate("aSP5[h]Rec")
+		"aSP5[h]Rec":
+			Character.animate("aSP5[h]bActive")
+		"aSP5[h]bActive":
 			Character.animate("aSP5Rec")
 		"aSP5[ex]Active":
 			Character.animate("aSP5[ex]Rec")
@@ -1605,16 +1614,21 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true, "ex" : true})
 			Character.unique_data.groundfin_count += 2
 			
-		"aSP5Startup", "aSP5[ex]Startup":
+		"SP5Startup", "aSP5Startup", "aSP5[ex]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-		"aSP5Active", "aSP5[ex]Active":
+			Character.anim_friction_mod = 0
+		"aSP5Active", "aSP5[h]Active", "aSP5[ex]Active":
 			Character.velocity.set_vector(Character.facing * 200 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			if Character.grounded:
 				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"aSP5[h]Rec", "aSP5[h]bActive":
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
 		"aSP5Rec", "aSP5[ex]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)

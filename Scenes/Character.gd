@@ -72,12 +72,12 @@ const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
 
 const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
-const SWEETSTOP_GUARD_DRAIN_MOD = 130 # Guard Drain on non-hitstunned defender is increased on sweetspotted hit
+const SWEETSTOP_GUARD_DRAIN_MOD = 150 # Guard Drain on non-hitstunned defender is increased on sweetspotted hit
 const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
 const SWEETSPOT_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on sweetspotted hit
 
 const PUNISH_DMG_MOD = 150 # damage modifier on punish_hit
-const PUNISH_GUARD_DRAIN_MOD = 130 # Guard Drain on non-hitstunned defender is increased on a punish hit
+const PUNISH_GUARD_DRAIN_MOD = 150 # Guard Drain on non-hitstunned defender is increased on a punish hit
 const PUNISH_HITSTOP_MOD = 130 # punish hits has 30% more hitstop
 
 const BREAK_DMG_MOD = 150 # damage modifier on break_hit
@@ -521,7 +521,7 @@ func test2():
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + " " + str(perfect_chain) + "\n" + \
-		str(input_buffer) + "\n" + str(input_state) + "\nHitstun: " + str($HitStunTimer.time)
+		str(input_buffer) + "\n" + str(input_state) + "\nHitstunGrace: " + str($HitStunGraceTimer.time)
 			
 			
 func _process(_delta):
@@ -1367,7 +1367,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				if !is_blocking(): $PBlockCDTimer.simulate()
 				$BurstLockTimer.simulate()
 				$PosFlowSealTimer.simulate()
-				if !$HitStunTimer.is_running() and !$BlockStunTimer.is_running() and state != Globals.char_state.SEQUENCE_TARGET:
+				if !$HitStunTimer.is_running() and !is_blockstunned() and state != Globals.char_state.SEQUENCE_TARGET:
 					$HitStunGraceTimer.simulate()
 					if Globals.training_mode:
 						$TrainingRegenTimer.simulate()
@@ -2256,6 +2256,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 
 			
 func check_drop(): # called when character becomes airborne while in a grounded state
+	if anim_gravity_mod <= 0: return
 	match new_state:
 		
 		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
@@ -2679,6 +2680,10 @@ func is_blockstunned():
 	match state: # use non-new state
 		Globals.char_state.GROUND_BLOCKSTUN, Globals.char_state.AIR_BLOCKSTUN:
 			return true
+		Globals.char_state.GROUND_BLOCK:
+			if Animator.query_to_play(["BlockstunReturn"]): return true
+		Globals.char_state.AIR_BLOCK:
+			if Animator.query_to_play(["aBlockstunReturn"]): return true
 	return false
 	
 func is_aerial():
@@ -2787,7 +2792,7 @@ func burst_revoke_check(move_name):
 	else: # for recovery frames, only non-attack specials can be revoked, and only if opponent is not in hitstun/blockstun
 		if Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
 			var target = get_node(targeted_opponent_path)
-			if target.get_node("HitStunTimer").is_running() or target.get_node("BlockStunTimer").is_running():
+			if target.get_node("HitStunTimer").is_running() or target.is_blockstunned():
 				return false
 		else:
 			return false
@@ -3955,7 +3960,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if knockback_strength <= LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
+		if knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
 
 #			if !"entity_nodepath" in hit_data:
 #				face(dir_to_attacker) # turn towards attacker
@@ -3968,7 +3973,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			var no_impact := false
 			
 			if adjusted_atk_level <= 1: # for attack level 1 attacks
-				if knockback_strength > LAUNCH_THRESHOLD: knockback_strength = LAUNCH_THRESHOLD # just in case
+				if knockback_strength > LAUNCH_THRESHOLD: knockback_strength = LAUNCH_THRESHOLD - FMath.S # just in case
 				
 				if $HitStunTimer.is_running(): # for hitstunned defender
 					if state == Globals.char_state.LAUNCHED_HITSTUN:
@@ -4002,17 +4007,34 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #					face(dir_to_attacker) # turn towards attacker/entity if hit straight up/down
 #				else:
 #					face(-sign(knockback_unit_vec.x))
-				
-				if hit_data.hit_center.y >= position.y: # A/B depending on height hit
-					if grounded:
-						animate("FlinchAStop")
-					else:
-						animate("aFlinchAStop")
-				else:
-					if grounded:
-						animate("FlinchBStop")
-					else:
+
+				var temp_flag := false # alternate hitstun for multi-hit flinch during hitstop
+				if state == Globals.char_state.AIR_FLINCH_HITSTUN:
+					if Animator.query_current(["aFlinchAStop"]):
 						animate("aFlinchBStop")
+						temp_flag = true
+					elif Animator.query_current(["aFlinchBStop"]):
+						animate("aFlinchAStop")
+						temp_flag = true
+				elif state == Globals.char_state.GROUND_FLINCH_HITSTUN:
+					if Animator.query_current(["FlinchAStop"]):
+						animate("FlinchBStop")
+						temp_flag = true
+					elif Animator.query_current(["FlinchBStop"]):
+						animate("FlinchAStop")
+						temp_flag = true
+				
+				if !temp_flag:
+					if hit_data.hit_center.y >= position.y: # A/B depending on height hit
+						if grounded:
+							animate("FlinchAStop")
+						else:
+							animate("aFlinchAStop")
+					else:
+						if grounded:
+							animate("FlinchBStop")
+						else:
+							animate("aFlinchBStop")
 					
 		else: # launch
 			
@@ -4565,7 +4587,7 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	else:
 		if hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 40):
 			hitspark_level = 1
-		elif hit_data.knockback_strength <= LAUNCH_THRESHOLD:  # LAUNCH_THRESHOLD is scaled
+		elif hit_data.knockback_strength < LAUNCH_THRESHOLD:  # LAUNCH_THRESHOLD is scaled
 			hitspark_level = 2
 		elif hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 170):
 			hitspark_level = 3
