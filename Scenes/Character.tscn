@@ -57,7 +57,6 @@ margin_right = 10.0
 margin_bottom = 22.0
 
 [node name="DashLandDBox" parent="." instance=ExtResource( 6 )]
-visible = false
 margin_left = -10.0
 margin_top = 15.0
 margin_right = 10.0

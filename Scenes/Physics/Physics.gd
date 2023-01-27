@@ -219,6 +219,8 @@ func is_in_wall(soft_platform_dbox):
 		
 		
 func is_against_ledge(soft_platform_dbox, direction):
+	if "grounded" in self and !get("grounded"):
+		return false
 	if !Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms", "SoftPlatforms"], Vector2(direction, 1)):
 		return true
 	else:
@@ -273,15 +275,16 @@ func snap_up(collision_box, dashland_dbox): # move character upwards till dashla
 		if !Detection.detect_bool([dashland_dbox], ["SoftPlatforms"]):
 			get("velocity").y = 0 # reset vertical velocity
 			call("set_true_position")
-			return
+			return true
 		# else if no solid platform above, move up 1 pixel
 		elif !Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2.UP):
 			position.y -= 1
 		else: # hit a solid platform, stop immediately, revert all movement
 			position.y += x
-			return
+			return false
 	# if fail to snap up after moving the max allowed distance, return to starting position
 	position.y += max_movement
+	return false
 	
 
 

@@ -239,7 +239,7 @@ var modulate_animations = {
 		"timestamps" : {
 			0 :
 			{
-				"modulate" : Color(0.5, 0.2, 0.5),
+				"modulate" : Color(0.3, 0.0, 0.3),
 			},
 			2 :
 			{

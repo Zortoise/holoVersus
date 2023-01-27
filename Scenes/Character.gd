@@ -20,7 +20,7 @@ const EX_GAUGE_REGEN_AMOUNT = 18 # EX Gauge regened per second when idling
 const GUARD_GAUGE_FLOOR = -10000
 const GUARD_GAUGE_CEIL = 10000
 const GUARD_GAUGE_SWELL_RATE = 150 # exact GG gain per frame during hitstun
-const GUARD_GAUGE_DEGEN_AMOUNT = 100 # exact GG degened per frame when GG > 100% out of hitstun
+const GUARD_GAUGE_DEGEN_AMOUNT = 150 # exact GG degened per frame when GG > 100% out of hitstun
 const BURSTCOUNTER_EX_COST = 10000
 const BURSTESCAPE_GG_COST = 5000
 const BURSTREVOKE_GG_COST = 5000
@@ -110,7 +110,7 @@ const PERFECTBLOCK_HITSTOP = 10
 const PBlockTimer_WAIT_TIME = 5
 const PBlockCDTimer_WAIT_TIME = 30
 
-const SUPERARMOR_GUARD_DRAIN_MOD = 250
+const SUPERARMOR_GUARD_DRAIN_MOD = 150
 
 
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
@@ -523,7 +523,7 @@ func test0():
 func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
-		"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
+		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
 		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + "\nHitstunGrace: " + str($HitStunGraceTimer.time) + " " + str(GG_swell_flag) + \
 		" " + str(first_hit_flag)
@@ -920,7 +920,7 @@ func simulate2(): # only ran if not in hitstop
 				elif Animator.query(["DashBrake"]):
 					if Globals.trait.CHAIN_DASH in query_traits():
 						animate("CrouchTransit")
-				else:
+				elif !Animator.query(["WaveDashBrake"]):
 					animate("CrouchTransit")
 
 		# FASTFALL --------------------------------------------------------------------------------------------------
@@ -1492,6 +1492,9 @@ func buffer_actions():
 
 	if button_jump in input_state.just_pressed:
 		input_buffer.push_front([button_jump, Settings.input_buffer_time[player_ID]])
+		tap_memory.append([button_jump, TAP_MEMORY_DURATION])
+#	if button_jump in input_state.just_released:
+#		release_memory.append([button_jump, TAP_MEMORY_DURATION])
 		
 	# quick cancel from button release
 	if (button_up in input_state.just_released or button_down in input_state.just_released):
@@ -1657,10 +1660,18 @@ func is_button_pressed(button):
 	return false
 		
 func is_button_released(button):
-	if button in [button_special, button_unique]:
-		for release in release_memory:
-			if release[0] == button:
+	for release in release_memory:
+		if release[0] == button:
+			return true
+	return false
+	
+func is_button_tapped_in_last_X_frames(button, x_time):
+	for tap in tap_memory:
+		if tap[0] == button:
+			if TAP_MEMORY_DURATION - tap[1] <= x_time:
 				return true
+			else:
+				return false
 	return false
 	
 #func get_last_tapped_dir(): # called by entities
@@ -1744,8 +1755,7 @@ func process_input_buffer():
 						# JUMPING ON GROUND --------------------------------------------------------------------------------------------------
 						
 						Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
-							if button_down in input_state.pressed and !button_dash in input_state.pressed \
-								and soft_grounded: # cannot be pressing dash
+							if button_down in input_state.pressed and soft_grounded:
 			#							!Character.button_left in Character.input_state.pressed and \f
 			#							!Character.button_right in Character.input_state.pressed: # don't use dir
 								
@@ -2220,7 +2230,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("BlockCRec")
 				UniqChar.landing_sound()
 				
-			else: # landing during aDashBrake or AirDashDD
+			else: # landing during AirDashDD
 				animate("HardLanding")
 			
 		Globals.char_state.AIR_ATK_STARTUP: # can land cancel on the 1st few frames (unless EX/Super), will auto-buffer pressed attacks
@@ -2351,6 +2361,23 @@ func check_snap_up():
 	else:
 		return false
 		
+func snap_up_wave_land_check():
+	if velocity.y <= 0 and check_snap_up() and snap_up($PlayerCollisionBox, $DashLandDBox):
+		if dir != 0: # if holding direction, dash towards it
+			if facing != dir:
+				face(dir)
+			animate("WaveDashBrake")
+			velocity.x = dir * UniqChar.get_stat("GROUND_DASH_SPEED")
+			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			UniqChar.dash_sound()
+		else:
+			animate("SoftLanding")
+#			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			UniqChar.landing_sound()
+		return true
+	else:
+		return false
+		
 func get_feet_pos(): # return global position of the point the character is standing on, for SFX emission
 	return position + Vector2(0, $PlayerCollisionBox.rect_position.y + $PlayerCollisionBox.rect_size.y)
 	
@@ -2428,10 +2455,10 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 func ex_flash():# process ex flash
 	if is_attacking(): 	# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active/recovery
 		if get_move_name() in UniqChar.EX_FLASH_ANIM:
-			if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["EX_flash", "EX_flash2"]):
+			if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["EX_flash", "EX_flash2", "armor_flash"]):
 				return
 			else:
-				$ModulatePlayer.play("EX_flash")
+				$ModulatePlayer.play("EX_flash2")
 				return
 				
 	if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["EX_flash", "EX_flash2"]): # not doing an ex move, stop ex flash if ex flashing
@@ -3707,15 +3734,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.block_state = Globals.block_state.AIR_WRONG
 				hit_data["superarmored"] = true
 		Globals.char_state.GROUND_ATK_ACTIVE:
-			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
-				Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr(): # defender has superarmor
-				hit_data.block_state = Globals.block_state.GROUND_WRONG
-				hit_data["superarmored"] = true
+			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr:
+				if Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
+						("entity_nodepath" in hit_data and Globals.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr()): # defender has superarmor
+					hit_data.block_state = Globals.block_state.GROUND_WRONG
+					hit_data["superarmored"] = true
 		Globals.char_state.AIR_ATK_ACTIVE:
-			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr and \
-				Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr(): # defender has superarmor
-				hit_data.block_state = Globals.block_state.AIR_WRONG
-				hit_data["superarmored"] = true
+			if !Globals.atk_attr.ANTI_GUARD in hit_data.move_data.atk_attr:
+				if Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
+						("entity_nodepath" in hit_data and Globals.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr()):
+					hit_data.block_state = Globals.block_state.AIR_WRONG
+					hit_data["superarmored"] = true
 		
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN:
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
@@ -3789,7 +3818,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
 	
-	if !hit_data.weak_hit and hit_data.move_data.damage > 0: # cannot Punish Hit for weak hits and non-damaging moves like Burst
+	if !hit_data.weak_hit and hit_data.move_data.damage > 0 and !"superarmored" in hit_data: # cannot Punish Hit for weak hits and non-damaging moves like Burst
 		match state:
 			Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
 				Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
@@ -3998,6 +4027,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #	var knockback_unit_vec := Vector2(1, 0).rotated(knockback_dir)
 
 	var no_impact_and_vel_change := false
+	
+	if "superarmored" in hit_data:
+		var knock_dir := 0
+		var segment = Globals.split_angle(knockback_dir, Globals.angle_split.FOUR, hit_data.attack_facing)
+		match segment:
+			Globals.compass.E:
+				knock_dir = 1
+			Globals.compass.W:
+				knock_dir = -1
+		move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $SoftPlatformDBox, true)
+		set_true_position()
+		return
 		
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
 			
@@ -4050,23 +4091,23 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #				else:
 #					face(-sign(knockback_unit_vec.x))
 
-				var temp_flag := false # alternate hitstun for multi-hit flinch during hitstop
+				var alternate_flag := false # alternate hitstun for multi-hit flinch during hitstop
 				if state == Globals.char_state.AIR_FLINCH_HITSTUN:
 					if Animator.query_current(["aFlinchAStop"]):
 						animate("aFlinchBStop")
-						temp_flag = true
+						alternate_flag = true
 					elif Animator.query_current(["aFlinchBStop"]):
 						animate("aFlinchAStop")
-						temp_flag = true
+						alternate_flag = true
 				elif state == Globals.char_state.GROUND_FLINCH_HITSTUN:
 					if Animator.query_current(["FlinchAStop"]):
 						animate("FlinchBStop")
-						temp_flag = true
+						alternate_flag = true
 					elif Animator.query_current(["FlinchBStop"]):
 						animate("FlinchAStop")
-						temp_flag = true
+						alternate_flag = true
 				
-				if !temp_flag:
+				if !alternate_flag:
 					if hit_data.hit_center.y >= position.y: # A/B depending on height hit
 						if grounded:
 							animate("FlinchAStop")
@@ -4123,27 +4164,25 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					launch_starting_rot = PI/4
 					
 	else: # blocking
-		
-		if !"superarmored" in hit_data: # no turning for superarmored hits
 			
-			if !"entity_nodepath" in hit_data:
-				if !"multihit" in hit_data: # for multi-hit move only the last hit turns blocking defender for cross-ups
-					face(dir_to_attacker) # blocking non-entities always turn towards attacker only
+		if !"entity_nodepath" in hit_data:
+			if !"multihit" in hit_data: # for multi-hit move only the last hit turns blocking defender for cross-ups
+				face(dir_to_attacker) # blocking non-entities always turn towards attacker only
 #					var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
 #					match segment:
 #						Globals.compass.E:
 #							face(-1) # face other way
 #						Globals.compass.W:
 #							face(1)
-					
-			else: # multi-hit entities turn on 1st hit
+				
+		else: # multi-hit entities turn on 1st hit
 #				face(dir_to_attacker)
-				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
-				match segment:
-					Globals.compass.E:
-						face(-1) # face other way
-					Globals.compass.W:
-						face(1)
+			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
+			match segment:
+				Globals.compass.E:
+					face(-1) # face other way
+				Globals.compass.W:
+					face(1)
 		
 		if adjusted_atk_level <= 1:
 			pass # level 1 hit when defender is blocking just push them back
@@ -4154,9 +4193,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					animate("Blockstun")
 					success_block = true
 				Globals.block_state.GROUND_WRONG:
-					if !is_atk_startup():
-						animate("WBlockstun")
-						success_block = false
+					animate("WBlockstun")
+					success_block = false
 				Globals.block_state.GROUND_PERFECT:
 					animate("PBlockstun")
 					success_block = true
@@ -4164,9 +4202,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					animate("aBlockstun")
 					success_block = true
 				Globals.block_state.AIR_WRONG:
-					if !is_atk_startup():
-						animate("aWBlockstun")
-						success_block = false
+					animate("aWBlockstun")
+					success_block = false
 				Globals.block_state.AIR_PERFECT:
 					animate("aPBlockstun")
 					success_block = true
@@ -4474,6 +4511,9 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun and blockstun
 #	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
 #	if "entity_nodepath" in hit_data:
 #		attacker_or_entity = get_node(hit_data.entity_nodepath)
+
+	if "superarmored" in hit_data:
+		return 1
 	
 	var atk_level: int = hit_data.move_data.atk_level
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
@@ -4567,6 +4607,9 @@ func check_if_crossed_up(attacker, angle_to_atker: int):
 
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
+		
+	if "superarmored" in hit_data:
+		return PERFECTBLOCK_HITSTOP
 		
 	if hit_data.block_state != Globals.block_state.UNBLOCKED:
 		if "multihit" in hit_data: return 5 # blocked multihit attack has less blockstop

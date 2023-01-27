@@ -22,7 +22,7 @@ const FALL_GRAV_MOD = 100 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const GROUND_DASH_SPEED = 420 * FMath.S # duration in animation data
-const AIR_DASH_SPEED = 390 * FMath.S # duration in animation data
+const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
 #const SUPER_JUMP_MOD = 150
@@ -510,7 +510,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE],
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE, Globals.atk_attr.PROJ_ARMOR_ACTIVE],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},

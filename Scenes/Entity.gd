@@ -409,7 +409,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	if hit_data.block_state != Globals.block_state.UNBLOCKED: # block sound
 		match hit_data.block_state:
 			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-				play_audio("block3", {"vol" : -15})
+				if !"superarmored" in hit_data:
+					play_audio("block3", {"vol" : -15})
+				else:
+					play_audio("bling6", {"vol" : -6})
 			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
 				play_audio("bling2", {"vol" : -3, "bus" : "PitchDown"})
 			_: # normal block
