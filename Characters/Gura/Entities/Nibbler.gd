@@ -53,6 +53,7 @@ func init(_aux_data: Dictionary):
 
 		
 func refine_move_name(move_name):
+		
 	match move_name:
 		"bActive":
 			return "Active"

@@ -86,9 +86,9 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, ledge_s
 				if not_in_sequence(collision_box) and check_offstage(collision_box):
 					return [false, false, false]
 					
-				if !manual_move and collision_box.is_in_group("Players") and $HitStunTimer.is_running(): # check if player touched blast barrier
-					if check_blast_barriers(collision_box, Globals.compass.N) == true: # bounced
-						return [false, false, false]
+#				if !manual_move and collision_box.is_in_group("Players") and $HitStunTimer.is_running(): # check if player touched blast barrier
+#					if check_blast_barriers(collision_box, Globals.compass.N) == true: # bounced
+#						return [false, false, false]
 			else: # hit ceiling
 				if !manual_move:
 					get("velocity").y = 0
@@ -133,13 +133,13 @@ func move_sequence_player_to(new_position: Vector2): # called by grabber, also m
 	var results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
 	call("set_true_position")
 	
-	return results # [in_velocity, landing_check, collision_check, ledgedrop_check]
+	return results # [landing_check, collision_check, ledgedrop_check]
 	
 	
 func move_sequence_player_by(move_amount: Vector2): # in some special cases where move_sequence_player_to() is not enough
 	var results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
 	call("set_true_position")
-	return results # [in_velocity, landing_check, collision_check, ledgedrop_check]
+	return results # [landing_check, collision_check, ledgedrop_check]
 	
 	
 func not_in_sequence(collision_box): # when object is in sequence, will not be killed at ceiling and sides but will die at bottom
@@ -158,27 +158,29 @@ func check_offstage(collision_box):
 	return false
 	
 	
-func check_blast_barriers(collision_box, compass_dir): # return null if not touching barriers, return bounced velocity if so
-	if call("get_damage_percent") >= 75: # no barrier if damage value too high
-		return false
-	match compass_dir:
+#func check_blast_barriers(collision_box, compass_dir): # return null if not touching barriers, return bounced velocity if so
+#	if call("get_damage_percent") >= 100: # no barrier if damage value too high
+#		return false
+#	match compass_dir:
 #		Globals.compass.W:
 #			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierL):
 #				return null
 #			call("bounce_dust", compass_dir)
-#			return Vector2(-in_velocity.x, in_velocity.y)
+#			get("velocity").x = -FMath.percent(get("velocity").x, 75)
+#			return true
 #		Globals.compass.E:
 #			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierR):
 #				return null
 #			call("bounce_dust", compass_dir)
-#			return Vector2(-in_velocity.x, in_velocity.y)
-		Globals.compass.N:
-			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierU):
-				return false
-			call("bounce_dust", compass_dir)
-			get("velocity").y = -FMath.percent(get("velocity").y, 25) # bounce down
-			return true
-	return false # just in case
+#			get("velocity").x = -FMath.percent(get("velocity").x, 75)
+#			return true
+#		Globals.compass.N:
+#			if !Detection.detect_duo(collision_box, Globals.Game.blastbarrierU):
+#				return false
+#			call("bounce_dust", compass_dir)
+#			get("velocity").y = -FMath.percent(get("velocity").y, 25) # bounce down
+#			return true
+#	return false # just in case
 
 	
 # no need to get character collision for up and down movement for now
@@ -202,8 +204,15 @@ func get_colliding_characters_side(collision_box, direction):
 	
 # return true if a wall in "direction", 1 is right, -1 is left
 func is_against_wall(collision_box, soft_platform_dbox, direction):
-	if Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2(direction, 0)) and \
-			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+	var to_check := ["SolidPlatforms", "BlastBarriers"]
+	if collision_box.is_in_group("Players") and call("is_killable", get("velocity").x):
+		to_check = ["SolidPlatforms"]
+		
+	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):
+		to_check = ["SolidPlatforms"]
+		
+	if Detection.detect_bool([collision_box], to_check, Vector2(direction, 0)) and \
+			!Detection.detect_bool([soft_platform_dbox], to_check):
 		if has_method("check_passthrough") and call("check_passthrough"):
 			return false
 		return true
@@ -228,8 +237,15 @@ func is_against_ledge(soft_platform_dbox, direction):
 		
 		
 func is_against_ceiling(collision_box, soft_platform_dbox): # return true if there is a solid platform above
-	if Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2.UP) and \
-			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+	var to_check := ["SolidPlatforms", "BlastBarriers"]
+	if collision_box.is_in_group("Players") and call("is_killable", get("velocity").y):
+		to_check = ["SolidPlatforms"]
+		
+	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):
+		to_check = ["SolidPlatforms"]
+		
+	if Detection.detect_bool([collision_box], to_check, Vector2.UP) and \
+			!Detection.detect_bool([soft_platform_dbox], to_check):
 		if has_method("check_passthrough") and call("check_passthrough"):
 			return false
 #		if collision_box.is_in_group("Players") and get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:

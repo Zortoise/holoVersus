@@ -129,4 +129,5 @@ valign = 1
 [connection signal="hide_SfxOver" from="SpritePlayer" to="." method="hide_SfxOver"]
 [connection signal="hide_SfxUnder" from="SpritePlayer" to="." method="hide_SfxUnder"]
 [connection signal="anim_finished" from="ModulatePlayer" to="." method="_on_ModulatePlayer_anim_finished"]
+[connection signal="anim_started" from="ModulatePlayer" to="." method="_on_ModulatePlayer_anim_started"]
 [connection signal="anim_finished" from="FadePlayer" to="." method="_on_FadePlayer_anim_finished"]

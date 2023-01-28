@@ -48,8 +48,15 @@ func rotate(angle_int: int): # rotate vector by a certain angle, angle is in int
 	
 # ------------------------------------------------------------------------------------------------------------------------------
 	
-func angle() -> int: # get angle of a vector by using reverse lookup on TANGENT_TABLE
-	if x == 0 and y == 0: return 0 # zero vector, just in case
+func angle(bias = null) -> int: # get angle of a vector by using reverse lookup on TANGENT_TABLE
+	if x == 0 and y == 0:
+		if bias != null and bias in [1, -1]:
+			if bias == 1:
+				return 0
+			else:
+				return 180
+		else:
+			return 0 # zero vector, just in case
 	
 	if abs(y) > abs(x * FMath.TANGENT_INF_REF): # x is too small and y/x approaches infinity, do not divide y by x
 		if y >= 0:

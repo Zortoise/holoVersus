@@ -10,8 +10,11 @@ const SPEED = 340 * FMath.S # ground speed
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
+const VAR_JUMP_TIME = 8 # frames after jumping where holding jump will reduce gravity
 const JUMP_HORIZONTAL_SPEED = 100 * FMath.S
-const AIR_JUMP_MOD = 90 # reduce height of air jumps
+const AIR_JUMP_HEIGHT_MOD = 90 # percentage of JUMP_SPEED, reduce height of air jumps
+const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
+const WALL_AIR_JUMP_MOD = 120 # percentage of SPEED when wall jumping
 const GRAVITY_MOD = 100 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 720 # affect terminal velocity downward
 const FASTFALL_MOD = 125 # fastfall speed, mod of terminal velocity
@@ -28,16 +31,16 @@ const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gai
 #const SUPER_JUMP_MOD = 150
 const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
-const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
-const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
+#const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
+#const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 950
-const GUARD_GAUGE_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
+const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
 #const GUARD_GAUGE_DEGEN_AMOUNT = 90 # exact GG degened per frame when GG > 100%
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 35 # % of damage taken as chip damage when blocking (average is 0.25)
 #const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
 const GUARD_DRAIN_MOD = 120 # modify Guard Drain when blocking attacks/taking stray hits, tankier characters have lower GUARD_GAUGE_LOSS_MOD
-const AIR_BLOCK_GG_COST = -2000 # Guard Gauge drain when starting an Air Block
+#const AIR_BLOCK_GG_COST = -2000 # Guard Gauge drain when starting an Air Block
 const TRAITS = [Globals.trait.CHAIN_DASH, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
 
 const SDHitspark_COLOR = "blue"
@@ -63,7 +66,7 @@ const SUPERS = []
 const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
-const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
+const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
 		"SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB"]
 #const EX_FLASH_ANIM = ["H", "Hb"]
 
@@ -218,7 +221,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.NO_REPEAT_NORMAL, Globals.atk_attr.NO_CHAIN],
+		"atk_attr" : [Globals.atk_attr.NO_REPEAT_MOVE, Globals.atk_attr.NO_CHAIN],
 		"move_sound" : { ref = "whoosh1", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
 	},
@@ -255,7 +258,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN],
+		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_REPEAT_MOVE],
 		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
@@ -272,45 +275,11 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES],
+		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES, 
+				Globals.atk_attr.NO_REPEAT_MOVE],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
-	"H[h]" : {
-		"atk_type" : Globals.atk_type.HEAVY,
-		"root" : "H",
-		"hitcount" : 1,
-		"damage" : 40,
-		"knockback" : 150 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 2,
-		"priority": 5,
-		"guard_drain": 1500,
-#		"guard_gain_on_combo" : 3500,
-		"EX_gain": 1000,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
-		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN],
-		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
-		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
-	},
-	"Hb[h]" : {
-		"atk_type" : Globals.atk_type.HEAVY,
-		"root" : "Hb",
-		"chain_starter" : "H[h]",
-		"hitcount" : 1,
-		"damage" : 70,
-		"knockback" : 550 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 6,
-		"priority": 5,
-		"EX_gain": 1500,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
-		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES],
-		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
-	},
+
 	"aL1" : {
 		"atk_type" : Globals.atk_type.LIGHT,
 		"hitcount" : 1,
@@ -379,7 +348,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -72,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.ANTI_AIR],
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -10} },
 	},
@@ -397,7 +366,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 45,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DESTROY_ENTITIES],
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DESTROY_ENTITIES, Globals.atk_attr.PUNISH_CRUSH],
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
 	},
@@ -531,8 +500,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, \
-				Globals.atk_attr.NO_PUSHBACK],
+		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_PUSHBACK],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
@@ -551,7 +519,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	"aSP3[h]" : {
@@ -570,8 +538,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, \
-				Globals.atk_attr.NO_PUSHBACK],
+		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_PUSHBACK],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
@@ -591,7 +558,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK],
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	"aSP3[ex]" : {
@@ -609,8 +576,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, \
-				Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.SEMI_INVUL_GROUND_STARTUP],
+		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_PUSHBACK],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
@@ -628,7 +594,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.SEMI_INVUL_STARTUP],
+		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	

@@ -65,7 +65,8 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY],
+		"atk_attr" : [Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY, \
+				Globals.atk_attr.STRONG_ENTITY],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
@@ -282,6 +283,7 @@ func turn_to_enemy():
 	
 
 func refine_move_name(move_name):
+		
 	match move_name:
 		"[c1]Spawn", "a[c1]Spawn", "a[c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE", "[c1]TurnESE":
 			return "[c1]Active"
@@ -336,10 +338,9 @@ func query_move_data(move_name) -> Dictionary:
 	return move_data
 	
 
-func query_atk_attr(move_name, skip_refine := false):
+func query_atk_attr(move_name):
 	
-	if !skip_refine:
-		move_name = refine_move_name(move_name)
+	move_name = refine_move_name(move_name)
 
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)

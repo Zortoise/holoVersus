@@ -78,7 +78,8 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active":
+		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active", \
+				"SP3Active", "SP3[h]Active", "SP3[ex]Active", "SP3bActive", "SP3b[h]Active", "SP3b[ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
 		"aSP3Rec", "aSP3[ex]Rec", "SP3Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
@@ -135,11 +136,11 @@ func simulate():
 	
 	# QUICK CANCEL AIR DASH FROM AIR BLOCK ------------------------------------------------------------------------------------
 	
-	if Character.state == Globals.char_state.AIR_BLOCK:
-		if Character.button_dash in Character.input_state.pressed and (Character.dir != 0 or Character.v_dir != 0):
-			if Animator.query_to_play(["aBlockStartup"]):
-				if Character.air_dash > 0:
-					Character.animate("aDashTransit")
+#	if Character.state == Globals.char_state.AIR_BLOCK:
+#		if Character.button_dash in Character.input_state.pressed and (Character.dir != 0 or Character.v_dir != 0):
+#			if Animator.query_to_play(["aBlockStartup"]):
+#				if Character.air_dash > 0:
+#					Character.animate("aDashTransit")
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 
@@ -273,7 +274,7 @@ func process_instant_actions():
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 			
-		if "BitemarkTriggerU" in Character.instant_actions:
+		if "BitemarkTriggerU" in Character.instant_actions and get_node(Character.targeted_opponent_path).state != Globals.char_state.DEAD:
 			if Character.unique_data.nibbler_count > 0:
 				var spawn_point = get_node(Character.targeted_opponent_path).position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
@@ -283,7 +284,7 @@ func process_instant_actions():
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
 						
-		if "BitemarkTriggerD" in Character.instant_actions:
+		if "BitemarkTriggerD" in Character.instant_actions and get_node(Character.targeted_opponent_path).state != Globals.char_state.DEAD:
 			if Character.unique_data.nibbler_count > 0:
 				var spawn_point = Character.position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
@@ -293,7 +294,7 @@ func process_instant_actions():
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
 						
-		if "BitemarkTrigger" in Character.instant_actions:
+		if "BitemarkTrigger" in Character.instant_actions and get_node(Character.targeted_opponent_path).state != Globals.char_state.DEAD:
 			if Character.unique_data.nibbler_count > 0:
 #				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
 #				spawn_point.x = round(spawn_point.x)
@@ -345,7 +346,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					if Animator.query(["aDashBrake"]) and !Globals.trait.AIR_CHAIN_DASH in query_traits():
 						continue
 					
-					if Character.air_dash > 0 or Character.get_node("HitStunGraceTimer").is_running():
+					if Character.air_dash > 0:
 						
 						if Character.v_dir > 0 and Character.button_jump in Character.input_state.pressed and \
 								Character.is_button_tapped_in_last_X_frames(Character.button_jump, 1) and \
@@ -513,9 +514,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			
 		"ExSp.dF":
 			if !has_acted[0]:
-				if !Character.is_static():
-					keep = false
-				else:
+				if !Character.impulse_used:
 					keep = !process_move(new_state, "SP6[ex]", has_acted)
 				
 		"ExSp.H":
@@ -719,6 +718,11 @@ func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
 		"Dash", "aDash", "aDashD", "aDashU":
 			Character.afterimage_trail()
+		"Tech", "GuardTech":
+			if Animator.time <= 15:
+				Character.afterimage_trail(null, 0.6, 10, Globals.afterimage_shader.WHITE)
+			else:
+				Character.afterimage_trail()
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			Character.afterimage_trail()
 			
@@ -731,6 +735,7 @@ func query_traits(): # may have special conditions
 	return TRAITS
 			
 func refine_move_name(move_name):
+		
 	match move_name:
 		"L2b":
 			return "L2"
@@ -742,6 +747,10 @@ func refine_move_name(move_name):
 			return "F3"
 		"F3[h]":
 			return "F3"
+		"H[h]":
+			return "H"
+		"Hb[h]":
+			return "Hb"
 		"aL2b", "aL2Land":
 			return "aL2"
 		"aF1[h]":
@@ -750,10 +759,16 @@ func refine_move_name(move_name):
 			return "SP1"
 		"SP3":
 			return "aSP3"
+		"SP3b":
+			return "aSP3b"
 		"SP3[h]": 
 			return "aSP3[h]"
+		"SP3b[h]": 
+			return "aSP3b[h]"
 		"SP3[ex]": 
 			return "aSP3[ex]"
+		"SP3b[ex]": 
+			return "aSP3b[ex]"
 		"SP5", "SP5b", "aSP5b":
 			return "aSP5"
 		"SP5[ex]", "SP5b[ex]", "aSP5b[ex]":
@@ -765,6 +780,7 @@ func refine_move_name(move_name):
 			
 func query_move_data(move_name) -> Dictionary: # can change under conditions
 	
+	var orig_move_name = move_name
 	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
@@ -772,16 +788,15 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-	move_data["atk_attr"] = query_atk_attr(move_name, true)
+	move_data["atk_attr"] = query_atk_attr(orig_move_name)
 	
 	return move_data
 	
 	
-func query_atk_attr(move_name, skip_refine := false) -> Array: # can change under conditions
+func query_atk_attr(move_name) -> Array: # can change under conditions
 
 	var orig_move_name = move_name
-	if !skip_refine:
-		move_name = refine_move_name(move_name)
+	move_name = refine_move_name(move_name)
 
 	var atk_attr := []
 	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
@@ -793,6 +808,10 @@ func query_atk_attr(move_name, skip_refine := false) -> Array: # can change unde
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		"F3[h]":
 			atk_attr.append(Globals.atk_attr.SUPERARMOR_STARTUP)
+		"SP3", "SP3b", "SP3[h]", "SP3b[h]": 
+			atk_attr.append_array([Globals.atk_attr.ANTI_AIR])
+		"SP3[ex]", "SP3b[ex]": 
+			atk_attr.append_array([Globals.atk_attr.ANTI_AIR, Globals.atk_attr.SEMI_INVUL_STARTUP])
 		
 	return atk_attr
 	
@@ -905,7 +924,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.velocity.set_vector(0, 0)
 			Partner.animate("aSeqFlinchAFreeze")
 			Partner.face(-Character.facing)
-			Partner.get_node("ModulatePlayer").play("tech_flash")
+			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
 			Character.play_audio("bling6", {"vol":-20})
 		"SP6[ex]SeqB":
 			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
@@ -971,17 +990,18 @@ func move_sequence_target(new_position): # move sequence_target to new position
 	if new_position == null: return # no grab point
 	
 	var Partner = get_node(Character.targeted_opponent_path)
-	var results = Partner.move_sequence_player_to(new_position) # [in_velocity, landing_check, collision_check, ledgedrop_check]
+	var results = Partner.move_sequence_player_to(new_position) # [landing_check, collision_check, ledgedrop_check]
 	
-	if results[1]: # Grabbed hit the ground, ends sequence step if it is triggered by Grabbed being grounded
+	if results[0]: # Grabbed hit the ground, ends sequence step if it is triggered by Grabbed being grounded
 		if end_sequence_step("target_ground"):
 			return
 			
-	if results[2]: # Grabbed hit the wall/ceiling/ground outside ground trigger, reposition Grabber
+	if results[1]: # Grabbed hit the wall/ceiling/ground outside ground trigger, reposition Grabber
 		var reposition = Partner.position + (Character.position - Animator.query_point("grabpoint"))
-		var reposition_results = Character.move_sequence_player_to(reposition) # [in_velocity, landing_check, collision_check, ledgedrop_check]
-		if reposition_results[2]: # fail to reposition properly
+		var reposition_results = Character.move_sequence_player_to(reposition) # [landing_check, collision_check, ledgedrop_check]
+		if reposition_results[1]: # fail to reposition properly
 			end_sequence_step("break") # break grab
+			
 			
 func sequence_fallthrough(): # which step in sequence ignore soft platforms
 	match Animator.to_play_animation:
@@ -1301,7 +1321,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("SP3[h]Startup")
 			else:
-				Character.animate("aSP3Active")
+				Character.animate("SP3Active")
 				Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 						{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3Startup":
@@ -1314,7 +1334,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 #		"aSP3bStartup":
 #			Character.animate("aSP3Active")
 		"SP3[h]Startup":
-			Character.animate("aSP3[h]Active")
+			Character.animate("SP3[h]Active")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3[h]Startup":
@@ -1325,7 +1345,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP3bActive")
 		"aSP3[h]Active":
 			Character.animate("aSP3b[h]Active")
-		"aSP3bActive", "aSP3b[h]Active":
+		"SP3Active":
+			Character.animate("SP3bActive")
+		"SP3[h]Active":
+			Character.animate("SP3b[h]Active")
+		"aSP3bActive", "aSP3b[h]Active", "SP3bActive", "SP3b[h]Active":
 			Character.animate("aSP3Rec")
 		"aSP3Rec":
 			Character.animate("FallTransit")
@@ -1333,7 +1357,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"SP3[ex]Startup":
-			Character.animate("aSP3[ex]Active")
+			Character.animate("SP3[ex]Active")
 			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
 					{"facing":Character.facing, "grounded":true, "back":true})
 		"aSP3[ex]Startup":
@@ -1343,6 +1367,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
+			Character.animate("aSP3[ex]Rec")
+		"SP3[ex]Active":
+			Character.animate("SP3b[ex]Active")
+		"SP3b[ex]Active":
 			Character.animate("aSP3[ex]Rec")
 		"aSP3[ex]Rec":
 			Character.animate("FallTransit")
@@ -1607,7 +1635,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			Character.velocity.x *= 0.5
 #			Character.velocity.y = -500
 #			Character.anim_gravity_mod = 0.0
-		"aSP3Active":
+		"aSP3Active", "SP3Active":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = -500 * FMath.S
 			Character.anim_gravity_mod = 0
@@ -1615,7 +1643,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			Character.velocity.x *= 0.5
 #			Character.velocity.y = -700
 #			Character.anim_gravity_mod = 0.0
-		"aSP3[h]Active", "aSP3[ex]Active":
+		"aSP3[h]Active", "aSP3[ex]Active", "SP3[h]Active", "SP3[ex]Active":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = -700 * FMath.S
 			Character.anim_gravity_mod = 0
@@ -1689,6 +1717,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 func start_audio(anim_name):
 	if Character.is_atk_active():
 		var move_name = anim_name.trim_suffix("Active")
+		if !move_name in MOVE_DATABASE:
+			move_name = refine_move_name(move_name)
 		if move_name in MOVE_DATABASE:
 			if "move_sound" in MOVE_DATABASE[move_name]:
 				if !MOVE_DATABASE[move_name].move_sound is Array:

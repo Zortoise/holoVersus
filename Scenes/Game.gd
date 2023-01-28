@@ -8,7 +8,7 @@ signal game_set
 signal time_over
 
 
-const CAMERA_MARGIN = 55 # camera limit distance from blast zone
+#const CAMERA_MARGIN = 55 # camera limit distance from blast zone
 const MARGIN_TO_TILT_KILLBLAST = 100
 const KILLBLAST_TILT_ANGLE = PI/7
 const HUD_FADE = 0.3
@@ -33,11 +33,13 @@ var stage
 var stage_box
 #var blastbarrierL
 #var blastbarrierR
-var blastbarrierU
+#var blastbarrierU
 var respawn_points = []
 var middle_point
-var left_ledge_point
-var right_ledge_point
+#var left_ledge_point
+#var right_ledge_point
+var left_corner
+var right_corner
 var P1_position: Vector2
 var P1_facing: int
 var P2_position: Vector2
@@ -99,7 +101,7 @@ func _ready():
 	
 	Globals.Game = self
 	Globals.pausing = false
-	Globals.zoom_level = 1.0
+	Globals.zoom_level = 2.0
 	Globals.winner = []
 	Globals.debug_mode = false
 	Globals.match_input_log.reset()
@@ -138,7 +140,6 @@ func setup():
 	stage.init()
 
 	set_camera_limit()
-	$CameraRef.position = Vector2.ZERO
 	
 	HUD = get_node("../../../HUD")
 	frame_viewer = get_node("../../../HUD/FrameViewer")
@@ -179,14 +180,22 @@ func setup():
 	
 	for player in $Players.get_children(): # each player target a random other player
 		player.initial_targeting()
+		
+	var players_position := Vector2.ZERO
+	for player in $Players.get_children():
+		players_position += player.position # add together to find midpoint
+			
+	var point_btw_char = players_position / $Players.get_child_count() # get midpoint
+	point_btw_char.y -= get_viewport_rect().size.y / 10.0 # lower it by a little
+	$CameraRef.position = point_btw_char
 
 # --------------------------------------------------------------------------------------------------
 
 func set_camera_limit():
-	$CameraRef/Camera2D.limit_left = stage_box.rect_global_position.x + CAMERA_MARGIN
-	$CameraRef/Camera2D.limit_right = stage_box.rect_global_position.x + stage_box.rect_size.x - CAMERA_MARGIN
-	$CameraRef/Camera2D.limit_top = stage_box.rect_global_position.y + CAMERA_MARGIN
-	$CameraRef/Camera2D.limit_bottom = stage_box.rect_global_position.y + stage_box.rect_size.y - CAMERA_MARGIN
+	$CameraRef/Camera2D.limit_left = stage_box.rect_global_position.x
+	$CameraRef/Camera2D.limit_right = stage_box.rect_global_position.x + stage_box.rect_size.x
+	$CameraRef/Camera2D.limit_top = stage_box.rect_global_position.y
+	$CameraRef/Camera2D.limit_bottom = stage_box.rect_global_position.y + stage_box.rect_size.y
 
 # MAIN LOOP (TESTING STUFF) --------------------------------------------------------------------------------------------------
 
@@ -427,7 +436,7 @@ func _physics_process(_delta):
 					if player.current_damage_value <= damage_value_of_winner: # whoever has less damage wins
 						winner_ID = player.player_ID
 						damage_value_of_winner = player.current_damage_value		
-			Globals.winner = [winner_ID, get_player_node(winner_ID).UniqueCharacter.NAME]
+			Globals.winner = [winner_ID, get_player_node(winner_ID).UniqChar.NAME]
 					
 
 func _process(delta):
@@ -437,11 +446,17 @@ func _process(delta):
 	
 	var players_position := Vector2.ZERO
 	
+	var focused_player_count := 0
 
 	for player in $Players.get_children():
+		if player.state == Globals.char_state.DEAD:
+			var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
+			if time_diff > 30 or time_diff < 0:
+				continue
+		focused_player_count += 1
 		players_position += player.position # add together to find midpoint
 			
-	var point_btw_char = players_position / $Players.get_child_count() # get midpoint
+	var point_btw_char = players_position / focused_player_count # get midpoint
 	point_btw_char.y -= get_viewport_rect().size.y / 10.0 # lower it by a little
 	$CameraRef.position = point_btw_char
 	
@@ -888,7 +903,7 @@ func get_killblast_angle_and_screenshake(body_position):
 			out_angle -= KILLBLAST_TILT_ANGLE
 		elif body_position.x >= right_wall_lvl - MARGIN_TO_TILT_KILLBLAST:
 			out_angle += KILLBLAST_TILT_ANGLE
-		set_screenshake(12)
+		set_screenshake(6)
 			
 	elif body_position.y <= ceil_lvl:
 		out_angle = PI
@@ -896,7 +911,7 @@ func get_killblast_angle_and_screenshake(body_position):
 			out_angle += KILLBLAST_TILT_ANGLE
 		elif body_position.x >= right_wall_lvl - MARGIN_TO_TILT_KILLBLAST:
 			out_angle -= KILLBLAST_TILT_ANGLE
-		set_screenshake(12)
+		set_screenshake(6)
 			
 	elif body_position.x <= left_wall_lvl:
 		out_angle = -PI/2
@@ -1123,18 +1138,27 @@ func defender_anti_airing(hitbox, hurtbox):
 	var attacker = get_node(hitbox.owner_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
 	
-	match hitbox.move_data.atk_type: # only normal attacks can be anti-aired
-		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
-	
-			if defender.new_state in [Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, \
-					Globals.char_state.AIR_ATK_ACTIVE]: # for airborne defender using anti-air, only anti-air during active frames
-				
-				var has_anti_air_attr = Globals.atk_attr.ANTI_AIR in defender.query_atk_attr()
-				if has_anti_air_attr and (!attacker.grounded or Globals.atk_attr.AIR_ATTACK in attacker.query_atk_attr(hitbox.move_name)):
-					# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
-					# and the attacker must be using an AIR_ATTACK in air or on ground, or be airborne
+	if defender.is_atk_startup() or defender.is_atk_active():
+		
+		var defender_move_data = defender.query_move_data()
+		
+		if Globals.atk_attr.ANTI_AIR in defender_move_data.atk_attr and \
+				(!attacker.grounded or Globals.atk_attr.AIR_ATTACK in hitbox.move_data.atk_attr):
+			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
+			# and the attacker must be using an AIR_ATTACK in air or on ground, or be airborne
+			var defender_tier = Globals.atk_type_to_tier(defender_move_data.atk_type)
+			var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
+			
+			if attacker_tier == 0: return true # air normals can be anti-aired by anything
+			elif attacker_tier > defender_tier: return false # cannot anti-air attacks of higher tier
+			elif attacker_tier == defender_tier:
+				if hitbox.move_data.priority >= defender_move_data.priority:
+					return false # if same tier, cannot anti-air attacks of equal or higher priority
+				else:
 					return true # defender successfully anti-aired
+					
 	return false
+	
 	
 func defender_semi_invul(hitbox, hurtbox):
 	var attacker_or_entity
@@ -1142,39 +1166,53 @@ func defender_semi_invul(hitbox, hurtbox):
 		attacker_or_entity = get_node(hitbox.owner_nodepath)
 	else:
 		attacker_or_entity = get_node(hitbox.entity_nodepath)
+		
+	if Globals.atk_attr.UNBLOCKABLE in hitbox.move_data.atk_attr or \
+			hitbox.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
+		return false # defender's semi-invul failed
+		
 	var defender = get_node(hurtbox.owner_nodepath)
-	if defender.new_state in [Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP]:
-		if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr() or \
-				(defender.grounded and Globals.atk_attr.SEMI_INVUL_GROUND_STARTUP in defender.query_atk_attr()):
-			if Globals.atk_attr.UNBLOCKABLE in attacker_or_entity.query_atk_attr(hitbox.move_name) or \
-					hitbox.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
-				return false # defender's semi-invul failed
-			else:
-				if "chain_combo" in attacker_or_entity: # prevent Burst Revoke
-					attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
-				return true # defender's semi-invul succeeded
+	var defender_semi_invuln := false
+	match defender.new_state:
+		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+			if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr():
+				defender_semi_invuln = true
+		Globals.char_state.AIR_RECOVERY:
+			if defender.Animator.query_to_play(["Tech"]) and defender.Animator.time <= 15:
+				defender_semi_invuln = true
+			if defender.Animator.query_to_play(["GuardTech"]) and defender.Animator.time <= 6:
+				defender_semi_invuln = true
+				
+	if defender_semi_invuln:
+		if "chain_combo" in attacker_or_entity: # prevent Burst Revoke on iframed attack
+			attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
+		return true # defender's semi-invul succeeded
+
 	return false
+	
 	
 func defender_backdash(hitbox, hurtbox):
 	var attacker = get_node(hitbox.owner_nodepath)
 	var defender = get_node(hurtbox.owner_nodepath)
-	var attacker_attr = attacker.query_atk_attr(hitbox.move_name)
+	var attacker_attr = hitbox.move_data.atk_attr
 	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
 		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
 				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
-			if defender.facing == sign(defender.position.x - attacker.position.x) and \
+			if defender.Animator.query_to_play(["Tech", "GuardTech"]):
+				return false
+			elif defender.facing == sign(defender.position.x - attacker.position.x) and \
 					!defender.Animator.query_to_play(["aDashUU", "aDashDD"]):
 				return true # defender's backdash succeeded
 	return false # defender's backdash failed
 	
 func defender_command_grab_dodge(hitbox, hurtbox):
-	var attacker_or_entity
-	if !"entity_nodepath" in hitbox: # not entity
-		attacker_or_entity = get_node(hitbox.owner_nodepath)
-	else:
-		attacker_or_entity = get_node(hitbox.entity_nodepath) # rare entity command grab
+#	var attacker_or_entity
+#	if !"entity_nodepath" in hitbox: # not entity
+#		attacker_or_entity = get_node(hitbox.owner_nodepath)
+#	else:
+#		attacker_or_entity = get_node(hitbox.entity_nodepath) # rare entity command grab
 	var defender = get_node(hurtbox.owner_nodepath)
-	if Globals.atk_attr.COMMAND_GRAB in attacker_or_entity.query_atk_attr(hitbox.move_name):
+	if Globals.atk_attr.COMMAND_GRAB in hitbox.move_data.atk_attr:
 		if defender.new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_BLOCKSTUN, \
 				Globals.char_state.AIR_BLOCKSTUN]:
 			return true # defender's evaded command grab
@@ -1189,6 +1227,10 @@ func handle_zoom(delta):
 	var array_of_vertical_diff = []
 	
 	for player in $Players.get_children():
+		if player.state == Globals.char_state.DEAD:
+			var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
+			if time_diff > 30 or time_diff < 0:
+				continue
 		array_of_horizontal_diff.append(abs(player.position.x - $CameraRef.position.x))
 		array_of_vertical_diff.append(abs(player.position.y - $CameraRef.position.y))
 	
@@ -1241,12 +1283,11 @@ func screenshake():
 	else:
 		$CameraRef/Camera2D.offset_v = -screen_shake_amount
 	
-	$CameraRef/Camera2D.limit_left = stage_box.rect_global_position.x + CAMERA_MARGIN - $CameraRef/Camera2D.offset_h
-	$CameraRef/Camera2D.limit_right = stage_box.rect_global_position.x + stage_box.rect_size.x - CAMERA_MARGIN + \
-			$CameraRef/Camera2D.offset_h
-	$CameraRef/Camera2D.limit_top = stage_box.rect_global_position.y + CAMERA_MARGIN - $CameraRef/Camera2D.offset_v
-	$CameraRef/Camera2D.limit_bottom = stage_box.rect_global_position.y + stage_box.rect_size.y - CAMERA_MARGIN + \
-			$CameraRef/Camera2D.offset_v
+	$CameraRef/Camera2D.limit_left = stage_box.rect_global_position.x - $CameraRef/Camera2D.offset_h
+	$CameraRef/Camera2D.limit_right = stage_box.rect_global_position.x + stage_box.rect_size.x + $CameraRef/Camera2D.offset_h
+	$CameraRef/Camera2D.limit_top = stage_box.rect_global_position.y - $CameraRef/Camera2D.offset_v
+	$CameraRef/Camera2D.limit_bottom = stage_box.rect_global_position.y + stage_box.rect_size.y + $CameraRef/Camera2D.offset_v
+	
 	
 func set_screenshake(amount = 5):
 	if amount > screen_shake_amount:
@@ -1384,7 +1425,10 @@ func set_input_indicator():
 			indicator.hide()
 			
 
-				
+func damage_limit_update(character):
+	var dmg_limit_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageLimit")
+	dmg_limit_indicator.text = str(character.UniqChar.get_stat("DAMAGE_VALUE_LIMIT"))
+	
 
 func damage_update(character, damage: int = 0):
 	var dmg_val_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageValue")
@@ -1484,9 +1528,9 @@ func stock_points_update(character, stock_points_change: int = 0):
 		
 		match character.player_ID:
 			0:
-				Globals.winner = [1, get_player_node(1).UniqueCharacter.NAME]
+				Globals.winner = [1, get_player_node(1).UniqChar.NAME]
 			1:
-				Globals.winner = [0, get_player_node(0).UniqueCharacter.NAME]
+				Globals.winner = [0, get_player_node(0).UniqChar.NAME]
 				
 				
 func burst_update(character):

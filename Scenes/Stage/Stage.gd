@@ -5,11 +5,17 @@ func init(): # called by unique stage code when init() is called
 	Globals.Game.stage_box = $StageBox
 #	Globals.Game.blastbarrierL = $StageBox/BlastBarrierL
 #	Globals.Game.blastbarrierR = $StageBox/BlastBarrierR
-	Globals.Game.blastbarrierU = $StageBox/BlastBarrierU
+#	Globals.Game.blastbarrierU = $StageBox/BlastBarrierU
+	$StageBox/BlastBarrierL.add_to_group("BlastBarriers")
+	$StageBox/BlastBarrierR.add_to_group("BlastBarriers")
+	$StageBox/BlastBarrierU.add_to_group("BlastBarriers")
+	$StageBox/BlastBarrierL.hide()
+	$StageBox/BlastBarrierR.hide()
 	$StageBox/BlastBarrierU.hide()
 	Globals.Game.middle_point = $MiddlePosition.position
-	Globals.Game.left_ledge_point = $LeftLedgePosition.position
-	Globals.Game.right_ledge_point = $RightLedgePosition.position
+	Globals.Game.left_corner = $StageBox.rect_global_position.x + 32
+	Globals.Game.right_corner = $StageBox.rect_global_position.x + $StageBox.rect_size.x - 32
+
 	for respawn_point in $RespawnPoints.get_children():
 		Globals.Game.respawn_points.append(respawn_point.position)
 	

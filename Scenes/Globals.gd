@@ -14,10 +14,11 @@ enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
-		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, SEMI_INVUL_GROUND_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
+		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK, DI_MANUAL_SEAL
-		CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO
-		COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_NORMAL, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY}
+		CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
+		COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
+		STRONG_ENTITY}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -29,7 +30,6 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # EASY_BLOCK = can be blocked correctly in either direction
 # ANTI_GUARD = always wrongblocked if chain_combo is false, cannot perfect block
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers and moves with UNBLOCKABLE
-# SEMI_INVUL_GROUND_STARTUP = startup is only semi-invulnerable if character is grounded
 # UNBLOCKABLE = for command grabs
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
@@ -47,15 +47,17 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # NOT_FROM_C_REC = cannot use during cancellable recovery, for certain moves like command grabs
 # LATE_CHAIN = can only chain into other moves during recovery and not active frames
 # LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
+# PUNISH_CRUSH = cause Punish Crush on punish hits
 # COMMAND_GRAB = cannot hit opponents during ground/air movement startup
 # VULN_LIMBS = take full damage from SDHits
-# NO_REPEAT_NORMAL = a Light/Fierce that can only be repeated once
+# NO_REPEAT_MOVE = a move that can only be repeated once
 # DESTROY_ENTITIES = hitbox destroys entities
 # DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
 # INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
 # HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)
+# STRONG_ENTITY = entity can lethal and guardbreak
 
-enum status_effect {LETHAL, BREAK, BREAK_RECOVER, REPEAT, RESPAWN_GRACE, POS_FLOW}
+enum status_effect {LETHAL, BREAK, BREAK_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFECT, AIR_PERFECT}
@@ -72,8 +74,8 @@ enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1
 
 const FRAME = 1.0/60.0
 const CAMERA_ZOOM_SPEED = 0.000006
-const RespawnTimer_WAIT_TIME = 60
-const FLAT_STOCK_LOSS = 500
+const RespawnTimer_WAIT_TIME = 75
+const FLAT_STOCK_LOSS = 1000
 
 # preloading scenes will cause issues, do them on onready variables instead
 onready var loaded_audio_scene := load("res://Scenes/AudioManager.tscn")
@@ -629,6 +631,37 @@ func compass_to_angle(compass):
 		Globals.compass.ENE:
 			return 338
 
+func dir_to_angle(dir: int, v_dir: int, bias: int):
+	match dir:
+		-1:
+			match v_dir:
+				-1:
+					return 225
+				0:
+					return 180
+				1:
+					return 135
+		0:
+			match v_dir:
+				-1:
+					return 270
+				0:
+					match bias:
+						1:
+							return 180
+						-1:
+							return 0
+				1:
+					return 90
+		1:
+			match v_dir:
+				-1:
+					return 315
+				0:
+					return 0
+				1:
+					return 45
+
 #func compass_to_angle(compass):
 #	match compass:
 #		Globals.compass.E:
@@ -738,8 +771,8 @@ func atk_type_to_tier(atk_type):
 	
 func status_effect_priority(effect):
 	match effect:
-		Globals.status_effect.REPEAT:
-			return 3
+#		Globals.status_effect.REPEAT:
+#			return 3
 		Globals.status_effect.BREAK:
 			return 3
 		Globals.status_effect.LETHAL:

@@ -13,17 +13,17 @@ script = ExtResource( 2 )
 
 [node name="BlastZoneRect2" type="TextureRect" parent="."]
 modulate = Color( 1, 0.631373, 0.631373, 1 )
-margin_left = -704.0
+margin_left = -448.0
 margin_top = -448.0
-margin_right = 704.0
-margin_bottom = 448.0
+margin_right = 448.0
+margin_bottom = 320.0
 texture = ExtResource( 6 )
 stretch_mode = 2
 
 [node name="BlastZoneRect" type="TextureRect" parent="."]
-margin_left = -576.0
+margin_left = -320.0
 margin_top = -320.0
-margin_right = 576.0
+margin_right = 320.0
 margin_bottom = 320.0
 texture = ExtResource( 6 )
 stretch_mode = 2
@@ -54,16 +54,16 @@ rect_pivot_offset = Vector2( 38, 13 )
 
 [node name="MainPlatform" type="TextureRect" parent="."]
 modulate = Color( 1.5, 1.5, 1.5, 1 )
-margin_left = -256.0
+margin_left = -384.0
 margin_top = 128.0
-margin_right = 256.0
-margin_bottom = 448.0
+margin_right = 384.0
+margin_bottom = 320.0
 texture = ExtResource( 6 )
 stretch_mode = 2
 
 [node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 1 )]
-margin_right = 512.0
-margin_bottom = 320.0
+margin_right = 768.0
+margin_bottom = 192.0
 
 [node name="MPlatform1" type="Node2D" parent="."]
 script = ExtResource( 5 )
@@ -122,26 +122,35 @@ position = Vector2( -128, 128 )
 [node name="P2_Position" type="Position2D" parent="."]
 position = Vector2( 128, 128 )
 
-[node name="LeftLedgePosition" type="Position2D" parent="."]
-position = Vector2( -256, 128 )
-
-[node name="RightLedgePosition" type="Position2D" parent="."]
-position = Vector2( 256, 128 )
-
 [node name="MiddlePosition" type="Position2D" parent="."]
 position = Vector2( 0, 128 )
 
 [node name="StageBox" type="ReferenceRect" parent="."]
-margin_left = -704.0
-margin_top = -448.0
-margin_right = 704.0
-margin_bottom = 448.0
+margin_left = -384.0
+margin_top = -384.0
+margin_right = 384.0
+margin_bottom = 256.0
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="BlastBarrierU" type="ColorRect" parent="StageBox"]
-margin_left = -64.0
-margin_top = -64.0
-margin_right = 1472.0
-margin_bottom = 56.0
+margin_left = -128.0
+margin_top = -128.0
+margin_right = 768.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierL" type="ColorRect" parent="StageBox"]
+margin_left = -128.0
+margin_top = -128.0
+margin_bottom = 704.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierR" type="ColorRect" parent="StageBox"]
+margin_left = 768.0
+margin_top = -128.0
+margin_right = 896.0
+margin_bottom = 704.0
 color = Color( 0, 0, 0, 1 )
 
 [node name="RespawnPoints" type="Node2D" parent="."]

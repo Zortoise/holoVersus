@@ -66,7 +66,7 @@ texture = ExtResource( 5 )
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 18
+frame = 4
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]
@@ -106,10 +106,9 @@ position = Vector2( 0, 288 )
 texture = ExtResource( 3 )
 
 [node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 4 )]
-visible = false
-margin_left = -256.0
+margin_left = -448.0
 margin_top = -160.0
-margin_right = 256.0
+margin_right = 448.0
 margin_bottom = 160.0
 
 [node name="FlowerGlow" type="Sprite" parent="MainPlatform"]
@@ -226,27 +225,35 @@ position = Vector2( -128, 128 )
 [node name="P2_Position" type="Position2D" parent="."]
 position = Vector2( 128, 128 )
 
-[node name="LeftLedgePosition" type="Position2D" parent="."]
-position = Vector2( -256, 128 )
-
-[node name="RightLedgePosition" type="Position2D" parent="."]
-position = Vector2( 256, 128 )
-
 [node name="MiddlePosition" type="Position2D" parent="."]
 position = Vector2( 0, 128 )
 
 [node name="StageBox" type="ReferenceRect" parent="."]
-visible = false
-margin_left = -704.0
-margin_top = -448.0
-margin_right = 704.0
-margin_bottom = 448.0
+margin_left = -384.0
+margin_top = -384.0
+margin_right = 384.0
+margin_bottom = 256.0
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="BlastBarrierU" type="ColorRect" parent="StageBox"]
-margin_left = -64.0
-margin_top = -64.0
-margin_right = 1472.0
-margin_bottom = 56.0
+margin_left = -128.0
+margin_top = -128.0
+margin_right = 768.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierL" type="ColorRect" parent="StageBox"]
+margin_left = -128.0
+margin_top = -128.0
+margin_bottom = 704.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierR" type="ColorRect" parent="StageBox"]
+margin_left = 768.0
+margin_top = -128.0
+margin_right = 896.0
+margin_bottom = 704.0
 color = Color( 0, 0, 0, 1 )
 
 [node name="RespawnPoints" type="Node2D" parent="."]

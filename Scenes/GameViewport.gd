@@ -155,7 +155,7 @@ func change_scene(new_scene: String): # called by animation
 	
 	
 func force_game_over(winner_ID):
-	Globals.winner = [winner_ID, Globals.Game.get_player_node(winner_ID).UniqueCharacter.NAME]
+	Globals.winner = [winner_ID, Globals.Game.get_player_node(winner_ID).UniqChar.NAME]
 	$Transition.play("transit_to_victory")
 	
 func _player_disconnected(_id): # opponent disconnected

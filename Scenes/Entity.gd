@@ -364,7 +364,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
 	var attacker = get_node(hit_data.attacker_nodepath) # will be this entity's master
 
-#	attacker.UniqueCharacter.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
+#	attacker.UniqChar.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
 
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks

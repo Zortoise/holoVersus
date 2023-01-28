@@ -160,7 +160,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"tech_flash" :{
+	"unlaunch_flash" :{
 		"duration": 5,
 		"loop" : false,
 		"timestamps" : {
@@ -177,6 +177,44 @@ var modulate_animations = {
 			0 :
 			{
 				"modulate" : Color(2.0, 2.0, 2.0),
+			},
+		}
+	},
+	"repeat" :{
+		"duration": 15,
+		"loop" : false,
+		"monochrome" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(1.0, 1.0, 1.0),
+			},
+		}
+	},
+	"tech_flash" :{
+		"duration": 15,
+		"loop" : false,
+		"monochrome" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(3.0, 3.0, 3.0),
+			},
+			2 :
+			{
+				"modulate" : Color(2.0, 2.0, 2.0),
+			},
+			4 :
+			{
+				"modulate" : Color(1.75, 1.75, 1.75),
+			},
+			6 :
+			{
+				"modulate" : Color(1.5, 1.5, 1.5),
+			},
+			8 :
+			{
+				"modulate" : Color(1.25, 1.25, 1.25),
 			},
 		}
 	},
@@ -311,7 +349,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"EX_block_flash" : {
+	"air_block_flash" : {
 		"duration": 4,
 		"loop" : false,
 #		"followup" : "EX_block_flash2",
@@ -428,6 +466,24 @@ var modulate_animations = {
 			10 :
 			{
 				"modulate" : Color(2.5, 1.25, 0.9), # yellow
+			},
+		},
+	},
+	"crush" : {
+		"duration": 12,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(1.5, 0.8, 0.5), # orange
+			},
+			4 :
+			{
+				"modulate" : Color(5.0, 0.7, 0.7),
+			},
+			10 :
+			{
+				"modulate" : Color(0.5, 0.2, 0.2)
 			},
 		}
 	},

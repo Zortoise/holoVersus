@@ -64,6 +64,7 @@ func wall_finder(global_pos: Vector2, facing, finding_range = 15):
 	# create a point
 	var point = Vector2(global_pos)
 	var wall_array = get_tree().get_nodes_in_group("SolidPlatforms")
+	wall_array.append_array(get_tree().get_nodes_in_group("BlastBarriers"))
 	
 	for x in finding_range:
 		for wall in wall_array:

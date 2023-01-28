@@ -72,7 +72,8 @@ func apply_shader():
 func simulate():
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
 	
-	if player_image and get_node(master_path).get_node("HitStopTimer").is_running():
+	if player_image and get_node(master_path).get_node("HitStopTimer").is_running() and \
+			!get_node(master_path).get_node("HitStunTimer").is_running():
 		return # does not advance if afterimage owner is a player and is in hitstop
 	
 	life -= 1.0
