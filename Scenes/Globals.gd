@@ -18,7 +18,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK, DI_MANUAL_SEAL
 		CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
 		COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
-		STRONG_ENTITY}
+		STRONG_ENTITY, NO_GDRAIN_ON_BLOCK, NO_TERMINAL_VEL_ACTIVE}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -56,6 +56,8 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
 # HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)
 # STRONG_ENTITY = entity can lethal and guardbreak
+# NO_GDRAIN_ON_BLOCK = no Guard Drain on block
+# NO_TERMINAL_VEL_ACTIVE = no terminal velocity on active frames
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge

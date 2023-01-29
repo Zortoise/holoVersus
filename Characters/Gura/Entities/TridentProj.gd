@@ -3,7 +3,7 @@ extends Node2D
 const ID = "trident" # for master to find it
 
 #const START_SPEED = 500
-const START_ROTATION = -14 # integer degrees, negative for upward
+#const START_ROTATION = -14 # integer degrees, negative for upward
 const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 #const LIFESPAN = null
 
@@ -72,8 +72,8 @@ const MOVE_DATABASE = {
 	"[ex]Active" : {
 		"root" : "TridentProjEX",
 		"atk_type" : Globals.atk_type.EX,
-		"hitcount" : 2,
-		"damage" : 70,
+		"hitcount" : 3,
+		"damage" : 50,
 		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
@@ -95,19 +95,11 @@ func init(aux_data: Dictionary):
 	
 	# set up starting data
 	Entity.unique_data = {"new_facing" : null, "new_v_facing" : null, "reset_rot" : null}
+	var rot: int
 	
 	 # starting animation
-	if "aerial" in aux_data:
-		match aux_data.charge_lvl:
-			1:
-				Animator.play("a[c1]Spawn")
-			2:
-				Animator.play("a[c2]Spawn")
-			3:
-				Animator.play("a[c3]Spawn")
-			4:
-				Animator.play("a[ex]Spawn")
-	else:
+	if !"alt_aim" in aux_data:
+		rot = -14
 		match aux_data.charge_lvl:
 			1:
 				Animator.play("[c1]Spawn")
@@ -117,52 +109,76 @@ func init(aux_data: Dictionary):
 				Animator.play("[c3]Spawn")
 			4:
 				Animator.play("[ex]Spawn")
+	else:
+		rot = -68
+		match aux_data.charge_lvl:
+			1:
+				Animator.play("[u][c1]Spawn")
+			2:
+				Animator.play("[u][c2]Spawn")
+			3:
+				Animator.play("[u][c3]Spawn")
+			4:
+				Animator.play("[u][ex]Spawn")	
+				
+	if "aerial" in aux_data:
+		rot = -rot
+		Entity.v_face(-1)
 				
 	match Animator.to_play_animation:
-		"[c1]Spawn":
+		"[c1]Spawn", "[u][c1]Spawn":
 			Entity.velocity.set_vector(500 * FMath.S, 0)
-			Entity.velocity.rotate(START_ROTATION)
+			Entity.velocity.rotate(rot)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 			Entity.life_point = 1
-		"[c2]Spawn":
+		"[c2]Spawn", "[u][c2]Spawn":
 			Entity.velocity.set_vector(600 * FMath.S, 0)
-			Entity.velocity.rotate(START_ROTATION)
+			Entity.velocity.rotate(rot)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 2
 			Entity.life_point = 2
 			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(START_ROTATION), "palette" : Entity.master_path})
-		"[c3]Spawn", "[ex]Spawn":
+					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : Entity.master_path})
+		"[c3]Spawn", "[u][c3]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
-			Entity.velocity.rotate(START_ROTATION)
+			Entity.velocity.rotate(rot)
+			Entity.velocity.x *= Entity.facing
+			Entity.absorption_value = 3
+			Entity.life_point = 4
+			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
+					{"facing":Entity.facing, "rot":deg2rad(rot)})
+		"[ex]Spawn", "[u][ex]Spawn":
+			Entity.velocity.set_vector(700 * FMath.S, 0)
+			Entity.velocity.rotate(rot)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 3
 			Entity.life_point = 3
 			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(START_ROTATION)})
-		"a[c1]Spawn":
-			Entity.velocity.set_vector(500 * FMath.S, 0)
-			Entity.velocity.rotate(-START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 1
-			Entity.life_point = 1
-		"a[c2]Spawn":
-			Entity.velocity.set_vector(600 * FMath.S, 0)
-			Entity.velocity.rotate(-START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 2
-			Entity.life_point = 2
-			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-					{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION), "palette" : Entity.master_path})
-		"a[c3]Spawn", "a[ex]Spawn":
-			Entity.velocity.set_vector(700 * FMath.S, 0)
-			Entity.velocity.rotate(-START_ROTATION)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 3
-			Entity.life_point = 3
-			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION)})
+					{"facing":Entity.facing, "rot":deg2rad(rot)})
+#
+#		"[u][c1]Spawn":
+#			Entity.velocity.set_vector(500 * FMath.S, 0)
+#			Entity.velocity.rotate(-rot)
+#			Entity.velocity.x *= Entity.facing
+#			Entity.absorption_value = 1
+#			Entity.life_point = 1
+#		"[u][c2]Spawn":
+#			Entity.velocity.set_vector(600 * FMath.S, 0)
+#			Entity.velocity.rotate(-START_ROTATION)
+#			Entity.velocity.x *= Entity.facing
+#			Entity.absorption_value = 2
+#			Entity.life_point = 2
+#			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
+#					{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION), "palette" : Entity.master_path})
+#		"[u][c3]Spawn", "[u][ex]Spawn":
+#			Entity.velocity.set_vector(700 * FMath.S, 0)
+#			Entity.velocity.rotate(-START_ROTATION)
+#			Entity.velocity.x *= Entity.facing
+#			Entity.absorption_value = 3
+#			Entity.life_point = 3
+#			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
+#					{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION)})
 
 #	Entity.lifespan = LIFESPAN # set starting lifespan
 #	Entity.absorption_value = ABSORPTION # set starting absorption_value
@@ -194,9 +210,9 @@ func init(aux_data: Dictionary):
 
 func spin():
 	match Animator.to_play_animation:
-		"[c2]Active", "a[c2]Active", "[ex]Active", "a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
+		"[c2]Active", "[ex]Active", "[u][c2]Active", "[u][ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			Animator.play("[c1]Spin")
-		"[c3]Active", "a[c3]Active":
+		"[c3]Active", "[u][c3]Active":
 			Animator.play("[c2]Spin")
 
 func turn_to_enemy():
@@ -285,13 +301,13 @@ func turn_to_enemy():
 func refine_move_name(move_name):
 		
 	match move_name:
-		"[c1]Spawn", "a[c1]Spawn", "a[c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE", "[c1]TurnESE":
+		"[c1]Spawn", "[u][c1]Spawn", "[u][c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE", "[c1]TurnESE":
 			return "[c1]Active"
-		"[c2]Spawn", "a[c2]Spawn", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
+		"[c2]Spawn", "[u][c2]Spawn", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			return "[c2]Active"
-		"[c3]Spawn", "a[c3]Spawn", "a[c3]Active":
+		"[c3]Spawn", "[u][c3]Spawn", "[u][c3]Active":
 			return "[c3]Active"
-		"[ex]Spawn", "a[ex]Spawn", "a[ex]Active":
+		"[ex]Spawn", "[u][ex]Spawn", "[u][ex]Active":
 			return "[ex]Active"
 	return move_name
 
@@ -308,32 +324,41 @@ func query_move_data(move_name) -> Dictionary:
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 #	move_data["atk_attr"] = query_atk_attr(move_name, true)
 	
-	if orig_move_name.begins_with("a"):
-		move_data.KB_angle = -25
-	else:
-		match orig_move_name:
-			"[c1]TurnE", "[c2]TurnE":
-				move_data.KB_angle = -31
-			"[c1]TurnS", "[c2]TurnS":
+#	if orig_move_name.begins_with("a"):
+#		move_data.KB_angle = -25
+#	else:
+	match orig_move_name:
+		"[c1]TurnE", "[c2]TurnE":
+			move_data.KB_angle = -31
+		"[c1]TurnS", "[c2]TurnS":
+			if Entity.v_facing == 1:
+				move_data.KB_angle = 90
+			else:
+				move_data.KB_angle = -90
+		"[c1]TurnSE", "[c2]TurnSE":
+			if Entity.v_facing == 1:
+				move_data.KB_angle = 0
+			else:
+				move_data.KB_angle = -76
+		"[c1]TurnSSE", "[c2]TurnSSE":
+			if Entity.v_facing == 1:
+				move_data.KB_angle = 31
+			else:
+				move_data.KB_angle = -83
+		"[c1]TurnESE", "[c2]TurnESE":
+			if Entity.v_facing == 1:
+				move_data.KB_angle = -25
+			else:
+				move_data.KB_angle = -55
+		_:
+			if orig_move_name.begins_with("[u]"):
 				if Entity.v_facing == 1:
-					move_data.KB_angle = 90
-				else:
-					move_data.KB_angle = -90
-			"[c1]TurnSE", "[c2]TurnSE":
-				if Entity.v_facing == 1:
-					move_data.KB_angle = 0
-				else:
-					move_data.KB_angle = -76
-			"[c1]TurnSSE", "[c2]TurnSSE":
-				if Entity.v_facing == 1:
-					move_data.KB_angle = 31
-				else:
 					move_data.KB_angle = -83
-			"[c1]TurnESE", "[c2]TurnESE":
-				if Entity.v_facing == 1:
-					move_data.KB_angle = -25
 				else:
-					move_data.KB_angle = -55
+					move_data.KB_angle = 31
+			else:
+				if Entity.v_facing == -1:
+					move_data.KB_angle = -25
 	
 	return move_data
 	
@@ -369,7 +394,7 @@ func simulate():
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 		
-		"[c2]Active", "a[c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
+		"[c2]Active", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			if posmod(Entity.lifetime, 3) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
@@ -379,14 +404,14 @@ func simulate():
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-						{"facing":Entity.facing, "rot": deg2rad(START_ROTATION), "palette" : Entity.master_path})
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14), "palette" : Entity.master_path})
 						
-		"a[c3]Active", "a[ex]Active":
+		"[u][c3]Active", "[u][ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-						{"facing":Entity.facing, "rot":-deg2rad(START_ROTATION), "palette" : Entity.master_path})
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68), "palette" : Entity.master_path})
 	
 	
 func kill(sound = true):
@@ -394,8 +419,8 @@ func kill(sound = true):
 		"[c1]Spawn", "[c2]Spawn", "[c3]Spawn", "[ex]Spawn", "[c1]Active", "[c2]Active", "[c3]Active", "[ex]Active":
 			Animator.play("Kill")
 			if sound: Entity.play_audio("break2", {"vol" : -15}) # don't put this outside, Spin animation has no kill()
-		"a[c1]Spawn", "a[c2]Spawn", "a[c3]Spawn", "a[ex]Spawn", "a[c1]Active", "a[c2]Active", "a[c3]Active", "a[ex]Active":
-			Animator.play("aKill")
+		"[u][c1]Spawn", "[u][c2]Spawn", "[u][c3]Spawn", "[u][ex]Spawn", "[u][c1]Active", "[u][c2]Active", "[u][c3]Active", "[u][ex]Active":
+			Animator.play("[u]Kill")
 			if sound: Entity.play_audio("break2", {"vol" : -15})
 		"[c1]TurnE", "[c2]TurnE":
 			Animator.play("EKill")
@@ -441,14 +466,14 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Animator.play("[c3]Active")
 		"[ex]Spawn":
 			Animator.play("[ex]Active")
-		"a[c1]Spawn":
-			Animator.play("a[c1]Active")
-		"a[c2]Spawn":
-			Animator.play("a[c2]Active")
-		"a[c3]Spawn":
-			Animator.play("a[c3]Active")
-		"a[ex]Spawn":
-			Animator.play("a[ex]Active")
+		"[u][c1]Spawn":
+			Animator.play("[u][c1]Active")
+		"[u][c2]Spawn":
+			Animator.play("[u][c2]Active")
+		"[u][c3]Spawn":
+			Animator.play("[u][c3]Active")
+		"[u][ex]Spawn":
+			Animator.play("[u][ex]Active")
 		"[c1]Spin", "[c2]Spin":
 			turn_to_enemy()
 			

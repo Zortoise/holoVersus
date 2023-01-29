@@ -32,7 +32,7 @@ func _ready():
 func state_detect(anim): # for unique animations, continued from state_detect() of main character node
 	match anim:
 		
-		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F2bStartup", "F3Startup", "F3bStartup", "F3[h]Startup", \
+		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F3Startup", "F3bStartup", "F3[h]Startup", \
 			"HStartup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
@@ -52,15 +52,21 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L2cCRec", "aF1CRec", "aF3CRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
-		"SP1Startup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", "SP1[ex]Startup":
+		"SP1Startup", "SP1bStartup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", \
+				"SP1[u]Startup", "SP1[u][c1]Startup", "SP1[u][c2]Startup", "SP1[u][c1]bStartup", "SP1[u][c2]bStartup", "SP1[u][c3]Startup", \
+				"SP1[ex]Startup", "SP1b[ex]Startup", "SP1[u][ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active", "SP1[ex]Active":
+		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active", "SP1[ex]Active", \
+				"SP1[u][c1]Active", "SP1[u][c2]Active", "SP1[u][c3]Active", "SP1[u][ex]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
 		"SP1Rec", "SP1[ex]Rec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
-		"aSP1Startup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", "aSP1[ex]Startup":
+		"aSP1Startup", "aSP1bStartup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", \
+				"aSP1[d]Startup", "aSP1[d][c1]Startup", "aSP1[d][c2]Startup", "aSP1[d][c1]bStartup", "aSP1[d][c2]bStartup", "aSP1[d][c3]Startup", \
+				"aSP1[ex]Startup", "aSP1b[ex]Startup", "aSP1[d][ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active", "aSP1[ex]Active":
+		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active", "aSP1[ex]Active", \
+				"aSP1[d][c1]Active", "aSP1[d][c2]Active", "aSP1[d][c3]Active", "aSP1[d][ex]Active":
 			return Globals.char_state.AIR_ATK_ACTIVE
 		"aSP1Rec", "aSP1[ex]Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
@@ -176,6 +182,16 @@ func simulate():
 						Character.animate("SP1[c3]Startup")
 					else:
 						Character.animate("SP1[c2]bStartup")
+						
+			"SP1[u][c1]Startup":
+				if !Character.button_light in Character.input_state.pressed:
+					Character.animate("SP1[u][c1]bStartup")
+			"SP1[u][c2]Startup":
+				if !Character.button_light in Character.input_state.pressed:
+					if Animator.time == 1:
+						Character.animate("SP1[u][c3]Startup")
+					else:
+						Character.animate("SP1[u][c2]bStartup")
 			
 	if Character.state == Globals.char_state.AIR_ATK_STARTUP:
 		match Animator.current_animation:
@@ -201,6 +217,18 @@ func simulate():
 						Character.animate("aSP1[c3]Startup")
 					else:
 						Character.animate("aSP1[c2]bStartup")
+						
+			"aSP1[d][c1]Startup":
+				if !Character.button_light in Character.input_state.pressed or Character.grounded:
+					Character.animate("aSP1[d][c1]bStartup")
+			"aSP1[d][c2]Startup":
+				if Character.grounded:
+					Character.animate("aSP1[d][c2]bStartup")
+				elif !Character.button_light in Character.input_state.pressed:
+					if Animator.time == 1:
+						Character.animate("aSP1[d][c3]Startup")
+					else:
+						Character.animate("aSP1[d][c2]bStartup")
 					
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
@@ -734,13 +762,29 @@ func get_stat(stat: String): # later can have effects that changes stats
 func query_traits(): # may have special conditions
 	return TRAITS
 			
+func get_root(move_name): # for aerial and chain memory
+	
+	if move_name in MOVE_DATABASE and "root" in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name].root
+		
+	match move_name:
+		"SP1[c1]", "SP1[c2]", "SP1[c3]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c3]", \
+				"aSP1[c1]", "aSP1[c2]", "aSP1[c3]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c3]":
+			return "SP1"
+		"SP1[ex]", "SP1[u][ex]", "aSP1[ex]", "aSP1[d][ex]":
+			return "SP1[ex]"
+			
+		"aSP1": # for startup for aerial memory
+			return "SP1"
+	
+	return move_name
+		
+			
 func refine_move_name(move_name):
 		
 	match move_name:
 		"L2b":
 			return "L2"
-		"F2b":
-			return "F2"
 		"F2[h]P":
 			return "F2[h]"
 		"F3b":
@@ -755,8 +799,12 @@ func refine_move_name(move_name):
 			return "aL2"
 		"aF1[h]":
 			return "aF1"
-		"SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]":
+		"SP1b", "aSP1", "aSP1b", "SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]", \
+			"SP1[u]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c1]b", "SP1[u][c2]b", "SP1[u][c3]", \
+			"aSP1[d]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c1]b", "aSP1[d][c2]b", "aSP1[d][c3]":
 			return "SP1"
+		"SP1b[ex]", "aSP1[ex]", "aSP1b[ex]", "SP1[u][ex]", "aSP1[d][ex]":
+			return "SP1[ex]"
 		"SP3":
 			return "aSP3"
 		"SP3b":
@@ -840,7 +888,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 		"F2[h]":
 			if hit_data.sweetspotted and !hit_data.break_hit and !hit_data.lethal_hit:
 				hit_data.move_data.KB_angle = 180
-				hit_data.move_data.knockback = 130 * FMath.S
+				hit_data.move_data.knockback = 200 * FMath.S
 				hit_data["pull"] = true
 				hit_data.move_data.atk_attr.append(Globals.atk_attr.DI_MANUAL_SEAL)
 				Character.animate("F2[h]PRec")
@@ -1033,8 +1081,8 @@ func get_trident_array(): # return array of all spinnable tridents
 	var trident_array := []
 	for entity in Globals.Game.get_node("EntitiesFront").get_children():
 		if get_node(entity.master_path).player_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
-			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "a[c2]Active", "[ex]Active", \
-					"a[ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE", "[c3]Active", "a[c3]Active"]:
+			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
+					"[u][ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE", "[c3]Active", "[u][c3]Active"]:
 				trident_array.append(entity)
 	return trident_array
 			
@@ -1146,8 +1194,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"F2Startup":
-			Character.animate("F2bStartup")
-		"F2bStartup":
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("F2[h]Active")
 			else:
@@ -1251,6 +1297,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("FallTransit")
 			
 		"SP1Startup":
+			if Character.button_up in Character.input_state.pressed:
+				Character.animate("SP1[u]Startup")
+			else:
+				Character.animate("SP1bStartup")
+		"SP1bStartup":
 			Character.animate("SP1[c1]Startup")
 		"SP1[c1]Startup":
 			Character.animate("SP1[c2]Startup")
@@ -1266,7 +1317,28 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("SP1Rec")
 		"SP1Rec":
 			Character.animate("Idle")
+			
+		"SP1[u]Startup":
+			Character.animate("SP1[u][c1]Startup")
+		"SP1[u][c1]Startup":
+			Character.animate("SP1[u][c2]Startup")
+		"SP1[u][c2]Startup":
+			Character.animate("SP1[u][c3]Startup")
+		"SP1[u][c1]bStartup":
+			Character.animate("SP1[u][c1]Active")
+		"SP1[u][c2]bStartup":
+			Character.animate("SP1[u][c2]Active")
+		"SP1[u][c3]Startup":
+			Character.animate("SP1[u][c3]Active")
+		"SP1[u][c1]Active", "SP1[u][c2]Active", "SP1[u][c3]Active":
+			Character.animate("SP1Rec")
+			
 		"aSP1Startup":
+			if Character.button_down in Character.input_state.pressed:
+				Character.animate("aSP1[d]Startup")
+			else:
+				Character.animate("aSP1bStartup")
+		"aSP1bStartup":
 			Character.animate("aSP1[c1]Startup")
 		"aSP1[c1]Startup":
 			Character.animate("aSP1[c2]Startup")
@@ -1283,18 +1355,54 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP1Rec":
 			Character.animate("FallTransit")
 			
+		"aSP1[d]Startup":
+			Character.animate("aSP1[d][c1]Startup")
+		"aSP1[d][c1]Startup":
+			Character.animate("aSP1[d][c2]Startup")
+		"aSP1[d][c2]Startup":
+			Character.animate("aSP1[d][c3]Startup")
+		"aSP1[d][c1]bStartup":
+			Character.animate("aSP1[d][c1]Active")
+		"aSP1[d][c2]bStartup":
+			Character.animate("aSP1[d][c2]Active")
+		"aSP1[d][c3]Startup":
+			Character.animate("aSP1[d][c3]Active")
+		"aSP1[d][c1]Active", "aSP1[d][c2]Active", "aSP1[d][c3]Active":
+			Character.animate("aSP1Rec")
+			
 		"SP1[ex]Startup":
+			if Character.button_up in Character.input_state.pressed:
+				Character.animate("SP1[u][ex]Startup")
+			else:
+				Character.animate("SP1b[ex]Startup")
+		"SP1b[ex]Startup":
 			Character.animate("SP1[ex]Active")
 		"SP1[ex]Active":
 			Character.animate("SP1[ex]Rec")
 		"SP1[ex]Rec":
 			Character.animate("Idle")
+			
+		"SP1[u][ex]Startup":
+			Character.animate("SP1[u][ex]Active")
+		"SP1[u][ex]Active":
+			Character.animate("SP1[ex]Rec")
+			
 		"aSP1[ex]Startup":
+			if Character.button_down in Character.input_state.pressed:
+				Character.animate("aSP1[d][ex]Startup")
+			else:
+				Character.animate("aSP1b[ex]Startup")
+		"aSP1b[ex]Startup":
 			Character.animate("aSP1[ex]Active")
 		"aSP1[ex]Active":
 			Character.animate("aSP1[ex]Rec")
 		"aSP1[ex]Rec":
 			Character.animate("FallTransit")
+			
+		"aSP1[d][ex]Startup":
+			Character.animate("aSP1[d][ex]Active")
+		"aSP1[d][ex]Active":
+			Character.animate("aSP1[ex]Rec")
 			
 		"aSP2Startup":
 			if Character.button_fierce in Character.input_state.pressed:
@@ -1502,7 +1610,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
 		"F1Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-		"F2bStartup":
+		"F2Startup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 		"F3[h]Startup":
 			Character.get_node("ModulatePlayer").play("armor_flash")
@@ -1562,11 +1670,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
 			
-		"aSP1Startup", "aSP1[ex]Startup":
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true})
+		"aSP1Startup", "aSP1[ex]Startup", "aSP1bStartup", "aSP1b[ex]Startup", "aSP1[d]Startup", "aSP1[d][ex]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-		"aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup":
+		"aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", \
+				"aSP1[d][c1]Startup", "aSP1[d][c2]Startup", "aSP1[d][c1]bStartup", "aSP1[d][c2]bStartup", "aSP1[d][c3]Startup":
 			Character.velocity_limiter.x = 20
 			Character.velocity_limiter.down = 20
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
@@ -1585,6 +1696,20 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			
+		"SP1[u][c1]Active": # spawn projectile at EntitySpawn
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1, "alt_aim" : true})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP1[u][c2]Active":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2, "alt_aim" : true})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP1[u][c3]Active":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3, "alt_aim" : true})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP1[u][ex]Active":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4, "alt_aim" : true})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			
 		"aSP1[c1]Active":
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1})
 		"aSP1[c2]Active":
@@ -1593,6 +1718,16 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3})
 		"aSP1[ex]Active":
 			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4})
+
+		"aSP1[d][c1]Active":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1, "alt_aim" : true})
+		"aSP1[d][c2]Active":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2, "alt_aim" : true})
+		"aSP1[d][c3]Active":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3, "alt_aim" : true})
+		"aSP1[d][ex]Active":
+			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4, "alt_aim" : true})
+
 		"aSP1Rec", "aSP1[ex]Rec":
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
@@ -1717,6 +1852,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 func start_audio(anim_name):
 	if Character.is_atk_active():
 		var move_name = anim_name.trim_suffix("Active")
+		var orig_move_name = move_name
 		if !move_name in MOVE_DATABASE:
 			move_name = refine_move_name(move_name)
 		if move_name in MOVE_DATABASE:
@@ -1726,6 +1862,15 @@ func start_audio(anim_name):
 				else:
 					for sound in MOVE_DATABASE[move_name].move_sound:
 						Character.play_audio(sound.ref, sound.aux_data)
+						
+		match orig_move_name:
+			"SP1[c1]", "SP1[u][c1]", "aSP1[c1]", "aSP1[d][c1]":
+				Character.play_audio("whoosh12", {"vol":-2})
+			"SP1[c2]", "SP1[u][c2]", "aSP1[c2]", "aSP1[d][c2]":
+				Character.play_audio("whoosh12", {})
+			"SP1[c3]", "SP1[u][c3]", "aSP1[c3]", "aSP1[d][c3]", "SP1[ex]", "SP1[u][ex]", "aSP1[ex]", "aSP1[d][ex]":
+				Character.play_audio("whoosh12", {})
+				Character.play_audio("water4", {"vol" : -20})
 	
 	match anim_name:
 		"JumpTransit2", "WallJumpTransit2":
@@ -1763,10 +1908,9 @@ func stagger_anim():
 			match sprite.frame:
 				38, 41:
 					Character.play_audio("footstep2", {"vol":-1})
-		"SP1[c1]Startup", "SP1[c2]Startup":
-			match sprite.frame:
-				13:
-					Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
+		"SP1[c1]Startup", "SP1[c2]Startup", "SP1[u][c1]Startup", "SP1[u][c2]Startup":
+			if Animator.time == 3:
+				Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
 						{"facing":Character.facing, "grounded":true})
 					
 					

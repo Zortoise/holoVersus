@@ -15,11 +15,11 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
-		"root" : "BurstEscape",
+		"burst" : "BurstEscape",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 0,
-		"knockback" : 550 * FMath.S,
+		"knockback" : 1000 * FMath.S,
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"atk_level" : 8,
 		"fixed_entity_hitstop" : 0,

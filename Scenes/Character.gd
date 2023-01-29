@@ -44,6 +44,7 @@ const PosFlowSealTimer_TIME = 60 # min number of frames to seal Postive Flow for
 const TrainingRegenTimer_TIME = 60 # number of frames before GG/Damage Value start regening
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
 const CORNER_PUSHBACK = 400 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
+#const CORNER_GUARD_DRAIN_MOD = 150 # blocker take extra Guard Drain when blocking at the corners
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -53,11 +54,12 @@ const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is a
 #const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
 # const DMG_BOOST_AT_DMG_VAL_LIMIT = 1.5 # increase in damage taken when damage percent is at 100%, goes pass it when damage percent goes >100%
 # const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
-const HITSTUN_REDUCTION_AT_MAX_GG = 50 # max reduction in hitstun when defender's Guard Gauge is at 200%
-const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when defender's Guard Gauge is at 200%
+#const F_HITSTUN_REDUCTION_AT_MAX_GG = 30 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%
+#const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
+#const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
 #const PERFECTCHAIN_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on perfect chains
 #const REPEAT_GGG_MOD = 200 # Guard Gain on hitstunned defender is increased on double_repeat
-const DMG_REDUCTION_AT_MAX_GG = 50 # max reduction in damage when defender's Guard Gauge is at 200%
+const DMG_REDUCTION_AT_MAX_GG = 30 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
 const AIR_BASE_BLOCK_GUARD_DRAIN_MOD = 130 # increased Guard Drain when base blocking in air
@@ -536,7 +538,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
+		"\nSPaerial_memory: " + str(aerial_sp_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + "\nHitstunGrace: " + str($HitStunGraceTimer.time) + " " + str(GG_swell_flag) + \
 		" " + str(first_hit_flag)
 			
@@ -1112,26 +1114,36 @@ func simulate2(): # only ran if not in hitstop
 	# terminal velocity downwards
 	var terminal: int
 	
-	if is_atk_startup() or is_atk_active() or new_state == Globals.char_state.AIR_RECOVERY:
-		pass # no terminal velocity during attacks and air movement
-
-	elif $HitStunTimer.is_running(): # during hitstun, only slowdown within a certain range
-		terminal = FMath.percent(GRAVITY, HITSTUN_TERMINAL_VELOCITY_MOD)
-		
-		if velocity.y < FMath.percent(terminal, TERMINAL_THRESHOLD) and velocity.y > terminal:
-			velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
-			
-	else:
-		terminal = FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD"))
+	var has_terminal := true
 	
-		if state == Globals.char_state.AIR_STANDBY and button_down in input_state.pressed:
-			if Settings.dj_fastfall[player_ID] == 0 or (Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
-				terminal = FMath.percent(terminal, UniqChar.get_stat("FASTFALL_MOD")) # increase terminal velocity when fastfalling
-		if state == Globals.char_state.AIR_BLOCK: # air blocking reduce terminal velocity
-			terminal = FMath.percent(terminal, AIRBLOCK_TERMINAL_MOD)
+	if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Tech", "GuardTech"]):
+		has_terminal = false
+	
+#	if is_atk_startup():
+#		if Globals.atk_attr.NO_TERMINAL_VEL_STARTUP in query_atk_attr():
+#			 has_terminal = false
+	if is_atk_active():
+		if Globals.atk_attr.NO_TERMINAL_VEL_ACTIVE in query_atk_attr():
+			 has_terminal = false
 
-		if velocity.y > terminal:
-			velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
+	if has_terminal:
+		if $HitStunTimer.is_running(): # during hitstun, only slowdown within a certain range
+			terminal = FMath.percent(GRAVITY, HITSTUN_TERMINAL_VELOCITY_MOD)
+			
+			if velocity.y < FMath.percent(terminal, TERMINAL_THRESHOLD) and velocity.y > terminal:
+				velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
+				
+		else:
+			terminal = FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD"))
+		
+			if state == Globals.char_state.AIR_STANDBY and button_down in input_state.pressed:
+				if Settings.dj_fastfall[player_ID] == 0 or (Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+					terminal = FMath.percent(terminal, UniqChar.get_stat("FASTFALL_MOD")) # increase terminal velocity when fastfalling
+			if state == Globals.char_state.AIR_BLOCK: # air blocking reduce terminal velocity
+				terminal = FMath.percent(terminal, AIRBLOCK_TERMINAL_MOD)
+
+			if velocity.y > terminal:
+				velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
 		
 
 # FRICTION/AIR RESISTANCE AND TRIGGERED ANIMATION CHANGES ----------------------------------------------------------
@@ -1891,7 +1903,7 @@ func process_input_buffer():
 							var move_name = get_move_name()
 							if move_name in UniqChar.STARTERS and !move_name in UniqChar.EX_MOVES and \
 								!move_name in UniqChar.SUPERS:
-								if Animator.time <= 3 and Animator.time != 0:
+								if Animator.time <= 1 and Animator.time != 0:
 									animate("JumpTransit")
 									rebuffer_actions() # this buffers the attack buttons currently being pressed
 
@@ -2920,14 +2932,16 @@ func burst_extend_check(move_name): # check if have resources to do it, then tak
 		return false
 	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL]:
 		return false
-	if move_name in UniqChar.MOVE_DATABASE and UniqChar.MOVE_DATABASE[move_name].atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
+	if UniqChar.query_move_data(move_name).atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
 		return false
 	change_burst_token(false)
 	return true
 	
 func burst_revoke_check(move_name):
-	move_name = UniqChar.refine_move_name(move_name)
-	if move_name in UniqChar.MOVE_DATABASE and UniqChar.MOVE_DATABASE[move_name].atk_type == Globals.atk_type.SPECIAL:
+	
+	var move_data = UniqChar.query_move_data(move_name)
+		
+	if move_data.atk_type == Globals.atk_type.SPECIAL:
 		pass # only special moves can be burst revoked
 	else:
 		return false
@@ -2936,14 +2950,13 @@ func burst_revoke_check(move_name):
 		return false
 		
 	if is_atk_active(): # for active frames, only attacking specials can be revoked
-		if !Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
-			if "no_revoke_time" in UniqChar.MOVE_DATABASE[move_name] and \
-				Animator.time >= UniqChar.MOVE_DATABASE[move_name].no_revoke_time: # some moves cannot be revoked after a specific time
+		if !Globals.atk_attr.NON_ATTACK in move_data.atk_attr:
+			if "no_revoke_time" in move_data and Animator.time >= move_data.no_revoke_time: # some moves cannot be revoked after a specific time
 				return false
 		else:
 			return false
 	else: # for recovery frames, only non-attack specials can be revoked, and only if opponent is not in hitstun/blockstun
-		if Globals.atk_attr.NON_ATTACK in query_atk_attr(move_name):
+		if Globals.atk_attr.NON_ATTACK in move_data.atk_attr:
 			var target = get_node(targeted_opponent_path)
 			if target.get_node("HitStunTimer").is_running() or target.is_blockstunned():
 				return false
@@ -3240,8 +3253,7 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 	
 func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aerial normals
 	
-	if attack_ref in UniqChar.MOVE_DATABASE and "root" in UniqChar.MOVE_DATABASE[attack_ref]:
-		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
+	attack_ref = UniqChar.get_root(attack_ref) # get the root attack
 		
 	if attack_ref in aerial_memory or attack_ref in aerial_sp_memory:
 		return false
@@ -3262,9 +3274,9 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	
 	if chain_combo in [Globals.chain_combo.RESET, Globals.chain_combo.NO_CHAIN]: return false # can only chain combo on hit
 	
-	if attack_ref in UniqChar.MOVE_DATABASE and "root" in UniqChar.MOVE_DATABASE[attack_ref]:
-		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
-	if attack_ref in chain_memory: return false # cannot chain into moves already done
+	var root_attack_ref = UniqChar.get_root(attack_ref)
+	
+	if root_attack_ref in chain_memory: return false # cannot chain into moves already done
 	
 #	if !move_name in UniqChar.MOVE_DATABASE:
 #		return false # just in case
@@ -3311,8 +3323,7 @@ func test_qc_chain_combo(attack_ref):
 	if chain_combo != Globals.chain_combo.RESET and Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
 		return false # if you are chain comboing and trying to quick cancel a valid move into one with CANNOT_CHAIN_INTO
 	
-	if attack_ref in UniqChar.MOVE_DATABASE and "root" in UniqChar.MOVE_DATABASE[attack_ref]:
-		attack_ref = UniqChar.MOVE_DATABASE[attack_ref].root # get the root attack
+	attack_ref = UniqChar.get_root(attack_ref)
 	
 	if attack_ref in chain_memory:
 		return false # cannot quick cancel into moves already done
@@ -3825,10 +3836,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
 	var double_repeat := false
-	var root_move_name = hit_data.move_name
-		
-	if "root" in hit_data.move_data: # for move variations
-		root_move_name = hit_data.move_data.root
+	var root_move_name = UniqChar.get_root(hit_data.move_name) # for move variations
 	
 	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
 		for array in repeat_memory:
@@ -4082,17 +4090,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !hit_data.break_hit and !hit_data.lethal_hit and Globals.atk_attr.SCREEN_SHAKE in hit_data.move_data.atk_attr:
 		Globals.Game.set_screenshake()
 		
-	if hit_data.block_state == Globals.block_state.UNBLOCKED and "root" in hit_data.move_data:
-		if hit_data.move_data.root == "BurstCounter":
-			attacker.reset_jumps()
-			reset_jumps()
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and "burst" in hit_data.move_data:
+		if hit_data.move_data.burst == "BurstCounter":
+#			attacker.reset_jumps()
+#			reset_jumps()
 			attacker.reset_guard_gauge()
-		elif hit_data.move_data.root == "BurstEscape":
+		elif hit_data.move_data.burst == "BurstEscape":
+			pass
+#			attacker.reset_jumps()
+#			reset_jumps()
+		elif hit_data.move_data.burst == "BurstExtend":
 			attacker.reset_jumps()
-			reset_jumps()
-		elif hit_data.move_data.root == "BurstExtend":
-#			attacker.reset_jumps() # only defender resets jumps, or else too overpowered
-			reset_jumps()
+#			reset_jumps()
 			current_guard_gauge = 0
 			Globals.Game.guard_gauge_update(self)
 #			defender.repeat_memory = []
@@ -4491,6 +4500,11 @@ func calculate_guard_gauge_change(hit_data) -> int:
 				guard_gauge_change = FMath.percent(guard_gauge_change, PUNISH_GUARD_DRAIN_MOD)
 		
 		if hit_data.block_state != Globals.block_state.UNBLOCKED:
+			if Globals.atk_attr.NO_GDRAIN_ON_BLOCK in hit_data.move_data.atk_attr:
+				return 0
+				
+			var cornered: bool = position.x < Globals.Game.left_corner or position.x > Globals.Game.right_corner
+				
 			match hit_data.block_state:
 				Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG: # increase GDrain for wrongblock
 					if !"superarmored" in hit_data:
@@ -4500,13 +4514,16 @@ func calculate_guard_gauge_change(hit_data) -> int:
 				Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:  # reduce/negate GDrain for perfect block
 					guard_gauge_change = FMath.percent(guard_gauge_change, PERFECTBLOCK_GUARD_DRAIN_MOD)
 				_:
-					if success_block: # on base block, reduce GDrain if already blocked an attack
+					if success_block and !cornered: # on base block, reduce GDrain if already blocked an attack, unless in corner
 						guard_gauge_change = FMath.percent(guard_gauge_change, BLOCKSTRING_GUARD_DRAIN_MOD)
 					else:
 						guard_gauge_change = FMath.percent(guard_gauge_change, BASE_BLOCK_GUARD_DRAIN_MOD)
 						
 					if !grounded: # increase GDrain for air Blocking opponent for base block
 						guard_gauge_change = FMath.percent(guard_gauge_change, AIR_BASE_BLOCK_GUARD_DRAIN_MOD)
+
+#			if cornered: # take extra Guard Drain at corner
+#				guard_gauge_change = FMath.percent(guard_gauge_change, CORNER_GUARD_DRAIN_MOD)
 				
 #		else:
 #			guard_gauge_change = FMath.percent(guard_gauge_change, FIRST_HIT_GUARD_DRAIN_MOD)
@@ -4565,7 +4582,7 @@ func calculate_knockback_strength(hit_data) -> int:
 	if !hit_data.weak_hit:  # no KB boost for multi-hit attacks (weak hits) till the last hit
 		if current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
 #			knockback_strength *= lerp(1.0, UniqChar.KB_BOOST_AT_MAX_GG, defender.get_guard_gauge_percent_above())
-			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, KB_BOOST_AT_MAX_GG), \
+			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \
 				get_guard_gauge_percent_above())
 				
 		if get_guard_gauge_percent_above() == 100: # just in case
@@ -4723,9 +4740,13 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 	else:
 		if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
+#			if hit_data.knockback_strength < LAUNCH_THRESHOLD:
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
 				get_guard_gauge_percent_above())
-			
+#			else:
+#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
+#					get_guard_gauge_percent_above())
+					
 		if state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
 			scaled_hitstun = FMath.percent(scaled_hitstun, CROUCH_REDUCTION_MOD)
 		
@@ -4841,8 +4862,8 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
 	var hitspark_level: int
 	
-	if "root" in hit_data.move_data and hit_data.move_data.root.begins_with("Burst"):
-		if hit_data.move_data.root == "BurstRevoke":
+	if "burst" in hit_data.move_data:
+		if hit_data.move_data.burst == "BurstRevoke":
 			hitspark_level = 1
 		else:
 			hitspark_level = 5
@@ -4957,10 +4978,7 @@ func landed_a_sequence(hit_data):
 	var defender = get_node(hit_data.defender_nodepath)
 	
 	# repeat penalty, cannot grab if repeated
-	var root_move_name = hit_data.move_name
-		
-	if "root" in hit_data.move_data: # for move variations
-		root_move_name = hit_data.move_data.root
+	var root_move_name = UniqChar.get_root(hit_data.move_name)
 		
 	for array in defender.repeat_memory:
 		if array[0] == player_ID and array[1] == root_move_name:
@@ -5070,7 +5088,7 @@ func sequence_launch():
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 		else:
 			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
+				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
 					get_guard_gauge_percent_above())
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
@@ -5087,7 +5105,7 @@ func sequence_launch():
 		launch_power = FMath.f_lerp(FMath.percent(launch_power, 200), FMath.percent(launch_power, DMG_VAL_KB_LIMIT), weight)
 		
 	if current_guard_gauge > 0: # knockback is increased by Guard Gauge when it is > 100%
-		launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, KB_BOOST_AT_MAX_GG), \
+		launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \
 			get_guard_gauge_percent_above())
 		
 	# LAUNCH ANGLE
@@ -5269,22 +5287,24 @@ func _on_SpritePlayer_anim_started(anim_name):
 		impulse_used = false
 		
 		if is_atk_active():
-			var move_name = anim_name.trim_suffix("Active")
-			if move_name in UniqChar.MOVE_DATABASE:
-				if "root" in UniqChar.MOVE_DATABASE[move_name]:
-					chain_memory.append(UniqChar.MOVE_DATABASE[move_name].root) # add move to chain memory
-					if !grounded: # add move to aerial memory
-						if is_normal_attack(UniqChar.MOVE_DATABASE[move_name].root):
-							aerial_memory.append(UniqChar.MOVE_DATABASE[move_name].root)
-						elif is_special_move(UniqChar.MOVE_DATABASE[move_name].root):
-							aerial_sp_memory.append(UniqChar.MOVE_DATABASE[move_name].root)
-				else:
-					chain_memory.append(move_name)
-					if !grounded:
-						if is_normal_attack(move_name):
-							aerial_memory.append(move_name)
-						elif is_special_move(move_name):
-							aerial_sp_memory.append(move_name)
+			var move_name = UniqChar.get_root(anim_name.trim_suffix("Active"))
+			
+#			if move_name in UniqChar.MOVE_DATABASE:
+			chain_memory.append(move_name) # add move to chain memory
+			
+			if !grounded: # add move to aerial memory
+				if is_normal_attack(move_name):
+					aerial_memory.append(move_name)
+				elif is_special_move(move_name):
+					aerial_sp_memory.append(move_name)
+							
+#				else:
+#					chain_memory.append(move_name)
+#					if !grounded:
+#						if is_normal_attack(move_name):
+#							aerial_memory.append(move_name)
+#						elif is_special_move(move_name):
+#							aerial_sp_memory.append(move_name)
 					
 #		else:
 #			perfect_chain = false # change to false if neither startup nor active

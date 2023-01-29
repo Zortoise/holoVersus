@@ -14,7 +14,7 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
-		"root" : "BurstExtend",
+		"burst" : "BurstExtend",
 		"atk_type" : Globals.atk_type.ENTITY,
 		"hitcount" : 1,
 		"damage" : 0,

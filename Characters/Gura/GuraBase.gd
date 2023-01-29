@@ -31,8 +31,8 @@ const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gai
 #const SUPER_JUMP_MOD = 150
 const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
-#const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
-#const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
+const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
+const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 950
 const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
@@ -58,7 +58,7 @@ const UNIQUE_DATA_REF = {
 }
 
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
-		"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
+	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
 const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 const SUPERS = []
@@ -66,8 +66,8 @@ const SUPERS = []
 const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
-const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
-		"SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB"]
+const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1b[ex]", "aSP1b[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
+	"SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB"]
 #const EX_FLASH_ANIM = ["H", "Hb"]
 
 # const DIRECTORY_NAME = "res://Characters/Gura/"
@@ -152,7 +152,7 @@ const MOVE_DATABASE = {
 	"L2" : {
 		"atk_type" : Globals.atk_type.LIGHT,
 		"hitcount" : 1,
-		"damage" : 40,
+		"damage" : 45,
 		"knockback" : 180 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
 		"atk_level" : 3,
@@ -191,7 +191,7 @@ const MOVE_DATABASE = {
 	"F2" : {
 		"atk_type" : Globals.atk_type.FIERCE,
 		"hitcount" : 1,
-		"damage" : 70,
+		"damage" : 60,
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
@@ -247,7 +247,7 @@ const MOVE_DATABASE = {
 	"H" : {
 		"atk_type" : Globals.atk_type.HEAVY,
 		"hitcount" : 1,
-		"damage" : 40,
+		"damage" : 30,
 		"knockback" : 150 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
@@ -275,15 +275,15 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES, 
-				Globals.atk_attr.NO_REPEAT_MOVE],
+		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES,
+			Globals.atk_attr.NO_REPEAT_MOVE],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 
 	"aL1" : {
 		"atk_type" : Globals.atk_type.LIGHT,
 		"hitcount" : 1,
-		"damage" : 35,
+		"damage" : 40,
 		"knockback" : 200 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
 		"atk_level" : 2,
@@ -301,7 +301,7 @@ const MOVE_DATABASE = {
 	"aL2" : {
 		"atk_type" : Globals.atk_type.LIGHT,
 		"hitcount" : 1,
-		"damage" : 30,
+		"damage" : 35,
 		"knockback" : 200 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
@@ -337,7 +337,7 @@ const MOVE_DATABASE = {
 	"aF3" : {
 		"atk_type" : Globals.atk_type.FIERCE,
 		"hitcount" : 1,
-		"damage" : 60,
+		"damage" : 55,
 		"knockback" : 350 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
@@ -355,7 +355,7 @@ const MOVE_DATABASE = {
 	"aH" : {
 		"atk_type" : Globals.atk_type.HEAVY,
 		"hitcount" : 1,
-		"damage" : 100,
+		"damage" : 90,
 		"knockback" : 475 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
@@ -376,52 +376,11 @@ const MOVE_DATABASE = {
 		"priority": 0,
 		"atk_attr" : [Globals.atk_attr.NON_ATTACK], # some projectile moves can have attributes like superarmor
 	},
-	"aSP1": {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"priority": 0,
-		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
-	},
-	"SP1[c1]": {
-		"atk_type" : Globals.atk_type.SPECIAL, # needed to check atk_type for Burst Revoke
-		"root" : "SP1", # needed for aerial memory
-		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-	},
-	"SP1[c2]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"root" : "SP1",
-		"move_sound" : { ref = "whoosh12", aux_data = {} },
-	},
-	"SP1[c3]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"root" : "SP1",
-		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
-	},
-	"aSP1[c1]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"root" : "aSP1",
-		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-	},
-	"aSP1[c2]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"root" : "aSP1",
-		"move_sound" : { ref = "whoosh12", aux_data = {} },
-	},
-	"aSP1[c3]": {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"root" : "aSP1",
-		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
-	},
 	"SP1[ex]": {
 		"atk_type" : Globals.atk_type.EX,
 		"priority": 0,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
 		"atk_attr" : [Globals.atk_attr.NON_ATTACK], # some projectile moves can have attributes like superarmor
-	},
-	"aSP1[ex]": {
-		"atk_type" : Globals.atk_type.EX,
-		"priority": 0,
-		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
-		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
 	},
 	
 	"aSP2" : {
@@ -546,7 +505,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP3b",
 		"chain_starter" : "aSP3[h]",
-		"no_revoke_time" : 0, 
+		"no_revoke_time" : 0,
 		"hitcount" : 1,
 		"damage" : 70,
 		"knockback" : 500 * FMath.S,
@@ -621,7 +580,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 #		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		"hitcount" : 1,
-		"damage" : 90,
+		"damage" : 80,
 		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 3,
@@ -641,7 +600,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 #		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		"hitcount" : 1,
-		"damage" : 55,
+		"damage" : 50,
 		"knockback" : 200 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
@@ -663,7 +622,7 @@ const MOVE_DATABASE = {
 		"chain_starter" : "aSP5[h]",
 #		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		"hitcount" : 1,
-		"damage" : 55,
+		"damage" : 50,
 		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 3,
@@ -680,7 +639,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 #		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		"hitcount" : 1,
-		"damage" : 120,
+		"damage" : 100,
 		"knockback" : 550 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
@@ -704,7 +663,7 @@ const MOVE_DATABASE = {
 		"priority": 11,
 		"hitspark_type" : Globals.hitspark_type.NONE,
 		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.CANNOT_CHAIN_INTO, \
-				Globals.atk_attr.NOT_FROM_C_REC, Globals.atk_attr.COMMAND_GRAB]
+			Globals.atk_attr.NOT_FROM_C_REC, Globals.atk_attr.COMMAND_GRAB]
 	},
 	
 	"SP6[ex]SeqE": {

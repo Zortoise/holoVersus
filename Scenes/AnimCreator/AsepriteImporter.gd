@@ -14,7 +14,7 @@ extends EditorScript
 export var entity_folder = "res://Characters/Gura/"
 # be sure to end with a "/", or not if you wish, I guess
 
-export var target_aseprite_filename = "Base"
+export var target_aseprite_filename = "SP1"
 # only need filename, not path, no need extension
 # if left empty, will process all .aseprite files in the AsepriteFiles folder in entity_folder
 
@@ -192,9 +192,16 @@ func process_sprite_layer(frame_data, in_aseprite_filename):
 	var hframes = layer_data.meta.size.w / layer_data.frames[0].sourceSize.w
 	var vframes = layer_data.meta.size.h / layer_data.frames[0].sourceSize.h
 	
+	var name_for_checking := [] # used to check for duplicated tag name
+	
 	# get data for each animation tag
 	for animation in layer_data.meta.frameTags:
 		var anim_name = animation.name
+		
+		if anim_name in name_for_checking:
+			print("Error: Duplicate animation tag name found: " + str(anim_name))
+		name_for_checking.append(anim_name)
+		
 		var loop := false
 		if anim_name.begins_with("~"): # if start with "~", remove it from the name and loop = true
 			loop = true
@@ -319,6 +326,7 @@ func process_polygon_layer(polygon_layer_name, frame_data, in_aseprite_filename)
 
 		var frames_in_anim = layer_data.frames.slice(animation.from, animation.to)
 		var anim_time := 0
+#		print(anim_name)
 		for frame in frames_in_anim: # getting polygon and adding it to that timestamp
 			frame_data[anim_name]["timestamps"][anim_time][polygon_layer_name.to_lower()] = polygon_array[get_frame_index(frame)]
 			anim_time += round(frame.duration / (100.0/6.0)) # convert from milliseconds to frame
