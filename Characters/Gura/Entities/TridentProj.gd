@@ -83,7 +83,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY],
+		"atk_attr" : [Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY, Globals.atk_attr.STRONG_ENTITY],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 }

@@ -25,7 +25,7 @@ const BURSTESCAPE_GG_COST = 5000
 const BURSTREVOKE_GG_COST = 5000
 const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blocking
 const AIRBLOCK_TERMINAL_MOD = 70 # multiply to get terminal velocity during air blocking
-const MAX_WALL_JUMP = 1
+const MAX_WALL_JUMP = 2
 const HITSTUN_TERMINAL_VELOCITY_MOD = 750 # multiply to GRAVITY to get terminal velocity during hitstun
 const HOP_JUMP_MOD = 80 # can hop by using up + jump
 const PERFECT_IMPULSE_MOD = 140 # multiply by UniqChar.get_stat("SPEED") and UniqChar.get_stat("IMPULSE MOD") to get perfect impulse velocity
@@ -54,7 +54,7 @@ const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is a
 #const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
 # const DMG_BOOST_AT_DMG_VAL_LIMIT = 1.5 # increase in damage taken when damage percent is at 100%, goes pass it when damage percent goes >100%
 # const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
-#const F_HITSTUN_REDUCTION_AT_MAX_GG = 30 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%
+const F_HITSTUN_REDUCTION_AT_MAX_GG = 0 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%
 #const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
 #const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
 #const PERFECTCHAIN_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on perfect chains
@@ -92,12 +92,14 @@ const BREAK_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Break
 const CRUSH_STUN_TIME = 40 # number of frames stun time last for Crush
 
 const BASE_BLOCK_GUARD_DRAIN_MOD = 150 # guard drain for base blocking
-const BLOCKSTRING_GUARD_DRAIN_MOD = 50 # reduced guard drain for base blocking during blockstrings
+const BLOCKSTRING_GUARD_DRAIN_MOD = 50 # reduced guard drain for base blocking during blockstrings outside corner
 const BASE_BLOCK_PUSHBACK_MOD = 70 # % of base knockback of attack
 const BASE_BLOCK_ATKER_PUSHBACK = 400 * FMath.S # how much the attacker is pushed away, fixed
 #const DOWNWARD_KB_REDUCTION_ON_BLOCK = 25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
-const BLOCKSTUN_MOD_FROM_HITSTUN = 40 # blockstun is 50% of calculated hitstun
+const BLOCKSTUN_MOD_FROM_HITSTUN = 50 # blockstun is % of calculated hitstun
 const MIN_BASE_BLOCKSTUN = 8
+const BLOCKSTRING_BLOCKSTUN_MOD = 70 # % of blockstun on success block blockstring outside corner
+const BLOCKSTRING_ATKER_PUSHBACK_MOD = 150 # % of attacker pushback on success block blockstring outside corner
 
 const WRONGBLOCK_CHIP_DMG_MOD = 200 # increased chip damage for wrongblocking
 const WRONGBLOCK_GUARD_DRAIN_MOD = 350 # increased guard drain for wrongblocking
@@ -1918,9 +1920,11 @@ func process_input_buffer():
 						Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
 							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.GROUND_BLOCKSTUN, \
-							Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN:
+							Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_BLOCKSTUN, Globals.char_state.AIR_RECOVERY:
 							if Animator.query_current(["WBlockstun", "aWBlockstun"]): # no burst during wrongblock
 								continue
+							if state == Globals.char_state.AIR_RECOVERY and !Animator.query_current(["Tech", "GuardTech"]):
+								continue # can burst during teching
 							if burst_counter_check():
 								animate("BurstCounterStartup")
 								chain_memory = []
@@ -1940,11 +1944,10 @@ func process_input_buffer():
 #								has_acted[0] = true
 #								keep = false
 
-						Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
-							Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
-							if new_state in [Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
-							Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE]:
-								# new state must not be standby, so landed moves cannot burst revoke on last frame of recovery
+						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP, \
+								Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
+								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
+							if is_attacking(): # new state must not be standby, so landed moves cannot burst revoke on last frame of recovery
 								var move_name = get_move_name()
 								if burst_extend_check(move_name):
 									animate("BurstExtend")
@@ -2270,7 +2273,7 @@ func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock)
 	if air_jump < UniqChar.get_stat("MAX_AIR_JUMP"): # cannot go over
 		air_jump += 1
 	
-func reset_cancels(): # done whenever you use an attack
+func reset_cancels(): # done whenever you use an attack, after startup frames finish and before active frames begin
 	chain_combo = Globals.chain_combo.RESET
 	dash_cancel = false
 	jump_cancel = false
@@ -2941,27 +2944,41 @@ func burst_revoke_check(move_name):
 	
 	var move_data = UniqChar.query_move_data(move_name)
 		
-	if move_data.atk_type == Globals.atk_type.SPECIAL:
-		pass # only special moves can be burst revoked
-	else:
-		return false
+#	if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY, Globals.atk_type.SPECIAL]:
+#		pass 
+#	else:
+#		return false
 		
 	if !chain_combo in [Globals.chain_combo.RESET] or (current_guard_gauge + 10000) < BURSTREVOKE_GG_COST:
 		return false
 		
-	if is_atk_active(): # for active frames, only attacking specials can be revoked
-		if !Globals.atk_attr.NON_ATTACK in move_data.atk_attr:
-			if "no_revoke_time" in move_data and Animator.time >= move_data.no_revoke_time: # some moves cannot be revoked after a specific time
-				return false
-		else:
-			return false
-	else: # for recovery frames, only non-attack specials can be revoked, and only if opponent is not in hitstun/blockstun
-		if Globals.atk_attr.NON_ATTACK in move_data.atk_attr:
-			var target = get_node(targeted_opponent_path)
-			if target.get_node("HitStunTimer").is_running() or target.is_blockstunned():
-				return false
-		else:
-			return false
+	var filter := false
+		
+	match move_data.atk_type:
+		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
+			if is_atk_startup():
+				filter = true
+		Globals.atk_type.SPECIAL:
+			if !"revoke_type" in move_data: # cannot revoke
+				filter = false
+			else:
+				match move_data.revoke_type:
+					Globals.revoke_type.STARTUP_REVOKE: # can only revoke during startup
+						if is_atk_startup():
+							filter = true
+					Globals.revoke_type.EARLY_REVOKE: # can only revoke during first 3 frames of active frames
+						if is_atk_active() and Animator.time > 0 and Animator.time <= 3:
+							filter = true
+					Globals.revoke_type.FULL_ACTIVE_REVOKE: # can only revoke during active frames
+						if is_atk_active() and Animator.time > 0:
+							filter = true
+					Globals.revoke_type.NON_ATK_REVOKE: # can only revoke during active frames if targeted opponent not in hit/blockstun
+						if is_atk_active() and Animator.time > 0:
+							var target = get_node(targeted_opponent_path)
+							if !target.get_node("HitStunTimer").is_running() and !target.is_blockstunned():
+								filter = true
+
+	if filter == false: return false
 			
 	change_guard_gauge(-BURSTREVOKE_GG_COST)
 	status_effect_to_remove.append(Globals.status_effect.POS_FLOW)
@@ -3268,7 +3285,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	var move_name = Animator.current_animation.trim_suffix("Rec")
 	move_name = move_name.trim_suffix("Active")
 	
-	if UniqChar.has_method("unique_chaining_rules") and UniqChar.unique_chaining_rules(move_name, attack_ref): # will use Character.chain_combo
+	if UniqChar.has_method("unique_chaining_rules") and UniqChar.unique_chaining_rules(move_name, attack_ref):
+		# will use Character.chain_combo, good for autocombos that triggers on hit/block and may/may not be on whiff
 		afterimage_cancel()
 		return true
 	
@@ -3692,12 +3710,11 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			jump_cancel = true
 				
 	# PUSHBACK ----------------------------------------------------------------------------------------------
-		# if blocked hit, pushback
-		# if attacking at the corner, pushback depending on defender's Guard Gauge
-	
+		
+	# if attacking at the corner, pushback depending on defender's Guard Gauge
 	if hit_data.block_state == Globals.block_state.UNBLOCKED and !Globals.atk_attr.NO_PUSHBACK in hit_data.move_data.atk_attr and \
 			!"multihit" in hit_data and !"autochain" in hit_data:
-		if defender.position.x < Globals.Game.left_corner or defender.position.x > Globals.Game.right_corner:
+		if "cornered" in hit_data:
 			
 			var pushback_strength = CORNER_PUSHBACK
 			if defender.current_guard_gauge > 0:
@@ -3713,6 +3730,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					if defender.position.x > Globals.Game.right_corner:
 						velocity.x -= pushback_strength
 	
+	# if blocked hit, pushback
 	if hit_data.block_state != Globals.block_state.UNBLOCKED and !Globals.atk_attr.NO_PUSHBACK in hit_data.move_data.atk_attr and \
 		!"multihit" in hit_data:
 		 # for multi-hit only last hit has attacker pushback
@@ -3727,9 +3745,12 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			_:
 				if !"autochain" in hit_data:
 					pushback_strength = BASE_BLOCK_ATKER_PUSHBACK # normal block
+					if "success_blocked" in hit_data and !"cornered" in hit_data: # on success block outside corner pushback more
+						pushback_strength = FMath.percent(pushback_strength, BLOCKSTRING_ATKER_PUSHBACK_MOD)
 		var pushback_dir: int = hit_data.angle_to_atker
 		var pushback_dir_enum = Globals.split_angle(pushback_dir, Globals.angle_split.SIX, facing) # this return an enum
 		pushback_dir = Globals.compass_to_angle(pushback_dir_enum)
+		
 		
 		velocity.set_vector(pushback_strength, 0)  # reset momentum
 		velocity.rotate(pushback_dir)
@@ -3821,6 +3842,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	if "entity_nodepath" in hit_data and !Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
 		hit_data["non_strong_proj"] = true
+		
+	if position.x < Globals.Game.left_corner or position.x > Globals.Game.right_corner:
+		hit_data["cornered"] = true
 		
 	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
 		if !"multihit" in hit_data and !"autochain" in hit_data:
@@ -3959,10 +3983,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			else:
 				hit_data.block_state = Globals.block_state.AIR
 				
+	if hit_data.block_state in [Globals.block_state.GROUND, Globals.block_state.AIR, Globals.block_state.GROUND_PERFECT, \
+			Globals.block_state.AIR_PERFECT] and success_block:
+		hit_data["success_blocked"] = true # for attacker pushback
+				
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
 	
-	if !hit_data.weak_hit and hit_data.move_data.damage > 0 and !"superarmored" in hit_data: # cannot Punish Hit for weak hits and non-damaging moves like Burst
+	if !hit_data.weak_hit and !"non_strong_proj" in hit_data and hit_data.move_data.damage > 0 and !"superarmored" in hit_data:
+		# cannot Punish Hit for weak hits, non-strong projectiles and non-damaging moves like Burst
+		# remember that multi-hit moves cannot do punish hits
 		match state:
 			Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
 				Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
@@ -3988,11 +4018,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 	take_damage(calculate_damage(hit_data)) # do damage calculation
 	
-	if get_guard_gauge_percent_below() <= 1 and !hit_data.weak_hit and hit_data.move_data.damage > 0 and \
-		!"autochain" in hit_data and !"non_strong_proj" in hit_data and !query_status_effect(Globals.status_effect.BREAK_RECOVER):  # check for break hit
-		# setting to 0.01 instead of 0 allow multi-hit moves to cause break_hits on the last attack
-		# autochain moves will not guardbreak, only the autochain finisher can
-		
+	if can_guardbreak(hit_data):
 		hit_data.break_hit = true
 		hit_data.block_state = Globals.block_state.UNBLOCKED
 				
@@ -4024,20 +4050,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var knockback_strength: int = calculate_knockback_strength(hit_data)
 	hit_data["knockback_strength"] = knockback_strength
 	
-	
 	# lethal hit, must have enough launch power to trigger it
-	if knockback_strength >= LAUNCH_THRESHOLD and get_damage_percent() >= 100 and !hit_data.weak_hit and hit_data.move_data.damage > 0: # check for lethal
+	if can_lethal(hit_data): # check for lethal
 		if hit_data.block_state == Globals.block_state.UNBLOCKED or hit_data.block_state == Globals.block_state.AIR_WRONG or \
 				hit_data.block_state == Globals.block_state.GROUND_WRONG:
-			if !"autochain" in hit_data and !"non_strong_proj" in hit_data:
-				
-				hit_data.lethal_hit = true
-				lethal_flag = true
-				hit_data.block_state = Globals.block_state.UNBLOCKED # wrongblocking has no effect when damage is over limit
-				knockback_strength = lethal_knockback(hit_data, knockback_strength)
+			hit_data.lethal_hit = true
+			hit_data.block_state = Globals.block_state.UNBLOCKED # wrongblocking has no effect when damage is over limit
+			knockback_strength = lethal_knockback(hit_data, knockback_strength)
 				
 	if !hit_data.lethal_hit:
 		lethal_flag = false
+	else:
+		lethal_flag = true
 		
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------
 	
@@ -4210,6 +4234,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		set_true_position()
 		return
 		
+
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
@@ -4226,7 +4251,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			var no_impact := false
 			
 			if adjusted_atk_level <= 1: # for attack level 1 attacks
-				if knockback_strength > LAUNCH_THRESHOLD: knockback_strength = LAUNCH_THRESHOLD - FMath.S # just in case
+#				if knockback_strength > LAUNCH_THRESHOLD: knockback_strength = LAUNCH_THRESHOLD - FMath.S # just in case
 				
 				if $HitStunTimer.is_running(): # for hitstunned defender
 					if state == Globals.char_state.LAUNCHED_HITSTUN:
@@ -4377,7 +4402,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				Globals.block_state.AIR_PERFECT:
 					animate("aPBlockstun")
 					success_block = true
-		
+					
 	if !no_impact_and_vel_change:
 		velocity.set_vector(knockback_strength, 0)  # reset momentum
 		velocity.rotate(knockback_dir)
@@ -4399,7 +4424,35 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 # HIT CALCULATION ---------------------------------------------------------------------------------------------------
 	
+func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but all moves except non-strong proj can Punish Hit)
+	if hit_data.weak_hit or "autochain" in hit_data or hit_data.double_repeat or hit_data.move_data.damage <= 0:
+		return false
+	if hit_data.knockback_strength < LAUNCH_THRESHOLD or get_damage_percent() < 100:
+		return false
+	if hit_data.sweetspotted:
+		return true
+		# non-strong hits that become strong hits via Sweetspotting may still not give lethal hits if knockback is lacking
+	if get_damage_percent() < 150:
+		if "non_strong_proj" in hit_data:
+			return false
+		if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE]:
+			return false
+	return true
+	# at 150% damage, any non-strong hits with high enough knockback will lethal, and any attack can Guardbreak on unblock/Base Block
 	
+func can_guardbreak(hit_data):
+	if hit_data.weak_hit or "autochain" in hit_data or hit_data.double_repeat or hit_data.move_data.damage <= 0:
+		return false # autochain moves will not guardbreak, only the autochain finisher can
+	if "non_strong_proj" in hit_data:
+		return false
+	if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT]: # Lights cannot Guardbreak, but Fierce can
+		return false
+	if get_guard_gauge_percent_below() > 1:
+		return false # setting to 0.01 instead of 0 allow multi-hit moves to cause break_hits on the last attack
+	if query_status_effect(Globals.status_effect.BREAK_RECOVER):
+		return false
+	return true
+		
 func calculate_damage(hit_data) -> int:
 	
 #	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
@@ -4502,9 +4555,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		if hit_data.block_state != Globals.block_state.UNBLOCKED:
 			if Globals.atk_attr.NO_GDRAIN_ON_BLOCK in hit_data.move_data.atk_attr:
 				return 0
-				
-			var cornered: bool = position.x < Globals.Game.left_corner or position.x > Globals.Game.right_corner
-				
+
 			match hit_data.block_state:
 				Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG: # increase GDrain for wrongblock
 					if !"superarmored" in hit_data:
@@ -4514,7 +4565,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 				Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:  # reduce/negate GDrain for perfect block
 					guard_gauge_change = FMath.percent(guard_gauge_change, PERFECTBLOCK_GUARD_DRAIN_MOD)
 				_:
-					if success_block and !cornered: # on base block, reduce GDrain if already blocked an attack, unless in corner
+					if success_block and !"cornered" in hit_data: # on base block, reduce GDrain if already blocked an attack, unless in corner
 						guard_gauge_change = FMath.percent(guard_gauge_change, BLOCKSTRING_GUARD_DRAIN_MOD)
 					else:
 						guard_gauge_change = FMath.percent(guard_gauge_change, BASE_BLOCK_GUARD_DRAIN_MOD)
@@ -4733,24 +4784,24 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 
 	var scaled_hitstun: int = ATK_LEVEL_TO_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 		
-	if hit_data.lethal_hit:
-		# increased hitstun on a lethal hit and no reduction from high Guard Gauge
-		scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
-		if get_damage_percent() > 1.0:
-			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
-	else:
-		if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-#			if hit_data.knockback_strength < LAUNCH_THRESHOLD:
-			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
-				get_guard_gauge_percent_above())
-#			else:
-#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
-#					get_guard_gauge_percent_above())
-					
-		if state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
-			scaled_hitstun = FMath.percent(scaled_hitstun, CROUCH_REDUCTION_MOD)
-		
 	if !blocking:
+		if hit_data.lethal_hit:
+			# increased hitstun on a lethal hit and no reduction from high Guard Gauge
+			scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
+			if get_damage_percent() > 1.0:
+				scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
+		else:
+			if current_guard_gauge > 0: # flinch hitstun is reduced by defender's Guard Gauge when it is > 100%
+				if hit_data.knockback_strength < LAUNCH_THRESHOLD:
+					scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, F_HITSTUN_REDUCTION_AT_MAX_GG), \
+						get_guard_gauge_percent_above())
+	#			else:
+	#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
+	#					get_guard_gauge_percent_above())
+						
+			if state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
+				scaled_hitstun = FMath.percent(scaled_hitstun, CROUCH_REDUCTION_MOD)
+		
 		return FMath.round_and_descale(scaled_hitstun)
 	else:
 		return scaled_hitstun # for further processing
@@ -4758,19 +4809,19 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 
 func calculate_blockstun(hit_data) -> int:
 	
-	if hit_data.double_repeat:
+	if hit_data.double_repeat or hit_data.adjusted_atk_level <= 1:
 		return 0
 	
 	var scaled_blockstun: int # 40% (BLOCKSTUN_MOD_FROM_HITSTUN) of hitstun, but has a minimum value
 	scaled_blockstun = int(max(FMath.percent(calculate_hitstun(hit_data, true), BLOCKSTUN_MOD_FROM_HITSTUN), MIN_BASE_BLOCKSTUN * FMath.S))
 	
 	if hit_data.block_state == Globals.block_state.AIR_WRONG or hit_data.block_state == Globals.block_state.GROUND_WRONG:
-		scaled_blockstun = int(max(FMath.percent(calculate_hitstun(hit_data, true), BLOCKSTUN_MOD_FROM_HITSTUN), MIN_BASE_BLOCKSTUN * FMath.S))
 		scaled_blockstun = FMath.percent(scaled_blockstun, WRONGBLOCK_BLOCKSTUN_MOD)
-	else:
-		if hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
-			scaled_blockstun = int(max(FMath.percent(calculate_hitstun(hit_data, true), BLOCKSTUN_MOD_FROM_HITSTUN), MIN_BASE_BLOCKSTUN * FMath.S))
-			scaled_blockstun = FMath.percent(scaled_blockstun, PERFECTBLOCK_BLOCKSTUN_MOD)
+	elif hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
+		scaled_blockstun = FMath.percent(scaled_blockstun, PERFECTBLOCK_BLOCKSTUN_MOD)
+		
+	elif success_block and !"cornered" in hit_data: # on base block, blockstrings on success block state reduce blockstun
+		scaled_blockstun = FMath.percent(scaled_blockstun, BLOCKSTRING_BLOCKSTUN_MOD)
 			
 	var blockstun: int = FMath.round_and_descale(scaled_blockstun)
 	
@@ -5086,10 +5137,10 @@ func sequence_launch():
 		if get_damage_percent() >= 100:
 			scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
-		else:
-			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
-					get_guard_gauge_percent_above())
+#		else:
+#			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("F_HITSTUN_REDUCTION_AT_MAX_GG")), \
+#					get_guard_gauge_percent_above())
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
 	orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
@@ -5357,11 +5408,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
 			else: # if next to wall when starting an air jump, do wall jump instead
 				if wall_jump_dir != 0:
-					velocity.x = wall_jump_dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("WALL_AIR_JUMP_MOD"))
+					velocity.x = wall_jump_dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("WALL_AIR_JUMP_HORIZ_MOD"))
 				else:
 					velocity.x = 0 # walls on both side
 					wall_jump_dir = facing # for the dash dust effect
-				velocity.y = -UniqChar.get_stat("JUMP_SPEED")
+#				velocity.y = -UniqChar.get_stat("JUMP_SPEED")
+				velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), UniqChar.get_stat("WALL_AIR_JUMP_VERT_MOD"))
 				$VarJumpTimer.time = UniqChar.get_stat("VAR_JUMP_TIME")
 				var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 					-wall_jump_dir)
@@ -5373,11 +5425,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"WallJumpTransit2":
 			aerial_memory = []
 			if wall_jump_dir != 0:
-				velocity.x = wall_jump_dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("WALL_AIR_JUMP_MOD"))
+				velocity.x = wall_jump_dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("WALL_AIR_JUMP_HORIZ_MOD"))
 			else:
 				velocity.x = 0 # walls on both side
 				wall_jump_dir = facing # for the dash dust effect
-			velocity.y = -UniqChar.get_stat("JUMP_SPEED")
+#			velocity.y = -UniqChar.get_stat("JUMP_SPEED")
+			velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), UniqChar.get_stat("WALL_AIR_JUMP_VERT_MOD"))
 			$VarJumpTimer.time = UniqChar.get_stat("VAR_JUMP_TIME")
 			var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 				-wall_jump_dir)

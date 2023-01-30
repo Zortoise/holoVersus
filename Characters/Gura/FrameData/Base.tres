@@ -304,7 +304,7 @@ frame_data = {
 "vframes": 18
 },
 "BurstRevoke": {
-"duration": 6,
+"duration": 8,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -313,7 +313,7 @@ frame_data = {
 "frame": 99,
 "hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
-3: {
+4: {
 "frame": 99,
 "hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 }
@@ -321,7 +321,7 @@ frame_data = {
 "vframes": 18
 },
 "BurstRevoke2": {
-"duration": 9,
+"duration": 7,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -330,7 +330,7 @@ frame_data = {
 "frame": 103,
 "hurtbox": [ Vector2( -13, 22 ), Vector2( 13, 22 ), Vector2( 13, -22 ), Vector2( -13, -22 ) ]
 },
-3: {
+2: {
 "frame": 25,
 "hurtbox": [ Vector2( -11, 17 ), Vector2( 17, 17 ), Vector2( 17, -16 ), Vector2( -11, -16 ) ]
 }

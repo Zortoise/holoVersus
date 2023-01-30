@@ -6,15 +6,16 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 340 * FMath.S # ground speed
+const SPEED = 350 * FMath.S # ground speed
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
-const VAR_JUMP_TIME = 8 # frames after jumping where holding jump will reduce gravity
-const JUMP_HORIZONTAL_SPEED = 100 * FMath.S
+const VAR_JUMP_TIME = 10 # frames after jumping where holding jump will reduce gravity
+const JUMP_HORIZONTAL_SPEED = 120 * FMath.S
 const AIR_JUMP_HEIGHT_MOD = 90 # percentage of JUMP_SPEED, reduce height of air jumps
 const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
-const WALL_AIR_JUMP_MOD = 120 # percentage of SPEED when wall jumping
+const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
+const WALL_AIR_JUMP_VERT_MOD = 100 # percentage of JUMP_SPEED when wall jumping
 const GRAVITY_MOD = 100 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 720 # affect terminal velocity downward
 const FASTFALL_MOD = 125 # fastfall speed, mod of terminal velocity
@@ -24,15 +25,15 @@ const AIR_RESISTANCE = 3 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 100 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const GROUND_DASH_SPEED = 420 * FMath.S # duration in animation data
-const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
+const GROUND_DASH_SPEED = 450 * FMath.S # duration in animation data
+const AIR_DASH_SPEED = 450 * FMath.S # duration in animation data
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
 #const SUPER_JUMP_MOD = 150
 const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
-const HITSTUN_REDUCTION_AT_MAX_GG = 75 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
-const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
+#const F_HITSTUN_REDUCTION_AT_MAX_GG = 50 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
+const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 950
 const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
@@ -374,13 +375,14 @@ const MOVE_DATABASE = {
 	"SP1": {
 		"atk_type" : Globals.atk_type.SPECIAL, # used for chaining
 		"priority": 0,
-		"atk_attr" : [Globals.atk_attr.NON_ATTACK], # some projectile moves can have attributes like superarmor
+		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
+		"atk_attr" : [],
 	},
 	"SP1[ex]": {
 		"atk_type" : Globals.atk_type.EX,
 		"priority": 0,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
-		"atk_attr" : [Globals.atk_attr.NON_ATTACK], # some projectile moves can have attributes like superarmor
+		"atk_attr" : [],
 	},
 	
 	"aSP2" : {
@@ -399,6 +401,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
+		"revoke_type" : Globals.revoke_type.FULL_ACTIVE_REVOKE,
 		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE, Globals.atk_attr.AIR_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -418,6 +421,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
+		"revoke_type" : Globals.revoke_type.FULL_ACTIVE_REVOKE,
 		"atk_attr" : [Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.NO_STRAFE, Globals.atk_attr.AIR_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -459,6 +463,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
+		"revoke_type" : Globals.revoke_type.EARLY_REVOKE,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_PUSHBACK],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -466,7 +471,7 @@ const MOVE_DATABASE = {
 	"aSP3b" : {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"chain_starter" : "aSP3",
-		"no_revoke_time" : 0, # time after which you cannot use burst revoke
+#		"no_revoke_time" : 0, # time after which you cannot use burst revoke
 		"hitcount" : 1,
 		"damage" : 70,
 		"knockback" : 475 * FMath.S,
@@ -497,6 +502,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
+		"revoke_type" : Globals.revoke_type.EARLY_REVOKE,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_PUSHBACK],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -505,7 +511,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"root" : "aSP3b",
 		"chain_starter" : "aSP3[h]",
-		"no_revoke_time" : 0,
+#		"no_revoke_time" : 0,
 		"hitcount" : 1,
 		"damage" : 70,
 		"knockback" : 500 * FMath.S,
@@ -560,19 +566,21 @@ const MOVE_DATABASE = {
 	"SP4": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
+		"atk_attr" : [],
+		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[h]": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
+		"atk_attr" : [],
+		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[ex]": {
 		"atk_type" : Globals.atk_type.EX,
 		"priority": 0,
-		"atk_attr" : [Globals.atk_attr.NON_ATTACK],
+		"atk_attr" : [],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	
@@ -592,6 +600,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
+		"revoke_type" : Globals.revoke_type.STARTUP_REVOKE,
 		"atk_attr" : [Globals.atk_attr.DESTROY_ENTITIES],
 		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
@@ -613,6 +622,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -20,
+		"revoke_type" : Globals.revoke_type.STARTUP_REVOKE,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_PUSHBACK, Globals.atk_attr.DESTROY_ENTITIES, Globals.atk_attr.NO_STRAFE],
 		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },

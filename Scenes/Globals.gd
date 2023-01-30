@@ -15,7 +15,7 @@ enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
-		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, NON_ATTACK, DI_MANUAL_SEAL
+		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, DI_MANUAL_SEAL
 		CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
 		COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
 		STRONG_ENTITY, NO_GDRAIN_ON_BLOCK, NO_TERMINAL_VEL_ACTIVE}
@@ -40,7 +40,6 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # NO_PUSHBACK = no pushback if not blocked, used mainly to make certain moves more punishable
 # NO_STRAFE = for certain aerials, prevent air strafing during active frames
 # REPEATABLE = will not incur repeat penalty, use for multi-entities
-# NON_ATTACK = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun/blockstun
 # DI_MANUAL_SEAL = seal DI for certain duration set by "burstlock" in move_data, for Burst Extend
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
 # CANNOT_CHAIN_INTO_ON_BLOCK = fails test_chain_combo() if chain combo == BLOCKED_NORMAL or BLOCKED_SPECIAL
@@ -65,6 +64,12 @@ enum status_effect {LETHAL, BREAK, BREAK_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW
 enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFECT, AIR_PERFECT}
 enum trait {CHAIN_DASH, AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK,
 		DASH_BLOCK, AIR_DASH_BLOCK}
+enum revoke_type {STARTUP_REVOKE, NON_ATK_REVOKE, EARLY_REVOKE, FULL_ACTIVE_REVOKE}
+# STARTUP_REVOKE = can only revoke this Special during startup just like Normals
+# NON_ATK_REVOKE = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun/blockstun
+# EARLY_REVOKE = can revoke within 1st 3 frames of the active frames of this Special
+# FULL_ACTIVE_REVOKE = can revoke anytime during active frames of this Special
+
 enum entity_trait {GROUNDED, LEDGE_STOP}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 enum moving_platform {MOVING, WARPING}
@@ -78,6 +83,7 @@ const FRAME = 1.0/60.0
 const CAMERA_ZOOM_SPEED = 0.000006
 const RespawnTimer_WAIT_TIME = 75
 const FLAT_STOCK_LOSS = 1000
+const CORNER_SIZE = 64
 
 # preloading scenes will cause issues, do them on onready variables instead
 onready var loaded_audio_scene := load("res://Scenes/AudioManager.tscn")
