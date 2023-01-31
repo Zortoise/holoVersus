@@ -19,7 +19,7 @@ const EX_GAUGE_REGEN_AMOUNT = 18 # EX Gauge regened per second when idling
 const GUARD_GAUGE_FLOOR = -10000
 const GUARD_GAUGE_CEIL = 10000
 const GUARD_GAUGE_SWELL_RATE = 120 # exact GG gain per frame during hitstun
-const GUARD_GAUGE_DEGEN_AMOUNT = 120 # exact GG degened per frame when GG > 100% out of hitstun
+const GUARD_GAUGE_DEGEN_AMOUNT = 150 # exact GG degened per frame when GG > 100% out of hitstun
 const BURSTCOUNTER_EX_COST = 10000
 const BURSTESCAPE_GG_COST = 5000
 const BURSTREVOKE_GG_COST = 5000
@@ -35,7 +35,7 @@ const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during ae
 #const HITSTUN_FALL_THRESHOLD = 400 * FMath.S  # if falling too fast during hitstun will help out
 const PLAYER_PUSH_SLOWDOWN = 95 # how much characters are slowed when they push against each other
 const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
-const CROUCH_REDUCTION_MOD = 50 # reduce knockback and hitstun if opponent is crouching
+#const CROUCH_REDUCTION_MOD = 50 # reduce knockback and hitstun if opponent is crouching
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
 const AC_BurstLockTimer_TIME = 10 # number of frames you cannot use Burst Escape after being hit with an autochain move
@@ -54,16 +54,17 @@ const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is a
 #const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
 # const DMG_BOOST_AT_DMG_VAL_LIMIT = 1.5 # increase in damage taken when damage percent is at 100%, goes pass it when damage percent goes >100%
 # const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
-const F_HITSTUN_REDUCTION_AT_MAX_GG = 0 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%
+const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
 #const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
 #const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
 #const PERFECTCHAIN_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on perfect chains
 #const REPEAT_GGG_MOD = 200 # Guard Gain on hitstunned defender is increased on double_repeat
-const DMG_REDUCTION_AT_MAX_GG = 30 # max reduction in damage when defender's Guard Gauge is at 200%
+const DMG_REDUCTION_AT_MAX_GG = 50 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
 const AIR_BASE_BLOCK_GUARD_DRAIN_MOD = 130 # increased Guard Drain when base blocking in air
-const ATK_LEVEL_TO_HITSTUN = [20, 25, 30, 35, 40, 45, 50, 55]
+const ATK_LEVEL_TO_F_HITSTUN = [10, 15, 20, 25, 30, 35, 10, 45]
+const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 15  # friction during hitstun
@@ -139,7 +140,7 @@ const KILL_VEL_THRESHOLD = 900 * FMath.S
 const LAUNCH_DUST_THRESHOLD = 1400 * FMath.S # velocity where launch dust increase in frequency
 
 const DDI_SIDE_MAX = 30 * FMath.S # horizontal Drift DI speed at 200% Guard Gauge
-const MAX_DDI_SIDE_SPEED = 300 * FMath.S # max horizontal Drift DI speed
+const MAX_DDI_SIDE_SPEED = 400 * FMath.S # max horizontal Drift DI speed
 const GDI_UP_MAX = 80 # gravity decrease upward Gravity DI at 200% Guard Gauge
 const GDI_DOWN_MAX = 130 # gravity increase downward Gravity DI at 200% Guard Gauge
 const VDI_MAX = 30 # change in knockback vector when using Vector DI at 200% Guard Gauge
@@ -344,7 +345,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 		has_burst = true
 	else:
 		stock_points_left = Globals.Game.starting_stock_pts
-	Globals.Game.damage_limit_update(self)
+#	Globals.Game.damage_limit_update(self)
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
@@ -2090,13 +2091,13 @@ func state_detect(anim):
 			return Globals.char_state.AIR_BLOCKSTUN
 			
 		"BurstCounterStartup", "BurstEscapeStartup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Globals.char_state.AIR_STARTUP
 		"BurstCounter", "BurstEscape", "BurstExtend":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Globals.char_state.AIR_RECOVERY
 		"BurstRec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Globals.char_state.AIR_RECOVERY
 		"BurstRevoke":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Globals.char_state.AIR_RECOVERY
 		"BurstRevoke2":
 			return Globals.char_state.AIR_C_RECOVERY
 			
@@ -2165,17 +2166,20 @@ func on_kill():
 		remove_all_status_effects()
 		reset_jumps()
 		
-		# your targeted opponent gain burst token
-#		get_node(targeted_opponent_path).change_burst_token(true)
+		var opponent = get_node(targeted_opponent_path)
+		if opponent.state != Globals.char_state.DEAD:
 			
-		# targeted opponent heals 50% of their Damage Value
-		if get_node(targeted_opponent_path).state != Globals.char_state.DEAD:
-			get_node(targeted_opponent_path).take_damage(-FMath.percent(get_node(targeted_opponent_path).current_damage_value, 50))
-		
-		var stock_loss: int = -Globals.FLAT_STOCK_LOSS # WIP, halves this on instant kills?
-		if current_damage_value > UniqChar.DAMAGE_VALUE_LIMIT:
-			stock_loss -= FMath.percent(current_damage_value - UniqChar.DAMAGE_VALUE_LIMIT, 100)
-		change_stock_points(stock_loss)
+			opponent.change_burst_token(true) # your targeted opponent gain burst token
+			
+			if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
+				opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
+			
+			if current_damage_value > UniqChar.DAMAGE_VALUE_LIMIT: # targeted opponent heals Damage Value equal to overkill damage
+				opponent.take_damage(-(current_damage_value - UniqChar.DAMAGE_VALUE_LIMIT))
+				
+			Globals.Game.damage_update(opponent)
+
+		change_stock_points(-1)
 		if stock_points_left > 0 and !Globals.Game.game_set:
 			$RespawnTimer.time = Globals.RespawnTimer_WAIT_TIME
 		else:
@@ -2323,7 +2327,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("BlockCRec")
 				UniqChar.landing_sound()
 				
-			elif Animator.query(["Tech", "GuardTech"]): # no landing
+			elif Animator.query(["Tech", "GuardTech"]) or Animator.to_play_animation.begins_with("Burst"): # no landing
 				pass
 				
 			else: # landing during AirDashDD
@@ -2668,6 +2672,8 @@ func check_quick_turn():
 			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
 				button_dash in input_state.pressed:
 				return false  # if attacking + holding dash, will not turn on 1st frame
+			elif Animator.to_play_animation.begins_with("Burst"):
+				return false
 			else:
 				return true
 	match new_state:
@@ -2905,10 +2911,10 @@ func guardtech():
 			return true
 	return false
 	
-func is_burst(move_name):
-	if move_name.begins_with("Burst"):
-		return true
-	return false
+#func is_burst(move_name):
+#	if move_name.begins_with("Burst"):
+#		return true
+#	return false
 	
 func burst_counter_check(): # check if have resources to do it, then take away those resources and return a bool
 	if current_ex_gauge < BURSTCOUNTER_EX_COST:
@@ -3248,13 +3254,13 @@ func query_polygons(): # requested by main game node when doing hit detection
 	
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
-	if is_burst(Animator.to_play_animation):
-		var burst_data = {
-			"atk_type" : Globals.atk_type.SUPER,
-			"priority": 0,
-			"atk_attr" : [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.NO_TURN]
-		}
-		return {"move_data" : burst_data, "move_name" : "Burst"}
+#	if is_burst(Animator.to_play_animation):
+#		var burst_data = {
+#			"atk_type" : Globals.atk_type.SUPER,
+#			"priority": 0,
+#			"atk_attr" : [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.NO_TURN]
+#		}
+#		return {"move_data" : burst_data, "move_name" : "Burst"}
 	
 	if Animator.to_play_animation.ends_with("Active"):
 		var move_name = Animator.to_play_animation.trim_suffix("Active")
@@ -3560,7 +3566,7 @@ func change_stock_points(stock_points_change: int):
 	if !Globals.training_mode:
 		stock_points_left += stock_points_change
 		stock_points_left = int(max(stock_points_left, 0))
-	Globals.Game.stock_points_update(self, stock_points_change)
+	Globals.Game.stock_points_update(self)
 	
 func change_burst_token(get_burst: bool):
 	if !Globals.training_mode:
@@ -3582,8 +3588,8 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 	if move_name == null:
 		move_name = get_move_name()
 		
-	if is_burst(move_name):
-		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.NO_TURN]
+#	if is_burst(move_name):
+#		return [Globals.atk_attr.SEMI_INVUL_STARTUP, Globals.atk_attr.NO_TURN]
 	
 	return UniqChar.query_atk_attr(move_name)
 	
@@ -3593,8 +3599,8 @@ func query_priority(in_move_name = null):
 	if move_name == null:
 		move_name = get_move_name()
 		
-	if is_burst(move_name):
-		return 0
+#	if is_burst(move_name):
+#		return 0
 	
 	var move_data = UniqChar.query_move_data(move_name)
 	if "priority" in move_data:
@@ -3877,9 +3883,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data["double_repeat"] = true # found multiple repeats
 					break
 		# append repeated move to repeat_memory later after guard gauge change calculation
-	
+		
 	var weak_hit := false
-	if hit_data.move_data.atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint or \
+	if ("atk_level" in hit_data and hit_data.move_data.atk_level <= 1) or hit_data.double_repeat or hit_data.semi_disjoint or \
 		"multihit" in hit_data: # multi-hit moves cannot cause lethal/break/sweetspot/punish outside of last hit
 		weak_hit = true
 		hit_data.sweetspotted = false # cannot sweetspot for weak hits
@@ -3990,7 +3996,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
 	
-	if !hit_data.weak_hit and !"non_strong_proj" in hit_data and hit_data.move_data.damage > 0 and !"superarmored" in hit_data:
+	if !hit_data.weak_hit and !"non_strong_proj" in hit_data and ("damage" in hit_data.move_data and hit_data.move_data.damage > 0) and \
+			!"superarmored" in hit_data:
 		# cannot Punish Hit for weak hits, non-strong projectiles and non-damaging moves like Burst
 		# remember that multi-hit moves cannot do punish hits
 		match state:
@@ -4015,13 +4022,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
-	change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
-	take_damage(calculate_damage(hit_data)) # do damage calculation
-	
-	if can_guardbreak(hit_data):
-		hit_data.break_hit = true
-		hit_data.block_state = Globals.block_state.UNBLOCKED
-				
+	if !"sequence" in hit_data.move_data:
+		change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
+		if can_guardbreak(hit_data):
+			hit_data.break_hit = true
+			hit_data.block_state = Globals.block_state.UNBLOCKED
+		
+		take_damage(calculate_damage(hit_data)) # do damage calculation
+
 	# append repeated move to move memory here since calculation for guard_gauge change uses it
 	if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit count
 		repeat_memory.append([attacker.player_ID, root_move_name])
@@ -4036,7 +4044,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker_or_entity.UniqEntity.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	else:
 		attacker.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
+		
 	UniqChar.being_hit(hit_data) # reaction, can change hit_data from there
+	
+	
+	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data
+		attacker_or_entity.landed_a_sequence(hit_data)
+		return
+		
+		
+	if !"entity_nodepath" in hit_data:
+		Globals.Game.get_node("Players").move_child(attacker, 0) # move attacker to bottom layer to see defender easier
 	
 	
 	# attack level
@@ -4593,6 +4611,9 @@ func calculate_knockback_strength(hit_data) -> int:
 
 	var knockback_strength: int = hit_data.move_data.knockback # scaled by FMath.S
 	
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and Globals.atk_attr.FIXED_KNOCKBACK_STR in hit_data.move_data.atk_attr:
+		return knockback_strength
+	
 	# for certain multi-hit attacks (not autochain), fixed KB or drag KB till the last hit
 	if "multihit" in hit_data:
 		if "fixed_knockback_multi" in hit_data.move_data:
@@ -4625,8 +4646,8 @@ func calculate_knockback_strength(hit_data) -> int:
 	if "autochain" in hit_data:
 		return knockback_strength
 
-	if state == Globals.char_state.CROUCHING: # reduce knockback if defender is crouching
-		knockback_strength = FMath.percent(knockback_strength, CROUCH_REDUCTION_MOD)
+#	if state == Globals.char_state.CROUCHING: # reduce knockback if defender is crouching
+#		knockback_strength = FMath.percent(knockback_strength, CROUCH_REDUCTION_MOD)
 		
 #	knockback_strength *= defender.UniqChar.KB_MOD # defender's weight
 
@@ -4782,7 +4803,11 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 	if hit_data.double_repeat:
 		return 0
 
-	var scaled_hitstun: int = ATK_LEVEL_TO_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
+	var scaled_hitstun := 0
+	if hit_data.knockback_strength < LAUNCH_THRESHOLD:
+		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
+	else:
+		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 		
 	if !blocking:
 		if hit_data.lethal_hit:
@@ -4791,16 +4816,16 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun and blockst
 			if get_damage_percent() > 1.0:
 				scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 		else:
-			if current_guard_gauge > 0: # flinch hitstun is reduced by defender's Guard Gauge when it is > 100%
-				if hit_data.knockback_strength < LAUNCH_THRESHOLD:
-					scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, F_HITSTUN_REDUCTION_AT_MAX_GG), \
-						get_guard_gauge_percent_above())
+			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+#				if hit_data.knockback_strength < LAUNCH_THRESHOLD:
+				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
+					get_guard_gauge_percent_above())
 	#			else:
 	#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
 	#					get_guard_gauge_percent_above())
 						
-			if state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
-				scaled_hitstun = FMath.percent(scaled_hitstun, CROUCH_REDUCTION_MOD)
+#			if state == Globals.char_state.CROUCHING: # reduce hitstun if opponent is crouching
+#				scaled_hitstun = FMath.percent(scaled_hitstun, CROUCH_REDUCTION_MOD)
 		
 		return FMath.round_and_descale(scaled_hitstun)
 	else:
@@ -5025,16 +5050,18 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	
 		
 func landed_a_sequence(hit_data):
-	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+#	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+
+	if hit_data.double_repeat == true: return # repeat penalty, cannot grab if repeated
+
 	var defender = get_node(hit_data.defender_nodepath)
 	
-	# repeat penalty, cannot grab if repeated
-	var root_move_name = UniqChar.get_root(hit_data.move_name)
-		
-	for array in defender.repeat_memory:
-		if array[0] == player_ID and array[1] == root_move_name:
-			return
-	defender.repeat_memory.append([player_ID, root_move_name])
+#	var root_move_name = UniqChar.get_root(hit_data.move_name)
+#
+#	for array in defender.repeat_memory:
+#		if array[0] == player_ID and array[1] == root_move_name:
+#			return
+#	defender.repeat_memory.append([player_ID, root_move_name])
 	
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
@@ -5043,11 +5070,12 @@ func landed_a_sequence(hit_data):
 		add_status_effect(Globals.status_effect.POS_FLOW, null)
 		
 	chain_combo = Globals.chain_combo.NO_CHAIN
+	defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# defender lose positive flow
 				
 				
-func being_sequenced(hit_data):
-	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
-	status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# lose positive flow
+#func being_sequenced(hit_data):
+#	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
+#	status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# lose positive flow
 	
 	
 func take_seq_damage(base_damage: int) -> bool: # return true if lethal
@@ -5133,14 +5161,14 @@ func sequence_launch():
 	if "fixed_hitstun" in seq_data:
 		hitstun = seq_data.fixed_hitstun
 	else:
-		var scaled_hitstun: int = ATK_LEVEL_TO_HITSTUN[seq_data.atk_level - 1] * FMath.S
+		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[seq_data.atk_level - 1] * FMath.S
 		if get_damage_percent() >= 100:
 			scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 #		else:
-#			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, UniqChar.get_stat("F_HITSTUN_REDUCTION_AT_MAX_GG")), \
-#					get_guard_gauge_percent_above())
+			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
+					get_guard_gauge_percent_above())
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
 	orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
@@ -5600,7 +5628,8 @@ func save_state():
 		"velocity_x" : velocity.x,
 		"velocity_y" : velocity.y,
 		"facing" : facing,
-		"velocity_previous_frame" : velocity_previous_frame,
+		"velocity_previous_frame_x" : velocity_previous_frame.x,
+		"velocity_previous_frame_y" : velocity_previous_frame.y,
 		"anim_gravity_mod" : anim_gravity_mod,
 		"anim_friction_mod" : anim_friction_mod,
 		"velocity_limiter" : velocity_limiter,
@@ -5682,7 +5711,8 @@ func load_state(state_data):
 	velocity.x = state_data.velocity_x
 	velocity.y = state_data.velocity_y
 	facing = state_data.facing
-	velocity_previous_frame = state_data.velocity_previous_frame
+	velocity_previous_frame.x = state_data.velocity_previous_frame_x
+	velocity_previous_frame.y = state_data.velocity_previous_frame_y
 	anim_gravity_mod = state_data.anim_gravity_mod
 	anim_friction_mod = state_data.anim_friction_mod
 	velocity_limiter = state_data.velocity_limiter

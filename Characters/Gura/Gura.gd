@@ -1670,8 +1670,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
 			
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})
 		"aSP1Startup", "aSP1[ex]Startup", "aSP1bStartup", "aSP1b[ex]Startup", "aSP1[d]Startup", "aSP1[d][ex]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20

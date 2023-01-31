@@ -18,7 +18,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, DI_MANUAL_SEAL
 		CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
 		COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
-		STRONG_ENTITY, NO_GDRAIN_ON_BLOCK, NO_TERMINAL_VEL_ACTIVE}
+		STRONG_ENTITY, NO_GDRAIN_ON_BLOCK, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # NO_CHAIN_ON_BLOCK = no chain combo on block
@@ -26,7 +26,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
 # JUMP_CANCEL = can cancel recovery with a jump, place this on the active animation with same name as the recovery animation
 # LEDGE_DROP = if move during attack will fall off ledges
-# NO_TURN = for rekkas, prevent turning during startup
+# NO_TURN = prevent turning during startup
 # EASY_BLOCK = can be blocked correctly in either direction
 # ANTI_GUARD = always wrongblocked if chain_combo is false, cannot perfect block
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers and moves with UNBLOCKABLE
@@ -57,6 +57,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # STRONG_ENTITY = entity can lethal and guardbreak
 # NO_GDRAIN_ON_BLOCK = no Guard Drain on block
 # NO_TERMINAL_VEL_ACTIVE = no terminal velocity on active frames
+# FIXED_KNOCKBACK_STR = fixed knockback, used for Burst Extend
 
 enum status_effect {LETHAL, BREAK, BREAK_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW}
 # BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge
@@ -148,7 +149,7 @@ var P1_input_style = 0
 var P2_char_ref = "Gura"
 var P2_palette = 2
 var P2_input_style = 0
-var starting_stock_pts = 4450
+var starting_stock_pts = 3
 var time_limit = 445
 var assists = 0
 var static_stage = 1 # 0 is false, 1 is true

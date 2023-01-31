@@ -17,7 +17,7 @@ const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
 const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
 const WALL_AIR_JUMP_VERT_MOD = 100 # percentage of JUMP_SPEED when wall jumping
 const GRAVITY_MOD = 100 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 720 # affect terminal velocity downward
+const TERMINAL_VELOCITY_MOD = 800 # affect terminal velocity downward
 const FASTFALL_MOD = 125 # fastfall speed, mod of terminal velocity
 const FRICTION = 15 # between 0.0 and 1.0
 const ACCELERATION = 15 # between 0.0 and 1.0
@@ -35,7 +35,7 @@ const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GRO
 #const F_HITSTUN_REDUCTION_AT_MAX_GG = 50 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
 const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
-const DAMAGE_VALUE_LIMIT = 950
+const DAMAGE_VALUE_LIMIT = 1100
 const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
 #const GUARD_GAUGE_DEGEN_AMOUNT = 90 # exact GG degened per frame when GG > 100%
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 35 # % of damage taken as chip damage when blocking (average is 0.25)
@@ -136,6 +136,7 @@ const MOVE_DATABASE = {
 	"L1c" : {
 		"atk_type" : Globals.atk_type.LIGHT,
 		"chain_starter" : "L1",
+		"root": "L1b",
 		"hitcount" : 1,
 		"damage" : 20,
 		"knockback" : 200 * FMath.S,
@@ -203,7 +204,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.LATE_CHAIN],
 		"move_sound" : { ref = "whoosh1", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
 	},
@@ -305,7 +306,7 @@ const MOVE_DATABASE = {
 		"damage" : 35,
 		"knockback" : 200 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 2,
+		"atk_level" : 3,
 		"priority": 1,
 		"guard_drain": 750,
 #		"guard_gain_on_combo" : 1500,

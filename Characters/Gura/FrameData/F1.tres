@@ -57,7 +57,7 @@ frame_data = {
 "SfxOver_hframes": 4,
 "SfxOver_spritesheet": "F1SfxOver",
 "SfxOver_vframes": 1,
-"duration": 14,
+"duration": 17,
 "hframes": 6,
 "loop": false,
 "spritesheet": "F1Sprite",
@@ -70,7 +70,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( -36, 10 ), Vector2( 42, 10 ), Vector2( 42, 6 ), Vector2( 62, 6 ), Vector2( 62, -1 ), Vector2( -36, -1 ) ],
 "sweetbox": [  ]
 },
-5: {
+6: {
 "SfxOver_frame": 3,
 "frame": 4,
 "hitbox": [  ],
@@ -78,7 +78,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( -37, 10 ), Vector2( -8, 10 ), Vector2( -8, -1 ), Vector2( -37, -1 ) ],
 "sweetbox": [  ]
 },
-10: {
+12: {
 "SfxOver_frame": 0,
 "frame": 4,
 "hitbox": [  ],

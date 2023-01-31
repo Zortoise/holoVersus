@@ -1,8 +1,8 @@
 extends Node2D
 
 const GAMEMODE_OPTIONS = ["1 v 1", "3 players FFA", "4 players FFA", "2 v 2"]
-const STOCKPOINTS_OPTIONS = [1, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4450, 5000, 5500, 6000, 6500, \
-		7000, 7500, 8000, 8500, 9000, 9500, 9999]
+const STOCKPOINTS_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, \
+		14, 15, 16, 17, 18, 19, 20]
 const TIMELIMIT_OPTIONS = ["none", 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 445, 480, 510, \
 		540, 570, 600, 630, 660, 690, 710, 750, 780, 810, 840, 870, 900, 930, 960, 999]
 const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
@@ -52,7 +52,7 @@ func triggered(triggered_node):
 			"Reset":
 				var game_config = {
 					"game_mode" : 0,
-					"stock_points" : 7,
+					"stock_points" : 2,
 					"time_limit" : 6,
 					"assists" : 0,
 					"static_stage" : 0,

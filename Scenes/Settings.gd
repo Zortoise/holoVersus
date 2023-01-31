@@ -271,7 +271,7 @@ func load_game_config():
 	# default game_config
 	return {
 			"game_mode" : 0,
-			"stock_points" : 7,
+			"stock_points" : 2,
 			"time_limit" : 6,
 			"assists" : 0,
 			"static_stage" : 0,

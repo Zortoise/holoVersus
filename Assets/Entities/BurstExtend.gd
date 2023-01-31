@@ -31,7 +31,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -90,
-		"atk_attr" : [Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DI_MANUAL_SEAL],
+		"atk_attr" : [Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DI_MANUAL_SEAL, Globals.atk_attr.FIXED_KNOCKBACK_STR],
 		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
 	}
 }

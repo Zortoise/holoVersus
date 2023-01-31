@@ -130,7 +130,7 @@ func load_net_game_config_host():
 			"host_side" : 0,
 			"input_delay" : 1,
 			"max_rollback" : 0,
-			"stock_points" : 7,
+			"stock_points" : 2,
 			"time_limit" : 6,
 			"assists" : 0,
 			"static_stage": 0,

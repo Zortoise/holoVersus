@@ -1,4 +1,4 @@
-[gd_scene load_steps=125 format=2]
+[gd_scene load_steps=126 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -37,6 +37,7 @@
 [ext_resource path="res://Assets/UI/inputs/input_left.png" type="Texture" id=35]
 [ext_resource path="res://Scenes/Menus/ButtonTypeC4.tscn" type="PackedScene" id=36]
 [ext_resource path="res://Scenes/Shaders/Monochrome.gdshader" type="Shader" id=37]
+[ext_resource path="res://Assets/UI/stock.png" type="Texture" id=38]
 
 [sub_resource type="Animation" id=5]
 length = 0.001
@@ -297,7 +298,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Vector2( 87, -23 ) ]
+"values": [ Vector2( 0, 0 ) ]
 }
 
 [sub_resource type="Animation" id=57]
@@ -314,7 +315,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0, 0.05, 0.1, 0.15 ),
 "transitions": PoolRealArray( 1, 1, 1, 1 ),
 "update": 1,
-"values": [ Vector2( 87, -10 ), Vector2( 87, -24 ), Vector2( 87, -10 ), Vector2( 87, -23 ) ]
+"values": [ Vector2( 0, 13 ), Vector2( 0, -1 ), Vector2( 0, 13 ), Vector2( 0, 0 ) ]
 }
 
 [sub_resource type="Animation" id=70]
@@ -616,10 +617,11 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Vector2( 87, -23 ) ]
+"values": [ Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=111]
+[sub_resource type="Animation" id=112]
+resource_name = "damage"
 length = 0.15
 step = 0.05
 tracks/0/type = "value"
@@ -632,7 +634,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0, 0.05, 0.1, 0.15 ),
 "transitions": PoolRealArray( 1, 1, 1, 1 ),
 "update": 1,
-"values": [ Vector2( 87, -10 ), Vector2( 87, -24 ), Vector2( 87, -10 ), Vector2( 87, -23 ) ]
+"values": [ Vector2( 0, 13 ), Vector2( 0, -1 ), Vector2( 0, 13 ), Vector2( 0, 0 ) ]
 }
 
 [sub_resource type="Animation" id=88]
@@ -1880,6 +1882,7 @@ texture = ExtResource( 11 )
 texture = ExtResource( 5 )
 
 [node name="DamageLimit" type="Label" parent="HUD/P1_HUDRect/Portrait"]
+visible = false
 margin_left = 159.0
 margin_right = 391.0
 margin_bottom = 72.0
@@ -1888,37 +1891,45 @@ custom_fonts/font = SubResource( 109 )
 text = "8888"
 valign = 2
 
-[node name="DamageValue" type="Label" parent="HUD/P1_HUDRect/Portrait"]
-margin_left = 87.0
-margin_top = -23.0
-margin_right = 319.0
-margin_bottom = 49.0
+[node name="DamageNode" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
+position = Vector2( 87, -10 )
+
+[node name="DamageValue" type="Label" parent="HUD/P1_HUDRect/Portrait/DamageNode"]
+margin_right = 232.0
+margin_bottom = 72.0
 custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
 custom_fonts/font = SubResource( 2 )
 text = "8888"
 valign = 2
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/DamageValue"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/DamageNode"]
+root_node = NodePath("../DamageValue")
 autoplay = "RESET"
 anims/RESET = SubResource( 56 )
 anims/damage = SubResource( 57 )
 
-[node name="AnimationPlayer2" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/DamageValue"]
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/DamageNode"]
+root_node = NodePath("../DamageValue")
 autoplay = "RESET"
 anims/RESET = SubResource( 70 )
 anims/flashing = SubResource( 87 )
 
+[node name="Stock" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
+position = Vector2( 104, -36 )
+texture = ExtResource( 38 )
+
 [node name="StockPoints" type="Label" parent="HUD/P1_HUDRect/Portrait"]
-margin_left = 92.0
-margin_top = -66.0
-margin_right = 247.0
-margin_bottom = -19.0
+margin_left = 133.0
+margin_top = -60.0
+margin_right = 233.0
+margin_bottom = -13.0
 custom_colors/font_color = Color( 0.890196, 0.219608, 0.219608, 1 )
 custom_fonts/font = SubResource( 3 )
-text = "8888"
+text = "9"
 valign = 2
 
 [node name="StockLoss" type="Label" parent="HUD/P1_HUDRect/Portrait/StockPoints"]
+visible = false
 modulate = Color( 1, 1, 1, 0 )
 margin_left = 115.0
 margin_right = 270.0
@@ -2087,6 +2098,7 @@ texture = ExtResource( 11 )
 texture = ExtResource( 5 )
 
 [node name="DamageLimit" type="Label" parent="HUD/P2_HUDRect/Portrait"]
+visible = false
 margin_left = 159.0
 margin_right = 391.0
 margin_bottom = 72.0
@@ -2095,37 +2107,45 @@ custom_fonts/font = SubResource( 109 )
 text = "8888"
 valign = 2
 
-[node name="DamageValue" type="Label" parent="HUD/P2_HUDRect/Portrait"]
-margin_left = 87.0
-margin_top = -23.0
-margin_right = 319.0
-margin_bottom = 49.0
+[node name="DamageNode" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( 87, -10 )
+
+[node name="DamageValue" type="Label" parent="HUD/P2_HUDRect/Portrait/DamageNode"]
+margin_right = 232.0
+margin_bottom = 72.0
 custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
 custom_fonts/font = SubResource( 2 )
 text = "8888"
 valign = 2
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/DamageValue"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/DamageNode"]
+root_node = NodePath("../DamageValue")
 autoplay = "RESET"
 anims/RESET = SubResource( 110 )
-anims/damage = SubResource( 111 )
+anims/damage = SubResource( 112 )
 
-[node name="AnimationPlayer2" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/DamageValue"]
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="HUD/P2_HUDRect/Portrait/DamageNode"]
+root_node = NodePath("../DamageValue")
 autoplay = "RESET"
 anims/RESET = SubResource( 88 )
 anims/flashing = SubResource( 89 )
 
+[node name="Stock" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( 104, -36 )
+texture = ExtResource( 38 )
+
 [node name="StockPoints" type="Label" parent="HUD/P2_HUDRect/Portrait"]
-margin_left = 92.0
-margin_top = -66.0
-margin_right = 247.0
-margin_bottom = -19.0
+margin_left = 133.0
+margin_top = -60.0
+margin_right = 233.0
+margin_bottom = -13.0
 custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
 custom_fonts/font = SubResource( 3 )
-text = "8888"
+text = "9"
 valign = 2
 
 [node name="StockLoss" type="Label" parent="HUD/P2_HUDRect/Portrait/StockPoints"]
+visible = false
 modulate = Color( 1, 1, 1, 0 )
 margin_left = 115.0
 margin_right = 270.0

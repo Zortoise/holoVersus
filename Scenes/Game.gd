@@ -1053,20 +1053,14 @@ func detect_hit():
 						
 	for hit_data in hit_data_array:
 		
+		get_node(hit_data.defender_nodepath).being_hit(hit_data) # will add stuff to hit_data, passing by reference
+		
 		if !"sequence" in hit_data.move_data:
-			# call being_hit() on the defender and landed_a_hit() on the attacker/entity
-			get_node(hit_data.defender_nodepath).being_hit(hit_data) # will add stuff to hit_data, passing by reference
 			if !"entity_nodepath" in hit_data:
 				get_node(hit_data.attacker_nodepath).landed_a_hit(hit_data)
-				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
+	#				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
 			else:
 				get_node(hit_data.entity_nodepath).landed_a_hit(hit_data)
-		else:
-			get_node(hit_data.defender_nodepath).being_sequenced(hit_data)
-			if !"entity_nodepath" in hit_data:
-				get_node(hit_data.attacker_nodepath).landed_a_sequence(hit_data)
-			else: # rare projectile grab
-				get_node(hit_data.entity_nodepath).landed_a_sequence(hit_data)
 		
 						
 func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_disjoint = false):
@@ -1176,6 +1170,9 @@ func defender_semi_invul(hitbox, hurtbox):
 	match defender.new_state:
 		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
 			if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr():
+				defender_semi_invuln = true
+		Globals.char_state.AIR_STARTUP:
+			if defender.Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
 				defender_semi_invuln = true
 		Globals.char_state.AIR_RECOVERY:
 			if defender.Animator.query_to_play(["Tech"]) and defender.Animator.time <= 15:
@@ -1425,35 +1422,35 @@ func set_input_indicator():
 			indicator.hide()
 			
 
-func damage_limit_update(character):
-	var dmg_limit_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageLimit")
-	dmg_limit_indicator.text = str(character.UniqChar.get_stat("DAMAGE_VALUE_LIMIT"))
+#func damage_limit_update(character):
+#	var dmg_limit_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageLimit")
+#	dmg_limit_indicator.text = str(character.UniqChar.get_stat("DAMAGE_VALUE_LIMIT"))
 	
 
 func damage_update(character, damage: int = 0):
-	var dmg_val_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageValue")
-	dmg_val_indicator.text = str(character.current_damage_value)
+	var dmg_val_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageNode/DamageValue")
+	dmg_val_indicator.text = str(character.UniqChar.get_stat("DAMAGE_VALUE_LIMIT") - character.current_damage_value)
 	
 	# change color
 	var dmg_percent = character.get_damage_percent()
 	if dmg_percent < 25:
-		dmg_val_indicator.get_node("AnimationPlayer2").stop()
+		dmg_val_indicator.get_node("../AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 1.0, 1.0)
 	elif dmg_percent < 50:
-		dmg_val_indicator.get_node("AnimationPlayer2").stop()
+		dmg_val_indicator.get_node("../AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 1.0, 0.5)
 	elif dmg_percent < 75:
-		dmg_val_indicator.get_node("AnimationPlayer2").stop()
+		dmg_val_indicator.get_node("../AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 0.5, 0.2)
 	elif dmg_percent < 100:
-		dmg_val_indicator.get_node("AnimationPlayer2").stop()
+		dmg_val_indicator.get_node("../AnimationPlayer2").stop()
 		dmg_val_indicator.modulate = Color(1.0, 0.0, 0.0)
 	else:
-		dmg_val_indicator.get_node("AnimationPlayer2").play("flashing")
+		dmg_val_indicator.get_node("../AnimationPlayer2").play("flashing")
 		
 	if damage > 0:
-		dmg_val_indicator.get_node("AnimationPlayer").stop() # this will restart the animation if it is playing it
-		dmg_val_indicator.get_node("AnimationPlayer").play("damage") # shake label
+		dmg_val_indicator.get_node("../AnimationPlayer").stop() # this will restart the animation if it is playing it
+		dmg_val_indicator.get_node("../AnimationPlayer").play("damage") # shake label
 		
 				
 func guard_gauge_update(character):
@@ -1507,7 +1504,7 @@ func ex_gauge_update(character):
 			ex_gauge_bar.get_node("AnimationPlayer").play("rainbow")
 	
 	
-func stock_points_update(character, stock_points_change: int = 0):
+func stock_points_update(character):
 	
 	var stock_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints")
 	if !Globals.training_mode:
@@ -1515,12 +1512,12 @@ func stock_points_update(character, stock_points_change: int = 0):
 	else:
 		stock_indicator.text = "INF"
 		
-	stock_points_change = int(min(stock_points_change, 9999))
+#	stock_points_change = int(min(stock_points_change, 9999))
 	
-	if stock_points_change < 0: # loss points
-		var stock_loss_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints/StockLoss")
-		stock_loss_indicator.text = str(stock_points_change)
-		stock_loss_indicator.get_node("AnimationPlayer").play("stock_loss")
+#	if stock_points_change < 0: # loss points
+#		var stock_loss_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/StockPoints/StockLoss")
+#		stock_loss_indicator.text = str(stock_points_change)
+#		stock_loss_indicator.get_node("AnimationPlayer").play("stock_loss")
 	
 	if character.stock_points_left <= 0 and !game_set:
 		game_set = true
