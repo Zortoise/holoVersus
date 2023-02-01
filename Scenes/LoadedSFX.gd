@@ -349,6 +349,40 @@ var modulate_animations = {
 			},
 		}
 	},
+	"s_dash_cancel" : {
+		"duration": 22,
+		"loop" : false,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(4.0, 4.0, 4.0),
+			},
+			4 : # this is the timestamp of the key
+			{
+				"modulate" : Color(1.2, 0.8, 0.8), # red
+			},
+			7 :
+			{
+				"modulate" : Color(1.2, 1.2, 0.8), # yellow
+			},
+			10 :
+			{
+				"modulate" : Color(0.8, 1.2, 0.8), # green
+			},
+			13 :
+			{
+				"modulate" : Color(0.8, 1.2, 1.2), # cyan
+			},
+			17 :
+			{
+				"modulate" : Color(0.8, 0.8, 1.2), # blue
+			},
+			19 :
+			{
+				"modulate" : Color(1.2, 0.8, 1.2), # purple
+			},
+		}
+	},
 	"air_block_flash" : {
 		"duration": 4,
 		"loop" : false,

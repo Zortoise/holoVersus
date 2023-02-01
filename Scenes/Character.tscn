@@ -97,11 +97,11 @@ margin_bottom = 22.0
 
 [node name="RespawnTimer" parent="." instance=ExtResource( 4 )]
 
-[node name="HitStunGraceTimer" parent="." instance=ExtResource( 4 )]
-
 [node name="BurstLockTimer" parent="." instance=ExtResource( 4 )]
 
-[node name="PosFlowSealTimer" parent="." instance=ExtResource( 4 )]
+[node name="StasisTimer" parent="." instance=ExtResource( 4 )]
+
+[node name="EXSealTimer" parent="." instance=ExtResource( 4 )]
 
 [node name="TrainingRegenTimer" parent="." instance=ExtResource( 4 )]
 

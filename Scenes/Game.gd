@@ -1471,37 +1471,40 @@ func guard_gauge_update(character):
 	
 func ex_gauge_update(character):
 	
-	var ex_gauge_bar = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXGauge")
-	var ex_lvl_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXLevel")
+	var ex_gauge_bars = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXGauges")
+#	var ex_lvl_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXLevel")
 
 	var current_ex_level: int = int(character.current_ex_gauge / 10000)
 	var leftover_ex_gauge: int
-	if current_ex_level >= 5:
+	if current_ex_level >= 3:
 		leftover_ex_gauge = 100
 	else:
 		leftover_ex_gauge = FMath.get_fraction_percent(character.current_ex_gauge - (current_ex_level * 10000), 10000)
 	
-	ex_gauge_bar.value = leftover_ex_gauge
-	ex_lvl_indicator.text = str(current_ex_level)
+#	ex_gauge_bar.value = leftover_ex_gauge
+#	ex_lvl_indicator.text = str(current_ex_level)
 	
-	# change color
 	match current_ex_level:
 		0:
-			ex_gauge_bar.get_node("AnimationPlayer").stop()
-			ex_gauge_bar.modulate = Color(1.0, 1.0, 1.0)
-			ex_lvl_indicator.get_node("AnimationPlayer").stop()
-			ex_lvl_indicator.modulate = Color(0.5, 0.5, 0.5)
-		1, 2:
-			ex_gauge_bar.get_node("AnimationPlayer").stop()
-			ex_gauge_bar.modulate = Color(1.0, 1.0, 1.0)
-			ex_lvl_indicator.get_node("AnimationPlayer").play("flash2")
-		3, 4:
-			ex_gauge_bar.get_node("AnimationPlayer").stop()
-			ex_gauge_bar.modulate = Color(1.0, 1.0, 1.0)
-			ex_lvl_indicator.get_node("AnimationPlayer").play("flash2")
-		5:
-			ex_lvl_indicator.get_node("AnimationPlayer").play("rainbow")
-			ex_gauge_bar.get_node("AnimationPlayer").play("rainbow")
+			ex_gauge_bars.get_node("AnimationPlayer").play("level0")
+			ex_gauge_bars.get_node("EXGauge").value = leftover_ex_gauge
+			ex_gauge_bars.get_node("EXGauge2").value = 0
+			ex_gauge_bars.get_node("EXGauge3").value = 0
+		1:
+			ex_gauge_bars.get_node("AnimationPlayer").play("level1")
+			ex_gauge_bars.get_node("EXGauge").value = 100
+			ex_gauge_bars.get_node("EXGauge2").value = leftover_ex_gauge
+			ex_gauge_bars.get_node("EXGauge3").value = 0
+		2:
+			ex_gauge_bars.get_node("AnimationPlayer").play("level2")
+			ex_gauge_bars.get_node("EXGauge").value = 100
+			ex_gauge_bars.get_node("EXGauge2").value = 100
+			ex_gauge_bars.get_node("EXGauge3").value = leftover_ex_gauge
+		3:
+			ex_gauge_bars.get_node("AnimationPlayer").play("level3")
+			ex_gauge_bars.get_node("EXGauge").value = 100
+			ex_gauge_bars.get_node("EXGauge2").value = 100
+			ex_gauge_bars.get_node("EXGauge3").value = 100
 	
 	
 func stock_points_update(character):
@@ -1531,11 +1534,11 @@ func stock_points_update(character):
 				
 				
 func burst_update(character):
-	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/BurstToken")
+	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/BurstToken")
 	if character.has_burst:
-		burst_token.show()
+		burst_token.get_node("AnimationPlayer").play("flash")
 	else:
-		burst_token.hide()
+		burst_token.get_node("AnimationPlayer").play("gray")
 		
 				
 func set_uniqueHUD(player_ID, uniqueHUD):

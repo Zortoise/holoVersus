@@ -26,7 +26,11 @@ const FALL_GRAV_MOD = 100 # reduced gravity when going down
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const GROUND_DASH_SPEED = 450 * FMath.S # duration in animation data
-const AIR_DASH_SPEED = 450 * FMath.S # duration in animation data
+const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
+const SUPER_DASH_SPEED = 450 * FMath.S # super dash
+const SUPER_DASH_GG_COST = 100 # exact GG loss per frame when superdashing
+const SUPER_DASH_TURN_RATE = 3 # exact navigate speed when superdashing
+
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
 #const SUPER_JUMP_MOD = 150
@@ -36,7 +40,7 @@ const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GRO
 const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 1100
-const GUARD_GAUGE_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
+const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
 #const GUARD_GAUGE_DEGEN_AMOUNT = 90 # exact GG degened per frame when GG > 100%
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 35 # % of damage taken as chip damage when blocking (average is 0.25)
 #const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
@@ -60,9 +64,9 @@ const UNIQUE_DATA_REF = {
 
 const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
 	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
-const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
-const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
-const SUPERS = []
+#const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
+#const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
+#const SUPERS = []
 
 const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
 
@@ -88,7 +92,7 @@ const MOVE_DATABASE = {
 		"priority": 2,
 		"guard_drain": 1000,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 600,
+#		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36,
@@ -106,7 +110,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
 		"atk_level" : 2,
 		"priority": 2,
-		"EX_gain": 600,
+#		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36,
@@ -125,7 +129,7 @@ const MOVE_DATABASE = {
 		"fixed_hitstop" : 10,
 		"fixed_atker_hitstop" : 1,
 		"priority": 2,
-		"EX_gain": 600,
+#		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36,
@@ -143,7 +147,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
 		"atk_level" : 2,
 		"priority": 2,
-		"EX_gain": 600,
+#		"EX_gain": 600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36,
@@ -161,7 +165,7 @@ const MOVE_DATABASE = {
 		"priority": 2,
 		"guard_drain": 1000,
 #		"guard_gain_on_combo" : 2000,
-		"EX_gain": 1500,
+#		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36,
@@ -180,7 +184,7 @@ const MOVE_DATABASE = {
 		"guard_drain": 1500, # on blocking opponent and opponent in neutral (multiplied), affect how well the move can guardcrush/break
 		# Supers have 0 Guard Drain
 #		"guard_gain_on_combo" : 2500, # affect comboability
-		"EX_gain": 2000, # EX Gain on block is a certain % of EX Gain on hit, defenders blocking this attack will gain a certain % as well
+#		"EX_gain": 2000, # EX Gain on block is a certain % of EX Gain on hit, defenders blocking this attack will gain a certain % as well
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36, # in degrees, 0 means straight ahead to the right, positive means rotating downward
@@ -200,7 +204,7 @@ const MOVE_DATABASE = {
 		"priority": 3,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 2000,
+#		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
@@ -219,7 +223,7 @@ const MOVE_DATABASE = {
 		"priority": 3,
 		"guard_drain": 1200,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 2000,
+#		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
@@ -238,7 +242,7 @@ const MOVE_DATABASE = {
 		"priority": 4,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 2000,
+#		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 90,
@@ -256,7 +260,7 @@ const MOVE_DATABASE = {
 		"priority": 5,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 1000,
+#		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
@@ -274,7 +278,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 6,
 		"priority": 5,
-		"EX_gain": 1500,
+#		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
@@ -293,7 +297,7 @@ const MOVE_DATABASE = {
 		"priority": 1,
 		"guard_drain": 1000,
 #		"guard_gain_on_combo" : 2000,
-		"EX_gain": 1600,
+#		"EX_gain": 1600,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 72,
@@ -311,7 +315,7 @@ const MOVE_DATABASE = {
 		"priority": 1,
 		"guard_drain": 750,
 #		"guard_gain_on_combo" : 1500,
-		"EX_gain": 1000,
+#		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 90,
@@ -329,7 +333,7 @@ const MOVE_DATABASE = {
 		"priority": 3,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 2000,
+#		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 72,
@@ -347,7 +351,7 @@ const MOVE_DATABASE = {
 		"priority": 3,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 2000,
+#		"EX_gain": 2000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -72,
@@ -365,7 +369,7 @@ const MOVE_DATABASE = {
 		"priority": 5,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 2500,
+#		"EX_gain": 2500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 45,
@@ -399,7 +403,7 @@ const MOVE_DATABASE = {
 		"priority": 7,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 1000,
+#		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
@@ -419,7 +423,7 @@ const MOVE_DATABASE = {
 		"priority": 7,
 		"guard_drain": 1500,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 2500,
+#		"EX_gain": 2500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
@@ -440,7 +444,7 @@ const MOVE_DATABASE = {
 		"priority": 10,
 		"guard_drain": 2000,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 0,
+#		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
@@ -461,7 +465,7 @@ const MOVE_DATABASE = {
 		"priority": 8,
 		"guard_drain": 2000,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 1000,
+#		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
@@ -481,7 +485,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 5,
 		"fixed_blockstun" : 5,
 		"priority": 8,
-		"EX_gain": 1500,
+#		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
@@ -500,7 +504,7 @@ const MOVE_DATABASE = {
 		"priority": 8,
 		"guard_drain": 2000,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 1000,
+#		"EX_gain": 1000,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
@@ -521,7 +525,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 5,
 		"fixed_blockstun" : 5,
 		"priority": 8,
-		"EX_gain": 1500,
+#		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
@@ -539,7 +543,7 @@ const MOVE_DATABASE = {
 		"priority": 11,
 		"guard_drain": 2500,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 0,
+#		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
@@ -557,7 +561,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 6,
 		"fixed_blockstun" : 5,
 		"priority": 11,
-		"EX_gain": 0,
+#		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 0,
@@ -598,7 +602,7 @@ const MOVE_DATABASE = {
 		"priority": 8,
 		"guard_drain": 2000,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 2500,
+#		"EX_gain": 2500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
@@ -620,7 +624,7 @@ const MOVE_DATABASE = {
 		"priority": 7,
 		"guard_drain": 2000,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 1500,
+#		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -20,
@@ -639,7 +643,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 3,
 		"priority": 7,
-		"EX_gain": 1500,
+#		"EX_gain": 1500,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
@@ -659,7 +663,7 @@ const MOVE_DATABASE = {
 		"priority": 11,
 		"guard_drain": 2500,
 #		"guard_gain_on_combo" : 3500,
-		"EX_gain": 0,
+#		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
@@ -684,7 +688,7 @@ const MOVE_DATABASE = {
 			"damage" : 0,
 			"hitstop" : 0,
 #			"guard_gain" : 3500,
-			"EX_gain": 0,
+#			"EX_gain": 0,
 			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103, # launch backwards
 			"atk_level" : 4,
@@ -696,7 +700,7 @@ const MOVE_DATABASE = {
 			"damage" : 0,
 			"hitstop" : 0,
 #			"guard_gain" : 3500,
-			"EX_gain": 0,
+#			"EX_gain": 0,
 			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103,
 			"atk_level" : 4,

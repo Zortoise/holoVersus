@@ -374,20 +374,20 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 	# EX GAIN ----------------------------------------------------------------------------------------------
 
-	match hit_data.block_state:
-		Globals.block_state.UNBLOCKED:
-			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
-			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 25))
-		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
-		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-			defender.change_ex_gauge(hit_data.move_data.EX_gain)
-		_:  # normal block
-			if !hit_data.double_repeat:
-				attacker.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
-			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
+#	match hit_data.block_state:
+#		Globals.block_state.UNBLOCKED:
+#			if !hit_data.double_repeat:
+#				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
+#			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 25))
+#		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
+#			if !hit_data.double_repeat:
+#				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
+#		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
+#			defender.change_ex_gauge(hit_data.move_data.EX_gain)
+#		_:  # normal block
+#			if !hit_data.double_repeat:
+#				attacker.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
+#			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame

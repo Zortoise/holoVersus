@@ -10,6 +10,7 @@ var last_picked = null
 
 func _ready():
 	hide()
+	$CanvasLayer.hide()
 	$CanvasLayer/Cursor.hide()
 	$CanvasLayer/Control.hide()
 	$CanvasLayer/TrainingControl.hide()
@@ -62,6 +63,7 @@ func set_training_settings():
 func open():
 	get_tree().paused = true
 	show()
+	$CanvasLayer.show()
 	$AltInputs.active = true
 	play_audio("ui_accept2", {"vol":-5})
 	
@@ -80,6 +82,7 @@ func open():
 	
 func close(yielding = true):
 	hide()
+	$CanvasLayer.hide()
 	$CanvasLayer/Cursor.hide()
 	if !Globals.training_mode:
 		$CanvasLayer/Control.hide()

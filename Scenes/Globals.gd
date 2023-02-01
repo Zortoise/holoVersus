@@ -494,109 +494,6 @@ func split_angle(angle: int, split_type = angle_split.FOUR, bias = 1):
 	return null
 			
 
-#func split_angle2(angle: float, split_type = 0, bias = 1):
-#	# for angle, 0 is straight right, positive is turning clockwise
-#	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
-#	# for 8 way split, the ranges would be
-#	# 338 ~ 23, 23 ~ 68, 68 ~ 113, 113 ~ 158, 158 ~ 203, 203 ~ 248, 248 ~ 293, 293 ~ 338
-#	# biased towards sideways and upward
-#	# can be biased towards left/right for straight up and straight down angles
-#
-#	angle = wrapf(angle, 0, TAU) # just in case
-#
-#	var segment: float
-#
-#	match split_type:
-#		0:
-#			segment = angle / (PI/4)
-#			if segment <= 1 or segment >= 7:
-#				return compass.E
-#			if segment < 3:
-#				return compass.S
-#			if segment <= 5:
-#				return compass.W
-#			return compass.N
-#
-#		1:
-#			segment = angle / (PI/2)
-#			if segment == 1:
-#				if bias == 1: return compass.SE
-#				else: return compass.SW
-#			if segment == 3:
-#				if bias == 1: return compass.NE
-#				else: return compass.NW
-#			if segment > 0 and segment < 1:
-#				return compass.SE
-#			if segment < 2:
-#				return compass.SW
-#			if segment < 3:
-#				return compass.NW
-#			return compass.NE
-#
-#		2:
-#			segment = angle / (PI/8)
-#			if segment <= 1 or segment >= 15:
-#				return compass.E
-#			if segment < 3:
-#				return compass.SE
-#			if segment <= 5:
-#				return compass.S
-#			if segment < 7:
-#				return compass.SW	
-#			if segment <= 9:
-#				return compass.W	
-#			if segment < 11:
-#				return compass.NW	
-#			if segment <= 13:
-#				return compass.N
-#			return compass.NE
-#
-#		3:
-#			segment = angle / (PI/4)
-#			if segment == 2:
-#				if bias == 1: return compass.SSE
-#				else: return compass.SSW
-#			if segment == 6:
-#				if bias == 1: return compass.NNE
-#				else: return compass.NNW
-#			if segment > 0 and segment <= 1:
-#				return compass.ESE
-#			if segment < 2:
-#				return compass.SSE
-#			if segment < 3:
-#				return compass.SSW
-#			if segment < 4:
-#				return compass.WSW	
-#			if segment <= 5:
-#				return compass.WNW	
-#			if segment < 6:
-#				return compass.NNW	
-#			if segment < 7:
-#				return compass.NNE
-#			return compass.ENE
-#
-#		4: # 12 segments
-#			segment = angle / (PI/6)
-#			if segment == 3:
-#				if bias == 1: return compass.SSE2
-#				else: return compass.SSW2
-#			if segment == 9:
-#				if bias == 1: return compass.NNE2
-#				else: return compass.NNW2
-#			if segment <= 1 or segment >= 11:
-#				return compass.E
-#			if segment < 3:
-#				return compass.SSE2
-#			if segment < 5:
-#				return compass.SSW2
-#			if segment <= 7:
-#				return compass.W
-#			if segment < 9:
-#				return compass.NNW2
-#			return compass.NNE2
-#
-#	return null
-
 func compass_to_angle(compass):
 	match compass:
 		Globals.compass.E:
@@ -657,9 +554,9 @@ func dir_to_angle(dir: int, v_dir: int, bias: int):
 				0:
 					match bias:
 						1:
-							return 180
-						-1:
 							return 0
+						-1:
+							return 180
 				1:
 					return 90
 		1:
@@ -671,98 +568,36 @@ func dir_to_angle(dir: int, v_dir: int, bias: int):
 				1:
 					return 45
 
-#func compass_to_angle(compass):
-#	match compass:
-#		Globals.compass.E:
-#			return 0.0
-#		Globals.compass.ESE:
-#			return PI/8
-#		Globals.compass.SE:
-#			return PI/4
-#		Globals.compass.SSE2:
-#			return PI/3
-#		Globals.compass.SSE:
-#			return 3*PI/8
-#		Globals.compass.S:
-#			return PI/2
-#		Globals.compass.SSW:
-#			return 5*PI/8
-#		Globals.compass.SSW2:
-#			return 2*PI/3
-#		Globals.compass.SW:
-#			return 3*PI/4
-#		Globals.compass.WSW:
-#			return 7*PI/8
-#		Globals.compass.W:
-#			return PI
-#		Globals.compass.WNW:
-#			return -7*PI/8
-#		Globals.compass.NW:
-#			return -3*PI/4
-#		Globals.compass.NNW2:
-#			return -2*PI/3
-#		Globals.compass.NNW:
-#			return -5*PI/8
-#		Globals.compass.N:
-#			return -PI/2
-#		Globals.compass.NNE:
-#			return -3*PI/8
-#		Globals.compass.NNE2:
-#			return -PI/3
-#		Globals.compass.NE:
-#			return -PI/4
-#		Globals.compass.ENE:
-#			return -PI/8
 
 ## TURNING CLOCKWISE/COUNTERCLOCKWISE USING DIRECTIONAL KEYS -------------------------------------------------------------------
 ## turn a direction towards a target direction
-#
-## direction and target_direction is in angle or Vector 2, return an angle
-## for constant turning, multiply turn_amount by FRAME before passing it in
-#func navigate(direction, target_direction, turn_amount: float):
-#	var new_direction_angle
-#
-#	var direction_angle: float
-#	var direction_vec: Vector2
-#
-#	var target_direction_angle: float
-#	var target_direction_vec: Vector2
-#
-#	# convert direction and target_direction into both angle and vec forms 1st
-#	if direction is float:
-#		direction_angle = direction
-#		direction_vec = Vector2(cos(direction), sin(direction))
-#	elif direction is Vector2:
-#		direction_vec = direction
-#		direction_angle = atan2(direction.y, direction.x)
-#	if target_direction is float:
-#		target_direction_angle = target_direction
-#		target_direction_vec = Vector2(cos(target_direction), sin(target_direction))
-#	elif target_direction is Vector2:
-#		target_direction_vec = target_direction
-#		target_direction_angle = atan2(target_direction.y, target_direction.x)
-#
-#	# get angle between direction and target_direction
-#	var angle = direction_vec.angle_to(target_direction_vec)
-#
-#	if angle > 0: # turn clockwise
-#		new_direction_angle = direction_angle + turn_amount
-#		# test for overshoot
-#		var new_direction_vec = Vector2(cos(new_direction_angle), sin(new_direction_angle))
-#		if new_direction_vec.angle_to(target_direction_vec) < 0: # if overshoot, return target_direction as angle
-#			return target_direction_angle
-#		else:
-#			return new_direction_angle # no overshoot, return new direction as angle
-#	elif angle < 0:
-#		new_direction_angle = direction_angle - turn_amount
-#		# test for overshoot
-#		var new_direction_vec = Vector2(cos(new_direction_angle), sin(new_direction_angle))
-#		if new_direction_vec.angle_to(target_direction_vec) > 0: # if overshoot, return target_direction as angle
-#			return target_direction_angle
-#		else:
-#			return new_direction_angle # no overshoot, return new direction as angle
-#	else:
-#		return direction_angle
+
+func navigate(angle: int, target_angle: int, turn_amount: int) -> int:
+	angle = posmod(angle, 360)
+	target_angle = posmod(target_angle, 360)
+	
+	var angle_btw :int = get_angle_btw(angle, target_angle)
+	
+	if abs(angle_btw) == 180 or angle == target_angle: # no turning if it is exactly backward or same diraction
+		return angle
+	
+	if abs(angle_btw) <= turn_amount:
+		return target_angle
+		
+	if angle_btw > 0:
+		return posmod(angle + turn_amount, 360)
+	else:
+		return posmod(angle - turn_amount, 360)
+
+
+func get_angle_btw(angle1: int, angle2: int) -> int:
+	var angle_btw = posmod(angle2, 360) - posmod(angle1, 360)
+	if abs(angle_btw) > 180:
+		if angle_btw > 0:
+			angle_btw = -(360 - angle_btw)
+		else:
+			angle_btw = 360 + angle_btw
+	return angle_btw
 		
 	
 func atk_type_to_tier(atk_type):

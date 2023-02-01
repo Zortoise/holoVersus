@@ -22,7 +22,7 @@ const MOVE_DATABASE = {
 		"fixed_hitstop" : 10,
 		"guard_drain": 1750,
 #		"guard_gain_on_combo" : 2500,
-		"EX_gain": 0,
+#		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -60,

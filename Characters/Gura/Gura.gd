@@ -346,114 +346,115 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 	match buffered_input[0]:
 		
 		Character.button_dash:
-			match new_state:
-				
-			# GROUND DASH ---------------------------------------------------------------------------------
-		
-				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
-					if keep and !Character.button_light in Character.input_state.just_pressed and \
-							!Character.button_fierce in Character.input_state.just_pressed:
-						if !Animator.query(["DashBrake", "WaveDashBrake"]):
-							# cannot dash during dash brake
-							Character.animate("DashTransit")
-							keep = false
-						else: # during dash brake, can continue dash backwards, limited dash dancing
-							if Character.dir == -Character.facing:
-								Character.face(Character.dir)
-								Character.animate("Dash")
-								keep = false
-							elif Character.instant_dir == -Character.facing:
-								Character.face(Character.instant_dir)
-								Character.animate("Dash")
-								keep = false
-						
-			# AIR DASH ---------------------------------------------------------------------------------
-				
-				Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+			if !has_acted[0]:
+				match new_state:
 					
-					if Animator.query(["aDashBrake"]) and !Globals.trait.AIR_CHAIN_DASH in query_traits():
-						continue
+				# GROUND DASH ---------------------------------------------------------------------------------
+			
+					Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+						if keep and !Character.button_light in Character.input_state.just_pressed and \
+								!Character.button_fierce in Character.input_state.just_pressed:
+							if !Animator.query(["DashBrake", "WaveDashBrake"]):
+								# cannot dash during dash brake
+								Character.animate("DashTransit")
+								keep = false
+							else: # during dash brake, can continue dash backwards, limited dash dancing
+								if Character.dir == -Character.facing:
+									Character.face(Character.dir)
+									Character.animate("Dash")
+									keep = false
+								elif Character.instant_dir == -Character.facing:
+									Character.face(Character.instant_dir)
+									Character.animate("Dash")
+									keep = false
+							
+				# AIR DASH ---------------------------------------------------------------------------------
 					
-					if Character.air_dash > 0:
+					Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 						
-						if Character.v_dir > 0 and Character.button_jump in Character.input_state.pressed and \
-								Character.is_button_tapped_in_last_X_frames(Character.button_jump, 1) and \
-								Character.check_snap_up() and \
-								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox")): # for easy wavedashing on soft platforms
-							# cannot snap up if jump is pressed more than 1 frame ago, to allow easier down dash after fallthrough
+						if Animator.query(["aDashBrake"]) and !Globals.trait.AIR_CHAIN_DASH in query_traits():
+							continue
+						
+						if Character.air_dash > 0:
+							
+							if Character.v_dir > 0 and Character.button_jump in Character.input_state.pressed and \
+									Character.is_button_tapped_in_last_X_frames(Character.button_jump, 1) and \
+									Character.check_snap_up() and \
+									Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox")): # for easy wavedashing on soft platforms
+								# cannot snap up if jump is pressed more than 1 frame ago, to allow easier down dash after fallthrough
 
-							Character.animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
-							input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
-									
-#								else:
-#									Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
-#									Character.animate("WaveDashBrake")
-#									if Character.dir != 0: # if holding direction, dash towards it
-#										if Character.facing != Character.dir:
-#											Character.face(Character.dir)
-#										Character.velocity.x = Character.dir * get_stat("GROUND_DASH_SPEED")
-#										Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-#											{"facing":Character.facing, "grounded":true})
-#										dash_sound()
-#									else:
-#										Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
-#													{"facing":Character.facing, "grounded":true})
-#										landing_sound()
+								Character.animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
+								input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
 										
-#								else: # not moving upward
-#									Character.animate("aDashTransit") # for dropping down and air dashing ASAP
-									
-#							elif Character.v_dir == 0:
-#								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
-#								Character.animate("DashTransit")
-									
-#							else:
-#								Character.animate("aDashTransit")
-									
-						else: # not in snap range
-							Character.animate("aDashTransit")
-							if Animator.query_current(["JumpTransit2"]): # if starting an air dash on the 1st frame after a ground jump
-								Character.velocity.y = FMath.percent(Character.velocity.y, 50)
-						keep = false
-						
-#				Globals.char_state.AIR_STARTUP: # cancel start of air jump into air dash
-#					if Animator.query(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
-#						if Character.air_dash > 0:
-#							Character.animate("aDashTransit")
-#							keep = false
-
-							
-			# DASH CANCELS ---------------------------------------------------------------------------------
-				# if land a sweetspot hit, can dash cancel afterward
-							
-				Globals.char_state.GROUND_ATK_RECOVERY:
-					if Character.test_dash_cancel():
-						Character.animate("DashTransit")
-						keep = false
-				
-				Globals.char_state.GROUND_ATK_ACTIVE:
-					if Character.dash_cancel:
-						Character.animate("DashTransit")
-						keep = false
-						
-				Globals.char_state.AIR_ATK_RECOVERY:
-					if Character.test_dash_cancel():
-						if !Character.grounded:
-							Character.animate("aDashTransit")
+	#								else:
+	#									Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
+	#									Character.animate("WaveDashBrake")
+	#									if Character.dir != 0: # if holding direction, dash towards it
+	#										if Character.facing != Character.dir:
+	#											Character.face(Character.dir)
+	#										Character.velocity.x = Character.dir * get_stat("GROUND_DASH_SPEED")
+	#										Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
+	#											{"facing":Character.facing, "grounded":true})
+	#										dash_sound()
+	#									else:
+	#										Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
+	#													{"facing":Character.facing, "grounded":true})
+	#										landing_sound()
+											
+	#								else: # not moving upward
+	#									Character.animate("aDashTransit") # for dropping down and air dashing ASAP
+										
+	#							elif Character.v_dir == 0:
+	#								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
+	#								Character.animate("DashTransit")
+										
+	#							else:
+	#								Character.animate("aDashTransit")
+										
+							else: # not in snap range
+								Character.animate("aDashTransit")
+								if Animator.query_current(["JumpTransit2"]): # if starting an air dash on the 1st frame after a ground jump
+									Character.velocity.y = FMath.percent(Character.velocity.y, 50)
 							keep = false
-						else: # grounded
-							Character.animate("DashTransit")
-							keep = false
-				
-				Globals.char_state.AIR_ATK_ACTIVE:
-					if Character.dash_cancel:
-						if !Character.grounded:
+							
+					Globals.char_state.AIR_STARTUP: # cancel start of air jump into air dash, used for up-dashes
+						if Animator.query(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
 							if Character.air_dash > 0:
 								Character.animate("aDashTransit")
 								keep = false
-						else: # grounded
+
+								
+				# DASH CANCELS ---------------------------------------------------------------------------------
+					# if land a sweetspot hit, can dash cancel afterward
+								
+					Globals.char_state.GROUND_ATK_RECOVERY:
+						if Character.test_dash_cancel():
 							Character.animate("DashTransit")
 							keep = false
+					
+					Globals.char_state.GROUND_ATK_ACTIVE:
+						if Character.dash_cancel:
+							Character.animate("DashTransit")
+							keep = false
+							
+					Globals.char_state.AIR_ATK_RECOVERY:
+						if Character.test_dash_cancel():
+							if !Character.grounded:
+								Character.animate("aDashTransit")
+								keep = false
+							else: # grounded
+								Character.animate("DashTransit")
+								keep = false
+					
+					Globals.char_state.AIR_ATK_ACTIVE:
+						if Character.dash_cancel:
+							if !Character.grounded:
+								if Character.air_dash > 0:
+									Character.animate("aDashTransit")
+									keep = false
+							else: # grounded
+								Character.animate("DashTransit")
+								keep = false
 							
 		# ---------------------------------------------------------------------------------
 		
@@ -744,7 +745,7 @@ func consume_one_air_dash(): # different characters can have different types of 
 
 func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
-		"Dash", "aDash", "aDashD", "aDashU":
+		"Dash", "aDash", "aDashD", "aDashU", "SDashTransit", "SDash":
 			Character.afterimage_trail()
 		"Tech", "GuardTech":
 			if Animator.time <= 15:
@@ -1150,6 +1151,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aDashBrake")
 		"aDashBrake":
 			Character.animate("Fall")
+		"SDashTransit":
+			Character.animate("SDash")
+#		"SDash":
+#			if !Character.grounded:
+#				Character.animate("aDashBrake")
+#			else:
+#				Character.animate("DashBrake")
 			
 		"L1Startup":
 			Character.animate("L1Active")
@@ -1892,6 +1900,9 @@ func start_audio(anim_name):
 			dash_sound()
 		"aDash", "aDashD", "aDashU":
 			Character.play_audio("dash1", {"vol" : -6})
+		"SDash":
+			Character.play_audio("dash1", {"vol" : -8})
+			Character.play_audio("launch1", {"vol" : -15})
 
 			
 		
