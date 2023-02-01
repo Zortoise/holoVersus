@@ -35,7 +35,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
 "SfxUnder_vframes": 4,
-"duration": 17,
+"duration": 18,
 "hframes": 6,
 "loop": false,
 "spritesheet": "HSprite",
@@ -56,7 +56,7 @@ frame_data = {
 "hurtbox": [ Vector2( -19, 22 ), Vector2( 2, 22 ), Vector2( 2, 5 ), Vector2( 10, 5 ), Vector2( 10, -6 ), Vector2( 2, -6 ), Vector2( 2, -20 ), Vector2( -19, -20 ) ],
 "sweetbox": [  ]
 },
-9: {
+10: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "frame": 2,
@@ -97,7 +97,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
 "SfxUnder_vframes": 4,
-"duration": 4,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "HSprite",

@@ -89,7 +89,10 @@ func simulate():
 								pips[player_number][pip_number].modulate = Color(1.0, 1.0, 0.3)	
 							Globals.char_state.LAUNCHED_HITSTUN:
 								player_stopped[player_number] = false
-								pips[player_number][pip_number].modulate = Color(1.0, 1.0, 0.3)	
+								if players[player_number].get_node("HitStunTimer").is_running():
+									pips[player_number][pip_number].modulate = Color(1.0, 1.0, 0.3)	
+								else: # techable
+									pips[player_number][pip_number].modulate = Color(0.6, 0.8, 0.3)	
 							Globals.char_state.GROUND_BLOCKSTUN, Globals.char_state.AIR_BLOCKSTUN:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(1.0, 0.8, 0.3)	

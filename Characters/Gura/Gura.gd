@@ -768,6 +768,11 @@ func get_root(move_name): # for aerial and chain memory
 		return MOVE_DATABASE[move_name].root
 		
 	match move_name:
+		"H[h]":
+			return "H"
+		"Hb[h]":
+			return "Hb"
+		
 		"SP1[c1]", "SP1[c2]", "SP1[c3]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c3]", \
 				"aSP1[c1]", "aSP1[c2]", "aSP1[c3]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c3]":
 			return "SP1"
@@ -1863,11 +1868,11 @@ func start_audio(anim_name):
 						
 		match orig_move_name:
 			"SP1[c1]", "SP1[u][c1]", "aSP1[c1]", "aSP1[d][c1]":
-				Character.play_audio("whoosh12", {"vol":-2})
+				Character.play_audio("whoosh12", {"bus":"PitchDown"})
 			"SP1[c2]", "SP1[u][c2]", "aSP1[c2]", "aSP1[d][c2]":
-				Character.play_audio("whoosh12", {})
+				Character.play_audio("whoosh12", {"bus":"PitchDown"})
 			"SP1[c3]", "SP1[u][c3]", "aSP1[c3]", "aSP1[d][c3]", "SP1[ex]", "SP1[u][ex]", "aSP1[ex]", "aSP1[d][ex]":
-				Character.play_audio("whoosh12", {})
+				Character.play_audio("whoosh12", {"bus":"PitchDown"})
 				Character.play_audio("water4", {"vol" : -20})
 	
 	match anim_name:

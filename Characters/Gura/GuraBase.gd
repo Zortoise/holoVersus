@@ -6,7 +6,7 @@ extends Node2D
 const NAME = "Gura"
 
 # character movement stats, use to overwrite
-const SPEED = 350 * FMath.S # ground speed
+const SPEED = 340 * FMath.S # ground speed
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
@@ -36,7 +36,7 @@ const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GRO
 const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 1100
-const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
+const GUARD_GAUGE_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
 #const GUARD_GAUGE_DEGEN_AMOUNT = 90 # exact GG degened per frame when GG > 100%
 const BASE_BLOCK_CHIP_DAMAGE_MOD = 35 # % of damage taken as chip damage when blocking (average is 0.25)
 #const GUARD_GAUGE_GAIN_MOD = 0.8 # modify Guard Gain when being comboed, tankier characters have higher GUARD_GAUGE_GAIN_MOD
@@ -260,6 +260,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
+		"impulse_mod" : 50,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.ANTI_GUARD, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_REPEAT_MOVE],
 		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },

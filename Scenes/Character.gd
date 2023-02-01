@@ -51,19 +51,13 @@ const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
 const DMG_VAL_KB_LIMIT = 300 # max damage percent before knockback stop increasing
 const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
-#const DMG_THRES_WHEN_KB_BOOST_STARTS = 0.7 # knockback only start increasing when damage percent is over this
-# const DMG_BOOST_AT_DMG_VAL_LIMIT = 1.5 # increase in damage taken when damage percent is at 100%, goes pass it when damage percent goes >100%
-# const DMG_THRES_WHEN_DMG_BOOST_STARTS = 0.7 # increase in damage taken when damage percent is over this
 const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
 #const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
 #const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
-#const PERFECTCHAIN_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on perfect chains
-#const REPEAT_GGG_MOD = 200 # Guard Gain on hitstunned defender is increased on double_repeat
 const DMG_REDUCTION_AT_MAX_GG = 50 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
-const AIR_BASE_BLOCK_GUARD_DRAIN_MOD = 130 # increased Guard Drain when base blocking in air
-const ATK_LEVEL_TO_F_HITSTUN = [10, 15, 20, 25, 30, 35, 10, 45]
+const ATK_LEVEL_TO_F_HITSTUN = [10, 15, 20, 25, 30, 35, 40, 45]
 const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
@@ -81,7 +75,6 @@ const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
 const SWEETSTOP_GUARD_DRAIN_MOD = 150 # Guard Drain on non-hitstunned defender is increased on sweetspotted hit
 const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
-#const SWEETSPOT_GGG_MOD = 50 # Guard Gain on hitstunned defender is reduced on sweetspotted hit
 
 const PUNISH_DMG_MOD = 150 # damage modifier on punish_hit
 const PUNISH_GUARD_DRAIN_MOD = 150 # Guard Drain on non-hitstunned defender is increased on a punish hit
@@ -96,11 +89,11 @@ const BASE_BLOCK_GUARD_DRAIN_MOD = 150 # guard drain for base blocking
 const BLOCKSTRING_GUARD_DRAIN_MOD = 50 # reduced guard drain for base blocking during blockstrings outside corner
 const BASE_BLOCK_PUSHBACK_MOD = 70 # % of base knockback of attack
 const BASE_BLOCK_ATKER_PUSHBACK = 400 * FMath.S # how much the attacker is pushed away, fixed
-#const DOWNWARD_KB_REDUCTION_ON_BLOCK = 25 # when being knocked downward (45 degree arc) while blocking, knockback is reduced
-const BLOCKSTUN_MOD_FROM_HITSTUN = 50 # blockstun is % of calculated hitstun
-const MIN_BASE_BLOCKSTUN = 8
 const BLOCKSTRING_BLOCKSTUN_MOD = 70 # % of blockstun on success block blockstring outside corner
 const BLOCKSTRING_ATKER_PUSHBACK_MOD = 150 # % of attacker pushback on success block blockstring outside corner
+const AIR_BASE_BLOCK_BLOCKSTUN_MOD = 150 # % of blockstun on baseblocking air attacks
+const AIR_BASE_BLOCK_GUARD_DRAIN_MOD = 130 # increased Guard Drain when base blocking in air
+const ATK_LEVEL_TO_BLOCKSTUN = [8, 12, 16, 20, 24, 28, 32, 36]
 
 const WRONGBLOCK_CHIP_DMG_MOD = 200 # increased chip damage for wrongblocking
 const WRONGBLOCK_GUARD_DRAIN_MOD = 350 # increased guard drain for wrongblocking
@@ -232,7 +225,7 @@ var hitcount_record = [] # record number of hits for current attack for each pla
 var ignore_list = [] # some moves has ignore_time, after hitting will ignore that player for a number of frames, used for multi-hit specials
 
 var launch_starting_rot := 0.0 # starting rotation when being launched, current rotation calculated using hitstun timer and this, can leave as float
-var orig_hitstun := 0 # used to set rotation when being launched, use to count up during hitstun
+var launchstun_rotate := 0 # used to set rotation when being launched, use to count up during hitstun
 var unique_data = {} # data unique for the character, stored as a dictionary
 var status_effects = [] # an Array of arrays, in each Array store a enum of the status effect and a duration, can have a third data as well
 var chain_combo = Globals.chain_combo.RESET # set to Globals.chain_combo
@@ -1016,7 +1009,7 @@ func simulate2(): # only ran if not in hitstop
 			Globals.char_state.GROUND_STANDBY:
 				animate("BlockStartup")
 			Globals.char_state.GROUND_C_RECOVERY:
-				if Animator.query(["BurstRevoke2"]): # cannot block out of BurstRevoke
+				if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
 					continue
 				if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
 					if Globals.trait.DASH_BLOCK in query_traits():
@@ -1037,7 +1030,7 @@ func simulate2(): # only ran if not in hitstop
 				animate("aBlockStartup")
 				$VarJumpTimer.stop()
 			Globals.char_state.AIR_C_RECOVERY:
-				if Animator.query(["BurstRevoke2"]): # cannot block out of BurstRevoke
+				if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
 					continue
 				if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
 					if Globals.trait.AIR_DASH_BLOCK in query_traits(): # only heavyweights can block out of air dashes
@@ -1070,7 +1063,7 @@ func simulate2(): # only ran if not in hitstop
 
 	var gravity_temp: int
 	
-	if $HitStunTimer.is_running(): # fix and lower gravity during hitstun
+	if $HitStunTimer.is_running() or new_state == Globals.char_state.LAUNCHED_HITSTUN: # fix and lower gravity during hitstun
 		gravity_temp = FMath.percent(GRAVITY, HITSTUN_GRAV_MOD)
 	else:
 		gravity_temp = FMath.percent(GRAVITY, UniqChar.get_stat("GRAVITY_MOD")) # each character are affected by gravity differently out of hitstun
@@ -1092,7 +1085,7 @@ func simulate2(): # only ran if not in hitstop
 
 	if !grounded: # gravity only pulls you if you are in the air
 		
-		if $HitStunTimer.is_running():
+		if $HitStunTimer.is_running() or new_state == Globals.char_state.LAUNCHED_HITSTUN:
 			if can_DI(): # up/down DI, depends on Guard Gauge
 				if v_dir == -1: # DIing upward
 					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
@@ -1130,7 +1123,7 @@ func simulate2(): # only ran if not in hitstop
 			 has_terminal = false
 
 	if has_terminal:
-		if $HitStunTimer.is_running(): # during hitstun, only slowdown within a certain range
+		if $HitStunTimer.is_running() or new_state == Globals.char_state.LAUNCHED_HITSTUN: # during hitstun, only slowdown within a certain range
 			terminal = FMath.percent(GRAVITY, HITSTUN_TERMINAL_VELOCITY_MOD)
 			
 			if velocity.y < FMath.percent(terminal, TERMINAL_THRESHOLD) and velocity.y > terminal:
@@ -1157,7 +1150,7 @@ func simulate2(): # only ran if not in hitstop
 	var friction_this_frame: int # 15
 	var air_res_this_frame: int
 	
-	if !$HitStunTimer.is_running():
+	if !$HitStunTimer.is_running() and new_state != Globals.char_state.LAUNCHED_HITSTUN:
 		friction_this_frame = UniqChar.get_stat("FRICTION")
 		air_res_this_frame = UniqChar.get_stat("AIR_RESISTANCE")
 	else:
@@ -1271,11 +1264,11 @@ func simulate2(): # only ran if not in hitstop
 		Globals.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
 			if !$HitStunTimer.is_running() and Animator.query_to_play(["Launch", "LaunchTransit"]):
-				if !tech():
-					animate("FallTransit")
-					$ModulatePlayer.play("unlaunch_flash")
-					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
-			elif !Animator.query_to_play(["HardLanding", "Tech"]): # only bounce if not teching next frame
+				tech()
+#					animate("FallTransit")]
+#					$ModulatePlayer.play("unlaunch_flash")
+#					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
+			if !Animator.query_to_play(["HardLanding", "Tech"]): # only bounce if not teching next frame
 				friction_this_frame = FMath.percent(friction_this_frame, 25) # lower friction during launch hitstun
 				
 # warning-ignore:unassigned_variable
@@ -1376,7 +1369,7 @@ func simulate2(): # only ran if not in hitstop
 	
 	process_VDI()
 	
-	if !$HitStopTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
+	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
 		launch_trail() # do launch trail before moving
 		
 #	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
@@ -1472,8 +1465,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			
 			# spin character during launch, be sure to do this after SpritePlayer since rotation is reset at start of each animation
 			if state == Globals.char_state.LAUNCHED_HITSTUN and Animator.query_current(["LaunchTransit", "Launch"]):
-				sprite.rotation = launch_starting_rot - facing * (orig_hitstun - $HitStunTimer.time) * \
-					LAUNCH_ROT_SPEED * Globals.FRAME
+				sprite.rotation = launch_starting_rot - facing * launchstun_rotate * LAUNCH_ROT_SPEED * Globals.FRAME
+				launchstun_rotate += 1
 		
 		# start hitstop timer at end of frame after SpritePlayer.simulate() by setting hitstop to a number other than null for the frame
 		# new hitstops override old ones
@@ -2098,7 +2091,7 @@ func state_detect(anim):
 			return Globals.char_state.AIR_RECOVERY
 		"BurstRevoke":
 			return Globals.char_state.AIR_RECOVERY
-		"BurstRevoke2":
+		"BurstCRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		_: # unique animations
@@ -2677,8 +2670,8 @@ func check_quick_turn():
 			else:
 				return true
 	match new_state:
-		Globals.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on any startup frame
-			if Animator.time <= 3 and Animator.time != 0:
+		Globals.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
+			if Animator.time <= 6 and Animator.time != 0:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqChar.STARTERS:
 					return false
@@ -2898,14 +2891,14 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 			return false
 	
 func tech():
-	if button_block in input_state.pressed and button_dash in input_state.pressed:
+	if button_dash in input_state.pressed:
 		if dir != 0 or v_dir != 0:
 			animate("Tech")
 			return true
 	return false
 	
 func guardtech():
-	if success_block and button_block in input_state.pressed and button_dash in input_state.pressed:
+	if success_block and button_dash in input_state.pressed:
 		if dir != 0 or v_dir != 0:
 			animate("GuardTech")
 			return true
@@ -3989,8 +3982,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			else:
 				hit_data.block_state = Globals.block_state.AIR
 				
-	if hit_data.block_state in [Globals.block_state.GROUND, Globals.block_state.AIR, Globals.block_state.GROUND_PERFECT, \
-			Globals.block_state.AIR_PERFECT] and success_block:
+	if hit_data.block_state in [Globals.block_state.GROUND, Globals.block_state.GROUND_PERFECT] and success_block:
 		hit_data["success_blocked"] = true # for attacker pushback
 				
 			
@@ -4081,6 +4073,25 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		lethal_flag = true
 		
+		
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and "burst" in hit_data.move_data:
+		if hit_data.move_data.burst == "BurstCounter":
+#			attacker.reset_jumps()
+#			reset_jumps()
+			attacker.reset_guard_gauge()
+		elif hit_data.move_data.burst == "BurstEscape":
+			pass
+#			attacker.reset_jumps()
+#			reset_jumps()
+		elif hit_data.move_data.burst == "BurstExtend":
+			attacker.reset_jumps()
+#			reset_jumps()
+			current_guard_gauge = 0
+			Globals.Game.guard_gauge_update(self)
+			hit_data.crush_punish = true
+#			defender.repeat_memory = []
+		# BurstRevoke does not reset anything
+		
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------
 	
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
@@ -4132,23 +4143,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !hit_data.break_hit and !hit_data.lethal_hit and Globals.atk_attr.SCREEN_SHAKE in hit_data.move_data.atk_attr:
 		Globals.Game.set_screenshake()
 		
-	if hit_data.block_state == Globals.block_state.UNBLOCKED and "burst" in hit_data.move_data:
-		if hit_data.move_data.burst == "BurstCounter":
-#			attacker.reset_jumps()
-#			reset_jumps()
-			attacker.reset_guard_gauge()
-		elif hit_data.move_data.burst == "BurstEscape":
-			pass
-#			attacker.reset_jumps()
-#			reset_jumps()
-		elif hit_data.move_data.burst == "BurstExtend":
-			attacker.reset_jumps()
-#			reset_jumps()
-			current_guard_gauge = 0
-			Globals.Game.guard_gauge_update(self)
-#			defender.repeat_memory = []
-		# BurstRevoke does not reset anything
-		
 	if "superarmored" in hit_data:
 		$ModulatePlayer.play("armor_flash")
 			
@@ -4164,7 +4158,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			$HitStunTimer.time = calculate_hitstun(hit_data)
-			orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
+			launchstun_rotate = 0 # used to calculation sprite rotation during launched state
 	else:
 		$BlockStunTimer.time = calculate_blockstun(hit_data)
 		if hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
@@ -4413,13 +4407,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					success_block = true
 				Globals.block_state.AIR:
 					animate("aBlockstun")
-					success_block = true
+					success_block = false
 				Globals.block_state.AIR_WRONG:
 					animate("aWBlockstun")
 					success_block = false
 				Globals.block_state.AIR_PERFECT:
 					animate("aPBlockstun")
-					success_block = true
+					success_block = false
 					
 	if !no_impact_and_vel_change:
 		velocity.set_vector(knockback_strength, 0)  # reset momentum
@@ -4765,7 +4759,7 @@ func calculate_knockback_dir(hit_data) -> int:
 	return knockback_dir
 
 
-func adjusted_atk_level(hit_data) -> int: # mostly for hitstun and blockstun
+func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	# atk_level = 1 are weak hits and cannot do a lot of stuff, cannot cause hitstun
 	
 #	var attacker_or_entity = get_node(hit_data.attacker_nodepath) # cleaner code
@@ -4774,13 +4768,13 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun and blockstun
 
 	if "superarmored" in hit_data:
 		return 1
+	if hit_data.double_repeat:
+		return 1 # double repeat is forced attack level 1
 	
 	var atk_level: int = hit_data.move_data.atk_level
 	if hit_data.semi_disjoint: # semi-disjoint hits limit hitstun
 		atk_level -= 1 # atk lvl 2 become weak hit
 		atk_level = int(clamp(atk_level, 1, 2))
-	elif hit_data.double_repeat:
-		return 1 # double repeat is forced attack level 1
 	else:
 		if hit_data.sweetspotted: # sweetspotted and Punish Hits give more hitstun
 			atk_level += 2
@@ -4836,28 +4830,31 @@ func calculate_blockstun(hit_data) -> int:
 	
 	if hit_data.double_repeat or hit_data.adjusted_atk_level <= 1:
 		return 0
-	
-	var scaled_blockstun: int # 40% (BLOCKSTUN_MOD_FROM_HITSTUN) of hitstun, but has a minimum value
-	scaled_blockstun = int(max(FMath.percent(calculate_hitstun(hit_data, true), BLOCKSTUN_MOD_FROM_HITSTUN), MIN_BASE_BLOCKSTUN * FMath.S))
-	
-	if hit_data.block_state == Globals.block_state.AIR_WRONG or hit_data.block_state == Globals.block_state.GROUND_WRONG:
-		scaled_blockstun = FMath.percent(scaled_blockstun, WRONGBLOCK_BLOCKSTUN_MOD)
-	elif hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
-		scaled_blockstun = FMath.percent(scaled_blockstun, PERFECTBLOCK_BLOCKSTUN_MOD)
+
+	var scaled_blockstun: int = ATK_LEVEL_TO_BLOCKSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
+	var blockstun: int 
 		
-	elif success_block and !"cornered" in hit_data: # on base block, blockstrings on success block state reduce blockstun
-		scaled_blockstun = FMath.percent(scaled_blockstun, BLOCKSTRING_BLOCKSTUN_MOD)
+	match hit_data.block_state:
+		
+		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
+			scaled_blockstun = FMath.percent(scaled_blockstun, WRONGBLOCK_BLOCKSTUN_MOD)
+			blockstun = FMath.round_and_descale(scaled_blockstun)
+			# fixed blockstun does not apply on wrongblocked hits
 			
-	var blockstun: int = FMath.round_and_descale(scaled_blockstun)
-	
-	# fixed blockstun does not apply on wrongblocked hits
-	if hit_data.block_state != Globals.block_state.AIR_WRONG and hit_data.block_state != Globals.block_state.GROUND_WRONG:
-		if "fixed_blockstun" in hit_data.move_data:
-			# for perfect block will choose the lesser of the 2 blockstuns
-			if hit_data.block_state == Globals.block_state.AIR_PERFECT or hit_data.block_state == Globals.block_state.GROUND_PERFECT:
+		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
+			scaled_blockstun = FMath.percent(scaled_blockstun, PERFECTBLOCK_BLOCKSTUN_MOD)
+			blockstun = FMath.round_and_descale(scaled_blockstun)
+			if "fixed_blockstun" in hit_data.move_data: # for perfect block will choose the lesser of the 2 blockstuns
 				return int(min(blockstun, hit_data.move_data.fixed_blockstun))
-			# normal block
-			return hit_data.move_data.fixed_blockstun
+				
+		_: # on base block
+			if "fixed_blockstun" in hit_data.move_data:
+				return hit_data.move_data.fixed_blockstun
+			elif success_block and !"cornered" in hit_data: # less blockstun during blockstrings on success-block
+				scaled_blockstun = FMath.percent(scaled_blockstun, BLOCKSTRING_BLOCKSTUN_MOD)
+			if !grounded: # air block has higher blockstun as well as Guard Drain
+				scaled_blockstun = FMath.percent(scaled_blockstun, AIR_BASE_BLOCK_BLOCKSTUN_MOD)
+			blockstun = FMath.round_and_descale(scaled_blockstun)
 	
 	return blockstun
 	
@@ -5171,7 +5168,7 @@ func sequence_launch():
 					get_guard_gauge_percent_above())
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
-	orig_hitstun = $HitStunTimer.time # used to calculation sprite rotation during launched state
+	launchstun_rotate = 0 # used to calculation sprite rotation during launched state
 		
 	# LAUNCH POWER
 	var launch_power = seq_data.launch_power # scaled
@@ -5330,12 +5327,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"BurstEscape":
 			animate("BurstRec")
 		"BurstExtend":
-			animate("BurstRec")
+			animate("BurstCRec")
 		"BurstRec":
 			animate("FallTransit")
 		"BurstRevoke":
-			animate("BurstRevoke2")
-		"BurstRevoke2":
+			animate("BurstCRec")
+		"BurstCRec":
 			animate("FallTransit")
 
 	UniqChar._on_SpritePlayer_anim_finished(anim_name)
@@ -5538,7 +5535,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(get_path(), "BurstRevoke", position, {"back":true})
 			$ModulatePlayer.play("pink_burst")
 			play_audio("blast1", {"vol" : -24,})
-		"BurstRevoke2":
+		"BurstCRec":
 			anim_gravity_mod = 0
 			
 	UniqChar._on_SpritePlayer_anim_started(anim_name)
@@ -5636,7 +5633,7 @@ func save_state():
 		"input_buffer" : input_buffer,
 		"afterimage_timer" : afterimage_timer,
 		"launch_starting_rot" : launch_starting_rot,
-		"orig_hitstun" : orig_hitstun,
+		"launchstun_rotate" : launchstun_rotate,
 		"chain_combo" : chain_combo,
 		"chain_memory" : chain_memory,
 		"dash_cancel" : dash_cancel,
@@ -5719,7 +5716,7 @@ func load_state(state_data):
 	input_buffer = state_data.input_buffer
 	afterimage_timer = state_data.afterimage_timer
 	launch_starting_rot = state_data.launch_starting_rot
-	orig_hitstun = state_data.orig_hitstun
+	launchstun_rotate = state_data.launchstun_rotate
 	chain_combo = state_data.chain_combo
 	chain_memory = state_data.chain_memory
 	dash_cancel = state_data.dash_cancel
