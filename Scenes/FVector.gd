@@ -19,8 +19,13 @@ func convert_to_vec() -> Vector2: # for going from scaled true_position to node 
 	return Vector2(FMath.round_and_descale(x), FMath.round_and_descale(y))
 	
 	
-func length() -> int:
-	var angle = angle() # get the angle 1st
+func length(in_angle = null) -> int:
+	var angle: int
+	if in_angle == null:
+		angle = angle() # get the angle 1st
+	else:
+		angle = in_angle
+		
 	if angle == 0 or angle == 180:
 		return int(abs(x))
 # warning-ignore:integer_division

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/BreaksparkSprite.png-240d2af5c39a5905b5c15a494b58f3ab.stex"
+path="res://.import/StunsparkSprite.png-6938a36074458357f6b788bf8f2fe6c1.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Effects/Hitsparks/Spritesheets/BreaksparkSprite.png"
-dest_files=[ "res://.import/BreaksparkSprite.png-240d2af5c39a5905b5c15a494b58f3ab.stex" ]
+source_file="res://Assets/Effects/Hitsparks/Spritesheets/StunsparkSprite.png"
+dest_files=[ "res://.import/StunsparkSprite.png-6938a36074458357f6b788bf8f2fe6c1.stex" ]
 
 [params]
 
@@ -31,5 +31,5 @@ process/invert_color=false
 process/normal_map_invert_y=false
 stream=false
 size_limit=0
-detect_3d=true
+detect_3d=false
 svg/scale=1.0

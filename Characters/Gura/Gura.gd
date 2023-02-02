@@ -35,7 +35,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F3Startup", "F3bStartup", "F3[h]Startup", \
 			"HStartup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
+		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", "F3[h]Active", \
 				"HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
 		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
@@ -296,8 +296,7 @@ func process_instant_actions():
 	Character.unique_data.nibbler_cancel = max(Character.unique_data.nibbler_cancel - 1, 0)
 	# nibbler_cancel is a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 	
-	if !Character.get_node("RespawnTimer").is_running() and !Character.get_node("HitStunTimer").is_running() and \
-			!Character.get_node("BlockStunTimer").is_running():
+	if !Character.get_node("RespawnTimer").is_running() and !Character.get_node("HitStunTimer").is_running():
 				
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
@@ -386,31 +385,6 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								Character.animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
 								input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
 										
-	#								else:
-	#									Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
-	#									Character.animate("WaveDashBrake")
-	#									if Character.dir != 0: # if holding direction, dash towards it
-	#										if Character.facing != Character.dir:
-	#											Character.face(Character.dir)
-	#										Character.velocity.x = Character.dir * get_stat("GROUND_DASH_SPEED")
-	#										Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-	#											{"facing":Character.facing, "grounded":true})
-	#										dash_sound()
-	#									else:
-	#										Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
-	#													{"facing":Character.facing, "grounded":true})
-	#										landing_sound()
-											
-	#								else: # not moving upward
-	#									Character.animate("aDashTransit") # for dropping down and air dashing ASAP
-										
-	#							elif Character.v_dir == 0:
-	#								Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox"))
-	#								Character.animate("DashTransit")
-										
-	#							else:
-	#								Character.animate("aDashTransit")
-										
 							else: # not in snap range
 								Character.animate("aDashTransit")
 								if Animator.query_current(["JumpTransit2"]): # if starting an air dash on the 1st frame after a ground jump
@@ -460,18 +434,10 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		
 		Character.button_light:
 			if !has_acted[0]:
-#				if Character.button_down in Character.input_state.pressed:
-#					keep = !process_move(new_state, "L2", has_acted, buffered_input[1])
-#				if keep:
 				keep = !process_move(new_state, "L1", has_acted)
 		
 		Character.button_fierce:
 			if !has_acted[0]:
-#				if Character.button_up in Character.input_state.pressed:
-#					keep = !process_move(new_state, "F3", has_acted, buffered_input[1]) # need to do this too for more consistency
-#				elif Character.button_down in Character.input_state.pressed:
-#					keep = !process_move(new_state, "F2", has_acted, buffered_input[1])
-#				if keep:
 				keep = !process_move(new_state, "F1", has_acted)
 
 		# SPECIAL ACTIONS ---------------------------------------------------------------------------------
@@ -633,7 +599,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					has_acted[0] = true
 					return true
 				
-			# chain cancel
+		# chain cancel
 		Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
 			if attack_ref in STARTERS:
 				if Character.test_chain_combo(attack_ref):
@@ -645,15 +611,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
 						return true
-						
-#				# EX Target Chain
-#				if attack_ref == "SP3[ex]" and Animator.query_to_play(["SP6[ex]GrabRec"]):
-#					if Character.is_ex_valid(attack_ref):
-#						Character.animate(attack_ref + "Startup")
-#						has_acted[0] = true
-#						return true
 			
-			# quick cancel
+		# quick cancel
 		Globals.char_state.GROUND_ATK_STARTUP:
 			if Character.grounded and attack_ref in STARTERS:
 				if Character.check_quick_cancel(attack_ref): # must be within 1st frame, animation name must be in MOVE_DATABASE
@@ -663,7 +622,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 							has_acted[0] = true
 							return true
 					
-			# chain cancel
+		# chain cancel
 		Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_ATK_ACTIVE:
 			if !Character.grounded:
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
@@ -676,13 +635,6 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 							has_acted[0] = true
 							return true
 							
-#					# EX Target Chain
-#					if attack_ref == "SP3[ex]" and Animator.query_to_play(["aSP6[ex]GrabRec"]):
-#						if Character.is_ex_valid("a" + attack_ref):
-#							Character.animate("a" + attack_ref + "Startup")
-#							has_acted[0] = true
-#							return true
-							
 			else:
 				if attack_ref in STARTERS:
 					if Character.test_chain_combo(attack_ref): # grounded
@@ -694,7 +646,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 							has_acted[0] = true
 							return true
 							
-			# quick cancel
+		# quick cancel
 		Globals.char_state.AIR_ATK_STARTUP:
 			if !Character.grounded:
 				if ("a" + attack_ref) in STARTERS:
@@ -745,9 +697,9 @@ func consume_one_air_dash(): # different characters can have different types of 
 
 func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
-		"Dash", "aDash", "aDashD", "aDashU", "SDashTransit", "SDash":
+		"Dash", "aDash", "aDashD", "aDashU", "FDashTransit", "FDash":
 			Character.afterimage_trail()
-		"Tech", "GuardTech":
+		"Tech":
 			if Animator.time <= 15:
 				Character.afterimage_trail(null, 0.6, 10, Globals.afterimage_shader.WHITE)
 			else:
@@ -861,7 +813,7 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		"F3[h]":
-			atk_attr.append(Globals.atk_attr.SUPERARMOR_STARTUP)
+			atk_attr.append_array([Globals.atk_attr.SUPERARMOR_STARTUP, Globals.atk_attr.SUPERARMOR_ACTIVE])
 		"SP3", "SP3b", "SP3[h]", "SP3b[h]": 
 			atk_attr.append_array([Globals.atk_attr.ANTI_AIR])
 		"SP3[ex]", "SP3b[ex]": 
@@ -892,7 +844,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			update_uniqueHUD()
 		"F2[h]":
-			if hit_data.sweetspotted and !hit_data.break_hit and !hit_data.lethal_hit:
+			if hit_data.sweetspotted and !hit_data.stun and !hit_data.lethal_hit:
 				hit_data.move_data.KB_angle = 180
 				hit_data.move_data.knockback = 200 * FMath.S
 				hit_data["pull"] = true
@@ -913,7 +865,7 @@ func being_hit(hit_data): # reaction, can change hit_data from here
 #				if Animator.query(["aDashU", "aDashD"]):
 #					hit_data.punish_hit = true
 					
-	if hit_data.block_state in [Globals.block_state.UNBLOCKED, Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG]:
+	if hit_data.block_state in [Globals.block_state.UNBLOCKED]:
 		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
 		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
 		update_uniqueHUD()
@@ -1151,8 +1103,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aDashBrake")
 		"aDashBrake":
 			Character.animate("Fall")
-		"SDashTransit":
-			Character.animate("SDash")
+		"FDashTransit":
+			Character.animate("FDash")
 #		"SDash":
 #			if !Character.grounded:
 #				Character.animate("aDashBrake")
@@ -1230,8 +1182,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"F3bStartup":
 			Character.animate("F3Active")
 		"F3[h]Startup":
-			Character.animate("F3Active")
+			Character.animate("F3[h]Active")
 		"F3Active":
+			Character.animate("F3Rec")
+		"F3[h]Active":
 			Character.animate("F3Rec")
 		"F3Rec":
 			Character.animate("Idle")
@@ -1581,10 +1535,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
-#		"aDashTransit":
-#			Character.aerial_memory = []
-#			Character.velocity.percent(20)
-#			Character.anim_gravity_mod = 0
 		"aDash":
 			consume_one_air_dash()
 			Character.aerial_memory = []
@@ -1777,18 +1727,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-#		"aSP3bStartup":
-#			Character.velocity.x *= 0.5
-#			Character.velocity.y = -500
-#			Character.anim_gravity_mod = 0.0
 		"aSP3Active", "SP3Active":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = -500 * FMath.S
 			Character.anim_gravity_mod = 0
-#		"aSP3b[h]Startup", "aSP3b[ex]Startup":
-#			Character.velocity.x *= 0.5
-#			Character.velocity.y = -700
-#			Character.anim_gravity_mod = 0.0
 		"aSP3[h]Active", "aSP3[ex]Active", "SP3[h]Active", "SP3[ex]Active":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = -700 * FMath.S
@@ -1900,7 +1842,7 @@ func start_audio(anim_name):
 			dash_sound()
 		"aDash", "aDashD", "aDashU":
 			Character.play_audio("dash1", {"vol" : -6})
-		"SDash":
+		"FDash":
 			Character.play_audio("dash1", {"vol" : -8})
 			Character.play_audio("launch1", {"vol" : -15})
 

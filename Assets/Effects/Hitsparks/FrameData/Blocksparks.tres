@@ -5,40 +5,7 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"Blockspark": {
-"duration": 17,
-"hframes": 6,
-"loop": false,
-"spritesheet": "BlocksparksSprite",
-"timestamps": {
-0: {
-"frame": 0
-},
-3: {
-"frame": 1
-},
-5: {
-"frame": 2
-},
-7: {
-"frame": 3
-},
-9: {
-"frame": 4
-},
-11: {
-"frame": 5
-},
-13: {
-"frame": 6
-},
-15: {
-"frame": 7
-}
-},
-"vframes": 6
-},
-"PBlockspark": {
+"SBlockspark": {
 "duration": 19,
 "hframes": 6,
 "loop": false,
@@ -75,13 +42,13 @@ frame_data = {
 "vframes": 6
 },
 "Superarmorspark": {
-"duration": 19,
+"duration": 17,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BlocksparksSprite",
 "timestamps": {
 0: {
-"frame": 16
+"frame": 8
 },
 3: {
 "frame": 25
@@ -102,10 +69,7 @@ frame_data = {
 "frame": 30
 },
 15: {
-"frame": 31
-},
-17: {
-"frame": 32
+"frame": 15
 }
 },
 "vframes": 6

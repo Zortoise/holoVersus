@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/SDashDustSprite.png-7a6a375ed75d942605ee3a31879f4c6c.stex"
+path="res://.import/FDashDustSprite.png-215dd65a1228521c709568dc638dbc4f.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Effects/DustClouds/Spritesheets/SDashDustSprite.png"
-dest_files=[ "res://.import/SDashDustSprite.png-7a6a375ed75d942605ee3a31879f4c6c.stex" ]
+source_file="res://Assets/Effects/DustClouds/Spritesheets/FDashDustSprite.png"
+dest_files=[ "res://.import/FDashDustSprite.png-215dd65a1228521c709568dc638dbc4f.stex" ]
 
 [params]
 

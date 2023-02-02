@@ -85,15 +85,9 @@ margin_bottom = 22.0
 
 [node name="VarJumpTimer" parent="." instance=ExtResource( 4 )]
 
-[node name="BlockStunTimer" parent="." instance=ExtResource( 4 )]
-
 [node name="HitStunTimer" parent="." instance=ExtResource( 4 )]
 
 [node name="HitStopTimer" parent="." instance=ExtResource( 4 )]
-
-[node name="PBlockTimer" parent="." instance=ExtResource( 4 )]
-
-[node name="PBlockCDTimer" parent="." instance=ExtResource( 4 )]
 
 [node name="RespawnTimer" parent="." instance=ExtResource( 4 )]
 

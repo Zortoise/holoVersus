@@ -5,49 +5,44 @@ const VERSION = "Test Build 6"
 enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_RECOVERY,
 		GROUND_C_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, GROUND_FLINCH_HITSTUN,
 		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_ATK_STARTUP, GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY,
-		AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, GROUND_BLOCKSTUN, AIR_BLOCK, AIR_BLOCKSTUN,
+		AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, AIR_BLOCK,
 		SEQUENCE_USER, SEQUENCE_TARGET}
 enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
-enum chain_combo {RESET, NO_CHAIN, NORMAL, BLOCKED_NORMAL, SPECIAL, BLOCKED_SPECIAL, SUPER}
-enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK, ANTI_GUARD
+enum chain_combo {RESET, NO_CHAIN, NORMAL, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, PARRIED, SUPER}
+enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK
 		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
-		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_PUSHBACK, NO_STRAFE, REPEATABLE, DI_MANUAL_SEAL
-		CANNOT_CHAIN_INTO, CANNOT_CHAIN_INTO_ON_BLOCK, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
-		COMMAND_GRAB, VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
-		STRONG_ENTITY, NO_GDRAIN_ON_BLOCK, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR}
+		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_STRAFE, REPEATABLE, DI_MANUAL_SEAL
+		CANNOT_CHAIN_INTO, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
+		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
+		STRONG_ENTITY, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR}
 # AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
-# NO_CHAIN_ON_BLOCK = no chain combo on block
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
 # JUMP_CANCEL = can cancel recovery with a jump, place this on the active animation with same name as the recovery animation
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
 # EASY_BLOCK = can be blocked correctly in either direction
-# ANTI_GUARD = always wrongblocked if chain_combo is false, cannot perfect block
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers and moves with UNBLOCKABLE
-# UNBLOCKABLE = for command grabs
+# UNBLOCKABLE = for command grabs and unparriable attacks
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
 # SUPERARMOR_STARTUP = Wrongblock all attacks during startup frames
 # SUPERARMOR_ACTIVE = Wrongblock all attacks during active frames
 # PROJ_ARMOR_ACTIVE = Wrongblock all projectiles during active frames
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
-# NO_PUSHBACK = no pushback if not blocked, used mainly to make certain moves more punishable
 # NO_STRAFE = for certain aerials, prevent air strafing during active frames
 # REPEATABLE = will not incur repeat penalty, use for multi-entities
 # DI_MANUAL_SEAL = seal DI for certain duration set by "burstlock" in move_data, for Burst Extend
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
-# CANNOT_CHAIN_INTO_ON_BLOCK = fails test_chain_combo() if chain combo == BLOCKED_NORMAL or BLOCKED_SPECIAL
 # NOT_FROM_C_REC = cannot use during cancellable recovery, for certain moves like command grabs
 # LATE_CHAIN = can only chain into other moves during recovery and not active frames
 # LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
 # PUNISH_CRUSH = cause Punish Crush on punish hits
-# COMMAND_GRAB = cannot hit opponents during ground/air movement startup
 # VULN_LIMBS = take full damage from SDHits
 # NO_REPEAT_MOVE = a move that can only be repeated once
 # DESTROY_ENTITIES = hitbox destroys entities
@@ -55,19 +50,19 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, NO_CHAIN_ON_BLOCK, ANTI_AIR, AUTOCHAIN, JUM
 # INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
 # HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)
 # STRONG_ENTITY = entity can lethal and guardbreak
-# NO_GDRAIN_ON_BLOCK = no Guard Drain on block
 # NO_TERMINAL_VEL_ACTIVE = no terminal velocity on active frames
 # FIXED_KNOCKBACK_STR = fixed knockback, used for Burst Extend
 
-enum status_effect {LETHAL, BREAK, BREAK_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW}
-# BREAK_RECOVER = get this when you got Broken, remove when out of hitstun and recovery some Guard Gauge
+enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, INVULN}
+# STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
+# INVULN = Strongblock and parry grant some invuln state
 
-enum block_state {UNBLOCKED, GROUND, AIR, GROUND_WRONG, AIR_WRONG, GROUND_PERFECT, AIR_PERFECT}
+enum block_state {UNBLOCKED, STRONG, WEAK}
 enum trait {CHAIN_DASH, AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK,
 		DASH_BLOCK, AIR_DASH_BLOCK}
 enum revoke_type {STARTUP_REVOKE, NON_ATK_REVOKE, EARLY_REVOKE, FULL_ACTIVE_REVOKE}
 # STARTUP_REVOKE = can only revoke this Special during startup just like Normals
-# NON_ATK_REVOKE = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun/blockstun
+# NON_ATK_REVOKE = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun
 # EARLY_REVOKE = can revoke within 1st 3 frames of the active frames of this Special
 # FULL_ACTIVE_REVOKE = can revoke anytime during active frames of this Special
 
@@ -327,12 +322,8 @@ func char_state_to_string(state):
 			return "AIR_ATK_RECOVERY"
 		Globals.char_state.GROUND_BLOCK:
 			return "GROUND_BLOCK"
-		Globals.char_state.GROUND_BLOCKSTUN:
-			return "GROUND_BLOCKSTUN"
 		Globals.char_state.AIR_BLOCK:
 			return "AIR_BLOCK"
-		Globals.char_state.AIR_BLOCKSTUN:
-			return "AIR_BLOCKSTUN"
 		Globals.char_state.SEQUENCE_TARGET:
 			return "SEQUENCE_TARGET"
 		Globals.char_state.SEQUENCE_USER:
@@ -617,7 +608,7 @@ func status_effect_priority(effect):
 	match effect:
 #		Globals.status_effect.REPEAT:
 #			return 3
-		Globals.status_effect.BREAK:
+		Globals.status_effect.STUN:
 			return 3
 		Globals.status_effect.LETHAL:
 			return 2

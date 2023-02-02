@@ -1020,15 +1020,15 @@ func detect_hit():
 				continue # defender must not be owner of hitbox
 			if defender_semi_invul(hitbox, hurtbox):
 				continue # attacker must not be attacking a semi-invul defender unless with certain moves
-			if defender_command_grab_dodge(hitbox, hurtbox):
-				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
+#			if defender_command_grab_dodge(hitbox, hurtbox):
+#				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
 			if !"entity_nodepath" in hitbox:
 				if !test_priority(hitbox, hurtbox):
 					continue # attacker must pass the priority test
 				if defender_anti_airing(hitbox, hurtbox):
 					continue # attacker must not be using an aerial against an anti-airing defender
-				if defender_backdash(hitbox, hurtbox):
-					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/ANTI_GUARD attack
+#				if defender_backdash(hitbox, hurtbox):
+#					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/ANTI_GUARD attack
 				if get_node(hitbox.owner_nodepath).is_hitcount_maxed(get_node(hurtbox.owner_nodepath).player_ID, hitbox.move_data):
 					continue # attacker must still have hitcount left
 				if get_node(hitbox.owner_nodepath).is_player_in_ignore_list(get_node(hurtbox.owner_nodepath).player_ID):
@@ -1177,8 +1177,6 @@ func defender_semi_invul(hitbox, hurtbox):
 		Globals.char_state.AIR_RECOVERY:
 			if defender.Animator.query_to_play(["Tech"]) and defender.Animator.time <= 15:
 				defender_semi_invuln = true
-			if defender.Animator.query_to_play(["GuardTech"]) and defender.Animator.time <= 6:
-				defender_semi_invuln = true
 				
 	if defender_semi_invuln:
 		if "chain_combo" in attacker_or_entity: # prevent Burst Revoke on iframed attack
@@ -1188,32 +1186,32 @@ func defender_semi_invul(hitbox, hurtbox):
 	return false
 	
 	
-func defender_backdash(hitbox, hurtbox):
-	var attacker = get_node(hitbox.owner_nodepath)
-	var defender = get_node(hurtbox.owner_nodepath)
-	var attacker_attr = hitbox.move_data.atk_attr
-	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
-		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
-				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
-			if defender.Animator.query_to_play(["Tech", "GuardTech"]):
-				return false
-			elif defender.facing == sign(defender.position.x - attacker.position.x) and \
-					!defender.Animator.query_to_play(["aDashUU", "aDashDD"]):
-				return true # defender's backdash succeeded
-	return false # defender's backdash failed
-	
-func defender_command_grab_dodge(hitbox, hurtbox):
-#	var attacker_or_entity
-#	if !"entity_nodepath" in hitbox: # not entity
-#		attacker_or_entity = get_node(hitbox.owner_nodepath)
-#	else:
-#		attacker_or_entity = get_node(hitbox.entity_nodepath) # rare entity command grab
-	var defender = get_node(hurtbox.owner_nodepath)
-	if Globals.atk_attr.COMMAND_GRAB in hitbox.move_data.atk_attr:
-		if defender.new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_BLOCKSTUN, \
-				Globals.char_state.AIR_BLOCKSTUN]:
-			return true # defender's evaded command grab
-	return false
+#func defender_backdash(hitbox, hurtbox):
+#	var attacker = get_node(hitbox.owner_nodepath)
+#	var defender = get_node(hurtbox.owner_nodepath)
+#	var attacker_attr = hitbox.move_data.atk_attr
+#	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
+#		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
+#				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
+#			if defender.Animator.query_to_play(["Tech", "GuardTech"]):
+#				return false
+#			elif defender.facing == sign(defender.position.x - attacker.position.x) and \
+#					!defender.Animator.query_to_play(["aDashUU", "aDashDD"]):
+#				return true # defender's backdash succeeded
+#	return false # defender's backdash failed
+#
+#func defender_command_grab_dodge(hitbox, hurtbox):
+##	var attacker_or_entity
+##	if !"entity_nodepath" in hitbox: # not entity
+##		attacker_or_entity = get_node(hitbox.owner_nodepath)
+##	else:
+##		attacker_or_entity = get_node(hitbox.entity_nodepath) # rare entity command grab
+#	var defender = get_node(hurtbox.owner_nodepath)
+#	if Globals.atk_attr.COMMAND_GRAB in hitbox.move_data.atk_attr:
+#		if defender.new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_BLOCKSTUN, \
+#				Globals.char_state.AIR_BLOCKSTUN]:
+#			return true # defender's evaded command grab
+#	return false
 
 # HANDLING ZOOM --------------------------------------------------------------------------------------------------
 

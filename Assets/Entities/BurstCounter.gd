@@ -25,14 +25,10 @@ const MOVE_DATABASE = {
 		"fixed_entity_hitstop" : 0,
 		"fixed_hitstop" : 15,
 		"fixed_hitstun" : 38,
-		"fixed_blockstun" : 38,
-		"guard_drain": 3000,
-#		"guard_gain_on_combo" : 0,
-#		"EX_gain": 0,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "yellow",
 		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.NO_GDRAIN_ON_BLOCK, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DESTROY_ENTITIES],
+		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DESTROY_ENTITIES],
 		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
 	}
 }

@@ -122,6 +122,45 @@ frame_data = {
 },
 "vframes": 2
 },
+"F3[h]Active": {
+"SfxOver_hframes": 6,
+"SfxOver_spritesheet": "F3SfxOver",
+"SfxOver_vframes": 1,
+"duration": 11,
+"hframes": 6,
+"loop": false,
+"spritesheet": "F3Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 1,
+"frame": 3,
+"hitbox": [ Vector2( -10, -39 ), Vector2( -27, -39 ), Vector2( -27, -19 ), Vector2( 29, -19 ), Vector2( 29, 22 ), Vector2( 62, 22 ), Vector2( 62, -41 ), Vector2( 46, -41 ), Vector2( 46, -52 ), Vector2( -10, -52 ) ],
+"hurtbox": [ Vector2( -9, 22 ), Vector2( 30, 22 ), Vector2( 30, -5 ), Vector2( -9, -5 ) ],
+"kborigin": Vector2( -16, 22 ),
+"sdhurtbox": [ Vector2( -10, -31 ), Vector2( 15, -30 ), Vector2( 29, -30 ), Vector2( 29, 22 ), Vector2( 62, 22 ), Vector2( 62, -41 ), Vector2( 46, -41 ), Vector2( 46, -52 ), Vector2( -10, -52 ) ],
+"sweetbox": [ Vector2( 36, 4 ), Vector2( 55, 4 ), Vector2( 55, -18 ), Vector2( 36, -18 ) ]
+},
+3: {
+"SfxOver_frame": 1,
+"frame": 3,
+"hitbox": [ Vector2( -10, -39 ), Vector2( -27, -39 ), Vector2( -27, -19 ), Vector2( 29, -19 ), Vector2( 29, 22 ), Vector2( 62, 22 ), Vector2( 62, -41 ), Vector2( 46, -41 ), Vector2( 46, -52 ), Vector2( -10, -52 ) ],
+"hurtbox": [ Vector2( -9, 22 ), Vector2( 30, 22 ), Vector2( 30, -5 ), Vector2( -9, -5 ) ],
+"kborigin": Vector2( -16, 22 ),
+"sdhurtbox": [ Vector2( -10, -31 ), Vector2( 15, -30 ), Vector2( 29, -30 ), Vector2( 29, 22 ), Vector2( 62, 22 ), Vector2( 62, -41 ), Vector2( 46, -41 ), Vector2( 46, -52 ), Vector2( -10, -52 ) ],
+"sweetbox": [  ]
+},
+6: {
+"SfxOver_frame": 2,
+"frame": 4,
+"hitbox": [ Vector2( 6, -44 ), Vector2( 19, -43 ), Vector2( 20, -43 ), Vector2( 20, -20 ), Vector2( 29, -20 ), Vector2( 29, 22 ), Vector2( 62, 22 ), Vector2( 62, -41 ), Vector2( 46, -41 ), Vector2( 46, -52 ), Vector2( 6, -52 ) ],
+"hurtbox": [ Vector2( -9, 22 ), Vector2( 30, 22 ), Vector2( 30, -5 ), Vector2( -9, -5 ) ],
+"kborigin": Vector2( -16, 22 ),
+"sdhurtbox": [ Vector2( 20, -20 ), Vector2( 29, -20 ), Vector2( 29, 22 ), Vector2( 62, 22 ), Vector2( 62, -41 ), Vector2( 46, -41 ), Vector2( 46, -52 ), Vector2( 20, -52 ) ],
+"sweetbox": [  ]
+}
+},
+"vframes": 2
+},
 "F3[h]Startup": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "F3SfxOver",

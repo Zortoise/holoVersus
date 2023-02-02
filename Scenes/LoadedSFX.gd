@@ -218,7 +218,45 @@ var modulate_animations = {
 			},
 		}
 	},
-	"perfectblock_flash" :{
+	"block" :{
+		"duration": 16,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(2.0, 2.0, 2.0),
+			},
+			2 :
+			{
+				"modulate" : Color(1.75, 1.75, 1.75),
+			},
+			4 :
+			{
+				"modulate" : Color(1.5, 1.5, 1.5),
+			},
+			6 :
+			{
+				"modulate" : Color(1.25, 1.25, 1.25),
+			},
+			8 :
+			{
+				"modulate" : Color(1.0, 1.0, 1.0),
+			},
+			10 :
+			{
+				"modulate" : Color(1.25, 1.25, 1.25),
+			},
+			12 :
+			{
+				"modulate" : Color(1.5, 1.5, 1.5),
+			},
+			14 :
+			{
+				"modulate" : Color(1.75, 1.75, 1.75),
+			},
+		}
+	},
+	"strongblock_flash" :{
 		"duration": 10,
 		"loop" : false,
 		"timestamps" : {
@@ -244,7 +282,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"wrongblock_flash" :{
+	"weakblock_flash" :{
 		"priority_lvl": 0,
 		"duration": 10,
 		"loop" : false,
@@ -277,23 +315,23 @@ var modulate_animations = {
 		"timestamps" : {
 			0 :
 			{
-				"modulate" : Color(0.3, 0.0, 0.3),
+				"modulate" : Color(0.5, 0.0, 0.0),
 			},
 			2 :
 			{
-				"modulate" : Color(0.8, 0.3, 0.8),
+				"modulate" : Color(0.8, 0.3, 0.3),
 			},
 			4 :
 			{
-				"modulate" : Color(0.75, 0.5, 0.75),
+				"modulate" : Color(0.75, 0.5, 0.5),
 			},
 			6 :
 			{
-				"modulate" : Color(0.9, 0.7, 0.9),
+				"modulate" : Color(0.9, 0.7, 0.7),
 			},
 			8 :
 			{
-				"modulate" : Color(1.0, 0.9, 1.0),
+				"modulate" : Color(1.0, 0.9, 0.9),
 			},
 		}
 	},
@@ -349,7 +387,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"s_dash_cancel" : {
+	"fdash_cancel" : {
 		"duration": 22,
 		"loop" : false,
 		"timestamps" : {
@@ -383,17 +421,17 @@ var modulate_animations = {
 			},
 		}
 	},
-	"air_block_flash" : {
-		"duration": 4,
-		"loop" : false,
-#		"followup" : "EX_block_flash2",
-		"timestamps" : {
-			0 : # this is the timestamp of the key
-			{
-				"modulate" : Color(4.0, 4.0, 4.0),
-			},
-		}
-	},
+#	"air_block_flash" : {
+#		"duration": 4,
+#		"loop" : false,
+##		"followup" : "EX_block_flash2",
+#		"timestamps" : {
+#			0 : # this is the timestamp of the key
+#			{
+#				"modulate" : Color(4.0, 4.0, 4.0),
+#			},
+#		}
+#	},
 #	"EX_block_flash2" : {
 #		"duration": 12,
 #		"loop" : true,
@@ -471,7 +509,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"break_flash" :{
+	"stun_flash" :{
 		"duration": 10,
 		"loop" : false,
 		"timestamps" : {
@@ -485,7 +523,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"break" : {
+	"stun" : {
 		"duration": 12,
 		"loop" : true,
 		"timestamps" : {

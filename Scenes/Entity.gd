@@ -364,67 +364,29 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
 	var attacker = get_node(hit_data.attacker_nodepath) # will be this entity's master
 
-#	attacker.UniqChar.landed_a_hit(hit_data) # reaction, nothing here yet, can change hit_data from there
-
 	var defender = get_node(hit_data.defender_nodepath)
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
 	attacker.targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
-
-	# no positive flow for entities
-
-	# EX GAIN ----------------------------------------------------------------------------------------------
-
-#	match hit_data.block_state:
-#		Globals.block_state.UNBLOCKED:
-#			if !hit_data.double_repeat:
-#				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
-#			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 25))
-#		Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-#			if !hit_data.double_repeat:
-#				attacker.change_ex_gauge(hit_data.move_data.EX_gain)
-#		Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-#			defender.change_ex_gauge(hit_data.move_data.EX_gain)
-#		_:  # normal block
-#			if !hit_data.double_repeat:
-#				attacker.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
-#			defender.change_ex_gauge(FMath.percent(hit_data.move_data.EX_gain, 50))
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 
 	if "fixed_entity_hitstop" in hit_data.move_data:
-		# multi-hit special/super moves are done by having lower atker hitstop then defender hitstop, and high "hitcount" and ignore_time
 		hitstop = hit_data.move_data.fixed_entity_hitstop
+		
+	elif hit_data.lethal_hit or hit_data.stun:
+		hitstop = null # no hitstop for entity for lethal hit, screenfreeze already enough
+		
 	else:
-		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
-			hitstop = hit_data.hitstop
-			
-#	# WIP, change to screen freeze later
-#	if hit_data.lethal_hit: # on lethal hit, hitstop this entity's master as well
-#		get_node(master_path).get_node("HitStopTimer").time = hit_data.hitstop
-			
+		if hitstop == null or hit_data.hitstop > hitstop:
+			hitstop = hit_data.hitstop			
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 
-	if hit_data.block_state != Globals.block_state.UNBLOCKED: # block sound
-		match hit_data.block_state:
-			Globals.block_state.AIR_WRONG, Globals.block_state.GROUND_WRONG:
-				if !"superarmored" in hit_data:
-					play_audio("block3", {"vol" : -15})
-				else:
-					play_audio("bling6", {"vol" : -6})
-			Globals.block_state.AIR_PERFECT, Globals.block_state.GROUND_PERFECT:
-				play_audio("bling2", {"vol" : -3, "bus" : "PitchDown"})
-			_: # normal block
-				play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
-
-	elif hit_data.semi_disjoint and !Globals.atk_attr.VULN_LIMBS in defender.query_atk_attr(): # SD Hit sound
-		play_audio("bling3", {"bus" : "LowPass"})
-
-	elif "hit_sound" in hit_data.move_data:
+	if hit_data.block_state == Globals.block_state.UNBLOCKED and "hit_sound" in hit_data.move_data:
 
 		var volume_change = 0
-		if hit_data.lethal_hit or hit_data.break_hit or hit_data.sweetspotted:
+		if hit_data.lethal_hit or hit_data.stun or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
 #		elif hit_data.adjusted_atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
 		elif hit_data.double_repeat:
@@ -447,9 +409,6 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				elif volume_change < 0:
 					aux_data["vol"] = volume_change
 				play_audio(sound.ref, aux_data)
-				
-#	if UniqEntity.has_method("landed_a_hit"):
-#		UniqEntity.landed_a_hit(hit_data) # reaction
 	
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------
