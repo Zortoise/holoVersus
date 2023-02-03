@@ -54,7 +54,7 @@ frame_data = {
 "vframes": 2
 },
 "L2Startup": {
-"duration": 12,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L2Sprite",
@@ -69,12 +69,12 @@ frame_data = {
 "hitbox": [  ],
 "hurtbox": [ Vector2( 6, 1 ), Vector2( -15, 1 ), Vector2( -15, 22 ), Vector2( 11, 22 ), Vector2( 11, 13 ), Vector2( 26, 13 ), Vector2( 26, -15 ), Vector2( 6, -15 ) ]
 },
-6: {
+5: {
 "frame": 2,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -13, 13 ), Vector2( 1, 13 ), Vector2( 1, 17 ), Vector2( 21, 17 ), Vector2( 21, 1 ), Vector2( 12, 1 ), Vector2( 12, -15 ), Vector2( -13, -15 ) ]
 },
-9: {
+8: {
 "frame": 3,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 15 ), Vector2( 24, 15 ), Vector2( 24, -7 ), Vector2( -12, -7 ) ]

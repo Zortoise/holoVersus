@@ -81,6 +81,39 @@ frame_data = {
 "spritesheet": "BlocksparksSprite",
 "timestamps": {
 0: {
+"frame": 0
+},
+3: {
+"frame": 1
+},
+5: {
+"frame": 2
+},
+7: {
+"frame": 3
+},
+9: {
+"frame": 4
+},
+11: {
+"frame": 5
+},
+13: {
+"frame": 6
+},
+15: {
+"frame": 7
+}
+},
+"vframes": 6
+},
+"WBlockspark2": {
+"duration": 17,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BlocksparksSprite",
+"timestamps": {
+0: {
 "frame": 8
 },
 3: {

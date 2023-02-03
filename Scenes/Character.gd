@@ -17,11 +17,13 @@ const TAP_MEMORY_DURATION = 4
 
 const MAX_EX_GAUGE = 30000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
-const EX_BASE_REGEN = 20
 
-const EX_HITSTUN_REGEN_MOD = 150
-const EX_LANDED_REGEN_MOD = 400
-const EX_BLOCKED_REGEN_MOD = 200
+const BASE_EX_REGEN = 15
+const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
+const LANDED_EX_REGEN_MOD = 500 # increase EX Regen when doing an unblocked attack
+const BLOCKED_EX_REGEN_MOD = 400 # increase EX Regen when doing a blocked attack
+const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
+const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 
 const GUARD_GAUGE_FLOOR = -10000
 const GUARD_GAUGE_CEIL = 10000
@@ -55,7 +57,6 @@ const TrainingRegenTimer_TIME = 60 # number of frames before GG/Damage Value sta
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
 const CORNER_PUSHBACK = 400 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
 #const CORNER_GUARD_DRAIN_MOD = 150 # blocker take extra Guard Drain when blocking at the corners
-const StasisTimer_TIME = 20 # number of frames you must not be pressing anything except Special to use Supers
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -224,7 +225,7 @@ var launchstun_rotate := 0 # used to set rotation when being launched, use to co
 var unique_data = {} # data unique for the character, stored as a dictionary
 var status_effects = [] # an Array of arrays, in each Array store a enum of the status effect and a duration, can have a third data as well
 var chain_combo = Globals.chain_combo.RESET # set to Globals.chain_combo
-var chain_memory = [] # appended whenever you attack, reset when starting an attack not from a chain
+var chain_memory = [] # appended whenever you attack, reset when not attacking or in air/ground startup
 #var chaining := false # set to true when chaining any attack, false when starting an attack not from a chain, chained heavies loses ANTI_GUARD
 var dash_cancel := false # set to true when landing a Sweetspotted Normal, set to false when starting any attack
 var jump_cancel := false # set to true when landing any unblocked hit, set to false when starting any attack
@@ -528,7 +529,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\nSPaerial_memory: " + str(aerial_sp_memory) + " " + str(chain_combo) + "\n" + \
+		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
 		" " + str(success_block)
 			
@@ -617,9 +618,6 @@ func simulate(new_input_state):
 	
 	hitstop = null
 	status_effect_to_remove = []
-	
-	if input_state.pressed.size() > 1 and input_state.pressed[0] != button_special:
-		$StasisTimer.time = StasisTimer_TIME # reset StasisTimer if any button except Special is pressed
 	
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
@@ -728,17 +726,24 @@ func simulate2(): # only ran if not in hitstop
 	if !Globals.training_mode:
 		
 		if !Globals.Game.input_lock and current_ex_gauge < MAX_EX_GAUGE and state != Globals.char_state.DEAD:
-			var ex_change := EX_BASE_REGEN
+			var ex_change := BASE_EX_REGEN * FMath.S
 			if is_hitstunned():
-				ex_change = FMath.percent(ex_change, EX_HITSTUN_REGEN_MOD)
+				ex_change = FMath.percent(ex_change, HITSTUN_EX_REGEN_MOD)
 			else:
 				match chain_combo:
 					Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL: # landed an attack on opponent
-						ex_change = FMath.percent(ex_change, EX_LANDED_REGEN_MOD)
+						ex_change = FMath.percent(ex_change, LANDED_EX_REGEN_MOD)
 					Globals.chain_combo.WEAKBLOCKED, Globals.chain_combo.STRONGBLOCKED: # landed an attack on blocking opponent
-						ex_change = FMath.percent(ex_change, EX_BLOCKED_REGEN_MOD)
-						
-			change_ex_gauge(ex_change)
+						ex_change = FMath.percent(ex_change, BLOCKED_EX_REGEN_MOD)
+					_:
+						if is_attacking() and new_state != Globals.char_state.SEQUENCE_USER:
+							var move_data = query_move_data()
+							if "revoke_type" in move_data and move_data.revoke_type == Globals.revoke_type.NON_ATK_REVOKE:
+								ex_change = FMath.percent(ex_change, NON_ATTACK_EX_REGEN_MOD) # for non-attacks, reduce EX regen
+							else:
+								ex_change = FMath.percent(ex_change, ATTACK_EX_REGEN_MOD) # physical attack, raise EX regen
+
+			change_ex_gauge(FMath.round_and_descale(ex_change))
 			
 			
 	else: # training mode regen EX Gauge
@@ -760,7 +765,8 @@ func simulate2(): # only ran if not in hitstop
 #	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
 #		reset_modulate()
 		
-	if !is_attacking() and state != Globals.char_state.AIR_STARTUP and state != Globals.char_state.GROUND_STARTUP:
+	if !is_attacking() and !new_state in [Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_STARTUP, \
+			Globals.char_state.AIR_RECOVERY, Globals.char_state.GROUND_RECOVERY]:
 		reset_cancels()
 		chain_memory = []
 		
@@ -1325,71 +1331,7 @@ func simulate2(): # only ran if not in hitstop
 #					animate("FallTransit")]
 #					$ModulatePlayer.play("unlaunch_flash")
 #					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
-			if !Animator.query_to_play(["HardLanding", "Tech"]): # only bounce if not teching next frame
-				friction_this_frame = FMath.percent(friction_this_frame, 25) # lower friction during launch hitstun
-				
-# warning-ignore:unassigned_variable
-				var test_velocity_x: int # get higher of velocities between this frame and previous frame for checking
-				var test_velocity_y: int
-				# this is needed as velocity resets to zero on hitting a wall, but if using only velocity previous frame,
-				# it wouldn't bounce if it hits the wall on the 1st frame
-				if abs(velocity.x) > abs(velocity_previous_frame.x):
-					test_velocity_x = velocity.x
-				else:
-					test_velocity_x = velocity_previous_frame.x
-				if abs(velocity.y) > abs(velocity_previous_frame.y):
-					test_velocity_y = velocity.y
-				else:
-					test_velocity_y = velocity_previous_frame.y
-				
-				
-				if is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, sign(test_velocity_x)):
-					if grounded:
-						velocity.y = -HORIZ_WALL_SLAM_UP_BOOST
-					velocity.x = -FMath.percent(test_velocity_x, 75)
-					if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
-						if sign(test_velocity_x) > 0:
-							bounce_dust(Globals.compass.E)
-						else:
-							bounce_dust(Globals.compass.W)
-						play_audio("rock3", {"vol" : -10,})
-						
-						# if bounce off hard enough, take damage scaled to velocity and guard gauge
-						if !(DI_seal and $BurstLockTimer.is_running()) and \
-								Detection.detect_bool([$PlayerCollisionBox], ["BlastBarriers"], Vector2(sign(test_velocity_x), 0)):
-							var weight: int = FMath.get_fraction_percent(int(abs(velocity.x)) - WALL_SLAM_THRESHOLD, \
-									FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-							var scaled_damage = FMath.f_lerp(WALL_SLAM_MIN_DAMAGE, WALL_SLAM_MAX_DAMAGE, weight)
-							if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
-								scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), \
-										get_guard_gauge_percent_above())
-							take_damage(scaled_damage)
-							
-				elif is_against_ceiling($PlayerCollisionBox, $SoftPlatformDBox):
-					velocity.y = -FMath.percent(test_velocity_y, 50)
-					if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
-						bounce_dust(Globals.compass.N)
-						play_audio("rock3", {"vol" : -10,})
-						
-						# if bounce off hard enough, take damage scaled to velocity and guard gauge
-						if !(DI_seal and $BurstLockTimer.is_running()) and \
-								Detection.detect_bool([$PlayerCollisionBox], ["BlastBarriers"], Vector2.UP):
-							var weight: int = FMath.get_fraction_percent(int(abs(velocity.y)) - WALL_SLAM_THRESHOLD, \
-									FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-							var scaled_damage = FMath.f_lerp(WALL_SLAM_MIN_DAMAGE, WALL_SLAM_MAX_DAMAGE, weight)
-							if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
-								scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), \
-										get_guard_gauge_percent_above())
-							take_damage(scaled_damage)
-							
-				elif grounded:
-					if $HitStunTimer.is_running():
-						velocity.y = -FMath.percent(test_velocity_y, 90)
-					else:
-						velocity.y = -FMath.percent(test_velocity_y, 50) # shorter bounce if techable
-					if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
-						bounce_dust(Globals.compass.S)
-						play_audio("rock3", {"vol" : -10,})
+			friction_this_frame = FMath.percent(friction_this_frame, 25) # lower friction during launch hitstun
 							
 	
 # APPLY FRICTION/AIR RESISTANCE --------------------------------------------------------------------------------------------------
@@ -1435,25 +1377,22 @@ func simulate2(): # only ran if not in hitstop
 	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
 		launch_trail() # do launch trail before moving
 		
-#	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
-#	velocity.y = round(velocity.y)
-	
-	if abs(velocity.x) < 5 * FMath.S:
-		velocity.x = 0
-	if abs(velocity.y) < 5 * FMath.S:
-		velocity.y = 0
+	if grounded and abs(velocity.x) < 30 * FMath.S:
+		velocity.x = 0  # this reduces slippiness by canceling grounded horizontal velocity when moving less than 0.5 pixels per frame
+
 	
 	velocity_previous_frame.x = velocity.x
 	velocity_previous_frame.y = velocity.y
 	
 	var results = move($PlayerCollisionBox, $SoftPlatformDBox, check_ledge_stop()) # [landing_check, collision_check, ledgedrop_check]
-#	velocity.x = results[0].x
-#	velocity.y = results[0].y
 	
 	if results[0]: check_landing()
 	
-	if results[1] and new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["FDash"]):
-		check_s_dash_crash()
+	if results[1]:
+		if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["FDash"]):
+			check_s_dash_crash()
+		elif new_state == Globals.char_state.LAUNCHED_HITSTUN:
+			bounce(results[0])
 	
 	# get overlapping characters, all grounded overlapping characters above you get sent to the back
 	var overlapping = Detection.detect_return([$PlayerCollisionBox], ["Players"])
@@ -1523,11 +1462,60 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			
 		$ModulatePlayer.simulate() # modulate animations continue even in hitstop
 	
-	$StasisTimer.simulate() # always counting down
 	test2()
 		
 
-	
+# BOUNCE --------------------------------------------------------------------------------------------------	
+
+func bounce(against_ground: bool):
+	if is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, sign(velocity_previous_frame.x)):
+		if grounded:
+			velocity.y = -HORIZ_WALL_SLAM_UP_BOOST
+		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
+		if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
+			if sign(velocity_previous_frame.x) > 0:
+				bounce_dust(Globals.compass.E)
+			else:
+				bounce_dust(Globals.compass.W)
+			play_audio("rock3", {"vol" : -10,})
+			
+			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			if !(DI_seal and $BurstLockTimer.is_running()) and \
+					Detection.detect_bool([$PlayerCollisionBox], ["BlastBarriers"], Vector2(sign(velocity_previous_frame.x), 0)):
+				var weight: int = FMath.get_fraction_percent(int(abs(velocity.x)) - WALL_SLAM_THRESHOLD, \
+						FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
+				var scaled_damage = FMath.f_lerp(WALL_SLAM_MIN_DAMAGE, WALL_SLAM_MAX_DAMAGE, weight)
+				if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
+					scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), \
+							get_guard_gauge_percent_above())
+				take_damage(scaled_damage)
+				
+	elif is_against_ceiling($PlayerCollisionBox, $SoftPlatformDBox):
+		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
+		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
+			bounce_dust(Globals.compass.N)
+			play_audio("rock3", {"vol" : -10,})
+			
+			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			if !(DI_seal and $BurstLockTimer.is_running()) and \
+					Detection.detect_bool([$PlayerCollisionBox], ["BlastBarriers"], Vector2.UP):
+				var weight: int = FMath.get_fraction_percent(int(abs(velocity.y)) - WALL_SLAM_THRESHOLD, \
+						FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
+				var scaled_damage = FMath.f_lerp(WALL_SLAM_MIN_DAMAGE, WALL_SLAM_MAX_DAMAGE, weight)
+				if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
+					scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), \
+							get_guard_gauge_percent_above())
+				take_damage(scaled_damage)
+				
+	elif against_ground:
+		if $HitStunTimer.is_running():
+			velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
+		else:
+			velocity.y = -FMath.percent(velocity_previous_frame.y, 50) # shorter bounce if techable
+		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
+			bounce_dust(Globals.compass.S)
+			play_audio("rock3", {"vol" : -10,})
+			
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
 	# to move an object, first do move_true_position(), then get_rounded_position()
@@ -1966,32 +1954,29 @@ func process_input_buffer():
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_RECOVERY:
 							if burst_counter_check():
 								animate("BurstCounterStartup")
-								chain_memory = []
 								has_acted[0] = true
 								keep = false
 								
-						Globals.char_state.AIR_RECOVERY: # can Burst Counter during teching
-							if Animator.query_current(["Tech"]):
-								if burst_counter_check():
-									animate("BurstCounterStartup")
-									chain_memory = []
-									has_acted[0] = true
-									keep = false
+#						Globals.char_state.AIR_RECOVERY: # can Burst Counter during teching
+#							if Animator.query_current(["Tech"]):
+#								if burst_counter_check():
+#									animate("BurstCounterStartup")
+#									has_acted[0] = true
+#									keep = false
 								
 						Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.AIR_FLINCH_HITSTUN, Globals.char_state.LAUNCHED_HITSTUN:
 							if burst_escape_check():
 								animate("BurstEscapeStartup")
-								chain_memory = []
 								has_acted[0] = true
 								keep = false
 								
 						# can Burst Counter if attack is blocked
 						Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY:
-							if burst_counter_check():
-									animate("BurstCounterStartup")
-									chain_memory = []
-									has_acted[0] = true
-									keep = false
+							if chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED, \
+									Globals.chain_combo.STRONGBLOCKED] and burst_counter_check():
+								animate("BurstCounterStartup")
+								has_acted[0] = true
+								keep = false
 							else: continue
 
 						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP, \
@@ -2001,12 +1986,10 @@ func process_input_buffer():
 								var move_name = get_move_name()
 								if burst_extend_check(move_name):
 									animate("BurstExtend")
-									chain_memory = []
 									has_acted[0] = true
 									keep = false
 								elif burst_revoke_check(move_name):
 									animate("BurstRevoke")
-									chain_memory = []
 									has_acted[0] = true
 									keep = false
 									
@@ -2368,7 +2351,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				
 			elif Animator.query(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-				animate("BlockCRec")
+				animate("BlockRec")
 				UniqChar.landing_sound()
 				
 			elif Animator.query(["Tech", "FDashTransit", "FDash"]) or Animator.to_play_animation.begins_with("Burst"): # no landing
@@ -2435,7 +2418,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			
 		Globals.char_state.GROUND_RECOVERY:
 			if Animator.query(["BlockRec"]):
-				animate("aBlockCRec")
+				animate("aBlockRec")
 			else:
 				animate("FallTransit")
 				
@@ -2974,7 +2957,12 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 func tech():
 	if button_dash in input_state.pressed:
 		if dir != 0 or v_dir != 0:
-			animate("Tech")
+			if button_block in input_state.pressed and super_dash > 0:
+				animate("FDashTransit")
+				$ModulatePlayer.play("unlaunch_flash")
+				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
+			else:
+				animate("Tech")
 			return true
 	return false
 	
@@ -2993,8 +2981,6 @@ func tech():
 func burst_counter_check(): # check if have resources to do it, then take away those resources and return a bool
 	if current_ex_gauge < BURSTCOUNTER_EX_COST:
 		return false # not enough EX Gauge to use it
-	if !chain_combo in [Globals.chain_combo.RESET, Globals.chain_combo.WEAKBLOCKED, Globals.chain_combo.STRONGBLOCKED]:
-		return false # must not have hit opponent, or have been blocked
 		
 	change_ex_gauge(-BURSTCOUNTER_EX_COST)
 	return true
@@ -3921,6 +3907,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 					
+		Globals.char_state.AIR_STARTUP: # fdash startup has projectile superarmor against non-strong projectiles
+			if Animator.query_current(["FDashTransit"]) and "entity_nodepath" in hit_data and \
+					!Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr and \
+					!Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
+					hit_data.block_state = Globals.block_state.WEAK
+					hit_data["superarmored"] = true
+				
 		# BLOCKING --------------------------------------------------------------------------------------------------
 		
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK:
@@ -3986,10 +3979,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
 	# attack level
-	var adjusted_atk_level: int = adjusted_atk_level(hit_data)
-	hit_data["adjusted_atk_level"] = adjusted_atk_level
+	var adjusted_atk_level: int = 1
 	
 	if !"sequence" in hit_data.move_data:
+		adjusted_atk_level = adjusted_atk_level(hit_data)
+		hit_data["adjusted_atk_level"] = adjusted_atk_level
+		
 		change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 		if can_stun(hit_data):
 			hit_data.stun = true
@@ -4455,18 +4450,18 @@ func calculate_damage(hit_data) -> int:
 
 func calculate_guard_gauge_change(hit_data) -> int:
 	
+	if hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]: # no Guard Drain for EX and Supers
+		return 0
+	
+	if "multihit" in hit_data or "autochain" in hit_data:  # for multi-hit/autochain moves, only last hit affect GG
+		return 0
+	
 	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on block
 		if hit_data.block_state == Globals.block_state.STRONG: # on strongblock, attacker lose GG
 			get_node(hit_data.attacker_nodepath).change_guard_gauge(-UniqChar.get_stat("STRONGBLOCK_GG_DRAIN"))
 		return 0
 
 	if is_hitstunned() and GG_swell_flag and !first_hit_flag: # if Guard Swell is active, no Guard Drain
-		return 0
-		
-	if "multihit" in hit_data or "autochain" in hit_data:  # for multi-hit/autochain moves, only last hit affect GG
-		return 0
-		
-	if hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]: # no Guard Drain for EX and Supers
 		return 0
 		
 	return -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1] # Guard Drain on 1st hit of the combo depends on Attack Level
@@ -5509,7 +5504,6 @@ func save_state():
 		"HitStopTimer_time" : $HitStopTimer.time,
 		"RespawnTimer_time" : $RespawnTimer.time,
 		"BurstLockTimer_time" : $BurstLockTimer.time,
-		"StasisTimer_time" : $StasisTimer.time,
 		"EXSealTimer_time" : $EXSealTimer.time,
 	}
 	
@@ -5600,7 +5594,6 @@ func load_state(state_data):
 	$HitStopTimer.time = state_data.HitStopTimer_time
 	$RespawnTimer.time = state_data.RespawnTimer_time
 	$BurstLockTimer.time = state_data.BurstLockTimer_time
-	$StasisTimer.time = state_data.StasisTimer_time
 	$EXSealTimer.time = state_data.EXSealTimer_time
 	
 	if Globals.training_mode:

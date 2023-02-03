@@ -53,7 +53,7 @@ frame_data = {
 "vframes": 17
 },
 "BlockRec": {
-"duration": 9,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -62,7 +62,7 @@ frame_data = {
 "frame": 61,
 "hurtbox": [ Vector2( -10, 22 ), Vector2( 18, 22 ), Vector2( 18, -16 ), Vector2( -10, -16 ) ]
 },
-3: {
+4: {
 "frame": 58,
 "hurtbox": [ Vector2( -10, 22 ), Vector2( 14, 22 ), Vector2( 14, -22 ), Vector2( -10, -22 ) ]
 }
@@ -1349,7 +1349,7 @@ frame_data = {
 "vframes": 17
 },
 "aBlockRec": {
-"duration": 9,
+"duration": 15,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1358,7 +1358,7 @@ frame_data = {
 "frame": 65,
 "hurtbox": [ Vector2( -7, -1 ), Vector2( -10, -1 ), Vector2( -10, 19 ), Vector2( 5, 19 ), Vector2( 5, 10 ), Vector2( 18, 10 ), Vector2( 18, -22 ), Vector2( -7, -22 ) ]
 },
-3: {
+5: {
 "frame": 62,
 "hurtbox": [ Vector2( -8, 19 ), Vector2( 14, 19 ), Vector2( 14, -22 ), Vector2( -8, -22 ) ]
 }

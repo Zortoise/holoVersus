@@ -178,7 +178,7 @@ const MOVE_DATABASE = {
 		"damage" : 60, # chip damage is a certain % of damage, Chipper Attribute can increase chip
 		"knockback" : 350 * FMath.S,  # knockback strength, block pushback (% of knockback strength), affect hitspark size and hitstop
 		"knockback_type": Globals.knockback_type.MIRRORED,
-		"atk_level" : 4, # 1~8, affect hitstun and blockstun
+		"atk_level" : 3, # 1~8, affect hitstun and blockstun
 		"priority": 4, # aL < L < aF < F < aH < H < Specials (depend on move) < EX (depend on move), Super, but some moves are different
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
@@ -335,7 +335,7 @@ const MOVE_DATABASE = {
 		"damage" : 90,
 		"knockback" : 475 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
+		"atk_level" : 5,
 		"priority": 5,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",

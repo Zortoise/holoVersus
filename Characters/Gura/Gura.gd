@@ -546,7 +546,6 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 				if Character.test_qc_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
 						Character.animate(attack_ref + "Startup")
-						Character.chain_memory = []
 						has_acted[0] = true
 						return true
 		Globals.char_state.AIR_STARTUP: # can attack on 1st frames of air dash
@@ -554,7 +553,6 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 				if Character.test_qc_chain_combo("a" + attack_ref):
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
-						Character.chain_memory = []
 						has_acted[0] = true
 						return true
 						
@@ -566,15 +564,14 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					continue # certain moves cannot be performed during cancellable recovery
 				elif Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
-					Character.chain_memory = []
 					has_acted[0] = true
 					return true
 					
 		Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
-			if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]):
+			if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]) and \
+					Character.test_qc_chain_combo(attack_ref):
 				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
-					Character.chain_memory = []
 					has_acted[0] = true
 					return true
 					
@@ -585,17 +582,15 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						continue # certain moves cannot be performed during cancellable recovery
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
-						Character.chain_memory = []
 						has_acted[0] = true
 						return true
 						
 		Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
 			if ("a" + attack_ref) in UP_TILTS and !Character.button_jump in Character.input_state.pressed and \
-					Character.test_aerial_memory("a" + attack_ref) and \
-					Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]):
+					Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
+					Character.test_qc_chain_combo("a" + attack_ref):
 				if Character.is_ex_valid("a" + attack_ref):
 					Character.animate("a" + attack_ref + "Startup")
-					Character.chain_memory = []
 					has_acted[0] = true
 					return true
 				
@@ -721,6 +716,8 @@ func get_root(move_name): # for aerial and chain memory
 		return MOVE_DATABASE[move_name].root
 		
 	match move_name:
+		"F3[h]":
+			return "F3"
 		"H[h]":
 			return "H"
 		"Hb[h]":
