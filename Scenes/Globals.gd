@@ -13,8 +13,8 @@ enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, PARRIED, SUPER}
-enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK
-		NO_JUMP_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
+enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK
+		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_STRAFE, REPEATABLE, DI_MANUAL_SEAL
 		CANNOT_CHAIN_INTO, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
 		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
@@ -23,7 +23,8 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, JUMP_CANCEL, LEDGE_DRO
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
-# JUMP_CANCEL = can cancel recovery with a jump, place this on the active animation with same name as the recovery animation
+# ACTIVE_CANCEL = can cancel active frames with a jump/dash/fdash on hit
+# NO_REC_CANCEL = cannot jump/dash/fdash/fastfall cancel recovery frames, but still can chain
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
 # EASY_BLOCK = can be blocked correctly in either direction

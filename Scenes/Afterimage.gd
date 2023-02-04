@@ -43,9 +43,10 @@ func init(in_master_path, in_spritesheet_ref, sprite_node_path, in_color_modulat
 		$Sprite.modulate.g = color_modulate.g
 		$Sprite.modulate.b = color_modulate.b
 	
-	life = float(in_lifetime)
-	lifetime = float(in_lifetime)
+	life = in_lifetime
+	lifetime = in_lifetime
 	starting_modulate_a = float(in_starting_modulate_a)
+	$Sprite.modulate.a = starting_modulate_a
 	position = sprite_base.global_position
 	
 	if Globals.Game.is_stage_paused(): # if spawned during screenfreeze, will not be frozen during screenfreeze
@@ -77,7 +78,7 @@ func simulate():
 		return # does not advance if afterimage owner is a player and is in hitstop
 	
 	life -= 1.0
-	$Sprite.modulate.a = lerp(starting_modulate_a, 0.0, 1.0 - life/lifetime)
+	$Sprite.modulate.a = lerp(starting_modulate_a, 0.0, 1.0 - float(life)/lifetime)
 	
 	if life <= 0.0:
 		free = true # don't use queue_free!

@@ -57,6 +57,7 @@ const TrainingRegenTimer_TIME = 60 # number of frames before GG/Damage Value sta
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
 const CORNER_PUSHBACK = 400 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
 #const CORNER_GUARD_DRAIN_MOD = 150 # blocker take extra Guard Drain when blocking at the corners
+const DODGE_SEMI_IFRAMES = 10 # frames of semi-invuln while dodging
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -111,7 +112,6 @@ const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch 
 const LAUNCH_BOOST = 250 * FMath.S # increased knockback strength when a flinch becomes a launch
 const LAUNCH_ROT_SPEED = 5*PI # speed of sprite rotation when launched, don't need fixed-point as sprite rotation is only visuals
 const UNLAUNCH_THRESHOLD = 450 * FMath.S # max velocity when hitting the ground to tech land
-const TECH_SPEED = 1000 * FMath.S
 
 const STRONG_HIT_AUDIO_BOOST = 3
 const WEAK_HIT_AUDIO_NERF = -9
@@ -189,7 +189,8 @@ var player_ID: int # player number controlling this character, 0 for P1, 1 for P
 var air_jump := 0
 var wall_jump := 0
 var air_dash := 0
-var super_dash := 0
+var air_dodge := 0
+var flying_dash := 0
 var state = Globals.char_state.GROUND_STANDBY
 var new_state = Globals.char_state.GROUND_STANDBY
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
@@ -226,9 +227,7 @@ var unique_data = {} # data unique for the character, stored as a dictionary
 var status_effects = [] # an Array of arrays, in each Array store a enum of the status effect and a duration, can have a third data as well
 var chain_combo = Globals.chain_combo.RESET # set to Globals.chain_combo
 var chain_memory = [] # appended whenever you attack, reset when not attacking or in air/ground startup
-#var chaining := false # set to true when chaining any attack, false when starting an attack not from a chain, chained heavies loses ANTI_GUARD
-var dash_cancel := false # set to true when landing a Sweetspotted Normal, set to false when starting any attack
-var jump_cancel := false # set to true when landing any unblocked hit, set to false when starting any attack
+var active_cancel := false # set to true when landing a Sweetspotted Normal or certain Launchers, set to false when starting any attack
 #var perfect_chain := false # set to true when doing a 1 frame cancel, set to false when not in active frames
 var repeat_memory = [] # appended whenever hit by a move, cleared whenever you recover from hitstun, to incur Repeat Penalty on attacker
 					# each entry is an array with [0] being the move name and [1] being the player_ID
@@ -1017,7 +1016,6 @@ func simulate2(): # only ran if not in hitstop
 #			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
 			
 	
-#	if UniqChar.STYLE == 0:
 	if button_block in input_state.pressed and !button_aux in input_state.pressed:
 		if current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
 			match state:
@@ -1132,7 +1130,7 @@ func simulate2(): # only ran if not in hitstop
 	
 	var has_terminal := true
 	
-	if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Tech"]):
+	if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge"]):
 		has_terminal = false
 	
 #	if is_atk_startup():
@@ -1606,6 +1604,7 @@ func capture_combinations():
 	
 	# instant air dash, place at back
 	combination(button_jump, button_dash, "InstaAirDash")
+	combination(button_aux, button_dash, "Dodge")
 	combination(button_block, button_dash, "FDash")
 	
 	if !button_unique in input_state.pressed: # this allows you to use Unique + Aux command when blocking without doing a Burst
@@ -1913,6 +1912,17 @@ func process_input_buffer():
 								animate("aJumpTransit")
 								keep = false
 								
+						Globals.char_state.AIR_ATK_ACTIVE: # some attacks can jump cancel on active frames
+							if active_cancel:
+								if !grounded:
+									if air_jump > 0:
+										afterimage_cancel()
+										animate("aJumpTransit")
+										keep = false
+								else: # grounded
+									afterimage_cancel()
+									animate("JumpTransit")
+									keep = false
 								
 						# JUMP CANCELS ---------------------------------------------------------------------------------
 								
@@ -1929,7 +1939,7 @@ func process_input_buffer():
 									keep = false
 						
 						Globals.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
-							if jump_cancel:
+							if active_cancel:
 								afterimage_cancel()
 								animate("JumpTransit")
 								keep = false
@@ -1951,7 +1961,11 @@ func process_input_buffer():
 					match state: # not new state
 						Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
 							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
-							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, Globals.char_state.AIR_RECOVERY:
+							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, \
+							Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY:
+							if state in [Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK] and \
+									button_dash in input_state.pressed:
+								continue # to make fdashing out of block easier
 							if burst_counter_check():
 								animate("BurstCounterStartup")
 								has_acted[0] = true
@@ -1993,25 +2007,39 @@ func process_input_buffer():
 									has_acted[0] = true
 									keep = false
 									
-#			"Tech":
-#				match new_state:
-#					Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
-#							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
-#							Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP:
-#						if $HitStunGraceTimer.is_running():
-#							animate("Tech")
-#							has_acted[0] = true
-#							keep = false
+			"Dodge":
+				match new_state:
+					Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
+							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
+							Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, \
+							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, Globals.char_state.GROUND_RECOVERY:
+						if new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP] and \
+								!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
+							continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP	
+						if new_state == Globals.char_state.GROUND_RECOVERY and (!Animator.query_to_play(["Dash"]) or Animator.time > 0):
+							continue # can cancel from 1st frame of ground dash
+						if new_state in [Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK] and \
+								!Animator.query_to_play(["BlockStartup", "aBlockStartup"]):
+							continue # can only cancel from block startup for GROUND_BLOCK/AIR_BLOCK	
+						if dodge_check():
+							animate("DodgeTransit")
+							has_acted[0] = true
+							keep = false
+							
 			"FDash":
 				match new_state:
 					Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
 							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
 							Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, \
+							Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY, \
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK:
 						if new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP] and \
 								!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
 							continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
-						if super_dash > 0:
+						if new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
+								!Animator.query_to_play(["BlockRec", "aBlockRec", "Dash", "aDash"]):
+							continue # can only cancel from certain non-attack recovery frames
+						if flying_dash > 0:
 							animate("FDashTransit")
 							has_acted[0] = true
 							keep = false
@@ -2096,10 +2124,10 @@ func state_detect(anim):
 			
 		"JumpTransit3","aJumpTransit3", "Jump", "FallTransit", "Fall", "FastFallTransit", "FastFall":
 			return Globals.char_state.AIR_STANDBY
-		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "FDashTransit", "JumpTransit2":
+		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "FDashTransit", "JumpTransit2", "DodgeTransit":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Globals.char_state.AIR_STARTUP
-		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRec", "Tech", "FDash":
+		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRec", "Dodge", "FDash":
 			return Globals.char_state.AIR_RECOVERY
 		"aDashBrake", "aBlockCRec":
 			return Globals.char_state.AIR_C_RECOVERY
@@ -2112,7 +2140,7 @@ func state_detect(anim):
 			return Globals.char_state.AIR_FLINCH_HITSTUN
 		"aFlinchAReturn", "aFlinchBReturn":
 			return Globals.char_state.AIR_C_RECOVERY
-		"LaunchAStop", "LaunchBStop", "LaunchCStop", "LaunchDStop", "LaunchEStop", "LaunchTransit", "Launch":
+		"LaunchStop", "LaunchTransit", "Launch":
 			return Globals.char_state.LAUNCHED_HITSTUN
 		
 		"SeqFlinchAFreeze", "SeqFlinchBFreeze":
@@ -2123,9 +2151,9 @@ func state_detect(anim):
 			return Globals.char_state.SEQUENCE_TARGET
 		"aSeqFlinchAStop", "aSeqFlinchA", "aSeqFlinchBStop", "aSeqFlinchB":
 			return Globals.char_state.SEQUENCE_TARGET
-		"SeqLaunchAFreeze", "SeqLaunchBFreeze", "SeqLaunchCFreeze", "SeqLaunchDFreeze", "SeqLaunchEFreeze":
+		"SeqLaunchFreeze":
 			return Globals.char_state.SEQUENCE_TARGET
-		"SeqLaunchAStop", "SeqLaunchBStop", "SeqLaunchCStop", "SeqLaunchDStop", "SeqLaunchEStop", "SeqLaunchTransit", "SeqLaunch":
+		"SeqLaunchStop", "SeqLaunchTransit", "SeqLaunch":
 			return Globals.char_state.SEQUENCE_TARGET
 			
 		"BlockStartup":
@@ -2292,7 +2320,8 @@ func reset_jumps():
 	air_jump = UniqChar.get_stat("MAX_AIR_JUMP") # reset jump count on ground
 	wall_jump = MAX_WALL_JUMP # reset wall jump count on ground
 	air_dash = UniqChar.get_stat("MAX_AIR_DASH")
-	super_dash = UniqChar.get_stat("MAX_SUPER_DASH")
+	air_dodge = UniqChar.get_stat("MAX_AIR_DODGE")
+	flying_dash = UniqChar.get_stat("MAX_FLYING_DASH")
 	aerial_memory = []
 	aerial_sp_memory = []
 	
@@ -2306,8 +2335,7 @@ func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock)
 	
 func reset_cancels(): # done whenever you use an attack, after startup frames finish and before active frames begin
 	chain_combo = Globals.chain_combo.RESET
-	dash_cancel = false
-	jump_cancel = false
+	active_cancel = false
 	
 func check_wall_jump():
 	var left_wall = Detection.detect_bool([$WallJumpLeftDBox], ["SolidPlatforms", "BlastBarriers"])
@@ -2354,7 +2382,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("BlockRec")
 				UniqChar.landing_sound()
 				
-			elif Animator.query(["Tech", "FDashTransit", "FDash"]) or Animator.to_play_animation.begins_with("Burst"): # no landing
+			elif Animator.query(["DodgeTransit", "Dodge", "FDashTransit", "FDash"]) or Animator.to_play_animation.begins_with("Burst"): # no landing
 				pass
 				
 			else: # landing during AirDashDD
@@ -2397,6 +2425,10 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			
 		Globals.char_state.AIR_BLOCK: # air block to ground block
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			if Animator.query_to_play(["aBlockStartup"]):
+				change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
+				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
+				remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("BlockLanding")
 
 			
@@ -2441,6 +2473,10 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 					animate("aFlinchB")
 			
 		Globals.char_state.GROUND_BLOCK:
+			if Animator.query_to_play(["BlockStartup"]):
+				change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
+				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
+				remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("aBlock")
 
 
@@ -2464,7 +2500,7 @@ func check_collidable(): # called by Physics.gd
 			if button_dash in input_state.pressed and chain_memory.size() == 0:
 				return false
 		Globals.char_state.AIR_RECOVERY:
-			if Animator.query_to_play(["Tech", "FDash"]):
+			if Animator.query_to_play(["Dodge", "FDash"]):
 				return false
 			
 	return UniqChar.check_collidable()
@@ -2476,12 +2512,28 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 	elif state == Globals.char_state.SEQUENCE_TARGET:
 		return true # when being grabbed, always fall through soft platforms
 #		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
-	elif new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Tech", "FDash"]):
+	elif new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge", "FDash"]):
 		return true
 	elif !grounded and is_attacking():
 		if button_down in input_state.pressed:
 			return true
 	return false
+	
+func check_semi_invuln():
+	if UniqChar.check_semi_invuln():
+		return true
+	else:
+		match new_state:
+			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+				if Globals.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
+					return true
+			Globals.char_state.AIR_STARTUP:
+				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
+					return true
+			Globals.char_state.AIR_RECOVERY:
+				if Animator.query_to_play(["Dodge"]) and Animator.time <= DODGE_SEMI_IFRAMES:
+					return true
+	return false	
 	
 func check_passthrough():
 	if state == Globals.char_state.SEQUENCE_USER:
@@ -2957,14 +3009,27 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 func tech():
 	if button_dash in input_state.pressed:
 		if dir != 0 or v_dir != 0:
-			if button_block in input_state.pressed and super_dash > 0:
+			if button_block in input_state.pressed and flying_dash > 0:
 				animate("FDashTransit")
 				$ModulatePlayer.play("unlaunch_flash")
 				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
-			else:
-				animate("Tech")
-			return true
+				return true
+			elif button_aux in input_state.pressed and dodge_check():
+				animate("DodgeTransit")
+				return true
 	return false
+	
+func dodge_check():
+	if current_guard_gauge + GUARD_GAUGE_CEIL < UniqChar.get_stat("DODGE_GG_COST"):
+		return false
+	if !grounded and air_dodge <= 0:
+		return false
+	
+	if current_guard_gauge > 0:
+		reset_guard_gauge()
+	else:
+		change_guard_gauge(-UniqChar.get_stat("DODGE_GG_COST"))
+	return true
 	
 #func guardtech():
 #	if success_block and button_dash in input_state.pressed:
@@ -3062,7 +3127,7 @@ func test_jump_cancel():
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
 		
 	var move_name = get_move_name()
-	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be jump cancelled
+	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be jump cancelled
 	
 	afterimage_cancel()
 	return true
@@ -3075,20 +3140,23 @@ func test_dash_cancel():
 	if !grounded and air_dash == 0: return false # if in air, need >1 air dash left
 	
 	var move_name = get_move_name()
-	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be dash cancelled
+	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be dash cancelled
 	
 	afterimage_cancel()
 	return true
 	
 	
 func test_fdash_cancel():
+	
 	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL, Globals.chain_combo.WEAKBLOCKED]:
 		return false # can only s_dash cancel on Normal hit/Special hit/weakblock
 		
-	if !grounded and super_dash == 0: return false # if in air, need >1 super dash left
+	if !grounded and flying_dash == 0: return false # if in air, need >1 super dash left
+	
+	if active_cancel: return true
 	
 	var move_name = get_move_name()
-	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false
+	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false
 	
 	var filter := false
 	var cost_ex := false
@@ -3124,7 +3192,7 @@ func test_fastfall_cancel():
 	if chain_combo != Globals.chain_combo.NORMAL: return false # can only fastfall cancel on hit (not block)
 	
 	var move_name = get_move_name()
-	if Globals.atk_attr.NO_JUMP_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_JUMP_CANCEL cannot be fastfall cancelled
+	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be fastfall cancelled
 	
 	afterimage_cancel()
 	return true
@@ -3680,8 +3748,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
 						chain_combo = Globals.chain_combo.NORMAL
 						if hit_data.sweetspotted or hit_data.punish_hit: # for sweetspotted/punish Normals, allow jump/dash cancel on active
-							dash_cancel = true 
-							jump_cancel = true
+							active_cancel = true
 						if is_aerial():  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
@@ -3689,8 +3756,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					Globals.atk_type.SUPER:
 						chain_combo = Globals.chain_combo.SUPER
 						
-				if Globals.atk_attr.JUMP_CANCEL in hit_data.move_data.atk_attr: # for JUMP_CANCEL atk attr, allow jump cancel on active
-					jump_cancel = true
+				if Globals.atk_attr.ACTIVE_CANCEL in hit_data.move_data.atk_attr: # for ACTIVE_CANCEL atk attr, allow certain cancels on active
+					active_cancel = true
 
 					
 			Globals.block_state.WEAK:
@@ -3968,7 +4035,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					if Animator.query(["DashTransit", "Dash"]):
 						hit_data.punish_hit = true
 			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
-				if Globals.trait.VULN_AIR_DASH in query_traits(): # most characters except heavyweights have VULN_AIR_DASH
+				if Animator.query(["Dodge"]):
+					hit_data.punish_hit = true
+				elif Globals.trait.VULN_AIR_DASH in query_traits(): # most characters except heavyweights have VULN_AIR_DASH
 					if Animator.query(["aDashTransit", "aDash", "aDashU", "aDashD"]):
 						hit_data.punish_hit = true
 						
@@ -4299,42 +4368,35 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			match segment:
 				Globals.compass.N:
 					face(dir_to_attacker) # turn towards attacker
-					animate("LaunchEStop")
 					if facing == 1:
 						launch_starting_rot = PI/2
 					else:
 						launch_starting_rot = 3*PI/2
 				Globals.compass.NE:
 					face(-1)
-					animate("LaunchDStop")
 					launch_starting_rot = 7*PI/4
 				Globals.compass.E:
 					face(-1)
-					animate("LaunchCStop")
 					launch_starting_rot = 0
 				Globals.compass.SE:
 					face(-1)
-					animate("LaunchBStop")
 					launch_starting_rot = 9*PI/4
 				Globals.compass.S:
 					face(dir_to_attacker) # turn towards attacker
-					animate("LaunchAStop")
 					if facing == -1:
 						launch_starting_rot = PI/2
 					else:
 						launch_starting_rot = 3*PI/2
 				Globals.compass.SW:
 					face(1)
-					animate("LaunchBStop")
 					launch_starting_rot = 7*PI/4
 				Globals.compass.W:
 					face(1)
-					animate("LaunchCStop")
 					launch_starting_rot = 0.0
 				Globals.compass.NW:
 					face(1)
-					animate("LaunchDStop")
 					launch_starting_rot = PI/4
+			animate("LaunchStop")
 					
 	else: # blocking
 			
@@ -5006,43 +5068,35 @@ func sequence_launch():
 	match segment:
 		Globals.compass.N:
 			face(-dir_to_attacker) # turn towards attacker
-			animate("LaunchEStop")
 			if facing == 1:
 				launch_starting_rot = PI/2
 			else:
 				launch_starting_rot = 3*PI/2
 		Globals.compass.NE:
 			face(-1)
-			animate("LaunchDStop")
 			launch_starting_rot = 7*PI/4
 		Globals.compass.E:
 			face(-1)
-			animate("LaunchCStop")
 			launch_starting_rot = 0
 		Globals.compass.SE:
 			face(-1)
-			animate("LaunchBStop")
 			launch_starting_rot = 9*PI/4
 		Globals.compass.S:
 			face(-dir_to_attacker) # turn towards attacker
-			print("check")
-			animate("LaunchAStop")
 			if facing == -1:
 				launch_starting_rot = PI/2
 			else:
 				launch_starting_rot = 3*PI/2
 		Globals.compass.SW:
 			face(1)
-			animate("LaunchBStop")
 			launch_starting_rot = 7*PI/4
 		Globals.compass.W:
 			face(1)
-			animate("LaunchCStop")
 			launch_starting_rot = 0.0
 		Globals.compass.NW:
 			face(1)
-			animate("LaunchDStop")
 			launch_starting_rot = PI/4
+	animate("LaunchStop")
 	
 	velocity.set_vector(launch_power, 0)  # reset momentum
 	velocity.rotate(launch_angle)
@@ -5080,7 +5134,9 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Fall")
 		"FastFallTransit":
 			animate("FastFall")
-		"Tech":
+		"DodgeTransit":
+			animate("Dodge")
+		"Dodge":
 			animate("Fall")
 			
 		"FlinchAStop":
@@ -5097,7 +5153,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aFlinchAReturn", "aFlinchBReturn":
 			animate("FallTransit")
 			
-		"LaunchAStop", "LaunchBStop", "LaunchCStop", "LaunchDStop", "LaunchEStop":
+		"LaunchStop":
 			animate("LaunchTransit")
 		"LaunchTransit":
 			animate("Launch")
@@ -5141,6 +5197,19 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("BurstCRec")
 		"BurstCRec":
 			animate("FallTransit")
+		
+		"SeqFlinchAStop":
+			animate("SeqFlinchA")
+		"SeqFlinchBStop":
+			animate("SeqFlinchB")	
+		"aSeqFlinchAStop":
+			animate("aSeqFlinchA")
+		"aSeqFlinchBStop":
+			animate("aSeqFlinchB")	
+		"SeqLaunchStop":
+			animate("SeqLaunchTransit")
+		"SeqLaunchTransit":
+			animate("SeqLaunch")
 
 	UniqChar._on_SpritePlayer_anim_finished(anim_name)
 
@@ -5186,7 +5255,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 	anim_friction_mod = 100
 	anim_gravity_mod = 100
 	velocity_limiter = {"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null}
-	sprite.rotation = 0
+	if Animator.query_current(["LaunchStop"]):
+		sprite.rotation = launch_starting_rot
+	else:
+		sprite.rotation = 0
 	
 	match anim_name:
 		"Run":
@@ -5264,8 +5336,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SoftLanding":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			
-		"Tech":
-			if current_guard_gauge > 0: reset_guard_gauge()
+		"DodgeTransit":
+			air_dodge -= 1
+			anim_gravity_mod = 0
+			anim_friction_mod = 0
+			velocity_limiter.x_slow = 10
+			velocity_limiter.y_slow = 10
+		"Dodge":
 			if get_node(targeted_opponent_path).position.x - position.x != 0 and \
 					sign(get_node(targeted_opponent_path).position.x - position.x) != facing:
 				face(-facing) # face opponent
@@ -5277,19 +5354,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 					tech_angle = Globals.dir_to_angle(dir, -1, facing)
 				else:
 					tech_angle = Globals.dir_to_angle(dir, 0, facing)
-			velocity.set_vector(TECH_SPEED, 0)
+			velocity.set_vector(UniqChar.get_stat("DODGE_SPEED"), 0)
 			velocity.rotate(tech_angle)
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
 			velocity_limiter.x_slow = 12
 			velocity_limiter.y_slow = 12
 			afterimage_timer = 1 # sync afterimage trail
-			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", position, {})
-			$ModulatePlayer.play("tech_flash")
-			play_audio("bling1", {"vol" : -12})
+#			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", position, {})
+			$ModulatePlayer.play("dodge_flash")
+			play_audio("bling1", {"vol" : -18})
 			
 		"FDashTransit":
-			super_dash -= 1
+			flying_dash -= 1
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
 			velocity_limiter.x_slow = 10
@@ -5441,6 +5518,8 @@ func save_state():
 		"air_jump" : air_jump,
 		"wall_jump" : wall_jump,
 		"air_dash" : air_dash,
+		"air_dodge" : air_dodge,
+		"flying_dash" : flying_dash,
 		"state" : state,
 		"new_state": new_state,
 		"true_position_x" : true_position.x, # duplicate() does not work on classes! must save the variables inside separately!
@@ -5459,8 +5538,7 @@ func save_state():
 		"launchstun_rotate" : launchstun_rotate,
 		"chain_combo" : chain_combo,
 		"chain_memory" : chain_memory,
-		"dash_cancel" : dash_cancel,
-		"jump_cancel" : jump_cancel,
+		"active_cancel" : active_cancel,
 		"success_block" : success_block,
 		"targeted_opponent_path" : targeted_opponent_path,
 		"has_burst": has_burst,
@@ -5518,6 +5596,8 @@ func load_state(state_data):
 	air_jump = state_data.air_jump
 	wall_jump = state_data.wall_jump
 	air_dash = state_data.air_dash
+	air_dodge = state_data.air_dodge
+	flying_dash = state_data.flying_dash
 	state = state_data.state
 	new_state = state_data.new_state
 	true_position.x = state_data.true_position_x
@@ -5536,8 +5616,7 @@ func load_state(state_data):
 	launchstun_rotate = state_data.launchstun_rotate
 	chain_combo = state_data.chain_combo
 	chain_memory = state_data.chain_memory
-	dash_cancel = state_data.dash_cancel
-	jump_cancel = state_data.jump_cancel
+	active_cancel = state_data.active_cancel
 	success_block = state_data.success_block
 	targeted_opponent_path = state_data.targeted_opponent_path
 	has_burst = state_data.has_burst

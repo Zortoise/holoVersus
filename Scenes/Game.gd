@@ -1166,19 +1166,8 @@ func defender_semi_invul(hitbox, hurtbox):
 		return false # defender's semi-invul failed
 		
 	var defender = get_node(hurtbox.owner_nodepath)
-	var defender_semi_invuln := false
-	match defender.new_state:
-		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
-			if Globals.atk_attr.SEMI_INVUL_STARTUP in defender.query_atk_attr():
-				defender_semi_invuln = true
-		Globals.char_state.AIR_STARTUP:
-			if defender.Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
-				defender_semi_invuln = true
-		Globals.char_state.AIR_RECOVERY:
-			if defender.Animator.query_to_play(["Tech"]) and defender.Animator.time <= 15:
-				defender_semi_invuln = true
 				
-	if defender_semi_invuln:
+	if defender.check_semi_invuln():
 		if "chain_combo" in attacker_or_entity: # prevent Burst Revoke on iframed attack
 			attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
 		return true # defender's semi-invul succeeded

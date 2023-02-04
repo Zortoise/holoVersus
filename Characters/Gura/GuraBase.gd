@@ -26,12 +26,15 @@ const FALL_GRAV_MOD = 100 # reduced gravity when going down
 
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const MAX_SUPER_DASH = 1
+const MAX_AIR_DODGE = 1
+const MAX_FLYING_DASH = 1
 const GROUND_DASH_SPEED = 450 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
 const FDASH_SPEED = 450 * FMath.S # flying dash
 const FDASH_GG_COST = 75 # exact GG loss per frame when fdashing
 const FDASH_TURN_RATE = 3 # exact navigate speed when fdashing
+const DODGE_GG_COST = 2500
+const DODGE_SPEED = 1000 * FMath.S
 
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
@@ -264,7 +267,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.JUMP_CANCEL, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES,
+		"atk_attr" : [Globals.atk_attr.ACTIVE_CANCEL, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES,
 			Globals.atk_attr.NO_REPEAT_MOVE],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
@@ -295,7 +298,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 90,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.NO_JUMP_CANCEL],
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.NO_REC_CANCEL],
 		"move_sound" : { ref = "whoosh15", aux_data = {"vol" : -9} },
 		"hit_sound" : { ref = "cut8", aux_data = {"vol" : -10} },
 	},
@@ -335,12 +338,13 @@ const MOVE_DATABASE = {
 		"damage" : 90,
 		"knockback" : 475 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 5,
+		"atk_level" : 6,
 		"priority": 5,
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 45,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.DESTROY_ENTITIES, Globals.atk_attr.PUNISH_CRUSH],
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.ACTIVE_CANCEL, Globals.atk_attr.DESTROY_ENTITIES, \
+				Globals.atk_attr.PUNISH_CRUSH],
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
 	},

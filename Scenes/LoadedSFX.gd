@@ -191,8 +191,8 @@ var modulate_animations = {
 			},
 		}
 	},
-	"tech_flash" :{
-		"duration": 15,
+	"dodge_flash" :{
+		"duration": 10,
 		"loop" : false,
 		"monochrome" : true,
 		"timestamps" : {
@@ -200,19 +200,19 @@ var modulate_animations = {
 			{
 				"modulate" : Color(3.0, 3.0, 3.0),
 			},
-			2 :
+			1 :
 			{
 				"modulate" : Color(2.0, 2.0, 2.0),
 			},
-			4 :
+			2 :
 			{
 				"modulate" : Color(1.75, 1.75, 1.75),
 			},
-			6 :
+			3 :
 			{
 				"modulate" : Color(1.5, 1.5, 1.5),
 			},
-			8 :
+			4 :
 			{
 				"modulate" : Color(1.25, 1.25, 1.25),
 			},

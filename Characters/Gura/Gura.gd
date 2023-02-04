@@ -130,6 +130,9 @@ func check_collidable():  # some characters have move that can pass through othe
 		"aSP2[h]Active":
 			return false
 	return true
+	
+func check_semi_invuln():
+	return false
 
 # UNIQUE INPUT CAPTURE --------------------------------------------------------------------------------------------------
 # some holdable buttons can have effect unique to the character
@@ -399,7 +402,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 
 								
 				# DASH CANCELS ---------------------------------------------------------------------------------
-					# if land a sweetspot hit, can dash cancel afterward
+					# if land a sweetspot hit, can dash cancel on active
 								
 					Globals.char_state.GROUND_ATK_RECOVERY:
 						if Character.test_dash_cancel():
@@ -407,7 +410,8 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							keep = false
 					
 					Globals.char_state.GROUND_ATK_ACTIVE:
-						if Character.dash_cancel:
+						if Character.active_cancel:
+							Character.afterimage_cancel() # need to do this manually for active cancel
 							Character.animate("DashTransit")
 							keep = false
 							
@@ -421,12 +425,14 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								keep = false
 					
 					Globals.char_state.AIR_ATK_ACTIVE:
-						if Character.dash_cancel:
+						if Character.active_cancel:
 							if !Character.grounded:
 								if Character.air_dash > 0:
+									Character.afterimage_cancel() # need to do this manually for active cancel
 									Character.animate("aDashTransit")
 									keep = false
 							else: # grounded
+								Character.afterimage_cancel() # need to do this manually for active cancel
 								Character.animate("DashTransit")
 								keep = false
 							
@@ -694,8 +700,8 @@ func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
 		"Dash", "aDash", "aDashD", "aDashU", "FDashTransit", "FDash":
 			Character.afterimage_trail()
-		"Tech":
-			if Animator.time <= 15:
+		"Dodge":
+			if Animator.time <= 10:
 				Character.afterimage_trail(null, 0.6, 10, Globals.afterimage_shader.WHITE)
 			else:
 				Character.afterimage_trail()
