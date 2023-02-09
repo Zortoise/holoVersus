@@ -102,7 +102,7 @@ func kill(sound = true):
 func collision(): # collided with a platform
 	var splash_pos = Entity.position + Vector2(0, Entity.get_node("EntityCollisionBox").rect_position.y + \
 			Entity.get_node("EntityCollisionBox").rect_size.y) # get feet pos
-	Globals.Game.spawn_SFX("SmallSplash", [Entity.master_path, "SmallSplash"], splash_pos, {"facing":Entity.facing, "grounded":true})
+	Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", splash_pos, {"facing":Entity.facing, "grounded":true}, Entity.master_path)
 	kill()
 	
 #func ledge_drop():

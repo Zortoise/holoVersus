@@ -153,85 +153,95 @@ func simulate():
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 
-	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aL2Active"]):
-		if Character.grounded:
-			Character.animate("aL2LandRec")
-			landing_sound()
-		elif !Character.button_light in Character.input_state.pressed:
-			Character.animate("aL2bRec")
+	match Character.state:
+		
+		Globals.char_state.AIR_ATK_ACTIVE:
+			if Animator.query_current(["aL2Active"]):
+				if Character.grounded:
+					Character.animate("aL2LandRec")
+					landing_sound()
+				elif !Character.button_light in Character.input_state.pressed:
+					Character.animate("aL2bRec")
 			
-	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["aL2bRec"]):
-		if Character.grounded:
-			Character.animate("aL2LandRec")
-			landing_sound()
+			# vertical air strafe for surfboard
+			elif Animator.query_current(["aSP2Active", "aSP2[ex]Active"]):
+				if Character.v_dir != 0:
+					Character.velocity.y += Character.v_dir * 100 * FMath.S
 			
-	if Character.state == Globals.char_state.AIR_ATK_RECOVERY and Animator.query_current(["aSP3Rec", "aSP3[ex]Rec"]):
-		if Character.grounded:
-			Character.animate("SP3Rec")
-			landing_sound()
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
-						{"facing":Character.facing, "grounded":true})
+		Globals.char_state.AIR_ATK_RECOVERY:
+			
+			if Animator.query_current(["aL2bRec"]):
+				if Character.grounded:
+					Character.animate("aL2LandRec")
+					landing_sound()
+					
+			elif Animator.query_current(["aSP3Rec", "aSP3[ex]Rec"]):
+				if Character.grounded:
+					Character.animate("SP3Rec")
+					landing_sound()
+					Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
+								{"facing":Character.facing, "grounded":true})
 			
 	# RELEASING HELD INPUTS --------------------------------------------------------------------------------------------------
 			
-	if Character.state == Globals.char_state.GROUND_ATK_STARTUP:
-		match Animator.current_animation:
-			"SP1[c1]Startup":
-				if !Character.button_light in Character.input_state.pressed:
-					Character.animate("SP1[c1]bStartup")
-			"SP1[c2]Startup":
-				if !Character.button_light in Character.input_state.pressed:
-					if Animator.time == 1:
-						Character.animate("SP1[c3]Startup")
-					else:
-						Character.animate("SP1[c2]bStartup")
-						
-			"SP1[u][c1]Startup":
-				if !Character.button_light in Character.input_state.pressed:
-					Character.animate("SP1[u][c1]bStartup")
-			"SP1[u][c2]Startup":
-				if !Character.button_light in Character.input_state.pressed:
-					if Animator.time == 1:
-						Character.animate("SP1[u][c3]Startup")
-					else:
-						Character.animate("SP1[u][c2]bStartup")
+		Globals.char_state.GROUND_ATK_STARTUP:
+			match Animator.current_animation:
+				"SP1[c1]Startup":
+					if !Character.button_light in Character.input_state.pressed:
+						Character.animate("SP1[c1]bStartup")
+				"SP1[c2]Startup":
+					if !Character.button_light in Character.input_state.pressed:
+						if Animator.time == 1:
+							Character.animate("SP1[c3]Startup")
+						else:
+							Character.animate("SP1[c2]bStartup")
+							
+				"SP1[u][c1]Startup":
+					if !Character.button_light in Character.input_state.pressed:
+						Character.animate("SP1[u][c1]bStartup")
+				"SP1[u][c2]Startup":
+					if !Character.button_light in Character.input_state.pressed:
+						if Animator.time == 1:
+							Character.animate("SP1[u][c3]Startup")
+						else:
+							Character.animate("SP1[u][c2]bStartup")
 			
-	if Character.state == Globals.char_state.AIR_ATK_STARTUP:
-		match Animator.current_animation:
-			"aF1[h]Startup": # if holding a.F
-				if !Character.button_fierce in Character.input_state.pressed:
-					Character.animate("aF1Active")
-				elif Character.grounded: # landing while holding a.F
-					if Character.button_up in Character.input_state.pressed: # if pressing up, cancel to neutral
-						Character.startup_cancel_flag = true
-						Character.animate("HardLanding")
-						landing_sound()
-					else: # if not pressing up, do a.F
+		Globals.char_state.AIR_ATK_STARTUP:
+			match Animator.current_animation:
+				"aF1[h]Startup": # if holding a.F
+					if !Character.button_fierce in Character.input_state.pressed:
 						Character.animate("aF1Active")
-			
-			"aSP1[c1]Startup":
-				if !Character.button_light in Character.input_state.pressed or Character.grounded:
-					Character.animate("aSP1[c1]bStartup")
-			"aSP1[c2]Startup":
-				if Character.grounded:
-					Character.animate("aSP1[c2]bStartup")
-				elif !Character.button_light in Character.input_state.pressed:
-					if Animator.time == 1:
-						Character.animate("aSP1[c3]Startup")
-					else:
+					elif Character.grounded: # landing while holding a.F
+						if Character.button_up in Character.input_state.pressed: # if pressing up, cancel to neutral
+							Character.startup_cancel_flag = true
+							Character.animate("HardLanding")
+							landing_sound()
+						else: # if not pressing up, do a.F
+							Character.animate("aF1Active")
+				
+				"aSP1[c1]Startup":
+					if !Character.button_light in Character.input_state.pressed or Character.grounded:
+						Character.animate("aSP1[c1]bStartup")
+				"aSP1[c2]Startup":
+					if Character.grounded:
 						Character.animate("aSP1[c2]bStartup")
-						
-			"aSP1[d][c1]Startup":
-				if !Character.button_light in Character.input_state.pressed or Character.grounded:
-					Character.animate("aSP1[d][c1]bStartup")
-			"aSP1[d][c2]Startup":
-				if Character.grounded:
-					Character.animate("aSP1[d][c2]bStartup")
-				elif !Character.button_light in Character.input_state.pressed:
-					if Animator.time == 1:
-						Character.animate("aSP1[d][c3]Startup")
-					else:
+					elif !Character.button_light in Character.input_state.pressed:
+						if Animator.time == 1:
+							Character.animate("aSP1[c3]Startup")
+						else:
+							Character.animate("aSP1[c2]bStartup")
+							
+				"aSP1[d][c1]Startup":
+					if !Character.button_light in Character.input_state.pressed or Character.grounded:
+						Character.animate("aSP1[d][c1]bStartup")
+				"aSP1[d][c2]Startup":
+					if Character.grounded:
 						Character.animate("aSP1[d][c2]bStartup")
+					elif !Character.button_light in Character.input_state.pressed:
+						if Animator.time == 1:
+							Character.animate("aSP1[d][c3]Startup")
+						else:
+							Character.animate("aSP1[d][c2]bStartup")
 					
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
@@ -942,17 +952,17 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP6[ex]SeqC":
 			Character.velocity.set_vector(0, 600 * FMath.S)  # dive down
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, \
-					{"facing":Character.facing, "rot":PI/2})
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, \
+					{"facing":Character.facing, "rot":PI/2}, Character.get_path())
 			Character.play_audio("water14", {})
 		"SP6[ex]SeqE":  # you hit ground
 			Partner.sequence_hit(0)
 			Character.velocity.set_vector(0, 0)
 			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
-			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
-					{"facing":Character.facing, "back":true, "grounded":true})
-			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
+					{"facing":Character.facing, "back":true, "grounded":true}, Character.get_path())
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true}, Character.get_path())
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
@@ -962,8 +972,8 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 		"aSP6[ex]SeqE":  # parther hit the ground but not you
 			Partner.sequence_hit(0)
 			Character.velocity.set_vector(0, 0)
-			Globals.Game.spawn_SFX("BigSplash", [Character.get_path(), "BigSplash"], Partner.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true}, Character.get_path())
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
 			Globals.Game.set_screenshake()
@@ -1400,25 +1410,25 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.animate("SP3[h]Startup")
 			else:
 				Character.animate("SP3Active")
-				Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
-						{"facing":Character.facing, "grounded":true, "back":true})
+				Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
+						{"facing":Character.facing, "grounded":true, "back":true}, Character.get_path())
 		"aSP3Startup":
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("aSP3[h]Startup")
 			else:
 				Character.animate("aSP3Active")
-				Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
-						{"facing":Character.facing, "rot":-PI/2})
+				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
+						{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 #		"aSP3bStartup":
 #			Character.animate("aSP3Active")
 		"SP3[h]Startup":
 			Character.animate("SP3[h]Active")
-			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true, "back":true})
+			Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true, "back":true}, Character.get_path())
 		"aSP3[h]Startup":
 			Character.animate("aSP3[h]Active")
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
-					{"facing":Character.facing, "rot":-PI/2})
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
+					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 		"aSP3Active":
 			Character.animate("aSP3bActive")
 		"aSP3[h]Active":
@@ -1436,12 +1446,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 		"SP3[ex]Startup":
 			Character.animate("SP3[ex]Active")
-			Globals.Game.spawn_SFX("MediumSplash", [Character.get_path(), "MediumSplash"], Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true, "back":true})
+			Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
+					{"facing":Character.facing, "grounded":true, "back":true}, Character.get_path())
 		"aSP3[ex]Startup":
 			Character.animate("aSP3[ex]Active")
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Vector2(Character.position.x, Character.position.y - 40), \
-					{"facing":Character.facing, "rot":-PI/2})
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
+					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1704,17 +1714,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.set_vector(Character.facing * 400 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
+			Character.velocity_limiter.y_slow = 50
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing}, Character.get_path())
 		"aSP2[h]Active":
-			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
+			Character.velocity.set_vector(Character.facing * 600 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing}, Character.get_path())
 		"aSP2[ex]Active":
 			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Globals.Game.spawn_SFX("WaterJet", [Character.get_path(), "WaterJet"], Character.position, {"facing":Character.facing})
+			Character.velocity_limiter.y_slow = 50
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing}, Character.get_path())
 		"aSP2[h]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)

@@ -19,7 +19,28 @@ func convert_to_vec() -> Vector2: # for going from scaled true_position to node 
 	return Vector2(FMath.round_and_descale(x), FMath.round_and_descale(y))
 	
 	
-func length(in_angle = null) -> int:
+func is_longer_than(target_length) -> bool: # target_length is scaled!
+	var descaled_vector = Vector2(FMath.round_and_descale(x), FMath.round_and_descale(y))
+	target_length = FMath.round_and_descale(target_length)
+	var length_square = (descaled_vector.x * descaled_vector.x) + (descaled_vector.y * descaled_vector.y)
+	if length_square > target_length * target_length:
+		return true
+	else:
+		return false
+	
+	
+func is_longer_than_another(other_fvector) -> bool: # compare length of 2 FVectors fast
+	var descaled_vector = Vector2(FMath.round_and_descale(x), FMath.round_and_descale(y))
+	var descaled_other_vector = Vector2(FMath.round_and_descale(other_fvector.x), FMath.round_and_descale(other_fvector.y))
+	var length_square = (descaled_vector.x * descaled_vector.x) + (descaled_vector.y * descaled_vector.y)
+	var other_length_square = (descaled_other_vector.x * descaled_other_vector.x) + (descaled_other_vector.y * descaled_other_vector.y)
+	if length_square > other_length_square:
+		return true
+	else:
+		return false
+		
+	
+func length(in_angle = null) -> int: # can pass in the angle if found before hand to make it faster
 	var angle: int
 	if in_angle == null:
 		angle = angle() # get the angle 1st

@@ -15,7 +15,7 @@ enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, PARRIED, SUPER}
 enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
-		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_STRAFE, REPEATABLE, DI_MANUAL_SEAL
+		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
 		CANNOT_CHAIN_INTO, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
 		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
 		STRONG_ENTITY, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR}
@@ -36,7 +36,8 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_D
 # SUPERARMOR_ACTIVE = Wrongblock all attacks during active frames
 # PROJ_ARMOR_ACTIVE = Wrongblock all projectiles during active frames
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
-# NO_STRAFE = for certain aerials, prevent air strafing during active frames
+# NO_STRAFE_NORMAL = for certain aerial normals, prevent air strafing during active frames
+# STRAFE_NON_NORMAL = for certain aerial non-normals, allow air strafing during active frames
 # REPEATABLE = will not incur repeat penalty, use for multi-entities
 # DI_MANUAL_SEAL = seal DI for certain duration set by "burstlock" in move_data, for Burst Extend
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
@@ -238,13 +239,20 @@ func _process(_delta):
 #func d_lerp(start, end, weight):
 #	return start + weight * (end - start)
 
-func sin_lerp(start, end, weight):
-	if weight <= 0: return start
-	if weight >= 1: return end
+#func sin_lerp(start, end, weight):
+#	if weight <= 0: return start
+#	if weight >= 1: return end
+#
+#	var weight2 = (sin(weight * PI - PI/2) + 1) * 0.5
+#	return lerp(start, end , weight2)
 	
-	var weight2 = (sin(weight * PI - PI/2) + 1) * 0.5
-	return lerp(start, end , weight2)
-	
+func is_length_longer(vector: Vector2, target_length: int) -> bool: # cheap way to find length without using square root
+	var x = int(vector.x)
+	var y = int(vector.y)
+	if (x * x) + (y * y) > target_length * target_length:
+		return true
+	else:
+		return false
 	
 #func ease_in_lerp(start, end, weight, factor = 2): # low weight changes a less, high weight changes a lot
 #	if weight <= 0: return start
@@ -336,7 +344,7 @@ func change_zoom_level(change):
 	zoom_level = clamp(zoom_level, 0.0, 2.0)
 	
 #	zoom_level = 0.0 # for taking screenshots of stages
-	
+
 
 # ANGLE SPLITTER ---------------------------------------------------------------------------------------------------
 

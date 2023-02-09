@@ -57,8 +57,8 @@ func simulate():
 				if new_facing_ref != 0: # turn to face targeted opponent
 					breach_facing = sign(new_facing_ref)
 				Globals.Game.spawn_entity(Entity.master_path, "SharkBreach", Entity.position, {"facing" : breach_facing})
-				Entity.play_audio("water4", {"unique_path" : Entity.master_path, "vol" : -23})
-				Entity.play_audio("water8", {"unique_path" : Entity.master_path, "vol" : -13})
+				Entity.play_audio("water4", {"vol" : -23})
+				Entity.play_audio("water8", {"vol" : -13})
 				# reduce ground fin count
 				get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
 				Entity.free = true

@@ -126,24 +126,24 @@ func init(aux_data: Dictionary):
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 2
 			Entity.life_point = 2
-			Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : Entity.master_path})
+			Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
+					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : Entity.master_path}, Entity.master_path)
 		"[c3]Spawn", "[u][c3]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 3
 			Entity.life_point = 4
-			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot)})
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_path)
 		"[ex]Spawn", "[u][ex]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 3
 			Entity.life_point = 3
-			Globals.Game.spawn_SFX("WaterJet", [Entity.master_path, "WaterJet"], Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot)})
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_path)
 #
 #		"[u][c1]Spawn":
 #			Entity.velocity.set_vector(500 * FMath.S, 0)
@@ -391,15 +391,15 @@ func simulate():
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
-				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14), "palette" : Entity.master_path})
+				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14), "palette" : Entity.master_path}, Entity.master_path)
 						
 		"[u][c3]Active", "[u][ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
-				Globals.Game.spawn_SFX("TridentRing", [Entity.master_path, "TridentRing"], Entity.position, \
-						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68), "palette" : Entity.master_path})
+				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68), "palette" : Entity.master_path}, Entity.master_path)
 	
 	
 func kill(sound = true):

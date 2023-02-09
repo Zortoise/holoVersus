@@ -664,7 +664,7 @@ func simulate2(): # only ran if not in hitstop
 	process_status_effects_timer() # remove expired status effects before running hit detection since that can add effects
 	
 	# clearing repeat memory
-	if !is_hitstunned():
+	if !is_hitstunned() and !state in [Globals.char_state.SEQUENCE_TARGET]:
 		repeat_memory = []
 		first_hit_flag = false
 		GG_swell_flag = false
@@ -836,16 +836,22 @@ func simulate2(): # only ran if not in hitstop
 				Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
 				Globals.char_state.AIR_BLOCK:
 					
-				if state == Globals.char_state.AIR_ATK_ACTIVE and Globals.atk_attr.NO_STRAFE in query_atk_attr():
-					continue # cannot strafe during some aerials
-				
-				if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
-					button_dash in input_state.pressed:
-					continue # if pressing attack + dash in the air, will not turn
+				if new_state == Globals.char_state.AIR_ATK_ACTIVE:
+					var move_data = query_move_data()
+					if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
+						if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
+							continue # cannot strafe during some aerial normals
+					else: # non-Normal
+						if !Globals.atk_attr.STRAFE_NON_NORMAL in move_data.atk_attr:
+							continue # can strafe during some aerial non-normals
 				
 				if !grounded:
 					if state == Globals.char_state.AIR_STANDBY and dir != facing: # flipping over
-						face(dir)
+						if (button_light in input_state.pressed or button_fierce in input_state.pressed or \
+								button_aux in input_state.pressed) and button_dash in input_state.pressed:
+							pass # if pressing attack + dash in the air, will not turn
+						else:
+							face(dir)
 					
 					var air_strafe_speed_temp: int = FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("AIR_STRAFE_SPEED_MOD"))
 					var air_strafe_limit_temp: int = FMath.percent(air_strafe_speed_temp, UniqChar.get_stat("AIR_STRAFE_LIMIT_MOD"))
@@ -1246,6 +1252,11 @@ func simulate2(): # only ran if not in hitstop
 							rotated = true
 					if !rotated:
 						rotate_sprite(vel_angle)
+						
+			elif Animator.query_current(["Dodge"]):
+				if get_node(targeted_opponent_path).position.x - position.x != 0 and \
+						sign(get_node(targeted_opponent_path).position.x - position.x) != facing:
+					face(-facing) # face opponent
 						
 					
 		Globals.char_state.GROUND_BLOCK:
@@ -2239,6 +2250,8 @@ func on_kill():
 		else:
 			$RespawnTimer.time = 9999
 		
+		if UniqChar.has_method("on_kill"): # for unique_data changes on death
+			UniqChar.on_kill()
 			
 	
 func respawn():
@@ -2408,14 +2421,14 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			if new_state == Globals.char_state.LAUNCHED_HITSTUN:
 				# need to use new_state to prevent an issue with grounded Break state causing HardLanding on flinch
 				# check using either velocity this frame or last frame
-				var velocity_length_to_check: int
-				var velocity_previous_frame_length: int = velocity_previous_frame.length()
-				var velocity_length: int = velocity.length()
-				if velocity_previous_frame_length > velocity_length:
-					velocity_length_to_check = velocity_previous_frame_length
+					
+				var vector_to_check
+				if velocity.is_longer_than_another(velocity_previous_frame):
+					vector_to_check = velocity
 				else:
-					velocity_length_to_check = velocity_length
-				if velocity_length_to_check <= UNLAUNCH_THRESHOLD:
+					vector_to_check = velocity_previous_frame
+				
+				if !vector_to_check.is_longer_than(UNLAUNCH_THRESHOLD):
 					if !tech():
 						animate("HardLanding")
 						$HitStunTimer.stop()
@@ -2481,11 +2494,10 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 
 
 func check_s_dash_crash():
-	var after_speed = velocity.length()
 	if !is_on_ground($SoftPlatformDBox):
 		animate("aDashBrake")
 	else:
-		if after_speed < FMath.percent(UniqChar.get_stat("FDASH_SPEED"), 50):
+		if !velocity.is_longer_than(FMath.percent(UniqChar.get_stat("FDASH_SPEED"), 50)):
 			animate("HardLanding")
 		else:
 			var old_angle = velocity.angle()
@@ -2729,12 +2741,11 @@ func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need
 		
 func launch_trail():
 	var frequency: int
-	var velocity_length = velocity.length()
-	if velocity_length <= FMath.percent(LAUNCH_DUST_THRESHOLD, 50):
+	if !velocity.is_longer_than(FMath.percent(LAUNCH_DUST_THRESHOLD, 50)):
 		frequency = 4
-	elif velocity_length <= LAUNCH_DUST_THRESHOLD: # the faster you go the more frequent the launch dust
+	elif velocity.is_longer_than(LAUNCH_DUST_THRESHOLD): # the faster you go the more frequent the launch dust
 		frequency = 3
-	elif velocity_length <= FMath.percent(LAUNCH_DUST_THRESHOLD, 200):
+	elif velocity.is_longer_than(FMath.percent(LAUNCH_DUST_THRESHOLD, 200)):
 		frequency = 2
 	else:
 		frequency = 1
@@ -3177,7 +3188,7 @@ func test_fdash_cancel():
 		if current_ex_gauge < FDash_CANCEL_EX_COST:
 			return false
 		change_ex_gauge(-FDash_CANCEL_EX_COST)
-		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"})
+		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
 		$ModulatePlayer.play("fdash_cancel")
 		
 	if filter:
@@ -3994,7 +4005,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					if crossed_up:
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
-						if attacker_vec.length(hit_data.angle_to_atker) <= STRONGBLOCK_RANGE:
+						if !attacker_vec.is_longer_than(STRONGBLOCK_RANGE):
 							if Globals.atk_attr.ANTI_AIR in hit_data.move_data.atk_attr and !grounded:
 								hit_data.block_state = Globals.block_state.WEAK # anti-air normals force weakblock on airblockers
 							else:
@@ -4656,14 +4667,14 @@ func calculate_knockback_dir(hit_data) -> int:
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
 		Globals.knockback_type.RADIAL:
-			if KBOrigin:
-				knockback_dir = ref_vector.angle(hit_data.attack_facing)
-				if hit_data.attack_facing > 0:
-					knockback_dir += hit_data.move_data.KB_angle # KB_angle can rotate radial knockback some more
-				else:
-					knockback_dir -= hit_data.move_data.KB_angle
-				knockback_dir = posmod(knockback_dir, 360)
-			else: print("Error: No KBOrigin found for knockback_type.RADIAL")
+#			if KBOrigin:
+			knockback_dir = ref_vector.angle(hit_data.attack_facing)
+			if hit_data.attack_facing > 0:
+				knockback_dir += hit_data.move_data.KB_angle # KB_angle can rotate radial knockback some more
+			else:
+				knockback_dir -= hit_data.move_data.KB_angle
+			knockback_dir = posmod(knockback_dir, 360)
+#			else: print("Error: No KBOrigin found for knockback_type.RADIAL")
 			
 	# for weak hit and grounded defender, or grounded blocking defender, if the hit is towards left/right instead of up/down, level it
 	if grounded and (hit_data.weak_hit or hit_data.adjusted_atk_level <= 1 or \
@@ -4972,10 +4983,10 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 	var seq_hit_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
 	var lethal = take_seq_damage(seq_hit_data.damage)
 	
-	if "hitstop" in seq_hit_data:
+	if "hitstop" in seq_hit_data and !"weak" in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
 		if lethal:
 			hitstop = LETHAL_HITSTOP
-			add_status_effect(Globals.status_effect.LETHAL, 0)
+			add_status_effect(Globals.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
 			Globals.Game.set_screenshake()
 			$ModulatePlayer.play("lethal_flash")
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
@@ -5005,10 +5016,10 @@ func sequence_launch():
 	# DAMAGE
 	var damage = seq_data.damage
 	var lethal = take_seq_damage(damage)
-	if damage > 0 and seq_data.hitstop > 0:
+	if damage > 0 and seq_data.hitstop > 0: # launch is a hit (rare)
 		if lethal:
 			hitstop = LETHAL_HITSTOP
-			add_status_effect(Globals.status_effect.LETHAL, 0)
+			add_status_effect(Globals.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
 			Globals.Game.set_screenshake()
 			$ModulatePlayer.play("lethal_flash")
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
@@ -5045,11 +5056,15 @@ func sequence_launch():
 	var launch_power = seq_data.launch_power # scaled
 	
 	if get_damage_percent() >= 100: # knockback is increased when Damage is over Damage Value Limit
-		launch_power += LETHAL_KB_MOD
+		lethal_flag = true
+		launch_power += LAUNCH_THRESHOLD
+		launch_power = FMath.percent(launch_power, LETHAL_KB_MOD)
 		var weight: int = int(min(FMath.get_fraction_percent(get_damage_percent() - 100, 25), 100))
 		#	0 percent damage over is x2.0 knockback
 		# 	25 percent damage over is x3.0 knockback
 		launch_power = FMath.f_lerp(FMath.percent(launch_power, 200), FMath.percent(launch_power, DMG_VAL_KB_LIMIT), weight)
+	else:
+		lethal_flag = false
 		
 	if current_guard_gauge > 0: # knockback is increased by Guard Gauge when it is > 100%
 		launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \

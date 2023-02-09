@@ -4,16 +4,23 @@ extends Node2D
 var free := false
 var sfx_ref
 
+var master_path = null
+
 var palette_ref = null
 var ignore_freeze := false
+
+var sticky_offset = null
 
 # for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
 # for unique sfx, in_sfx_ref will be a an array with master's nodepath as 1st entry and string for 2nd entry
 # for master's palette, place "palette" : get_path() in aux_data, palette_ref will be master's nodepath
 # aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
-func init(in_anim: String, in_sfx_ref, in_position: Vector2, aux_data: Dictionary):
+func init(in_anim: String, in_sfx_ref: String, in_position: Vector2, aux_data: Dictionary, in_master_path = null):
 	
 	sfx_ref = in_sfx_ref
+	if in_master_path != null:
+		master_path = in_master_path
+	
 	load_sfx_ref() # load frame data and spritesheet
 	
 	position = in_position
@@ -28,6 +35,12 @@ func init(in_anim: String, in_sfx_ref, in_position: Vector2, aux_data: Dictionar
 	if "palette" in aux_data:
 		palette_ref = aux_data.palette
 		palette()
+	if "sticky" in aux_data:
+		if master_path == null:
+			print("Error: Did not pass in master_path for sticky SFX!")
+		else:
+			sticky_offset = in_position - get_node(master_path).position
+		
 		
 	$SpritePlayer.play(in_anim)
 	
@@ -36,12 +49,12 @@ func init(in_anim: String, in_sfx_ref, in_position: Vector2, aux_data: Dictionar
 	
 	
 func load_sfx_ref(): # load frame data and spritesheet
-	if sfx_ref is String and sfx_ref in LoadedSFX.loaded_sfx: # common sfx
+	if sfx_ref in LoadedSFX.loaded_sfx: # common sfx
 		$Sprite.texture = LoadedSFX.loaded_sfx[sfx_ref]["spritesheet"]
 		$SpritePlayer.init_with_loaded_frame_data($Sprite, LoadedSFX.loaded_sfx[sfx_ref]["frame_data"])
-	elif sfx_ref is Array: # unique sfx, loaded_sfx_ref will be a an array with master's nodepath as 1st entry and string for 2nd entry
-		$Sprite.texture = get_node(sfx_ref[0]).sfx_data[sfx_ref[1]]["spritesheet"]
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, get_node(sfx_ref[0]).sfx_data[sfx_ref[1]]["frame_data"])
+	elif master_path != null and sfx_ref in get_node(master_path).sfx_data: # unique sfx
+		$Sprite.texture = get_node(master_path).sfx_data[sfx_ref]["spritesheet"]
+		$SpritePlayer.init_with_loaded_frame_data($Sprite, get_node(master_path).sfx_data[sfx_ref]["frame_data"])
 	else:
 		print("Error: sfx_ref not found.")
 
@@ -58,6 +71,9 @@ func palette():
 		$Sprite.material.set_shader_param("swap", get_node(palette_ref).loaded_palette)
 
 func simulate():
+	if sticky_offset != null:
+		position = get_node(master_path).position + sticky_offset
+		
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
 	
 	$SpritePlayer.simulate()
@@ -72,13 +88,15 @@ func _on_SpritePlayer_anim_finished(_anim_name):
 func save_state():
 	var state_data = {
 		"sfx_ref" : sfx_ref,
+		"master_path" : master_path,
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
 		"free" : free,
 		"position" : position,
 		"scale" : $Sprite.scale,
 		"rotation" : $Sprite.rotation,
 		"palette_ref" : palette_ref,
-		"ignore_freeze" : ignore_freeze
+		"ignore_freeze" : ignore_freeze,
+		"sticky_offset" : sticky_offset,
 	}
 	return state_data
 	
@@ -91,10 +109,15 @@ func load_state(state_data):
 		palette()
 	
 	sfx_ref = state_data.sfx_ref
+	master_path = state_data.master_path
 	load_sfx_ref()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	free = state_data.free
 	ignore_freeze = state_data.ignore_freeze
+	
+	sticky_offset = state_data.sticky_offset
+	if sticky_offset != null:
+		position = get_node(master_path).position + sticky_offset
 	
 #--------------------------------------------------------------------------------------------------

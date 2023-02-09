@@ -1611,16 +1611,15 @@ func spawn_entity(master_path: NodePath, entity_ref: String, out_position, aux_d
 	entity.init(master_path, entity_ref, out_position, aux_data)
 	
 
-# for common sfx, loaded_sfx_ref is a string pointing to loaded sfx in LoadedSFX.gb
-# for unique sfx, loaded_sfx_ref will be a NodePath leading to the sfx's loaded FrameData .tres file and loaded spritesheet
+# for unique sfx, pass in the master_path as well
 # aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
-func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary):
+func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, master_path = null):
 	var sfx = Globals.loaded_SFX_scene.instance()
 	if !"back" in aux_data:
 		$SFXFront.add_child(sfx)
 	else:
 		$SFXBack.add_child(sfx)
-	sfx.init(anim, loaded_sfx_ref, out_position, aux_data)
+	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, master_path)
 	
 	
 func spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, \
