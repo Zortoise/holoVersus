@@ -1026,35 +1026,21 @@ margin_right = 293.0
 margin_bottom = 116.0
 text = "Player 2"
 
-[node name="Player3" parent="PlayersList" instance=ExtResource( 8 )]
+[node name="Blank" type="Label" parent="PlayersList"]
 margin_top = 120.0
 margin_right = 293.0
-margin_bottom = 176.0
-disabled = true
-text = "Player 3"
-
-[node name="Player4" parent="PlayersList" instance=ExtResource( 8 )]
-margin_top = 180.0
-margin_right = 293.0
-margin_bottom = 236.0
-disabled = true
-text = "Player 4"
-
-[node name="Blank" type="Label" parent="PlayersList"]
-margin_top = 240.0
-margin_right = 293.0
-margin_bottom = 290.0
+margin_bottom = 170.0
 
 [node name="Save" parent="PlayersList" instance=ExtResource( 8 )]
-margin_top = 294.0
+margin_top = 174.0
 margin_right = 293.0
-margin_bottom = 350.0
+margin_bottom = 230.0
 text = "Save and return"
 
 [node name="Discard" parent="PlayersList" instance=ExtResource( 8 )]
-margin_top = 354.0
+margin_top = 234.0
 margin_right = 293.0
-margin_bottom = 410.0
+margin_bottom = 290.0
 focus_neighbour_bottom = NodePath("../Player1")
 text = "Discard Changes"
 

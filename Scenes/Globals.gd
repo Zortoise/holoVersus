@@ -13,7 +13,7 @@ enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, PARRIED, SUPER}
-enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_DROP, NO_TURN, EASY_BLOCK
+enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, EASY_BLOCK
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
 		CANNOT_CHAIN_INTO, NOT_FROM_C_REC, LATE_CHAIN, LATE_CHAIN_INTO, PUNISH_CRUSH
@@ -27,6 +27,7 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_D
 # NO_REC_CANCEL = cannot jump/dash/fdash/fastfall cancel recovery frames, but still can chain
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
+# NO_QUICK_CANCEL = prevent quick canceling during startup
 # EASY_BLOCK = can be blocked correctly in either direction
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers and moves with UNBLOCKABLE
 # UNBLOCKABLE = for command grabs and unparriable attacks
@@ -128,7 +129,7 @@ var startup := true # for main menu transition
 var main_menu_focus := "Local" # for transition back to main menu
 var net_menu_focus := "Host" # for transition back to netplay menu
 var settings_menu_focus := "Change"
-var zoom_level := 2.0  # only betweem 0.0 and 2.0! changed by distance between characters
+var zoom_level := 2.0  # only betweem 1.5 and 2.0! changed by distance between characters
 var Game # hold the node for main game scene
 var random
 var pausing := false # set to true when a player tries to pause the game
@@ -341,7 +342,7 @@ func char_state_to_string(state):
 
 func change_zoom_level(change):
 	zoom_level += change
-	zoom_level = clamp(zoom_level, 0.0, 2.0)
+	zoom_level = clamp(zoom_level, 1.5, 2.0)
 	
 #	zoom_level = 0.0 # for taking screenshots of stages
 

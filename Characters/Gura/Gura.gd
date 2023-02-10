@@ -6,11 +6,12 @@ extends "res://Characters/Gura/GuraBase.gd"
 # 1. Add it in MOVE_DATABASE and STARTERS, also in EX_MOVES/SUPERS, and in UP_TILTS if needed (even for EX Moves)
 # 2. Add it in state_detect()
 # 3. Add it in _on_SpritePlayer_anim_finished() to set the transitions
-# 4. Add it in _on_SpritePlayer_anim_started() to set up sfx_over, entity/sfx spawning  and other physics modifying characteristics
+# 4. Add it in _on_SpritePlayer_anim_started() to set up entity/sfx spawning  and other physics modifying characteristics
 # 6. Add it in capture_combinations() if it is a special action
 # 5. Add it in process_buffered_input() for inputs
 # 7. Add any startup/recovery animations not in MOVE_DATABASE to refine_move_name()
-
+# 8. Add any versions not in MOVE_DATABASE in get_root() for aerial and chain memory
+	
 # --------------------------------------------------------------------------------------------------
 
 # shortening code, set by main character node
@@ -43,11 +44,11 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1bCRec", "F1CRec":
 			return Globals.char_state.GROUND_C_RECOVERY
 			
-		"aL1Startup", "aL2Startup", "aF1Startup", "aF1[h]Startup", "aF3Startup", "aHStartup":
+		"aL1Startup", "aL2Startup", "aL3Startup", "aF1Startup", "aF1[h]Startup", "aF3Startup", "aHStartup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"aL1Active", "aL2Active", "aF1Active", "aF3Active", "aHActive":
+		"aL1Active", "aL2Active", "aL3Active", "aF1Active", "aF3Active", "aHActive":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"L2Rec", "aL1Rec", "aL2Rec", "aL2bRec", "aF1Rec", "aF3Rec", "aHRec":
+		"L2Rec", "aL1Rec", "aL2Rec", "aL3Rec", "aL2bRec", "aF1Rec", "aF3Rec", "aHRec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"L2cCRec", "aF1CRec", "aF3CRec":
 			return Globals.char_state.AIR_C_RECOVERY
@@ -79,6 +80,8 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"aSP2CRec":
 			return Globals.char_state.AIR_C_RECOVERY
+			
+			
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
@@ -120,6 +123,17 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
 			return Globals.char_state.SEQUENCE_USER
+			
+		"SP7Startup":
+			return Globals.char_state.GROUND_ATK_STARTUP
+		"aSP7Startup":
+			return Globals.char_state.AIR_ATK_STARTUP
+		"aSP7Active":
+			return Globals.char_state.AIR_ATK_ACTIVE
+		"aSP7Rec":
+			return Globals.char_state.AIR_ATK_RECOVERY
+		"SP7Rec":
+			return Globals.char_state.GROUND_ATK_RECOVERY
 		
 	print("Error: " + anim + " not found.")
 		
@@ -269,6 +283,8 @@ func capture_combinations():
 	
 	Character.combination(Character.button_special, Character.button_light, "Sp.L")
 	Character.ex_combination(Character.button_special, Character.button_light, "ExSp.L")
+	
+	Character.combination_trio(Character.button_special, Character.button_down, Character.button_light, "Sp.dL")
 	
 	Character.combination(Character.button_special, Character.button_fierce, "Sp.F")
 	Character.ex_combination(Character.button_special, Character.button_fierce, "ExSp.F")
@@ -482,6 +498,11 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		"Sp.L":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP1", has_acted)
+				
+		"Sp.dL":
+			if !has_acted[0]:
+				if test_instinct():
+					keep = !process_move(new_state, "SP7", has_acted)
 	
 		"Sp.F":
 			if !has_acted[0]:
@@ -602,7 +623,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						return true
 						
 		Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
-			if ("a" + attack_ref) in UP_TILTS and !Character.button_jump in Character.input_state.pressed and \
+			if ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
+					!Character.button_jump in Character.input_state.pressed and \
 					Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
 					Character.test_qc_chain_combo("a" + attack_ref):
 				if Character.is_ex_valid("a" + attack_ref):
@@ -660,7 +682,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		# quick cancel
 		Globals.char_state.AIR_ATK_STARTUP:
 			if !Character.grounded:
-				if ("a" + attack_ref) in STARTERS:
+				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 					if Character.check_quick_cancel("a" + attack_ref):
 						if Character.test_qc_chain_combo("a" + attack_ref):
 							if Character.is_ex_valid("a" + attack_ref, true):
@@ -747,6 +769,9 @@ func get_root(move_name): # for aerial and chain memory
 			
 		"aSP1": # for startup for aerial memory
 			return "SP1"
+
+		"aSP7":
+			return "SP7"
 	
 	return move_name
 		
@@ -794,6 +819,8 @@ func refine_move_name(move_name):
 			return "aSP5[ex]"
 		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
 			return "aSP6[ex]"
+		"aSP7":
+			return "SP7"
 	return move_name
 			
 			
@@ -948,8 +975,11 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 		"SP6[ex]SeqB":
 			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
 			if Character.grounded:
-				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
+				Character.play_audio("water4", {"vol" : -20})
+#				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+#				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP6[ex]SeqC":
 			Character.velocity.set_vector(0, 600 * FMath.S)  # dive down
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, \
@@ -959,12 +989,9 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.sequence_hit(0)
 			Character.velocity.set_vector(0, 0)
 			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
-			Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
-					{"facing":Character.facing, "back":true, "grounded":true}, Character.get_path())
-			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true}, Character.get_path())
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.get_path())
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
 			Globals.Game.set_screenshake()
 			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
@@ -973,7 +1000,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.sequence_hit(0)
 			Character.velocity.set_vector(0, 0)
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true}, Character.get_path())
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.get_path())
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
 			Globals.Game.set_screenshake()
@@ -1048,12 +1075,17 @@ func sequence_passfloor(): # which step in sequence ignore hard floor
 #		return true # can chain Akontio: Instinct from recovery of Akontio
 #	return false
 	
+func unique_chaining_rules(move_name, attack_ref):
+	if Character.is_atk_recovery() and refine_move_name(move_name) in ["SP1", "SP1[ex]"] and refine_move_name(attack_ref) == "SP7":
+		return true
+	return false
+	
 func get_trident_array(): # return array of all spinnable tridents
 	var trident_array := []
 	for entity in Globals.Game.get_node("EntitiesFront").get_children():
 		if get_node(entity.master_path).player_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
 			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
-					"[u][ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE", "[c3]Active", "[u][c3]Active"]:
+					"[u][ex]Active", "[c3]Active", "[u][c3]Active"]:
 				trident_array.append(entity)
 	return trident_array
 			
@@ -1239,6 +1271,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("FallTransit")
 		"aL2LandRec":
 			Character.animate("Crouch")
+			
+		"aL3Startup":
+			Character.animate("aL3Active")
+		"aL3Active":
+			Character.animate("aL3Rec")
+		"aL3Rec":
+			Character.animate("FallTransit")
 
 		"aF1Startup":
 #			if get("STYLE") == 0:
@@ -1410,25 +1449,25 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.animate("SP3[h]Startup")
 			else:
 				Character.animate("SP3Active")
-				Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
-						{"facing":Character.facing, "grounded":true, "back":true}, Character.get_path())
+				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
 		"aSP3Startup":
 			if Character.button_fierce in Character.input_state.pressed:
 				Character.animate("aSP3[h]Startup")
 			else:
 				Character.animate("aSP3Active")
-				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
-						{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+#				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
+#						{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 #		"aSP3bStartup":
 #			Character.animate("aSP3Active")
 		"SP3[h]Startup":
 			Character.animate("SP3[h]Active")
-			Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true, "back":true}, Character.get_path())
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
 		"aSP3[h]Startup":
 			Character.animate("aSP3[h]Active")
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
-					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+#			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
+#					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 		"aSP3Active":
 			Character.animate("aSP3bActive")
 		"aSP3[h]Active":
@@ -1446,12 +1485,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 		"SP3[ex]Startup":
 			Character.animate("SP3[ex]Active")
-			Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Character.get_feet_pos(), \
-					{"facing":Character.facing, "grounded":true, "back":true}, Character.get_path())
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
 		"aSP3[ex]Startup":
 			Character.animate("aSP3[ex]Active")
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
-					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+#			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
+#					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1538,6 +1577,17 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP6[ex]GrabRec":
 			Character.animate("FallTransit")
 			
+		"SP7Startup", "aSP7Startup":
+			Character.animate("aSP7Active")
+		"aSP7Active":
+			if Character.grounded:
+				Character.animate("SP7Rec")
+			else:
+				Character.animate("aSP7Rec")
+		"SP7Rec":
+			Character.animate("Idle")
+		"aSP7Rec":
+			Character.animate("FallTransit")
 
 func _on_SpritePlayer_anim_started(anim_name):
 
@@ -1593,13 +1643,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"HStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			
-		"aL1Startup":
+		"aL1Startup", "aL3Startup":
 			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
-		"aL1Active":
+		"aL1Active", "aL3Active":
 			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
-		"aL1Rec":
+		"aL1Rec", "aL3Rec":
 			Character.velocity_limiter.x = 85
 		"aL2Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
@@ -1715,18 +1765,18 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 50
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.get_path())
 		"aSP2[h]Active":
 			Character.velocity.set_vector(Character.facing * 600 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.get_path())
 		"aSP2[ex]Active":
 			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 50
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.get_path())
 		"aSP2[h]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
@@ -1813,6 +1863,26 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.face(-Character.facing)
 			Character.velocity_limiter.down = 20
 			Character.anim_gravity_mod = 25
+		
+		"SP7Startup":
+			Character.face_opponent()
+			Character.get_node("ModulatePlayer").play("unflinch_flash")
+		"aSP7Startup":
+			Character.face_opponent()
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
+			Character.get_node("ModulatePlayer").play("unflinch_flash")
+		"aSP7Active":
+			instinct()
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.down = 10
+		"SP7Rec":
+			Character.play_audio("water13", {"vol" : -10})
+		"aSP7Rec":
+			Character.play_audio("water13", {"vol" : -10})
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.down = 10
 			
 	start_audio(anim_name)
 

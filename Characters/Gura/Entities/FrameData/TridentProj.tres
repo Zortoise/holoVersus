@@ -250,7 +250,7 @@ frame_data = {
 "vframes": 16
 },
 "[c1]Spin": {
-"duration": 30,
+"duration": 22,
 "hframes": 6,
 "loop": false,
 "spritesheet": "TridentProjSprite",
@@ -474,7 +474,7 @@ frame_data = {
 "vframes": 16
 },
 "[c2]Spin": {
-"duration": 30,
+"duration": 22,
 "hframes": 6,
 "loop": false,
 "spritesheet": "TridentProjSprite",

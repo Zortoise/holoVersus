@@ -1,0 +1,74 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"EXFlash": {
+"duration": 18,
+"hframes": 6,
+"loop": false,
+"spritesheet": "ShinesSprite",
+"timestamps": {
+0: {
+"frame": 7
+},
+2: {
+"frame": 8
+},
+4: {
+"frame": 9
+},
+6: {
+"frame": 10
+},
+8: {
+"frame": 11
+},
+10: {
+"frame": 12
+},
+12: {
+"frame": 13
+},
+14: {
+"frame": 14
+},
+16: {
+"frame": 15
+}
+},
+"vframes": 3
+},
+"FDashCancel": {
+"duration": 15,
+"hframes": 6,
+"loop": false,
+"spritesheet": "ShinesSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+3: {
+"frame": 1
+},
+5: {
+"frame": 2
+},
+7: {
+"frame": 3
+},
+9: {
+"frame": 4
+},
+11: {
+"frame": 5
+},
+13: {
+"frame": 6
+}
+},
+"vframes": 3
+}
+}

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/MediumSplashSprite.png-7b9699aa9f04971cf3f433d0b082a48f.stex"
+path="res://.import/ShinesSprite.png-0b7eccf846b9873c2f28846718d89ed1.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Characters/Gura/SFX/Spritesheets/MediumSplashSprite.png"
-dest_files=[ "res://.import/MediumSplashSprite.png-7b9699aa9f04971cf3f433d0b082a48f.stex" ]
+source_file="res://Assets/Effects/Shines/Spritesheets/ShinesSprite.png"
+dest_files=[ "res://.import/ShinesSprite.png-0b7eccf846b9873c2f28846718d89ed1.stex" ]
 
 [params]
 

@@ -1600,6 +1600,18 @@ func rng_generate(upper_limit: int) -> int: # will return a number from 0 to (up
 	current_rng_seed = wrapi(result, 1, 10000) # each call to generate a number changes the current seed
 	return posmod(result, upper_limit)
 			
+func rng_facing():
+	if rng_generate(2) == 0:
+		return 1
+	else:
+		return -1
+		
+func rng_bool():
+	if rng_generate(2) == 0:
+		return true
+	else:
+		return false
+			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------
 
 func spawn_entity(master_path: NodePath, entity_ref: String, out_position, aux_data: Dictionary):

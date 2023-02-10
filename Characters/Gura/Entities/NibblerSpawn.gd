@@ -24,7 +24,7 @@ func simulate():
 	elif Animator.current_animation == "Kill" and Animator.time == 5:
 		var spawn_point = Animator.query_point("entityspawn")
 		Globals.Game.spawn_entity(Entity.master_path, "Nibbler", spawn_point, {"facing" : Entity.facing})
-		Globals.Game.spawn_SFX("MediumSplash", "MediumSplash", Entity.position, {"facing":Entity.facing, "grounded":true}, Entity.master_path)
+		Globals.Game.spawn_SFX("BigSplash", "BigSplash", Entity.position, {"facing":Entity.facing, "grounded":true}, Entity.master_path)
 		Entity.play_audio("water6", {"vol" : -20})
 		Entity.free = true
 	

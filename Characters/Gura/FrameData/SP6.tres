@@ -297,7 +297,7 @@ frame_data = {
 "frame": 0,
 "grabpoint": null,
 "grabrotdir": null,
-"hitbox": [ Vector2( 12, 4 ), Vector2( 25, 4 ), Vector2( 25, -1 ), Vector2( 12, -1 ) ],
+"hitbox": [ Vector2( 9, 5 ), Vector2( 29, 5 ), Vector2( 29, -2 ), Vector2( 9, -2 ) ],
 "hurtbox": [ Vector2( -3, 0 ), Vector2( -13, 0 ), Vector2( -13, 22 ), Vector2( 9, 22 ), Vector2( 9, 5 ), Vector2( 26, 5 ), Vector2( 26, -2 ), Vector2( 18, -2 ), Vector2( 18, -17 ), Vector2( -3, -17 ) ]
 }
 },

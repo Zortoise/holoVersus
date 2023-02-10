@@ -1,13 +1,11 @@
-[gd_scene load_steps=40 format=2]
+[gd_scene load_steps=37 format=2]
 
 [ext_resource path="res://Scenes/Stage/Stage.gd" type="Script" id=1]
 [ext_resource path="res://Stages/Aurora/Resources/main_platform.png" type="Texture" id=3]
 [ext_resource path="res://Scenes/Stage/SolidPlatform.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Stages/Aurora/Resources/background.png" type="Texture" id=5]
-[ext_resource path="res://Stages/Aurora/FlowerGlow.gd" type="Script" id=6]
 [ext_resource path="res://Stages/Aurora/ShootingStarSpawner.gd" type="Script" id=7]
 [ext_resource path="res://Stages/Aurora/WispSpawner.gd" type="Script" id=8]
-[ext_resource path="res://Stages/Aurora/Resources/flower_glow.png" type="Texture" id=9]
 [ext_resource path="res://Stages/Aurora/Resources/Aurora/Aurora1.png" type="Texture" id=10]
 [ext_resource path="res://Stages/Aurora/Resources/Aurora/Aurora2.png" type="Texture" id=11]
 [ext_resource path="res://Stages/Aurora/Resources/Aurora/Aurora4.png" type="Texture" id=12]
@@ -48,9 +46,6 @@ animations = [ {
 "speed": 10.0
 } ]
 
-[sub_resource type="CanvasItemMaterial" id=1]
-blend_mode = 1
-
 [node name="Aurora" type="Node2D"]
 script = ExtResource( 1 )
 
@@ -66,15 +61,15 @@ texture = ExtResource( 5 )
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 4
+frame = 20
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]
 visible = false
 modulate = Color( 1, 0, 0, 0.180392 )
-margin_left = -704.0
+margin_left = -448.0
 margin_top = -448.0
-margin_right = 703.0
+margin_right = 448.0
 script = ExtResource( 7 )
 
 [node name="ParallaxLayer2" type="ParallaxLayer" parent="ParallaxBackground"]
@@ -82,10 +77,10 @@ motion_scale = Vector2( 0.9, 0.95 )
 
 [node name="WispSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer2"]
 visible = false
-margin_left = -704.0
+margin_left = -456.0
 margin_top = -32.0
-margin_right = 704.0
-margin_bottom = 576.0
+margin_right = 448.0
+margin_bottom = 320.0
 color = Color( 1, 0.984314, 0, 0.243137 )
 script = ExtResource( 8 )
 
@@ -94,58 +89,22 @@ motion_scale = Vector2( 0.8, 0.9 )
 
 [node name="Wisp2Spawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer3"]
 visible = false
-margin_left = -704.0
+margin_left = -448.0
 margin_top = -32.0
-margin_right = 704.0
-margin_bottom = 576.0
+margin_right = 448.0
+margin_bottom = 320.0
 color = Color( 1, 0.984314, 0, 0.243137 )
 script = ExtResource( 32 )
 
 [node name="MainPlatform" type="Sprite" parent="."]
-position = Vector2( 0, 288 )
+position = Vector2( 0, 224 )
 texture = ExtResource( 3 )
 
 [node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 4 )]
 margin_left = -448.0
-margin_top = -160.0
+margin_top = -96.0
 margin_right = 448.0
-margin_bottom = 160.0
-
-[node name="FlowerGlow" type="Sprite" parent="MainPlatform"]
-material = SubResource( 1 )
-position = Vector2( 77, -49 )
-texture = ExtResource( 9 )
-script = ExtResource( 6 )
-
-[node name="FlowerGlow2" type="Sprite" parent="MainPlatform"]
-material = SubResource( 1 )
-position = Vector2( -65, 4 )
-texture = ExtResource( 9 )
-script = ExtResource( 6 )
-
-[node name="FlowerGlow3" type="Sprite" parent="MainPlatform"]
-material = SubResource( 1 )
-position = Vector2( 91, 56 )
-texture = ExtResource( 9 )
-script = ExtResource( 6 )
-
-[node name="FlowerGlow4" type="Sprite" parent="MainPlatform"]
-material = SubResource( 1 )
-position = Vector2( 198, -12 )
-texture = ExtResource( 9 )
-script = ExtResource( 6 )
-
-[node name="FlowerGlow5" type="Sprite" parent="MainPlatform"]
-material = SubResource( 1 )
-position = Vector2( -236, -82 )
-texture = ExtResource( 9 )
-script = ExtResource( 6 )
-
-[node name="FlowerGlow6" type="Sprite" parent="MainPlatform"]
-material = SubResource( 1 )
-position = Vector2( -158, 67 )
-texture = ExtResource( 9 )
-script = ExtResource( 6 )
+margin_bottom = 224.0
 
 [node name="MPlatform1" type="Node2D" parent="."]
 script = ExtResource( 35 )

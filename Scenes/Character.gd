@@ -53,9 +53,9 @@ const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can la
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
 const AC_BurstLockTimer_TIME = 10 # number of frames you cannot use Burst Escape after being hit with an autochain move
 #const PosFlowSealTimer_TIME = 30 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
-const TrainingRegenTimer_TIME = 60 # number of frames before GG/Damage Value start regening
+const TrainingRegenTimer_TIME = 50 # number of frames before GG/Damage Value start regening
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
-const CORNER_PUSHBACK = 400 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
+const CORNER_PUSHBACK = 200 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
 #const CORNER_GUARD_DRAIN_MOD = 150 # blocker take extra Guard Drain when blocking at the corners
 const DODGE_SEMI_IFRAMES = 10 # frames of semi-invuln while dodging
 
@@ -503,7 +503,7 @@ func initial_targeting(): # target random players at start, cannot do in init() 
 	for x in Globals.player_count:
 		if x != player_ID:
 			player_ids.append(x)
-	targeted_opponent_path = Globals.Game.get_player_node(player_ids[rng_generate(player_ids.size())]).get_path()
+	targeted_opponent_path = Globals.Game.get_player_node(player_ids[Globals.Game.rng_generate(player_ids.size())]).get_path()
 	
 
 	
@@ -528,7 +528,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
+		"\naerial_memory: " + str(aerial_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
 		" " + str(success_block)
 			
@@ -747,9 +747,9 @@ func simulate2(): # only ran if not in hitstop
 			
 	else: # training mode regen EX Gauge
 		if current_ex_gauge < MAX_EX_GAUGE:
-			change_ex_gauge(320)
+			change_ex_gauge(600)
 		if Globals.training_settings.regen == 1 and !$TrainingRegenTimer.is_running() and current_damage_value > 0:
-			take_damage(-18) # regen damage
+			take_damage(-30) # regen damage
 	
 		
 	
@@ -838,6 +838,8 @@ func simulate2(): # only ran if not in hitstop
 					
 				if new_state == Globals.char_state.AIR_ATK_ACTIVE:
 					var move_data = query_move_data()
+					if !can_air_strafe(move_data):
+						continue # some attacks cannot be air strafed
 					if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
 						if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
 							continue # cannot strafe during some aerial normals
@@ -1236,10 +1238,7 @@ func simulate2(): # only ran if not in hitstop
 #					$PosFlowSealTimer.time = PosFlowSealTimer_TIME
 					
 					if grounded and posmod(Globals.Game.frametime, 5) == 0: # drag rocks on ground
-						var h_direction: int
-						if rng_generate(2) == 0: h_direction = 1
-						else: h_direction = -1
-						Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":h_direction})
+						Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing()})
 						
 					var vel_angle = velocity.angle() # rotation and navigation
 					var rotated := false
@@ -2205,9 +2204,7 @@ func is_killable(vel_value):
 func on_kill():
 	if state != Globals.char_state.DEAD:
 		play_audio("kill1", {"vol" : -2})
-		var sfx_facing: int = 1
-		if rng_generate(2) == 0:
-			sfx_facing = -1
+		var sfx_facing: int = Globals.Game.rng_facing()
 		var rot = Globals.Game.get_killblast_angle_and_screenshake(position) * -sfx_facing # can be a float, effect is visual
 		var aux_data = {"facing" : sfx_facing, "rot" : rot}
 		match player_ID:
@@ -2304,14 +2301,7 @@ func respawn():
 	state = Globals.char_state.GROUND_STANDBY
 	add_status_effect(Globals.status_effect.RESPAWN_GRACE, RESPAWN_GRACE_DURATION)
 	
-	var v_mirror: bool
-	if rng_generate(2) == 0: v_mirror = true
-	else: v_mirror = false
-	var h_direction: int
-	if rng_generate(2) == 0: h_direction = 1
-	else: h_direction = -1
-	
-	var aux_data = {"back":true, "facing":h_direction, "v_mirror":v_mirror}
+	var aux_data = {"back":true, "facing":Globals.Game.rng_facing(), "v_mirror":Globals.Game.rng_bool()}
 	match player_ID:
 		0:
 			pass
@@ -2328,6 +2318,11 @@ func face(in_dir):
 	sprite.scale.x = facing
 	sfx_over.scale.x = facing
 	sfx_under.scale.x = facing
+	
+func face_opponent():
+	if get_node(targeted_opponent_path).position.x - position.x != 0 and \
+			sign(get_node(targeted_opponent_path).position.x - position.x) != facing:
+		face(-facing)
 	
 func reset_jumps():
 	air_jump = UniqChar.get_stat("MAX_AIR_JUMP") # reset jump count on ground
@@ -2582,10 +2577,10 @@ func snap_up_wave_land_check():
 func get_feet_pos(): # return global position of the point the character is standing on, for SFX emission
 	return position + Vector2(0, $PlayerCollisionBox.rect_position.y + $PlayerCollisionBox.rect_size.y)
 	
-func rng_generate(upper_limit: int): # will return a number from 0 to (upper_limit - 1)
-	if Globals.Game.has_method("rng_generate"):
-		return Globals.Game.rng_generate(upper_limit)
-	else: return null
+#func rng_generate(upper_limit: int): # will return a number from 0 to (upper_limit - 1)
+#	if Globals.Game.has_method("rng_generate"):
+#		return Globals.Game.rng_generate(upper_limit)
+#	else: return null
 	
 func can_DI(): # already checked for HitStunTimer
 	if current_guard_gauge <= 0 or get_damage_percent() >= 100:
@@ -2638,17 +2633,15 @@ func set_monochrome():
 func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, number, radius, v_mirror_rand = false):
 	if Globals.Game.frametime % interval == 0:  # only shake every X frames
 		for x in number:
-			var angle = rng_generate(10) * PI/5.0
-			var distance = rng_generate(5) * radius/5.0
+			var angle = Globals.Game.rng_generate(10) * PI/5.0
+			var distance = Globals.Game.rng_generate(5) * radius/5.0
 			var particle_pos = position + Vector2(distance, 0).rotated(angle)
 			particle_pos.x = round(particle_pos.x)
 			particle_pos.y = round(particle_pos.y)
-			var particle_facing = 1
-			if rng_generate(2) == 0:
-				particle_facing = -1
-			var aux_data = {"facing" : particle_facing}
-			if v_mirror_rand and rng_generate(2) == 0:
-				aux_data["v_mirror"] = true
+
+			var aux_data = {"facing" : Globals.Game.rng_facing()}
+			if v_mirror_rand:
+				aux_data["v_mirror"] = Globals.Game.rng_bool()
 			if palette != "":
 				aux_data["palette"] = palette
 			Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data)
@@ -2743,26 +2736,20 @@ func launch_trail():
 	var frequency: int
 	if !velocity.is_longer_than(FMath.percent(LAUNCH_DUST_THRESHOLD, 50)):
 		frequency = 4
-	elif velocity.is_longer_than(LAUNCH_DUST_THRESHOLD): # the faster you go the more frequent the launch dust
+	elif !velocity.is_longer_than(LAUNCH_DUST_THRESHOLD): # the faster you go the more frequent the launch dust
 		frequency = 3
-	elif velocity.is_longer_than(FMath.percent(LAUNCH_DUST_THRESHOLD, 200)):
+	elif !velocity.is_longer_than(FMath.percent(LAUNCH_DUST_THRESHOLD, 200)):
 		frequency = 2
 	else:
 		frequency = 1
 		
 	if posmod($HitStunTimer.time, frequency) == 0:
 		
-		var v_mirror: bool
-		if rng_generate(2) == 0: v_mirror = true
-		else: v_mirror = false
-		var h_direction: int
-		if rng_generate(2) == 0: h_direction = 1
-		else: h_direction = -1
-		
 		if !grounded:
-			Globals.Game.spawn_SFX("LaunchDust", "DustClouds", position, {"back":true, "facing":h_direction, "v_mirror":v_mirror})
+			Globals.Game.spawn_SFX("LaunchDust", "DustClouds", position, {"back":true, "facing":Globals.Game.rng_facing(), \
+					"v_mirror":Globals.Game.rng_bool()})
 		else:
-			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":h_direction})
+			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing()})
 			
 	
 # QUICK STATE CHECK ---------------------------------------------------------------------------------------------------
@@ -2818,6 +2805,9 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	var move_name = get_move_name()
 	if move_name == null: return false
 	if !move_name in UniqChar.STARTERS or is_super(move_name): return false
+	
+	if Globals.atk_attr.NO_QUICK_CANCEL in query_atk_attr(move_name):
+		return false
 	
 	if is_ex_move(move_name): # cancelling from ex move, only other ex moves are possible
 		if is_ex_move(attack_ref): # cancelling into another ex move
@@ -2993,6 +2983,15 @@ func is_super(move_name):
 		Globals.atk_type.SUPER:
 			return true
 	return false
+
+func can_air_strafe(move_data):
+	if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
+		if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
+			return false # cannot strafe during some aerial normals
+	else: # non-Normal
+		if !Globals.atk_attr.STRAFE_NON_NORMAL in move_data.atk_attr:
+			return false # can strafe during some aerial non-normals
+	return true
 	
 # called by unique character to check if there is an EX version and if it is valid
 func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
@@ -3003,6 +3002,9 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		if current_ex_gauge >= EX_MOVE_COST:
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
+			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, UniqChar.get_stat("EYE_LEVEL")), \
+					{"palette":"pink"}, get_path())
+			$ModulatePlayer.play("EX_flash")
 			return true
 		else:
 			return false
@@ -3012,6 +3014,9 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
+			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, UniqChar.get_stat("EYE_LEVEL")), \
+					{"palette":"pink"}, get_path())
+			$ModulatePlayer.play("EX_flash")
 			return true
 		else:
 			return false
@@ -3164,7 +3169,9 @@ func test_fdash_cancel():
 		
 	if !grounded and flying_dash == 0: return false # if in air, need >1 super dash left
 	
-	if active_cancel: return true
+	if active_cancel:
+		afterimage_cancel()
+		return true
 	
 	var move_name = get_move_name()
 	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false
@@ -3189,6 +3196,8 @@ func test_fdash_cancel():
 			return false
 		change_ex_gauge(-FDash_CANCEL_EX_COST)
 		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+		Globals.Game.spawn_SFX("FDashCancel", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+				"v_mirror":Globals.Game.rng_bool(), "palette":"blue", "sticky":true}, get_path())
 		$ModulatePlayer.play("fdash_cancel")
 		
 	if filter:
@@ -3364,7 +3373,7 @@ func test_status_visual_effect_priority():
 	
 func sprite_shake(): # used for Break and lethal blows
 	if posmod(Globals.Game.frametime, 2) == 0:  # only shake every 2 frames
-		var random = rng_generate(9) + 1
+		var random = Globals.Game.rng_generate(9) + 1
 		var shake := Vector2.ZERO
 		match random:
 			1, 2, 3:
@@ -3798,8 +3807,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				
 	# PUSHBACK ----------------------------------------------------------------------------------------------
 		
-	if "multihit" in hit_data or "autochain" in hit_data:
-		pass
+	if "multihit" in hit_data or "autochain" in hit_data or !can_air_strafe(hit_data.move_data):
+		pass # if an attack does not allow air strafing, it cannot be pushed back
 	else:
 		
 		match hit_data.block_state:
@@ -3809,7 +3818,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				if "cornered" in hit_data:
 					var pushback_strength: int = CORNER_PUSHBACK
 					if defender.current_guard_gauge > 0:
-						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 200), \
+						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
 								defender.get_guard_gauge_percent_above())
 					match Globals.split_angle(hit_data.angle_to_atker, Globals.angle_split.TWO, facing):
 						Globals.compass.E:
@@ -4268,11 +4277,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		generate_blockspark(hit_data)
 		
 	if hit_data.stun: # stunspark is on top of regular hitspark
-		var v_mirror := false
-		if rng_generate(2) == 0: v_mirror = true
-		var out_facing := 1
-		if rng_generate(2) == 0: out_facing = -1
-		Globals.Game.spawn_SFX("Stunspark", "Stunspark", hit_data.hit_center, {"facing":out_facing, "v_mirror":v_mirror})
+		Globals.Game.spawn_SFX("Stunspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
+				"v_mirror":Globals.Game.rng_bool()})
 	
 	# ---------------------------------------------------------------------------------------------------
 			
@@ -4814,11 +4820,7 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
 	# SD hits have special hitspark, unless has VULN_LIMBS
 	if hit_data.semi_disjoint and !Globals.atk_attr.VULN_LIMBS in query_atk_attr():
-		var v_mirror := false
-		if rng_generate(2) == 0: v_mirror = true
-		var out_facing := 1
-		if rng_generate(2) == 0: out_facing = -1
-		var aux_data = {"facing":out_facing, "v_mirror":v_mirror}
+		var aux_data = {"facing":Globals.Game.rng_facing(), "v_mirror":Globals.Game.rng_bool()}
 		if UniqChar.SDHitspark_COLOR != "red":
 			aux_data["palette"] = UniqChar.SDHitspark_COLOR
 		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data.hit_center, aux_data)
@@ -4876,11 +4878,9 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 			pass
 					
 	if hitspark != "":
-		var v_mirror := false
-		if rng_generate(2) == 0: v_mirror = true # 50% change of mirror the hitspark
 		var rot_rad : float = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
 		if "pull" in hit_data: rot_rad += PI # flip if pulling
-		var aux_data = {"rot": rot_rad, "v_mirror":v_mirror}
+		var aux_data = {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}
 		if hit_data.move_data["hitspark_palette"] != "red":
 			aux_data["palette"] = hit_data.move_data["hitspark_palette"]
 		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, aux_data)
@@ -5358,9 +5358,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			velocity_limiter.x_slow = 10
 			velocity_limiter.y_slow = 10
 		"Dodge":
-			if get_node(targeted_opponent_path).position.x - position.x != 0 and \
-					sign(get_node(targeted_opponent_path).position.x - position.x) != facing:
-				face(-facing) # face opponent
+			face_opponent()
 			var tech_angle: int
 			if !grounded or soft_grounded:
 				tech_angle = Globals.dir_to_angle(dir, v_dir, facing)

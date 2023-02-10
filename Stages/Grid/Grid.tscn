@@ -62,7 +62,8 @@ texture = ExtResource( 6 )
 stretch_mode = 2
 
 [node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 1 )]
-margin_right = 768.0
+margin_left = -64.0
+margin_right = 832.0
 margin_bottom = 192.0
 
 [node name="MPlatform1" type="Node2D" parent="."]

@@ -9,6 +9,14 @@ var flicker_fade := 0.3 # how much to reduce alpha by when flickering
 
 var time := 0.0 # float
 
+# Example of code to enter in extended instance Sprite Node
+#func _ready():
+#
+#	modulate_start = Color(1.0, 1.0, 1.0, 1.0)
+#	modulate_end = Color(1.0, 1.0, 1.0, 0.3)
+#	period = 5.0 # number of seconds for modulate to complete a cycle
+#
+#	init()
 
 func init():
 	time = Globals.random.randf() * period # randomize start point

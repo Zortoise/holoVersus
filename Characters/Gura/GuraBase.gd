@@ -11,7 +11,7 @@ const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
 const VAR_JUMP_TIME = 10 # frames after jumping where holding jump will reduce gravity
-const JUMP_HORIZONTAL_SPEED = 120 * FMath.S
+const JUMP_HORIZONTAL_SPEED = 110 * FMath.S
 const AIR_JUMP_HEIGHT_MOD = 90 # percentage of JUMP_SPEED, reduce height of air jumps
 const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
 const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
@@ -23,6 +23,7 @@ const FRICTION = 15 # between 0.0 and 1.0
 const ACCELERATION = 15 # between 0.0 and 1.0
 const AIR_RESISTANCE = 3 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 100 # reduced gravity when going down
+const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
@@ -70,13 +71,14 @@ const UNIQUE_DATA_REF = {
 	"nibbler_cancel" : 0, # a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 }
 
-const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
-	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
+const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
+	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]", \
+	"SP7", "aSP7"]
 #const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
 #const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 #const SUPERS = []
 
-const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
+const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aL3", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
 const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1b[ex]", "aSP1b[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
@@ -302,6 +304,21 @@ const MOVE_DATABASE = {
 		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.NO_REC_CANCEL],
 		"move_sound" : { ref = "whoosh15", aux_data = {"vol" : -9} },
 		"hit_sound" : { ref = "cut8", aux_data = {"vol" : -10} },
+	},
+	"aL3" : {
+		"atk_type" : Globals.atk_type.LIGHT,
+		"hitcount" : 1,
+		"damage" : 40,
+		"knockback" : 400 * FMath.S,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"atk_level" : 3,
+		"priority": 1,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : -80,
+		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12, "bus" : "PitchDown"} },
+		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
 	"aF1" : {
 		"atk_type" : Globals.atk_type.FIERCE,
@@ -637,6 +654,13 @@ const MOVE_DATABASE = {
 			"launch_angle" : -103,
 			"atk_level" : 4,
 		}
+	},
+	
+	"SP7": {
+		"atk_type" : Globals.atk_type.SPECIAL,
+		"priority": 0,
+		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
+		"atk_attr" : [Globals.atk_attr.NO_TURN, Globals.atk_attr.NO_QUICK_CANCEL],
 	},
 
 }

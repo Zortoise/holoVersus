@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/KillBlastSprite.png-419478068fea4da81a61c23bc2fbf145.stex"
+path="res://.import/SP7SfxOver.png-90d6912af6ba10e1bb40e1395800fe89.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Effects/DustClouds/Spritesheets/KillBlastSprite.png"
-dest_files=[ "res://.import/KillBlastSprite.png-419478068fea4da81a61c23bc2fbf145.stex" ]
+source_file="res://Characters/Gura/Spritesheets/SP7SfxOver.png"
+dest_files=[ "res://.import/SP7SfxOver.png-90d6912af6ba10e1bb40e1395800fe89.stex" ]
 
 [params]
 
@@ -31,5 +31,5 @@ process/invert_color=false
 process/normal_map_invert_y=false
 stream=false
 size_limit=0
-detect_3d=true
+detect_3d=false
 svg/scale=1.0

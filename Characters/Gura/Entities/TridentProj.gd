@@ -198,9 +198,9 @@ func init(aux_data: Dictionary):
 
 func spin():
 	match Animator.to_play_animation:
-		"[c2]Active", "[ex]Active", "[u][c2]Active", "[u][ex]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
+		"[c2]Active", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			Animator.play("[c1]Spin")
-		"[c3]Active", "[u][c3]Active":
+		"[c3]Active", "[u][c3]Active", "[ex]Active", "[u][ex]Active":
 			Animator.play("[c2]Spin")
 
 func turn_to_enemy():
@@ -284,6 +284,8 @@ func turn_to_enemy():
 	Entity.unique_data.new_facing = new_facing
 	Entity.unique_data.new_v_facing = new_v_facing
 	Entity.unique_data.reset_rot = true
+	Entity.lifetime = 0
+	Entity.play_audio("whoosh12", {"bus":"PitchDown"})
 	
 
 func refine_move_name(move_name):
@@ -377,7 +379,7 @@ func simulate():
 	match Animator.to_play_animation: # afterimage trail
 		
 		"[c1]Spin", "[c2]Spin":
-			Entity.velocity.percent(85)
+			Entity.velocity.percent(80)
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
@@ -386,6 +388,10 @@ func simulate():
 			if posmod(Entity.lifetime, 3) == 0:
 				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
+			if !Animator.to_play_animation in ["[c2]Active", "[u][c2]Active"]:
+				if Entity.lifetime > 25 and Entity.hitcount_record.size() == 0:
+					Animator.play("[c1]Spin")
+		
 				
 		"[c3]Active", "[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
@@ -428,6 +434,12 @@ func kill(sound = true):
 
 	
 func collision(): # collided with a platform
+	
+	match Animator.to_play_animation:
+		"[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
+			if Entity.hitcount_record.size() == 0:
+				Animator.play("[c1]Spin")
+				return
 	kill()
 	
 #func ledge_drop():

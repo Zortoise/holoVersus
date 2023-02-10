@@ -467,11 +467,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 52,
-"hurtbox": [ Vector2( -18, 18 ), Vector2( 18, 18 ), Vector2( 18, -18 ), Vector2( -18, -18 ) ]
+"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
 },
 4: {
 "frame": 53,
-"hurtbox": [ Vector2( -18, 18 ), Vector2( 18, 18 ), Vector2( 18, -18 ), Vector2( -18, -18 ) ]
+"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
 }
 },
 "vframes": 17

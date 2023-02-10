@@ -3,7 +3,7 @@ extends "res://Scenes/Stage/StageParticleSpawner.gd"
 
 func _ready():
 	hide()
-	interval = 0.05
+	interval = 0.2
 	
 	particle_scene = load("res://Stages/Aurora/Wisp2.tscn")
 	particle_data = {

@@ -388,6 +388,36 @@ var modulate_animations = {
 		}
 	},
 	"fdash_cancel" : {
+		"duration": 24,
+		"loop" : false,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(1.0, 2.5, 2.5),
+			},
+			4 :
+			{
+				"modulate" : Color(0.8, 1.5, 5.0),
+			},
+			8 :
+			{
+				"modulate" : Color(1.0, 1.0, 1.5),
+			},
+			12 :
+			{
+				"modulate" : Color(1.0, 2.5, 2.5),
+			},
+			16 :
+			{
+				"modulate" : Color(0.8, 1.5, 5.0),
+			},
+			20 :
+			{
+				"modulate" : Color(1.0, 1.0, 1.5),
+			},
+		}
+	},
+	"fdash_cancel2" : {
 		"duration": 22,
 		"loop" : false,
 		"timestamps" : {

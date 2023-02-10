@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "BigSplash": {
-"duration": 24,
+"duration": 21,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BigSplashSprite",
@@ -17,19 +17,28 @@ frame_data = {
 4: {
 "frame": 1
 },
-8: {
+7: {
 "frame": 2
 },
-12: {
+9: {
 "frame": 3
 },
-16: {
+11: {
 "frame": 4
 },
-20: {
+13: {
 "frame": 5
+},
+15: {
+"frame": 6
+},
+17: {
+"frame": 7
+},
+19: {
+"frame": 8
 }
 },
-"vframes": 1
+"vframes": 2
 }
 }
