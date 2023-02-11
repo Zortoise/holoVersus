@@ -102,28 +102,36 @@ var modulate_animations = {
 		}
 	},
 	"red_burst" : {
-		"duration": 15,
+		"duration": 24,
 		"loop" : false,
 		"timestamps" : {
 			0 :
 			{
 				"modulate" : Color(4.0, 4.0, 4.0),
 			},
-			3 :
+			4 :
 			{
 				"modulate" : Color(5.0, 1.0, 1.0),
 			},
-			7 :
+			8 :
 			{
 				"modulate" : Color(4.0, 4.0, 4.0),
 			},
-			11 :
+			12 :
+			{
+				"modulate" : Color(5.0, 1.0, 1.0),
+			},
+			16 :
+			{
+				"modulate" : Color(4.0, 4.0, 4.0),
+			},
+			20 :
 			{
 				"modulate" : Color(5.0, 1.0, 1.0),
 			},
 		}
 	},
-	"pink_burst" : {
+	"pink_reset" : {
 		"duration": 12,
 		"loop" : false,
 		"afterimage_trail" : 0,
@@ -387,7 +395,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"fdash_cancel" : {
+	"blue_reset" : {
 		"duration": 24,
 		"loop" : false,
 		"timestamps" : {

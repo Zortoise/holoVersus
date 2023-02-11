@@ -1168,7 +1168,7 @@ func defender_semi_invul(hitbox, hurtbox):
 	var defender = get_node(hurtbox.owner_nodepath)
 				
 	if defender.check_semi_invuln():
-		if "chain_combo" in attacker_or_entity: # prevent Burst Revoke on iframed attack
+		if "chain_combo" in attacker_or_entity: # prevent Quick Reset on iframed attack
 			attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
 		return true # defender's semi-invul succeeded
 

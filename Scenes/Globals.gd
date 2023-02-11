@@ -63,11 +63,11 @@ enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, 
 enum block_state {UNBLOCKED, STRONG, WEAK}
 enum trait {CHAIN_DASH, AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK,
 		DASH_BLOCK, AIR_DASH_BLOCK}
-enum revoke_type {STARTUP_REVOKE, NON_ATK_REVOKE, EARLY_REVOKE, FULL_ACTIVE_REVOKE}
-# STARTUP_REVOKE = can only revoke this Special during startup just like Normals
-# NON_ATK_REVOKE = projectiles and stuff, cannot be Burst Revoked if targeted opponent is in hitstun
-# EARLY_REVOKE = can revoke within 1st 3 frames of the active frames of this Special
-# FULL_ACTIVE_REVOKE = can revoke anytime during active frames of this Special
+enum reset_type {STARTUP_RESET, NON_ATK_RESET, EARLY_RESET, FULL_ACTIVE_RESET}
+# STARTUP_RESET = can only a_reset this Special during startup just like Normals
+# NON_ATK_RESET = projectiles and stuff, cannot be a_reseted if targeted opponent is in hitstun
+# EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special
+# FULL_ACTIVE_RESET = can a_reset anytime during active frames of this Special
 
 enum entity_trait {GROUNDED, LEDGE_STOP}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
@@ -112,11 +112,6 @@ onready var common_entity_data = {
 	},
 	"BurstExtend" : {
 		"scene" : load("res://Assets/Entities/BurstExtend.tscn"),
-		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
-		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
-	},
-	"BurstRevoke" : {
-		"scene" : load("res://Assets/Entities/BurstRevoke.tscn"),
 		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
 		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
 	},

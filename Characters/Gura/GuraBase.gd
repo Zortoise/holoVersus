@@ -28,12 +28,10 @@ const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const MAX_AIR_DODGE = 1
-const MAX_FLYING_DASH = 1
 const GROUND_DASH_SPEED = 450 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
-const FDASH_SPEED = 450 * FMath.S # flying dash
-const FDASH_GG_COST = 75 # exact GG loss per frame when fdashing
-const FDASH_TURN_RATE = 3 # exact navigate speed when fdashing
+const B_RESET_SPEED = 450 * FMath.S # flying dash
+const B_RESET_TURN_RATE = 5 # exact navigate speed when fdashing
 const DODGE_GG_COST = 2500
 const DODGE_SPEED = 1000 * FMath.S
 
@@ -370,7 +368,7 @@ const MOVE_DATABASE = {
 	"SP1": {
 		"atk_type" : Globals.atk_type.SPECIAL, # used for chaining
 		"priority": 0,
-		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
+		"reset_type" : Globals.reset_type.NON_ATK_RESET,
 		"atk_attr" : [],
 	},
 	"SP1[ex]": {
@@ -393,7 +391,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"revoke_type" : Globals.revoke_type.FULL_ACTIVE_REVOKE,
+		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
 		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -410,7 +408,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
-		"revoke_type" : Globals.revoke_type.FULL_ACTIVE_REVOKE,
+		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
 		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -444,7 +442,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
-		"revoke_type" : Globals.revoke_type.EARLY_REVOKE,
+		"reset_type" : Globals.reset_type.EARLY_RESET,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -476,7 +474,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
-		"revoke_type" : Globals.revoke_type.EARLY_REVOKE,
+		"reset_type" : Globals.reset_type.EARLY_RESET,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -533,14 +531,14 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
 		"atk_attr" : [],
-		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
+		"reset_type" : Globals.reset_type.NON_ATK_RESET,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[h]": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
 		"atk_attr" : [],
-		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
+		"reset_type" : Globals.reset_type.NON_ATK_RESET,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[ex]": {
@@ -562,7 +560,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
-		"revoke_type" : Globals.revoke_type.STARTUP_REVOKE,
+		"reset_type" : Globals.reset_type.STARTUP_RESET,
 		"atk_attr" : [Globals.atk_attr.DESTROY_ENTITIES],
 		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
@@ -581,7 +579,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "red",
 		"KB_angle" : -20,
-		"revoke_type" : Globals.revoke_type.STARTUP_REVOKE,
+		"reset_type" : Globals.reset_type.STARTUP_RESET,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.DESTROY_ENTITIES],
 		"move_sound" : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -7} },
@@ -658,7 +656,7 @@ const MOVE_DATABASE = {
 	"SP7": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"priority": 0,
-		"revoke_type" : Globals.revoke_type.NON_ATK_REVOKE,
+		"reset_type" : Globals.reset_type.NON_ATK_RESET,
 		"atk_attr" : [Globals.atk_attr.NO_TURN, Globals.atk_attr.NO_QUICK_CANCEL],
 	},
 

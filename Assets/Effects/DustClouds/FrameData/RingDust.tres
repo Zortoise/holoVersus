@@ -5,11 +5,11 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"FDashDust": {
+"RingDust": {
 "duration": 18,
 "hframes": 6,
 "loop": false,
-"spritesheet": "FDashDustSprite",
+"spritesheet": "RingDustSprite",
 "timestamps": {
 0: {
 "frame": 0

@@ -730,7 +730,7 @@ func consume_one_air_dash(): # different characters can have different types of 
 
 func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
-		"Dash", "aDash", "aDashD", "aDashU", "FDashTransit", "FDash":
+		"Dash", "aDash", "aDashD", "aDashU", "BResetTransit", "BReset":
 			Character.afterimage_trail()
 		"Dodge":
 			if Animator.time <= 10:
@@ -1148,8 +1148,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aDashBrake")
 		"aDashBrake":
 			Character.animate("Fall")
-		"FDashTransit":
-			Character.animate("FDash")
 #		"SDash":
 #			if !Character.grounded:
 #				Character.animate("aDashBrake")
@@ -1927,7 +1925,7 @@ func start_audio(anim_name):
 			dash_sound()
 		"aDash", "aDashD", "aDashU":
 			Character.play_audio("dash1", {"vol" : -6})
-		"FDash":
+		"BReset":
 			Character.play_audio("dash1", {"vol" : -8})
 			Character.play_audio("launch1", {"vol" : -15})
 

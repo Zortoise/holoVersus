@@ -41,7 +41,7 @@ frame_data = {
 },
 "vframes": 3
 },
-"FDashCancel": {
+"Reset": {
 "duration": 15,
 "hframes": 6,
 "loop": false,

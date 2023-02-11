@@ -186,7 +186,7 @@ func simulate2(): # only ran if not in hitstop
 	
 func interactions():
 	
-	if UniqEntity.has_method("kill"):
+	if UniqEntity.has_method("kill") and !Animator.to_play_animation.ends_with("Kill"):
 		var my_hitbox = Animator.query_polygon("hitbox")
 		if my_hitbox != null:
 			
