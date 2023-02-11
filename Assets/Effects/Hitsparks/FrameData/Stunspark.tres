@@ -5,6 +5,57 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"Crushspark": {
+"duration": 23,
+"hframes": 6,
+"loop": false,
+"spritesheet": "StunsparkSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+2: {
+"frame": 1
+},
+4: {
+"frame": 14
+},
+6: {
+"frame": 15
+},
+8: {
+"frame": 16
+},
+10: {
+"frame": 17
+},
+12: {
+"frame": 18
+},
+14: {
+"frame": 19
+},
+16: {
+"frame": 20
+},
+18: {
+"frame": 21
+},
+19: {
+"frame": 22
+},
+20: {
+"frame": 23
+},
+21: {
+"frame": 24
+},
+22: {
+"frame": 25
+}
+},
+"vframes": 5
+},
 "Stunspark": {
 "duration": 29,
 "hframes": 6,
@@ -54,6 +105,6 @@ frame_data = {
 "frame": 13
 }
 },
-"vframes": 3
+"vframes": 5
 }
 }

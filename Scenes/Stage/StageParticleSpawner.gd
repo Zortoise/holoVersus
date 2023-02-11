@@ -33,8 +33,8 @@ func _physics_process(delta):
 func spawn(offset = false):
 # warning-ignore:unassigned_variable
 	var spawn_pos: Vector2
-	spawn_pos.x = Globals.random.randf() * rect_size.x + rect_position.x
-	spawn_pos.y = Globals.random.randf() * rect_size.y + rect_position.y
+	spawn_pos.x = round(Globals.random.randf() * rect_size.x + rect_position.x)
+	spawn_pos.y = round(Globals.random.randf() * rect_size.y + rect_position.y)
 	
 	var particle = particle_scene.instance()
 	get_parent().add_child(particle)

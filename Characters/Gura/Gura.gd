@@ -546,8 +546,8 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			
 		"ExSp.dF":
 			if !has_acted[0]:
-				if !Character.impulse_used:
-					keep = !process_move(new_state, "SP6[ex]", has_acted)
+#				if !Character.impulse_used:
+				keep = !process_move(new_state, "SP6[ex]", has_acted)
 				
 		"ExSp.H":
 			if !has_acted[0]:
@@ -1619,6 +1619,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})
 			
+		"L1Startup":
+			Character.anim_friction_mod = 150
 		"L2Startup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 80)
 		"L2Active":
@@ -1639,6 +1641,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.get_node("ModulatePlayer").play("armor_flash")
 		"HStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.anim_friction_mod = 150
 			
 		"aL1Startup", "aL3Startup":
 			Character.velocity_limiter.x = 85
@@ -1836,7 +1839,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 25
 			
 		"SP6[ex]Startup":
-			Character.velocity.x = 0
+			Character.anim_friction_mod = 200
 		"aSP6[ex]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20

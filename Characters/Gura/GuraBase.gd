@@ -103,7 +103,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36,
-		"impulse_mod" : 50,
+#		"impulse_mod" : 50,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
 		"move_sound" : { ref = "whoosh2", aux_data = {"vol" : -12} },
 		"hit_sound" : { ref = "cut1", aux_data = {"vol" : -15} },
@@ -251,7 +251,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
-		"impulse_mod" : 50,
+#		"impulse_mod" : 50,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.NO_CHAIN, Globals.atk_attr.NO_REPEAT_MOVE],
 		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -362,7 +362,7 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "blue",
 		"KB_angle" : 45,
 		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.ACTIVE_CANCEL, Globals.atk_attr.DESTROY_ENTITIES, \
-				Globals.atk_attr.PUNISH_CRUSH],
+				Globals.atk_attr.CRUSH],
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
 	},
@@ -627,8 +627,7 @@ const MOVE_DATABASE = {
 		"hitcount" : 1,
 		"priority": 11,
 		"hitspark_type" : Globals.hitspark_type.NONE,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.CANNOT_CHAIN_INTO, \
-				Globals.atk_attr.NOT_FROM_C_REC]
+		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.CANNOT_CHAIN_INTO, Globals.atk_attr.NOT_FROM_C_REC]
 	},
 	
 	"SP6[ex]SeqE": {

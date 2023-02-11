@@ -48,7 +48,7 @@ frame_data = {
 "vframes": 2
 },
 "L1Startup": {
-"duration": 6,
+"duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L1Sprite",
@@ -59,7 +59,7 @@ frame_data = {
 "hurtbox": [ Vector2( -10, 22 ), Vector2( 14, 22 ), Vector2( 14, -22 ), Vector2( -10, -22 ) ],
 "sdhurtbox": [  ]
 },
-3: {
+2: {
 "frame": 1,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -5, 3 ), Vector2( -10, 3 ), Vector2( -10, 22 ), Vector2( 17, 22 ), Vector2( 17, -19 ), Vector2( -5, -19 ) ],

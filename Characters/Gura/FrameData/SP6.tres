@@ -272,7 +272,7 @@ frame_data = {
 "vframes": 6
 },
 "SP6[ex]Startup": {
-"duration": 5,
+"duration": 1,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP6Sprite",
@@ -394,7 +394,7 @@ frame_data = {
 "vframes": 6
 },
 "aSP6[ex]Startup": {
-"duration": 5,
+"duration": 1,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP6Sprite",

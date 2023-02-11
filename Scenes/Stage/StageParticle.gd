@@ -64,6 +64,9 @@ func _physics_process(delta):
 		else:
 			position = origin
 			
+		position.x = round(position.x)
+		position.y = round(position.y)
+			
 # warning-ignore:unassigned_variable
 		var detect_box: Rect2 # get a larger box
 		detect_box.position = Globals.Game.stage_box.rect_global_position

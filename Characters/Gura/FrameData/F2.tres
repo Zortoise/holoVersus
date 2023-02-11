@@ -89,7 +89,7 @@ frame_data = {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "F2SfxOver",
 "SfxOver_vframes": 2,
-"duration": 11,
+"duration": 12,
 "hframes": 6,
 "loop": false,
 "spritesheet": "F2Sprite",

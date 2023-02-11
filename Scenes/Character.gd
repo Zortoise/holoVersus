@@ -899,9 +899,9 @@ func simulate2(): # only ran if not in hitstop
 					impulse_used = true
 					var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
 					# some moves have their own impulse mod
-					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
-						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
-						impulse = FMath.percent(impulse, impulse_mod)
+#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
+#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
+#						impulse = FMath.percent(impulse, impulse_mod)
 					velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 
@@ -1713,6 +1713,9 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 		if tap[0] in exclude_buttons:
 			return
 			
+	if are_inputs_too_close(): # if last pressed button_ex is too close to last pressed attack button, cannot perform EX
+		return
+			
 	if (button1 in input_state.just_pressed and is_button_released(button_ex)) or \
 		(button_ex in input_state.just_released and is_button_pressed(button1)):
 		if !instant:
@@ -1725,6 +1728,10 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 			
 				
 func ex_combination_trio(button_ex, button1, button2, action, back = false, instant = false):
+	
+	if are_inputs_too_close(): # if last pressed button_ex is too close to last pressed attack button, cannot perform EX
+		return
+	
 	if (button1 in input_state.just_pressed and is_button_pressed(button2) and is_button_released(button_ex)) or \
 		(button2 in input_state.just_pressed and is_button_pressed(button1) and is_button_released(button_ex)) or \
 		(button_ex in input_state.just_released and is_button_pressed(button1) and is_button_pressed(button2)):
@@ -3857,7 +3864,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	if hit_data.block_state == Globals.block_state.UNBLOCKED and "hit_sound" in hit_data.move_data:
 		
 		var volume_change = 0
-		if hit_data.lethal_hit or hit_data.stun or hit_data.crush_punish or hit_data.sweetspotted:
+		if hit_data.lethal_hit or hit_data.stun or hit_data.crush or hit_data.sweetspotted:
 			volume_change += STRONG_HIT_AUDIO_BOOST
 		elif hit_data.double_repeat:
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
@@ -3909,7 +3916,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data["angle_to_atker"] = attacker_vec.angle()
 	hit_data["lethal_hit"] = false
 	hit_data["punish_hit"] = false
-	hit_data["crush_punish"] = false
+	hit_data["crush"] = false
 	hit_data["stun"] = false
 	hit_data["block_state"] = Globals.block_state.UNBLOCKED
 	hit_data["repeat"] = false
@@ -3949,7 +3956,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data.repeat = true # found a repeat
 					if hit_data.move_data.atk_type in [Globals.atk_type.SPECIAL, Globals.atk_type.EX, Globals.atk_type.SUPER] or \
 							Globals.atk_attr.NO_REPEAT_MOVE in hit_data.move_data.atk_attr:
-						double_repeat = true # if attack is non-normal or a no repeat move, can only repeat once
+						double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
 						hit_data["double_repeat"] = true
 						break
 				elif !double_repeat:
@@ -4054,6 +4061,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		# cannot Punish Hit for weak hits, non-strong projectiles and non-damaging moves like Burst
 		# remember that multi-hit moves cannot do punish hits
 		match state:
+			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+				if Globals.atk_attr.CRUSH in hit_data.move_data.atk_attr:
+					hit_data.punish_hit = true
 			Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
 				Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
 				hit_data.punish_hit = true
@@ -4069,8 +4079,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					if Animator.query(["aDashTransit", "aDash", "aDashU", "aDashD"]):
 						hit_data.punish_hit = true
 						
-	if hit_data.punish_hit and Globals.atk_attr.PUNISH_CRUSH in hit_data.move_data.atk_attr:
-		hit_data.crush_punish = true
+	if hit_data.punish_hit and Globals.atk_attr.CRUSH in hit_data.move_data.atk_attr:
+		hit_data.crush = true
 						
 	
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
@@ -4144,7 +4154,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				attacker.reset_jumps()
 				current_guard_gauge = 0
 				Globals.Game.guard_gauge_update(self)
-				hit_data.crush_punish = true
+				hit_data.crush = true
 				
 		# BurstRevoke does not reset anything
 		
@@ -4175,7 +4185,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		$ModulatePlayer.play("lethal_flash")
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		
-	elif hit_data.crush_punish:
+	elif hit_data.crush:
 		add_status_effect(Globals.status_effect.CRUSH, 0)
 		$ModulatePlayer.play("stun_flash")
 		play_audio("rock2", {"vol" : -5})
@@ -4246,7 +4256,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if hit_data.stun:
 		hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
-	elif hit_data.crush_punish:
+	elif hit_data.crush:
 		hitstop = CRUSH_TIME
 	
 	if !double_repeat: # lock Burst Escape for a few frames afterwards, some moves like Autochain moves lock for more
@@ -4286,6 +4296,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	if hit_data.stun: # stunspark is on top of regular hitspark
 		Globals.Game.spawn_SFX("Stunspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
+				"v_mirror":Globals.Game.rng_bool()})
+	elif hit_data.crush:
+		Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()})
 	
 	# ---------------------------------------------------------------------------------------------------
@@ -4836,12 +4849,14 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
 	var hitspark_level: int
 	
-	if "burst" in hit_data.move_data:
+	if hit_data.adjusted_atk_level <= 1:
+		hitspark_level = 0
+	elif "burst" in hit_data.move_data:
 		if hit_data.move_data.burst == "BurstRevoke":
 			hitspark_level = 1
 		else:
 			hitspark_level = 5
-	elif hit_data.stun or hit_data.crush_punish:
+	elif hit_data.stun or hit_data.crush:
 		hitspark_level = 5 # max size for Break
 	else:
 		if hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 40):
@@ -4863,8 +4878,8 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	match hit_data.move_data.hitspark_type:
 		Globals.hitspark_type.HIT:
 			match hitspark_level:
-#				1:
-#					hitspark = "HitsparkA"
+				0:
+					hitspark = "HitsparkA"
 				1, 2:
 					hitspark = "HitsparkB"
 				3, 4:
@@ -4873,8 +4888,8 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 					hitspark = "HitsparkD"
 		Globals.hitspark_type.SLASH:
 			match hitspark_level:
-#				1:
-#					hitspark = "SlashsparkA"
+				0:
+					hitspark = "SlashsparkA"
 				1, 2:
 					hitspark = "SlashsparkB"
 				3, 4:
@@ -5252,9 +5267,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 					var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
 					if instant_dir != 0: # perfect impulse
 						impulse = FMath.percent(impulse, PERFECT_IMPULSE_MOD)
-					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
-						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
-						impulse = FMath.percent(impulse, impulse_mod)
+#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
+#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
+#						impulse = FMath.percent(impulse, impulse_mod)
 					velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 						
