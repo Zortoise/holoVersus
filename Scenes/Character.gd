@@ -12,7 +12,7 @@ const TERMINAL_THRESHOLD = 150 # if velocity.y is over this during hitstun, no t
 const VAR_JUMP_GRAV_MOD = 20 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
-const TAP_MEMORY_DURATION = 4
+const TAP_MEMORY_DURATION = 7
 #const HitStunGraceTimer_TIME = 10 # number of frames that repeat_memory will be cleared after hitstun/blockstun ends
 
 const MAX_EX_GAUGE = 30000
@@ -1737,7 +1737,7 @@ func ex_combination_trio(button_ex, button1, button2, action, back = false, inst
 			instant_actions_temp.append(action)
 			
 func is_button_pressed(button):
-	if button in [button_light, button_fierce, button_aux]: # for attack buttons, considered "pressed" a few frame after being tapped as well
+	if button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
 		for tap in tap_memory:
 			if tap[0] == button:
@@ -1777,6 +1777,14 @@ func is_button_tapped_in_last_X_frames(button, x_time):
 			else:
 				return false
 	return false
+	
+func held_version(button): # for held version of moves, called 8 frames after startup
+	if !button in input_state.pressed:
+		return false
+	for tap in tap_memory: # if this button is pressed in the last X frames, return false
+		if tap[0] == button:
+			return false
+	return true
 	
 #func get_last_tapped_dir(): # called by entities
 #	var left_time = 0

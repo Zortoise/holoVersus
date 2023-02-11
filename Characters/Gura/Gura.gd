@@ -1161,7 +1161,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1Active":
 			Character.animate("L1Rec")
 		"L1Rec":
-			if Character.button_light in Character.input_state.pressed:
+			if Character.held_version(Character.button_light):
 				Character.animate("L1b[h]Active")
 			else:
 				Character.animate("L1bActive")
@@ -1204,7 +1204,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"F2Startup":
-			if Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_fierce):
 				Character.animate("F2[h]Active")
 			else:
 				Character.animate("F2Active")
@@ -1220,7 +1220,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"F3Startup":
-			if Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_fierce):
 				Character.animate("F3[h]Startup")
 			else:
 				Character.animate("F3bStartup")
@@ -1236,7 +1236,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 
 		"HStartup":
-			if Character.button_light in Character.input_state.pressed and Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_light) and Character.held_version(Character.button_fierce):
 				Character.animate("H[h]Startup")
 			else:
 				Character.animate("HActive")
@@ -1263,7 +1263,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aL2Startup":
 			Character.animate("aL2Active")
 		"aL2Rec":
-			if Character.button_light in Character.input_state.pressed:
+			if Character.held_version(Character.button_light):
 				Character.animate("aL2Startup")
 			else:
 				Character.animate("aL2bRec")
@@ -1281,7 +1281,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 		"aF1Startup":
 #			if get("STYLE") == 0:
-			if Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_fierce):
 				Character.animate("aF1[h]Startup")
 			else:
 				Character.animate("aF1Active")
@@ -1424,7 +1424,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP1[ex]Rec")
 			
 		"aSP2Startup":
-			if Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_fierce):
 				Character.animate("aSP2[h]Active")
 			else:
 				Character.animate("aSP2Active")
@@ -1445,19 +1445,18 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP2Rec")
 			
 		"SP3Startup":
-			if Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_fierce):
 				Character.animate("SP3[h]Startup")
 			else:
 				Character.animate("SP3Active")
 				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
 						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
 		"aSP3Startup":
-			if Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_fierce):
 				Character.animate("aSP3[h]Startup")
 			else:
 				Character.animate("aSP3Active")
-#				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
-#						{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 #		"aSP3bStartup":
 #			Character.animate("aSP3Active")
 		"SP3[h]Startup":
@@ -1466,8 +1465,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
 		"aSP3[h]Startup":
 			Character.animate("aSP3[h]Active")
-#			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
-#					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 		"aSP3Active":
 			Character.animate("aSP3bActive")
 		"aSP3[h]Active":
@@ -1489,8 +1487,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
 		"aSP3[ex]Startup":
 			Character.animate("aSP3[ex]Active")
-#			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Vector2(Character.position.x, Character.position.y - 40), \
-#					{"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.get_path())
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1503,7 +1500,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("FallTransit")
 			
 		"SP4Startup":
-			if Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_fierce):
 				Character.animate("SP4[h]Active")
 			else:
 				Character.animate("SP4Active")
@@ -1517,7 +1514,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"SP5Startup", "aSP5Startup":
-			if Character.button_light in Character.input_state.pressed and Character.button_fierce in Character.input_state.pressed:
+			if Character.held_version(Character.button_light) and Character.held_version(Character.button_fierce):
 				Character.animate("aSP5[h]Active")
 			else:
 				Character.animate("aSP5Active")
