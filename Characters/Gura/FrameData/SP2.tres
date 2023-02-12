@@ -19,7 +19,7 @@ frame_data = {
 "frame": 2,
 "hitbox": [ Vector2( -10, 29 ), Vector2( 20, 29 ), Vector2( 20, 21 ), Vector2( 35, 21 ), Vector2( 35, -9 ), Vector2( 20, -9 ), Vector2( 20, -25 ), Vector2( -10, -25 ) ],
 "hurtbox": [ Vector2( -2, -2 ), Vector2( -10, -2 ), Vector2( -10, 13 ), Vector2( 9, 13 ), Vector2( 9, 5 ), Vector2( 16, 5 ), Vector2( 16, -22 ), Vector2( -2, -22 ) ],
-"sfxspawn": Vector2( 21, 9 ),
+"sfxspawn": Vector2( 0, 9 ),
 "sweetbox": [  ],
 "vacpoint": Vector2( 74, -20 )
 },
@@ -91,7 +91,7 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxUnder_frame": 12,
-"frame": 12,
+"frame": 11,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -10, 19 ), Vector2( 12, 19 ), Vector2( 12, -22 ), Vector2( -10, -22 ) ],
 "sfxspawn": null,
@@ -100,7 +100,7 @@ frame_data = {
 },
 6: {
 "SfxUnder_frame": 13,
-"frame": 13,
+"frame": 12,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -10, 12 ), Vector2( 13, 12 ), Vector2( 13, -21 ), Vector2( -10, -21 ) ],
 "sfxspawn": null,
@@ -121,7 +121,7 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxUnder_frame": 10,
-"frame": 10,
+"frame": 9,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -10, 15 ), Vector2( 12, 15 ), Vector2( 12, -21 ), Vector2( -10, -21 ) ],
 "sfxspawn": null,
@@ -130,7 +130,7 @@ frame_data = {
 },
 5: {
 "SfxUnder_frame": 11,
-"frame": 11,
+"frame": 10,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, -5 ), Vector2( -19, -5 ), Vector2( -19, 11 ), Vector2( -4, 11 ), Vector2( -4, 3 ), Vector2( 10, 3 ), Vector2( 10, -21 ), Vector2( -11, -21 ) ],
 "sfxspawn": null,
@@ -190,10 +190,10 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxUnder_frame": 3,
-"frame": 9,
+"frame": 2,
 "hitbox": [ Vector2( -10, 29 ), Vector2( 20, 29 ), Vector2( 20, 21 ), Vector2( 35, 21 ), Vector2( 35, -9 ), Vector2( 20, -9 ), Vector2( 20, -25 ), Vector2( -10, -25 ) ],
 "hurtbox": [ Vector2( -2, -2 ), Vector2( -10, -2 ), Vector2( -10, 13 ), Vector2( 9, 13 ), Vector2( 9, 5 ), Vector2( 16, 5 ), Vector2( 16, -22 ), Vector2( -2, -22 ) ],
-"sfxspawn": Vector2( 21, 9 ),
+"sfxspawn": Vector2( 0, 9 ),
 "sweetbox": [  ],
 "vacpoint": Vector2( 74, -20 )
 },
@@ -307,7 +307,7 @@ frame_data = {
 "frame": 2,
 "hitbox": [ Vector2( -10, 29 ), Vector2( 20, 29 ), Vector2( 20, 21 ), Vector2( 35, 21 ), Vector2( 35, -9 ), Vector2( 20, -9 ), Vector2( 20, -25 ), Vector2( -10, -25 ) ],
 "hurtbox": [ Vector2( -2, -2 ), Vector2( -10, -2 ), Vector2( -10, 13 ), Vector2( 9, 13 ), Vector2( 9, 5 ), Vector2( 16, 5 ), Vector2( 16, -22 ), Vector2( -2, -22 ) ],
-"sfxspawn": Vector2( 21, 9 ),
+"sfxspawn": Vector2( 0, 9 ),
 "sweetbox": [ Vector2( 23, 13 ), Vector2( 35, 13 ), Vector2( 35, -1 ), Vector2( 23, -1 ) ],
 "vacpoint": Vector2( 74, -20 )
 },

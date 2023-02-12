@@ -14,6 +14,7 @@ const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft p
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
 const TAP_MEMORY_DURATION = 7
 #const HitStunGraceTimer_TIME = 10 # number of frames that repeat_memory will be cleared after hitstun/blockstun ends
+const ShorthopTimer_TIME = 15 # frames after shorthopping where you cannot block
 
 const MAX_EX_GAUGE = 30000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
@@ -527,7 +528,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\naerial_memory: " + str(aerial_memory) + " " + str(chain_combo) + "\n" + \
+		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
 		" " + str(success_block)
 			
@@ -1021,8 +1022,10 @@ func simulate2(): # only ran if not in hitstop
 #			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
 			
 	
-	if button_block in input_state.pressed and !button_aux in input_state.pressed:
-		if current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
+	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
+		if $ShorthopTimer.is_running():
+			pass # no blocking after shorthopping for a while
+		elif current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
 			match state:
 				
 			# ground blocking
@@ -1438,6 +1441,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			
 			if !hitstop: # timers do not run on exact frame hitstop starts
 				$VarJumpTimer.simulate()
+				$ShorthopTimer.simulate()
 				$HitStunTimer.simulate()
 				$BurstLockTimer.simulate()
 				if !get_node(targeted_opponent_path).is_hitstunned():
@@ -1781,9 +1785,8 @@ func is_button_tapped_in_last_X_frames(button, x_time):
 func held_version(button): # for held version of moves, called 8 frames after startup
 	if !button in input_state.pressed:
 		return false
-	for tap in tap_memory: # if this button is pressed in the last X frames, return false
-		if tap[0] == button:
-			return false
+	if is_button_tapped_in_last_X_frames(button, 7): # if this button is pressed in the last X frames, return false
+		return false
 	return true
 	
 #func get_last_tapped_dir(): # called by entities
@@ -1882,6 +1885,11 @@ func process_input_buffer():
 									
 							if keep:
 								animate("JumpTransit") # ground jump
+								keep = false
+								
+						Globals.char_state.GROUND_BLOCK:
+							if Animator.time <= 1:
+								animate("JumpTransit") 
 								keep = false
 							
 						# BUFFERING AN INSTANT AIRDASH ---------------------------------------------------------------------------------
@@ -2868,7 +2876,7 @@ func are_inputs_too_close():
 			
 	if time_of_last_special_or_unique_tap == null or time_of_last_attack_tap == null:
 		return false
-	elif abs(time_of_last_special_or_unique_tap - time_of_last_attack_tap) <= 2:
+	elif abs(time_of_last_special_or_unique_tap - time_of_last_attack_tap) <= 1:
 		return true
 	return false
 	
@@ -5295,13 +5303,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Run":
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"JumpTransit2":
-			if button_jump in input_state.pressed and (button_down in input_state.pressed or button_up in input_state.pressed):
-				# down/up and jump to hop
+			if button_jump in input_state.pressed and button_block in input_state.pressed:
+				# block and jump to shorthop
+				$ShorthopTimer.time = ShorthopTimer_TIME
 				velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), HOP_JUMP_MOD)
 				if dir != 0: # when hopping can press left/right for a long hop
 					var boost: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("LONG_HOP_JUMP_MOD"))
 					velocity.x += boost
 					velocity.x = int(clamp(velocity.x, -abs(boost), abs(boost)))
+					var sfx_point = get_feet_pos()
+					sfx_point.x -= dir * 5 # spawn the dust behind slightly
+					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", sfx_point, {"facing":dir, "grounded":true})
+				else:
+					Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 #			elif button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to super jump, cannot adjust height
 #				velocity.y = -FMath.percent(UniqChar.JUMP_SPEED, UniqChar.SUPER_JUMP_MOD)
 #				velocity.x = 0
@@ -5313,7 +5327,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 						velocity.x += dir * UniqChar.get_stat("JUMP_HORIZONTAL_SPEED")
 						velocity.x = int(clamp(velocity.x, -UniqChar.get_stat("SPEED"), UniqChar.get_stat("SPEED")))
 #					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
-			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+				Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"aJumpTransit2":
 			aerial_memory = []
 			if !check_wall_jump():
@@ -5611,6 +5625,7 @@ func save_state():
 		"RespawnTimer_time" : $RespawnTimer.time,
 		"BurstLockTimer_time" : $BurstLockTimer.time,
 		"EXSealTimer_time" : $EXSealTimer.time,
+		"ShorthopTimer_time" : $ShorthopTimer.time,
 	}
 	
 	if Globals.training_mode:
@@ -5701,6 +5716,7 @@ func load_state(state_data):
 	$RespawnTimer.time = state_data.RespawnTimer_time
 	$BurstLockTimer.time = state_data.BurstLockTimer_time
 	$EXSealTimer.time = state_data.EXSealTimer_time
+	$ShorthopTimer.time = state_data.ShorthopTimer_time
 	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = state_data.TrainingRegenTimer_time
