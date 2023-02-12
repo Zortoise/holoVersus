@@ -284,7 +284,7 @@ func capture_combinations():
 	Character.combination(Character.button_special, Character.button_light, "Sp.L")
 	Character.ex_combination(Character.button_special, Character.button_light, "ExSp.L")
 	
-	Character.combination_trio(Character.button_special, Character.button_down, Character.button_light, "Sp.dL")
+#	Character.combination_trio(Character.button_special, Character.button_down, Character.button_light, "Sp.dL")
 	
 	Character.combination(Character.button_special, Character.button_fierce, "Sp.F")
 	Character.ex_combination(Character.button_special, Character.button_fierce, "ExSp.F")
@@ -296,6 +296,8 @@ func capture_combinations():
 	
 	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	Character.ex_combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
+	
+#	Character.doubletap_combination(Character.button_special, Character.button_fierce, "SpSp.F")
 
 
 func rebuffer_actions():
@@ -497,12 +499,15 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				
 		"Sp.L":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP1", has_acted)
-				
-		"Sp.dL":
-			if !has_acted[0]:
 				if test_instinct():
 					keep = !process_move(new_state, "SP7", has_acted)
+				else:
+					keep = !process_move(new_state, "SP1", has_acted)
+				
+#		"Sp.dL":
+#			if !has_acted[0]:
+#				if test_instinct():
+#					keep = !process_move(new_state, "SP7", has_acted)
 	
 		"Sp.F":
 			if !has_acted[0]:
@@ -1181,7 +1186,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L2Startup":
 			Character.animate("L2Active")
 		"L2Active":
-			if Character.grounded:
+			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
 				Character.animate("L2bRec")
 			else:
 				Character.animate("L2cCRec")
@@ -1529,12 +1534,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP5[ex]Active":
 			Character.animate("aSP5[ex]Rec")
 		"aSP5Rec":
-			if Character.grounded:
+			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
 				Character.animate("SP5bRec")
 			else:
 				Character.animate("aSP5bRec")
 		"aSP5[ex]Rec":
-			if Character.grounded:
+			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
 				Character.animate("SP5b[ex]Rec")
 			else:
 				Character.animate("aSP5b[ex]Rec")
@@ -1546,7 +1551,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP6[ex]Startup", "aSP6[ex]Startup":
 			Character.animate("aSP6[ex]Active")
 		"aSP6[ex]Active":
-			if Character.grounded:
+			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
 				Character.animate("SP6[ex]Rec")
 			else:
 				Character.animate("aSP6[ex]Rec")
@@ -1575,7 +1580,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP7Startup", "aSP7Startup":
 			Character.animate("aSP7Active")
 		"aSP7Active":
-			if Character.grounded:
+			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
 				Character.animate("SP7Rec")
 			else:
 				Character.animate("aSP7Rec")

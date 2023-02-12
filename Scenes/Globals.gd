@@ -109,8 +109,8 @@ onready var common_entity_data = {
 		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
 		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
 	},
-	"BurstExtend" : {
-		"scene" : load("res://Assets/Entities/BurstExtend.tscn"),
+	"BurstAwakening" : {
+		"scene" : load("res://Assets/Entities/BurstAwakening.tscn"),
 		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
 		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
 	},

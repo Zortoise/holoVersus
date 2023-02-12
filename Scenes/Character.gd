@@ -12,7 +12,7 @@ const TERMINAL_THRESHOLD = 150 # if velocity.y is over this during hitstun, no t
 const VAR_JUMP_GRAV_MOD = 20 # gravity multiplier during Variable Jump time
 const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft platforms
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
-const TAP_MEMORY_DURATION = 7
+const TAP_MEMORY_DURATION = 20
 #const HitStunGraceTimer_TIME = 10 # number of frames that repeat_memory will be cleared after hitstun/blockstun ends
 const ShorthopTimer_TIME = 15 # frames after shorthopping where you cannot block
 
@@ -528,7 +528,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
+		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
 		" " + str(success_block)
 			
@@ -1652,7 +1652,7 @@ func rebuffer_trio(button1, button2, button3, action, back = false):
 			
 			
 func ex_rebuffer(button_ex, button1, action, back = false):
-	if button1 in input_state.pressed and is_button_released(button_ex):
+	if button1 in input_state.pressed and is_button_released_in_last_X_frames(button_ex, 7):
 		if !back:
 			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
 		else:
@@ -1696,6 +1696,16 @@ func combination_trio(button1, button2, button3, action, back = false, instant =
 			instant_actions_temp.append(action)
 			return true
 	return false
+	
+	
+func doubletap_combination(button_ex, button1, action, back = false, instant = false):
+	if count_tap(button_ex, 20) >= 2:
+		ex_combination(button_ex, button1, action, back, instant)
+		
+func doubletap_combination_trio(button_ex, button1, button2, action, back = false, instant = false):
+	if count_tap(button_ex, 20) >= 2:
+		ex_combination_trio(button_ex, button1, button2, action, back, instant)
+			
 			
 func ex_combination(button_ex, button1, action, back = false, instant = false):
 
@@ -1706,14 +1716,14 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 	if button1 == button_light: exclude_buttons.append(button_fierce)
 	elif button1 == button_fierce: exclude_buttons.append(button_light)
 	
-	for tap in tap_memory:
-		if tap[0] in exclude_buttons:
+	for button in exclude_buttons:
+		if is_button_tapped_in_last_X_frames(button, 4):
 			return
 			
 	if are_inputs_too_close(): # if last pressed button_ex is too close to last pressed attack button, cannot perform EX
 		return
 			
-	if (button1 in input_state.just_pressed and is_button_released(button_ex)) or \
+	if (button1 in input_state.just_pressed and is_button_released_in_last_X_frames(button_ex, 7)) or \
 		(button_ex in input_state.just_released and is_button_pressed(button1)):
 		if !instant:
 			if !back:
@@ -1722,15 +1732,15 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
 		else:
 			instant_actions_temp.append(action)
-			
+
 				
 func ex_combination_trio(button_ex, button1, button2, action, back = false, instant = false):
 	
 	if are_inputs_too_close(): # if last pressed button_ex is too close to last pressed attack button, cannot perform EX
 		return
 	
-	if (button1 in input_state.just_pressed and is_button_pressed(button2) and is_button_released(button_ex)) or \
-		(button2 in input_state.just_pressed and is_button_pressed(button1) and is_button_released(button_ex)) or \
+	if (button1 in input_state.just_pressed and is_button_pressed(button2) and is_button_released_in_last_X_frames(button_ex, 7)) or \
+		(button2 in input_state.just_pressed and is_button_pressed(button1) and is_button_released_in_last_X_frames(button_ex, 7)) or \
 		(button_ex in input_state.just_released and is_button_pressed(button1) and is_button_pressed(button2)):
 		if !instant:
 			if !back:
@@ -1743,9 +1753,8 @@ func ex_combination_trio(button_ex, button1, button2, action, back = false, inst
 func is_button_pressed(button):
 	if button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
-		for tap in tap_memory:
-			if tap[0] == button:
-				return true
+		if is_button_tapped_in_last_X_frames(button, 7):
+			return true
 #	elif button == button_up:
 #		if Settings.tap_jump[player_ID] == 0: # tap jump off
 #			if button in input_state.pressed:
@@ -1767,20 +1776,40 @@ func is_button_pressed(button):
 			return true
 	return false
 		
-func is_button_released(button):
-	for release in release_memory:
+#func is_button_released(button):
+#	for release in release_memory:
+#		if release[0] == button:
+#			return true
+#	return false
+	
+func is_button_released_in_last_X_frames(button, x_time):
+	for x in release_memory.size():
+		var release = release_memory[-x-1]
+		if release[1] < TAP_MEMORY_DURATION - x_time:
+			return false
 		if release[0] == button:
 			return true
 	return false
 	
 func is_button_tapped_in_last_X_frames(button, x_time):
-	for tap in tap_memory:
+	for x in tap_memory.size():
+		var tap = tap_memory[-x-1]
+		if tap[1] < TAP_MEMORY_DURATION - x_time:
+			return false
 		if tap[0] == button:
-			if TAP_MEMORY_DURATION - tap[1] <= x_time:
-				return true
-			else:
-				return false
+			return true
 	return false
+	
+func count_tap(button, x_time):
+	var count := 0
+	for x in tap_memory.size():
+		var tap = tap_memory[-x-1]
+		if tap[1] < TAP_MEMORY_DURATION - x_time:
+			break
+		if tap[0] == button:
+			count += 1
+	return count
+			
 	
 func held_version(button): # for held version of moves, called 8 frames after startup
 	if !button in input_state.pressed:
@@ -1788,6 +1817,27 @@ func held_version(button): # for held version of moves, called 8 frames after st
 	if is_button_tapped_in_last_X_frames(button, 7): # if this button is pressed in the last X frames, return false
 		return false
 	return true
+	
+func are_inputs_too_close():
+	var time_of_last_special_or_unique_tap = null
+	var time_of_last_attack_tap = null
+	
+	for x in tap_memory.size():
+		var tap = tap_memory[-x-1]
+		if tap[1] < TAP_MEMORY_DURATION - 7:
+			break
+		if tap[0] in [button_special, button_unique]:
+			time_of_last_special_or_unique_tap = tap[1]
+			break
+		elif tap[0] in [button_light, button_fierce, button_aux]:
+			time_of_last_attack_tap = tap[1]
+			break
+			
+	if time_of_last_special_or_unique_tap == null or time_of_last_attack_tap == null:
+		return false
+	elif abs(time_of_last_special_or_unique_tap - time_of_last_attack_tap) <= 1:
+		return true
+	return false
 	
 #func get_last_tapped_dir(): # called by entities
 #	var left_time = 0
@@ -2019,15 +2069,15 @@ func process_input_buffer():
 								keep = false
 							else: continue
 
-						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP, \
-								Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
-								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
-							if is_attacking(): # new state must not be standby
-								var move_name = get_move_name()
-								if burst_extend_check(move_name):
-									animate("BurstExtend")
-									has_acted[0] = true
-									keep = false
+#						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP, \
+#								Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
+#								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
+#							if is_attacking(): # new state must not be standby
+#								var move_name = get_move_name()
+#								if burst_extend_check(move_name):
+#									animate("BurstExtend")
+#									has_acted[0] = true
+#									keep = false
 									
 			"Reset":
 				if is_attacking(): # new state must not be standby
@@ -2129,6 +2179,7 @@ func animate(anim):
 
 			
 func rebuffer_actions():
+	
 	if button_light in input_state.pressed:
 		input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
 	if button_fierce in input_state.pressed:
@@ -2204,7 +2255,7 @@ func state_detect(anim):
 			
 		"BurstCounterStartup", "BurstEscapeStartup":
 			return Globals.char_state.AIR_STARTUP
-		"BurstCounter", "BurstEscape", "BurstExtend":
+		"BurstCounter", "BurstEscape", "BurstAwakening":
 			return Globals.char_state.AIR_RECOVERY
 		"BurstRec":
 			return Globals.char_state.AIR_RECOVERY
@@ -2262,8 +2313,6 @@ func on_kill():
 		
 		var opponent = get_node(targeted_opponent_path)
 		if opponent.state != Globals.char_state.DEAD:
-			
-			opponent.change_burst_token(true) # your targeted opponent gain burst token
 			
 			if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
 				opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
@@ -2327,6 +2376,9 @@ func respawn():
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.stock_points_update(self)
+	
+	if get_node(targeted_opponent_path).state != Globals.char_state.DEAD:
+		get_node(targeted_opponent_path).change_burst_token(true) # your targeted opponent gain burst token
 	
 	$Sprites.show()
 	animate("Idle")
@@ -2864,21 +2916,7 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 		
 	return false
 	
-func are_inputs_too_close():
-	var time_of_last_special_or_unique_tap = null
-	var time_of_last_attack_tap = null
-	
-	for tap in tap_memory:
-		if tap[0] in [button_special, button_unique]:
-			time_of_last_special_or_unique_tap = tap[1]
-		elif tap[0] in [button_light, button_fierce, button_aux]:
-			time_of_last_attack_tap = tap[1]
-			
-	if time_of_last_special_or_unique_tap == null or time_of_last_attack_tap == null:
-		return false
-	elif abs(time_of_last_special_or_unique_tap - time_of_last_attack_tap) <= 1:
-		return true
-	return false
+
 	
 #func is_static(): # for command grabs to prevent impulses on ground
 ##	if !grounded: return true
@@ -3113,15 +3151,15 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 	return true
 	
 	
-func burst_extend_check(move_name): # check if have resources to do it, then take away those resources and return a bool
-	if !is_atk_active(): # active frames only
-		return false
-	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL]:
-		return false
-	if UniqChar.query_move_data(move_name).atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
-		return false
-	change_burst_token(false)
-	return true
+#func burst_extend_check(move_name): # check if have resources to do it, then take away those resources and return a bool
+#	if !is_atk_active(): # active frames only
+#		return false
+#	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL]:
+#		return false
+#	if UniqChar.query_move_data(move_name).atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
+#		return false
+#	change_burst_token(false)
+#	return true
 	
 	
 func a_reset_check(move_name):
@@ -4135,21 +4173,21 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		lethal_flag = true
 		
 	if "burst" in hit_data.move_data and !hit_data.double_repeat:
-		if hit_data.move_data.burst == "BurstCounter":
+		if hit_data.move_data.burst in ["BurstCounter"]:
 			attacker.reset_jumps()
-			# Burst Counter grants attacker Positive Flow even on block
+			# Burst Counter grants attacker Positive Flow
 			if attacker.current_guard_gauge < 0:
 				attacker.add_status_effect(Globals.status_effect.POS_FLOW, null)
 				
 		elif hit_data.move_data.burst == "BurstEscape":
 			attacker.reset_jumps()
 			
-		elif hit_data.move_data.burst == "BurstExtend":
-			if hit_data.block_state == Globals.block_state.UNBLOCKED:
-				attacker.reset_jumps()
-				current_guard_gauge = 0
-				Globals.Game.guard_gauge_update(self)
-				hit_data.crush = true
+#		elif hit_data.move_data.burst == "BurstExtend":
+#			if hit_data.block_state == Globals.block_state.UNBLOCKED:
+#				attacker.reset_jumps()
+#				current_guard_gauge = 0
+#				Globals.Game.guard_gauge_update(self)
+#				hit_data.crush = true
 				
 		
 		
@@ -4309,8 +4347,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				knock_dir = 1
 			Globals.compass.W:
 				knock_dir = -1
-		move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $SoftPlatformDBox, true)
-		set_true_position()
+		if knock_dir != 0:
+			move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $SoftPlatformDBox, true)
+			set_true_position()
 		return
 		
 
@@ -5211,19 +5250,24 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Block")
 			
 		"BurstCounterStartup":
-			animate("BurstCounter")
+			if held_version(button_aux) and held_version(button_block) and has_burst:
+				animate("BurstAwakening")
+			else:
+				animate("BurstCounter")
 		"BurstCounter":
+			animate("BurstRec")
+		"BurstAwakening":
 			animate("BurstRec")
 		"BurstEscapeStartup":
 			animate("BurstEscape")
 		"BurstEscape":
 			animate("BurstRec")
-		"BurstExtend":
-			animate("BurstCRec")
+#		"BurstExtend":
+#			animate("BurstCRec")
 		"BurstRec":
 			animate("FallTransit")
-		"BurstCRec":
-			animate("FallTransit")
+#		"BurstCRec":
+#			animate("FallTransit")
 			
 		"AReset":
 			animate("AResetCRec")
@@ -5417,7 +5461,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			else:
 				$ModulatePlayer.play("blue_burst")
 			play_audio("faller1", {"vol" : -10, "bus" : "PitchUp"})
-		"BurstCounter", "BurstEscape", "BurstExtend":
+		"BurstCounter", "BurstEscape", "BurstAwakening":
 #			chain_combo = 0
 			velocity.set_vector(0, 0)
 			velocity_limiter.x = 0
@@ -5430,8 +5474,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 			elif anim_name == "BurstEscape":
 				Globals.Game.spawn_entity(get_path(), "BurstEscape", position, {})
 			else:
-				Globals.Game.spawn_entity(get_path(), "BurstExtend", position, {})
-				$ModulatePlayer.play("red_burst")
+				Globals.Game.spawn_entity(get_path(), "BurstAwakening", position, {})
+				$ModulatePlayer.play("white_burst")
+				play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"})
+				$EXSealTimer.time = 0
+				change_ex_gauge(MAX_EX_GAUGE)
+				reset_jumps()
+				if current_guard_gauge < 0: # gain positive flow
+					add_status_effect(Globals.status_effect.POS_FLOW, null)
+				change_burst_token(false)
 			play_audio("blast1", {"vol" : -18,})
 		"BurstCRec":
 			anim_gravity_mod = 0
