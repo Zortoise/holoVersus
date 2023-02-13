@@ -1461,6 +1461,15 @@ func ex_gauge_update(character):
 	var ex_gauge_bars = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXGauges")
 #	var ex_lvl_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXLevel")
 
+	if character.super_ex_lock != null and character.get_node("EXSealTimer").is_running():
+		character.current_ex_gauge = 0
+		ex_gauge_bars.get_node("AnimationPlayer").play("lock")
+		ex_gauge_bars.get_node("EXGauge").value = 0
+		ex_gauge_bars.get_node("EXGauge2").value = 0
+		ex_gauge_bars.get_node("EXGauge3").value = 0
+		ex_gauge_bars.get_node("../EXLock").value = character.get_node("EXSealTimer").time / float(character.super_ex_lock) * 100
+		return
+
 	var current_ex_level: int = int(character.current_ex_gauge / 10000)
 	var leftover_ex_gauge: int
 	if current_ex_level >= 3:
@@ -1521,10 +1530,12 @@ func stock_points_update(character):
 				
 				
 func burst_update(character):
-	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/BurstToken")
-	if character.has_burst:
+	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/BurstToken")
+	if character.burst_token == Globals.burst.AVAILABLE:
 		burst_token.get_node("AnimationPlayer").play("flash")
-	else:
+	elif character.burst_token == Globals.burst.CONSUMED:
+		burst_token.get_node("AnimationPlayer").play("empty")
+	elif character.burst_token == Globals.burst.EXHAUSTED:
 		burst_token.get_node("AnimationPlayer").play("gray")
 		
 				

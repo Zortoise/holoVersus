@@ -215,7 +215,8 @@ var sprite_texture_ref = { # used for afterimages
 onready var current_damage_value: int = 0
 onready var current_guard_gauge: int = 0
 onready var current_ex_gauge: int = 10000
-onready var has_burst := true
+onready var super_ex_lock = null # starting EXSealTimer time
+onready var burst_token = Globals.burst.AVAILABLE
 var stock_points_left: int
 
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
@@ -329,7 +330,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	
 	if Globals.training_mode:
 		stock_points_left = 10000
-		has_burst = true
+		burst_token = Globals.burst.AVAILABLE
 	else:
 		stock_points_left = Globals.Game.starting_stock_pts
 #	Globals.Game.damage_limit_update(self)
@@ -588,11 +589,15 @@ func simulate(new_input_state):
 #				play_audio("kill3", {"vol" : -12, "bus" : "Reverb"})
 #
 #		test_num += 1
-			change_ex_gauge(MAX_EX_GAUGE)
-			change_burst_token(true)
+#			change_ex_gauge(-MAX_EX_GAUGE)
+#			$EXSealTimer.time = 120
+#			super_ex_lock = 120
+#			change_burst_token(1)
+			if super_test(true):
+				super_cost(120, true)
 			get_node(targeted_opponent_path).change_guard_gauge(-8000)
 			get_node(targeted_opponent_path).change_ex_gauge(MAX_EX_GAUGE)
-			get_node(targeted_opponent_path).change_burst_token(true)
+			get_node(targeted_opponent_path).change_burst_token(Globals.burst.AVAILABLE)
 			unique_data.bitten_player_path = targeted_opponent_path
 			unique_data.nibbler_count = 3
 			UniqChar.update_uniqueHUD()
@@ -603,8 +608,7 @@ func simulate(new_input_state):
 			Globals.Game.superfreeze(get_path())
 #			Globals.Game.set_screenstop()
 #			Globals.Game.set_screenshake()
-
-		
+	
 # PAUSING --------------------------------------------------------------------------------------------------
 		
 	if button_pause in input_state.just_pressed:
@@ -668,7 +672,7 @@ func simulate2(): # only ran if not in hitstop
 		repeat_memory = []
 		first_hit_flag = false
 		GG_swell_flag = false
-		$BurstLockTimer.time = 0
+		$BurstLockTimer.stop()
 		DI_seal = false
 		lethal_flag = false
 		
@@ -749,7 +753,10 @@ func simulate2(): # only ran if not in hitstop
 		if Globals.training_settings.regen == 1 and !$TrainingRegenTimer.is_running() and current_damage_value > 0:
 			take_damage(-30) # regen damage
 	
-		
+	if !$EXSealTimer.is_running():
+		super_ex_lock = null
+	elif super_ex_lock != null:
+		Globals.Game.ex_gauge_update(self)
 	
 	# drain EX Gauge when air blocking
 #	if !grounded and is_blocking():
@@ -1444,8 +1451,14 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$ShorthopTimer.simulate()
 				$HitStunTimer.simulate()
 				$BurstLockTimer.simulate()
-				if !get_node(targeted_opponent_path).is_hitstunned():
-					$EXSealTimer.simulate()
+				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
+					if !get_node(targeted_opponent_path).is_hitstunned(): # no counting down EX Seal if opponent is hitstunned
+						$EXSealTimer.simulate()
+				else: # EX Seal from using super, count down during opponent hitstun as well
+					if is_attacking() and is_super(get_move_name()): # no counting down EX Seal during Super animation
+						pass
+					else:
+						$EXSealTimer.simulate()
 				if !is_hitstunned() and state != Globals.char_state.SEQUENCE_TARGET:
 #					$HitStunGraceTimer.simulate()
 					if Globals.training_mode:
@@ -2301,6 +2314,9 @@ func on_kill():
 		$HitStunTimer.stop()
 		$HitStopTimer.stop()
 		
+		super_ex_lock = null
+		$EXSealTimer.stop()
+		
 		$Sprites.hide()
 		state = Globals.char_state.DEAD
 		velocity.set_vector(0, 0)
@@ -2313,6 +2329,9 @@ func on_kill():
 		
 		var opponent = get_node(targeted_opponent_path)
 		if opponent.state != Globals.char_state.DEAD:
+			
+			if opponent.burst_token == Globals.burst.EXHAUSTED:
+				opponent.change_burst_token(Globals.burst.AVAILABLE) # your targeted opponent gain burst token if exhausted
 			
 			if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
 				opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
@@ -2371,14 +2390,11 @@ func respawn():
 			
 	current_damage_value = 0
 	current_guard_gauge = 0
-	change_burst_token(true) # gain Burst on death
+	change_burst_token(Globals.burst.AVAILABLE) # gain Burst on death
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.stock_points_update(self)
-	
-	if get_node(targeted_opponent_path).state != Globals.char_state.DEAD:
-		get_node(targeted_opponent_path).change_burst_token(true) # your targeted opponent gain burst token
 	
 	$Sprites.show()
 	animate("Idle")
@@ -3090,6 +3106,20 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		else:
 			return false
 
+func super_test(cost_burst := false):
+	if current_ex_gauge != MAX_EX_GAUGE:
+		return false
+	if cost_burst and burst_token != Globals.burst.AVAILABLE:
+		return false
+	return true
+		
+func super_cost(ex_lock_time := 0, cost_burst := false):
+	change_ex_gauge(-MAX_EX_GAUGE)
+	if ex_lock_time > 0:
+		$EXSealTimer.time = ex_lock_time
+		super_ex_lock = ex_lock_time
+	if cost_burst:
+		change_burst_token(Globals.burst.CONSUMED)
 	
 func tech():
 	if button_dash in input_state.pressed:
@@ -3144,17 +3174,17 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 	if current_guard_gauge >= GUARD_GAUGE_CEIL:
 		change_guard_gauge(-10000) # higher cost if GG is full, but cost no Burst Token
 		return true
-	if !has_burst or current_guard_gauge <= 0:
+	if burst_token != Globals.burst.AVAILABLE or current_guard_gauge <= 0:
 		return false # not enough resouces to use it
 	change_guard_gauge(-BURSTESCAPE_GG_COST)
-	change_burst_token(false)
+	change_burst_token(Globals.burst.EXHAUSTED)
 	return true
 	
 	
 #func burst_extend_check(move_name): # check if have resources to do it, then take away those resources and return a bool
 #	if !is_atk_active(): # active frames only
 #		return false
-#	if !has_burst or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL]:
+#	if !burst_token or !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL]:
 #		return false
 #	if UniqChar.query_move_data(move_name).atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
 #		return false
@@ -3706,8 +3736,9 @@ func change_ex_gauge(ex_gauge_change: int):
 	current_ex_gauge += ex_gauge_change
 	current_ex_gauge = int(clamp(current_ex_gauge, 0, MAX_EX_GAUGE))
 	Globals.Game.ex_gauge_update(self)
-	if ex_gauge_change < 0: # any usage of EX gauge seals it, some moves add to the timer
-		$EXSealTimer.time = $EXSealTimer.time + BASE_EX_SEAL_TIME
+	if ex_gauge_change < 0: # any usage of EX gauge seals it
+		if $EXSealTimer.time < BASE_EX_SEAL_TIME:
+			$EXSealTimer.time = BASE_EX_SEAL_TIME
 
 func change_stock_points(stock_points_change: int):
 	if !Globals.training_mode:
@@ -3715,9 +3746,9 @@ func change_stock_points(stock_points_change: int):
 		stock_points_left = int(max(stock_points_left, 0))
 	Globals.Game.stock_points_update(self)
 	
-func change_burst_token(get_burst: bool):
+func change_burst_token(new_burst_token: int):
 	if !Globals.training_mode:
-		has_burst = get_burst
+		burst_token = new_burst_token
 		Globals.Game.burst_update(self)
 	
 	
@@ -4146,9 +4177,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# ---------------------------------------------------------------------------------
 	
-	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data
-		attacker_or_entity.landed_a_sequence(hit_data)
+	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
+		if !hit_data.semi_disjoint and !hit_data.double_repeat:
+			attacker_or_entity.landed_a_sequence(hit_data)
 		return
+		
 		
 		
 	if !"entity_nodepath" in hit_data:
@@ -4284,7 +4317,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	hit_data["hitstop"] = hitstop # send this to attacker as well
 	if hitstop > 0:
-		$HitStopTimer.time = 0 # taking hitstop cancel pre-existing hitstop
+		$HitStopTimer.stop() # taking hitstop cancel pre-existing hitstop
 	
 	if hit_data.stun:
 		hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
@@ -5250,7 +5283,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Block")
 			
 		"BurstCounterStartup":
-			if held_version(button_aux) and held_version(button_block) and has_burst:
+			if held_version(button_aux) and held_version(button_block) and burst_token == Globals.burst.AVAILABLE:
 				animate("BurstAwakening")
 			else:
 				animate("BurstCounter")
@@ -5347,7 +5380,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Run":
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"JumpTransit2":
-			if button_jump in input_state.pressed and button_block in input_state.pressed:
+			if button_jump in input_state.pressed and (button_down in input_state.pressed or button_block in input_state.pressed):
 				# block and jump to shorthop
 				$ShorthopTimer.time = ShorthopTimer_TIME
 				velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), HOP_JUMP_MOD)
@@ -5477,22 +5510,26 @@ func _on_SpritePlayer_anim_started(anim_name):
 				Globals.Game.spawn_entity(get_path(), "BurstAwakening", position, {})
 				$ModulatePlayer.play("white_burst")
 				play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"})
-				$EXSealTimer.time = 0
+				$EXSealTimer.stop()
 				change_ex_gauge(MAX_EX_GAUGE)
 				reset_jumps()
 				if current_guard_gauge < 0: # gain positive flow
 					add_status_effect(Globals.status_effect.POS_FLOW, null)
-				change_burst_token(false)
+				change_burst_token(Globals.burst.CONSUMED)
 			play_audio("blast1", {"vol" : -18,})
 		"BurstCRec":
 			anim_gravity_mod = 0
 			
 		"AReset":
 			anim_gravity_mod = 0
+			anim_friction_mod = 0
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
 			Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool(), "palette":"pink"}, get_path())
 			$ModulatePlayer.play("pink_reset")
+		"AResetCRec":
+			anim_gravity_mod = 0
+			anim_friction_mod = 0
 		"BResetTransit":
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
@@ -5634,7 +5671,7 @@ func save_state():
 		"active_cancel" : active_cancel,
 		"success_block" : success_block,
 		"targeted_opponent_path" : targeted_opponent_path,
-		"has_burst": has_burst,
+		"burst_token": burst_token,
 		"impulse_used" : impulse_used,
 		"DI_seal" : DI_seal,
 		"last_dir": last_dir,
@@ -5647,6 +5684,7 @@ func save_state():
 		"current_damage_value" : current_damage_value,
 		"current_guard_gauge" : current_guard_gauge,
 		"current_ex_gauge" : current_ex_gauge,
+		"super_ex_lock" : super_ex_lock,
 		"stock_points_left" : stock_points_left,
 		
 		"unique_data" : unique_data,
@@ -5712,7 +5750,7 @@ func load_state(state_data):
 	active_cancel = state_data.active_cancel
 	success_block = state_data.success_block
 	targeted_opponent_path = state_data.targeted_opponent_path
-	has_burst = state_data.has_burst
+	burst_token = state_data.burst_token
 	impulse_used = state_data.impulse_used
 	DI_seal = state_data.DI_seal
 	last_dir = state_data.last_dir
@@ -5725,6 +5763,7 @@ func load_state(state_data):
 	current_damage_value = state_data.current_damage_value
 	current_guard_gauge = state_data.current_guard_gauge
 	current_ex_gauge = state_data.current_ex_gauge
+	super_ex_lock = state_data.super_ex_lock
 	stock_points_left = state_data.stock_points_left
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
