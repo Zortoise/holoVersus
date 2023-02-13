@@ -50,6 +50,8 @@ var P2_palette_picked := 1
 func _ready():
 	Globals.pausing = false
 	
+	BGM.bgm(BGM.common_music["char_select"])
+	
 	# load characters
 	var dir = Directory.new()
 	if dir.open("res://Characters/") == OK:
@@ -525,6 +527,8 @@ func start_battle():
 	
 	Globals.time_limit = 0
 	Globals.training_mode = true
+	
+	BGM.fade()
 	$Transition.play("transit_to_battle")
 	
 	

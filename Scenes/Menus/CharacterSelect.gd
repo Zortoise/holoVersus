@@ -51,6 +51,8 @@ var P2_palette_picked := 1
 func _ready():
 	Globals.pausing = false
 	
+	BGM.bgm(BGM.common_music["char_select"])
+	
 	# load characters
 	var dir = Directory.new()
 	if dir.open("res://Characters/") == OK:
@@ -679,7 +681,8 @@ func start_battle():
 		new_stage_array.erase("Random")
 		new_stage_array.shuffle()
 		Globals.stage_ref = new_stage_array[0]
-	
+		
+	BGM.fade()
 	$Transition.play("transit_to_battle")
 	
 	

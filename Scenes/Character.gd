@@ -4011,7 +4011,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
 	var double_repeat := false
-	var root_move_name = UniqChar.get_root(hit_data.move_name) # for move variations
+	var root_move_name # for move variations
+	if !"entity_nodepath" in hit_data:
+		root_move_name = attacker.UniqChar.get_root(hit_data.move_name)
+	elif "root" in hit_data.move_data: # is entity, most has a root in move_data
+		root_move_name = hit_data.move_data.root
+	else:
+		root_move_name = hit_data.move_name
 	
 	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
 		for array in repeat_memory:
@@ -4030,7 +4036,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 	# add to repeat memory
 	if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-			repeat_memory.append([attacker.player_ID, root_move_name])
+		repeat_memory.append([attacker.player_ID, root_move_name])
 	
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------

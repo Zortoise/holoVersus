@@ -72,6 +72,8 @@ var my_payload = {
 
 func _ready():
 	
+	BGM.bgm(BGM.common_music["char_select"])
+	
 # warning-ignore:return_value_discarded
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 # warning-ignore:return_value_discarded
@@ -624,6 +626,7 @@ func start_battle():
 	else:
 		get_node(opponent + "_Stage").texture = stage_data[opponent_payload.stage]["select_R"]
 
+	BGM.fade()
 	$Transition.play("transit_to_battle")
 
 	
