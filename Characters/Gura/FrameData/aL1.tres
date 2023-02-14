@@ -39,7 +39,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "aL1SfxUnder",
 "SfxUnder_vframes": 1,
-"duration": 11,
+"duration": 13,
 "hframes": 5,
 "loop": false,
 "spritesheet": "aL1Sprite",
@@ -50,13 +50,13 @@ frame_data = {
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, -6 ), Vector2( -20, -6 ), Vector2( -20, 1 ), Vector2( -13, 1 ), Vector2( -13, 27 ), Vector2( 30, 27 ), Vector2( 30, 2 ), Vector2( 9, 2 ), Vector2( 9, -5 ), Vector2( 13, -5 ), Vector2( 13, -21 ), Vector2( -11, -21 ) ]
 },
-3: {
+4: {
 "SfxUnder_frame": 4,
 "frame": 4,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, -3 ), Vector2( -16, -3 ), Vector2( -16, 5 ), Vector2( -11, 5 ), Vector2( -11, 14 ), Vector2( 9, 14 ), Vector2( 9, -1 ), Vector2( 15, -1 ), Vector2( 15, -21 ), Vector2( -11, -21 ) ]
 },
-8: {
+9: {
 "SfxUnder_frame": 5,
 "frame": 4,
 "hitbox": [  ],
@@ -69,7 +69,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "aL1SfxUnder",
 "SfxUnder_vframes": 1,
-"duration": 6,
+"duration": 8,
 "hframes": 5,
 "loop": false,
 "spritesheet": "aL1Sprite",
@@ -80,7 +80,7 @@ frame_data = {
 "hitbox": [  ],
 "hurtbox": [ Vector2( -9, 19 ), Vector2( 3, 19 ), Vector2( 3, 8 ), Vector2( 13, 8 ), Vector2( 13, -21 ), Vector2( -9, -21 ) ]
 },
-3: {
+4: {
 "SfxUnder_frame": 0,
 "frame": 1,
 "hitbox": [  ],

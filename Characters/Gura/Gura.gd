@@ -41,8 +41,6 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.GROUND_ATK_ACTIVE
 		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
-		"L1bCRec", "F1CRec":
-			return Globals.char_state.GROUND_C_RECOVERY
 			
 		"aL1Startup", "aL2Startup", "aL3Startup", "aF1Startup", "aF1[h]Startup", "aF3Startup", "aHStartup":
 			return Globals.char_state.AIR_ATK_STARTUP
@@ -50,7 +48,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_ACTIVE
 		"L2Rec", "aL1Rec", "aL2Rec", "aL3Rec", "aL2bRec", "aF1Rec", "aF3Rec", "aHRec":
 			return Globals.char_state.AIR_ATK_RECOVERY
-		"L2cCRec", "aF1CRec", "aF3CRec":
+		"L2cCRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		"SP1Startup", "SP1bStartup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", \
@@ -1171,8 +1169,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1bActive":
 			Character.animate("L1bRec")
 		"L1bRec":
-			Character.animate("L1bCRec")
-		"L1bCRec":
 			Character.animate("Idle")
 		"L1b[h]Active":
 			Character.animate("L1b[h]Rec")
@@ -1181,7 +1177,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1cActive":
 			Character.animate("L1cRec")
 		"L1cRec":
-			Character.animate("L1bCRec")
+			Character.animate("Idle")
 			
 		"L2Startup":
 			Character.animate("L2Active")
@@ -1202,8 +1198,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"F1Active":
 			Character.animate("F1Rec")
 		"F1Rec":
-			Character.animate("F1CRec")
-		"F1CRec":
 			Character.animate("Idle")
 			
 		"F2Startup":
@@ -1298,8 +1292,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aF1Active":
 			Character.animate("aF1Rec")
 		"aF1Rec":
-			Character.animate("aF1CRec")
-		"aF1CRec":
 			Character.animate("FallTransit")
 
 		"aF3Startup":
@@ -1307,8 +1299,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aF3Active":
 			Character.animate("aF3Rec")
 		"aF3Rec":
-			Character.animate("aF3CRec")
-		"aF3CRec":
 			Character.animate("FallTransit")
 	
 		"aHStartup":

@@ -529,7 +529,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
+		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
 		" " + str(success_block)
 			
@@ -1852,10 +1852,8 @@ func are_inputs_too_close():
 			break
 		if tap[0] in [button_special, button_unique]:
 			time_of_last_special_or_unique_tap = tap[1]
-			break
 		elif tap[0] in [button_light, button_fierce, button_aux]:
 			time_of_last_attack_tap = tap[1]
-			break
 			
 	if time_of_last_special_or_unique_tap == null or time_of_last_attack_tap == null:
 		return false
@@ -2045,6 +2043,8 @@ func process_input_buffer():
 								keep = false
 								
 						Globals.char_state.GROUND_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
+							if chain_memory.size() != 0:
+								continue # cannot quick jump cancel attacks in chains
 							var move_name = get_move_name()
 							if move_name in UniqChar.STARTERS and !is_ex_move(move_name) and !is_super(move_name):
 								if Animator.time <= 1 and Animator.time != 0:
@@ -3553,10 +3553,14 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	if chain_combo == Globals.chain_combo.STRONGBLOCKED: return false # cannot cancel into anything but Burst Counter if strongblocked
 	
 	match query_move_data(move_name).atk_type:
-		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE: # Light/Fierce Normals can chain cancel on whiff
+		Globals.atk_type.LIGHT: # Light Normals can chain cancel on whiff
 			pass
+		Globals.atk_type.FIERCE: # Fierce Normals cannot chain into Lights on whiff
+			if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED] and \
+					query_move_data(attack_ref).atk_type == Globals.atk_type.LIGHT:
+				return false
 		Globals.atk_type.HEAVY: # Heavy Normals can only chain cancel on hit
-			if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+			if !chain_combo in [Globals.chain_combo.NORMAL]:
 				return false
 		_:  # only normals can be chain cancelled from
 			return false
@@ -3564,14 +3568,18 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
 		if is_atk_active(): # cannot chain on active frames unless landed an unblocked/weakblocked hit
 			return false
-		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
-			return false
+#		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
+#			return false
 	
 	var root_attack_ref = UniqChar.get_root(attack_ref)
 	if root_attack_ref in chain_memory: return false # cannot chain into moves already done
 
 	if Globals.atk_attr.NO_CHAIN in query_atk_attr(move_name) or Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
 		return false # some moves cannnot be chained from, some moves cannot be chained into
+		
+	if Globals.atk_attr.ONLY_CHAIN_ON_HIT in query_atk_attr(move_name): # some attacks can only chain from on hit
+		if !chain_combo in [Globals.chain_combo.NORMAL]:
+			return false
 		
 	if is_atk_active():
 		if Globals.atk_attr.LATE_CHAIN in query_atk_attr(move_name):
@@ -3587,9 +3595,9 @@ func test_qc_chain_combo(attack_ref): # called during attack startup
 	
 	if chain_memory.size() == 0: return true # not chaining, can QC into any valid move
 
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
-		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
-			return false
+#	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+#		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
+#			return false
 	
 	# if chaining, cannot QC into moves with CANNOT_CHAIN_INTO
 	if Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):

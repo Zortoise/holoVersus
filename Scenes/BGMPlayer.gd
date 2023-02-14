@@ -25,7 +25,7 @@ func init(in_bgm_dictionary, loop = false):
 
 func _process(delta):
 	if decaying:
-		volume_db -= 120.0 * delta
+		volume_db -= 60.0 * delta
 		if volume_db <= -80:
 			queue_free()
 		

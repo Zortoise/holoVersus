@@ -172,7 +172,7 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "blue",
 		"KB_angle" : -36,
 		"atk_attr" : [Globals.atk_attr.LEDGE_DROP, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.NO_REC_CANCEL],
-		"move_sound" : { ref = "whoosh14", aux_data = {"vol" : -9, "bus" : "PitchDown"} },
+		"move_sound" : { ref = "whoosh5", aux_data = {"vol" : -15, "bus" : "PitchDown"} },
 		"hit_sound" : { ref = "impact11", aux_data = {"vol" : -10} },
 	},
 	"F1" : {
@@ -234,7 +234,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 90,
-		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.DESTROY_ENTITIES],
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR, Globals.atk_attr.DESTROY_ENTITIES, Globals.atk_attr.ONLY_CHAIN_ON_HIT],
 		"move_sound" : { ref = "whoosh7", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "impact19", aux_data = {"vol" : -18} },
 	},
