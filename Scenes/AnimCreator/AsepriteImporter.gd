@@ -73,6 +73,10 @@ func process_aseprite_file(in_aseprite_filename: String): # output a single .tre
 			process_polygon_layer("Hitbox", frame_data, in_aseprite_filename)
 		elif layer_name.begins_with("Sweetbox"):
 			process_polygon_layer("Sweetbox", frame_data, in_aseprite_filename)
+		elif layer_name.begins_with("ExPolygonA"): # can be used for various effects like vacuuming or sourspots
+			process_polygon_layer("ExPolygonA", frame_data, in_aseprite_filename)
+		elif layer_name.begins_with("ExPolygonB"):
+			process_polygon_layer("ExPolygonB", frame_data, in_aseprite_filename)
 		elif layer_name.begins_with("SfxOver"):
 			process_sfx_layer("SfxOver", frame_data, in_aseprite_filename)
 		elif layer_name.begins_with("SfxUnder"):
@@ -89,6 +93,10 @@ func process_aseprite_file(in_aseprite_filename: String): # output a single .tre
 			process_point_layer("GrabRotDir", frame_data, in_aseprite_filename)
 		elif layer_name.begins_with("VacPoint"):
 			process_point_layer("VacPoint", frame_data, in_aseprite_filename)
+		elif layer_name.begins_with("ExPointA"): # can be used for extra SfxSpawn and EntitySpawn points
+			process_point_layer("ExPointA", frame_data, in_aseprite_filename)
+		elif layer_name.begins_with("ExPointB"):
+			process_point_layer("ExPointB", frame_data, in_aseprite_filename)
 				
 	# ---------------------------------------------------------------------------------------------------
 	# save frame_data dictionary for this aseprite file to a .tres file

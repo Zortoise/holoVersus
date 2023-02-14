@@ -17,6 +17,8 @@ script = ExtResource( 4 )
 
 [node name="HitStopTimer" parent="." instance=ExtResource( 1 )]
 
+[node name="NoCollideTimer" parent="." instance=ExtResource( 1 )]
+
 [node name="EntityCollisionBox" parent="." instance=ExtResource( 3 )]
 margin_right = 10.0
 margin_bottom = 10.0

@@ -529,7 +529,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
+		"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
 		" " + str(success_block)
 			
@@ -1395,16 +1395,26 @@ func simulate2(): # only ran if not in hitstop
 	velocity_previous_frame.x = velocity.x
 	velocity_previous_frame.y = velocity.y
 	
+	var orig_pos = position
 	var results = move($PlayerCollisionBox, $SoftPlatformDBox, check_ledge_stop()) # [landing_check, collision_check, ledgedrop_check]
 	
-	if results[0]: check_landing()
-	
+#	if results[0]: check_landing()
+
 	if results[1]:
-		if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["BReset"]):
-			check_b_reset_crash()
-		elif new_state == Globals.char_state.LAUNCHED_HITSTUN:
-			bounce(results[0])
-	
+		if $NoCollideTimer.is_running(): # if collide during 1st/Xth frame after hitstop, will return to position before moving
+			position = orig_pos
+			set_true_position()
+			velocity.x = velocity_previous_frame.x
+			velocity.y = velocity_previous_frame.y
+		else:
+			if results[0]: check_landing()
+			
+			if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["BReset"]):
+				check_b_reset_crash()
+			elif new_state == Globals.char_state.LAUNCHED_HITSTUN:
+				bounce(results[0])
+			
+			
 	# get overlapping characters, all grounded overlapping characters above you get sent to the back
 	var overlapping = Detection.detect_return([$PlayerCollisionBox], ["Players"])
 	if overlapping.size() > 0:
@@ -1451,6 +1461,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$ShorthopTimer.simulate()
 				$HitStunTimer.simulate()
 				$BurstLockTimer.simulate()
+				$NoCollideTimer.simulate()
 				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
 					if !get_node(targeted_opponent_path).is_hitstunned(): # no counting down EX Seal if opponent is hitstunned
 						$EXSealTimer.simulate()
@@ -3524,18 +3535,37 @@ func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aeri
 	
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
 	
-	if !is_atk_recovery() and !is_atk_active(): return false
+	match state: # need to be in attack active/recovery
+		Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE, \
+				Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY:
+			pass
+		_:
+			return false
 	
-	var move_name = Animator.current_animation.trim_suffix("Rec")
-	move_name = move_name.trim_suffix("Active")
+	var move_name = Animator.current_animation.trim_suffix("Active")
+	move_name = move_name.trim_suffix("Rec")
 	
 	if UniqChar.has_method("unique_chaining_rules") and UniqChar.unique_chaining_rules(move_name, attack_ref):
 		# will use Character.chain_combo, good for autocombos that triggers on hit/block and may/may not be on whiff
 		afterimage_cancel()
 		return true
+		
+	if chain_combo == Globals.chain_combo.STRONGBLOCKED: return false # cannot cancel into anything but Burst Counter if strongblocked
 	
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]: return false
-	# can only chain combo on normal unblocked/weakblocked hit
+	match query_move_data(move_name).atk_type:
+		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE: # Light/Fierce Normals can chain cancel on whiff
+			pass
+		Globals.atk_type.HEAVY: # Heavy Normals can only chain cancel on hit
+			if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+				return false
+		_:  # only normals can be chain cancelled from
+			return false
+	
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+		if is_atk_active(): # cannot chain on active frames unless landed an unblocked/weakblocked hit
+			return false
+		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
+			return false
 	
 	var root_attack_ref = UniqChar.get_root(attack_ref)
 	if root_attack_ref in chain_memory: return false # cannot chain into moves already done
@@ -3555,7 +3585,11 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 
 func test_qc_chain_combo(attack_ref): # called during attack startup
 	
-	if chain_combo == Globals.chain_combo.RESET: return true # not chaining, can QC into any valid move
+	if chain_memory.size() == 0: return true # not chaining, can QC into any valid move
+
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
+			return false
 	
 	# if chaining, cannot QC into moves with CANNOT_CHAIN_INTO
 	if Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
@@ -3808,9 +3842,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
 	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
 	
-	match hit_data.block_state: # gain Positive Flow if unblocked, GG is under 100%, atk_level > 1
+	match hit_data.block_state: # gain Positive Flow if unblocked, GG is under 100%, atk_level > 1, or semi-disjoint hit
 		Globals.block_state.UNBLOCKED:
-			if current_guard_gauge < 0 and !hit_data.weak_hit and hit_data.adjusted_atk_level > 1:
+			if current_guard_gauge < 0 and ((!hit_data.weak_hit and hit_data.adjusted_atk_level > 1) or hit_data.semi_disjoint):
 				add_status_effect(Globals.status_effect.POS_FLOW, null)
 	
 	
@@ -4329,6 +4363,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
 	elif hit_data.crush:
 		hitstop = CRUSH_TIME
+		
+	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
+		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
+			$NoCollideTimer.time = hit_data.move_data.ignore_time
+		else:
+			$NoCollideTimer.time = 1
 	
 	if !double_repeat: # lock Burst Escape for a few frames afterwards, some moves like Autochain moves lock for more
 		if "burstlock" in hit_data.move_data:
@@ -5721,6 +5761,7 @@ func save_state():
 		"BurstLockTimer_time" : $BurstLockTimer.time,
 		"EXSealTimer_time" : $EXSealTimer.time,
 		"ShorthopTimer_time" : $ShorthopTimer.time,
+		"NoCollideTimer_time" : $NoCollideTimer.time,
 	}
 	
 	if Globals.training_mode:
@@ -5813,6 +5854,7 @@ func load_state(state_data):
 	$BurstLockTimer.time = state_data.BurstLockTimer_time
 	$EXSealTimer.time = state_data.EXSealTimer_time
 	$ShorthopTimer.time = state_data.ShorthopTimer_time
+	$NoCollideTimer.time = state_data.NoCollideTimer_time
 	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = state_data.TrainingRegenTimer_time

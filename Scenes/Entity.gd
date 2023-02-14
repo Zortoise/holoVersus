@@ -160,6 +160,10 @@ func simulate2(): # only ran if not in hitstop
 	
 	# movement
 	if has_node("EntityCollisionBox"):
+		
+		var orig_pos = position
+		var orig_vel_x = velocity.x
+		var orig_vel_y = velocity.y
 	
 		var results #  # [landing_check, collision_check, ledgedrop_check]
 		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
@@ -171,12 +175,24 @@ func simulate2(): # only ran if not in hitstop
 			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
 				UniqEntity.kill()
 			elif results[1]: # if colliding with a solid platform, runs collision() which can kill it or bounce it
-				UniqEntity.collision()
+				if $NoCollideTimer.is_running(): # if collide during 1st frame of hitstop, will return to position before moving
+					position = orig_pos
+					set_true_position()
+					velocity.x = orig_vel_x
+					velocity.y = orig_vel_y
+				else:
+					UniqEntity.collision()
 		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
 			if !is_on_ground($SoftPlatformDBox): # spawned in the air, kill it
 				UniqEntity.kill()
 			elif results[2]: # reached a ledge
-				UniqEntity.ledge_stop()
+				if $NoCollideTimer.is_running(): # if go off ledge during 1st frame of hitstop, will return to position before moving
+					position = orig_pos
+					set_true_position()
+					velocity.x = orig_vel_x
+					velocity.y = orig_vel_y
+				else:	
+					UniqEntity.ledge_stop()
 		
 	else: # no collision with platforms
 		position += velocity.convert_to_vec()
@@ -259,6 +275,9 @@ func simulate_after(): # do this after hit detection
 		lifetime += 1
 		if lifespan != null and lifetime >= lifespan:
 			UniqEntity.kill()
+			
+		if !hitstop:
+			$NoCollideTimer.simulate()
 				
 	# start hitstop timer at end of frame after SpritePlayer.simulate() by setting hitstop to a number other than null for the frame
 	# new hitstops override old ones
@@ -380,6 +399,12 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	else:
 		if hitstop == null or hit_data.hitstop > hitstop:
 			hitstop = hit_data.hitstop			
+			
+	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
+		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
+			$NoCollideTimer.time = hit_data.move_data.ignore_time
+		else:
+			$NoCollideTimer.time = 1
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 
@@ -529,6 +554,7 @@ func save_state():
 		"unique_data" : unique_data,
 		
 		"HitStopTimer_time" : $HitStopTimer.time,
+		"NoCollideTimer_time" : $NoCollideTimer.time,
 	}
 	return state_data
 
@@ -561,6 +587,7 @@ func load_state(state_data):
 	unique_data = state_data.unique_data
 	
 	$HitStopTimer.time = state_data.HitStopTimer_time
+	$NoCollideTimer.time = state_data.NoCollideTimer_time
 
 		
 #--------------------------------------------------------------------------------------------------
