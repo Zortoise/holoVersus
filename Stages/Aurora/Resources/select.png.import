@@ -2,25 +2,25 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/select_R.png-5b872e1abc80330cc0a30f477480b1b7.stex"
+path="res://.import/select.png-150346c034188a6f7d4b77c33e11720a.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Stages/Aurora/Resources/select_R.png"
-dest_files=[ "res://.import/select_R.png-5b872e1abc80330cc0a30f477480b1b7.stex" ]
+source_file="res://Stages/Aurora/Resources/select.png"
+dest_files=[ "res://.import/select.png-150346c034188a6f7d4b77c33e11720a.stex" ]
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/lossy_quality=0.7
 compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2

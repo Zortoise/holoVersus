@@ -262,6 +262,7 @@ func watch_replay():
 		Globals.replay_is_netgame = false
 		Globals.replay_profiles = ["", ""]
 		
+	BGM.fade()
 	$Transition.play("transit_to_battle")
 	
 	

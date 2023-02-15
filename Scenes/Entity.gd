@@ -400,7 +400,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		if hitstop == null or hit_data.hitstop > hitstop:
 			hitstop = hit_data.hitstop			
 			
-	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
+	if hitstop != null and hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
 		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
 			$NoCollideTimer.time = hit_data.move_data.ignore_time
 		else:

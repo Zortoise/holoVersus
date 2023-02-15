@@ -29,6 +29,13 @@ func _ready():
 	$Control/Winner.text = Netplay.get_profile_name_from_player_id(Globals.winner[0])
 	$Control/Character.text = Globals.winner[1]
 	$FullArt.texture = ResourceLoader.load("res://Characters/" + Globals.winner[1] + "/UI/full_art.png")
+	match Globals.winner[0]:
+		0:
+			$Background/Triangle.modulate = Color(0.73, 0.19, 0.27)
+			$Background/Triangle2.modulate = Color(0.73, 0.19, 0.27)
+		1:
+			$Background/Triangle.modulate = Color(0.22, 0.48, 0.82)
+			$Background/Triangle2.modulate = Color(0.22, 0.48, 0.82)
 	
 	for node in $VictoryMenu/VictoryList.get_children():
 		if node.is_in_group("has_focus"):

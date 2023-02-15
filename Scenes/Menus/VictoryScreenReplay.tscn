@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://Characters/Gura/UI/full_art.png" type="Texture" id=1]
 [ext_resource path="res://Assets/UI/victory.png" type="Texture" id=2]
@@ -6,7 +6,7 @@
 [ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://Assets/UI/cursor.png" type="Texture" id=5]
 [ext_resource path="res://Scenes/Menus/ButtonTypeB.tscn" type="PackedScene" id=6]
-[ext_resource path="res://Assets/UI/black_box_small.png" type="Texture" id=7]
+[ext_resource path="res://Assets/UI/character_select_tri.png" type="Texture" id=7]
 [ext_resource path="res://Scenes/Menus/AltInputs.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Scenes/Shaders/White.gdshader" type="Shader" id=9]
 
@@ -101,7 +101,7 @@ tracks/1/keys = {
 } ]
 }
 
-[sub_resource type="Shader" id=22]
+[sub_resource type="Shader" id=49]
 code = "shader_type canvas_item;
 
 uniform vec2 Direction = vec2(1.0, 0.0);
@@ -112,10 +112,44 @@ void fragment()
 	COLOR = texture(TEXTURE, UV + (Direction * TIME * Speed));
 }"
 
-[sub_resource type="ShaderMaterial" id=23]
-shader = SubResource( 22 )
+[sub_resource type="ShaderMaterial" id=50]
+shader = SubResource( 49 )
 shader_param/Direction = Vector2( 1, 1.7 )
 shader_param/Speed = 0.5
+
+[sub_resource type="Animation" id=51]
+resource_name = "default"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.458824, 0.458824, 0.458824, 1 ), Color( 0.87451, 0.87451, 0.87451, 1 ), Color( 0.458824, 0.458824, 0.458824, 1 ) ]
+}
+
+[sub_resource type="Animation" id=52]
+resource_name = "rainbow"
+length = 1.8
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.7, 0.7, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 0.7, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 0.7, 1 ) ]
+}
 
 [sub_resource type="ShaderMaterial" id=48]
 shader = ExtResource( 9 )
@@ -449,19 +483,39 @@ anims/start_transit_in = SubResource( 29 )
 anims/transit_to_replays = SubResource( 31 )
 anims/transit_to_watch_again = SubResource( 42 )
 
-[node name="Background" type="TextureRect" parent="."]
-material = SubResource( 23 )
+[node name="Background" type="Node2D" parent="."]
+
+[node name="Background" type="ColorRect" parent="Background"]
+modulate = Color( 0.658663, 0.658663, 0.658663, 1 )
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+
+[node name="Back" type="Node2D" parent="Background"]
+modulate = Color( 0.588235, 0.588235, 0.588235, 1 )
+
+[node name="Background" type="TextureRect" parent="Background/Back"]
+modulate = Color( 0.716427, 0.716427, 0.716427, 1 )
+material = SubResource( 50 )
 margin_right = 1920.0
 margin_bottom = 1080.0
 texture = ExtResource( 2 )
 stretch_mode = 2
 
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Background/Back/Background"]
+autoplay = "default"
+playback_speed = 0.5
+anims/default = SubResource( 51 )
+anims/rainbow = SubResource( 52 )
+
 [node name="Triangle" type="Sprite" parent="Background"]
-position = Vector2( 1728, 512 )
+modulate = Color( 0.73, 0.19, 0.27, 1 )
+position = Vector2( 260, 684 )
 texture = ExtResource( 7 )
 
 [node name="Triangle2" type="Sprite" parent="Background"]
-position = Vector2( 192, 584 )
+modulate = Color( 0.72549, 0.192157, 0.266667, 1 )
+position = Vector2( 1660, 404 )
 rotation = 3.14159
 texture = ExtResource( 7 )
 
@@ -522,9 +576,17 @@ margin_top = 640.0
 margin_right = 1024.0
 margin_bottom = 640.0
 
+[node name="ColorRect" type="ColorRect" parent="VictoryMenu"]
+margin_left = -8.0
+margin_top = -8.0
+margin_right = 664.0
+margin_bottom = 200.0
+color = Color( 0.87451, 0.87451, 0.87451, 1 )
+
 [node name="ColorRect2" type="ColorRect" parent="VictoryMenu"]
 margin_right = 656.0
 margin_bottom = 192.0
+rect_pivot_offset = Vector2( 384, 8 )
 color = Color( 0.121569, 0.121569, 0.121569, 1 )
 
 [node name="VictoryList" type="VBoxContainer" parent="VictoryMenu"]

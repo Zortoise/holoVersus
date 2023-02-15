@@ -25,12 +25,10 @@ var character_data = { # to be filled at _ready()
 
 var stage_data = { # to be filled at _ready()
 	"Random" : {
-		"select_L" : ResourceLoader.load("res://Assets/UI/random_select_L.png"), 
-		"select_R" : ResourceLoader.load("res://Assets/UI/random_select_R.png"), 
+		"select" : ResourceLoader.load("res://Assets/UI/random_select.png"), 
 	}
 #	"Aurora" : {
-#		"select_L" : ResourceLoader.load("res://Stages/Aurora/Resources/select_L.png"), 
-#		"select_R" : ResourceLoader.load("res://Stages/Aurora/Resources/select_R.png"), 
+#		"select" : ResourceLoader.load("res://Stages/Aurora/Resources/select.png"), 
 #	}
 }
 var stage_array
@@ -90,8 +88,7 @@ func _ready():
 		while stage_name != "":
 			if !stage_name.begins_with("."):
 				stage_data[stage_name] = {}
-				stage_data[stage_name]["select_L"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select_L.png")
-				stage_data[stage_name]["select_R"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select_R.png")
+				stage_data[stage_name]["select"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select.png")
 			stage_name = dir.get_next()
 	else: print("Error: Cannot open Stages folder from CharacterSelect.gd")
 	
@@ -554,7 +551,7 @@ func shift_stage_list(player_ID, v_dir):
 			$P1_StageSelect/StageList.move_child(new_stagelabel, 0) # make child the new first child
 			new_stagelabel.text = stage_array[index]
 			
-		$P1_Stage.texture = stage_data[$P1_StageSelect/StageList.get_child(3).text].select_L # update stage texture
+		$P1_Stage.texture = stage_data[$P1_StageSelect/StageList.get_child(3).text].select # update stage texture
 		for x in $P1_StageSelect/StageList.get_children(): # return color to normal
 			x.modulate = Color(1.0, 1.0, 1.0)
 		$P1_StageSelect/StageList.get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at
@@ -583,7 +580,7 @@ func shift_stage_list(player_ID, v_dir):
 			$P2_StageSelect/StageList.move_child(new_stagelabel, 0) # make child the new first child
 			new_stagelabel.text = stage_array[index]
 			
-		$P2_Stage.texture = stage_data[$P2_StageSelect/StageList.get_child(3).text].select_R # update stage texture
+		$P2_Stage.texture = stage_data[$P2_StageSelect/StageList.get_child(3).text].select # update stage texture
 		for x in $P2_StageSelect/StageList.get_children(): # return color to normal
 			x.modulate = Color(1.0, 1.0, 1.0)
 		$P2_StageSelect/StageList.get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at

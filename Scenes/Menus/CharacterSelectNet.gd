@@ -25,12 +25,10 @@ var character_data = { # to be filled at _ready()
 
 var stage_data = { # to be filled at _ready()
 	"Random" : {
-		"select_L" : ResourceLoader.load("res://Assets/UI/random_select_L.png"), 
-		"select_R" : ResourceLoader.load("res://Assets/UI/random_select_R.png"), 
+		"select" : ResourceLoader.load("res://Assets/UI/random_select.png"), 
 	}
 #	"Aurora" : {
-#		"select_L" : ResourceLoader.load("res://Stages/Aurora/Resources/select_L.png"), 
-#		"select_R" : ResourceLoader.load("res://Stages/Aurora/Resources/select_R.png"), 
+#		"select" : ResourceLoader.load("res://Stages/Aurora/Resources/select.png"), 
 #	}
 }
 var stage_array
@@ -50,7 +48,6 @@ var opponent: String # "P1" or "P2"
 var last_picked # store it for setting later
 
 var my_stage
-var my_stage_half # either "select_L" or "select_R"
 var my_fullart
 var my_name
 #var my_input_style
@@ -94,10 +91,10 @@ func _ready():
 	match player:
 		"P1":
 			opponent = "P2"
-			my_stage_half = "select_L"
+#			my_stage_half = "select_L"
 		"P2":
 			opponent = "P1"
-			my_stage_half = "select_R"
+#			my_stage_half = "select_R"
 	get_node(opponent + "_Stage").hide()
 	get_node(opponent + "_FullArt").hide()
 	get_node(opponent + "_Name").hide()
@@ -146,8 +143,7 @@ func _ready():
 		while stage_name != "":
 			if !stage_name.begins_with("."):
 				stage_data[stage_name] = {}
-				stage_data[stage_name]["select_L"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select_L.png")
-				stage_data[stage_name]["select_R"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select_R.png")
+				stage_data[stage_name]["select"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select.png")
 			stage_name = dir.get_next()
 	else: print("Error: Cannot open Stages folder from CharacterSelect.gd")
 	
@@ -428,7 +424,7 @@ func shift_stage_list(v_dir):
 		my_stageselect.get_node("StageList").move_child(new_stagelabel, 0) # make child the new first child
 		new_stagelabel.text = stage_array[index]
 		
-	my_stage.texture = stage_data[my_stageselect.get_node("StageList").get_child(3).text][my_stage_half] # update stage texture
+	my_stage.texture = stage_data[my_stageselect.get_node("StageList").get_child(3).text].select # update stage texture
 	for x in my_stageselect.get_node("StageList").get_children(): # return color to normal
 		x.modulate = Color(1.0, 1.0, 1.0)
 	my_stageselect.get_node("StageList").get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at
@@ -621,10 +617,10 @@ func start_battle():
 			$P2_Sprite.get_child(0).material.set_shader_param("swap", character_data[Globals.P2_char_ref]["palettes"][str(Globals.P2_palette)])
 
 	
-	if opponent == "P1":
-		get_node(opponent + "_Stage").texture = stage_data[opponent_payload.stage]["select_L"] # update stage texture
-	else:
-		get_node(opponent + "_Stage").texture = stage_data[opponent_payload.stage]["select_R"]
+#	if opponent == "P1":
+	get_node(opponent + "_Stage").texture = stage_data[opponent_payload.stage]["select"] # update stage texture
+#	else:
+#		get_node(opponent + "_Stage").texture = stage_data[opponent_payload.stage]["select_R"]
 
 	BGM.fade()
 	$Transition.play("transit_to_battle")

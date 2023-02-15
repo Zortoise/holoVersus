@@ -1048,6 +1048,8 @@ func simulate2(): # only ran if not in hitstop
 					if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
 						if Globals.trait.DASH_BLOCK in query_traits():
 							animate("BlockStartup")
+					elif Animator.query(["HardLanding"]):
+						pass # cannot block on hardlanding
 					else:
 	#					continue
 						animate("BlockStartup")
@@ -3279,7 +3281,7 @@ func a_reset_check(move_name):
 						if is_atk_active() and Animator.time > 0:
 							filter = true
 					Globals.reset_type.NON_ATK_RESET: # can only reset during active frames if targeted opponent not in hit
-						if is_atk_active() and Animator.time > 0:
+						if is_atk_active() and Animator.time > 1: # not on frame 1
 							var target = get_node(targeted_opponent_path)
 							if !target.get_node("HitStunTimer").is_running():
 								filter = true

@@ -2312,6 +2312,7 @@ texture = ExtResource( 7 )
 position = Vector2( -66, -31 )
 
 [node name="EXGauge" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder/EXGauges"]
+modulate = Color( 1, 0.9, 0.8, 1 )
 margin_left = -13.0
 margin_top = 1.0
 margin_right = 56.0
@@ -2321,7 +2322,7 @@ value = 100.0
 texture_progress = ExtResource( 9 )
 
 [node name="EXGauge2" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder/EXGauges"]
-modulate = Color( 1, 0.9, 0.8, 1 )
+modulate = Color( 1, 1, 1, 0 )
 margin_left = 58.0
 margin_top = 1.0
 margin_right = 127.0
@@ -2371,11 +2372,12 @@ position = Vector2( 1, 1 )
 texture = ExtResource( 12 )
 
 [node name="EXLabel" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
-modulate = Color( 1.5, 0.6, 0.6, 1 )
+modulate = Color( 0.784314, 0.784314, 0.784314, 1 )
 position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
 [node name="EXLock" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
+visible = false
 margin_left = -79.0
 margin_top = -30.0
 margin_right = 132.0

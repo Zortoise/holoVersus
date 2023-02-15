@@ -1161,8 +1161,11 @@ func defender_semi_invul(hitbox, hurtbox):
 	else:
 		attacker_or_entity = get_node(hitbox.entity_nodepath)
 		
-	if Globals.atk_attr.UNBLOCKABLE in hitbox.move_data.atk_attr or \
-			hitbox.move_data.atk_type in [Globals.atk_type.SUPER]:
+#	if Globals.atk_attr.UNBLOCKABLE in hitbox.move_data.atk_attr or \
+#			hitbox.move_data.atk_type in [Globals.atk_type.SUPER]:
+#		return false # defender's semi-invul failed
+		
+	if hitbox.move_data.atk_type in [Globals.atk_type.SUPER]:
 		return false # defender's semi-invul failed
 		
 	var defender = get_node(hurtbox.owner_nodepath)

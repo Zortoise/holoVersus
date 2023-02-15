@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=2]
+[gd_scene load_steps=66 format=2]
 
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/UI/character_picker_P1.png" type="Texture" id=2]
@@ -7,10 +7,9 @@
 [ext_resource path="res://Characters/Gura/UI/full_art.png" type="Texture" id=5]
 [ext_resource path="res://Scenes/Shaders/White.gdshader" type="Shader" id=6]
 [ext_resource path="res://Scenes/Menus/ButtonTypeE2.tscn" type="PackedScene" id=7]
-[ext_resource path="res://Stages/Aurora/Resources/select_L.png" type="Texture" id=8]
+[ext_resource path="res://Stages/Aurora/Resources/select.png" type="Texture" id=8]
 [ext_resource path="res://Assets/UI/character_picker_P2.png" type="Texture" id=9]
 [ext_resource path="res://Scenes/Menus/MenuTheme.tres" type="Theme" id=10]
-[ext_resource path="res://Stages/Aurora/Resources/select_R.png" type="Texture" id=11]
 [ext_resource path="res://Scenes/Shaders/Palette.gdshader" type="Shader" id=12]
 [ext_resource path="res://Characters/Gura/Palettes/2.png" type="Texture" id=13]
 [ext_resource path="res://Scenes/Menus/CharacterSelect.gd" type="Script" id=14]
@@ -23,6 +22,8 @@
 [ext_resource path="res://Scenes/Menus/StageLabel.tscn" type="PackedScene" id=21]
 [ext_resource path="res://Scenes/Menus/P1DirInputs.gd" type="Script" id=22]
 [ext_resource path="res://Scenes/Menus/P2DirInputs.gd" type="Script" id=23]
+[ext_resource path="res://Assets/UI/character_select_tri.png" type="Texture" id=24]
+[ext_resource path="res://Assets/UI/stage_select.png" type="Texture" id=25]
 
 [sub_resource type="Animation" id=29]
 length = 0.001
@@ -116,7 +117,7 @@ tracks/1/keys = {
 } ]
 }
 
-[sub_resource type="Shader" id=46]
+[sub_resource type="Shader" id=76]
 code = "shader_type canvas_item;
 
 uniform vec2 Direction = vec2(1.0, 0.0);
@@ -127,10 +128,44 @@ void fragment()
 	COLOR = texture(TEXTURE, UV + (Direction * TIME * Speed));
 }"
 
-[sub_resource type="ShaderMaterial" id=23]
-shader = SubResource( 46 )
+[sub_resource type="ShaderMaterial" id=71]
+shader = SubResource( 76 )
 shader_param/Direction = Vector2( 1, 1 )
 shader_param/Speed = 0.4
+
+[sub_resource type="Animation" id=74]
+resource_name = "default"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.458824, 0.458824, 0.458824, 1 ), Color( 0.87451, 0.87451, 0.87451, 1 ), Color( 0.458824, 0.458824, 0.458824, 1 ) ]
+}
+
+[sub_resource type="Animation" id=73]
+resource_name = "rainbow"
+length = 1.8
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.7, 0.7, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 0.7, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 1.5, 1 ), Color( 1.5, 0.7, 0.7, 1 ) ]
+}
 
 [sub_resource type="ShaderMaterial" id=52]
 shader = ExtResource( 6 )
@@ -213,7 +248,7 @@ outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
 use_filter = true
 font_data = ExtResource( 19 )
 
-[sub_resource type="Theme" id=60]
+[sub_resource type="Theme" id=75]
 default_font = SubResource( 70 )
 
 [sub_resource type="Animation" id=69]
@@ -573,16 +608,60 @@ anims/transit_in = SubResource( 30 )
 anims/transit_to_battle = SubResource( 32 )
 anims/transit_to_local = SubResource( 31 )
 
-[node name="Background" type="TextureRect" parent="."]
-material = SubResource( 23 )
+[node name="Background" type="Node2D" parent="."]
+
+[node name="Background" type="ColorRect" parent="Background"]
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+
+[node name="Back" type="Node2D" parent="Background"]
+
+[node name="Background" type="TextureRect" parent="Background/Back"]
+modulate = Color( 0.572457, 0.572457, 0.572457, 1 )
+material = SubResource( 71 )
 margin_right = 1920.0
 margin_bottom = 1080.0
 texture = ExtResource( 3 )
 stretch_mode = 2
 
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Background/Back/Background"]
+autoplay = "default"
+playback_speed = 0.5
+anims/default = SubResource( 74 )
+anims/rainbow = SubResource( 73 )
+
+[node name="TriangleL" type="Sprite" parent="Background"]
+modulate = Color( 0.72549, 0.192157, 0.266667, 1 )
+position = Vector2( 132, 680 )
+texture = ExtResource( 24 )
+
+[node name="TriangleR" type="Sprite" parent="Background"]
+modulate = Color( 0.215686, 0.482353, 0.823529, 1 )
+position = Vector2( 1788, 676 )
+scale = Vector2( -1, 1 )
+texture = ExtResource( 24 )
+
+[node name="MaskL" type="Light2D" parent="Background"]
+position = Vector2( 960, 360 )
+rotation = 3.14159
+scale = Vector2( 1, -1 )
+texture = ExtResource( 25 )
+mode = 3
+range_item_cull_mask = 4
+
+[node name="MaskR" type="Light2D" parent="Background"]
+position = Vector2( 960, 360 )
+rotation = 3.14159
+scale = Vector2( -1, -1 )
+texture = ExtResource( 25 )
+mode = 3
+range_item_cull_mask = 8
+
 [node name="P1_Stage" type="Sprite" parent="."]
+light_mask = 5
 material = SubResource( 52 )
-position = Vector2( 684, 308 )
+position = Vector2( 960, 360 )
 texture = ExtResource( 8 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="P1_Stage"]
@@ -591,9 +670,10 @@ anims/RESET = SubResource( 42 )
 anims/flash = SubResource( 43 )
 
 [node name="P2_Stage" type="Sprite" parent="."]
+light_mask = 9
 material = SubResource( 53 )
-position = Vector2( 1236, 308 )
-texture = ExtResource( 11 )
+position = Vector2( 960, 360 )
+texture = ExtResource( 8 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="P2_Stage"]
 autoplay = "RESET"
@@ -651,7 +731,7 @@ custom_constants/separation = -5
 modulate = Color( 1.2, 1.2, 1.2, 1 )
 margin_right = 145.0
 margin_bottom = 40.0
-theme = SubResource( 60 )
+theme = SubResource( 75 )
 custom_colors/font_color = Color( 0.686275, 0.345098, 1, 1 )
 text = "HYBRID"
 
@@ -664,7 +744,7 @@ anims/gray = SubResource( 62 )
 margin_top = 35.0
 margin_right = 145.0
 margin_bottom = 75.0
-theme = SubResource( 60 )
+theme = SubResource( 75 )
 custom_colors/font_color = Color( 0.25098, 0.843137, 1, 1 )
 text = "Classic"
 
@@ -685,7 +765,7 @@ custom_constants/separation = -5
 modulate = Color( 1.2, 1.2, 1.2, 1 )
 margin_right = 145.0
 margin_bottom = 40.0
-theme = SubResource( 60 )
+theme = SubResource( 75 )
 custom_colors/font_color = Color( 0.686275, 0.345098, 1, 1 )
 text = "HYBRID"
 
@@ -699,7 +779,7 @@ modulate = Color( 1.2, 1.2, 1.2, 1 )
 margin_top = 35.0
 margin_right = 145.0
 margin_bottom = 75.0
-theme = SubResource( 60 )
+theme = SubResource( 75 )
 custom_colors/font_color = Color( 0.25098, 0.843137, 1, 1 )
 text = "Classic"
 
@@ -1388,6 +1468,7 @@ anims/RESET = SubResource( 50 )
 anims/hold = SubResource( 51 )
 
 [node name="P1_ButtonCheck" type="Control" parent="."]
+visible = false
 margin_left = 64.0
 margin_top = 64.0
 margin_right = 64.0
@@ -1572,6 +1653,7 @@ custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "5 frames"
 
 [node name="P2_ButtonCheck" type="Control" parent="."]
+visible = false
 margin_left = 1280.0
 margin_top = 64.0
 margin_right = 1280.0
