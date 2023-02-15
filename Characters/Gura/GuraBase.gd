@@ -28,10 +28,11 @@ const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const MAX_AIR_DODGE = 1
+const MAX_SUPER_DASH = 1
 const GROUND_DASH_SPEED = 450 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
-const B_RESET_SPEED = 450 * FMath.S # flying dash
-const B_RESET_TURN_RATE = 5 # exact navigate speed when fdashing
+const SDASH_SPEED = 450 * FMath.S # super dash
+const SDASH_TURN_RATE = 5 # exact navigate speed when sdashing
 const DODGE_GG_COST = 2500
 const DODGE_SPEED = 1000 * FMath.S
 

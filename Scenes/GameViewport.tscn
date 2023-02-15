@@ -41,6 +41,7 @@
 [ext_resource path="res://Assets/UI/EX_label.png" type="Texture" id=39]
 [ext_resource path="res://Assets/UI/EX_lock.png" type="Texture" id=40]
 [ext_resource path="res://Assets/UI/EX_lock_under.png" type="Texture" id=41]
+[ext_resource path="res://Assets/UI/guard_label.png" type="Texture" id=42]
 
 [sub_resource type="Animation" id=5]
 length = 0.001
@@ -775,11 +776,6 @@ tracks/1/keys = {
 "update": 0,
 "values": [ Color( 1.5, 0.6, 0.6, 1 ) ]
 }
-
-[sub_resource type="DynamicFont" id=128]
-size = 18
-use_filter = true
-font_data = ExtResource( 3 )
 
 [sub_resource type="ShaderMaterial" id=107]
 shader = ExtResource( 37 )
@@ -2390,15 +2386,9 @@ texture_under = ExtResource( 41 )
 texture_progress = ExtResource( 40 )
 fill_mode = 1
 
-[node name="GuardLabel" type="Label" parent="HUD/P1_HUDRect/GaugesUnder"]
-margin_left = -127.0
-margin_top = 11.0
-margin_right = -63.0
-margin_bottom = 30.0
-custom_colors/font_color = Color( 0.784314, 0.784314, 0.784314, 1 )
-custom_fonts/font = SubResource( 128 )
-text = "GUARD"
-valign = 2
+[node name="GuardLabel" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
+position = Vector2( -96, 19 )
+texture = ExtResource( 42 )
 
 [node name="Unique" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
 position = Vector2( 0, -78 )
@@ -2623,15 +2613,9 @@ texture_under = ExtResource( 41 )
 texture_progress = ExtResource( 40 )
 fill_mode = 1
 
-[node name="GuardLabel" type="Label" parent="HUD/P2_HUDRect/GaugesUnder"]
-margin_left = -127.0
-margin_top = 11.0
-margin_right = -63.0
-margin_bottom = 30.0
-custom_colors/font_color = Color( 0.784314, 0.784314, 0.784314, 1 )
-custom_fonts/font = SubResource( 128 )
-text = "GUARD"
-valign = 2
+[node name="GuardLabel" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
+position = Vector2( -96, 19 )
+texture = ExtResource( 42 )
 
 [node name="Unique" type="Node2D" parent="HUD/P2_HUDRect/GaugesUnder"]
 position = Vector2( 0, -78 )

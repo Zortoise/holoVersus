@@ -191,6 +191,7 @@ var air_jump := 0
 var wall_jump := 0
 var air_dash := 0
 var air_dodge := 0
+var super_dash := 0
 var state = Globals.char_state.GROUND_STANDBY
 var new_state = Globals.char_state.GROUND_STANDBY
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
@@ -1233,27 +1234,44 @@ func simulate2(): # only ran if not in hitstop
 					UniqChar.consume_one_air_dash() # reduce air_dash count by 1
 					
 #			elif Animator.query_to_play(["Tech", "GuardTech", "FDash"]):
-			if Animator.query_current(["BReset"]):
-				if !button_dash in input_state.pressed: # stop BReset dashing
+			var sdashing := false
+			if Animator.query_current(["SDash"]):
+				if button_dash in input_state.pressed:
+					sdashing = true
+					if !grounded: # if airborne, change to aSDash
+						animate("aSDash")
+				else:
 					if !grounded:
 						animate("aDashBrake")
 					else:
 						animate("DashBrake")
+			elif Animator.query_current(["aSDash"]):
+				if button_dash in input_state.pressed:
+					sdashing = true
+#					if grounded: # if landed on ground, change to SDash
+#						animate("SDash")
 				else:
-					if grounded and posmod(Globals.Game.frametime, 5) == 0: # drag rocks on ground
-						Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing()})
-						
-					var vel_angle = velocity.angle() # rotation and navigation
-					var rotated := false
-					if dir != 0 or v_dir != 0:
-						var target_angle = Globals.dir_to_angle(dir, v_dir, facing)
-						var new_angle = Globals.navigate(vel_angle, target_angle, UniqChar.get_stat("B_RESET_TURN_RATE"))
-						if new_angle != vel_angle:
-							velocity.rotate(new_angle - vel_angle)
-							rotate_sprite(new_angle)
-							rotated = true
-					if !rotated:
-						rotate_sprite(vel_angle)
+					if !grounded:
+						animate("aDashBrake")
+					else:
+						animate("DashBrake")
+				
+			if sdashing:
+				if grounded and posmod(Globals.Game.frametime, 5) == 0: # drag rocks on ground
+					Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
+					
+				var vel_angle = velocity.angle() # rotation and navigation
+				var rotated := false
+				if dir != 0 or v_dir != 0:
+					var target_angle = Globals.dir_to_angle(dir, v_dir, facing)
+					var new_angle = Globals.navigate(vel_angle, target_angle, UniqChar.get_stat("SDASH_TURN_RATE"))
+					if new_angle != vel_angle:
+						velocity.rotate(new_angle - vel_angle)
+						rotate_sprite(new_angle)
+						rotated = true
+				if !rotated:
+					rotate_sprite(vel_angle)
+					
 						
 			elif Animator.query_current(["Dodge"]):
 				if get_node(targeted_opponent_path).position.x - position.x != 0 and \
@@ -1409,8 +1427,8 @@ func simulate2(): # only ran if not in hitstop
 		else:
 			if results[0]: check_landing()
 			
-			if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["BReset"]):
-				check_b_reset_crash()
+			if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["SDash", "aSDash"]):
+				check_sdash_crash()
 			elif new_state == Globals.char_state.LAUNCHED_HITSTUN:
 				bounce(results[0])
 			
@@ -1973,9 +1991,14 @@ func process_input_buffer():
 								has_acted[0] = true
 								keep = false
 								
-						# WALL JUMPS  --------------------------------------------------------------------------------------------------
+						# AIR JUMPS  --------------------------------------------------------------------------------------------------
 			
 						Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+#							if grounded:
+#								animate("JumpTransit") # ground jump
+#								keep = false
+#								continue
+							
 							if Settings.dj_fastfall[player_ID] == 1 and button_down in input_state.pressed:
 								continue
 								
@@ -2118,10 +2141,29 @@ func process_input_buffer():
 									continue
 						Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE, \
 								Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY:
-							if test_b_reset():
-								animate("BResetTransit")
+							if test_sdash_cancel():
+								animate("SDashTransit")
 								has_acted[0] = true
 								keep = false
+								
+				if keep:
+					match new_state:
+						Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
+								Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
+								Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, \
+								Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY, \
+								Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK:
+							if new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP] and \
+									!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
+								continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
+							if new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
+									!Animator.query_to_play(["BlockRec", "aBlockRec", "Dash", "aDash"]):
+								continue # can only cancel from certain non-attack recovery frames
+							if super_dash > 0:
+								animate("SDashTransit")
+								has_acted[0] = true
+								keep = false
+									
 									
 			"Dodge":
 				match new_state:
@@ -2286,11 +2328,11 @@ func state_detect(anim):
 		"BurstCRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
-		"AReset", "BReset":
+		"AReset", "SDash", "aSDash":
 			return Globals.char_state.AIR_RECOVERY
 		"AResetCRec":
 			return Globals.char_state.AIR_C_RECOVERY
-		"BResetTransit":
+		"SDashTransit":
 			return Globals.char_state.AIR_STARTUP
 			
 		_: # unique animations
@@ -2440,6 +2482,7 @@ func reset_jumps():
 	wall_jump = MAX_WALL_JUMP # reset wall jump count on ground
 	air_dash = UniqChar.get_stat("MAX_AIR_DASH")
 	air_dodge = UniqChar.get_stat("MAX_AIR_DODGE")
+	super_dash = UniqChar.get_stat("MAX_SUPER_DASH")
 	aerial_memory = []
 	aerial_sp_memory = []
 	
@@ -2500,7 +2543,8 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("BlockRec")
 				UniqChar.landing_sound()
 				
-			elif Animator.query(["DodgeTransit", "Dodge", "AReset", "BReset"]) or Animator.to_play_animation.begins_with("Burst"): # no landing
+			elif Animator.query(["DodgeTransit", "Dodge", "AReset", "SDash", "aSDash"]) or \
+					Animator.to_play_animation.begins_with("Burst"): # no landing
 				pass
 				
 			else: # landing during AirDashDD
@@ -2598,15 +2642,15 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			animate("aBlock")
 
 
-func check_b_reset_crash():
+func check_sdash_crash():
 	if !is_on_ground($SoftPlatformDBox):
 		animate("aDashBrake")
 	else:
-		if !velocity.is_longer_than(FMath.percent(UniqChar.get_stat("B_RESET_SPEED"), 50)):
+		if !velocity.is_longer_than(FMath.percent(UniqChar.get_stat("SDASH_SPEED"), 50)):
 			animate("HardLanding")
 		else:
 			var old_angle = velocity.angle()
-			velocity.set_vector(UniqChar.get_stat("B_RESET_SPEED"), 0)
+			velocity.set_vector(UniqChar.get_stat("SDASH_SPEED"), 0)
 			velocity.rotate(old_angle)
 
 func check_collidable(): # called by Physics.gd
@@ -2614,10 +2658,11 @@ func check_collidable(): # called by Physics.gd
 		Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER:
 			return false
 		Globals.char_state.GROUND_ATK_STARTUP: # crossover attack
-			if button_dash in input_state.pressed and chain_memory.size() == 0:
+			if button_dash in input_state.pressed:
+#					and chain_memory.size() == 0:
 				return false
 		Globals.char_state.AIR_RECOVERY:
-			if Animator.query_to_play(["Dodge", "BReset"]):
+			if Animator.query_to_play(["Dodge", "SDash", "aSDash"]):
 				return false
 			
 	return UniqChar.check_collidable()
@@ -2629,7 +2674,7 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 	elif state == Globals.char_state.SEQUENCE_TARGET:
 		return true # when being grabbed, always fall through soft platforms
 #		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
-	elif new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge", "BReset"]):
+	elif new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge", "SDash", "aSDash"]):
 		return true
 	elif !grounded and is_attacking():
 		if button_down in input_state.pressed:
@@ -2859,7 +2904,7 @@ func launch_trail():
 			Globals.Game.spawn_SFX("LaunchDust", "DustClouds", position, {"back":true, "facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
 		else:
-			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing()})
+			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
 			
 	
 # QUICK STATE CHECK ---------------------------------------------------------------------------------------------------
@@ -3136,7 +3181,7 @@ func tech():
 	if button_dash in input_state.pressed:
 		if dir != 0 or v_dir != 0:
 			if button_block in input_state.pressed:
-				animate("BResetTransit")
+				animate("SDashTransit")
 				$ModulatePlayer.play("unlaunch_flash")
 				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 				return true
@@ -3273,25 +3318,32 @@ func test_dash_cancel():
 	return true
 	
 	
-func test_b_reset():
+func test_sdash_cancel():
 	
 	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL, Globals.chain_combo.WEAKBLOCKED]:
 		return false # can only s_dash cancel on Normal hit/Special hit/weakblock
 	
-	if current_ex_gauge < BETARESET_EX_COST:
-		return false
-	
 	var move_name = get_move_name()
 	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name):
 		return false
-	if !is_non_EX_special_move(move_name):
-		return false
 		
-	change_ex_gauge(-BETARESET_EX_COST)
-	play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
-	Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-			"v_mirror":Globals.Game.rng_bool(), "palette":"blue", "sticky":true}, get_path())
-	$ModulatePlayer.play("blue_reset")
+	if is_normal_attack(move_name): # normal attacks can be sdashed on recovery on hit
+		if super_dash == 0: return false
+		if is_atk_active(): #  some normals can be sdashed on active frames, but only with active_cancel == true
+			if !active_cancel:
+				return false
+				
+	elif is_non_EX_special_move(move_name):
+		if current_ex_gauge < BETARESET_EX_COST:
+			return false
+		change_ex_gauge(-BETARESET_EX_COST)
+		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+		Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+				"v_mirror":Globals.Game.rng_bool(), "palette":"blue", "sticky":true}, get_path())
+		$ModulatePlayer.play("blue_reset")
+	else:
+		return false	
+	
 	afterimage_cancel()
 	return true
 
@@ -4121,12 +4173,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 					
-#		Globals.char_state.AIR_STARTUP: # fdash startup has projectile superarmor against non-strong projectiles
-#			if Animator.query_current(["FDashTransit"]) and "entity_nodepath" in hit_data and \
-#					!Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr and \
-#					!Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
-#					hit_data.block_state = Globals.block_state.WEAK
-#					hit_data["superarmored"] = true
+		Globals.char_state.AIR_STARTUP: # sdash startup has projectile superarmor against non-strong projectiles
+			if Animator.query_current(["SDashTransit"]) and "entity_nodepath" in hit_data and \
+					!Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr and \
+					!Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
+					hit_data.block_state = Globals.block_state.WEAK
+					hit_data["superarmored"] = true
 				
 		# BLOCKING --------------------------------------------------------------------------------------------------
 		
@@ -5360,13 +5412,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("AResetCRec")
 		"AResetCRec":
 			animate("FallTransit")
-		"BResetTransit":
-			animate("BReset")
-		"BReset":
-			if !grounded:
-				animate("aDashBrake")
-			else:
-				animate("DashBrake")
+		"SDashTransit":
+			animate("SDash")
+		"aSDash":
+			animate("aDashBrake")
 			
 		"SeqFlinchAStop":
 			animate("SeqFlinchA")
@@ -5584,29 +5633,34 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"AResetCRec":
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
-		"BResetTransit":
+		"SDashTransit":
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
 			velocity_limiter.x_slow = 10
 			velocity_limiter.y_slow = 10
 			afterimage_timer = 1 # sync afterimage trail
-		"BReset":
-			remove_status_effect(Globals.status_effect.POS_FLOW)
-			var b_reset_angle: int
+		"SDash":
+#			remove_status_effect(Globals.status_effect.POS_FLOW)
+			super_dash = int(max(0, super_dash - 1))
+			var sdash_angle: int
 			if !grounded or soft_grounded:
-				b_reset_angle = Globals.dir_to_angle(dir, v_dir, facing)
+				sdash_angle = Globals.dir_to_angle(dir, v_dir, facing)
 			else:
 				if v_dir == -1:
-					b_reset_angle = Globals.dir_to_angle(dir, -1, facing)
+					sdash_angle = Globals.dir_to_angle(dir, -1, facing)
 				else:
-					b_reset_angle = Globals.dir_to_angle(dir, 0, facing)
-			velocity.set_vector(UniqChar.get_stat("B_RESET_SPEED"), 0)
-			velocity.rotate(b_reset_angle)
+					sdash_angle = Globals.dir_to_angle(dir, 0, facing)
+			velocity.set_vector(UniqChar.get_stat("SDASH_SPEED"), 0)
+			velocity.rotate(sdash_angle)
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
 			afterimage_timer = 1 # sync afterimage trail
-			Globals.Game.spawn_SFX( "RingDust", "RingDust", position, {"rot":deg2rad(b_reset_angle), "back":true})
-			rotate_sprite(b_reset_angle)
+			Globals.Game.spawn_SFX( "RingDust", "RingDust", position, {"rot":deg2rad(sdash_angle), "back":true})
+			rotate_sprite(sdash_angle)
+		"aSDash":
+			anim_gravity_mod = 0
+			anim_friction_mod = 0
+			afterimage_timer = 1 # sync afterimage trail
 			
 	UniqChar._on_SpritePlayer_anim_started(anim_name)
 	
@@ -5704,6 +5758,7 @@ func save_state():
 		"wall_jump" : wall_jump,
 		"air_dash" : air_dash,
 		"air_dodge" : air_dodge,
+		"super_dash" : super_dash,
 		"state" : state,
 		"new_state": new_state,
 		"true_position_x" : true_position.x, # duplicate() does not work on classes! must save the variables inside separately!
@@ -5784,6 +5839,7 @@ func load_state(state_data):
 	wall_jump = state_data.wall_jump
 	air_dash = state_data.air_dash
 	air_dodge = state_data.air_dodge
+	super_dash = state_data.super_dash
 	state = state_data.state
 	new_state = state_data.new_state
 	true_position.x = state_data.true_position_x

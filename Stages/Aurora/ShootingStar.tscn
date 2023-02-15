@@ -93,6 +93,6 @@ animations = [ {
 [node name="ShootingStar" type="AnimatedSprite"]
 material = SubResource( 1 )
 frames = SubResource( 21 )
-frame = 1
+frame = 17
 playing = true
 script = ExtResource( 1 )
