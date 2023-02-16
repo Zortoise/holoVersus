@@ -1136,10 +1136,14 @@ func defender_anti_airing(hitbox, hurtbox):
 		
 		var defender_move_data = defender.query_move_data()
 		
-		if Globals.atk_attr.ANTI_AIR in defender_move_data.atk_attr and \
-				(!attacker.grounded or Globals.atk_attr.AIR_ATTACK in hitbox.move_data.atk_attr):
+		if Globals.atk_attr.ANTI_AIR in defender_move_data.atk_attr:
+			if attacker.grounded: # can anti-air grounded aerials
+				if !Globals.atk_attr.AERIAL in hitbox.move_data.atk_attr: return false
+			else: # if attacker is airborne, they must be above defender
+				if attacker.get_feet_pos().y > defender.get_feet_pos().y: return false
+				
 			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
-			# and the attacker must be using an AIR_ATTACK in air or on ground, or be airborne
+			# and the attacker must be using an AERIAL on ground, or be airborne and above defender
 			var defender_tier = Globals.atk_type_to_tier(defender_move_data.atk_type)
 			var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
 			

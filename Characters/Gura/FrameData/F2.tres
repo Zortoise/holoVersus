@@ -128,7 +128,7 @@ frame_data = {
 "hitbox": [ Vector2( 25, 4 ), Vector2( 81, 4 ), Vector2( 81, -15 ), Vector2( 25, -15 ) ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 14, 22 ), Vector2( 14, 1 ), Vector2( 25, 1 ), Vector2( 25, -6 ), Vector2( 14, -6 ), Vector2( 14, -19 ), Vector2( -11, -19 ) ],
 "sdhurtbox": [ Vector2( 25, 2 ), Vector2( 81, 2 ), Vector2( 81, -13 ), Vector2( 25, -13 ) ],
-"sweetbox": [ Vector2( 46, -1 ), Vector2( 79, -1 ), Vector2( 79, -10 ), Vector2( 46, -10 ) ]
+"sweetbox": [ Vector2( 42, 2 ), Vector2( 80, 2 ), Vector2( 80, -13 ), Vector2( 42, -13 ) ]
 }
 },
 "vframes": 2

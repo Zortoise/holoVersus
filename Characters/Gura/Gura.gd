@@ -6,11 +6,22 @@ extends "res://Characters/Gura/GuraBase.gd"
 # 1. Add it in MOVE_DATABASE and STARTERS, also in EX_MOVES/SUPERS, and in UP_TILTS if needed (even for EX Moves)
 # 2. Add it in state_detect()
 # 3. Add it in _on_SpritePlayer_anim_finished() to set the transitions
-# 4. Add it in _on_SpritePlayer_anim_started() to set up entity/sfx spawning  and other physics modifying characteristics
+# 4. Add it in _on_SpritePlayer_anim_started() to set up entity/sfx spawning and other physics modifying characteristics
 # 6. Add it in capture_combinations() if it is a special action
 # 5. Add it in process_buffered_input() for inputs
 # 7. Add any startup/recovery animations not in MOVE_DATABASE to refine_move_name()
 # 8. Add any versions not in MOVE_DATABASE in get_root() for aerial and chain memory
+	
+# Steps to add auto-sequences:
+# 1. Add final Sequence Steps and steps with damage into MOVE_DATABASE
+# 2. Add Sequence Steps and GrabRec animations into state_detect()
+# 3. Add Sequence Steps in _on_SpritePlayer_anim_finished() to set the transitions, place "end_sequence_step()" in last/branching steps
+# 4. Add Sequence Steps in _on_SpritePlayer_anim_started(), place "start_sequence_step()" on each step
+# 5. Add initial actions for each Step in start_sequence_step()
+# 6. Add frame-by-frame events and physics (gravity, air res) in simulate_sequence()
+# 7. Add frame-by-frame movement for the opponent in simulate_sequence_after() as "move_sequence_target(grab_point)" and "rotate_partner(Partner)"
+# 8. Add final Steps and branching Steps in end_sequence_step(), for final Step place in "Partner.sequence_launch()" there
+# 9. Add GrabRec animations into refine_move_name()
 	
 # --------------------------------------------------------------------------------------------------
 
@@ -33,23 +44,29 @@ func _ready():
 func state_detect(anim): # for unique animations, continued from state_detect() of main character node
 	match anim:
 		
-		"L1Startup", "L2Startup", "F1Startup", "F2Startup", "F3Startup", "F3bStartup", "F3[h]Startup", \
+		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "F3bStartup", "F3[h]Startup", \
 			"HStartup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
-		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", "F3[h]Active", \
-				"HActive", "HbActive", "H[h]Active", "Hb[h]Active":
+		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "L3Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
+				"F3[h]Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
-		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", "Hb[h]Rec", "aL2LandRec":
+		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
+				"Hb[h]Rec", "aL2LandRec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 			
-		"aL1Startup", "aL2Startup", "aL3Startup", "aF1Startup", "aF1[h]Startup", "aF3Startup", "aHStartup":
+		"aL1Startup", "aL2Startup", "aL3Startup", "aF1Startup", "aF1[h]Startup", "aF2Startup", "aF3Startup", "aHStartup":
 			return Globals.char_state.AIR_ATK_STARTUP
-		"aL1Active", "aL2Active", "aL3Active", "aF1Active", "aF3Active", "aHActive":
+		"aL1Active", "aL2Active", "aL3Active", "aF1Active", "aF2Active", "aF3Active", "aHActive":
 			return Globals.char_state.AIR_ATK_ACTIVE
-		"L2Rec", "aL1Rec", "aL2Rec", "aL3Rec", "aL2bRec", "aF1Rec", "aF3Rec", "aHRec":
+		"L2Rec", "aL1Rec", "aL2Rec", "aL3Rec", "aL2bRec", "aF1Rec", "aF2Rec", "aF3Rec", "aHRec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"L2cCRec":
 			return Globals.char_state.AIR_C_RECOVERY
+			
+		"aF2SeqA", "aF2SeqB":
+			return Globals.char_state.SEQUENCE_USER
+		"aF2GrabRec", "aF2bGrabRec":
+			return Globals.char_state.AIR_ATK_RECOVERY
 			
 		"SP1Startup", "SP1bStartup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", \
 				"SP1[u]Startup", "SP1[u][c1]Startup", "SP1[u][c2]Startup", "SP1[u][c1]bStartup", "SP1[u][c2]bStartup", "SP1[u][c3]Startup", \
@@ -121,7 +138,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Globals.char_state.AIR_ATK_RECOVERY
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
 			return Globals.char_state.SEQUENCE_USER
-			
+
 		"SP7Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"aSP7Startup":
@@ -798,6 +815,8 @@ func refine_move_name(move_name):
 			return "aL2"
 		"aF1[h]":
 			return "aF1"
+		"aF2Grab", "aF2bGrab":
+			return "aF2"
 		"SP1b", "aSP1", "aSP1b", "SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]", \
 			"SP1[u]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c1]b", "SP1[u][c2]b", "SP1[u][c3]", \
 			"aSP1[d]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c1]b", "aSP1[d][c2]b", "aSP1[d][c3]":
@@ -874,6 +893,19 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			Character.animate("aL2Rec")
 		"L2":
 			Character.animate("L2Rec")
+			
+		"F2[h]":
+			if hit_data.sweetspotted and !hit_data.stun and !hit_data.lethal_hit:
+				hit_data.move_data.KB_angle = 180
+				hit_data.move_data.knockback = 200 * FMath.S
+				hit_data["pull"] = true
+				hit_data.move_data.atk_attr.append(Globals.atk_attr.DI_MANUAL_SEAL)
+				Character.animate("F2[h]PRec")
+			
+		"aF2":
+			if hit_data.sweetspotted:
+				hit_data.move_data["sequence"] = "aF2SeqA"
+			
 		"aSP5", "aSP5[h]b":
 			if hit_data.sweetspotted:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
@@ -886,13 +918,8 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			else:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			update_uniqueHUD()
-		"F2[h]":
-			if hit_data.sweetspotted and !hit_data.stun and !hit_data.lethal_hit:
-				hit_data.move_data.KB_angle = 180
-				hit_data.move_data.knockback = 200 * FMath.S
-				hit_data["pull"] = true
-				hit_data.move_data.atk_attr.append(Globals.atk_attr.DI_MANUAL_SEAL)
-				Character.animate("F2[h]PRec")
+			
+
 
 
 func landed_a_hit2(_hit_data): # right before the end
@@ -950,29 +977,50 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 	
 	var Partner = get_node(Character.targeted_opponent_path)
 	var grab_point = Animator.query_point("grabpoint")
-	var grab_rot_dir = Animator.query_point("grabrotdir")
 	
 	match Animator.to_play_animation:
+		"aF2SeqA", "aF2SeqB":
+			move_sequence_target(grab_point)
+			rotate_partner(Partner)
+		
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			move_sequence_target(grab_point)
-			if grab_rot_dir != null:
-				if Partner.facing == -1:
-					Partner.sprite.rotation = grab_point.angle_to_point(grab_rot_dir)
-				else:
-					Partner.sprite.rotation = grab_point.angle_to_point(grab_rot_dir) + PI
+			rotate_partner(Partner)
 		"SP6[ex]SeqE":
 			pass
+					
+						
+
+			
 						
 func start_sequence_step(): # this is ran at the start of every sequence_step
 	var Partner = get_node(Character.targeted_opponent_path)
 
 	match Animator.to_play_animation:
+		"aF2SeqA":
+			Globals.Game.get_node("Players").move_child(Character, 0)
+			Character.velocity.set_vector(0, 0)
+			Partner.velocity.set_vector(0, 0)
+			Partner.animate("aSeqFlinchAFreeze")
+			Partner.face(-Character.facing)
+			rotate_partner(Partner)
+			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
+			Character.play_audio("cut2", {"vol":-20})
+			Globals.Game.spawn_SFX("HitsparkC", "HitsparkC", Animator.query_point("grabpoint"), {"facing":-Character.facing, \
+					"rot":deg2rad(-70), "palette":"blue"})
+		"aF2SeqB":
+			Character.velocity.set_vector(150 * FMath.S * Character.facing, 0)
+			Character.velocity.rotate(70 * Character.facing)
+			Character.play_audio("whoosh15", {"vol":-8})
+			Character.play_audio("whoosh3", {"vol":-13, "bus":"PitchDown"})
+			
 		"SP6[ex]SeqA":
 			Globals.Game.get_node("Players").move_child(Character, 0) # move Grabber to back, some grabs move Grabbed to back
 			Character.velocity.set_vector(0, 0) # freeze first
 			Partner.velocity.set_vector(0, 0)
 			Partner.animate("aSeqFlinchAFreeze")
 			Partner.face(-Character.facing)
+			rotate_partner(Partner)
 			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
 			Character.play_audio("bling6", {"vol":-20})
 		"SP6[ex]SeqB":
@@ -1020,6 +1068,10 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 		return true
 	
 	match Animator.to_play_animation:
+		"aF2SeqB":
+			Partner.sequence_launch()
+			return true
+		
 		"SP6[ex]SeqD": # ends when either you or parther hit the ground
 			if trigger == "ground": # you hit the ground
 				Character.animate("SP6[ex]SeqE")
@@ -1034,6 +1086,17 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 			Partner.sequence_launch()
 			return true
 	return false
+			
+			
+func rotate_partner(Partner): # rotate partner according to grabrotdir
+	var grab_point = Animator.query_point("grabpoint")
+	var grab_rot_dir = Animator.query_point("grabrotdir")
+
+	if grab_rot_dir != null:
+		if Partner.facing == -1:
+			Partner.sprite.rotation = grab_point.angle_to_point(grab_rot_dir)
+		else:
+			Partner.sprite.rotation = grab_point.angle_to_point(grab_rot_dir) + PI
 			
 func move_sequence_target(new_position): # move sequence_target to new position
 	if new_position == null: return # no grab point
@@ -1193,6 +1256,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L2cCRec":
 			Character.animate("FallTransit")
 			
+		"L3Startup":
+			Character.animate("L3Active")
+		"L3Active":
+			Character.animate("L3Rec")
+		"L3Rec":
+			Character.animate("Idle")
+			
 		"F1Startup":
 			Character.animate("F1Active")
 		"F1Active":
@@ -1292,6 +1362,23 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aF1Active":
 			Character.animate("aF1Rec")
 		"aF1Rec":
+			Character.animate("FallTransit")
+
+		"aF2Startup":
+			Character.animate("aF2Active")
+		"aF2Active":
+			Character.animate("aF2Rec")
+		"aF2Rec":
+			Character.animate("FallTransit")
+
+		"aF2SeqA":
+			Character.animate("aF2SeqB")
+		"aF2SeqB":
+			end_sequence_step()
+			Character.animate("aF2GrabRec")
+		"aF2GrabRec":
+			Character.animate("aF2bGrabRec")
+		"aF2bGrabRec":
 			Character.animate("FallTransit")
 
 		"aF3Startup":
@@ -1665,6 +1752,29 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aF1Rec":
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 100
+		"aF2Startup":
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
+		"aF2Active":
+			Character.velocity_limiter.x = 50
+			Character.velocity_limiter.down = 85
+			Character.anim_gravity_mod = 50
+		"aF2Rec":
+			Character.velocity_limiter.x = 70
+			Character.velocity_limiter.down = 70
+		"aF2SeqA", "aF2SeqB":
+			start_sequence_step()
+		"aF2GrabRec":
+			Character.velocity_limiter.x = 50
+			Character.velocity_limiter.down = 85
+			Character.anim_gravity_mod = 50
+		"aF2bGrabRec":
+			Character.face(-Character.facing)
+			Character.velocity_limiter.x = 50
+			Character.velocity_limiter.down = 85
+			Character.anim_gravity_mod = 50
+			
 		"aF3Startup":
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 0

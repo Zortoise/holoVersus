@@ -70,14 +70,14 @@ const UNIQUE_DATA_REF = {
 	"nibbler_cancel" : 0, # a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 }
 
-const STARTERS = ["L1", "L2", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
+const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
 	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]", \
 	"SP7", "aSP7"]
 #const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
 #const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 #const SUPERS = []
 
-const UP_TILTS = ["F3", "SP3", "SP3[ex]", "aL3", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
+const UP_TILTS = ["L3", "F3", "SP3", "SP3[ex]", "aL3", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
 const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1b[ex]", "aSP1b[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
@@ -176,6 +176,21 @@ const MOVE_DATABASE = {
 		"move_sound" : { ref = "whoosh5", aux_data = {"vol" : -15, "bus" : "PitchDown"} },
 		"hit_sound" : { ref = "impact11", aux_data = {"vol" : -10} },
 	},
+	"L3" : {
+		"atk_type" : Globals.atk_type.LIGHT,
+		"hitcount" : 1,
+		"damage" : 55,
+		"knockback" : 445 * FMath.S,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"atk_level" : 4,
+		"priority": 3,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : -80,
+		"atk_attr" : [Globals.atk_attr.ANTI_AIR],
+		"move_sound" : { ref = "whoosh9", aux_data = {"vol" : -18} },
+		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -10,} },
+	},
 	"F1" : {
 		"atk_type" : Globals.atk_type.FIERCE, # light/fierce/heavy/special/ex/super
 		"hitcount" : 1,
@@ -268,8 +283,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.ACTIVE_CANCEL, Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES,
-			Globals.atk_attr.NO_REPEAT_MOVE],
+		"atk_attr" : [Globals.atk_attr.NO_IMPULSE, Globals.atk_attr.DESTROY_ENTITIES, Globals.atk_attr.NO_REPEAT_MOVE],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 
@@ -285,7 +299,7 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "blue",
 #		"KB_angle" : 72,
 		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [Globals.atk_attr.AERIAL],
 		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12} },
 		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
@@ -300,7 +314,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 90,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.NO_REC_CANCEL],
+		"atk_attr" : [Globals.atk_attr.AERIAL, Globals.atk_attr.NO_REC_CANCEL],
 		"move_sound" : { ref = "whoosh15", aux_data = {"vol" : -9} },
 		"hit_sound" : { ref = "cut8", aux_data = {"vol" : -10} },
 	},
@@ -315,7 +329,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -80,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [Globals.atk_attr.AERIAL],
 		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12, "bus" : "PitchDown"} },
 		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
@@ -330,9 +344,35 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 72,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [Globals.atk_attr.AERIAL],
 		"move_sound" : { ref = "whoosh14", aux_data = {"vol" : -9, "bus": "PitchDown"} },
 		"hit_sound" : { ref = "impact12", aux_data = {"vol" : -15} },
+	},
+	"aF2" : {
+		"atk_type" : Globals.atk_type.FIERCE,
+		"hitcount" : 1,
+		"damage" : 45,
+		"knockback" : 350 * FMath.S,
+		"knockback_type": Globals.knockback_type.FIXED,
+		"atk_level" : 4,
+		"fixed_ss_hitstop" : 12,
+		"priority": 3,
+		"hitspark_type" : Globals.hitspark_type.HIT,
+		"hitspark_palette" : "blue",
+		"KB_angle" : 70,
+		"atk_attr" : [Globals.atk_attr.NO_REPEAT_MOVE],
+		"move_sound" : { ref = "whoosh15", aux_data = {"vol" : -5, "bus": "PitchDown"} },
+		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+	},
+	"aF2SeqB": {
+		"sequence_launch" : {
+			"damage" : 30,
+			"hitstop" : 0,
+			"weak" : true,
+			"launch_power" : 500 * FMath.S,
+			"launch_angle" : -100,
+			"atk_level" : 4,
+		}
 	},
 	"aF3" : {
 		"atk_type" : Globals.atk_type.FIERCE,
@@ -345,7 +385,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -72,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [Globals.atk_attr.AERIAL],
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -10} },
 	},
@@ -360,8 +400,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : 45,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK, Globals.atk_attr.ACTIVE_CANCEL, Globals.atk_attr.DESTROY_ENTITIES, \
-				Globals.atk_attr.CRUSH],
+		"atk_attr" : [Globals.atk_attr.AERIAL, Globals.atk_attr.DESTROY_ENTITIES, Globals.atk_attr.CRUSH],
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
 	},
@@ -393,7 +432,7 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
 		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [Globals.atk_attr.AERIAL],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},
@@ -410,7 +449,7 @@ const MOVE_DATABASE = {
 		"hitspark_palette" : "blue",
 		"KB_angle" : -90,
 		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
-		"atk_attr" : [Globals.atk_attr.AIR_ATTACK],
+		"atk_attr" : [Globals.atk_attr.AERIAL],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},

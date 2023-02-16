@@ -13,7 +13,7 @@ var common_music = {
 		"name" : "char_select",
 		"audio" : ResourceLoader.load("res://Assets/Music/Character Select.ogg"),
 		"loop_end": 90.66,
-#		"vol" : 1,
+		"vol" : -4,
 		}
 }
 

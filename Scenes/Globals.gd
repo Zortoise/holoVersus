@@ -13,18 +13,18 @@ enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WS
 enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
-enum chain_combo {RESET, NO_CHAIN, NORMAL, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, PARRIED, SUPER}
-enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, EASY_BLOCK
+enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, PARRIED, SUPER}
+enum atk_attr {AERIAL, NO_CHAIN, ANTI_AIR, AUTOCHAIN, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, EASY_BLOCK
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
-		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
+		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
+		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
 		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
 		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
 		STRONG_ENTITY, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR}
-# AIR_ATTACK = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
+# AERIAL = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
-# ACTIVE_CANCEL = can cancel active frames with a jump/dash/fdash on hit
 # NO_REC_CANCEL = cannot jump/dash/fdash/fastfall cancel recovery frames, but still can chain
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
@@ -34,9 +34,11 @@ enum atk_attr {AIR_ATTACK, NO_CHAIN, ANTI_AIR, AUTOCHAIN, ACTIVE_CANCEL, LEDGE_D
 # UNBLOCKABLE = for command grabs and unparriable attacks
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
-# SUPERARMOR_STARTUP = Wrongblock all attacks during startup frames
-# SUPERARMOR_ACTIVE = Wrongblock all attacks during active frames
-# PROJ_ARMOR_ACTIVE = Wrongblock all projectiles during active frames
+# SUPERARMOR_STARTUP = weakblock all attacks during startup frames
+# SUPERARMOR_ACTIVE = weakblock all attacks during active frames
+# PROJ_ARMOR_ACTIVE = weakblock all projectiles during active frames
+# NORMALARMOR_STARTUP = weakblock all Normals/non-strong projectiles during startup frames
+# NORMALARMOR_ACTIVE = weakblock all Normals/non-strong projectiles during active frames
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
 # NO_STRAFE_NORMAL = for certain aerial normals, prevent air strafing during active frames
 # STRAFE_NON_NORMAL = for certain aerial non-normals, allow air strafing during active frames

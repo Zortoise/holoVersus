@@ -733,7 +733,7 @@ func simulate2(): # only ran if not in hitstop
 				ex_change = FMath.percent(ex_change, HITSTUN_EX_REGEN_MOD)
 			else:
 				match chain_combo:
-					Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL: # landed an attack on opponent
+					Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL: # landed an attack on opponent
 						ex_change = FMath.percent(ex_change, LANDED_EX_REGEN_MOD)
 					Globals.chain_combo.WEAKBLOCKED, Globals.chain_combo.STRONGBLOCKED: # landed an attack on blocking opponent
 						ex_change = FMath.percent(ex_change, BLOCKED_EX_REGEN_MOD)
@@ -3097,9 +3097,21 @@ func is_atk_recovery():
 			return true
 	return false
 	
+#func is_normal_attack(move_name):
+#	match query_move_data(move_name).atk_type:
+#		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY: # can only chain combo into a Normal
+#			return true
+#	return false
+	
 func is_normal_attack(move_name):
 	match query_move_data(move_name).atk_type:
-		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY: # can only chain combo into a Normal
+		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE: # can only chain combo into a Normal
+			return true
+	return false
+	
+func is_heavy(move_name):
+	match query_move_data(move_name).atk_type:
+		Globals.atk_type.HEAVY: # can only chain combo into a Normal
 			return true
 	return false
 	
@@ -3295,7 +3307,7 @@ func a_reset_check(move_name):
 	
 func test_jump_cancel():
 	
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.WEAKBLOCKED]:
 		return false # can only jump cancel on Normal hit/weakblock
 	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
@@ -3308,7 +3320,7 @@ func test_jump_cancel():
 	
 	
 func test_dash_cancel():
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.WEAKBLOCKED]:
 		return false # can only dash cancel on Normal hit/weakblock
 		
 	if !grounded and air_dash == 0: return false # if in air, need >1 air dash left
@@ -3322,7 +3334,7 @@ func test_dash_cancel():
 	
 func test_sdash_cancel():
 	
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.SPECIAL, Globals.chain_combo.WEAKBLOCKED]:
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL, Globals.chain_combo.WEAKBLOCKED]:
 		return false # can only s_dash cancel on Normal hit/Special hit/weakblock
 	
 	var move_name = get_move_name()
@@ -3352,7 +3364,7 @@ func test_sdash_cancel():
 	
 func test_fastfall_cancel():
 	if grounded: return false
-	if chain_combo != Globals.chain_combo.NORMAL: return false # can only fastfall cancel on hit (not block)
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]: return false # can only fastfall cancel on hit (not block)
 	
 	var move_name = get_move_name()
 	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be fastfall cancelled
@@ -3604,7 +3616,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		afterimage_cancel()
 		return true
 		
-	if chain_combo == Globals.chain_combo.STRONGBLOCKED: return false # cannot cancel into anything but Burst Counter if strongblocked
+	if chain_combo == Globals.chain_combo.STRONGBLOCKED: return false # cannot cancel into anything but Burst Counter if strongblockeda
 	
 	match query_move_data(move_name).atk_type:
 		Globals.atk_type.LIGHT: # Light Normals can chain cancel on whiff
@@ -3613,13 +3625,13 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 			if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED] and \
 					query_move_data(attack_ref).atk_type == Globals.atk_type.LIGHT:
 				return false
-		Globals.atk_type.HEAVY: # Heavy Normals can only chain cancel on hit
-			if !chain_combo in [Globals.chain_combo.NORMAL]:
+		Globals.atk_type.HEAVY: # Heavy Normals can only chain cancel into non-normals
+			if is_normal_attack(attack_ref):
 				return false
-		_:  # only normals can be chain cancelled from
+		_:  # only Light/Fierce normals can be chain cancelled from
 			return false
 	
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.WEAKBLOCKED]:
 		if is_atk_active(): # cannot chain on active frames unless landed an unblocked/weakblocked hit
 			return false
 #		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
@@ -3652,6 +3664,11 @@ func test_qc_chain_combo(attack_ref): # called during attack startup
 #	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.WEAKBLOCKED]:
 #		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
 #			return false
+
+	# cannot qc jumpsquat from Active Cancel
+	if state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP]:
+		if active_cancel:
+			return false
 	
 	# if chaining, cannot QC into moves with CANNOT_CHAIN_INTO
 	if Globals.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
@@ -3940,19 +3957,26 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			
 			Globals.block_state.UNBLOCKED:
 				match hit_data.move_data.atk_type:
-					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
+					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
 						chain_combo = Globals.chain_combo.NORMAL
-						if hit_data.sweetspotted or hit_data.punish_hit: # for sweetspotted/punish Normals, allow jump/dash cancel on active
+						if !"multihit" in hit_data and !"autochain" in hit_data:
+							if hit_data.sweetspotted or hit_data.punish_hit: # for sweetspotted/punish Normals, allow jump/dash cancel on active
+								active_cancel = true
+							if is_aerial():  # for unblocked aerial you regain 1 air jump
+								gain_one_air_jump()
+					Globals.atk_type.HEAVY:
+						chain_combo = Globals.chain_combo.HEAVY
+						if !"multihit" in hit_data and !"autochain" in hit_data:
 							active_cancel = true
-						if is_aerial():  # for unblocked aerial you regain 1 air jump
-							gain_one_air_jump()
+							if is_aerial():  # for unblocked aerial you regain 1 air jump
+								gain_one_air_jump()
 					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
 						chain_combo = Globals.chain_combo.SPECIAL
 					Globals.atk_type.SUPER:
 						chain_combo = Globals.chain_combo.SUPER
 						
-				if Globals.atk_attr.ACTIVE_CANCEL in hit_data.move_data.atk_attr: # for ACTIVE_CANCEL atk attr, allow certain cancels on active
-					active_cancel = true
+#				if Globals.atk_attr.ACTIVE_CANCEL in hit_data.move_data.atk_attr: # for ACTIVE_CANCEL atk attr, allow certain cancels on active
+#					active_cancel = true
 
 					
 			Globals.block_state.WEAK:
@@ -3962,7 +3986,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 #						if Globals.atk_attr.NO_CHAIN_ON_WEAKBLOCK in hit_data.move_data.atk_attr:
 #							chain_combo = Globals.chain_combo.NO_CHAIN
 					Globals.atk_type.HEAVY:
-						chain_combo = Globals.chain_combo.NORMAL
+						chain_combo = Globals.chain_combo.HEAVY
 					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
 						chain_combo = Globals.chain_combo.SPECIAL
 					Globals.atk_type.SUPER:
@@ -3973,7 +3997,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
 						chain_combo = Globals.chain_combo.STRONGBLOCKED
 					Globals.atk_type.HEAVY:
-						chain_combo = Globals.chain_combo.NORMAL
+						chain_combo = Globals.chain_combo.HEAVY
 					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
 						chain_combo = Globals.chain_combo.SPECIAL
 					Globals.atk_type.SUPER:
@@ -4064,6 +4088,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
 	
+	remove_status_effect(Globals.status_effect.STUN)
+	$HitStopTimer.stop() # cancel pre-existing hitstop
+	
 	# get direction to attacker
 	var vec_to_attacker: Vector2 = attacker_or_entity.position - position
 	if vec_to_attacker.x == 0: # rare case of attacker directly on defender
@@ -4089,6 +4116,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	if "entity_nodepath" in hit_data and !Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
 		hit_data["non_strong_proj"] = true
+		
+	if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] or "non_strong_proj" in hit_data:
+		hit_data["normalarmorable"] = true
 		
 	if position.x < Globals.Game.left_corner or position.x > Globals.Game.right_corner:
 		hit_data["cornered"] = true
@@ -4154,36 +4184,38 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
-	
-	match state: # not new_state, cannot block on exact frame attack is detected
-		
-		# SUPERARMOR --------------------------------------------------------------------------------------------------
-		
-		# WEAK block_state
-		# attacker can chain combo normally after hitting an armored defender
-		
-		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
-			if !Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr and \
-				Globals.atk_attr.SUPERARMOR_STARTUP in query_atk_attr(): # defender has superarmor
-				hit_data.block_state = Globals.block_state.WEAK
-				hit_data["superarmored"] = true
-				
-		Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
-			if !Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
-				if Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
-						("entity_nodepath" in hit_data and Globals.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr()): # defender has superarmor
+
+	if !Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
+		match state: # not new_state, cannot block on exact frame attack is detected
+			
+			# SUPERARMOR --------------------------------------------------------------------------------------------------
+			
+			# WEAK block_state
+			# attacker can chain combo normally after hitting an armored defender
+			
+			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
+				if Globals.atk_attr.SUPERARMOR_STARTUP in query_atk_attr() or \
+						(Globals.atk_attr.NORMALARMOR_STARTUP in query_atk_attr() and "normalarmorable" in hit_data):
 					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 					
-		Globals.char_state.AIR_STARTUP: # sdash startup has projectile superarmor against non-strong projectiles
-			if Animator.query_current(["SDashTransit"]) and "entity_nodepath" in hit_data and \
-					!Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr and \
-					!Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
+			Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
+				if Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
+						(Globals.atk_attr.NORMALARMOR_ACTIVE in query_atk_attr() and "normalarmorable" in hit_data) or \
+						(Globals.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr() and "entity_nodepath" in hit_data):
+					hit_data.block_state = Globals.block_state.WEAK
+					hit_data["superarmored"] = true
+						
+						
+			Globals.char_state.AIR_STARTUP: # sdash startup has projectile superarmor against non-strong projectiles
+				if Animator.query_current(["SDashTransit"]) and "entity_nodepath" in hit_data and \
+						!Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
 					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 				
 		# BLOCKING --------------------------------------------------------------------------------------------------
 		
+	match state:
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK:
 
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
@@ -4418,9 +4450,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								# screenfreeze for everyone but the defender till their hitstop is over
 		
 	hit_data["hitstop"] = hitstop # send this to attacker as well
-	if hitstop > 0:
-		$HitStopTimer.stop() # taking hitstop cancel pre-existing hitstop
-	
+
 	if hit_data.stun:
 		hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
 	elif hit_data.crush:
@@ -5099,7 +5129,7 @@ func generate_blockspark(hit_data):
 	
 	
 # AUTO SEQUENCES ---------------------------------------------------------------------------------------------------
-		
+
 func simulate_sequence(): # cut into this during simulate2() during sequences
 	
 	test0()
@@ -5211,7 +5241,7 @@ func sequence_launch():
 	var damage = seq_data.damage
 	var lethal = take_seq_damage(damage)
 	if damage > 0 and seq_data.hitstop > 0: # launch is a hit (rare)
-		if lethal:
+		if lethal and !"weak" in seq_data:
 			hitstop = LETHAL_HITSTOP
 			add_status_effect(Globals.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
 			Globals.Game.set_screenshake()
@@ -5249,7 +5279,7 @@ func sequence_launch():
 	# LAUNCH POWER
 	var launch_power = seq_data.launch_power # scaled
 	
-	if get_damage_percent() >= 100: # knockback is increased when Damage is over Damage Value Limit
+	if get_damage_percent() >= 100 and !"weak" in seq_data: # knockback is increased when Damage is over Damage Value Limit
 		lethal_flag = true
 		launch_power += LAUNCH_THRESHOLD
 		launch_power = FMath.percent(launch_power, LETHAL_KB_MOD)
@@ -5465,7 +5495,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			chain_memory.append(move_name) # add move to chain memory
 			
 			if !grounded: # add move to aerial memory
-				if is_normal_attack(move_name):
+				if is_normal_attack(move_name) or is_heavy(move_name):
 					aerial_memory.append(move_name)
 				elif is_special_move(move_name):
 					aerial_sp_memory.append(move_name)
