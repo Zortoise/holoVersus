@@ -28,7 +28,8 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.DESTRUCTIBLE_ENTITY],
+		"proj_level" : 1,
+		"atk_attr" : [],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c2]Active" : {
@@ -42,6 +43,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
+		"proj_level" : 2,
 		"atk_attr" : [Globals.atk_attr.DRAG_KB],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
@@ -56,8 +58,8 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY, \
-				Globals.atk_attr.STRONG_ENTITY],
+		"proj_level" : 3,
+		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.DRAG_KB],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
@@ -71,8 +73,8 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
-		"atk_attr" : [Globals.atk_attr.DRAG_KB, Globals.atk_attr.INDESTRUCTIBLE_ENTITY, Globals.atk_attr.STRONG_ENTITY, \
-				Globals.atk_attr.NO_REPEAT_MOVE],
+		"proj_level" : 3,
+		"atk_attr" : [Globals.atk_attr.DRAG_KB, Globals.atk_attr.NO_REPEAT_MOVE],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 }

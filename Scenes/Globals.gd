@@ -344,6 +344,13 @@ func change_zoom_level(change):
 	
 #	zoom_level = 0.0 # for taking screenshots of stages
 
+func point_in_polygon(point: Vector2, polygon: Array):
+	var point_poly = [Vector2(point.x - 1, point.y + 1), Vector2(point.x + 1, point.y + 1), \
+			Vector2(point.x - 1, point.y - 1), Vector2(point.x + 1, point.y - 1)]
+	if Geometry.intersect_polygons_2d(point_poly, polygon):
+		return true
+	else:
+		return false
 
 # ANGLE SPLITTER ---------------------------------------------------------------------------------------------------
 

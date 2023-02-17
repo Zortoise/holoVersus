@@ -399,37 +399,45 @@ margin_bottom = 1112.0
 custom_constants/separation = 7
 
 [node name="Tutorial" parent="MainMenuList" instance=ExtResource( 3 )]
+rect_pivot_offset = Vector2( -1698, -24 )
 focus_neighbour_top = NodePath("../Quit")
 disabled = true
 text = "Tutorial"
 
-[node name="Local" parent="MainMenuList" instance=ExtResource( 3 )]
+[node name="Survival" parent="MainMenuList" instance=ExtResource( 3 )]
 margin_top = 65.0
 margin_bottom = 123.0
+rect_pivot_offset = Vector2( -1698, -24 )
+disabled = true
+text = "Survival"
+
+[node name="Local" parent="MainMenuList" instance=ExtResource( 3 )]
+margin_top = 130.0
+margin_bottom = 188.0
 text = "Local"
 
 [node name="Netplay" parent="MainMenuList" instance=ExtResource( 3 )]
-margin_top = 130.0
-margin_bottom = 188.0
+margin_top = 195.0
+margin_bottom = 253.0
 text = "Netplay"
 
 [node name="Training" parent="MainMenuList" instance=ExtResource( 3 )]
-margin_top = 195.0
-margin_bottom = 253.0
+margin_top = 260.0
+margin_bottom = 318.0
 text = "Training"
 
 [node name="Controls" parent="MainMenuList" instance=ExtResource( 3 )]
-margin_top = 260.0
-margin_bottom = 318.0
+margin_top = 325.0
+margin_bottom = 383.0
 text = "Controls"
 
 [node name="Settings" parent="MainMenuList" instance=ExtResource( 3 )]
-margin_top = 325.0
-margin_bottom = 383.0
+margin_top = 390.0
+margin_bottom = 448.0
 text = "Settings"
 
 [node name="Quit" parent="MainMenuList" instance=ExtResource( 3 )]
-margin_top = 390.0
-margin_bottom = 448.0
+margin_top = 455.0
+margin_bottom = 513.0
 focus_neighbour_bottom = NodePath("../Tutorial")
 text = "Quit"

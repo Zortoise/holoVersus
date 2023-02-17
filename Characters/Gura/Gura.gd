@@ -10,7 +10,7 @@ extends "res://Characters/Gura/GuraBase.gd"
 # 6. Add it in capture_combinations() if it is a special action
 # 5. Add it in process_buffered_input() for inputs
 # 7. Add any startup/recovery animations not in MOVE_DATABASE to refine_move_name()
-# 8. Add any versions not in MOVE_DATABASE in get_root() for aerial and chain memory
+# 8. Add any active frame versions not in MOVE_DATABASE in get_root() for aerial and chain memory
 	
 # Steps to add auto-sequences:
 # 1. Add final Sequence Steps and steps with damage into MOVE_DATABASE
@@ -44,14 +44,14 @@ func _ready():
 func state_detect(anim): # for unique animations, continued from state_detect() of main character node
 	match anim:
 		
-		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "F3bStartup", "F3[h]Startup", \
-			"HStartup", "H[h]Startup":
+		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "F3[b]Startup", "F3[h]Startup", \
+			"HStartup", "H[b]Startup", "H[h]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "L3Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
 				"F3[h]Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
 		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
-				"Hb[h]Rec", "aL2LandRec":
+				"aL2LandRec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
 			
 		"aL1Startup", "aL2Startup", "aL3Startup", "aF1Startup", "aF1[h]Startup", "aF2Startup", "aF3Startup", "aHStartup":
@@ -65,21 +65,21 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			
 		"aF2SeqA", "aF2SeqB":
 			return Globals.char_state.SEQUENCE_USER
-		"aF2GrabRec", "aF2bGrabRec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+		"aF2GrabRec":
+			return Globals.char_state.AIR_C_RECOVERY
 			
-		"SP1Startup", "SP1bStartup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", \
+		"SP1Startup", "SP1[b]Startup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", \
 				"SP1[u]Startup", "SP1[u][c1]Startup", "SP1[u][c2]Startup", "SP1[u][c1]bStartup", "SP1[u][c2]bStartup", "SP1[u][c3]Startup", \
-				"SP1[ex]Startup", "SP1b[ex]Startup", "SP1[u][ex]Startup":
+				"SP1[ex]Startup", "SP1[b][ex]Startup", "SP1[u][ex]Startup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active", "SP1[ex]Active", \
 				"SP1[u][c1]Active", "SP1[u][c2]Active", "SP1[u][c3]Active", "SP1[u][ex]Active":
 			return Globals.char_state.GROUND_ATK_ACTIVE
 		"SP1Rec", "SP1[ex]Rec":
 			return Globals.char_state.GROUND_ATK_RECOVERY
-		"aSP1Startup", "aSP1bStartup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", \
+		"aSP1Startup", "aSP1[b]Startup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", \
 				"aSP1[d]Startup", "aSP1[d][c1]Startup", "aSP1[d][c2]Startup", "aSP1[d][c1]bStartup", "aSP1[d][c2]bStartup", "aSP1[d][c3]Startup", \
-				"aSP1[ex]Startup", "aSP1b[ex]Startup", "aSP1[d][ex]Startup":
+				"aSP1[ex]Startup", "aSP1[b][ex]Startup", "aSP1[d][ex]Startup":
 			return Globals.char_state.AIR_ATK_STARTUP
 		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active", "aSP1[ex]Active", \
 				"aSP1[d][c1]Active", "aSP1[d][c2]Active", "aSP1[d][c3]Active", "aSP1[d][ex]Active":
@@ -372,7 +372,7 @@ func process_instant_actions():
 #				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
 #				spawn_point.x = round(spawn_point.x)
 #				spawn_point.y = round(spawn_point.y)
-				var spawn_point = FMath.find_center([get_node(Character.targeted_opponent_path).position, Character.position])
+				var spawn_point = FMath.find_center([get_node(Character.targeted_opponent_path).position, Character.position], Character.facing)
 				var spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point2 == null: # if no ground found below, check above a little
 					spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
@@ -803,11 +803,9 @@ func refine_move_name(move_name):
 			return "L2"
 		"F2[h]P":
 			return "F2[h]"
-		"F3b":
+		"F3[b]", "F3[h]":
 			return "F3"
-		"F3[h]":
-			return "F3"
-		"H[h]":
+		"H[b]", "H[h]":
 			return "H"
 		"Hb[h]":
 			return "Hb"
@@ -875,7 +873,11 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		"F3[h]":
+			atk_attr.append_array([Globals.atk_attr.NORMALARMOR_STARTUP, Globals.atk_attr.NORMALARMOR_ACTIVE])
+		"H[h]":
 			atk_attr.append_array([Globals.atk_attr.SUPERARMOR_STARTUP, Globals.atk_attr.SUPERARMOR_ACTIVE])
+		"Hb[h]":
+			atk_attr.append_array([ Globals.atk_attr.SUPERARMOR_ACTIVE])
 		"SP3", "SP3b", "SP3[h]", "SP3b[h]": 
 			atk_attr.append_array([Globals.atk_attr.ANTI_AIR])
 		"SP3[ex]", "SP3b[ex]": 
@@ -1290,8 +1292,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.held_version(Character.button_fierce):
 				Character.animate("F3[h]Startup")
 			else:
-				Character.animate("F3bStartup")
-		"F3bStartup":
+				Character.animate("F3[b]Startup")
+		"F3[b]Startup":
 			Character.animate("F3Active")
 		"F3[h]Startup":
 			Character.animate("F3[h]Active")
@@ -1306,7 +1308,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.held_version(Character.button_light) and Character.held_version(Character.button_fierce):
 				Character.animate("H[h]Startup")
 			else:
-				Character.animate("HActive")
+				Character.animate("H[b]Startup")
+
+		"H[b]Startup":
+			Character.animate("HActive")
 		"HActive":
 			Character.animate("HbActive")
 		"HbActive":
@@ -1316,8 +1321,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"H[h]Active":
 			Character.animate("Hb[h]Active")
 		"Hb[h]Active":
-			Character.animate("Hb[h]Rec")
-		"HbRec", "Hb[h]Rec":
+			Character.animate("HbRec")
+		"HbRec":
 			Character.animate("Idle")
 
 		"aL1Startup":
@@ -1377,8 +1382,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			end_sequence_step()
 			Character.animate("aF2GrabRec")
 		"aF2GrabRec":
-			Character.animate("aF2bGrabRec")
-		"aF2bGrabRec":
 			Character.animate("FallTransit")
 
 		"aF3Startup":
@@ -1399,8 +1402,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.button_up in Character.input_state.pressed:
 				Character.animate("SP1[u]Startup")
 			else:
-				Character.animate("SP1bStartup")
-		"SP1bStartup":
+				Character.animate("SP1[b]Startup")
+		"SP1[b]Startup":
 			Character.animate("SP1[c1]Startup")
 		"SP1[c1]Startup":
 			Character.animate("SP1[c2]Startup")
@@ -1436,8 +1439,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.button_down in Character.input_state.pressed:
 				Character.animate("aSP1[d]Startup")
 			else:
-				Character.animate("aSP1bStartup")
-		"aSP1bStartup":
+				Character.animate("aSP1[b]Startup")
+		"aSP1[b]Startup":
 			Character.animate("aSP1[c1]Startup")
 		"aSP1[c1]Startup":
 			Character.animate("aSP1[c2]Startup")
@@ -1473,8 +1476,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.button_up in Character.input_state.pressed:
 				Character.animate("SP1[u][ex]Startup")
 			else:
-				Character.animate("SP1b[ex]Startup")
-		"SP1b[ex]Startup":
+				Character.animate("SP1[b][ex]Startup")
+		"SP1[b][ex]Startup":
 			Character.animate("SP1[ex]Active")
 		"SP1[ex]Active":
 			Character.animate("SP1[ex]Rec")
@@ -1490,8 +1493,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			if Character.button_down in Character.input_state.pressed:
 				Character.animate("aSP1[d][ex]Startup")
 			else:
-				Character.animate("aSP1b[ex]Startup")
-		"aSP1b[ex]Startup":
+				Character.animate("aSP1[b][ex]Startup")
+		"aSP1[b][ex]Startup":
 			Character.animate("aSP1[ex]Active")
 		"aSP1[ex]Active":
 			Character.animate("aSP1[ex]Rec")
@@ -1722,6 +1725,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"HStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Character.anim_friction_mod = 150
+		"H[h]Startup":
+			Character.get_node("ModulatePlayer").play("armor_flash")
 			
 		"aL1Startup", "aL3Startup":
 			Character.velocity_limiter.x = 85
@@ -1766,10 +1771,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aF2SeqA", "aF2SeqB":
 			start_sequence_step()
 		"aF2GrabRec":
-			Character.velocity_limiter.x = 50
-			Character.velocity_limiter.down = 85
-			Character.anim_gravity_mod = 50
-		"aF2bGrabRec":
 			Character.face(-Character.facing)
 			Character.velocity_limiter.x = 50
 			Character.velocity_limiter.down = 85
@@ -1799,7 +1800,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
 			
-		"aSP1Startup", "aSP1[ex]Startup", "aSP1bStartup", "aSP1b[ex]Startup", "aSP1[d]Startup", "aSP1[d][ex]Startup":
+		"aSP1Startup", "aSP1[ex]Startup", "aSP1[b]Startup", "aSP1[b][ex]Startup", "aSP1[d]Startup", "aSP1[d][ex]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0

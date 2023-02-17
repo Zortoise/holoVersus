@@ -34,6 +34,24 @@ func round_and_descale(in_int: int) -> int:
 		out_int = quotient
 	return out_int
 	
+func round_up_and_descale(in_int: int) -> int:
+	var out_int: int
+# warning-ignore:integer_division
+	var quotient: int = in_int / S
+	var remainder: int = in_int - (quotient * S)
+	if remainder > 0:
+		out_int = quotient + 1
+	else:
+		out_int = quotient
+	return out_int
+	
+func round_down_and_descale(in_int: int) -> int:
+	var out_int: int
+# warning-ignore:integer_division
+	var quotient: int = in_int / S
+	out_int = quotient
+	return out_int
+	
 
 func percent(in_int: int, percent: int) -> int: # for multiplication/division (to multiply by 2: percent = 200, to divide by 2: percent = 50)
 	var out_int: int
@@ -111,17 +129,22 @@ func ease_in_lerp(start: int, end: int, weight_percent: int) -> int: # starts sl
 	return f_lerp(start, end , weight2)
 	
 	
-func find_center(array: Array) -> Vector2:
+func find_center(array: Array, bias: int) -> Vector2:
 	var total_x := 0
 	var total_y := 0
 	for point in array:
 		total_x += point.x * S
 		total_y += point.y * S
 		
+	var average_x: int
+	if bias == 1:
 # warning-ignore:integer_division
-	var average_x: int = total_x / array.size()
+		average_x = round_up_and_descale(int(total_x / array.size()))
+	else:
 # warning-ignore:integer_division
-	var average_y: int = total_y / array.size()
+		average_x = round_down_and_descale(int(total_x / array.size()))
+# warning-ignore:integer_division
+	var average_y: int = round_and_descale(int(total_y / array.size()))
 	
-	return Vector2(round_and_descale(average_x), round_and_descale(average_y))
+	return Vector2(average_x, average_y)
 	

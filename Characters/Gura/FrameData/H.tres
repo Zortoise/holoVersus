@@ -11,7 +11,7 @@ frame_data = {
 "SfxOver_vframes": 1,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
+"SfxUnder_vframes": 2,
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -34,8 +34,8 @@ frame_data = {
 "SfxOver_vframes": 1,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
-"duration": 18,
+"SfxUnder_vframes": 2,
+"duration": 8,
 "hframes": 6,
 "loop": false,
 "spritesheet": "HSprite",
@@ -48,15 +48,30 @@ frame_data = {
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 7, 22 ), Vector2( 7, -1 ), Vector2( 16, -1 ), Vector2( 16, -20 ), Vector2( -11, -20 ) ],
 "sweetbox": [  ]
 },
-6: {
+5: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "frame": 1,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -19, 22 ), Vector2( 2, 22 ), Vector2( 2, 5 ), Vector2( 10, 5 ), Vector2( 10, -6 ), Vector2( 2, -6 ), Vector2( 2, -20 ), Vector2( -19, -20 ) ],
 "sweetbox": [  ]
+}
 },
-10: {
+"vframes": 2
+},
+"H[b]Startup": {
+"SfxOver_hframes": 4,
+"SfxOver_spritesheet": "HSfxOver",
+"SfxOver_vframes": 1,
+"SfxUnder_hframes": 6,
+"SfxUnder_spritesheet": "HSfxUnder",
+"SfxUnder_vframes": 2,
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "HSprite",
+"timestamps": {
+0: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "frame": 2,
@@ -73,7 +88,7 @@ frame_data = {
 "SfxOver_vframes": 1,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
+"SfxUnder_vframes": 2,
 "duration": 4,
 "hframes": 6,
 "loop": false,
@@ -81,9 +96,9 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxOver_frame": 1,
-"SfxUnder_frame": 10,
+"SfxUnder_frame": 1,
 "frame": 3,
-"hitbox": [ Vector2( 46, -42 ), Vector2( 35, -42 ), Vector2( 35, -22 ), Vector2( 30, -22 ), Vector2( 30, -8 ), Vector2( 20, -8 ), Vector2( 20, 22 ), Vector2( 30, 23 ), Vector2( 75, 23 ), Vector2( 75, 0 ), Vector2( 90, 0 ), Vector2( 90, -55 ), Vector2( 46, -55 ) ],
+"hitbox": [ Vector2( 21, -42 ), Vector2( 10, -42 ), Vector2( 10, -22 ), Vector2( 5, -22 ), Vector2( 5, -8 ), Vector2( -5, -8 ), Vector2( -5, 22 ), Vector2( 5, 23 ), Vector2( 50, 23 ), Vector2( 50, 0 ), Vector2( 65, 0 ), Vector2( 65, -55 ), Vector2( 21, -55 ) ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
 "sweetbox": [  ]
 }
@@ -96,8 +111,8 @@ frame_data = {
 "SfxOver_vframes": 1,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
-"duration": 3,
+"SfxUnder_vframes": 2,
+"duration": 17,
 "hframes": 6,
 "loop": false,
 "spritesheet": "HSprite",
@@ -119,7 +134,7 @@ frame_data = {
 "SfxOver_vframes": 1,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
+"SfxUnder_vframes": 2,
 "duration": 14,
 "hframes": 6,
 "loop": false,
@@ -166,7 +181,7 @@ frame_data = {
 "SfxOver_vframes": 1,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
+"SfxUnder_vframes": 2,
 "duration": 18,
 "hframes": 6,
 "loop": false,
@@ -221,7 +236,7 @@ frame_data = {
 "SfxOver_vframes": 1,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
+"SfxUnder_vframes": 2,
 "duration": 14,
 "hframes": 6,
 "loop": false,
@@ -229,23 +244,23 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxOver_frame": 2,
-"SfxUnder_frame": 11,
+"SfxUnder_frame": 2,
 "frame": 4,
-"hitbox": [ Vector2( 51, -48 ), Vector2( 38, -48 ), Vector2( 38, -35 ), Vector2( 25, -35 ), Vector2( 25, 1 ), Vector2( 82, 1 ), Vector2( 82, -60 ), Vector2( 51, -60 ) ],
+"hitbox": [ Vector2( 26, -48 ), Vector2( 13, -48 ), Vector2( 13, -35 ), Vector2( 0, -35 ), Vector2( 0, 1 ), Vector2( 57, 1 ), Vector2( 57, -60 ), Vector2( 26, -60 ) ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
-"sweetbox": [ Vector2( 54, -22 ), Vector2( 77, -22 ), Vector2( 77, -49 ), Vector2( 54, -49 ) ]
+"sweetbox": [ Vector2( 29, -22 ), Vector2( 52, -22 ), Vector2( 52, -49 ), Vector2( 29, -49 ) ]
 },
 3: {
 "SfxOver_frame": 2,
-"SfxUnder_frame": 11,
+"SfxUnder_frame": 2,
 "frame": 4,
-"hitbox": [ Vector2( 51, -48 ), Vector2( 38, -48 ), Vector2( 38, -35 ), Vector2( 25, -35 ), Vector2( 25, 1 ), Vector2( 82, 1 ), Vector2( 82, -60 ), Vector2( 51, -60 ) ],
+"hitbox": [ Vector2( 26, -48 ), Vector2( 13, -48 ), Vector2( 13, -35 ), Vector2( 0, -35 ), Vector2( 0, 1 ), Vector2( 57, 1 ), Vector2( 57, -60 ), Vector2( 26, -60 ) ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
 "sweetbox": [  ]
 },
 4: {
 "SfxOver_frame": 3,
-"SfxUnder_frame": 12,
+"SfxUnder_frame": 3,
 "frame": 4,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
@@ -253,65 +268,10 @@ frame_data = {
 },
 9: {
 "SfxOver_frame": 0,
-"SfxUnder_frame": 13,
+"SfxUnder_frame": 4,
 "frame": 4,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
-"sweetbox": [  ]
-}
-},
-"vframes": 2
-},
-"Hb[h]Rec": {
-"SfxOver_hframes": 4,
-"SfxOver_spritesheet": "HSfxOver",
-"SfxOver_vframes": 1,
-"SfxUnder_hframes": 6,
-"SfxUnder_spritesheet": "HSfxUnder",
-"SfxUnder_vframes": 4,
-"duration": 18,
-"hframes": 6,
-"loop": false,
-"spritesheet": "HSprite",
-"timestamps": {
-0: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 14,
-"frame": 4,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
-"sweetbox": [  ]
-},
-6: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 15,
-"frame": 5,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
-"sweetbox": [  ]
-},
-9: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 16,
-"frame": 5,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -11, 22 ), Vector2( 11, 22 ), Vector2( 11, -19 ), Vector2( -11, -19 ) ],
-"sweetbox": [  ]
-},
-12: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 17,
-"frame": 6,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -24 ), Vector2( -12, -24 ) ],
-"sweetbox": [  ]
-},
-15: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 18,
-"frame": 6,
-"hitbox": [  ],
-"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -24 ), Vector2( -12, -24 ) ],
 "sweetbox": [  ]
 }
 },

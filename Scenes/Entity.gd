@@ -207,15 +207,24 @@ func interactions():
 		if my_hitbox != null:
 			
 			var to_destroy := false
+			
+			var easy_destructible := false # if true, all physical attacks can destroy this entity
+			if Globals.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 1:
+				easy_destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
+				
+			var indestructible := false
+			if Globals.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
+				indestructible = true
 
 			 # get characters that can destroy this entity
 			var character_array = Globals.Game.get_node("Players").get_children()
 			var destroyer_array = []
-			for character in character_array:
-				if character.player_ID != get_node(master_path).player_ID and character.is_atk_active() and \
-					(Globals.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or \
-					Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
-					destroyer_array.append(character)
+			
+			if !indestructible:
+				for character in character_array:
+					if character.player_ID != get_node(master_path).player_ID and character.is_atk_active() and \
+						(easy_destructible or Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
+						destroyer_array.append(character)
 					
 			 # get entities that can destroy or clash with this entity
 			var entity_array = Globals.Game.get_node("EntitiesFront").get_children()
@@ -223,21 +232,20 @@ func interactions():
 			var clash_array := []
 			for entity in entity_array:
 				if get_node(entity.master_path).player_ID != get_node(master_path).player_ID:
-					if Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
+					if !indestructible and Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
 						destroyer_array.append(entity)
 					elif entity.absorption_value != null and entity.absorption_value > 0:
 						clash_array.append(entity)
 			
 			# check for entity destroyers
-			if !Globals.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr():
-				for destroyer in destroyer_array:
-					var second_hitbox = destroyer.Animator.query_polygon("hitbox")
-					if second_hitbox != null:
-						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
-						if intersect_polygons.size() > 0: # detected intersection
-							UniqEntity.kill()
-							to_destroy = true
-							break
+			for destroyer in destroyer_array:
+				var second_hitbox = destroyer.Animator.query_polygon("hitbox")
+				if second_hitbox != null:
+					var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+					if intersect_polygons.size() > 0: # detected intersection
+						UniqEntity.kill()
+						to_destroy = true
+						break
 					
 			# check for clashes
 			if !to_destroy and absorption_value != null and absorption_value > 0:
@@ -375,6 +383,14 @@ func query_move_data(in_move_name = null):
 		
 	var move_data = UniqEntity.query_move_data(in_move_name)
 	return move_data
+	
+func get_proj_level():
+	if UniqEntity.MOVE_DATABASE.size() == 0: return null
+	else:
+		var move_data = query_move_data()
+		if "proj_level" in move_data:
+			return move_data.proj_level
+	return null
 	
 	
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 

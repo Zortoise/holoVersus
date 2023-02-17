@@ -4114,7 +4114,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Globals.atk_attr.AUTOCHAIN in hit_data.move_data.atk_attr:
 		hit_data["autochain"] = true
 		
-	if "entity_nodepath" in hit_data and !Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
+	if "entity_nodepath" in hit_data and "proj_level" in hit_data.move_data and hit_data.move_data.proj_level != 3:
 		hit_data["non_strong_proj"] = true
 		
 	if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] or "non_strong_proj" in hit_data:
@@ -4208,8 +4208,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 						
 			Globals.char_state.AIR_STARTUP: # sdash startup has projectile superarmor against non-strong projectiles
-				if Animator.query_current(["SDashTransit"]) and "entity_nodepath" in hit_data and \
-						!Globals.atk_attr.STRONG_ENTITY in hit_data.move_data.atk_attr:
+				if Animator.query_current(["SDashTransit"]) and "non_strong_proj" in hit_data:
 					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 				

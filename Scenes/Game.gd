@@ -1069,7 +1069,7 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_d
 	var point_array := []
 	for intersect_polygon in intersect_polygons:
 		point_array.append_array(intersect_polygon)
-	var hit_center: Vector2 = FMath.find_center(point_array)
+	var hit_center: Vector2 = FMath.find_center(point_array, get_node(hitbox.owner_nodepath).facing)
 	
 #	var sum := Vector2.ZERO
 #	var number_of_points := 0.0
@@ -1083,8 +1083,9 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox, semi_d
 #	hit_center.y = round(hit_center.y) # remove decimals
 
 	var sweetspotted := false
-	if semi_disjoint == false and "sweetbox" in hitbox and Geometry.is_point_in_polygon(hit_center, hitbox.sweetbox):
-		sweetspotted = true # cannot sweetspot on SD hits
+	if semi_disjoint == false and "sweetbox" in hitbox:
+		if Globals.point_in_polygon(hit_center, hitbox.sweetbox): # Geometry.is_point_in_polygon() wouldn't work on pixels due to left/right
+			sweetspotted = true # cannot sweetspot on SD hits
 	
 	var hit_data = { # send this to both attacker and defender
 		"attacker_nodepath" : hitbox.owner_nodepath,

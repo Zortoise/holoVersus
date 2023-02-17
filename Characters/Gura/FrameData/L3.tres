@@ -37,7 +37,7 @@ frame_data = {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "L3SfxOver",
 "SfxOver_vframes": 1,
-"duration": 15,
+"duration": 11,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L3Sprite",
@@ -58,7 +58,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( 17, -1 ), Vector2( 31, -1 ), Vector2( 31, -15 ), Vector2( 17, -15 ) ],
 "sweetbox": [  ]
 },
-9: {
+7: {
 "SfxOver_frame": 0,
 "frame": 5,
 "hitbox": [  ],
