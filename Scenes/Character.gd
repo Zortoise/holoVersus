@@ -19,9 +19,9 @@ const ShorthopTimer_TIME = 15 # frames after shorthopping where you cannot block
 const MAX_EX_GAUGE = 30000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
 
-const BASE_EX_REGEN = 15
+const BASE_EX_REGEN = 20
 const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
-const LANDED_EX_REGEN_MOD = 500 # increase EX Regen when doing an unblocked attack
+const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
 const BLOCKED_EX_REGEN_MOD = 400 # increase EX Regen when doing a blocked attack
 const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
 const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
@@ -58,7 +58,7 @@ const TrainingRegenTimer_TIME = 50 # number of frames before GG/Damage Value sta
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
 const CORNER_PUSHBACK = 200 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
 #const CORNER_GUARD_DRAIN_MOD = 150 # blocker take extra Guard Drain when blocking at the corners
-const DODGE_SEMI_IFRAMES = 10 # frames of semi-invuln while dodging
+#const DODGE_SEMI_IFRAMES = 10 # frames of semi-invuln while dodging
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
@@ -106,7 +106,7 @@ const STRONGBLOCK_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is push
 const STRONGBLOCK_KNOCKBACK_MOD = 50 # % of knockback defender experience when strongblocking
 const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 
-const SUPERARMOR_GUARD_DRAIN_MOD = 150
+#const SUPERARMOR_GUARD_DRAIN_MOD = 150
 
 
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
@@ -238,6 +238,7 @@ var aerial_memory = [] # appended whenever an air normal attack is made, cannot 
 var aerial_sp_memory = [] # appended whenever an air normal attack is made, cannot do the same air normal twice before landing
 						  # reset on landing
 var success_block := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
+var success_dodge := false # set to true after iframing through an attack, turn later part of dodge cancellable, reset outside dodge
 var targeted_opponent_path: NodePath # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
 var tap_memory = []
 var release_memory = []
@@ -532,7 +533,7 @@ func test2():
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
 		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-		" " + str(success_block)
+		" " + str(success_dodge)
 			
 			
 func _process(_delta):
@@ -677,11 +678,15 @@ func simulate2(): # only ran if not in hitstop
 		DI_seal = false
 		lethal_flag = false
 		
+	if success_dodge and (new_state != Globals.char_state.AIR_RECOVERY or !Animator.query_to_play(["Dodge"])):
+		success_dodge = false # reset success_dodge outside dodge
+		
 	# GG Swell during hitstun
 	if !$HitStopTimer.is_running() and is_hitstunned() and GG_swell_flag and !first_hit_flag and \
-			!state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER] and !(DI_seal and $BurstLockTimer.is_running()):
-		current_guard_gauge = int(min(GUARD_GAUGE_CEIL, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
-		Globals.Game.guard_gauge_update(self)
+			!state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER] and \
+			!(DI_seal and $BurstLockTimer.is_running()):
+			current_guard_gauge = int(min(GUARD_GAUGE_CEIL, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
+			Globals.Game.guard_gauge_update(self)
 
 	# regen/degen GG
 	elif !is_hitstunned():
@@ -1148,7 +1153,7 @@ func simulate2(): # only ran if not in hitstop
 	
 	var has_terminal := true
 	
-	if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge"]):
+	if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge", "DodgeRec", "DodgeCRec"]):
 		has_terminal = false
 	
 #	if is_atk_startup():
@@ -1483,7 +1488,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$BurstLockTimer.simulate()
 				$NoCollideTimer.simulate()
 				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
-					if !get_node(targeted_opponent_path).is_hitstunned(): # no counting down EX Seal if opponent is hitstunned
+					if !get_node(targeted_opponent_path).is_hitstunned() and state != Globals.char_state.SEQUENCE_USER:
+						# no counting down EX Seal if opponent is hitstunned or you are using a sequeue
 						$EXSealTimer.simulate()
 				else: # EX Seal from using super, count down during opponent hitstun as well
 					if is_attacking() and is_super(get_move_name()): # no counting down EX Seal during Super animation
@@ -1495,6 +1501,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 					if Globals.training_mode:
 						$TrainingRegenTimer.simulate()
 
+			UniqChar.unique_flash()
 			ex_flash()
 			block_flash()
 			process_afterimage_trail() 	# do afterimage trails
@@ -2283,9 +2290,9 @@ func state_detect(anim):
 		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "JumpTransit2", "DodgeTransit":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Globals.char_state.AIR_STARTUP
-		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRec", "Dodge":
+		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRec", "Dodge", "DodgeRec":
 			return Globals.char_state.AIR_RECOVERY
-		"aDashBrake", "aBlockCRec":
+		"aDashBrake", "aBlockCRec", "DodgeCRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
 		"FlinchAStop", "FlinchA", "FlinchBStop", "FlinchB":
@@ -2518,14 +2525,20 @@ func check_wall_jump():
 		
 func check_landing(): # called by physics.gd when character stopped by floor
 	match new_state:
-		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+		Globals.char_state.AIR_STANDBY:
 			animate("SoftLanding")
 			
+		Globals.char_state.AIR_C_RECOVERY:
+			if Animator.query_to_play(["DodgeCRec"]):
+				pass
+			else:
+				animate("SoftLanding")
+			
 		Globals.char_state.AIR_STARTUP:
-			if Animator.query(["aJumpTransit"]):
+			if Animator.query_to_play(["aJumpTransit"]):
 				animate("SoftLanding")
 				input_buffer.append([button_jump, Settings.input_buffer_time[player_ID]])
-			elif Animator.query(["aDashTransit"]):
+			elif Animator.query_to_play(["aDashTransit"]):
 				animate("SoftLanding")
 				input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
 				
@@ -2540,12 +2553,12 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				if dir == facing:
 					velocity.x = facing * FMath.percent(UniqChar.get_stat("GROUND_DASH_SPEED"), UniqChar.get_stat("WAVE_DASH_SPEED_MOD"))
 				
-			elif Animator.query(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
+			elif Animator.query_to_play(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				animate("BlockRec")
 				UniqChar.landing_sound()
 				
-			elif Animator.query(["DodgeTransit", "Dodge", "AReset", "SDash", "aSDash"]) or \
+			elif Animator.query_to_play(["DodgeTransit", "Dodge", "DodgeRec", "AReset", "SDash", "aSDash"]) or \
 					Animator.to_play_animation.begins_with("Burst"): # no landing
 				pass
 				
@@ -2604,7 +2617,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			animate("FallTransit")
 			
 		Globals.char_state.GROUND_STARTUP:
-			if Animator.query(["JumpTransit"]): # instantly jump if dropped during jump transit
+			if Animator.query_to_play(["JumpTransit"]): # instantly jump if dropped during jump transit
 				animate("JumpTransit2")
 			else:
 				animate("FallTransit")
@@ -2613,7 +2626,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			pass # GROUND_ACTIVE not used for now
 			
 		Globals.char_state.GROUND_RECOVERY:
-			if Animator.query(["BlockRec"]):
+			if Animator.query_to_play(["BlockRec"]):
 				animate("aBlockRec")
 			else:
 				animate("FallTransit")
@@ -2695,7 +2708,8 @@ func check_semi_invuln():
 				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
 					return true
 			Globals.char_state.AIR_RECOVERY:
-				if Animator.query_to_play(["Dodge"]) and Animator.time <= DODGE_SEMI_IFRAMES:
+				if Animator.query_to_play(["Dodge"]):
+#					and Animator.time <= DODGE_SEMI_IFRAMES:
 					return true
 	return false	
 	
@@ -2826,8 +2840,8 @@ func block_flash():
 	if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["block"]): # stop flashing
 		reset_modulate()
 		
-func get_spritesheets():
-	pass
+#func get_spritesheets():
+#	pass
 			
 func process_afterimage_trail():# process afterimage trail
 	# Character.afterimage_trail() can accept 2 parameters, 1st is the starting modulate, 2nd is the lifetime
@@ -4123,13 +4137,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if position.x < Globals.Game.left_corner or position.x > Globals.Game.right_corner:
 		hit_data["cornered"] = true
 		
-	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
-		if !"multihit" in hit_data and !"autochain" in hit_data:
-			GG_swell_flag = true
-			first_hit_flag = true
-	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
-		first_hit_flag = false
-	
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
 		attacker_or_entity.append_ignore_list(player_ID, hit_data.move_data.ignore_time)
@@ -4145,20 +4152,21 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		root_move_name = hit_data.move_name
 	
-	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
-		for array in repeat_memory:
-			if array[0] == attacker.player_ID and array[1] == root_move_name:
-				if !hit_data.repeat:
-					hit_data.repeat = true # found a repeat
-					if hit_data.move_data.atk_type in [Globals.atk_type.SPECIAL, Globals.atk_type.EX, Globals.atk_type.SUPER] or \
-							Globals.atk_attr.NO_REPEAT_MOVE in hit_data.move_data.atk_attr:
-						double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
-						hit_data["double_repeat"] = true
+	if !"MOB" in attacker: # mobs do not incur repeat penalty
+		if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
+			for array in repeat_memory:
+				if array[0] == attacker.player_ID and array[1] == root_move_name:
+					if !hit_data.repeat:
+						hit_data.repeat = true # found a repeat
+						if hit_data.move_data.atk_type in [Globals.atk_type.SPECIAL, Globals.atk_type.EX, Globals.atk_type.SUPER] or \
+								Globals.atk_attr.NO_REPEAT_MOVE in hit_data.move_data.atk_attr:
+							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
+							hit_data["double_repeat"] = true
+							break
+					elif !double_repeat:
+						double_repeat = true
+						hit_data["double_repeat"] = true # found multiple repeats
 						break
-				elif !double_repeat:
-					double_repeat = true
-					hit_data["double_repeat"] = true # found multiple repeats
-					break
 					
 	# add to repeat memory
 	if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
@@ -4267,18 +4275,37 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			# check for Punish Hits for dashes
 			Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_RECOVERY:
 				if Globals.trait.VULN_GRD_DASH in query_traits(): # all chain dashers have VULN_GRD_DASH
-					if Animator.query(["DashTransit", "Dash"]):
+					if Animator.query_current(["DashTransit", "Dash"]):
 						hit_data.punish_hit = true
-			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
-				if Animator.query(["Dodge"]):
+			Globals.char_state.AIR_STARTUP:
+				if Globals.trait.VULN_AIR_DASH in query_traits(): # most characters except heavyweights have VULN_AIR_DASH
+					if Animator.query_current(["aDashTransit"]):
+						hit_data.punish_hit = true
+			Globals.char_state.AIR_RECOVERY:
+				if Animator.query_current(["DodgeRec"]):
 					hit_data.punish_hit = true
 				elif Globals.trait.VULN_AIR_DASH in query_traits(): # most characters except heavyweights have VULN_AIR_DASH
-					if Animator.query(["aDashTransit", "aDash", "aDashU", "aDashD"]):
+					if Animator.query_current(["aDash", "aDashU", "aDashD", "aDashUU", "aDashDD"]):
 						hit_data.punish_hit = true
+			Globals.char_state.AIR_C_RECOVERY:
+				if Animator.query_current(["DodgeCRec"]):
+					hit_data.punish_hit = true
 						
 	if hit_data.punish_hit and Globals.atk_attr.CRUSH in hit_data.move_data.atk_attr:
 		hit_data.crush = true
 						
+	
+	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
+	
+	# unique reactions
+	if "entity_nodepath" in hit_data:
+		if attacker_or_entity.UniqEntity.has_method("landed_a_hit0"):
+			attacker_or_entity.UniqEntity.landed_a_hit0(hit_data) # reaction, can change hit_data from there
+	elif attacker.UniqChar.has_method("landed_a_hit0"):
+		attacker.UniqChar.landed_a_hit0(hit_data) # reaction, can change hit_data from there
+	
+	if UniqChar.has_method("being_hit0"):	
+		UniqChar.being_hit0(hit_data) # reaction, can change hit_data from there
 	
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
@@ -4297,16 +4324,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		take_damage(calculate_damage(hit_data)) # do damage calculation
 
 			
-	# FIRST REACTION ---------------------------------------------------------------------------------
+	# FIRST REACTION (after damage) ---------------------------------------------------------------------------------
 	
 	# unique reactions
 	if "entity_nodepath" in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit"):
 			attacker_or_entity.UniqEntity.landed_a_hit(hit_data) # reaction, can change hit_data from there
-	else:
+	elif attacker.UniqChar.has_method("landed_a_hit"):
 		attacker.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
-		
-	UniqChar.being_hit(hit_data) # reaction, can change hit_data from there
+	
+	if UniqChar.has_method("being_hit"):	
+		UniqChar.being_hit(hit_data) # reaction, can change hit_data from there
 	
 	# ---------------------------------------------------------------------------------
 	
@@ -4315,6 +4343,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker_or_entity.landed_a_sequence(hit_data)
 		return
 		
+		
+	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
+		if !"multihit" in hit_data and !"autochain" in hit_data:
+			GG_swell_flag = true
+			first_hit_flag = true
+	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
+		first_hit_flag = false
 		
 		
 	if !"entity_nodepath" in hit_data:
@@ -4479,15 +4514,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Globals.atk_attr.DI_MANUAL_SEAL in hit_data.move_data.atk_attr:
 		$BurstLockTimer.time = 9999
 		DI_seal = true
-		
-#	# SECOND REACTION ---------------------------------------------------------------------------------
+	
+#	# SECOND REACTION (after knockback) ---------------------------------------------------------------------------------
 
 	if "entity_nodepath" in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit2"):
 			attacker_or_entity.UniqEntity.landed_a_hit2(hit_data) # reaction, can change hit_data from there
-	else:
+	elif attacker.UniqChar.has_method("landed_a_hit2"):
 		attacker.UniqChar.landed_a_hit2(hit_data) # reaction, can change hit_data from there
-	UniqChar.being_hit2(hit_data) # reaction, can change hit_data from there
+	
+	if UniqChar.has_method("being_hit2"):	
+		UniqChar.being_hit2(hit_data) # reaction, can change hit_data from there
 	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
@@ -4683,9 +4720,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 # HIT CALCULATION ---------------------------------------------------------------------------------------------------
 	
 func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but all moves except non-strong proj can Punish Hit)
+	if get_damage_percent() < 100:
+		return false
 	if hit_data.weak_hit or "autochain" in hit_data or hit_data.move_data.damage <= 0:
 		return false
-	if hit_data.knockback_strength < LAUNCH_THRESHOLD or get_damage_percent() < 100:
+	if "MOB" in get_node(hit_data.attacker_nodepath):
+		return true
+	if hit_data.knockback_strength < LAUNCH_THRESHOLD:
 		return false
 	if hit_data.sweetspotted:
 		return true
@@ -4703,7 +4744,8 @@ func can_stun(hit_data):
 		return false # autochain moves will not guardbreak, only the autochain finisher can
 	if "non_strong_proj" in hit_data:
 		return false
-	if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT]: # Lights cannot Stun, but Fierce can
+	if !"MOB" in get_node(hit_data.attacker_nodepath) and hit_data.move_data.atk_type in [Globals.atk_type.LIGHT]:
+		# Lights cannot Stun, but Fierce can
 		return false
 	if get_guard_gauge_percent_below() > 1:
 		return false # setting to 0.01 instead of 0 allow multi-hit moves to cause Stun on the last attack
@@ -4753,20 +4795,23 @@ func calculate_damage(hit_data) -> int:
 
 func calculate_guard_gauge_change(hit_data) -> int:
 	
-	if hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]: # no Guard Drain for EX and Supers
+	if hit_data.move_data.atk_type in [Globals.atk_type.SUPER]: # no Guard Drain for Supers
 		return 0
 	
 	if "multihit" in hit_data or "autochain" in hit_data:  # for multi-hit/autochain moves, only last hit affect GG
 		return 0
 	
-	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on block
-		if hit_data.block_state == Globals.block_state.STRONG: # on strongblock, attacker lose GG
-			get_node(hit_data.attacker_nodepath).change_guard_gauge(-UniqChar.get_stat("STRONGBLOCK_GG_DRAIN"))
-		return 0
-
 	if is_hitstunned() and GG_swell_flag and !first_hit_flag: # if Guard Swell is active, no Guard Drain
 		return 0
-		
+	
+#	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+	
+	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on block
+		match hit_data.block_state:
+			Globals.block_state.STRONG: # on strongblock, attacker lose GG
+				get_node(hit_data.attacker_nodepath).change_guard_gauge(-UniqChar.get_stat("STRONGBLOCK_GG_DRAIN"))
+		return 0
+
 	return -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1] # Guard Drain on 1st hit of the combo depends on Attack Level
 
 	
@@ -4942,7 +4987,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	return atk_level
 	
 	
-func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun determined by attack level and defender's Guard Gauge
+func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's Guard Gauge
 	
 	if "fixed_hitstun" in hit_data.move_data and !hit_data.double_repeat:
 		return hit_data.move_data.fixed_hitstun
@@ -4959,25 +5004,23 @@ func calculate_hitstun(hit_data, blocking = false) -> int: # hitstun determined 
 	else:
 		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 		
-	if !blocking:
-		if hit_data.lethal_hit:
-			# increased hitstun on a lethal hit and no reduction from high Guard Gauge
-			scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
-			if get_damage_percent() > 1.0:
-				scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
-		else:
-			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-#				if hit_data.knockback_strength < LAUNCH_THRESHOLD:
-				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
-					get_guard_gauge_percent_above())
-	#			else:
-	#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
-	#					get_guard_gauge_percent_above())
-
 		
-		return FMath.round_and_descale(scaled_hitstun)
+	if hit_data.lethal_hit:
+		# increased hitstun on a lethal hit and no reduction from high Guard Gauge
+		scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
+		if get_damage_percent() > 1.0:
+			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 	else:
-		return scaled_hitstun # for further processing
+		if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+#				if hit_data.knockback_strength < LAUNCH_THRESHOLD:
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
+				get_guard_gauge_percent_above())
+#			else:
+#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
+#					get_guard_gauge_percent_above())
+
+	return FMath.round_and_descale(scaled_hitstun)
+
 	
 	
 func check_if_crossed_up(attacker, angle_to_atker: int):
@@ -5061,7 +5104,7 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	else:
 		if hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 40):
 			hitspark_level = 1
-		elif hit_data.knockback_strength < LAUNCH_THRESHOLD:  # LAUNCH_THRESHOLD is scaled
+		elif hit_data.knockback_strength < LAUNCH_THRESHOLD:
 			hitspark_level = 2
 		elif hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 170):
 			hitspark_level = 3
@@ -5250,13 +5293,19 @@ func sequence_launch():
 			hitstop = seq_data.hitstop
 			seq_user.hitstop = hitstop
 		
-	# GUARD GAIN
-#	var guard_gain = seq_data.guard_gain # sequences do not drain GG, only cause GG gain (cannot stun)
-#	change_guard_gauge(guard_gain)
+	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
+		GG_swell_flag = true
+		first_hit_flag = true
+	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
+		first_hit_flag = false
 	
-	# EX GAIN
-#	seq_user.change_ex_gauge(seq_data.EX_gain)
-#	change_ex_gauge(FMath.percent(seq_data.EX_gain, 25))
+	$BurstLockTimer.time = BurstLockTimer_TIME
+	DI_seal = false
+	
+	# GUARD DRAIN ON FIRST HIT
+	if !"weak" in seq_data and !(GG_swell_flag and !first_hit_flag):
+		var guard_drain = -ATK_LEVEL_TO_GDRAIN[seq_data.atk_level - 1]
+		change_guard_gauge(guard_drain)
 		
 	# HITSTUN
 	var hitstun: int
@@ -5267,7 +5316,7 @@ func sequence_launch():
 		if get_damage_percent() >= 100:
 			scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
-#		else:
+		else:
 			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
 				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
 					get_guard_gauge_percent_above())
@@ -5375,6 +5424,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"DodgeTransit":
 			animate("Dodge")
 		"Dodge":
+			if success_dodge:
+				animate("DodgeCRec")
+			else:
+				animate("DodgeRec")
+		"DodgeRec":
+			animate("Fall")
+		"DodgeCRec":
 			animate("Fall")
 			
 		"FlinchAStop":
@@ -5618,6 +5674,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", position, {})
 			$ModulatePlayer.play("dodge_flash")
 			play_audio("bling1", {"vol" : -18})
+		"DodgeRec", "DodgeCRec":
+			anim_gravity_mod = 0
+			anim_friction_mod = 0
+			velocity_limiter.x_slow = 12
+			velocity_limiter.y_slow = 12
 			
 		"BurstCounterStartup", "BurstEscapeStartup":
 			velocity_limiter.x_slow = 20
@@ -5810,6 +5871,7 @@ func save_state():
 		"chain_memory" : chain_memory,
 		"active_cancel" : active_cancel,
 		"success_block" : success_block,
+		"success_dodge" : success_dodge,
 		"targeted_opponent_path" : targeted_opponent_path,
 		"burst_token": burst_token,
 		"impulse_used" : impulse_used,
@@ -5891,6 +5953,7 @@ func load_state(state_data):
 	chain_memory = state_data.chain_memory
 	active_cancel = state_data.active_cancel
 	success_block = state_data.success_block
+	success_dodge = state_data.success_dodge
 	targeted_opponent_path = state_data.targeted_opponent_path
 	burst_token = state_data.burst_token
 	impulse_used = state_data.impulse_used

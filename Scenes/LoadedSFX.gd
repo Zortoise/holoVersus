@@ -33,6 +33,16 @@ var loaded_ui_audio = { # code in _ready() will load this with .wav files at sta
 
 # also contain modulate animations
 var modulate_animations = {
+	"darken" : {
+		"duration": 2,
+		"loop" : false,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(0.7, 0.7, 0.7),
+			},
+		}
+	},
 	"yellow_burst" : {
 		"duration": 22,
 		"loop" : false,

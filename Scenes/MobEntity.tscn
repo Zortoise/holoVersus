@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Scenes/FrameTimer.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/SpritePlayer.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/Physics/DetectBox.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/MobEntity.gd" type="Script" id=4]
+[ext_resource path="res://Assets/Entities/BurstCounter.tscn" type="PackedScene" id=5]
+
+[node name="MobEntity" type="Node2D"]
+script = ExtResource( 4 )
+
+[node name="BurstCounter" parent="." instance=ExtResource( 5 )]
+
+[node name="Sprite" type="Sprite" parent="."]
+
+[node name="SpritePlayer" parent="." instance=ExtResource( 2 )]
+
+[node name="HitStopTimer" parent="." instance=ExtResource( 1 )]
+
+[node name="NoCollideTimer" parent="." instance=ExtResource( 1 )]
+
+[node name="EntityCollisionBox" parent="." instance=ExtResource( 3 )]
+margin_right = 10.0
+margin_bottom = 10.0
+color = Color( 1, 0.92549, 0.32549, 1 )
+
+[node name="EntitySpriteBox" parent="." instance=ExtResource( 3 )]
+
+[node name="SoftPlatformDBox" parent="." instance=ExtResource( 3 )]
+margin_left = -10.0
+margin_top = 21.0
+margin_right = 10.0
+margin_bottom = 22.0
+
+[connection signal="anim_finished" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_finished"]
+[connection signal="anim_started" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_started"]

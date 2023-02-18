@@ -45,10 +45,10 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 	match anim:
 		
 		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "F3[b]Startup", "F3[h]Startup", \
-			"HStartup", "H[b]Startup", "H[h]Startup":
+			"HStartup":
 			return Globals.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "L3Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
-				"F3[h]Active", "HActive", "HbActive", "H[h]Active", "Hb[h]Active":
+				"F3[h]Active", "HActive", "HbActive":
 			return Globals.char_state.GROUND_ATK_ACTIVE
 		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
 				"aL2LandRec":
@@ -753,12 +753,16 @@ func afterimage_trail():# process afterimage trail
 		"Dash", "aDash", "aDashD", "aDashU", "SDashTransit", "SDash", "aSDash":
 			Character.afterimage_trail()
 		"Dodge":
-			if Animator.time <= 10:
-				Character.afterimage_trail(null, 0.6, 10, Globals.afterimage_shader.WHITE)
-			else:
-				Character.afterimage_trail()
+			Character.afterimage_trail(null, 0.6, 10, Globals.afterimage_shader.WHITE)
+		"DodgeRec", "DodgeCRec":
+			Character.afterimage_trail()
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			Character.afterimage_trail()
+			
+func unique_flash():
+	match Animator.to_play_animation:
+		"SP1[c2]Startup", "SP1[u][c2]Startup", "aSP1[c2]Startup", "aSP1[d][c2]Startup":
+			Character.get_node("ModulatePlayer").play("darken")
 			
 # GET DATA --------------------------------------------------------------------------------------------------
 
@@ -768,7 +772,7 @@ func get_stat(stat: String): # later can have effects that changes stats
 func query_traits(): # may have special conditions
 	return TRAITS
 			
-func get_root(move_name): # for aerial and chain memory
+func get_root(move_name): # for aerial and chain memory, only needed for versions with active frames not in MOVE_DATABASE
 	
 	if move_name in MOVE_DATABASE and "root" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].root
@@ -776,10 +780,6 @@ func get_root(move_name): # for aerial and chain memory
 	match move_name:
 		"F3[h]":
 			return "F3"
-		"H[h]":
-			return "H"
-		"Hb[h]":
-			return "Hb"
 		
 		"SP1[c1]", "SP1[c2]", "SP1[c3]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c3]", \
 				"aSP1[c1]", "aSP1[c2]", "aSP1[c3]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c3]":
@@ -805,21 +805,18 @@ func refine_move_name(move_name):
 			return "F2[h]"
 		"F3[b]", "F3[h]":
 			return "F3"
-		"H[b]", "H[h]":
-			return "H"
-		"Hb[h]":
-			return "Hb"
+
 		"aL2b", "aL2Land":
 			return "aL2"
 		"aF1[h]":
 			return "aF1"
 		"aF2Grab", "aF2bGrab":
 			return "aF2"
-		"SP1b", "aSP1", "aSP1b", "SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]", \
+		"SP1[b]", "aSP1", "aSP1[b]", "SP1[c1]", "SP1[c2]", "SP1[c1]b", "SP1[c2]b", "SP1[c3]", "aSP1[c1]", "aSP1[c2]", "aSP1[c1]b", "aSP1[c2]b", "aSP1[c3]", \
 			"SP1[u]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c1]b", "SP1[u][c2]b", "SP1[u][c3]", \
 			"aSP1[d]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c1]b", "aSP1[d][c2]b", "aSP1[d][c3]":
 			return "SP1"
-		"SP1b[ex]", "aSP1[ex]", "aSP1b[ex]", "SP1[u][ex]", "aSP1[d][ex]":
+		"SP1[b][ex]", "aSP1[ex]", "aSP1[b][ex]", "SP1[u][ex]", "aSP1[d][ex]":
 			return "SP1[ex]"
 		"SP3":
 			return "aSP3"
@@ -874,10 +871,7 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		"F3[h]":
 			atk_attr.append_array([Globals.atk_attr.NORMALARMOR_STARTUP, Globals.atk_attr.NORMALARMOR_ACTIVE])
-		"H[h]":
-			atk_attr.append_array([Globals.atk_attr.SUPERARMOR_STARTUP, Globals.atk_attr.SUPERARMOR_ACTIVE])
-		"Hb[h]":
-			atk_attr.append_array([ Globals.atk_attr.SUPERARMOR_ACTIVE])
+
 		"SP3", "SP3b", "SP3[h]", "SP3b[h]": 
 			atk_attr.append_array([Globals.atk_attr.ANTI_AIR])
 		"SP3[ex]", "SP3b[ex]": 
@@ -897,7 +891,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			Character.animate("L2Rec")
 			
 		"F2[h]":
-			if hit_data.sweetspotted and !hit_data.stun and !hit_data.lethal_hit:
+			if !"tough_mob" in hit_data and hit_data.sweetspotted and !hit_data.stun and !hit_data.lethal_hit:
 				hit_data.move_data.KB_angle = 180
 				hit_data.move_data.knockback = 200 * FMath.S
 				hit_data["pull"] = true
@@ -905,7 +899,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 				Character.animate("F2[h]PRec")
 			
 		"aF2":
-			if hit_data.sweetspotted:
+			if !"tough_mob" in hit_data and hit_data.sweetspotted:
 				hit_data.move_data["sequence"] = "aF2SeqA"
 			
 		"aSP5", "aSP5[h]b":
@@ -922,31 +916,14 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			update_uniqueHUD()
 			
 
-
-
-func landed_a_hit2(_hit_data): # right before the end
-	pass
-	
-
-func being_hit(hit_data): # reaction, can change hit_data from here
+func being_hit(hit_data):
 #	var defender = get_node(hit_data.defender_nodepath)
-	
-#	if !hit_data.weak_hit and hit_data.move_data.damage > 0:
-#		match defender.state:
-#			Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
-#				if Animator.query(["aDashU", "aDashD"]):
-#					hit_data.punish_hit = true
 					
 	if hit_data.block_state in [Globals.block_state.UNBLOCKED]:
 		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
 		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
 		update_uniqueHUD()
 		
-func being_hit2(_hit_data): # right before the end
-	pass
-
-				
-	
 	
 # AUTO SEQUENCES --------------------------------------------------------------------------------------------------
 
@@ -1305,22 +1282,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 
 		"HStartup":
-			if Character.held_version(Character.button_light) and Character.held_version(Character.button_fierce):
-				Character.animate("H[h]Startup")
-			else:
-				Character.animate("H[b]Startup")
-
-		"H[b]Startup":
 			Character.animate("HActive")
 		"HActive":
 			Character.animate("HbActive")
 		"HbActive":
-			Character.animate("HbRec")
-		"H[h]Startup":
-			Character.animate("H[h]Active")
-		"H[h]Active":
-			Character.animate("Hb[h]Active")
-		"Hb[h]Active":
 			Character.animate("HbRec")
 		"HbRec":
 			Character.animate("Idle")
@@ -1725,8 +1690,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"HStartup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
 			Character.anim_friction_mod = 150
-		"H[h]Startup":
-			Character.get_node("ModulatePlayer").play("armor_flash")
 			
 		"aL1Startup", "aL3Startup":
 			Character.velocity_limiter.x = 85
@@ -2012,7 +1975,7 @@ func start_audio(anim_name):
 				Character.play_audio("whoosh12", {"bus":"PitchDown"})
 			"SP1[c3]", "SP1[u][c3]", "aSP1[c3]", "aSP1[d][c3]", "SP1[ex]", "SP1[u][ex]", "aSP1[ex]", "aSP1[d][ex]":
 				Character.play_audio("whoosh12", {"bus":"PitchDown"})
-				Character.play_audio("water4", {"vol" : -20})
+				Character.play_audio("water4", {"vol" : -20, "bus":"PitchDown"})
 	
 	match anim_name:
 		"JumpTransit2", "WallJumpTransit2":

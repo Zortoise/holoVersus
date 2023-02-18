@@ -95,6 +95,9 @@ var audio_queue := [] # contain audio created while the game is being simulated 
 const AUDIO_QUEUE_LIFE = 5
 var rollback_start_frametime = null
 
+var LevelControl
+
+
 func _ready():
 	
 # SETUP STAGE, CAMERA, RNG SEED --------------------------------------------------------------------------------------------------
@@ -106,7 +109,13 @@ func _ready():
 	Globals.debug_mode = false
 	Globals.match_input_log.reset()
 	
-	if Netplay.is_netplay():
+	if Globals.survival_level != null:
+		LevelControl = load("res://Scenes/LevelControl.tscn").instance()
+		add_child(LevelControl)
+		move_child(LevelControl, 0)
+		LevelControl.init()
+		
+	elif Netplay.is_netplay():
 		var NetgameSetup = load("res://Scenes/NetgameSetup.tscn").instance()
 		add_child(NetgameSetup)
 		move_child(NetgameSetup, 0)
@@ -618,6 +627,12 @@ func simulate(rendering = true):
 			entity.free()
 		else:
 			entity.simulate()
+			
+	for entity in $MobEntities.get_children():
+		if entity.free:
+			entity.free()
+		else:
+			entity.simulate()
 
 	if !is_stage_paused():
 		detect_hit()
@@ -630,6 +645,9 @@ func simulate(rendering = true):
 		entity.simulate_after()
 		
 	for entity in $EntitiesFront.get_children():
+		entity.simulate_after()
+		
+	for entity in $MobEntities.get_children():
 		entity.simulate_after()
 
 
@@ -715,6 +733,7 @@ func save_state(timestamp):
 		"entities_front_data" : [],
 		"SFX_back_data" : [],
 		"SFX_front_data" : [],
+		"mob_entities_data" : [],
 #		"audio_data" : [],
 		"stage_data" : {},
 		"screenfreeze" : null,
@@ -745,6 +764,9 @@ func save_state(timestamp):
 		
 	for entity in $EntitiesFront.get_children():
 		game_state.entities_front_data.append(entity.save_state())
+		
+	for entity in $MobEntities.get_children():
+		game_state.mob_entities_data.append(entity.save_state())
 		
 	for SFX in $SFXFront.get_children():
 		game_state.SFX_front_data.append(SFX.save_state())
@@ -807,6 +829,8 @@ func load_state(game_state, loading_autosave = true):
 		entity.free()
 	for entity in $EntitiesFront.get_children():
 		entity.free()
+	for entity in $MobEntities.get_children():
+		entity.free()
 	for SFX in $SFXFront.get_children():
 		SFX.free()
 	for SFX in $SFXBack.get_children():
@@ -828,6 +852,11 @@ func load_state(game_state, loading_autosave = true):
 	for state_data in loaded_game_state.entities_front_data:
 		var new_entity = Globals.loaded_entity_scene.instance()
 		$EntitiesFront.add_child(new_entity)
+		new_entity.load_state(state_data)
+		
+	for state_data in loaded_game_state.mob_entities_data:
+		var new_entity = Globals.loaded_mob_entity_scene.instance()
+		$MobEntities.add_child(new_entity)
 		new_entity.load_state(state_data)
 		
 	for state_data in loaded_game_state.SFX_front_data:
@@ -1018,8 +1047,6 @@ func detect_hit():
 		for hurtbox in hurtboxes:
 			if hitbox.owner_nodepath == hurtbox.owner_nodepath:
 				continue # defender must not be owner of hitbox
-			if defender_semi_invul(hitbox, hurtbox):
-				continue # attacker must not be attacking a semi-invul defender unless with certain moves
 #			if defender_command_grab_dodge(hitbox, hurtbox):
 #				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
 			if !"entity_nodepath" in hitbox:
@@ -1043,7 +1070,10 @@ func detect_hit():
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.polygon)
 			if intersect_polygons.size() > 0: # detected a hit
 				
-				create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox)
+				if defender_semi_invul(hitbox, hurtbox):
+					pass # attacker must not be attacking a semi-invul defender unless with certain moves
+				else:
+					create_hit_data(hit_data_array, intersect_polygons, hitbox, hurtbox)
 				
 			elif "sdhurtbox" in hurtbox: # detecting a semi-disjoint hit
 				var intersect_polygons_sd = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.sdhurtbox)
@@ -1178,6 +1208,7 @@ func defender_semi_invul(hitbox, hurtbox):
 	if defender.check_semi_invuln():
 		if "chain_combo" in attacker_or_entity: # prevent Alpha Reset on iframed attack
 			attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
+		defender.success_dodge = true
 		return true # defender's semi-invul succeeded
 
 	return false
@@ -1327,6 +1358,9 @@ func process_darken():
 		for x in $EntitiesFront.get_children():
 			if get_node(x.master_path).player_ID == screenfreeze: pass
 			else: x.modulate = SCREEN_DARKEN
+		for x in $MobEntities.get_children():
+			if get_node(x.master_path).player_ID == screenfreeze: pass
+			else: x.modulate = SCREEN_DARKEN
 		for x in $SFXFront.get_children():
 			if "ignore_freeze" in x and x.ignore_freeze: pass
 			else: x.modulate = SCREEN_DARKEN
@@ -1338,6 +1372,7 @@ func process_darken():
 		for x in $Afterimages.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
 		for x in $Players.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
 		for x in $EntitiesFront.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
+		for x in $MobEntities.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
 		for x in $SFXFront.get_children(): x.modulate = Color(1.0, 1.0, 1.0)
 					
 func superfreeze(player_path):		
@@ -1640,6 +1675,11 @@ func spawn_entity(master_path: NodePath, entity_ref: String, out_position, aux_d
 	else:
 		$EntitiesBack.add_child(entity)
 	entity.init(master_path, entity_ref, out_position, aux_data)
+	
+func spawn_mob_entity(master_mob_ID: int, entity_ref: String, out_position, aux_data: Dictionary):
+	var mob_entity = Globals.loaded_mob_entity_scene.instance()
+	$MobEntities.add_child(mob_entity)
+	mob_entity.init(master_mob_ID, entity_ref, out_position, aux_data)
 	
 
 # for unique sfx, pass in the master_path as well
