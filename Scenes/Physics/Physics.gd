@@ -58,8 +58,12 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, ledge_s
 						move_amount.x -= sign(move_amount.x)
 					else:
 						for colliding_character in colliding_characters: # push collided player 1 pixel while you lose 1 move_amount
-							colliding_character.move_amount(Vector2(sign(move_amount.x), 0), colliding_character.get_node("PlayerCollisionBox"), \
-								colliding_character.get_node("SoftPlatformDBox"))
+							if colliding_character.has_node("SoftPlatformDBox"):
+								colliding_character.move_amount(Vector2(sign(move_amount.x), 0), colliding_character.get_node("PlayerCollisionBox"), \
+									colliding_character.get_node("SoftPlatformDBox"))
+							else:
+								colliding_character.move_amount(Vector2(sign(move_amount.x), 0), colliding_character.get_node("PlayerCollisionBox"), \
+									colliding_character.get_node("PlayerCollisionBox"))
 							colliding_character.set_true_position()
 						move_amount.x -= sign(move_amount.x) # skip moving this move_amount
 						if !manual_move:
@@ -130,14 +134,23 @@ func move_sequence_player_to(new_position: Vector2): # called by grabber, also m
 	move_amount.x = new_position.x - position.x
 	move_amount.y = new_position.y - position.y
 		
-	var results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
+	var results
+	if has_node("SoftPlatformDBox"):
+		results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
+	else:
+		results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("PlayerCollisionBox"))
 	call("set_true_position")
 	
 	return results # [landing_check, collision_check, ledgedrop_check]
 	
 	
 func move_sequence_player_by(move_amount: Vector2): # in some special cases where move_sequence_player_to() is not enough
-	var results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
+	var results
+	if has_node("SoftPlatformDBox"):
+		results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("SoftPlatformDBox"))
+	else:
+		results = move_amount(move_amount, get_node("PlayerCollisionBox"), get_node("PlayerCollisionBox"))
+	
 	call("set_true_position")
 	return results # [landing_check, collision_check, ledgedrop_check]
 	
@@ -186,14 +199,16 @@ func check_offstage(collision_box):
 # no need to get character collision for up and down movement for now
 func get_colliding_characters_side(collision_box, direction):
 	var colliding_characters = []
-	var tester = collision_box.get_parent()
+#	var tester = collision_box.get_parent()
 	
 	# get an array of character nodes in the way
 	var characters_detected = Detection.detect_return([collision_box], ["Players"], Vector2(direction, 0))
 	for character in characters_detected:
+		if "MOB" in self and "MOB" in character:
+			continue # mobs do not collide with each other
 		# check if you are moving toward them or away, only collide if moving towards them
-		if ((direction == 1 and character.position.x > tester.position.x) or \
-				(direction == -1 and character.position.x < tester.position.x)):
+		if ((direction == 1 and character.position.x > position.x) or \
+				(direction == -1 and character.position.x < position.x)):
 			if character.state == Globals.char_state.CROUCHING and !get("grounded") and character.position.y > position.y:
 				continue # if you are airborne, will not collide with opponents that are crouching and under you
 			elif character.has_method("check_collidable") and character.call("check_collidable"): # detected character must be collidable
@@ -205,7 +220,7 @@ func get_colliding_characters_side(collision_box, direction):
 # return true if a wall in "direction", 1 is right, -1 is left
 func is_against_wall(collision_box, soft_platform_dbox, direction):
 	var to_check := ["SolidPlatforms", "BlastBarriers"]
-	if collision_box.is_in_group("Players") and call("is_killable", get("velocity").x):
+	if collision_box.is_in_group("Players") and has_method("is_killable") and call("is_killable", get("velocity").x):
 		to_check = ["SolidPlatforms"]
 		
 	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):
@@ -238,7 +253,7 @@ func is_against_ledge(soft_platform_dbox, direction):
 		
 func is_against_ceiling(collision_box, soft_platform_dbox): # return true if there is a solid platform above
 	var to_check := ["SolidPlatforms", "BlastBarriers"]
-	if collision_box.is_in_group("Players") and call("is_killable", get("velocity").y):
+	if collision_box.is_in_group("Players") and has_method("is_killable") and call("is_killable", get("velocity").y):
 		to_check = ["SolidPlatforms"]
 		
 	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):

@@ -9,7 +9,6 @@ const MOB = true
 const GRAVITY = 70 * FMath.S # per frame
 
 const GUARD_GAUGE_FLOOR = -10000
-const GUARD_GAUGE_SWELL_RATE = 100 # exact GG gain per frame during hitstun
 
 const PLAYER_PUSH_SLOWDOWN = 95 # how much characters are slowed when they push against each other
 
@@ -17,10 +16,6 @@ const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
 const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
-#const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
-#const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
-const DMG_REDUCTION_AT_MAX_GG = 50 # max reduction in damage when defender's Guard Gauge is at 200%
-#const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
 const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
 const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
@@ -30,11 +25,12 @@ const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
 const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
 
-const CRUSH_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Crush
-const LETHAL_HITSTOP = 25
-const CRUSH_TIME = 40 # number of frames stun time last for Crush
+const STUN_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Crush
+const LETHAL_HITSTOP = 15
+const MOB_BREAK_HITSTOP_MOD = 150 # increase hitstop when guardbreaking
 
-const GUARDED_KNOCKBACK_MOD = 100 # % of knockback mob experience when attacked outside Guardbroken state
+const GUARDED_DMG_MOD = 50 # % of damage taken when attacked outside Guardbroken state
+const GUARDED_KNOCKBACK_MOD = 120 # % of knockback mob experience when attacked outside Guardbroken state
 
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
 const LAUNCH_BOOST = 250 * FMath.S # increased knockback strength when a flinch becomes a launch
@@ -56,9 +52,7 @@ onready var Animator = $SpritePlayer # clean code
 onready var sprite = $Sprites/Sprite # clean code
 onready var sfx_under = $Sprites/SfxUnder # clean code
 onready var sfx_over = $Sprites/SfxOver # clean code
-var UniqMob # unique character node
-var directory_name
-var palette_number
+var UniqChar # unique character node
 
 var spritesheets
 var unique_audio
@@ -71,10 +65,12 @@ var grounded := true
 var hitstop = null # holder to influct hitstop at end of frame
 var status_effect_to_remove = [] # holder to remove status effects at end of frame
 
-var mob_ID: int # player number controlling this character, 0 for P1, 1 for P2
-
 
 # character state, save these when saving and loading along with position, sprite frame and animation progress
+
+var free := false
+var mob_ref
+var player_ID: int
 
 var state = Globals.char_state.GROUND_STANDBY
 var new_state = Globals.char_state.GROUND_STANDBY
@@ -109,12 +105,12 @@ var unique_data = {} # data unique for the character, stored as a dictionary
 var status_effects = [] # an Array of arrays, in each Array store a enum of the status effect and a duration, can have a third data as well
 
 var repeat_memory = [] # appended whenever hit by a move, cleared whenever you recover from hitstun, to incur Repeat Penalty on attacker
-					# each entry is an array with [0] being the move name and [1] being the mob_ID
+					# each entry is an array with [0] being the move name and [1] being the player_ID
 
-var targeted_opponent_path: NodePath # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
+var target_ID = null # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
 
 
-var current_command: String # key to a COMMANDS dictionary on UniqMob
+var current_command: String # key to a COMMANDS dictionary on UniqChar
 var command_timer := 0 # timer that counts up
 var guardbroken := false # when GG is depleted, mob enters a guardbroken state where they no longer has superarmor till GG refills
 
@@ -126,51 +122,67 @@ var test_num := 0
 # SETUP CHARACTER --------------------------------------------------------------------------------------------------
 
 # this is run after adding this node to the tree
-func init(in_mob, start_position, start_facing, in_palette_number):
+func init(mob_name: String, start_position: Vector2, start_facing = null):
 	
-	set_mob_id()
+	set_player_ID()
 	
-	# remove test character node and add the real character node
-	var test_character = get_child(0) # test character node should be directly under this node
-	test_character.free()
+	mob_ref = mob_name
 	
-	UniqMob = in_mob
-	add_child(UniqMob)
-	move_child(UniqMob, 0)
-	directory_name = "res://Mobs/" + UniqMob.NAME + "/"
-	
-	spritesheets = Globals.Game.LevelControl.spritesheets
-	unique_audio = Globals.Game.LevelControl.unique_audio
-	entity_data = Globals.Game.LevelControl.entity_data
-	sfx_data = Globals.Game.LevelControl.sfx_data
-	
-	UniqMob.sprite = sprite
-	sprite.texture = spritesheets["BaseSprite"]
-	
-	# set up animators
-	UniqMob.Animator = $SpritePlayer
-	Animator.init(sprite, sfx_over, sfx_under, directory_name + "FrameData/")
-	animate("Idle")
-	$ModulatePlayer.sprite = sprite
-	$FadePlayer.sprite = sprite
-	
-	# overwrite default movement stats
-	
-	setup_boxes(UniqMob.get_node("DefaultCollisionBox"))
+	load_mob()
 	
 	# incoming start position points at the floor
 	start_position.y -= $PlayerCollisionBox.rect_position.y + $PlayerCollisionBox.rect_size.y
 	
 	position = start_position
 	set_true_position()
+	
+	if start_facing != null:
+		face(start_facing)
+	
+#	Globals.Game.damage_update(self)
+#	Globals.Game.guard_gauge_update(self)
+	
+	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
+	
+	animate("Idle")
+	initial_targeting()
+	face_opponent()
+	
+	
+func set_player_ID(): # each mob has a unique negative player_ID, set by order when they spawn during a level
+	player_ID = Globals.Game.LevelControl.mob_ID_ref
+	Globals.Game.LevelControl.mob_ID_ref -= 1
+	
+	
+func load_mob():
+	# remove test character node and add the real character node
+	var test_character = get_child(0) # test character node should be directly under this node
+	test_character.free()
+	
+	UniqChar = Globals.Game.LevelControl.mob_data[mob_ref].scene.instance()
+	add_child(UniqChar)
+	move_child(UniqChar, 0)
+	
+	spritesheets = Globals.Game.LevelControl.mob_data[mob_ref].spritesheets
+	unique_audio = Globals.Game.LevelControl.mob_data[mob_ref].unique_audio
+	entity_data = Globals.Game.LevelControl.mob_data[mob_ref].entity_data
+	sfx_data = Globals.Game.LevelControl.mob_data[mob_ref].sfx_data
+	
+	UniqChar.sprite = sprite
+	
+	# set up animators
+	UniqChar.Animator = $SpritePlayer
+	# load frame data
+	Animator.init_with_loaded_frame_data_array(sprite, sfx_over, sfx_under, Globals.Game.LevelControl.mob_data[mob_ref].frame_data_array)
+	$ModulatePlayer.sprite = sprite
+	$FadePlayer.sprite = sprite
+	
+	# overwrite default movement stats
+	
+	setup_boxes(UniqChar.get_node("DefaultCollisionBox"))
+	
 	floor_level = Globals.Game.middle_point.y # get floor level of stage
 	
-	if facing != start_facing:
-		face(start_facing)
-		
-	palette_number = in_palette_number
-	if palette_number > 1:
-		loaded_palette = ResourceLoader.load(directory_name + "Palettes/" + str(palette_number) + ".png")
 	palette()
 	sfx_under.hide()
 	sfx_over.hide()
@@ -178,14 +190,7 @@ func init(in_mob, start_position, start_facing, in_palette_number):
 #	Globals.Game.damage_update(self)
 #	Globals.Game.guard_gauge_update(self)
 	
-	unique_data = UniqMob.UNIQUE_DATA_REF.duplicate(true)
 	
-	
-func set_mob_id(): # each mob has a unique mob_id, set by order when they spawn during a level
-	Globals.Game.current_mob_number += 1
-	mob_ID = Globals.Game.current_mob_number
-
-
 func setup_boxes(ref_rect): # set up detection boxes
 	
 	$PlayerCollisionBox.rect_position = ref_rect.rect_position
@@ -199,7 +204,11 @@ func palette():
 	
 	monochrome = false
 	
-	if palette_number <= 1:
+	UniqChar.load_palette()
+#	loaded_palette set by UniqChar on loading based on Globals.Game.LevelControl.mob_data[mob_ref].variant
+#	from Globals.Game.LevelControl.mob_data[mob_ref].palettes dictionary
+	
+	if loaded_palette == null:
 		sprite.material = null
 		sfx_over.material = null
 		sfx_under.material = null
@@ -215,26 +224,50 @@ func palette():
 		sfx_under.material.set_shader_param("swap", loaded_palette)
 		
 
-func initial_targeting(): # target random players at start, cannot do in init() since need all players to be added first
-	# target a random opponent
-	var player_IDs = []
-	for x in Globals.player_count:
-		player_IDs.append(x)
-	targeted_opponent_path = Globals.Game.get_player_node(player_IDs[Globals.Game.rng_generate(player_IDs.size())]).get_path()
+func initial_targeting(): # target closest player at start
+	if Globals.player_count == 1:
+		target_ID = 0
+	else:
+		var target_node = FMath.get_closest([Globals.Game.get_player_node(0), Globals.Game.get_player_node(1)], position)
+		target_ID = target_node.player_ID
+		return target_node
 	
+func get_target():
+	var target_node = Globals.Game.get_player_node(target_ID)
+	
+	if target_node.state == Globals.char_state.DEAD: # player is dead
+		if Globals.player_count == 1:
+			return self # no more players
+		else: # target other player
+			if target_ID == 0:
+				target_ID = 1
+				target_node = Globals.Game.get_player_node(target_ID)
+				if target_node.state == Globals.char_state.DEAD:
+					return self # no more players
+				else:
+					return target_node
+			else:
+				target_ID = 0
+				target_node = Globals.Game.get_player_node(target_ID)
+				if target_node.state == Globals.char_state.DEAD:
+					return self # no more players
+				else:
+					return target_node
+	else:
+		return target_node
 
 	
 # TESTING --------------------------------------------------------------------------------------------------
 
 # for testing only
 func test1():
-	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "old state: " + Globals.char_state_to_string(state) + \
+	$TestNode2D/TestLabel.text = "old state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + "\n"
 	
 func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
-		"\n" + str(velocity.x) + "  grounded: " + str(grounded)
+		"\n" + str(current_guard_gauge) + " " + str(guardbroken) + " " + str(target_ID) + "\ngrounded: " + str(grounded)
 			
 			
 func _process(_delta):
@@ -255,11 +288,11 @@ func _process(_delta):
 		else:
 			$PlayerCollisionBox.hide()
 
-	if test:
-		if Globals.debug_mode2:
-			$TestNode2D.show()
-		else:
-			$TestNode2D.hide()
+#	if test:
+	if Globals.debug_mode2:
+		$TestNode2D.show()
+	else:
+		$TestNode2D.hide()
 			
 			
 func simulate(_new_input_state):
@@ -270,7 +303,7 @@ func simulate(_new_input_state):
 	hitstop = null
 	status_effect_to_remove = []
 	
-	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != mob_ID: # screenfrozen
+	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
@@ -279,7 +312,6 @@ func simulate(_new_input_state):
 	if !$HitStopTimer.is_running():
 		simulate2()
 		
-
 func simulate2(): # only ran if not in hitstop
 	
 # START OF FRAME --------------------------------------------------------------------------------------------------
@@ -299,14 +331,14 @@ func simulate2(): # only ran if not in hitstop
 	# GG Swell during guardbroken state
 	if !$HitStopTimer.is_running() and !state in [Globals.char_state.SEQUENCE_TARGET]:
 		if guardbroken:
-			current_guard_gauge = int(min(0, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
-			if current_guard_gauge == 0:
+			current_guard_gauge = int(min(0, current_guard_gauge + UniqChar.get_stat("GUARD_GAUGE_SWELL_RATE")))
+			if current_guard_gauge == 0 and !$HitStunTimer.is_running():
 				guardbroken = false
 	#		Globals.Game.guard_gauge_update(self)
 		else:
 			if current_guard_gauge < 0:
 				var guard_gauge_regen: int = 0
-				guard_gauge_regen = UniqMob.get_stat("GUARD_GAUGE_REGEN_AMOUNT")
+				guard_gauge_regen = UniqChar.get_stat("GUARD_GAUGE_REGEN_AMOUNT")
 				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen))
 	#			Globals.Game.guard_gauge_update(self)
 		
@@ -316,29 +348,62 @@ func simulate2(): # only ran if not in hitstop
 		
 # AI COMMANDS --------------------------------------------------------------------------------------------------
 		
-	if current_command != "":
-		command_timer += 1
-		
-# MOVEMENT --------------------------------------------------------------------------------------------------
-
-	var dir: = 0
-
-	if UniqMob.COMMANDS.current_command.action == "Run":
-		dir = UniqMob.COMMANDS.current_command.dir
-		match state:
-			
-	# GROUND MOVEMENT --------------------------------------------------------------------------------------------------
+	var dir := 0
 	
-			Globals.char_state.GROUND_STANDBY:
-				if dir != facing: # flipping over
-					face(dir)
-					animate("RunTransit") # restart run animation
-				 # if not in run animation, do run animation
-				if !Animator.query(["Run", "RunTransit"]):
-					animate("RunTransit")
+	if !current_command in UniqChar.COMMANDS: # standby
+		if state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.AIR_STANDBY]:
+			UniqChar.decision()
+	else:
+		
+		if "triggers" in UniqChar.COMMANDS[current_command]:
+			for trigger in UniqChar.COMMANDS[current_command].triggers:
+				match trigger.type:
+					"cross":
+						if get_opponent_dir() != facing:
+							current_command = trigger.next
+							command_timer = 0
+					"zone":
+						if are_players_in_box(trigger.origin, trigger.size):
+							current_command = trigger.next
+							command_timer = 0
+							
+		
+		match UniqChar.COMMANDS[current_command].action:
+					
+			"idle":
+				if state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.AIR_STANDBY]:
+					if !"no_turn" in UniqChar.COMMANDS[current_command]:
+						face_opponent()
+					
+			"run":
+				if state == Globals.char_state.GROUND_STANDBY:
+					if "dir" in UniqChar.COMMANDS[current_command]:
+						match UniqChar.COMMANDS[current_command].dir:
+							1, -1:
+								dir = UniqChar.COMMANDS[current_command].dir
+							"facing":
+								dir = facing
+					else: # towards targeted player
+						dir = get_opponent_dir()
+								
+					if dir != facing: # flipping over
+						face(dir)
+						animate("RunTransit") # restart run animation
+					if !Animator.query(["Run", "RunTransit"]): # if not in run animation, do run animation
+						animate("RunTransit")	
+					velocity.x = FMath.f_lerp(velocity.x, dir * UniqChar.get_stat("SPEED"), UniqChar.get_stat("ACCELERATION"))
+					
+			"ground_attack":
+				if state == Globals.char_state.GROUND_STANDBY:
+					if "dir" in UniqChar.COMMANDS[current_command]:
+						match UniqChar.COMMANDS[current_command].dir:
+							1, -1:
+								face(UniqChar.COMMANDS[current_command].dir)
+					else: # towards targeted player
+						face_opponent()
 						
-				velocity.x = FMath.f_lerp(velocity.x, dir * UniqMob.get_stat("SPEED"), UniqMob.get_stat("ACCELERATION"))
-
+					animate(UniqChar.COMMANDS[current_command].anim)
+					current_command = "standby"
 			
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
@@ -355,7 +420,7 @@ func simulate2(): # only ran if not in hitstop
 
 # GRAVITY --------------------------------------------------------------------------------------------------
 
-	var gravity_temp: int = FMath.percent(GRAVITY, UniqMob.get_stat("GRAVITY_MOD"))
+	var gravity_temp: int = FMath.percent(GRAVITY, UniqChar.get_stat("GRAVITY_MOD"))
 		
 	if anim_gravity_mod != 100:
 		gravity_temp = FMath.percent(GRAVITY, anim_gravity_mod) # anim_gravity_mod is based off current animation
@@ -366,7 +431,7 @@ func simulate2(): # only ran if not in hitstop
 			pass
 		else:
 			if velocity.y > 0: # some mobs may fall at different speed compared to going up
-				gravity_temp = FMath.percent(gravity_temp, UniqMob.get_stat("FALL_GRAV_MOD"))
+				gravity_temp = FMath.percent(gravity_temp, UniqChar.get_stat("FALL_GRAV_MOD"))
 				
 		velocity.y += gravity_temp
 		
@@ -383,7 +448,7 @@ func simulate2(): # only ran if not in hitstop
 			 has_terminal = false
 
 	if has_terminal:
-		terminal = FMath.percent(GRAVITY, UniqMob.get_stat("TERMINAL_VELOCITY_MOD"))
+		terminal = FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD"))
 
 		if velocity.y > terminal:
 			velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
@@ -397,8 +462,8 @@ func simulate2(): # only ran if not in hitstop
 	var friction_this_frame: int # 15
 	var air_res_this_frame: int
 	
-	friction_this_frame = UniqMob.get_stat("FRICTION")
-	air_res_this_frame = UniqMob.get_stat("AIR_RESISTANCE")
+	friction_this_frame = UniqChar.get_stat("FRICTION")
+	air_res_this_frame = UniqChar.get_stat("AIR_RESISTANCE")
 	
 	match state:
 		Globals.char_state.GROUND_STANDBY:
@@ -469,7 +534,7 @@ func simulate2(): # only ran if not in hitstop
 	
 # --------------------------------------------------------------------------------------------------
 
-	UniqMob.simulate() 
+	UniqChar.simulate() 
 
 # --------------------------------------------------------------------------------------------------
 	
@@ -477,12 +542,12 @@ func simulate2(): # only ran if not in hitstop
 
 	# limit velocity if velocity limiter is not null, "if velocity_limiter.x" will not pass if it is zero!
 	if velocity_limiter.x != null:
-		var limit: int = FMath.percent(UniqMob.get_stat("SPEED"), velocity_limiter.x)
+		var limit: int = FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.x)
 		velocity.x = int(clamp(velocity.x, -limit, limit))
-	if velocity_limiter.up != null and velocity.y < -FMath.percent(UniqMob.get_stat("SPEED"), velocity_limiter.up):
-		velocity.y = -FMath.percent(UniqMob.get_stat("SPEED"), velocity_limiter.up)
-	if velocity_limiter.down != null and velocity.y > FMath.percent(UniqMob.get_stat("SPEED"), velocity_limiter.down):
-		velocity.y = FMath.percent(UniqMob.get_stat("SPEED"), velocity_limiter.down)
+	if velocity_limiter.up != null and velocity.y < -FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.up):
+		velocity.y = -FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.up)
+	if velocity_limiter.down != null and velocity.y > FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.down):
+		velocity.y = FMath.percent(UniqChar.get_stat("SPEED"), velocity_limiter.down)
 	if velocity_limiter.x_slow != null:
 		velocity.x = FMath.f_lerp(velocity.x, 0, velocity_limiter.x_slow)
 	if velocity_limiter.y_slow != null:
@@ -498,7 +563,7 @@ func simulate2(): # only ran if not in hitstop
 	velocity_previous_frame.y = velocity.y
 	
 	var orig_pos = position
-	var results = move($PlayerCollisionBox, $SoftPlatformDBox, true) # [landing_check, collision_check, ledgedrop_check]
+	var results = move($PlayerCollisionBox, $PlayerCollisionBox, true) # [landing_check, collision_check, ledgedrop_check]
 	
 #	if results[0]: check_landing()
 
@@ -520,11 +585,22 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	
 	test1()
 	
+	# advance command
+	if current_command in UniqChar.COMMANDS and "timeout" in UniqChar.COMMANDS[current_command]:
+		command_timer += 1
+		if command_timer >= UniqChar.COMMANDS[current_command].timeout[0]:
+			if UniqChar.COMMANDS[current_command].timeout[1] == null:
+				UniqChar.decision()
+			else:
+				current_command = UniqChar.COMMANDS[current_command].timeout[1]
+			command_timer = 0
+	
+	
 	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
 										   # useful for status effects that are removed after being hit
 		remove_status_effect(effect)
 		
-	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != mob_ID:
+	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
 		hitstop = null
 		return
 	
@@ -541,7 +617,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			$HitStunTimer.simulate()
 			$NoCollideTimer.simulate()
 
-		UniqMob.unique_flash()
+		UniqChar.unique_flash()
 		process_afterimage_trail() 	# do afterimage trails
 		
 		# spin character during launch, be sure to do this after SpritePlayer since rotation is reset at start of each animation
@@ -629,7 +705,7 @@ func state_detect(anim):
 		# universal animations
 		"Idle", "RunTransit", "Run", "Brake", "TurnTransit":
 			return Globals.char_state.GROUND_STANDBY
-		"Landing":
+		"SoftLanding":
 			return Globals.char_state.GROUND_RECOVERY
 		"FallTransit", "Fall":
 			return Globals.char_state.AIR_STANDBY
@@ -660,15 +736,15 @@ func state_detect(anim):
 			
 			
 		_: # unique animations
-			return UniqMob.state_detect(anim)
+			return UniqChar.state_detect(anim)
 			
 	
 # ---------------------------------------------------------------------------------------------------
 
 func on_kill():
 
-	if UniqMob.has_method("on_kill"): # for unique_data changes on death
-		UniqMob.on_kill()
+	if UniqChar.has_method("on_kill"): # for unique_data changes on death
+		UniqChar.on_kill()
 			
 func face(in_dir):
 	facing = in_dir
@@ -677,14 +753,47 @@ func face(in_dir):
 	sfx_under.scale.x = facing
 	
 func face_opponent():
-	if get_node(targeted_opponent_path).position.x - position.x != 0 and \
-			sign(get_node(targeted_opponent_path).position.x - position.x) != facing:
+	if facing != get_opponent_dir():
 		face(-facing)
+		
+		
+func get_opponent_dir():
+	var target = get_target()
+	if target.position.x == position.x: return facing
+	else: return int(sign(target.position.x - position.x))
+	
+	
+func are_players_in_box(origin: Vector2, size:Vector2) -> bool:
+	origin.x = origin.x * facing
+	origin = position + origin
+	var left_bound = origin.x - int(size.x/2)
+	var right_bound = origin.x + int(size.x/2)
+	var top_bound = origin.y - int(size.y/2)
+	var bottom_bound = origin.y + int(size.y/2)
+
+	for player in get_alive_players():
+		if player.position.x >= left_bound and player.position.x <= right_bound and \
+				player.position.y <= bottom_bound and player.position.y >= top_bound:
+			return true
+	return false
+	
+			
+func get_alive_players() -> Array:
+	var players = []
+	var player_1 = Globals.Game.get_player_node(0)
+	if player_1.state != Globals.char_state.DEAD:
+		players.append(player_1)
+	if Globals.player_count == 2:
+		var player_2 = Globals.Game.get_player_node(1)
+		if player_2.state != Globals.char_state.DEAD:
+			players.append(player_2)
+	return players
+	
 	
 func check_landing(): # called by physics.gd when character stopped by floor
 	match new_state:
 		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY:
-			animate("Landing")
+			animate("SoftLanding")
 
 		Globals.char_state.AIR_FLINCH_HITSTUN: # land during hitstun
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
@@ -694,7 +803,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				"aFlinchBStop", "aFlinchB":
 					animate("FlinchB")
 			if velocity_previous_frame.y > 300 * FMath.S:
-				UniqMob.landing_sound() # only make landing sound if landed fast enough, or very annoying
+				UniqChar.landing_sound() # only make landing sound if landed fast enough, or very annoying
 			
 		Globals.char_state.LAUNCHED_HITSTUN: # land during launch_hitstun, can bounce or tech land
 			if new_state == Globals.char_state.LAUNCHED_HITSTUN:
@@ -708,7 +817,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 					vector_to_check = velocity_previous_frame
 				
 				if !vector_to_check.is_longer_than(UNLAUNCH_THRESHOLD):
-					animate("Landing")
+					animate("SoftLanding")
 					$HitStunTimer.stop()
 					velocity.y = 0 # stop bouncing
 					$ModulatePlayer.play("unlaunch_flash")
@@ -721,7 +830,7 @@ func check_collidable(): # called by Physics.gd
 		Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER:
 			return false
 			
-	return UniqMob.check_collidable()
+	return UniqChar.check_collidable()
 	
 func check_fallthrough(): # during aerials, can drop through platforms if down is held
 	return false
@@ -731,10 +840,13 @@ func check_semi_invuln():
 	
 func check_passthrough():
 	if state == Globals.char_state.SEQUENCE_USER:
-		return UniqMob.sequence_passthrough() # for cinematic supers
+		return UniqChar.sequence_passthrough() # for cinematic supers
 	elif state == Globals.char_state.SEQUENCE_TARGET:
-		return get_node(targeted_opponent_path).check_passthrough() # copy passthrough state of the one grabbing you
+		return get_target().sequence_partner_passthrough() # get passthrough state from the one grabbing you
 	return false
+		
+func sequence_partner_passthrough():
+	return UniqChar.sequence_partner_passthrough()
 		
 func get_feet_pos(): # return global position of the point the character is standing on, for SFX emission
 	return position + Vector2(0, $PlayerCollisionBox.rect_position.y + $PlayerCollisionBox.rect_size.y)
@@ -793,7 +905,7 @@ func process_afterimage_trail():# process afterimage trail
 			afterimage_trail()
 			return
 			
-	UniqMob.afterimage_trail()
+	UniqChar.afterimage_trail()
 			
 			
 func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime: int = 10, \
@@ -813,16 +925,16 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 			main_color_modulate = color_modulate
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
-				starting_modulate_a, lifetime, afterimage_shader)
+			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
+				starting_modulate_a, lifetime, afterimage_shader, mob_ref)
 			
-		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), main_color_modulate, \
-			starting_modulate_a, lifetime, afterimage_shader)
+		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), main_color_modulate, \
+			starting_modulate_a, lifetime, afterimage_shader, mob_ref)
 #		spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
-				starting_modulate_a, lifetime, afterimage_shader)
+			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
+				starting_modulate_a, lifetime, afterimage_shader, mob_ref)
 	else:
 		afterimage_timer -= 1
 		
@@ -830,15 +942,15 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
-			starting_modulate_a, lifetime)
+		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
+			starting_modulate_a, lifetime, mob_ref)
 		
-	Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), null, \
-		starting_modulate_a, lifetime)
+	Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), null, \
+		starting_modulate_a, lifetime, mob_ref)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
-			starting_modulate_a, lifetime)
+		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
+			starting_modulate_a, lifetime, mob_ref)
 		
 		
 func launch_trail():
@@ -953,15 +1065,8 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 				status_effect_to_remove.append(status_effect[0])
 				
 		match status_effect[0]:
-			Globals.status_effect.STUN_RECOVER: # when recovering from a combo where a Stun occur, restore Guard Gauge to 50%
-				if !is_hitstunned():
-					status_effect_to_remove.append(status_effect[0])
-					if current_guard_gauge < -5000:
-						current_guard_gauge = -5000
-						Globals.Game.guard_gauge_update(self)
-			Globals.status_effect.POS_FLOW: # positive flow ends if guard gauge returns to 0
-				if current_guard_gauge >= 0:
-					status_effect_to_remove.append(status_effect[0])
+			_:
+				pass
 			
 #	for status_effect in effect_to_erase:
 #		status_effects.erase(status_effect)
@@ -969,34 +1074,24 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 		
 func new_status_effect(effect): # run on frame the status effect is inflicted/state is loaded, for visual effects
 	match effect:
-		Globals.status_effect.POS_FLOW:
-			Globals.Game.HUD.get_node("P" + str(mob_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
-				Globals.loaded_guard_gauge_pos
 		Globals.status_effect.LETHAL:
 			Globals.Game.lethalfreeze(get_path())
 		
 func continue_visual_effect_of_status(effect): # run every frame, will not add visual effect if there is already one of higher priority
 	match effect:
-		Globals.status_effect.LETHAL:
-			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["lethal", "lethal_flash"]):
-				$ModulatePlayer.play("lethal")
-			set_monochrome()
-			sprite_shake()
-		Globals.status_effect.STUN:
-			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["stun", "stun_flash"]):
-				$ModulatePlayer.play("stun")
-			particle("Sparkle", "Particles", "yellow", 4, 1, 25)
-			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
-			sprite_shake()
-		Globals.status_effect.CRUSH:
-			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["crush", "stun_flash"]):
-				$ModulatePlayer.play("crush")
-			particle("Sparkle", "Particles", "red", 4, 1, 25)
-			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
-			sprite_shake()
-		Globals.status_effect.RESPAWN_GRACE:
-			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["respawn_grace"]):
-				$ModulatePlayer.play("respawn_grace")
+		_:
+			pass
+#		Globals.status_effect.LETHAL:
+#			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["lethal", "lethal_flash"]):
+#				$ModulatePlayer.play("lethal")
+#			set_monochrome()
+#			sprite_shake()
+#		Globals.status_effect.CRUSH:
+#			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["crush", "stun_flash"]):
+#				$ModulatePlayer.play("crush")
+#			particle("Sparkle", "Particles", "red", 4, 1, 25)
+#			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
+#			sprite_shake()
 
 func remove_status_effect(effect): # comb through the dictionary to remove a specific status effect
 	var effect_to_erase = []
@@ -1014,22 +1109,15 @@ func remove_all_status_effects():
 		
 func clear_visual_effect_of_status(effect): # must run this when removing status effects to remove the visual effect
 	match effect:
-		Globals.status_effect.LETHAL:
-			Globals.Game.lethalfreeze("unfreeze")
-			continue
-		Globals.status_effect.LETHAL, Globals.status_effect.STUN, Globals.status_effect.CRUSH:
-			if $ModulatePlayer.query_current(["lethal", "stun", "crush"]):
-				reset_modulate()
-				sprite.position = Vector2.ZERO
-#		Globals.status_effect.REPEAT:
-#			if monochrome:
+		_:
+			pass
+#		Globals.status_effect.LETHAL:
+#			Globals.Game.lethalfreeze("unfreeze")
+#			continue
+#		Globals.status_effect.CRUSH:
+#			if $ModulatePlayer.query_current(["crush"]):
 #				reset_modulate()
-		Globals.status_effect.RESPAWN_GRACE:
-			if $ModulatePlayer.query_current(["respawn_grace"]):
-				reset_modulate()
-		Globals.status_effect.POS_FLOW:
-			Globals.Game.HUD.get_node("P" + str(mob_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
-				Globals.loaded_guard_gauge
+#				sprite.position = Vector2.ZERO
 				
 func test_status_visual_effect_priority():
 	# visual effects of status effects like Poison has lower priority over effects like EX
@@ -1075,7 +1163,7 @@ func query_polygons(): # requested by main game node when doing hit detection
 					polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
 					polygons_queried.kborigin = Animator.query_point("kborigin")
 					polygons_queried.vacpoint = Animator.query_point("vacpoint")
-			polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
+#			polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
 			
 		if query_status_effect(Globals.status_effect.RESPAWN_GRACE) or query_status_effect(Globals.status_effect.INVULN):
 			pass  # no hurtbox during respawn grace or after a strongblock/parry
@@ -1089,9 +1177,9 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 	
 	if Animator.to_play_animation.ends_with("Active"):
 		var move_name = Animator.to_play_animation.trim_suffix("Active")
-		move_name = UniqMob.refine_move_name(move_name)
-		if UniqMob.MOVE_DATABASE.has(move_name):
-			return {"move_data" : UniqMob.query_move_data(move_name), "move_name" : move_name}
+		move_name = UniqChar.refine_move_name(move_name)
+		if UniqChar.MOVE_DATABASE.has(move_name):
+			return {"move_data" : UniqChar.query_move_data(move_name), "move_name" : move_name}
 		else:
 			print("Error: " + move_name + " not found in MOVE_DATABASE for query_move_data_and_name().")
 	else:
@@ -1169,7 +1257,7 @@ func atk_startup_resets():# ran whenever an attack starts
 # GAUGES -----------------------------------------------------------------------------------------------------------------------------
 	
 func get_damage_percent() -> int:
-	return FMath.get_fraction_percent(current_damage_value, UniqMob.get_stat("DAMAGE_VALUE_LIMIT"))
+	return FMath.get_fraction_percent(current_damage_value, UniqChar.get_stat("DAMAGE_VALUE_LIMIT"))
 	
 func get_guard_gauge_percent_below() -> int:
 	if current_guard_gauge <= GUARD_GAUGE_FLOOR:
@@ -1181,22 +1269,22 @@ func get_guard_gauge_percent_below() -> int:
 func take_damage(damage: int): # called by attacker
 	current_damage_value += damage
 	current_damage_value = int(clamp(current_damage_value, 0, 9999)) # cannot go under zero (take_damage is also used for healing)
-	Globals.Game.damage_update(self, damage)
+#	Globals.Game.damage_update(self, damage)
 	
 func change_guard_gauge(guard_gauge_change: int): # called by attacker
 	current_guard_gauge += guard_gauge_change
 	current_guard_gauge = int(clamp(current_guard_gauge, GUARD_GAUGE_FLOOR, 0))
-	Globals.Game.guard_gauge_update(self)
+#	Globals.Game.guard_gauge_update(self)
 	
 func reset_guard_gauge():
 	current_guard_gauge = 0
-	Globals.Game.guard_gauge_update(self)
+#	Globals.Game.guard_gauge_update(self)
 	
 
 # QUERY UNIQUE CHARACTER DATA ---------------------------------------------------------------------------------------------- 
 	
 func query_traits(): # may have certain conditions
-	return UniqMob.query_traits()
+	return UniqChar.query_traits()
 	
 
 func query_atk_attr(in_move_name = null):
@@ -1207,7 +1295,7 @@ func query_atk_attr(in_move_name = null):
 	if move_name == null:
 		move_name = get_move_name()
 	
-	return UniqMob.query_atk_attr(move_name)
+	return UniqChar.query_atk_attr(move_name)
 	
 	
 func query_atk_attr_current(): # used for the FrameViewer only
@@ -1215,10 +1303,10 @@ func query_atk_attr_current(): # used for the FrameViewer only
 	var move_name = Animator.current_animation.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
-	return UniqMob.query_atk_attr(move_name)
+	return UniqChar.query_atk_attr(move_name)
 	
 	
-func query_priority(_in_move_name):
+func query_priority(_in_move_name = null):
 	return 0
 	
 	
@@ -1230,7 +1318,7 @@ func query_move_data(in_move_name = null):
 	if move_name == null:
 		move_name = get_move_name()
 	
-	var move_data = UniqMob.query_move_data(move_name)
+	var move_data = UniqChar.query_move_data(move_name)
 	return move_data
 	
 	
@@ -1238,9 +1326,12 @@ func query_move_data(in_move_name = null):
 	
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	var defender = get_node(hit_data.defender_nodepath)
-	increment_hitcount(defender.mob_ID) # for measuring hitcount of attacks
-	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
+	if defender == null:
+		return # defender is deleted
+	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
+	
+	target_ID = hit_data.defender_ID # target last attacked opponent
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -1251,10 +1342,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		
 	elif hit_data.stun:
 		if hitstop == null or hit_data.hitstop > hitstop:
-			hitstop = CRUSH_HITSTOP_ATTACKER # fixed hitstop for attacking for Guardbreaks
+			hitstop = STUN_HITSTOP_ATTACKER # fixed hitstop for attacking for Break Hits
 			
 	elif hit_data.lethal_hit:
-		hitstop = null # no hitstop for attacker for lethal hit, screenfreeze already enough
+		hitstop = null # no hitstop for mob attacker for lethal hit, screenfreeze already enough
 		
 	else:
 		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
@@ -1276,22 +1367,28 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 func being_hit(hit_data): # called by main game node when taking a hit
 
-	var attacker = get_node(hit_data.attacker_nodepath)
+	var attacker = Globals.Game.get_player_node(hit_data.attacker_ID)
 #	var defender = get_node(hit_data.defender_nodepath)
 	
 	var attacker_or_entity = attacker # cleaner code
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
 
-	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
+	if attacker_or_entity == null:
+		return # attacked by something that is already deleted, return
+
+	hit_data["attacker"] = attacker # for other functions
+	hit_data["attacker_or_entity"] = attacker_or_entity
+
+	target_ID = attacker.player_ID # target opponent who last attacked you
 	
-	remove_status_effect(Globals.status_effect.STUN)
+	remove_status_effect(Globals.status_effect.CRUSH)
 	$HitStopTimer.stop() # cancel pre-existing hitstop
 	
 	# get direction to attacker
 	var vec_to_attacker: Vector2 = attacker_or_entity.position - position
 	if vec_to_attacker.x == 0: # rare case of attacker directly on defender
-		vec_to_attacker.x = -attacker.facing
+		vec_to_attacker.x = -attacker_or_entity.facing
 	var dir_to_attacker := int(sign(vec_to_attacker.x)) # for setting facing on defender
 		
 	var attacker_vec := FVector.new()
@@ -1299,18 +1396,21 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	hit_data["angle_to_atker"] = attacker_vec.angle()
 	hit_data["lethal_hit"] = false
+	hit_data["punish_hit"] = false
 	hit_data["stun"] = false
+	hit_data["crush"] = false
+	hit_data["block_state"] = Globals.block_state.UNBLOCKED
 	hit_data["repeat"] = false
 	hit_data["double_repeat"] = false
 	
-	if !attacker_or_entity.is_hitcount_last_hit(mob_ID, hit_data.move_data):
+	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data):
 		hit_data["multihit"] = true
 	if Globals.atk_attr.AUTOCHAIN in hit_data.move_data.atk_attr:
 		hit_data["autochain"] = true
 	
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
-		attacker_or_entity.append_ignore_list(mob_ID, hit_data.move_data.ignore_time)
+		attacker_or_entity.append_ignore_list(player_ID, hit_data.move_data.ignore_time)
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -1325,7 +1425,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
 		for array in repeat_memory:
-			if array[0] == attacker.mob_ID and array[1] == root_move_name:
+			if array[0] == hit_data.attacker_ID and array[1] == root_move_name:
 				if !hit_data.repeat:
 					hit_data.repeat = true # found a repeat
 					if hit_data.move_data.atk_type in [Globals.atk_type.SPECIAL, Globals.atk_type.EX, Globals.atk_type.SUPER] or \
@@ -1338,9 +1438,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data["double_repeat"] = true # found multiple repeats
 					break
 					
-	# add to repeat memory
-	if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-		repeat_memory.append([attacker.mob_ID, root_move_name])
+		# add to repeat memory
+		if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
+			repeat_memory.append([attacker.player_ID, root_move_name])
 	
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
@@ -1373,8 +1473,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif attacker.UniqChar.has_method("landed_a_hit0"):
 		attacker.UniqChar.landed_a_hit0(hit_data) # reaction, can change hit_data from there
 	
-	if UniqMob.has_method("being_hit0"):	
-		UniqMob.being_hit0(hit_data) # reaction, can change hit_data from there
+	if UniqChar.has_method("being_hit0"):	
+		UniqChar.being_hit0(hit_data) # reaction, can change hit_data from there
 			
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
@@ -1388,11 +1488,23 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if !guardbroken:
 			change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 			if get_guard_gauge_percent_below() == 0:
-				hit_data.stun = true
+				hit_data["mob_break"] = true
+				guardbroken = true
+				repeat_memory = [] # reset move memory for getting a Break
 		
-		take_damage(calculate_damage(hit_data)) # do damage calculation
+		var damage = calculate_damage(hit_data)
+		take_damage(damage) # do damage calculation
+		if damage > 0:
+			if guardbroken:
+				if hit_data.double_repeat or adjusted_atk_level == 1:
+					Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+				else:
+					Globals.Game.spawn_damage_number(damage, hit_data.hit_center)
+			else:
+				Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+		
 		if get_damage_percent() >= 100:
-			hit_data.lethal = true
+			hit_data.lethal_hit = true
 			
 
 	# FIRST REACTION ---------------------------------------------------------------------------------
@@ -1404,8 +1516,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif attacker.UniqChar.has_method("landed_a_hit"):
 		attacker.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	
-	if UniqMob.has_method("being_hit"):	
-		UniqMob.being_hit(hit_data) # reaction, can change hit_data from there
+	if UniqChar.has_method("being_hit"):	
+		UniqChar.being_hit(hit_data) # reaction, can change hit_data from there
 	
 	# ---------------------------------------------------------------------------------
 	
@@ -1439,16 +1551,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Globals.Game.set_screenshake()
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		
-	elif hit_data.stun:
-		guardbroken = true
-		add_status_effect(Globals.status_effect.CRUSH, 0)
-		repeat_memory = [] # reset move memory for getting a Break
-		$ModulatePlayer.play("stun_flash")
-		play_audio("rock2", {"vol" : -5})
+	elif "mob_break" in hit_data:
+		$ModulatePlayer.play("punish_sweet_flash")
+		play_audio("rock2", {"vol" : -7})
 			
 	elif hit_data.sweetspotted:
-		$ModulatePlayer.play("sweet_flash")
+		$ModulatePlayer.play("punish_sweet_flash")
 		play_audio("break2", {"vol" : -15})
+		
+	else:
+		$ModulatePlayer.play("mob_hit_flash")
 		
 	if Globals.atk_attr.SCREEN_SHAKE in hit_data.move_data.atk_attr:
 		Globals.Game.set_screenshake()
@@ -1456,7 +1568,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
-	if hit_data.block_state == Globals.block_state.UNBLOCKED:
+	if guardbroken:
 		if adjusted_atk_level <= 1 and $HitStunTimer.is_running(): # for atk level 1 hits on hitstunned opponent, add their hitstun to existing hitstun
 			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
@@ -1471,10 +1583,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hitstop = LETHAL_HITSTOP # set for defender, attacker has no hitstop during LETHAL_HITSTOP
 								# screenfreeze for everyone but the defender till their hitstop is over
 		
+	if !hit_data.lethal_hit and "mob_break" in hit_data:
+		hitstop = FMath.percent(hitstop, MOB_BREAK_HITSTOP_MOD)
+		
 	hit_data["hitstop"] = hitstop # send this to attacker as well
-
-	if hit_data.stun:
-		hitstop = CRUSH_TIME
 		
 	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
 		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
@@ -1490,14 +1602,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif attacker.UniqChar.has_method("landed_a_hit2"):
 		attacker.UniqChar.landed_a_hit2(hit_data) # reaction, can change hit_data from there
 	
-	if UniqMob.has_method("being_hit2"):	
-		UniqMob.being_hit2(hit_data) # reaction, can change hit_data from there
+	if UniqChar.has_method("being_hit2"):	
+		UniqChar.being_hit2(hit_data) # reaction, can change hit_data from there
 	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
 	generate_hitspark(hit_data)
 
-	if hit_data.stun: # stunspark is on top of regular hitspark
+	if "mob_break" in hit_data: # stunspark is on top of regular hitspark
 		Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()})
 	
@@ -1630,6 +1742,9 @@ func calculate_damage(hit_data) -> int:
 	else:
 		if hit_data.sweetspotted:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
+			
+	if !guardbroken:
+		scaled_damage = FMath.percent(scaled_damage, GUARDED_DMG_MOD)
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
 	
@@ -1642,7 +1757,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if guardbroken: # if guardbroken, no Guard Drain
 		return 0
 		
-	return -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1] # Guard Drain on 1st hit of the combo depends on Attack Level
+	var guard_gauge_change = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+	guard_gauge_change = FMath.percent(guard_gauge_change, UniqChar.get_stat("GUARD_DRAIN_MOD")) # different drain rate for each mob
+		
+	return guard_gauge_change
 
 	
 	
@@ -1669,23 +1787,16 @@ func calculate_knockback_strength(hit_data) -> int:
 		return knockback_strength
 
 	if guardbroken and !hit_data.weak_hit:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
-		knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, UniqMob.get_stat("KB_BOOST_AT_MAX_GG")), \
+		knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \
 				get_guard_gauge_percent_below())
 
-	if "MOB_WEIGHT_KB_MOD" in UniqMob: # mobs can have different weights
-		knockback_strength = FMath.percent(knockback_strength, UniqMob.get_stat("MOB_WEIGHT_KB_MOD"))
+	if "MOB_WEIGHT_KB_MOD" in UniqChar: # mobs can have different weights
+		knockback_strength = FMath.percent(knockback_strength, UniqChar.get_stat("MOB_WEIGHT_KB_MOD"))
 	
 	return knockback_strength
 	
 	
 func calculate_knockback_dir(hit_data) -> int:
-	
-	var attacker = get_node(hit_data.attacker_nodepath)
-
-	var attacker_or_entity = attacker # cleaner code
-	if "entity_nodepath" in hit_data:
-		attacker_or_entity = get_node(hit_data.entity_nodepath)
-#
 	
 	var knockback_dir := 0
 	var knockback_type = hit_data.move_data.knockback_type
@@ -1694,7 +1805,7 @@ func calculate_knockback_dir(hit_data) -> int:
 	if "multihit" in hit_data or "autochain" in hit_data:
 		
 		if Globals.atk_attr.DRAG_KB in hit_data.move_data.atk_attr: # can be drag KB till the last hit
-			return attacker_or_entity.velocity.angle()
+			return hit_data.attacker_or_entity.velocity.angle()
 			
 		elif "vacpoint" in hit_data: # or vacuum towards VacPoint
 			var vac_vector := FVector.new()
@@ -1716,7 +1827,7 @@ func calculate_knockback_dir(hit_data) -> int:
 	if KBOrigin:
 		ref_vector.set_from_vec(hit_data.hit_center - KBOrigin)
 	else:
-		ref_vector.set_from_vec(hit_data.hit_center - attacker_or_entity.position)
+		ref_vector.set_from_vec(hit_data.hit_center - hit_data.attacker_or_entity.position)
 		
 	if ref_vector.x <= FMath.S and ref_vector.x >= -FMath.S:
 		ref_vector.x = 0 # reduce rounding errors when calculating hit center
@@ -1840,8 +1951,8 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		hitspark_level = 0
 	elif "burst" in hit_data.move_data:
 		hitspark_level = 5
-	elif hit_data.stun:
-		hitspark_level = 5 # max size for Break
+	elif hit_data.lethal_hit or "mob_break" in hit_data:
+		hitspark_level = 5 # max size for Lethal and Break
 	else:
 		if hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 40):
 			hitspark_level = 1
@@ -1899,11 +2010,11 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 func simulate_sequence(): # cut into this during simulate2() during sequences
 	
 	if state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		if get_node(targeted_opponent_path).state != Globals.char_state.SEQUENCE_USER:
+		if get_target().state != Globals.char_state.SEQUENCE_USER:
 			animate("Idle") # auto release if not released proberly, just in case
 		
-	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqMob.SEQUENCES[sequence_name]
-		UniqMob.simulate_sequence()
+	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
+		UniqChar.simulate_sequence()
 		
 		
 	if abs(velocity.x) < 5 * FMath.S:
@@ -1914,22 +2025,25 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	velocity_previous_frame.x = velocity.x
 	velocity_previous_frame.y = velocity.y
 	
-	var results = move($PlayerCollisionBox, $SoftPlatformDBox, UniqMob.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
+	var results = move($PlayerCollisionBox, $PlayerCollisionBox, UniqChar.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
 #	velocity.x = results[0].x
 #	velocity.y = results[0].y
 	
 	if state == Globals.char_state.SEQUENCE_USER:
-		UniqMob.simulate_sequence_after() # move grabbed target after grabber has moved
+		UniqChar.simulate_sequence_after() # move grabbed target after grabber has moved
 	
-	if results[0]: UniqMob.end_sequence_step("ground") # hit the ground, no effect if simulate_sequence_after() broke grab and animated "Idle"
+	if results[0]: UniqChar.end_sequence_step("ground") # hit the ground, no effect if simulate_sequence_after() broke grab and animated "Idle"
 	
 		
 func landed_a_sequence(hit_data):
+	
+	if new_state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
+		return # no sequencing multiple players at once
 
-	var defender = get_node(hit_data.defender_nodepath)
+	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
 	
 	animate(hit_data.move_data.sequence)
-	UniqMob.start_sequence_step()
+	UniqChar.start_sequence_step()
 	
 	defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# defender lose positive flow
 
@@ -1942,19 +2056,22 @@ func take_seq_damage(base_damage: int) -> bool: # return true if lethal
 	var damage: int = int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum damage is 1
 	
 	take_damage(damage)
+	if damage > 0:
+		Globals.Game.spawn_damage_number(damage, position)
 	if get_damage_percent() >= 100:
 		return true # return true if lethal
 	return false
 	
 	
 func sequence_hit(hit_key: int): # most auto sequences deal damage during the sequence outside of the launch
-	var seq_user = get_node(targeted_opponent_path)
-	var seq_hit_data = seq_user.UniqMob.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
+	var seq_user = get_target()
+	var seq_hit_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
 	var lethal = take_seq_damage(seq_hit_data.damage)
 	
 	if "hitstop" in seq_hit_data and !"weak" in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
 		if lethal:
 			hitstop = LETHAL_HITSTOP
+			seq_user.hitstop = hitstop
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		else:
@@ -1963,13 +2080,13 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 
 
 func sequence_launch():
-	var seq_user = get_node(targeted_opponent_path)
+	var seq_user = get_target()
 	var dir_to_attacker = sign(position.x - seq_user.position.x)
 	if dir_to_attacker == 0: dir_to_attacker = facing
 	
-	if !seq_user.Animator.to_play_animation in seq_user.UniqMob.MOVE_DATABASE:
+	if !seq_user.Animator.to_play_animation in seq_user.UniqChar.MOVE_DATABASE:
 		print("Error: " + Animator.to_play_animation + " auto-sequence not found in database.")
-	var seq_data = seq_user.UniqMob.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_launch
+	var seq_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_launch
 	
 #		"sequence_launch" : { # for final hit of sequence
 #			"damage" : 0,
@@ -2009,7 +2126,7 @@ func sequence_launch():
 		
 	# LAUNCH POWER
 	var launch_power = seq_data.launch_power # scaled
-	launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, UniqMob.get_stat("KB_BOOST_AT_MAX_GG")), \
+	launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, UniqChar.get_stat("KB_BOOST_AT_MAX_GG")), \
 			get_guard_gauge_percent_below())
 		
 	# LAUNCH ANGLE
@@ -2071,7 +2188,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:
 		"RunTransit":
 			animate("Run")
-		"Landing", "Brake":
+		"SoftLanding", "Brake":
 			animate("Idle")
 			
 		"FallTransit":
@@ -2109,7 +2226,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SeqLaunchTransit":
 			animate("SeqLaunch")
 
-	UniqMob._on_SpritePlayer_anim_finished(anim_name)
+	UniqChar._on_SpritePlayer_anim_finished(anim_name)
 
 
 func _on_SpritePlayer_anim_started(anim_name):
@@ -2127,14 +2244,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
 		"Run":
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-		"Landing":
+		"SoftLanding":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 
-	UniqMob._on_SpritePlayer_anim_started(anim_name)
+	UniqChar._on_SpritePlayer_anim_started(anim_name)
 	
 	
 func _on_SpritePlayer_frame_update(): # emitted after every frame update, useful for staggering audio
-	UniqMob.stagger_anim()
+	UniqChar.stagger_anim()
 
 # return modulate to normal after ModulatePlayer finishes playing
 # may do follow-up modulate animation
@@ -2188,7 +2305,7 @@ func reset_fade():
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	
 	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
-		aux_data["unique_path"] = get_path() # add a new key to aux_data
+		aux_data["mob_ref"] = mob_ref # add a new key to aux_data
 		
 	Globals.Game.play_audio(audio_ref, aux_data)
 
@@ -2220,6 +2337,10 @@ func hide_SfxUnder():
 
 func save_state():
 	var state_data = {
+		
+		"free" : free,
+		"mob_ref" : mob_ref,
+		"player_ID" : player_ID,
 			
 		"position" : position,
 		"state" : state,
@@ -2237,7 +2358,7 @@ func save_state():
 		"afterimage_timer" : afterimage_timer,
 		"launch_starting_rot" : launch_starting_rot,
 		"launchstun_rotate" : launchstun_rotate,
-		"targeted_opponent_path" : targeted_opponent_path,
+		"target_ID" : target_ID,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -2274,6 +2395,11 @@ func save_state():
 	
 func load_state(state_data):
 	
+	free = state_data.free
+	mob_ref = state_data.mob_ref
+	player_ID = state_data.player_ID
+	load_mob()
+	
 	position = state_data.position
 	state = state_data.state
 	new_state = state_data.new_state
@@ -2290,7 +2416,7 @@ func load_state(state_data):
 	afterimage_timer = state_data.afterimage_timer
 	launch_starting_rot = state_data.launch_starting_rot
 	launchstun_rotate = state_data.launchstun_rotate
-	targeted_opponent_path = state_data.targeted_opponent_path
+	target_ID = state_data.target_ID
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	
@@ -2300,7 +2426,7 @@ func load_state(state_data):
 #	Globals.Game.guard_gauge_update(self)
 	
 	unique_data = state_data.unique_data
-#	if UniqMob.has_method("update_uniqueHUD"): UniqMob.update_uniqueHUD()
+#	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
 	repeat_memory = state_data.repeat_memory
 	remove_all_status_effects()
 	status_effects = state_data.status_effects
@@ -2321,7 +2447,6 @@ func load_state(state_data):
 			LoadedSFX.modulate_animations[$ModulatePlayer.current_animation].has("monochrome"): set_monochrome()
 	reset_fade()
 	$FadePlayer.load_state(state_data.FadePlayer_data)
-#	palette()
 	
 	$HitStunTimer.time = state_data.HitStunTimer_time
 	$HitStopTimer.time = state_data.HitStopTimer_time

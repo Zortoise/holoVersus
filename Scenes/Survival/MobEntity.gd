@@ -1,19 +1,19 @@
 extends "res://Scenes/Physics/Physics.gd"
 
+const MOB_ENTITY = true
 var UniqEntity
 onready var Animator = $SpritePlayer
 
-const STRONG_HIT_AUDIO_BOOST = 3
-const WEAK_HIT_AUDIO_NERF = -9
-
 # to save:
 var free := false
-var entity_ref
 var facing := 1
 var v_facing := 1
-var master_path: NodePath
-var creator_path: NodePath
-#var master_ID: int
+var reflected := false
+
+var master_ID: int # for special cases where an entity has a special effect that affects its master
+var entity_ref: String
+var creator_mob_ref: String # name of creator, so can look up mob_data in LevelControl under entity_ref
+
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
 var velocity := FVector.new()
 var lifetime := 0
@@ -28,18 +28,16 @@ var unique_data = {} # data unique for the entity, stored as a dictionary
 var hitstop = null
 
 
-func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary):
+func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary):
 	
-	master_path = in_master_path
-	creator_path = in_master_path
-#	master_ID = get_node(master_path).player_ID
+	master_ID = in_master_ID
+	creator_mob_ref = in_creator_mob_ref
 	entity_ref = in_entity_ref
+	
 	position = in_position
 	set_true_position()
 	
-	if !"facing" in aux_data:
-		face(get_node(master_path).facing) # face in same direction as master
-	elif aux_data.facing != 0: # just in case
+	if aux_data.facing != 0: # just in case
 		face(aux_data.facing)
 	
 	# for sprites:
@@ -65,18 +63,11 @@ func init(in_master_path: NodePath, in_entity_ref: String, in_position: Vector2,
 		
 func load_entity():
 
-	var is_common = entity_ref in Globals.common_entity_data # check if UniqEntity scene is common or character-unique
-	
-	if is_common: # common entity with loaded data stored in Globals.gb
-		UniqEntity = Globals.common_entity_data[entity_ref].scene.instance() # load UniqEntity scene
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, Globals.common_entity_data[entity_ref].frame_data) # load frame data
-		$Sprite.texture = Globals.common_entity_data[entity_ref].spritesheet # load spritesheet
-		
-	else: # character-unique entity with loaded data stored in master's node
-		var entity_data = get_node(creator_path).entity_data[entity_ref]
-		UniqEntity = entity_data.scene.instance() # load UniqEntity scene
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, entity_data.frame_data) # load frame data
-		$Sprite.texture = entity_data.spritesheet # load spritesheet
+	 # character-unique entity with loaded data stored in Globals.Game.LevelControl.mob_data
+	var entity_data = Globals.Game.LevelControl.mob_data[creator_mob_ref].entity_data[entity_ref]
+	UniqEntity = entity_data.scene.instance() # load UniqEntity scene
+	$SpritePlayer.init_with_loaded_frame_data($Sprite, entity_data.frame_data) # load frame data
+	$Sprite.texture = entity_data.spritesheet # load spritesheet
 		
 	add_child(UniqEntity)
 	move_child(UniqEntity, 0)
@@ -92,16 +83,9 @@ func load_entity():
 		
 		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
-			$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
-			$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
-			$SoftPlatformDBox.rect_size.x = ref_rect.rect_size.x
-			$SoftPlatformDBox.rect_size.y = 1
-		else:
-			$SoftPlatformDBox.free()
-			
+
 	else: # no collision, delete EntityCollisionBox
 		$EntityCollisionBox.free()
-		$SoftPlatformDBox.free()
 		
 	if UniqEntity.has_node("DefaultSpriteBox"): # for an entity to go offstage, the entire sprite must be offstage
 		var ref_rect = UniqEntity.get_node("DefaultSpriteBox")
@@ -111,17 +95,18 @@ func load_entity():
 		$EntitySpriteBox.free()
 		
 	if "PALETTE" in UniqEntity: # load palette
-		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palette
-			if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
-				$Sprite.material = ShaderMaterial.new()
-				$Sprite.material.shader = Globals.loaded_palette_shader
-				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqEntity.PALETTE])
-				
-		elif get_node(creator_path).loaded_palette != null: # same palette as creator, just set UniqEntity.PALETTE to null
+#		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palette
+		if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", get_node(creator_path).loaded_palette)
+			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqEntity.PALETTE])
 				
+		elif UniqEntity.PALETTE in Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes:
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Globals.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes[UniqEntity.PALETTE])
+				
+
 
 func simulate():
 	hitstop = null
@@ -137,11 +122,6 @@ func simulate():
 
 func simulate2(): # only ran if not in hitstop
 	
-#	if abs(velocity.x) < 5.0: # do this at the start too
-#		velocity.x = 0.0
-#	if abs(velocity.y) < 5.0:
-#		velocity.y = 0.0
-
 	UniqEntity.simulate()
 	
 	ignore_list_progress_timer()
@@ -150,8 +130,6 @@ func simulate2(): # only ran if not in hitstop
 		$Sprite.hide()
 		return
 	
-#	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
-#	velocity.y = round(velocity.y)
 	
 	if abs(velocity.x) < 5 * FMath.S:
 		velocity.x = 0
@@ -167,7 +145,7 @@ func simulate2(): # only ran if not in hitstop
 	
 		var results #  # [landing_check, collision_check, ledgedrop_check]
 		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
-			results = move($EntityCollisionBox, $SoftPlatformDBox, Globals.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
+			results = move($EntityCollisionBox, $EntityCollisionBox, Globals.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
 		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
 			results = move($EntityCollisionBox, $EntityCollisionBox)
 		
@@ -182,20 +160,14 @@ func simulate2(): # only ran if not in hitstop
 					velocity.y = orig_vel_y
 				else:
 					UniqEntity.collision()
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
-			if !is_on_ground($SoftPlatformDBox): # spawned in the air, kill it
+		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+			if !is_on_solid_ground($EntityCollisionBox): # spawned in the air, kill it
 				UniqEntity.kill()
-			elif results[2]: # reached a ledge
-				if $NoCollideTimer.is_running(): # if go off ledge during 1st frame of hitstop, will return to position before moving
-					position = orig_pos
-					set_true_position()
-					velocity.x = orig_vel_x
-					velocity.y = orig_vel_y
-				else:	
-					UniqEntity.ledge_stop()
 		
 	else: # no collision with platforms
-		position += velocity.convert_to_vec()
+		true_position.x += velocity.x
+		true_position.y += velocity.y
+		position = true_position.convert_to_vec()
 		
 	interactions() # do this after movement!
 	
@@ -216,14 +188,17 @@ func interactions():
 			if Globals.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
 				indestructible = true
 
+			var can_clash := false
+			if absorption_value != null and absorption_value > 0:
+				can_clash = true
+
 			 # get characters that can destroy this entity
 			var character_array = Globals.Game.get_node("Players").get_children()
 			var destroyer_array = []
 			
 			if !indestructible:
 				for character in character_array:
-					if character.player_ID != get_node(master_path).player_ID and character.is_atk_active() and \
-						(easy_destructible or Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
+					if character.is_atk_active() and (easy_destructible or Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
 						destroyer_array.append(character)
 					
 			 # get entities that can destroy or clash with this entity
@@ -231,11 +206,10 @@ func interactions():
 			entity_array.append_array(Globals.Game.get_node("EntitiesBack").get_children())
 			var clash_array := []
 			for entity in entity_array:
-				if get_node(entity.master_path).player_ID != get_node(master_path).player_ID:
-					if !indestructible and Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
-						destroyer_array.append(entity)
-					elif entity.absorption_value != null and entity.absorption_value > 0:
-						clash_array.append(entity)
+				if !indestructible and Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
+					destroyer_array.append(entity)
+				elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
+					clash_array.append(entity)
 			
 			# check for entity destroyers
 			for destroyer in destroyer_array:
@@ -248,7 +222,7 @@ func interactions():
 						break
 					
 			# check for clashes
-			if !to_destroy and absorption_value != null and absorption_value > 0:
+			if !to_destroy and can_clash:
 				var clash_array2 = []
 				for entity in clash_array:
 					var second_hitbox = entity.Animator.query_polygon("hitbox")
@@ -424,32 +398,13 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 
-	if hit_data.block_state == Globals.block_state.UNBLOCKED and "hit_sound" in hit_data.move_data:
+	if "hit_sound" in hit_data.move_data:
 
-		var volume_change = 0
-		if hit_data.lethal_hit or hit_data.stun or hit_data.sweetspotted:
-			volume_change += STRONG_HIT_AUDIO_BOOST
-#		elif hit_data.adjusted_atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
-		elif hit_data.double_repeat:
-			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
-			
 		if !hit_data.move_data.hit_sound is Array:
-
-			var aux_data = hit_data.move_data.hit_sound.aux_data.duplicate(true)
-			if "vol" in aux_data:
-				aux_data["vol"] = min(aux_data["vol"] + volume_change, 0) # max is 0
-			elif volume_change < 0:
-				aux_data["vol"] = volume_change
-			play_audio(hit_data.move_data.hit_sound.ref, aux_data)
-
+			play_audio(hit_data.move_data.hit_sound.ref, hit_data.move_data.hit_sound.aux_data)
 		else: # multiple sounds at once
 			for sound in hit_data.move_data.hit_sound:
-				var aux_data = sound.aux_data.duplicate(true)
-				if "vol" in aux_data:
-					aux_data["vol"] = min(aux_data["vol"] + volume_change, 0) # max is 0
-				elif volume_change < 0:
-					aux_data["vol"] = volume_change
-				play_audio(sound.ref, aux_data)
+				play_audio(sound.ref, sound.aux_data)
 	
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------
@@ -538,7 +493,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	
 	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
-		aux_data["unique_path"] = creator_path # add a new key to aux_data
+		aux_data["mob_ref"] = creator_mob_ref # add a new key to aux_data
 		
 	Globals.Game.play_audio(audio_ref, aux_data)
 
@@ -551,12 +506,12 @@ func save_state():
 		"v_facing" : v_facing,
 		"rotation" : $Sprite.rotation,
 		
+		"master_ID" : master_ID,
 		"entity_ref" : entity_ref,
+		"creator_mob_ref" : creator_mob_ref,
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
 		
 		"free" : free,
-		"master_path" : master_path,
-		"creator_path" : creator_path,
 		"true_position_x" : true_position.x,
 		"true_position_y" : true_position.y,
 		"velocity_x" : velocity.x,
@@ -582,9 +537,9 @@ func load_state(state_data):
 	$Sprite.scale.y = v_facing
 	$Sprite.rotation = state_data.rotation
 
+	master_ID = state_data.master_ID
 	entity_ref = state_data.entity_ref
-	master_path = state_data.master_path
-	creator_path = state_data.creator_path
+	creator_mob_ref = state_data.creator_mob_ref
 	load_entity()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)

@@ -196,6 +196,10 @@ func simulate():
 			elif Animator.query_current(["aSP2Active", "aSP2[ex]Active"]):
 				if Character.v_dir != 0:
 					Character.velocity.y += Character.v_dir * 100 * FMath.S
+					
+#			elif Animator.query_current(["aSP1[c1]Active"]):
+#				if Character.button_aux in Character.input_state.pressed:
+#					Character.animate("aSP1[c1]Active")
 			
 		Globals.char_state.AIR_ATK_RECOVERY:
 			
@@ -347,37 +351,37 @@ func process_instant_actions():
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 			
-		if "BitemarkTriggerU" in Character.instant_actions and get_node(Character.targeted_opponent_path).state != Globals.char_state.DEAD:
+		if "BitemarkTriggerU" in Character.instant_actions and Character.get_target() != Character:
 			if Character.unique_data.nibbler_count > 0:
-				var spawn_point = get_node(Character.targeted_opponent_path).position
+				var spawn_point = Character.get_target().position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
-					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point, {})
+					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {})
 					Character.play_audio("water15", {"unique_path" : Character.get_path()})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
 						
-		if "BitemarkTriggerD" in Character.instant_actions and get_node(Character.targeted_opponent_path).state != Globals.char_state.DEAD:
+		if "BitemarkTriggerD" in Character.instant_actions and Character.get_target() != Character:
 			if Character.unique_data.nibbler_count > 0:
 				var spawn_point = Character.position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
-					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point, {})
+					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {})
 					Character.play_audio("water15", {"unique_path" : Character.get_path()})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
 						
-		if "BitemarkTrigger" in Character.instant_actions and get_node(Character.targeted_opponent_path).state != Globals.char_state.DEAD:
+		if "BitemarkTrigger" in Character.instant_actions and Character.get_target() != Character:
 			if Character.unique_data.nibbler_count > 0:
 #				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
 #				spawn_point.x = round(spawn_point.x)
 #				spawn_point.y = round(spawn_point.y)
-				var spawn_point = FMath.find_center([get_node(Character.targeted_opponent_path).position, Character.position], Character.facing)
+				var spawn_point = FMath.find_center([Character.get_target().position, Character.position], Character.facing)
 				var spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point2 == null: # if no ground found below, check above a little
 					spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
 				if spawn_point2 != null:
-					Globals.Game.spawn_entity(Character.get_path(), "NibblerSpawn", spawn_point2, {})
+					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point2, {})
 					Character.play_audio("water15", {"unique_path" : Character.get_path()})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
@@ -593,6 +597,10 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 
 	
 func process_move(new_state, attack_ref: String, has_acted: Array): # return true if button consumed
+	
+	 # no attacking during respawn grace
+	if Character.query_status_effect(Globals.status_effect.RESPAWN_GRACE):
+		return true
 	
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
 		return false # since this will trigger instant aerial
@@ -928,7 +936,7 @@ func being_hit(hit_data):
 # AUTO SEQUENCES --------------------------------------------------------------------------------------------------
 
 func simulate_sequence(): # this is ran on every frame during a sequence
-	var Partner = get_node(Character.targeted_opponent_path)
+	var Partner = Character.get_target()
 	
 	match Animator.to_play_animation:
 		"SP6[ex]SeqA":
@@ -954,7 +962,7 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 						
 func simulate_sequence_after(): # called after moving and animating every frame, grab_point and grab_rot_dir are only updated then
 	
-	var Partner = get_node(Character.targeted_opponent_path)
+	var Partner = Character.get_target()
 	var grab_point = Animator.query_point("grabpoint")
 	
 	match Animator.to_play_animation:
@@ -973,7 +981,7 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 			
 						
 func start_sequence_step(): # this is ran at the start of every sequence_step
-	var Partner = get_node(Character.targeted_opponent_path)
+	var Partner = Character.get_target()
 
 	match Animator.to_play_animation:
 		"aF2SeqA":
@@ -1006,14 +1014,14 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
 			if Character.grounded:
 				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
+						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
 				Character.play_audio("water4", {"vol" : -20})
 #				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 #				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP6[ex]SeqC":
 			Character.velocity.set_vector(0, 600 * FMath.S)  # dive down
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, \
-					{"facing":Character.facing, "rot":PI/2}, Character.get_path())
+					{"facing":Character.facing, "rot":PI/2}, Character.player_ID)
 			Character.play_audio("water14", {})
 		"SP6[ex]SeqE":  # you hit ground
 			Partner.sequence_hit(0)
@@ -1021,7 +1029,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.get_path())
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.player_ID)
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
 			Globals.Game.set_screenshake()
 			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
@@ -1030,7 +1038,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.sequence_hit(0)
 			Character.velocity.set_vector(0, 0)
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.get_path())
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.player_ID)
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
 			Globals.Game.set_screenshake()
@@ -1039,7 +1047,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 							
 func end_sequence_step(trigger = null): # this is ran at the end of certain sequence_step, or to end a trigger sequence_step
 	# return true if sequence_step ended
-	var Partner = get_node(Character.targeted_opponent_path)
+	var Partner = Character.get_target()
 	
 	if trigger == "break": # grab break
 		Character.animate("Idle")
@@ -1080,7 +1088,7 @@ func rotate_partner(Partner): # rotate partner according to grabrotdir
 func move_sequence_target(new_position): # move sequence_target to new position
 	if new_position == null: return # no grab point
 	
-	var Partner = get_node(Character.targeted_opponent_path)
+	var Partner = Character.get_target()
 	var results = Partner.move_sequence_player_to(new_position) # [landing_check, collision_check, ledgedrop_check]
 	
 	if results[0]: # Grabbed hit the ground, ends sequence step if it is triggered by Grabbed being grounded
@@ -1106,6 +1114,9 @@ func sequence_ledgestop(): # which step in sequence are stopped by ledges
 func sequence_passthrough(): # which step in sequence ignore all platforms (for cinematic supers)
 	return false
 	
+func sequence_partner_passthrough(): # which step in sequence has partner ignore all platforms
+	return false
+	
 func sequence_passfloor(): # which step in sequence ignore hard floor
 	match Animator.to_play_animation:
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
@@ -1128,7 +1139,7 @@ func unique_chaining_rules(move_name, attack_ref):
 func get_trident_array(): # return array of all spinnable tridents
 	var trident_array := []
 	for entity in Globals.Game.get_node("EntitiesFront").get_children():
-		if get_node(entity.master_path).player_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
+		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
 			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
 					"[u][ex]Active", "[c3]Active", "[u][c3]Active"]:
 				trident_array.append(entity)
@@ -1300,7 +1311,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aL2Startup":
 			Character.animate("aL2Active")
 		"aL2Rec":
-			if Character.held_version(Character.button_light):
+			if Globals.survival_level == null and Character.held_version(Character.button_light):
 				Character.animate("aL2Startup")
 			else:
 				Character.animate("aL2bRec")
@@ -1498,22 +1509,22 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			else:
 				Character.animate("SP3Active")
 				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
+						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
 		"aSP3Startup":
 			if Character.held_version(Character.button_fierce):
 				Character.animate("aSP3[h]Startup")
 			else:
 				Character.animate("aSP3Active")
-				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.player_ID)
 #		"aSP3bStartup":
 #			Character.animate("aSP3Active")
 		"SP3[h]Startup":
 			Character.animate("SP3[h]Active")
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
 		"aSP3[h]Startup":
 			Character.animate("aSP3[h]Active")
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.player_ID)
 		"aSP3Active":
 			Character.animate("aSP3bActive")
 		"aSP3[h]Active":
@@ -1532,10 +1543,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP3[ex]Startup":
 			Character.animate("SP3[ex]Active")
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.get_path())
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
 		"aSP3[ex]Startup":
 			Character.animate("aSP3[ex]Active")
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.player_ID)
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1773,51 +1784,56 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 20
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[ex]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			
 		"SP1[u][c1]Active": # spawn projectile at EntitySpawn
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1, "alt_aim" : true})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c2]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2, "alt_aim" : true})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c3]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3, "alt_aim" : true})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][ex]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4, "alt_aim" : true})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			
 		"aSP1[c1]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1})
+#			var point = Animator.query_point("entityspawn")
+#			for x in 30:
+#				point.y -= 5
+#				Globals.Game.spawn_entity(Character.player_ID, "TridentProj", point, \
+#						{"aerial" : true, "charge_lvl" : 1})
 		"aSP1[c2]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2})
 		"aSP1[c3]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3})
 		"aSP1[ex]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4})
 
 		"aSP1[d][c1]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1, "alt_aim" : true})
 		"aSP1[d][c2]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2, "alt_aim" : true})
 		"aSP1[d][c3]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3, "alt_aim" : true})
 		"aSP1[d][ex]Active":
-			Globals.Game.spawn_entity(Character.get_path(), "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4, "alt_aim" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4, "alt_aim" : true})
 
 		"aSP1Rec", "aSP1[ex]Rec":
 			Character.velocity_limiter.x = 70
@@ -1832,18 +1848,18 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 50
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.player_ID)
 		"aSP2[h]Active":
 			Character.velocity.set_vector(Character.facing * 600 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.player_ID)
 		"aSP2[ex]Active":
 			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 50
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.get_path())
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.player_ID)
 		"aSP2[h]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
@@ -1872,17 +1888,17 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"SP4Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
-			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {})
+			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", Animator.query_point("entityspawn"), {})
 			Character.unique_data.groundfin_count += 1
 		"SP4[h]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
-			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", Animator.query_point("entityspawn"), {"held" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", Animator.query_point("entityspawn"), {"held" : true})
 			Character.unique_data.groundfin_count += 1
 		"SP4[ex]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
 			var spawn_point = Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"ex" : true})
-			Globals.Game.spawn_entity(Character.get_path(), "GroundFin", spawn_point, {"held" : true, "ex" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"ex" : true})
+			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"held" : true, "ex" : true})
 			Character.unique_data.groundfin_count += 2
 			
 		"SP5Startup", "aSP5Startup", "aSP5[ex]Startup":

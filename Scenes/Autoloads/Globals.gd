@@ -75,6 +75,7 @@ enum reset_type {STARTUP_RESET, NON_ATK_RESET, EARLY_RESET, FULL_ACTIVE_RESET}
 enum entity_trait {GROUNDED, LEDGE_STOP}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 enum moving_platform {MOVING, WARPING}
+enum dmg_num_col {WHITE, RED, GRAY, GREEN}
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
 		P1_UNIQUE, P1_PAUSE,
@@ -88,7 +89,7 @@ const FLAT_STOCK_LOSS = 1000
 const CORNER_SIZE = 64
 
 # preloading scenes will cause issues, do them on onready variables instead
-onready var loaded_audio_scene := load("res://Scenes/AudioManager.tscn")
+onready var loaded_audio_scene := load("res://Scenes/Audio/AudioManager.tscn")
 onready var loaded_character_scene := load("res://Scenes/Character.tscn")
 onready var loaded_entity_scene := load("res://Scenes/Entity.tscn")
 onready var loaded_SFX_scene := load("res://Scenes/SFX.tscn")
@@ -98,6 +99,7 @@ onready var monochrome_shader = load("res://Scenes/Shaders/Monochrome.gdshader")
 onready var white_shader = load("res://Scenes/Shaders/White.gdshader")
 onready var loaded_guard_gauge = ResourceLoader.load("res://Assets/UI/guard_gauge1.png")
 onready var loaded_guard_gauge_pos = load("res://Assets/UI/guard_gauge_pos.tres")
+onready var loaded_dmg_num_scene = load("res://Scenes/DamageNumber.tscn")
 
 onready var loaded_ui_audio_scene := load("res://Scenes/Menus/UIAudio.tscn")
 
@@ -132,6 +134,7 @@ var Game # hold the node for main game scene
 var random
 var pausing := false # set to true when a player tries to pause the game
 var winner = [0, "Gura"] # 0 is the player ID, 1 is the character's name, pass to victory screen
+var damage_numbers := false
 
 var debug_mode := false
 var debug_mode2 := false

@@ -130,7 +130,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 2
 			Entity.life_point = 2
 			Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : Entity.master_path}, Entity.master_path)
+					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : "master"}, Entity.master_ID)
 		"[c3]Spawn", "[u][c3]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
@@ -138,7 +138,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 3
 			Entity.life_point = 4
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_path)
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_ID)
 		"[ex]Spawn", "[u][ex]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
@@ -146,7 +146,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 3
 			Entity.life_point = 3
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_path)
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_ID)
 #
 #		"[u][c1]Spawn":
 #			Entity.velocity.set_vector(500 * FMath.S, 0)
@@ -210,8 +210,8 @@ func turn_to_enemy():
 	
 	Entity.hitcount_record = []
 	
-	var master_node = get_node(Entity.master_path)
-	var enemy_node = get_node(master_node.targeted_opponent_path)
+	var master_node = Globals.Game.get_player_node(Entity.master_ID)
+	var enemy_node = Globals.Game.get_player_node(master_node.target_ID)
 	
 	var angle_finder := FVector.new()
 	angle_finder.set_from_vec(enemy_node.position - Entity.position)
@@ -385,11 +385,11 @@ func simulate():
 			Entity.velocity.percent(80)
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 		
 		"[c2]Active", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			if posmod(Entity.lifetime, 3) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 			if !Animator.to_play_animation in ["[c2]Active", "[u][c2]Active"]:
 				if Entity.lifetime > 25 and Entity.hitcount_record.size() == 0:
@@ -398,17 +398,17 @@ func simulate():
 				
 		"[c3]Active", "[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14), "palette" : Entity.master_path}, Entity.master_path)
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14), "palette" : "master"}, Entity.master_ID)
 						
 		"[u][c3]Active", "[u][ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_path, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68), "palette" : Entity.master_path}, Entity.master_path)
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68), "palette" : "master"}, Entity.master_ID)
 	
 	
 func kill(sound = true):

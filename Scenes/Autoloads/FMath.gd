@@ -148,3 +148,22 @@ func find_center(array: Array, bias: int) -> Vector2:
 	
 	return Vector2(average_x, average_y)
 	
+	
+func get_closest(node_array: Array, target_point: Vector2): # find closest node to target_point
+	var shortest_dist_square = null
+	var found = null
+	
+	for node in node_array:
+		var x = node.position.x - target_point.x
+		var y = node.position.y - target_point.y
+		var dist_square = x * x + y * y
+		if shortest_dist_square == null:
+			found = node
+			shortest_dist_square = dist_square
+		else:
+			if dist_square < shortest_dist_square:
+				found = node
+				shortest_dist_square = dist_square
+	
+	return found
+	

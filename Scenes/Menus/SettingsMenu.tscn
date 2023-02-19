@@ -327,35 +327,33 @@ margin_top = 333.0
 margin_right = 704.0
 margin_bottom = 389.0
 
-[node name="Blank" type="Label" parent="SettingsList"]
+[node name="DamageNumbers" parent="SettingsList" instance=ExtResource( 9 )]
 margin_top = 393.0
 margin_right = 704.0
-margin_bottom = 422.0
+margin_bottom = 449.0
+
+[node name="Blank" type="Label" parent="SettingsList"]
+margin_top = 453.0
+margin_right = 704.0
+margin_bottom = 482.0
 custom_fonts/font = SubResource( 19 )
 text = " "
 
 [node name="GameVolume" parent="SettingsList" instance=ExtResource( 4 )]
-margin_top = 426.0
-margin_right = 704.0
-margin_bottom = 482.0
-
-[node name="MusicVolume" parent="SettingsList" instance=ExtResource( 4 )]
 margin_top = 486.0
 margin_right = 704.0
 margin_bottom = 542.0
 
-[node name="UIVolume" parent="SettingsList" instance=ExtResource( 4 )]
+[node name="MusicVolume" parent="SettingsList" instance=ExtResource( 4 )]
 margin_top = 546.0
 margin_right = 704.0
 margin_bottom = 602.0
-focus_neighbour_bottom = NodePath("../Fullscreen")
 
-[node name="Blank4" type="Label" parent="SettingsList"]
+[node name="UIVolume" parent="SettingsList" instance=ExtResource( 4 )]
 margin_top = 606.0
 margin_right = 704.0
-margin_bottom = 635.0
-custom_fonts/font = SubResource( 19 )
-text = " "
+margin_bottom = 662.0
+focus_neighbour_bottom = NodePath("../Fullscreen")
 
 [node name="SettingsList2" type="VBoxContainer" parent="."]
 margin_left = 192.0

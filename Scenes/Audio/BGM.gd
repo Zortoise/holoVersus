@@ -1,7 +1,7 @@
 extends Node
 
 # WIP, handle looping and music transitions (fade out)
-var BGMPlayerScene = load("res://Scenes/BGMPlayer.tscn")
+var BGMPlayerScene = load("res://Scenes/Audio/BGMPlayer.tscn")
 
 var common_music = {
 	"title_theme" : {

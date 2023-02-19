@@ -547,6 +547,24 @@ var modulate_animations = {
 			},
 		}
 	},
+	"mob_hit_flash" :{
+		"duration": 6,
+		"loop" : false,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(0.0, 0.0, 0.0),
+			},
+			2 :
+			{
+				"modulate" : Color(2.0, 0.0, 0.0),
+			},
+			3 :
+			{
+				"modulate" : Color(1.5, 0.5, 0.5),
+			},
+		}
+	},
 	"sweet_flash" :{
 		"duration": 8,
 		"loop" : false,

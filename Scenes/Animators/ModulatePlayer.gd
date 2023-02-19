@@ -1,4 +1,4 @@
-extends "res://Scenes/FrameAnimPlayer.gd"
+extends "res://Scenes/Animators/FrameAnimPlayer.gd"
 
 
 # list of available animations, built-in instead of reading a resource file like the real FrameAnimPlayer

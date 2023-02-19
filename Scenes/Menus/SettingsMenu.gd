@@ -6,6 +6,7 @@ const BORDERLESS_OPTIONS = ["off", "on"]
 const VSYNC_OPTIONS = ["off", "on", "via compositor"]
 const FPSLOCK_OPTIONS = ["uncapped", "on"]
 const FPSPING_OPTIONS = ["off", "on"]
+const DAMAGENUMBERS_OPTIONS = ["off", "on"]
 
 
 func _ready():
@@ -35,6 +36,7 @@ func _ready():
 	$SettingsList/GameVolume.load_button("Game Volume", config.game_volume)
 	$SettingsList/MusicVolume.load_button("Music Volume", config.music_volume)
 	$SettingsList/UIVolume.load_button("UI Volume", config.ui_volume)
+	$SettingsList/DamageNumbers.load_button("Damage Numbers", DAMAGENUMBERS_OPTIONS, config.damage_numbers)
 	
 	
 func _process(_delta):
@@ -50,6 +52,7 @@ func _process(_delta):
 				"game_volume" : $SettingsList/GameVolume.value,
 				"music_volume" : $SettingsList/MusicVolume.value,
 				"ui_volume" : $SettingsList/UIVolume.value,
+				"damage_numbers" : $SettingsList/DamageNumbers.option_pointer,
 			}
 			Settings.save_settings(new_config)
 			play_audio("ui_accept", {"vol":-8})
@@ -80,6 +83,7 @@ func triggered(triggered_node):
 					"game_volume" : $SettingsList/GameVolume.value,
 					"music_volume" : $SettingsList/MusicVolume.value,
 					"ui_volume" : $SettingsList/UIVolume.value,
+					"damage_numbers" : $SettingsList/DamageNumbers.option_pointer,
 				}
 				Settings.save_settings(new_config)
 				play_audio("ui_accept", {"vol":-8})

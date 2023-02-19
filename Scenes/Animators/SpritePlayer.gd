@@ -1,4 +1,4 @@
-extends "res://Scenes/FrameAnimPlayer.gd"
+extends "res://Scenes/Animators/FrameAnimPlayer.gd"
 
 
 # set up sprite to animate and import animation list from a .tres file	
@@ -27,3 +27,15 @@ func init_with_loaded_frame_data(in_sprite, loaded_frame_data):
 	sprite = in_sprite
 	for key in loaded_frame_data.frame_data.keys():
 		animations[key] = loaded_frame_data.frame_data[key]
+		
+# for mobs which require frame data already loaded, can have multiple .tres files so pass in an array
+func init_with_loaded_frame_data_array(in_sprite, in_sfx_over, in_sfx_under, frame_data_array):
+	
+	sprite = in_sprite
+	sfx_over = in_sfx_over
+	sfx_under = in_sfx_under
+	
+	for loaded_frame_data in frame_data_array:
+		for key in loaded_frame_data.frame_data.keys():
+			animations[key] = loaded_frame_data.frame_data[key]
+

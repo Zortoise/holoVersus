@@ -2,8 +2,6 @@ extends AudioStreamPlayer
 
 
 # WIP, handle looping and music transitions (fade out)
-var BGMPlayerScene = load("res://Scenes/BGMPlayer.tscn")
-
 var bgm_dictionary
 
 var decaying := false

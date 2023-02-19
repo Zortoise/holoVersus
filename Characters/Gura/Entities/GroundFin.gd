@@ -43,7 +43,8 @@ func simulate():
 	
 	match Animator.to_play_animation: # triggering shark breach
 		"Active", "[h]Active", "Turn", "[h]Turn":
-			if get_node(Entity.master_path).unique_data.groundfin_trigger:
+			var master_node = Globals.Game.get_player_node(Entity.master_ID)
+			if master_node.unique_data.groundfin_trigger:
 #				var breach_facing = get_node(Entity.master_path).get_last_tapped_dir()
 #				var turned := false
 #				if breach_facing == 0:
@@ -53,14 +54,14 @@ func simulate():
 #				if breach_facing == 0:
 #					breach_facing = Entity.facing
 				var breach_facing = Entity.facing
-				var new_facing_ref = get_node(get_node(Entity.master_path).targeted_opponent_path).position.x - Entity.position.x
+				var new_facing_ref = Globals.Game.get_player_node(master_node.target_ID).position.x - Entity.position.x
 				if new_facing_ref != 0: # turn to face targeted opponent
 					breach_facing = sign(new_facing_ref)
-				Globals.Game.spawn_entity(Entity.master_path, "SharkBreach", Entity.position, {"facing" : breach_facing})
+				Globals.Game.spawn_entity(Entity.master_ID, "SharkBreach", Entity.position, {"facing" : breach_facing})
 				Entity.play_audio("water4", {"vol" : -23})
 				Entity.play_audio("water8", {"vol" : -13})
 				# reduce ground fin count
-				get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
+				master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
 				Entity.free = true
 				
 				
@@ -72,7 +73,8 @@ func kill(_sound = true):
 	if !Animator.to_play_animation.ends_with("Kill"):
 		Animator.play("Kill")
 		# reduce ground fin count
-		get_node(Entity.master_path).unique_data.groundfin_count = max(0, get_node(Entity.master_path).unique_data.groundfin_count - 1)
+		var master_node = Globals.Game.get_player_node(Entity.master_ID)
+		master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
 	
 	
 func collision(): # collided with a wall, turns

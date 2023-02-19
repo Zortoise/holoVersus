@@ -26,6 +26,8 @@ script = ExtResource( 1 )
 
 [node name="SFXFront" type="Node2D" parent="."]
 
+[node name="DamageNumbers" type="Node2D" parent="."]
+
 [node name="AudioPlayers" type="Node2D" parent="."]
 
 [node name="DecayAudio" type="Node2D" parent="."]

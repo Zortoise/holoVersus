@@ -150,7 +150,8 @@ func load_settings():
 		config = ResourceLoader.load("user://config.tres").config
 		
 		var valid := true # check if config has all needed keys, if not, use default config
-		for check in ["fullscreen", "window_size", "borderless", "vsync", "fps_lock", "fps_and_ping", "game_volume", "music_volume", "ui_volume"]:
+		for check in ["fullscreen", "window_size", "borderless", "vsync", "fps_lock", "fps_and_ping", "game_volume", "music_volume", \
+				"ui_volume", "damage_numbers"]:
 			if !check in config:
 				valid = false
 		if valid:
@@ -167,6 +168,7 @@ func load_settings():
 		"game_volume" : 70, # 0 to 100
 		"music_volume" : 70, # 0 to 100
 		"ui_volume" : 70, # 0 to 100
+		"damage_numbers" : 0 # array index
 	}
 	
 	
@@ -219,6 +221,12 @@ func set_settings(config):
 			Fps.hide()
 		1:
 			Fps.show()
+			
+	match config.damage_numbers:
+		0:
+			Globals.damage_numbers = false
+		1:
+			Globals.damage_numbers = true
 
 	set_volume("Game", config.game_volume)
 	set_volume("Music", config.music_volume)

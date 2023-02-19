@@ -239,7 +239,7 @@ var aerial_sp_memory = [] # appended whenever an air normal attack is made, cann
 						  # reset on landing
 var success_block := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
 var success_dodge := false # set to true after iframing through an attack, turn later part of dodge cancellable, reset outside dodge
-var targeted_opponent_path: NodePath # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
+var target_ID = null # ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var tap_memory = []
 var release_memory = []
 var impulse_used := false
@@ -293,7 +293,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	set_up_sfx() # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
 	
 	UniqChar.sprite = sprite
-	sprite.texture = spritesheets["BaseSprite"]
+#	sprite.texture = spritesheets["BaseSprite"]
 	
 	# set up animators
 	UniqChar.Animator = $SpritePlayer
@@ -453,7 +453,7 @@ func set_up_entities(): # scan all .tscn files within Entities folder and add th
 #	var entity_data = {
 #	#	"TridentProj" : { # example
 #	#		"scene" : load("res://Characters/Gura/Entities/TridentProj.tscn"),
-#	#		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+#	#		"frame_data" : ResourceLoader.load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
 #	#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
 #	#	},
 #	}
@@ -502,13 +502,45 @@ func set_up_sfx(): # scan all .tres files within SFX/FrameData folder and add th
 	
 func initial_targeting(): # target random players at start, cannot do in init() since need all players to be added first
 	# target a random opponent
-	var player_ids = []
-	for x in Globals.player_count:
-		if x != player_ID:
-			player_ids.append(x)
-	targeted_opponent_path = Globals.Game.get_player_node(player_ids[Globals.Game.rng_generate(player_ids.size())]).get_path()
+	if Globals.survival_level == null:
+		var player_IDs = []
+		for x in Globals.player_count:
+			if x != player_ID:
+				player_IDs.append(x)
+		target_ID = player_IDs[Globals.Game.rng_generate(player_IDs.size())]
+	else:
+		target_ID = player_ID
 	
-
+func get_target():
+	if Globals.survival_level == null:
+		var target = Globals.Game.get_player_node(target_ID)
+		if target.state == Globals.char_state.DEAD:
+			return self
+		else:
+			return target
+			
+	else: # get targeted mob
+		if target_ID != null and target_ID != player_ID:
+			var target_node = Globals.Game.get_player_node(target_ID)
+			if target_node != null:
+				return target_node
+				
+		# not yet target a mob, or targeted mob is dead
+		if Globals.Game.get_node("Players").get_children().size() == Globals.player_count:
+			target_ID = player_ID
+			return self # no mobs, target self
+		else: # find closest mob
+			var targets = [] 
+			for target in Globals.Game.get_node("Players").get_children():
+				if "MOB" in target:
+					targets.append(target)
+			if targets.size() == 0:
+				return self # no mobs, target self
+			else:
+				var target_node = FMath.get_closest(targets, position)
+				target_ID = target_node.player_ID
+				return target_node
+			
 	
 # TESTING --------------------------------------------------------------------------------------------------
 
@@ -595,16 +627,14 @@ func simulate(new_input_state):
 #			$EXSealTimer.time = 120
 #			super_ex_lock = 120
 #			change_burst_token(1)
-			if super_test(true):
-				super_cost(120, true)
-			get_node(targeted_opponent_path).change_guard_gauge(-8000)
-			get_node(targeted_opponent_path).change_ex_gauge(MAX_EX_GAUGE)
-			get_node(targeted_opponent_path).change_burst_token(Globals.burst.AVAILABLE)
-			unique_data.bitten_player_path = targeted_opponent_path
-			unique_data.nibbler_count = 3
-			UniqChar.update_uniqueHUD()
+#			if super_test(true):
+#				super_cost(120, true)
+#			Globals.Game.get_player_node(target_ID).change_guard_gauge(-8000)
+#			unique_data.nibbler_count = 3
+#			UniqChar.update_uniqueHUD()
 			
-			UniqChar.instinct()
+			Globals.Game.LevelControl.spawn_mob("TestMobBase", Vector2.ZERO)
+
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
 			Globals.Game.superfreeze(get_path())
@@ -644,6 +674,7 @@ func simulate2(): # only ran if not in hitstop
 # START OF FRAME --------------------------------------------------------------------------------------------------
 
 	if state == Globals.char_state.DEAD:
+#	 and Globals.survival_level == null:
 		respawn()
 
 	dir = 0
@@ -1034,52 +1065,52 @@ func simulate2(): # only ran if not in hitstop
 #		if button_dash in input_state.just_pressed and button_aux in input_state.pressed:
 #			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
 			
-	
-	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
-		if $ShorthopTimer.is_running():
-			pass # no blocking after shorthopping for a while
-		elif current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
-			match state:
-				
-			# ground blocking
-	#			Globals.char_state.GROUND_STARTUP: # can block on 1st frame of ground dash
-	#				if Animator.query_current(["DashTransit"]):
-	#					animate("BlockStartup")
-				Globals.char_state.GROUND_STANDBY:
-					animate("BlockStartup")
-				Globals.char_state.GROUND_C_RECOVERY:
-#					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
-#						continue
-					if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
-						if Globals.trait.DASH_BLOCK in query_traits():
-							animate("BlockStartup")
-					elif Animator.query(["HardLanding"]):
-						pass # cannot block on hardlanding
-					else:
-	#					continue
+	if Globals.survival_level == null:
+		if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
+			if $ShorthopTimer.is_running():
+				pass # no blocking after shorthopping for a while
+			elif current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
+				match state:
+					
+				# ground blocking
+		#			Globals.char_state.GROUND_STARTUP: # can block on 1st frame of ground dash
+		#				if Animator.query_current(["DashTransit"]):
+		#					animate("BlockStartup")
+					Globals.char_state.GROUND_STANDBY:
 						animate("BlockStartup")
-						
-			# air blocking
-	#		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqChar.get_stat("AIR_BLOCK_GG_COST"):
+					Globals.char_state.GROUND_C_RECOVERY:
+	#					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
+	#						continue
+						if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
+							if Globals.trait.DASH_BLOCK in query_traits():
+								animate("BlockStartup")
+						elif Animator.query(["HardLanding"]):
+							pass # cannot block on hardlanding
+						else:
+		#					continue
+							animate("BlockStartup")
+							
+				# air blocking
+		#		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqChar.get_stat("AIR_BLOCK_GG_COST"):
 
-	#			Globals.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
-	#				if Animator.query_current(["aDashTransit"]):
-	#					animate("aBlockStartup")
-	#					$VarJumpTimer.stop()
-				Globals.char_state.AIR_STANDBY:
-	#				if current_ex_gauge >= UniqChar.AIR_BLOCK_DRAIN_RATE * 0.5:
-					animate("aBlockStartup")
-					$VarJumpTimer.stop()
-				Globals.char_state.AIR_C_RECOVERY:
-					if Animator.query(["AResetCRec"]): # cannot block out of Alpha Reset
-						continue
-					if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
-						if Globals.trait.AIR_DASH_BLOCK in query_traits(): # only heavyweights can block out of air dashes
-							animate("aBlockStartup")
-							$VarJumpTimer.stop()
-					else:
+		#			Globals.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
+		#				if Animator.query_current(["aDashTransit"]):
+		#					animate("aBlockStartup")
+		#					$VarJumpTimer.stop()
+					Globals.char_state.AIR_STANDBY:
+		#				if current_ex_gauge >= UniqChar.AIR_BLOCK_DRAIN_RATE * 0.5:
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
+					Globals.char_state.AIR_C_RECOVERY:
+						if Animator.query(["AResetCRec"]): # cannot block out of Alpha Reset
+							continue
+						if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
+							if Globals.trait.AIR_DASH_BLOCK in query_traits(): # only heavyweights can block out of air dashes
+								animate("aBlockStartup")
+								$VarJumpTimer.stop()
+						else:
+							animate("aBlockStartup")
+							$VarJumpTimer.stop()
 			
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
@@ -1281,8 +1312,8 @@ func simulate2(): # only ran if not in hitstop
 					
 						
 			elif Animator.query_current(["Dodge"]):
-				if get_node(targeted_opponent_path).position.x - position.x != 0 and \
-						sign(get_node(targeted_opponent_path).position.x - position.x) != facing:
+				if get_target().position.x - position.x != 0 and \
+						sign(get_target().position.x - position.x) != facing:
 					face(-facing) # face opponent
 						
 					
@@ -1362,7 +1393,7 @@ func simulate2(): # only ran if not in hitstop
 		
 		Globals.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
-			if !$HitStunTimer.is_running() and Animator.query_to_play(["Launch", "LaunchTransit"]):
+			if !$HitStunTimer.is_running() and new_state != Globals.char_state.LAUNCHED_HITSTUN:
 				tech()
 #					animate("FallTransit")]
 #					$ModulatePlayer.play("unlaunch_flash")
@@ -1488,7 +1519,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$BurstLockTimer.simulate()
 				$NoCollideTimer.simulate()
 				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
-					if !get_node(targeted_opponent_path).is_hitstunned() and state != Globals.char_state.SEQUENCE_USER:
+					if !get_target().is_hitstunned() and state != Globals.char_state.SEQUENCE_USER:
 						# no counting down EX Seal if opponent is hitstunned or you are using a sequeue
 						$EXSealTimer.simulate()
 				else: # EX Seal from using super, count down during opponent hitstun as well
@@ -2168,7 +2199,7 @@ func process_input_buffer():
 							if new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
 									!Animator.query_to_play(["BlockRec", "aBlockRec", "Dash", "aDash"]):
 								continue # can only cancel from certain non-attack recovery frames
-							if super_dash > 0:
+							if grounded or super_dash > 0:
 								animate("SDashTransit")
 								has_acted[0] = true
 								keep = false
@@ -2233,11 +2264,7 @@ func process_input_buffer():
 # STATE DETECT ---------------------------------------------------------------------------------------------------
 
 func animate(anim):
-	
-	 # no attacking during respawn grace
-	if query_status_effect(Globals.status_effect.RESPAWN_GRACE) and anim.trim_suffix("Startup") in UniqChar.STARTERS:
-		return
-	
+
 	var old_new_state = new_state
 	
 	Animator.play(anim)
@@ -2389,19 +2416,20 @@ func on_kill():
 		remove_all_status_effects()
 		reset_jumps()
 		
-		var opponent = get_node(targeted_opponent_path)
-		if opponent.state != Globals.char_state.DEAD:
-			
-			if opponent.burst_token == Globals.burst.EXHAUSTED:
-				opponent.change_burst_token(Globals.burst.AVAILABLE) # your targeted opponent gain burst token if exhausted
-			
-			if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
-				opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
-			
-			if current_damage_value > UniqChar.DAMAGE_VALUE_LIMIT: # targeted opponent heals Damage Value equal to overkill damage
-				opponent.take_damage(-(current_damage_value - UniqChar.DAMAGE_VALUE_LIMIT))
+		if Globals.survival_level == null:
+			var opponent = get_target()
+			if opponent.state != Globals.char_state.DEAD:
 				
-			Globals.Game.damage_update(opponent)
+				if opponent.burst_token == Globals.burst.EXHAUSTED:
+					opponent.change_burst_token(Globals.burst.AVAILABLE) # your targeted opponent gain burst token if exhausted
+				
+				if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
+					opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
+				
+				if current_damage_value > UniqChar.DAMAGE_VALUE_LIMIT: # targeted opponent heals Damage Value equal to overkill damage
+					opponent.take_damage(-(current_damage_value - UniqChar.DAMAGE_VALUE_LIMIT))
+					
+				Globals.Game.damage_update(opponent)
 
 		change_stock_points(-1)
 		if stock_points_left > 0 and !Globals.Game.game_set:
@@ -2482,9 +2510,13 @@ func face(in_dir):
 	sfx_under.scale.x = facing
 	
 func face_opponent():
-	if get_node(targeted_opponent_path).position.x - position.x != 0 and \
-			sign(get_node(targeted_opponent_path).position.x - position.x) != facing:
+	if facing != get_opponent_dir():
 		face(-facing)
+		
+func get_opponent_dir():
+	var target = get_target()
+	if target.position.x == position.x: return facing
+	else: return int(sign(target.position.x - position.x))
 	
 func reset_jumps():
 	air_jump = UniqChar.get_stat("MAX_AIR_JUMP") # reset jump count on ground
@@ -2717,8 +2749,11 @@ func check_passthrough():
 	if state == Globals.char_state.SEQUENCE_USER:
 		return UniqChar.sequence_passthrough() # for cinematic supers
 	elif state == Globals.char_state.SEQUENCE_TARGET:
-		return get_node(targeted_opponent_path).check_passthrough() # copy passthrough state of the one grabbing you
+		return get_target().sequence_partner_passthrough() # get passthrough state from the one grabbing you
 	return false
+	
+func sequence_partner_passthrough():
+	return UniqChar.sequence_partner_passthrough()
 		
 # check if in place for a down-dash snap up landing, if so, snap up
 func check_snap_up():
@@ -2875,15 +2910,15 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 			main_color_modulate = color_modulate
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
+			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
 				starting_modulate_a, lifetime, afterimage_shader)
 			
-		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), main_color_modulate, \
+		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), main_color_modulate, \
 			starting_modulate_a, lifetime, afterimage_shader)
 #		spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
+			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
 				starting_modulate_a, lifetime, afterimage_shader)
 	else:
 		afterimage_timer -= 1
@@ -2892,14 +2927,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
+		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
 			starting_modulate_a, lifetime)
 		
-	Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sprite, sprite.get_path(), null, \
+	Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), null, \
 		starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(get_path(), sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
+		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
 			starting_modulate_a, lifetime)
 		
 		
@@ -3172,7 +3207,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
 			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, UniqChar.get_stat("EYE_LEVEL")), \
-					{"palette":"pink"}, get_path())
+					{"palette":"pink"})
 			$ModulatePlayer.play("EX_flash")
 			return true
 		else:
@@ -3184,7 +3219,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
 			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, UniqChar.get_stat("EYE_LEVEL")), \
-					{"palette":"pink"}, get_path())
+					{"palette":"pink"})
 			$ModulatePlayer.play("EX_flash")
 			return true
 		else:
@@ -3308,8 +3343,7 @@ func a_reset_check(move_name):
 							filter = true
 					Globals.reset_type.NON_ATK_RESET: # can only reset during active frames if targeted opponent not in hit
 						if is_atk_active() and Animator.time > 1: # not on frame 1
-							var target = get_node(targeted_opponent_path)
-							if !target.get_node("HitStunTimer").is_running():
+							if !get_target().get_node("HitStunTimer").is_running():
 								filter = true
 
 	if filter == false: return false
@@ -3356,7 +3390,7 @@ func test_sdash_cancel():
 		return false
 		
 	if is_normal_attack(move_name): # normal attacks can be sdashed on recovery on hit
-		if super_dash == 0: return false
+		if !grounded and super_dash == 0: return false
 		if is_atk_active(): #  some normals can be sdashed on active frames, but only with active_cancel == true
 			if !active_cancel:
 				return false
@@ -3367,7 +3401,7 @@ func test_sdash_cancel():
 		change_ex_gauge(-BETARESET_EX_COST)
 		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
 		Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool(), "palette":"blue", "sticky":true}, get_path())
+				"v_mirror":Globals.Game.rng_bool(), "palette":"blue", "sticky":true}, player_ID)
 		$ModulatePlayer.play("blue_reset")
 	else:
 		return false	
@@ -3580,7 +3614,8 @@ func query_polygons(): # requested by main game node when doing hit detection
 					polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
 					polygons_queried.kborigin = Animator.query_point("kborigin")
 					polygons_queried.vacpoint = Animator.query_point("vacpoint")
-			polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
+			if Globals.survival_level == null: # no semi-disjoint mechanic in Survival
+				polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
 			
 		if query_status_effect(Globals.status_effect.RESPAWN_GRACE) or query_status_effect(Globals.status_effect.INVULN):
 			pass  # no hurtbox during respawn grace or after a strongblock/parry
@@ -3931,9 +3966,13 @@ func query_move_data(in_move_name = null):
 	
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	var defender = get_node(hit_data.defender_nodepath)
-	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
-	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
+	if defender == null:
+		return # defender is deleted
+	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
+#	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+	
+	target_ID = hit_data.defender_ID # target last attacked opponent
 	
 	match hit_data.block_state: # gain Positive Flow if unblocked, GG is under 100%, atk_level > 1, or semi-disjoint hit
 		Globals.block_state.UNBLOCKED:
@@ -3953,7 +3992,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			hitstop = STUN_HITSTOP_ATTACKER # fixed hitstop for attacking for Break Hits
 			
 	elif hit_data.lethal_hit:
-		hitstop = null # no hitstop for attacker for lethal hit, screenfreeze already enough
+		if Globals.survival_level == null: # no screenfreeze for Survival Mode
+			hitstop = null # no hitstop for attacker for lethal hit, screenfreeze already enough
+		else: # follow hitstop of lethaled mob, which is lower
+			hitstop = hit_data.hitstop
 		
 	else:
 		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
@@ -4093,22 +4135,29 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
 
-	var attacker = get_node(hit_data.attacker_nodepath)
+	var attacker = Globals.Game.get_player_node(hit_data.attacker_ID)
 #	var defender = get_node(hit_data.defender_nodepath)
 	
 	var attacker_or_entity = attacker # cleaner code
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
 
-	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
+	if attacker_or_entity == null:
+		return # attacked by something that is already deleted, return
+		
+	hit_data["attacker"] = attacker # for other functions
+	hit_data["attacker_or_entity"] = attacker_or_entity
+		
+	target_ID = hit_data.attacker_ID # target attacking opponent
 	
 	remove_status_effect(Globals.status_effect.STUN)
+	remove_status_effect(Globals.status_effect.CRUSH)
 	$HitStopTimer.stop() # cancel pre-existing hitstop
 	
 	# get direction to attacker
 	var vec_to_attacker: Vector2 = attacker_or_entity.position - position
 	if vec_to_attacker.x == 0: # rare case of attacker directly on defender
-		vec_to_attacker.x = -attacker.facing
+		vec_to_attacker.x = -attacker_or_entity.facing
 	var dir_to_attacker := int(sign(vec_to_attacker.x)) # for setting facing on defender
 		
 	var attacker_vec := FVector.new()
@@ -4152,10 +4201,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		root_move_name = hit_data.move_name
 	
-	if !"MOB" in attacker: # mobs do not incur repeat penalty
+	if attacker != null and !"MOB" in attacker: # mobs do not incur repeat penalty
 		if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
 			for array in repeat_memory:
-				if array[0] == attacker.player_ID and array[1] == root_move_name:
+				if array[0] == hit_data.attacker_ID and array[1] == root_move_name:
 					if !hit_data.repeat:
 						hit_data.repeat = true # found a repeat
 						if hit_data.move_data.atk_type in [Globals.atk_type.SPECIAL, Globals.atk_type.EX, Globals.atk_type.SUPER] or \
@@ -4168,9 +4217,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data["double_repeat"] = true # found multiple repeats
 						break
 					
-	# add to repeat memory
-	if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-		repeat_memory.append([attacker.player_ID, root_move_name])
+			# add to repeat memory
+			if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
+				repeat_memory.append([attacker.player_ID, root_move_name])
 	
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
@@ -4226,12 +4275,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK:
 
 			hit_data.sweetspotted = false # blocking will not cause sweetspot hits
-			var crossed_up: bool = check_if_crossed_up(attacker, hit_data.angle_to_atker)
 
 			match hit_data.move_data.atk_type:
 				
 				Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
-					if crossed_up:
+					if check_if_crossed_up(attacker, hit_data.angle_to_atker):
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
 						if !attacker_vec.is_longer_than(STRONGBLOCK_RANGE):
@@ -4321,7 +4369,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data.stun = true
 			hit_data.block_state = Globals.block_state.UNBLOCKED
 		
-		take_damage(calculate_damage(hit_data)) # do damage calculation
+		var damage = calculate_damage(hit_data)
+		take_damage(damage) # do damage calculation
+		if damage > 0:
+			if Globals.survival_level == null:
+				if hit_data.double_repeat or adjusted_atk_level == 1:
+					Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+				else:
+					Globals.Game.spawn_damage_number(damage, hit_data.hit_center)
+			else:
+				Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.RED)
 
 			
 	# FIRST REACTION (after damage) ---------------------------------------------------------------------------------
@@ -4373,7 +4430,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		lethal_flag = true
 		
-	if "burst" in hit_data.move_data and !hit_data.double_repeat:
+	if "burst" in hit_data.move_data and !hit_data.double_repeat and attacker != null:
 		if hit_data.move_data.burst in ["BurstCounter"]:
 			attacker.reset_jumps()
 			# Burst Counter grants attacker Positive Flow
@@ -4421,7 +4478,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif hit_data.crush:
 		add_status_effect(Globals.status_effect.CRUSH, 0)
 		$ModulatePlayer.play("stun_flash")
-		play_audio("rock2", {"vol" : -5})
+		play_audio("rock2", {"vol" : -7})
 		
 	elif hit_data.punish_hit and hit_data.sweetspotted:
 		$ModulatePlayer.play("punish_sweet_flash")
@@ -4724,7 +4781,7 @@ func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but
 		return false
 	if hit_data.weak_hit or "autochain" in hit_data or hit_data.move_data.damage <= 0:
 		return false
-	if "MOB" in get_node(hit_data.attacker_nodepath):
+	if "MOB" in hit_data.attacker_or_entity or "MOB_ENTITY" in hit_data.attacker_or_entity:
 		return true
 	if hit_data.knockback_strength < LAUNCH_THRESHOLD:
 		return false
@@ -4740,16 +4797,17 @@ func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but
 	# at 150% damage, any non-strong hits with high enough knockback will lethal, and any attack can Guardbreak on unblock/Base Block
 	
 func can_stun(hit_data):
+	if get_guard_gauge_percent_below() > 1:
+		return false # setting to 0.01 instead of 0 allow multi-hit moves to cause Stun on the last attack
+	if query_status_effect(Globals.status_effect.STUN_RECOVER):
+		return false
 	if hit_data.weak_hit or "autochain" in hit_data or hit_data.move_data.damage <= 0:
 		return false # autochain moves will not guardbreak, only the autochain finisher can
 	if "non_strong_proj" in hit_data:
 		return false
-	if !"MOB" in get_node(hit_data.attacker_nodepath) and hit_data.move_data.atk_type in [Globals.atk_type.LIGHT]:
-		# Lights cannot Stun, but Fierce can
-		return false
-	if get_guard_gauge_percent_below() > 1:
-		return false # setting to 0.01 instead of 0 allow multi-hit moves to cause Stun on the last attack
-	if query_status_effect(Globals.status_effect.STUN_RECOVER):
+	if "MOB" in hit_data.attacker_or_entity or "MOB_ENTITY" in hit_data.attacker_or_entity:
+		return true
+	if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT]:# Lights cannot Stun, but Fierce can
 		return false
 	return true
 		
@@ -4809,7 +4867,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on block
 		match hit_data.block_state:
 			Globals.block_state.STRONG: # on strongblock, attacker lose GG
-				get_node(hit_data.attacker_nodepath).change_guard_gauge(-UniqChar.get_stat("STRONGBLOCK_GG_DRAIN"))
+				if hit_data.attacker != null:
+					hit_data.attacker.change_guard_gauge(-UniqChar.get_stat("STRONGBLOCK_GG_DRAIN"))
 		return 0
 
 	return -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1] # Guard Drain on 1st hit of the combo depends on Attack Level
@@ -4880,13 +4939,7 @@ func lethal_knockback(hit_data, knockback_strength):
 	
 func calculate_knockback_dir(hit_data) -> int:
 	
-	var attacker = get_node(hit_data.attacker_nodepath)
 
-	var attacker_or_entity = attacker # cleaner code
-	if "entity_nodepath" in hit_data:
-		attacker_or_entity = get_node(hit_data.entity_nodepath)
-#
-	
 	var knockback_dir := 0
 	var knockback_type = hit_data.move_data.knockback_type
 	
@@ -4894,7 +4947,7 @@ func calculate_knockback_dir(hit_data) -> int:
 	if "multihit" in hit_data or "autochain" in hit_data:
 		
 		if Globals.atk_attr.DRAG_KB in hit_data.move_data.atk_attr: # can be drag KB till the last hit
-			return attacker_or_entity.velocity.angle()
+			return hit_data.attacker_or_entity.velocity.angle()
 			
 		elif "vacpoint" in hit_data: # or vacuum towards VacPoint
 			var vac_vector := FVector.new()
@@ -4916,7 +4969,7 @@ func calculate_knockback_dir(hit_data) -> int:
 	if KBOrigin:
 		ref_vector.set_from_vec(hit_data.hit_center - KBOrigin)
 	else:
-		ref_vector.set_from_vec(hit_data.hit_center - attacker_or_entity.position)
+		ref_vector.set_from_vec(hit_data.hit_center - hit_data.attacker_or_entity.position)
 		
 	if ref_vector.x <= FMath.S and ref_vector.x >= -FMath.S:
 		ref_vector.x = 0 # reduce rounding errors when calculating hit center
@@ -5177,7 +5230,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	test0()
 	
 	if state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		if get_node(targeted_opponent_path).state != Globals.char_state.SEQUENCE_USER:
+		if get_target().state != Globals.char_state.SEQUENCE_USER:
 			animate("Idle") # auto release if not released proberly, just in case
 		
 	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
@@ -5205,9 +5258,12 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 		
 func landed_a_sequence(hit_data):
 
+	if new_state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
+		return # no sequencing multiple players at once
+
 	if hit_data.double_repeat == true: return # repeat penalty, cannot grab if repeated
 
-	var defender = get_node(hit_data.defender_nodepath)
+	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
 	
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
@@ -5239,13 +5295,18 @@ func take_seq_damage(base_damage: int) -> bool: # return true if lethal
 	var damage: int = int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum damage is 1
 	
 	take_damage(damage)
+	if damage > 0:
+		if Globals.survival_level == null:
+			Globals.Game.spawn_damage_number(damage, position)
+		else:
+			Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.RED)
 	if get_damage_percent() >= 100:
 		return true # return true if lethal
 	return false
 	
 	
 func sequence_hit(hit_key: int): # most auto sequences deal damage during the sequence outside of the launch
-	var seq_user = get_node(targeted_opponent_path)
+	var seq_user = get_target()
 	var seq_hit_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
 	var lethal = take_seq_damage(seq_hit_data.damage)
 	
@@ -5262,7 +5323,7 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 
 
 func sequence_launch():
-	var seq_user = get_node(targeted_opponent_path)
+	var seq_user = get_target()
 	var dir_to_attacker = sign(position.x - seq_user.position.x)
 	if dir_to_attacker == 0: dir_to_attacker = facing
 	
@@ -5698,11 +5759,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			if rng_generate(2) == 0:
 #				burst_facing = -1
 			if anim_name == "BurstCounter":
-				Globals.Game.spawn_entity(get_path(), "BurstCounter", position, {})
+				Globals.Game.spawn_entity(player_ID, "BurstCounter", position, {})
 			elif anim_name == "BurstEscape":
-				Globals.Game.spawn_entity(get_path(), "BurstEscape", position, {})
+				Globals.Game.spawn_entity(player_ID, "BurstEscape", position, {})
 			else:
-				Globals.Game.spawn_entity(get_path(), "BurstAwakening", position, {})
+				Globals.Game.spawn_entity(player_ID, "BurstAwakening", position, {})
 				$ModulatePlayer.play("white_burst")
 				play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"})
 				$EXSealTimer.stop()
@@ -5720,7 +5781,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			anim_friction_mod = 0
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
 			Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool(), "palette":"pink"}, get_path())
+				"v_mirror":Globals.Game.rng_bool(), "palette":"pink"})
 			$ModulatePlayer.play("pink_reset")
 		"AResetCRec":
 			anim_gravity_mod = 0
@@ -5733,7 +5794,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			afterimage_timer = 1 # sync afterimage trail
 		"SDash":
 #			remove_status_effect(Globals.status_effect.POS_FLOW)
-			super_dash = int(max(0, super_dash - 1))
+			if !grounded:
+				super_dash = int(max(0, super_dash - 1))
 			var sdash_angle: int
 			if !grounded or soft_grounded:
 				sdash_angle = Globals.dir_to_angle(dir, v_dir, facing)
@@ -5872,7 +5934,7 @@ func save_state():
 		"active_cancel" : active_cancel,
 		"success_block" : success_block,
 		"success_dodge" : success_dodge,
-		"targeted_opponent_path" : targeted_opponent_path,
+		"target_ID" : target_ID,
 		"burst_token": burst_token,
 		"impulse_used" : impulse_used,
 		"DI_seal" : DI_seal,
@@ -5954,7 +6016,7 @@ func load_state(state_data):
 	active_cancel = state_data.active_cancel
 	success_block = state_data.success_block
 	success_dodge = state_data.success_dodge
-	targeted_opponent_path = state_data.targeted_opponent_path
+	target_ID = state_data.target_ID
 	burst_token = state_data.burst_token
 	impulse_used = state_data.impulse_used
 	DI_seal = state_data.DI_seal

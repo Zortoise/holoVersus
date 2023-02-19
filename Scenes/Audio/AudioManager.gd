@@ -3,7 +3,6 @@ extends AudioStreamPlayer
 var free := false
 
 var audio_ref: String
-var unique_path
 var volume_target := 0
 
 var decay := false
@@ -21,8 +20,9 @@ func init(in_audio_ref: String, aux_data: Dictionary):
 		bus = aux_data.bus
 		
 	if "unique_path" in aux_data: # load unique audio
-		unique_path = aux_data.unique_path
 		stream = get_node(aux_data.unique_path).unique_audio[audio_ref]
+	elif "mob_ref" in aux_data:
+		stream = Globals.Game.LevelControl.mob_data[aux_data.mob_ref].unique_audio[audio_ref]
 	else:
 		stream = LoadedSFX.loaded_audio[audio_ref]
 		
