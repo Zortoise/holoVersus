@@ -229,12 +229,21 @@ func load_state(state_data):
 			else: # for normal animations
 				new_time = time
 				
-			while new_time > 0:
-				new_time -= 1
-				if new_time in animations[current_animation]["timestamps"]:
-					set_up_texture()
-					process_timestamp(new_time)
-					break 
+#			while new_time > 0:
+#				new_time -= 1
+#				if new_time in animations[current_animation]["timestamps"]:
+#					set_up_texture()
+#					process_timestamp(new_time)
+#					break 
+					
+			var result = Globals.timestamp_find(animations[current_animation].timestamps.keys(), new_time, true)
+			if result != null:
+				set_up_texture()
+				process_timestamp(result)
+			else:
+				print("Error: Unable to find timestamp when loading animation " + current_animation + " at time: " + str(new_time))
+			
+			
 		else:
 			set_up_texture()
 			process_timestamp(time)

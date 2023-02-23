@@ -5,9 +5,36 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"Killburst": {
+"duration": 11,
+"hframes": 6,
+"loop": false,
+"spritesheet": "ParticlesSprite",
+"timestamps": {
+0: {
+"frame": 5
+},
+3: {
+"frame": 6
+},
+5: {
+"frame": 7
+},
+7: {
+"frame": 8
+},
+9: {
+"frame": 9
+},
+10: {
+"frame": 10
+}
+},
+"vframes": 2
+},
 "Sparkle": {
 "duration": 15,
-"hframes": 5,
+"hframes": 6,
 "loop": false,
 "spritesheet": "ParticlesSprite",
 "timestamps": {
@@ -27,6 +54,6 @@ frame_data = {
 "frame": 4
 }
 },
-"vframes": 1
+"vframes": 2
 }
 }

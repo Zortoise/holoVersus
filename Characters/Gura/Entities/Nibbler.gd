@@ -26,8 +26,6 @@ const MOVE_DATABASE = {
 		"knockback" : 300 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 2,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
 		"proj_level" : 1,
 		"atk_attr" : [Globals.atk_attr.REPEATABLE],

@@ -23,6 +23,10 @@ func focused(focused_node):
 func triggered(triggered_node):
 	if !$Transition.is_playing():
 		match triggered_node.name:
+			"Survival":
+				Globals.main_menu_focus = triggered_node.name
+				play_audio("ui_accept", {"vol":-8})
+				$Transition.play("transit_to_survival")
 			"Local":
 				Globals.main_menu_focus = triggered_node.name
 				play_audio("ui_accept", {"vol":-8})

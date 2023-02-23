@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://Assets/UI/logo_transparent.png" type="Texture" id=1]
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=2]
@@ -176,6 +176,36 @@ tracks/1/keys = {
 } ]
 }
 
+[sub_resource type="Animation" id=19]
+resource_name = "transit_to_survival"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.15 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ "res://Scenes/Menus/SurvivalMenu.tscn" ],
+"method": "change_scene"
+} ]
+}
+
 [sub_resource type="Animation" id=18]
 resource_name = "transit_to_training"
 length = 0.15
@@ -341,6 +371,7 @@ anims/transit_to_controls = SubResource( 15 )
 anims/transit_to_local = SubResource( 16 )
 anims/transit_to_netplay = SubResource( 17 )
 anims/transit_to_settings = SubResource( 13 )
+anims/transit_to_survival = SubResource( 19 )
 anims/transit_to_training = SubResource( 18 )
 
 [node name="Background" type="Control" parent="."]
@@ -377,7 +408,7 @@ text = "test"
 valign = 1
 
 [node name="Cursor" type="Sprite" parent="."]
-position = Vector2( 1394, 636 )
+position = Vector2( 1362, 636 )
 texture = ExtResource( 4 )
 offset = Vector2( 10, 0 )
 
@@ -392,9 +423,9 @@ anims/RESET = SubResource( 9 )
 anims/default = SubResource( 10 )
 
 [node name="MainMenuList" type="VBoxContainer" parent="."]
-margin_left = 1442.0
+margin_left = 1410.0
 margin_top = 480.0
-margin_right = 1817.0
+margin_right = 1785.0
 margin_bottom = 1112.0
 custom_constants/separation = 7
 
@@ -408,8 +439,7 @@ text = "Tutorial"
 margin_top = 65.0
 margin_bottom = 123.0
 rect_pivot_offset = Vector2( -1698, -24 )
-disabled = true
-text = "Survival"
+text = "Mimic Raid"
 
 [node name="Local" parent="MainMenuList" instance=ExtResource( 3 )]
 margin_top = 130.0

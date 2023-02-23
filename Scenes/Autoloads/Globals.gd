@@ -14,17 +14,18 @@ enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, PARRIED, SUPER}
-enum atk_attr {AERIAL, NO_CHAIN, ANTI_AIR, AUTOCHAIN, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, EASY_BLOCK
+enum atk_attr {AERIAL, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, EASY_BLOCK
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
 		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
 		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
-		STRONG_ENTITY, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR}
+		STRONG_ENTITY, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST}
 # AERIAL = for all aerial Normals/Specials, used for anti-air and preventing aerial anti-guard moves from working on grounded opponents
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
+# FOLLOW_UP = follow-ups for autochain moves, deal no Guard Drain, does not proc Guard Swell
 # NO_REC_CANCEL = cannot jump/dash/fdash/fastfall cancel recovery frames, but still can chain
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
@@ -58,10 +59,10 @@ enum atk_attr {AERIAL, NO_CHAIN, ANTI_AIR, AUTOCHAIN, LEDGE_DROP, NO_TURN, NO_QU
 # STRONG_ENTITY = entity can lethal and guardbreak
 # NO_TERMINAL_VEL_ACTIVE = no terminal velocity on active frames
 # FIXED_KNOCKBACK_STR = fixed knockback, used for Burst Extend
+# NO_SS_ATK_LVL_BOOST = no sweetspot boost in atk level, for Survival Mode
 
-enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, INVULN}
+enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, SURVIVAL_GRACE}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
-# INVULN = Strongblock and parry grant some invuln state
 
 enum block_state {UNBLOCKED, STRONG, WEAK}
 enum trait {CHAIN_DASH, AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK,
@@ -76,6 +77,9 @@ enum entity_trait {GROUNDED, LEDGE_STOP}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 enum moving_platform {MOVING, WARPING}
 enum dmg_num_col {WHITE, RED, GRAY, GREEN}
+enum mob_attr {POWER, HP, TOUGH, FRAGILE, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
+		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE}
+enum peak_flag {GROUNDED, JUMPING, PEAK, PEAK_SPENT} # for mob AI command
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
 		P1_UNIQUE, P1_PAUSE,
@@ -140,7 +144,7 @@ var debug_mode := false
 var debug_mode2 := false
 
 # match settings, changed when starting a game
-var player_count = 2 # WIP
+var player_count = 2
 var stage_ref = "Grid"
 var P1_char_ref = "Gura"
 var P1_palette = 1
@@ -645,3 +649,36 @@ func status_effect_priority(effect):
 #	match atk_attr:
 #		_:
 #			return
+
+# find the timestamp just below or after an array of timestamps
+func timestamp_find(timestamps: Array, target_time: int, find_lower: bool):
+	timestamps.sort()
+	var higher_time = null
+	var lower_time = null
+	for timestamp in timestamps:
+		if timestamp == target_time:
+			return target_time
+		if timestamp > target_time: # overshot
+			higher_time = timestamp
+			break
+		else:
+			lower_time = timestamp
+	match find_lower:
+		true:
+			if lower_time != null:
+				return lower_time
+			else:
+				return null
+		false:
+			if higher_time != null:
+				return higher_time
+			else:
+				return null
+	
+func remove_instances(results: Array, to_remove):
+	if to_remove in results:
+		while to_remove in results:
+			results.erase(to_remove)
+	
+	
+

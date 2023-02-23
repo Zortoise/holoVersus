@@ -41,7 +41,6 @@ const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blo
 const AIRBLOCK_TERMINAL_MOD = 70 # multiply to get terminal velocity during air blocking
 const MAX_WALL_JUMP = 2
 const HITSTUN_TERMINAL_VELOCITY_MOD = 650 # multiply to GRAVITY to get terminal velocity during hitstun
-const HOP_JUMP_MOD = 80 # can hop by using up + jump
 const PERFECT_IMPULSE_MOD = 140 # multiply by UniqChar.get_stat("SPEED") and UniqChar.get_stat("IMPULSE MOD") to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
 #const GRAVITY_UP_STRAFE_MOD = 0.9 # can reduce gravity if holding up during aerial startup/active
@@ -134,6 +133,8 @@ const GDI_DOWN_MAX = 130 # gravity increase downward Gravity DI at 200% Guard Ga
 const VDI_MAX = 30 # change in knockback vector when using Vector DI at 200% Guard Gauge
 #const DI_MIN_MOD = 0 # percent of max DI at 100% Guard Gauge
 
+const SURVIVAL_HITSTOP = 15
+const MOB_GRACE_DURATION = 30 # how long invincibility last after being hit by a mob
 
 # variables used, don't touch these
 var loaded_palette = null
@@ -275,12 +276,13 @@ var test_num := 0
 
 # this is run after adding this node to the tree
 func init(in_player_ID, in_character, start_position, start_facing, in_palette_number):
+	add_to_group("PlayerNodes")
 	
 	set_player_id(in_player_ID)
 	
 	# remove test character node and add the real character node
-	var test_character = get_child(0) # test character node should be directly under this node
-	test_character.free()
+#	var test_character = get_child(0) # test character node should be directly under this node
+#	test_character.free()
 	
 	UniqChar = in_character
 	add_child(UniqChar)
@@ -335,6 +337,13 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 		burst_token = Globals.burst.AVAILABLE
 	else:
 		stock_points_left = Globals.Game.starting_stock_pts
+		
+	if Globals.survival_level != null:
+		burst_token = Globals.burst.CONSUMED
+
+	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
+	
+	yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
 #	Globals.Game.damage_limit_update(self)
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
@@ -342,7 +351,6 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	Globals.Game.stock_points_update(self)
 	Globals.Game.burst_update(self)
 	
-	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
 	
 func set_player_id(in_player_ID): # can use this to change player you are controlling during training mode
 	player_ID = in_player_ID
@@ -522,18 +530,18 @@ func get_target():
 	else: # get targeted mob
 		if target_ID != null and target_ID != player_ID:
 			var target_node = Globals.Game.get_player_node(target_ID)
-			if target_node != null:
+			if target_node != null and target_node.state != Globals.char_state.DEAD:
 				return target_node
 				
 		# not yet target a mob, or targeted mob is dead
 		if Globals.Game.get_node("Players").get_children().size() == Globals.player_count:
 			target_ID = player_ID
 			return self # no mobs, target self
-		else: # find closest mob
-			var targets = [] 
-			for target in Globals.Game.get_node("Players").get_children():
-				if "MOB" in target:
-					targets.append(target)
+		else: # find closest alive mob
+			var targets = get_tree().get_nodes_in_group("MobNodes")
+			for target in targets:
+				if target.state == Globals.char_state.DEAD:
+					targets.erase(target)
 			if targets.size() == 0:
 				return self # no mobs, target self
 			else:
@@ -659,7 +667,9 @@ func simulate(new_input_state):
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
-	$RespawnTimer.simulate()
+	
+	if stock_points_left > 0 and !Globals.Game.game_set:
+		$RespawnTimer.simulate()
 	
 	if !$RespawnTimer.is_running():
 		if !$HitStopTimer.is_running():
@@ -708,6 +718,17 @@ func simulate2(): # only ran if not in hitstop
 		$BurstLockTimer.stop()
 		DI_seal = false
 		lethal_flag = false
+		
+	if Globals.survival_level != null:
+		if current_damage_value > 0 and Globals.Game.LevelControl.wave_standby_timer > 0:
+			if Globals.Game.LevelControl.wave_standby_timer == 1:
+				current_damage_value = 0
+				Globals.Game.damage_update(self)
+			else:
+				take_damage(-20) # heal between waves
+		
+		if !is_hitstunned() and query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
+			remove_status_effect(Globals.status_effect.SURVIVAL_GRACE)
 		
 	if success_dodge and (new_state != Globals.char_state.AIR_RECOVERY or !Animator.query_to_play(["Dodge"])):
 		success_dodge = false # reset success_dodge outside dodge
@@ -774,6 +795,8 @@ func simulate2(): # only ran if not in hitstop
 					Globals.chain_combo.WEAKBLOCKED, Globals.chain_combo.STRONGBLOCKED: # landed an attack on blocking opponent
 						ex_change = FMath.percent(ex_change, BLOCKED_EX_REGEN_MOD)
 					_:
+						if Globals.survival_level != null:
+							continue # no whiff EX Gain for Survival
 						if is_attacking() and new_state != Globals.char_state.SEQUENCE_USER:
 							var move_data = query_move_data()
 							if "reset_type" in move_data and move_data.reset_type == Globals.reset_type.NON_ATK_RESET:
@@ -781,7 +804,10 @@ func simulate2(): # only ran if not in hitstop
 							else:
 								ex_change = FMath.percent(ex_change, ATTACK_EX_REGEN_MOD) # physical attack, raise EX regen
 
-			change_ex_gauge(FMath.round_and_descale(ex_change))
+			if Globals.survival_level != null and ex_change == BASE_EX_REGEN * FMath.S:
+				pass# no passive EX Gain for Survival
+			else:
+				change_ex_gauge(FMath.round_and_descale(ex_change))
 			
 			
 	else: # training mode regen EX Gauge
@@ -917,8 +943,16 @@ func simulate2(): # only ran if not in hitstop
 				if is_hitstunned() and can_DI():# no changing facing
 					
 					# DDI speed and speed limit depends on guard gauge
-					var DDI_speed: int = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
-					var DDI_speed_limit: int = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
+					var DDI_speed: int
+					var DDI_speed_limit: int
+					
+					if Globals.survival_level == null:
+						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
+						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
+					else:
+						DDI_speed = DDI_SIDE_MAX
+						DDI_speed_limit = MAX_DDI_SIDE_SPEED
+					
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
 						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit (can scale speed limit to guard gauge?)
 							velocity.x = int(clamp(velocity.x + dir * DDI_speed, -DDI_speed_limit, DDI_speed_limit))
@@ -1065,52 +1099,51 @@ func simulate2(): # only ran if not in hitstop
 #		if button_dash in input_state.just_pressed and button_aux in input_state.pressed:
 #			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
 			
-	if Globals.survival_level == null:
-		if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
-			if $ShorthopTimer.is_running():
-				pass # no blocking after shorthopping for a while
-			elif current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
-				match state:
-					
-				# ground blocking
-		#			Globals.char_state.GROUND_STARTUP: # can block on 1st frame of ground dash
-		#				if Animator.query_current(["DashTransit"]):
-		#					animate("BlockStartup")
-					Globals.char_state.GROUND_STANDBY:
-						animate("BlockStartup")
-					Globals.char_state.GROUND_C_RECOVERY:
-	#					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
-	#						continue
-						if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
-							if Globals.trait.DASH_BLOCK in query_traits():
-								animate("BlockStartup")
-						elif Animator.query(["HardLanding"]):
-							pass # cannot block on hardlanding
-						else:
-		#					continue
+	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
+		if $ShorthopTimer.is_running():
+			pass # no blocking after shorthopping for a while
+		elif current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
+			match state:
+				
+			# ground blocking
+	#			Globals.char_state.GROUND_STARTUP: # can block on 1st frame of ground dash
+	#				if Animator.query_current(["DashTransit"]):
+	#					animate("BlockStartup")
+				Globals.char_state.GROUND_STANDBY:
+					animate("BlockStartup")
+				Globals.char_state.GROUND_C_RECOVERY:
+#					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
+#						continue
+					if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
+						if Globals.trait.DASH_BLOCK in query_traits():
 							animate("BlockStartup")
-							
-				# air blocking
-		#		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqChar.get_stat("AIR_BLOCK_GG_COST"):
+					elif Animator.query(["HardLanding"]):
+						pass # cannot block on hardlanding
+					else:
+	#					continue
+						animate("BlockStartup")
+						
+			# air blocking
+	#		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqChar.get_stat("AIR_BLOCK_GG_COST"):
 
-		#			Globals.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
-		#				if Animator.query_current(["aDashTransit"]):
-		#					animate("aBlockStartup")
-		#					$VarJumpTimer.stop()
-					Globals.char_state.AIR_STANDBY:
-		#				if current_ex_gauge >= UniqChar.AIR_BLOCK_DRAIN_RATE * 0.5:
-						animate("aBlockStartup")
-						$VarJumpTimer.stop()
-					Globals.char_state.AIR_C_RECOVERY:
-						if Animator.query(["AResetCRec"]): # cannot block out of Alpha Reset
-							continue
-						if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
-							if Globals.trait.AIR_DASH_BLOCK in query_traits(): # only heavyweights can block out of air dashes
-								animate("aBlockStartup")
-								$VarJumpTimer.stop()
-						else:
+	#			Globals.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
+	#				if Animator.query_current(["aDashTransit"]):
+	#					animate("aBlockStartup")
+	#					$VarJumpTimer.stop()
+				Globals.char_state.AIR_STANDBY:
+	#				if current_ex_gauge >= UniqChar.AIR_BLOCK_DRAIN_RATE * 0.5:
+					animate("aBlockStartup")
+					$VarJumpTimer.stop()
+				Globals.char_state.AIR_C_RECOVERY:
+					if Animator.query(["AResetCRec"]): # cannot block out of Alpha Reset
+						continue
+					if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
+						if Globals.trait.AIR_DASH_BLOCK in query_traits(): # only heavyweights can block out of air dashes
 							animate("aBlockStartup")
 							$VarJumpTimer.stop()
+					else:
+						animate("aBlockStartup")
+						$VarJumpTimer.stop()
 			
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
@@ -1159,10 +1192,16 @@ func simulate2(): # only ran if not in hitstop
 		
 		if is_hitstunned():
 			if can_DI(): # up/down DI, depends on Guard Gauge
-				if v_dir == -1: # DIing upward
-					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
-				elif v_dir == 1: # DIing downward
-					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
+				if Globals.survival_level == null:
+					if v_dir == -1: # DIing upward
+						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
+					elif v_dir == 1: # DIing downward
+						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
+				else:
+					if v_dir == -1: # DIing upward
+						gravity_temp = FMath.percent(gravity_temp, GDI_UP_MAX)
+					elif v_dir == 1: # DIing downward
+						gravity_temp = FMath.percent(gravity_temp, GDI_DOWN_MAX)
 					
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
@@ -2432,10 +2471,7 @@ func on_kill():
 				Globals.Game.damage_update(opponent)
 
 		change_stock_points(-1)
-		if stock_points_left > 0 and !Globals.Game.game_set:
-			$RespawnTimer.time = Globals.RespawnTimer_WAIT_TIME
-		else:
-			$RespawnTimer.time = 9999
+		$RespawnTimer.time = Globals.RespawnTimer_WAIT_TIME
 		
 		if UniqChar.has_method("on_kill"): # for unique_data changes on death
 			UniqChar.on_kill()
@@ -2480,7 +2516,8 @@ func respawn():
 			
 	current_damage_value = 0
 	current_guard_gauge = 0
-	change_burst_token(Globals.burst.AVAILABLE) # gain Burst on death
+	if Globals.survival_level == null:
+		change_burst_token(Globals.burst.AVAILABLE) # gain Burst on death
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
@@ -2634,10 +2671,13 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			
 		Globals.char_state.AIR_BLOCK: # air block to ground block
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-			if Animator.query_to_play(["aBlockStartup"]):
+			
+			if Animator.query_to_play(["aBlockStartup"]): # if dropping during block startup
 				change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
-				remove_status_effect(Globals.status_effect.POS_FLOW)
+#				if Globals.survival_level == null:
+#					remove_status_effect(Globals.status_effect.POS_FLOW)
+					
 			animate("BlockLanding")
 
 			
@@ -2685,7 +2725,8 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			if Animator.query_to_play(["BlockStartup"]):
 				change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
-				remove_status_effect(Globals.status_effect.POS_FLOW)
+#				if Globals.survival_level == null:
+#					remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("aBlock")
 
 
@@ -2789,7 +2830,9 @@ func get_feet_pos(): # return global position of the point the character is stan
 #	else: return null
 	
 func can_DI(): # already checked for HitStunTimer
-	if current_guard_gauge <= 0 or get_damage_percent() >= 100:
+	if Globals.survival_level == null and current_guard_gauge <= 0:
+		return false
+	if get_damage_percent() >= 100:
 		return false
 	if DI_seal and $BurstLockTimer.is_running():
 		return false
@@ -2797,7 +2840,9 @@ func can_DI(): # already checked for HitStunTimer
 
 func process_VDI():
 	# to be able to DI, must be entering knockback animation and has a directional key pressed
-	if (dir != 0 or v_dir != 0) and !DI_seal and current_guard_gauge > 0 and get_damage_percent() < 100 and \
+	if Globals.survival_level == null and current_guard_gauge <= 0: return
+	
+	if (dir != 0 or v_dir != 0) and !DI_seal and get_damage_percent() < 100 and \
 		((state == Globals.char_state.LAUNCHED_HITSTUN and Animator.query_to_play(["LaunchTransit"]) and \
 		!Animator.query_current(["LaunchTransit"])) or \
 		(state == Globals.char_state.GROUND_FLINCH_HITSTUN and Animator.query_to_play(["FlinchA", "FlinchB"]) and \
@@ -2806,13 +2851,19 @@ func process_VDI():
 		!Animator.query_current(["aFlinchA", "aFlinchB"]))):
 		var velocity_length: int = velocity.length()
 		var VDI_amount_max: int = FMath.percent(velocity_length, VDI_MAX)
-		var VDI_amount: int = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
+		var VDI_amount: int
+		
+		if Globals.survival_level == null:
+			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
+		else:
+			VDI_amount = VDI_amount_max
 		
 		if dir != 0 and v_dir != 0: # diagonal, multiply by 0.71
 			VDI_amount = FMath.percent(VDI_amount, 71)
 			
 		velocity.x += dir * VDI_amount
 		velocity.y += v_dir * VDI_amount
+		
 
 # SPECIAL EFFECTS --------------------------------------------------------------------------------------------------
 
@@ -3533,8 +3584,8 @@ func continue_visual_effect_of_status(effect): # run every frame, will not add v
 			particle("Sparkle", "Particles", "red", 4, 1, 25)
 			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
 			sprite_shake()
-		Globals.status_effect.RESPAWN_GRACE:
-			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["respawn_grace"]):
+		Globals.status_effect.RESPAWN_GRACE, Globals.status_effect.SURVIVAL_GRACE:
+			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["respawn_grace", "punish_sweet_flash"]):
 				$ModulatePlayer.play("respawn_grace")
 
 func remove_status_effect(effect): # comb through the dictionary to remove a specific status effect
@@ -3563,7 +3614,7 @@ func clear_visual_effect_of_status(effect): # must run this when removing status
 #		Globals.status_effect.REPEAT:
 #			if monochrome:
 #				reset_modulate()
-		Globals.status_effect.RESPAWN_GRACE:
+		Globals.status_effect.RESPAWN_GRACE, Globals.status_effect.SURVIVAL_GRACE:
 			if $ModulatePlayer.query_current(["respawn_grace"]):
 				reset_modulate()
 		Globals.status_effect.POS_FLOW:
@@ -3617,8 +3668,8 @@ func query_polygons(): # requested by main game node when doing hit detection
 			if Globals.survival_level == null: # no semi-disjoint mechanic in Survival
 				polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
 			
-		if query_status_effect(Globals.status_effect.RESPAWN_GRACE) or query_status_effect(Globals.status_effect.INVULN):
-			pass  # no hurtbox during respawn grace or after a strongblock/parry
+		if query_status_effect(Globals.status_effect.RESPAWN_GRACE) or query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
+			pass  # no hurtbox during respawn grace
 		else:
 			polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
 
@@ -3839,7 +3890,8 @@ func get_guard_gauge_percent_above() -> int:
 		
 func take_damage(damage: int): # called by attacker
 	current_damage_value += damage
-	current_damage_value = int(clamp(current_damage_value, 0, 9999)) # cannot go under zero (take_damage is also used for healing)
+	current_damage_value = int(clamp(current_damage_value, 0, UniqChar.get_stat("DAMAGE_VALUE_LIMIT") + 9999))
+	# cannot go under zero (take_damage is also used for healing)
 	Globals.Game.damage_update(self, damage)
 	
 func change_guard_gauge(guard_gauge_change: int): # called by attacker
@@ -3972,14 +4024,12 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
 #	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
 	
-	target_ID = hit_data.defender_ID # target last attacked opponent
-	
 	match hit_data.block_state: # gain Positive Flow if unblocked, GG is under 100%, atk_level > 1, or semi-disjoint hit
 		Globals.block_state.UNBLOCKED:
 			if current_guard_gauge < 0 and ((!hit_data.weak_hit and hit_data.adjusted_atk_level > 1) or hit_data.semi_disjoint):
 				add_status_effect(Globals.status_effect.POS_FLOW, null)
-	
-	
+
+
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 	
@@ -4132,6 +4182,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 func being_hit(hit_data): # called by main game node when taking a hit
 	
+	if Globals.survival_level != null and query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
+		hit_data["cancelled"] = true
+		return # cannot be attacked twice during survival mode
+	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
 
@@ -4141,14 +4195,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var attacker_or_entity = attacker # cleaner code
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
-
-	if attacker_or_entity == null:
-		return # attacked by something that is already deleted, return
 		
+	if attacker_or_entity == null:
+		hit_data["cancelled"] = true
+		return # attacked by something that is already deleted, return
+
 	hit_data["attacker"] = attacker # for other functions
 	hit_data["attacker_or_entity"] = attacker_or_entity
 		
-	target_ID = hit_data.attacker_ID # target attacking opponent
+	if attacker != null:	
+		attacker.target_ID = player_ID # attacker target defender
+	if Globals.survival_level == null:
+		target_ID = hit_data.attacker_ID # if not survival mode, target attacking opponent
 	
 	remove_status_effect(Globals.status_effect.STUN)
 	remove_status_effect(Globals.status_effect.CRUSH)
@@ -4174,8 +4232,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data):
 		hit_data["multihit"] = true
+		if attacker_or_entity.is_hitcount_first_hit(player_ID):
+			hit_data["first_hit"] = true
 	if Globals.atk_attr.AUTOCHAIN in hit_data.move_data.atk_attr:
 		hit_data["autochain"] = true
+	if Globals.atk_attr.FOLLOW_UP in hit_data.move_data.atk_attr:
+		hit_data["follow_up"] = true
 		
 	if "entity_nodepath" in hit_data and "proj_level" in hit_data.move_data and hit_data.move_data.proj_level != 3:
 		hit_data["non_strong_proj"] = true
@@ -4183,8 +4245,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] or "non_strong_proj" in hit_data:
 		hit_data["normalarmorable"] = true
 		
-	if position.x < Globals.Game.left_corner or position.x > Globals.Game.right_corner:
-		hit_data["cornered"] = true
+	match dir_to_attacker:
+		1:
+			if position.x < Globals.Game.left_corner:
+				hit_data["cornered"] = true
+		-1:
+			if position.x > Globals.Game.right_corner:
+				hit_data["cornered"] = true
 		
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
@@ -4192,16 +4259,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
-	var double_repeat := false
-	var root_move_name # for move variations
-	if !"entity_nodepath" in hit_data:
-		root_move_name = attacker.UniqChar.get_root(hit_data.move_name)
-	elif "root" in hit_data.move_data: # is entity, most has a root in move_data
-		root_move_name = hit_data.move_data.root
-	else:
-		root_move_name = hit_data.move_name
-	
-	if attacker != null and !"MOB" in attacker: # mobs do not incur repeat penalty
+	if Globals.survival_level == null:
+		var double_repeat := false
+		var root_move_name # for move variations
+		if !"entity_nodepath" in hit_data:
+			root_move_name = attacker.UniqChar.get_root(hit_data.move_name)
+		elif "root" in hit_data.move_data: # is entity, most has a root in move_data
+			root_move_name = hit_data.move_data.root
+		else:
+			root_move_name = hit_data.move_name
+		
 		if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
 			for array in repeat_memory:
 				if array[0] == hit_data.attacker_ID and array[1] == root_move_name:
@@ -4220,7 +4287,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			# add to repeat memory
 			if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
 				repeat_memory.append([attacker.player_ID, root_move_name])
-	
+		
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
 	
@@ -4279,10 +4346,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			match hit_data.move_data.atk_type:
 				
 				Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
-					if check_if_crossed_up(attacker, hit_data.angle_to_atker):
+					if attacker != null and check_if_crossed_up(attacker, hit_data.angle_to_atker):
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
 						if !attacker_vec.is_longer_than(STRONGBLOCK_RANGE):
+#							if Globals.survival_level != null:
+#								hit_data.block_state = Globals.block_state.WEAK # no proximity parry for Survival Mode
 							if Globals.atk_attr.ANTI_AIR in hit_data.move_data.atk_attr and !grounded:
 								hit_data.block_state = Globals.block_state.WEAK # anti-air normals force weakblock on airblockers
 							else:
@@ -4301,10 +4370,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data.block_state = Globals.block_state.UNBLOCKED
 					
 				Globals.atk_type.ENTITY: # projectiles always cause Weakblock, but some projectiles are unblockable
-					if !Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
-						hit_data.block_state = Globals.block_state.WEAK
-					else:
+#					if check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker):
+#						hit_data.block_state = Globals.block_state.UNBLOCKED
+					if Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
 						hit_data.block_state = Globals.block_state.UNBLOCKED
+					else:
+						if Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
+							hit_data.block_state = Globals.block_state.STRONG
+						else:
+							hit_data.block_state = Globals.block_state.WEAK
 				
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
@@ -4341,7 +4415,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 	if hit_data.punish_hit and Globals.atk_attr.CRUSH in hit_data.move_data.atk_attr:
 		hit_data.crush = true
+			
+	# GUARD SWELL ---------------------------------------------------------------------------------
 						
+	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:
+		pass # multi-hit moves not the first hit and autochain follow-ups do not proc Guard Swell
+	else:
+		if GG_swell_flag == false: # start GG swell if not started yet and hit with most attacks
+			GG_swell_flag = true
+			first_hit_flag = true
+		else: # hit after GG swell started, turn off first_hit_flag to gaining GG
+			first_hit_flag = false
 	
 	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
 	
@@ -4349,7 +4433,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if "entity_nodepath" in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit0"):
 			attacker_or_entity.UniqEntity.landed_a_hit0(hit_data) # reaction, can change hit_data from there
-	elif attacker.UniqChar.has_method("landed_a_hit0"):
+	elif attacker != null and attacker.UniqChar.has_method("landed_a_hit0"):
 		attacker.UniqChar.landed_a_hit0(hit_data) # reaction, can change hit_data from there
 	
 	if UniqChar.has_method("being_hit0"):	
@@ -4373,7 +4457,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		take_damage(damage) # do damage calculation
 		if damage > 0:
 			if Globals.survival_level == null:
-				if hit_data.double_repeat or adjusted_atk_level == 1:
+				if hit_data.double_repeat or adjusted_atk_level == 1 or hit_data.block_state != Globals.block_state.UNBLOCKED:
 					Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
 				else:
 					Globals.Game.spawn_damage_number(damage, hit_data.hit_center)
@@ -4387,7 +4471,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if "entity_nodepath" in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit"):
 			attacker_or_entity.UniqEntity.landed_a_hit(hit_data) # reaction, can change hit_data from there
-	elif attacker.UniqChar.has_method("landed_a_hit"):
+	elif attacker != null and attacker.UniqChar.has_method("landed_a_hit"):
 		attacker.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	
 	if UniqChar.has_method("being_hit"):	
@@ -4400,16 +4484,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker_or_entity.landed_a_sequence(hit_data)
 		return
 		
-		
-	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
-		if !"multihit" in hit_data and !"autochain" in hit_data:
-			GG_swell_flag = true
-			first_hit_flag = true
-	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
-		first_hit_flag = false
-		
-		
-	if !"entity_nodepath" in hit_data:
+	if !"entity_nodepath" in hit_data and attacker != null:
 		Globals.Game.get_node("Players").move_child(attacker, 0) # move attacker to bottom layer to see defender easier
 	
 
@@ -4418,7 +4493,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data["knockback_dir"] = knockback_dir
 	var knockback_strength: int = calculate_knockback_strength(hit_data)
 	hit_data["knockback_strength"] = knockback_strength
-	
+
 	# lethal hit, must have enough launch power to trigger it
 	if can_lethal(hit_data): # check for lethal
 		if hit_data.block_state in [Globals.block_state.UNBLOCKED]:
@@ -4453,7 +4528,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
-		
+	# gain POS_FLOW on strongblock
+	if hit_data.block_state == Globals.block_state.STRONG and current_guard_gauge < 0:
+		add_status_effect(Globals.status_effect.POS_FLOW, null)
+
 	if hit_data.double_repeat:
 		$ModulatePlayer.play("repeat")
 #		add_status_effect(Globals.status_effect.REPEAT, 10)
@@ -4474,6 +4552,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Globals.Game.set_screenshake()
 		$ModulatePlayer.play("lethal_flash")
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+		if Globals.survival_level != null:
+			add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
 		
 	elif hit_data.crush:
 		add_status_effect(Globals.status_effect.CRUSH, 0)
@@ -4505,10 +4585,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Globals.block_state.STRONG:
 				$ModulatePlayer.play("strongblock_flash")
 				play_audio("bling2", {"vol" : -8, "bus" : "PitchDown"})
-#			Globals.block_state.PARRY:
-#				$ModulatePlayer.play("strongblock_flash")
-#				play_audio("bling6", {"vol" : -6})
-#				play_audio("bling2", {"vol" : -3, "bus" : "PitchDown"})
+
+
+	elif Globals.survival_level != null and !hit_data.weak_hit and !"autochain" in hit_data:
+		add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
+		$ModulatePlayer.play("punish_sweet_flash")
+		play_audio("impact29", {"vol" : -10, "bus" : "LowPass"})
 				
 	if !hit_data.stun and !hit_data.lethal_hit and Globals.atk_attr.SCREEN_SHAKE in hit_data.move_data.atk_attr:
 		Globals.Game.set_screenshake()
@@ -4516,17 +4598,24 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 	# -------------------------------------------------------------------------------------------
 	
-	if adjusted_atk_level > 1 and !hit_data.block_state in [Globals.block_state.STRONG]:
-		 # loses Positive Flow for atk_level > 1 if not strongblocked
-		status_effect_to_remove.append(Globals.status_effect.POS_FLOW)
-		# remove it at end of frame, this way both players loses positive flow during clashes
+	if adjusted_atk_level > 1:
+#		if Globals.survival_level == null:
+#			if !hit_data.block_state in [Globals.block_state.STRONG]:
+#				 # loses Positive Flow for atk_level > 1 if not strongblocked
+#				status_effect_to_remove.append(Globals.status_effect.POS_FLOW)
+#				# remove it at end of frame, this way both players loses positive flow during clashes
+#
+#		else: # for Survival Mode, do not lose POS_FLOW when blocking attacks
+		if hit_data.block_state == Globals.block_state.UNBLOCKED:
+			status_effect_to_remove.append(Globals.status_effect.POS_FLOW)
 		
 	$VarJumpTimer.stop()
 	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
-		if adjusted_atk_level <= 1 and $HitStunTimer.is_running(): # for atk level 1 hits on hitstunned opponent, add their hitstun to existing hitstun
+		if !hit_data.double_repeat and adjusted_atk_level <= 1 and $HitStunTimer.is_running():
+			# for atk level 1 hits on hitstunned opponent, add their hitstun to existing hitstun
 			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			$HitStunTimer.time = calculate_hitstun(hit_data)
@@ -4553,7 +4642,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		else:
 			$NoCollideTimer.time = 1
 	
-	if !double_repeat: # lock Burst Escape for a few frames afterwards, some moves like Autochain moves lock for more
+	if !hit_data.double_repeat: # lock Burst Escape for a few frames afterwards, some moves like Autochain moves lock for more
 		if "burstlock" in hit_data.move_data:
 			$BurstLockTimer.time = hit_data.move_data.burstlock
 		elif "autochain" in hit_data: # autochain moves will lock Burst/DI for 10 frames minimum
@@ -4577,7 +4666,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if "entity_nodepath" in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit2"):
 			attacker_or_entity.UniqEntity.landed_a_hit2(hit_data) # reaction, can change hit_data from there
-	elif attacker.UniqChar.has_method("landed_a_hit2"):
+	elif attacker != null and attacker.UniqChar.has_method("landed_a_hit2"):
 		attacker.UniqChar.landed_a_hit2(hit_data) # reaction, can change hit_data from there
 	
 	if UniqChar.has_method("being_hit2"):	
@@ -4620,7 +4709,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
+		if Globals.survival_level == null and (knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1):
 
 #			if !"entity_nodepath" in hit_data:
 #				face(dir_to_attacker) # turn towards attacker
@@ -4856,7 +4945,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if hit_data.move_data.atk_type in [Globals.atk_type.SUPER]: # no Guard Drain for Supers
 		return 0
 	
-	if "multihit" in hit_data or "autochain" in hit_data:  # for multi-hit/autochain moves, only last hit affect GG
+	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:  
+	# for multi-hit/autochain moves, only first hit affect GG
 		return 0
 	
 	if is_hitstunned() and GG_swell_flag and !first_hit_flag: # if Guard Swell is active, no Guard Drain
@@ -4865,10 +4955,6 @@ func calculate_guard_gauge_change(hit_data) -> int:
 #	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
 	
 	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on block
-		match hit_data.block_state:
-			Globals.block_state.STRONG: # on strongblock, attacker lose GG
-				if hit_data.attacker != null:
-					hit_data.attacker.change_guard_gauge(-UniqChar.get_stat("STRONGBLOCK_GG_DRAIN"))
 		return 0
 
 	return -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1] # Guard Drain on 1st hit of the combo depends on Attack Level
@@ -4916,6 +5002,10 @@ func calculate_knockback_strength(hit_data) -> int:
 				
 		if get_guard_gauge_percent_above() == 100: # all attacks will Launch at 100% GG
 			knockback_strength = int(max(knockback_strength, LAUNCH_THRESHOLD))
+	
+	if Globals.survival_level != null and !hit_data.weak_hit: # all attacks will Launch during Survival Mode
+		knockback_strength = int(max(knockback_strength, LAUNCH_THRESHOLD))
+		
 	
 	return knockback_strength
 	
@@ -5057,6 +5147,8 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 	else:
 		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 		
+	if Globals.survival_level != null and !hit_data.weak_hit and !"autochain" in hit_data:
+		return int(min(scaled_hitstun, MOB_GRACE_DURATION)) # limited hitstun for mob attack
 		
 	if hit_data.lethal_hit:
 		# increased hitstun on a lethal hit and no reduction from high Guard Gauge
@@ -5096,6 +5188,7 @@ func check_if_crossed_up(attacker, angle_to_atker: int):
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
 		
+		
 	if "superarmored" in hit_data:
 		return STRONGBLOCK_HITSTOP
 		
@@ -5115,6 +5208,9 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 	# some moves have predetermined hitstop
 	if "fixed_hitstop" in hit_data.move_data:
 		return hit_data.move_data.fixed_hitstop
+		
+	if Globals.survival_level != null and !hit_data.weak_hit and !"autochain" in hit_data:
+		return SURVIVAL_HITSTOP
 	
 # warning-ignore:integer_division
 	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 100) # scaled, +1 frame of hitstop for each 100 scaled knockback
@@ -5132,6 +5228,7 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 	hitstop_temp = FMath.round_and_descale(hitstop_temp) # descale it
 	hitstop_temp = int(clamp(hitstop_temp, MIN_HITSTOP, MAX_HITSTOP)) # max hitstop is 13, min hitstop is 5
 			
+			
 #	print(hitstop_temp)
 	return hitstop_temp
 	
@@ -5148,7 +5245,10 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
 	var hitspark_level: int
 	
-	if hit_data.adjusted_atk_level <= 1:
+	if Globals.survival_level != null and !hit_data.weak_hit and !"autochain" in hit_data:
+		hitspark_level = 5 # Survival Mode
+	
+	elif hit_data.adjusted_atk_level <= 1:
 		hitspark_level = 0
 	elif "burst" in hit_data.move_data:
 		hitspark_level = 5
@@ -5169,8 +5269,24 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		if hit_data.sweetspotted or hit_data.punish_hit: # if sweetspotted/punish hit, hitspark level increased by 1
 			hitspark_level = int(clamp(hitspark_level + 1, 1, 5)) # max is 5
 		
-	var hitspark = ""
 		
+	if !"hitspark_type" in hit_data.move_data:
+		if hit_data.attacker_or_entity.has_method("get_default_hitspark_type"):
+			hit_data.move_data["hitspark_type"] = hit_data.attacker_or_entity.get_default_hitspark_type()
+		elif hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_type"):
+			hit_data.move_data["hitspark_type"] = hit_data.attacker.get_default_hitspark_type()
+		else:
+			hit_data.move_data["hitspark_type"] = Globals.hitspark_type.HIT
+			
+	if !"hitspark_palette" in hit_data.move_data:
+		if hit_data.attacker_or_entity.has_method("get_default_hitspark_palette"):
+			hit_data.move_data["hitspark_palette"] = hit_data.attacker_or_entity.get_default_hitspark_palette()
+		elif hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_palette"):
+			hit_data.move_data["hitspark_palette"] = hit_data.attacker.get_default_hitspark_palette()
+		else:
+			hit_data.move_data["hitspark_palette"] = "red"
+		
+	var hitspark = ""
 	match hit_data.move_data.hitspark_type:
 		Globals.hitspark_type.HIT:
 			match hitspark_level:
@@ -5204,6 +5320,12 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 			aux_data["palette"] = hit_data.move_data["hitspark_palette"]
 		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, aux_data)
 		
+func get_default_hitspark_type():
+	return UniqChar.get_stat("DEFAULT_HITSPARK_TYPE")
+func get_default_hitspark_palette():
+	if palette_number in UniqChar.PALETTE_TO_HITSPARK_PALETTE:
+		return UniqChar.PALETTE_TO_HITSPARK_PALETTE[palette_number]
+	return UniqChar.get_stat("DEFAULT_HITSPARK_PALETTE")
 	
 func generate_blockspark(hit_data):
 	
@@ -5259,7 +5381,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 func landed_a_sequence(hit_data):
 
 	if new_state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
-		return # no sequencing multiple players at once
+		return # no sequencing multiple players at once, just in case
 
 	if hit_data.double_repeat == true: return # repeat penalty, cannot grab if repeated
 
@@ -5354,11 +5476,11 @@ func sequence_launch():
 			hitstop = seq_data.hitstop
 			seq_user.hitstop = hitstop
 		
-	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
-		GG_swell_flag = true
-		first_hit_flag = true
-	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
-		first_hit_flag = false
+#	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
+#		GG_swell_flag = true
+#		first_hit_flag = true
+#	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
+#		first_hit_flag = false
 	
 	$BurstLockTimer.time = BurstLockTimer_TIME
 	DI_seal = false
@@ -5517,7 +5639,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			success_block = false
 			change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
-			remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
+#			if Globals.survival_level == null:
+#				remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
 			animate("Block")
 		"BlockRec":
 			animate("Idle")
@@ -5527,7 +5650,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			success_block = false
 			change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
-			remove_status_effect(Globals.status_effect.POS_FLOW)
+#			if Globals.survival_level == null:
+#				remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("aBlock")
 		"aBlockRec":
 			animate("FallTransit")
@@ -5634,7 +5758,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			if button_jump in input_state.pressed and (button_down in input_state.pressed or button_block in input_state.pressed):
 				# block and jump to shorthop
 				$ShorthopTimer.time = ShorthopTimer_TIME
-				velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), HOP_JUMP_MOD)
+				velocity.y = -FMath.percent(UniqChar.get_stat("JUMP_SPEED"), UniqChar.get_stat("HOP_JUMP_MOD"))
 				if dir != 0: # when hopping can press left/right for a long hop
 					var boost: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("LONG_HOP_JUMP_MOD"))
 					velocity.x += boost
@@ -5762,6 +5886,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 				Globals.Game.spawn_entity(player_ID, "BurstCounter", position, {})
 			elif anim_name == "BurstEscape":
 				Globals.Game.spawn_entity(player_ID, "BurstEscape", position, {})
+				$HitStunTimer.stop()
 			else:
 				Globals.Game.spawn_entity(player_ID, "BurstAwakening", position, {})
 				$ModulatePlayer.play("white_burst")

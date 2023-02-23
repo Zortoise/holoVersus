@@ -471,7 +471,7 @@ tracks/3/keys = {
 "times": PoolRealArray( 0, 0.8, 1.6 )
 }
 
-[node name="VictoryScreen" type="Node2D"]
+[node name="VictoryScreenReplay" type="Node2D"]
 script = ExtResource( 3 )
 
 [node name="AltInputs" parent="." instance=ExtResource( 8 )]

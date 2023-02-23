@@ -1,0 +1,70 @@
+extends Node
+
+const STAGE = "Grid"
+const STARTING_STOCKS = 3
+
+const MOB_LIST = [
+	["GuraM", "Gura"],
+]
+
+var RESOURCE_ADD = {
+	"GuraM" : {
+		"palettes" : {
+			"mimic" : ResourceLoader.load("res://Characters/Gura/Palettes/4.png")
+		},
+		"entity_data" : {
+			"TridentProjM" : {
+				"scene" : load("res://Mobs/GuraM/Entities/TridentProjM.tscn"),
+				"frame_data" : ResourceLoader.load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+				"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
+			}
+		}
+	}	
+}
+
+
+#enum mob_attr {POWER, HP, TOUGH, FRAGILE, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
+#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE}
+# extra ones: "weak_zone"
+
+# CHAIN: X, TOUGH: 0-3, SPEED: 0-6 (0 and 1 are slow), HP: 0-5 (0 and 1 are lower, 0 is 1 hp)
+# POWER: 0-5 (0 and 1 are lower), PROJ_SPEED: 0-3 (0 and 1 are slow)
+
+const WAVES = {
+	1 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				48 : [
+
+					{"mob" : "GuraM", "level" : 3, "variant" : "zone", "offset" : Vector2(0, 0),
+					"attr" : {
+						Globals.mob_attr.HP : 5,
+#						Globals.mob_attr.CHAIN : 10,
+#						Globals.mob_attr.SPEED : 2,
+#						Globals.mob_attr.PROJ_SPEED : 3,
+#						Globals.mob_attr.BLACK_TRAIL : true,
+#						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+						} },
+
+				],
+			}
+	},
+#	2 : { # wave ID
+#		"timestamps" :
+#			{ # wave time
+#				48 : [
+#					{"mob" : "GuraM", "level" : 1, "variant" : "base", "offset" : Vector2(0, 0),
+#					"attr" : {Globals.mob_attr.FRAGILE : true} },
+#				],
+#			}
+#	},
+}
+
+#					"attr" : {
+#						Globals.mob_attr.HP : 0,
+#						Globals.mob_attr.CHAIN : 10,
+#						Globals.mob_attr.SPEED : 0,
+#						Globals.mob_attr.TOUGH : 3,
+#						Globals.mob_attr.POWER : 5,
+#						Globals.mob_attr.PROJ_SPEED : 0,
+#						} },

@@ -22,6 +22,9 @@ func _ready():
 				node.connect("focused", self, "focused")
 			if node.is_in_group("has_trigger"):
 				node.connect("triggered", self, "triggered")
+				
+		if Globals.survival_level != null:
+			$CanvasLayer/Control/PauseList/ReturnToCharSelect.text = "Return to Raid Menu"
 	
 	else:
 		$CanvasLayer/TrainingControl/TrainingList.show()
@@ -121,7 +124,9 @@ func triggered(triggered_node):
 		"ReturnToCharSelect":
 			play_audio("ui_accept", {"vol":-8})
 			close(false)
-			if !Globals.training_mode:
+			if Globals.survival_level != null:
+				get_node("../Transition").play("transit_to_survival")
+			elif !Globals.training_mode:
 				get_node("../Transition").play("transit_to_char_select")
 			else:
 				get_node("../Transition").play("transit_to_char_select_training")

@@ -1,9 +1,8 @@
 extends Node2D
 
-const CHAR_GRID = {
-	5 : "Gura",
-	6 : "Random"
+var char_grid = {
 }
+var grid_dimensions = [0, 0]
 
 const STAGE_LIST_SIZE = 7
 onready var loaded_stagelabel = load("res://Scenes/Menus/StageLabel.tscn")
@@ -129,26 +128,26 @@ func load_last_picked(last_picked):
 		P2_changed_character()
 
 	if last_picked.P1_palette != null:
-		if P1_picker_pos in CHAR_GRID and "palettes" in character_data[CHAR_GRID[P1_picker_pos]]:
-			P1_palette_picked = wrapi(last_picked.P1_palette, 1, character_data[CHAR_GRID[P1_picker_pos]]["palettes"].size() + 2) # wrap around pointer
+		if P1_picker_pos in char_grid and "palettes" in character_data[char_grid[P1_picker_pos]]:
+			P1_palette_picked = wrapi(last_picked.P1_palette, 1, character_data[char_grid[P1_picker_pos]]["palettes"].size() + 2) # wrap around pointer
 			if P1_palette_picked == 1:
 				$P1_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
 			else:
 				$P1_Sprite.get_child(0).material = ShaderMaterial.new()
 				$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
 				$P1_Sprite.get_child(0).material.set_shader_param("swap", \
-						character_data[CHAR_GRID[P1_picker_pos]]["palettes"][str(P1_palette_picked)])
+						character_data[char_grid[P1_picker_pos]]["palettes"][str(P1_palette_picked)])
 		
 	if last_picked.P2_palette != null:
-		if P2_picker_pos in CHAR_GRID and "palettes" in  character_data[CHAR_GRID[P2_picker_pos]]:
-			P2_palette_picked = wrapi(last_picked.P2_palette, 1, character_data[CHAR_GRID[P2_picker_pos]]["palettes"].size() + 2) # wrap around pointer
+		if P2_picker_pos in char_grid and "palettes" in  character_data[char_grid[P2_picker_pos]]:
+			P2_palette_picked = wrapi(last_picked.P2_palette, 1, character_data[char_grid[P2_picker_pos]]["palettes"].size() + 2) # wrap around pointer
 			if P2_palette_picked == 1:
 				$P2_Sprite.get_child(0).material = null
 			else:
 				$P2_Sprite.get_child(0).material = ShaderMaterial.new()
 				$P2_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
 				$P2_Sprite.get_child(0).material.set_shader_param("swap", \
-						character_data[CHAR_GRID[P2_picker_pos]]["palettes"][str(P2_palette_picked)])
+						character_data[char_grid[P2_picker_pos]]["palettes"][str(P2_palette_picked)])
 
 	if last_picked.P1_stage != null:
 		if last_picked.P1_stage in stage_array:
@@ -157,8 +156,43 @@ func load_last_picked(last_picked):
 			
 	
 func populate_char_grid():
-	for character_number in CHAR_GRID.keys():
-		$Grid.get_child(character_number).texture = character_data[CHAR_GRID[character_number]]["portrait"]
+	
+	var total = $Grid.get_child_count()
+	grid_dimensions[0] = $Grid.columns
+	grid_dimensions[1] = int(ceil(total/grid_dimensions[0]))
+	
+	var center_indexes = [] # 5, 17, 29
+	var left_indexes = []
+	var right_indexes = []
+	var center_point = int((grid_dimensions[0] - 1) / 2.0)
+	
+	for y in grid_dimensions[1]:
+		center_indexes.append(center_point + (y * grid_dimensions[0]))
+		left_indexes.append(y * grid_dimensions[0])
+		right_indexes.append(left_indexes[y] + grid_dimensions[0] - 1)
+		
+	var index_array = []
+	for level in center_indexes.size():
+		var current_coord = center_indexes[level]
+		var changer := 1
+		while current_coord >= left_indexes[level] and current_coord <= right_indexes[level]:
+			index_array.append(current_coord)
+			current_coord += changer
+			changer = -changer
+			if changer < 0: changer -= 1
+			else: changer += 1
+			
+	var char_names = []
+	for character in character_data.keys(): # get Random to the back
+		if character != "Random":
+			char_names.append(character)
+	char_names.append("Random")
+
+	for char_pos in char_names.size():
+		char_grid[index_array[char_pos]] = char_names[char_pos]
+	
+	for character_number in char_grid.keys():
+		$Grid.get_child(character_number).texture = character_data[char_grid[character_number]]["portrait"]
 		$Grid.get_child(character_number).modulate = Color(1.0, 1.0, 1.0, 1.0)
 	
 	
@@ -313,8 +347,8 @@ func P1_changed_character():
 		play_audio("ui_move2", {"vol":-12})
 	P1_palette_picked = 1 # reset picked palette
 	$P1_Picker.rect_position = $Grid.get_child(P1_picker_pos).rect_global_position # move picker
-	if P1_picker_pos in CHAR_GRID: # update art/select sprite/name
-		var char_name: String = CHAR_GRID[P1_picker_pos]
+	if P1_picker_pos in char_grid: # update art/select sprite/name
+		var char_name: String = char_grid[P1_picker_pos]
 		$P1_FullArt.texture = character_data[char_name]["art"]
 		if $P1_Sprite.get_child_count() > 0:
 			$P1_Sprite.get_child(0).free()
@@ -333,8 +367,8 @@ func P2_changed_character():
 		play_audio("ui_move2", {"vol":-12})
 	P2_palette_picked = 1 # reset picked palette
 	$P2_Picker.rect_position = $Grid.get_child(P2_picker_pos).rect_global_position # move picker
-	if P2_picker_pos in CHAR_GRID:
-		var char_name: String = CHAR_GRID[P2_picker_pos]
+	if P2_picker_pos in char_grid:
+		var char_name: String = char_grid[P2_picker_pos]
 		$P2_FullArt.texture = character_data[char_name]["art"]
 		if $P2_Sprite.get_child_count() > 0:
 			$P2_Sprite.get_child(0).free()
@@ -351,10 +385,10 @@ func P2_changed_character():
 
 func change_palette(p_dir):
 	
-	if phase == 0 and p_dir != 0 and P1_picker_pos in CHAR_GRID and $P1_Sprite.get_child_count() > 0: # last one is just in case
+	if phase == 0 and p_dir != 0 and P1_picker_pos in char_grid and $P1_Sprite.get_child_count() > 0: # last one is just in case
 		P1_palette_picked += p_dir # move pointer
 		play_audio("ui_move2", {"vol":-12})
-		var char_name: String = CHAR_GRID[P1_picker_pos]
+		var char_name: String = char_grid[P1_picker_pos]
 		P1_palette_picked = wrapi(P1_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 		if P1_palette_picked == 1:
 			$P1_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
@@ -363,10 +397,10 @@ func change_palette(p_dir):
 			$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
 			$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P1_palette_picked)])
 			
-	if phase == 1 and p_dir != 0 and P2_picker_pos in CHAR_GRID and $P2_Sprite.get_child_count() > 0: # last one is just in case
+	if phase == 1 and p_dir != 0 and P2_picker_pos in char_grid and $P2_Sprite.get_child_count() > 0: # last one is just in case
 		P2_palette_picked += p_dir # move pointer
 		play_audio("ui_move2", {"vol":-12})
-		var char_name: String = CHAR_GRID[P2_picker_pos]
+		var char_name: String = char_grid[P2_picker_pos]
 		P2_palette_picked = wrapi(P2_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 		
 		if P2_palette_picked == 1:
@@ -378,7 +412,7 @@ func change_palette(p_dir):
 
 
 func P1_picked_character():
-	if P1_picker_pos in CHAR_GRID:
+	if P1_picker_pos in char_grid:
 		play_audio("ui_accept2", {"vol":-5})
 		$P1_Picker/AnimationPlayer.play("RESET")
 		$P1_FullArt/AnimationPlayer.play("flash")
@@ -387,7 +421,7 @@ func P1_picked_character():
 		$P2_Picker.show()
 	
 func P2_picked_character():
-	if P2_picker_pos in CHAR_GRID:
+	if P2_picker_pos in char_grid:
 		play_audio("ui_accept2", {"vol":-5})
 		$P2_Picker/AnimationPlayer.play("RESET")
 		$P2_FullArt/AnimationPlayer.play("flash")
@@ -396,9 +430,9 @@ func P2_picked_character():
 		$P1_StageSelect.show()
 		
 		# if same character and palette, change palette automatically
-		if CHAR_GRID[P2_picker_pos] != "Random":
-			if CHAR_GRID[P1_picker_pos] == CHAR_GRID[P2_picker_pos] and P1_palette_picked == P2_palette_picked:
-				var char_name: String = CHAR_GRID[P1_picker_pos]
+		if char_grid[P2_picker_pos] != "Random":
+			if char_grid[P1_picker_pos] == char_grid[P2_picker_pos] and P1_palette_picked == P2_palette_picked:
+				var char_name: String = char_grid[P1_picker_pos]
 				P2_palette_picked = wrapi(P2_palette_picked + 1, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 				if P2_palette_picked == 1:
 					$P2_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
@@ -478,9 +512,9 @@ func start_battle():
 
 	Globals.stage_ref = $P1_StageSelect/StageList.get_child(3).text
 
-	Globals.P1_char_ref = CHAR_GRID[P1_picker_pos]
+	Globals.P1_char_ref = char_grid[P1_picker_pos]
 	Globals.P1_palette = P1_palette_picked
-	Globals.P2_char_ref = CHAR_GRID[P2_picker_pos]
+	Globals.P2_char_ref = char_grid[P2_picker_pos]
 	Globals.P2_palette = P2_palette_picked
 	
 	# saving last picked characters and stages
@@ -496,7 +530,7 @@ func start_battle():
 	
 	# handling random
 	if Globals.P1_char_ref == "Random":
-		var character_array = CHAR_GRID.values()
+		var character_array = char_grid.values()
 		character_array.erase("Random")
 		character_array.shuffle()
 		Globals.P1_char_ref = character_array[0]
@@ -506,7 +540,7 @@ func start_battle():
 		if Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
 			Globals.P1_palette = wrapi(Globals.P1_palette + 1, 1, character_data[Globals.P1_char_ref]["palettes"].size() + 2)
 	if Globals.P2_char_ref == "Random":
-		var character_array = CHAR_GRID.values()
+		var character_array = char_grid.values()
 		character_array.erase("Random")
 		character_array.shuffle()
 		Globals.P2_char_ref = character_array[0]

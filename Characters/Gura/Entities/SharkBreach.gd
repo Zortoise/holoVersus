@@ -20,8 +20,6 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 5,
 		"fixed_hitstop" : 10,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
 		"KB_angle" : -60,
 		"atk_attr" : [Globals.atk_attr.REPEATABLE],
 		"hit_sound" : { ref = "water1", aux_data = {"vol" : -6} },

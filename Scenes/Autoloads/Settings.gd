@@ -168,7 +168,7 @@ func load_settings():
 		"game_volume" : 70, # 0 to 100
 		"music_volume" : 70, # 0 to 100
 		"ui_volume" : 70, # 0 to 100
-		"damage_numbers" : 0 # array index
+		"damage_numbers" : 1 # array index
 	}
 	
 	
@@ -285,6 +285,31 @@ func load_game_config():
 			"static_stage" : 0,
 			"custom_playlist" : 0,
 		}		
+
+func save_survival_config(survival_config: Dictionary):
+	var survival_config_data = load("res://Scenes/Menus/GameConfig.gd").new() # save config data
+	survival_config_data.game_config = survival_config.duplicate()
+# warning-ignore:return_value_discarded
+	ResourceSaver.save("user://survival_config.tres", survival_config_data)
+	
+func load_survival_config():
+	var survival_config: Dictionary
+	if ResourceLoader.exists("user://survival_config.tres"):
+		survival_config = ResourceLoader.load("user://survival_config.tres").game_config
+		
+		var valid := true # check if game_config has all needed keys, if not, use default game_config
+		for check in ["level_select", "player_count"]:
+			if !check in survival_config:
+				valid = false
+		if valid:
+			return survival_config
+		
+	# default training_config
+	return {
+			"level_select" : 0,
+			"player_count" : 0,
+		}	
+
 
 func save_training_config(training_config: Dictionary):
 	var training_config_data = load("res://Scenes/Menus/GameConfig.gd").new() # save config data

@@ -52,8 +52,8 @@ func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_da
 #	if "rot" in aux_data:
 #		rotation = aux_data.rot * scale.x
 		
-	var test_entity = get_child(0) # test entity node should be directly under this node
-	test_entity.free()
+#	var test_entity = get_child(0) # test entity node should be directly under this node
+#	test_entity.free()
 	
 	load_entity()
 		
@@ -227,9 +227,7 @@ func interactions():
 			if Globals.survival_level == null:
 				character_array = Globals.Game.get_node("Players").get_children()
 			else:
-				for player in Globals.Game.get_node("Players").get_children():
-					if "MOB" in player:
-						character_array.append(player)
+				character_array = get_tree().get_nodes_in_group("MobNodes")
 			var destroyer_array = []
 			
 			if !indestructible:

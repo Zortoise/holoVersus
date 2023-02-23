@@ -83,6 +83,8 @@ func triggered(triggered_node):
 				if Globals.time_limit is String: Globals.time_limit = 0
 				Globals.assists = game_config.assists
 				Globals.static_stage = game_config.static_stage
+				Globals.survival_level = null
+				Globals.player_count = 2
 			"Return":
 				play_audio("ui_back", {})
 				$Transition.play("transit_to_main")

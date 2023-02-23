@@ -13,6 +13,8 @@ var reflected := false
 var master_ID: int # for special cases where an entity has a special effect that affects its master
 var entity_ref: String
 var creator_mob_ref: String # name of creator, so can look up mob_data in LevelControl under entity_ref
+var mob_attr: Dictionary
+var palette_ref: String
 
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
 var velocity := FVector.new()
@@ -28,11 +30,15 @@ var unique_data = {} # data unique for the entity, stored as a dictionary
 var hitstop = null
 
 
-func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary):
+func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary, \
+		in_mob_attr: Dictionary, in_palette_ref = null):
 	
 	master_ID = in_master_ID
 	creator_mob_ref = in_creator_mob_ref
 	entity_ref = in_entity_ref
+	mob_attr = in_mob_attr
+	if in_palette_ref != null:
+		palette_ref = in_palette_ref
 	
 	position = in_position
 	set_true_position()
@@ -50,8 +56,8 @@ func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, 
 #	if "rot" in aux_data:
 #		rotation = aux_data.rot * scale.x
 		
-	var test_entity = get_child(0) # test entity node should be directly under this node
-	test_entity.free()
+#	var test_entity = get_child(0) # test entity node should be directly under this node
+#	test_entity.free()
 	
 	load_entity()
 		
@@ -101,12 +107,10 @@ func load_entity():
 			$Sprite.material.shader = Globals.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqEntity.PALETTE])
 				
-		elif UniqEntity.PALETTE in Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes:
+		elif palette_ref != "" and palette_ref in Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes:
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes[UniqEntity.PALETTE])
-				
-
+			$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes[palette_ref])
 
 func simulate():
 	hitstop = null
@@ -193,7 +197,7 @@ func interactions():
 				can_clash = true
 
 			 # get characters that can destroy this entity
-			var character_array = Globals.Game.get_node("Players").get_children()
+			var character_array = get_tree().get_nodes_in_group("PlayerNodes")
 			var destroyer_array = []
 			
 			if !indestructible:
@@ -366,16 +370,21 @@ func get_proj_level():
 			return move_data.proj_level
 	return null
 	
+func modify_stat(to_return, attr: int, values: Array):
+	return FMath.percent(to_return, values[int(clamp(mob_attr[attr], 0, values.size() - 1))])
 	
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 
 
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	var attacker = get_node(hit_data.attacker_nodepath) # will be this entity's master
+	var attacker = Globals.Game.get_player_node(hit_data.attacker_ID) # will be this entity's master
+	if attacker != null:
+		attacker.target_ID = hit_data.defender_ID # target last attacked opponent
 
-	var defender = get_node(hit_data.defender_nodepath)
-	increment_hitcount(defender.player_ID) # for measuring hitcount of attacks
-	attacker.targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
+#	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
+	
+	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
+
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -509,6 +518,8 @@ func save_state():
 		"master_ID" : master_ID,
 		"entity_ref" : entity_ref,
 		"creator_mob_ref" : creator_mob_ref,
+		"mob_attr": mob_attr,
+		"palette_ref" : palette_ref,
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
 		
 		"free" : free,
@@ -540,6 +551,8 @@ func load_state(state_data):
 	master_ID = state_data.master_ID
 	entity_ref = state_data.entity_ref
 	creator_mob_ref = state_data.creator_mob_ref
+	mob_attr = state_data.mob_attr
+	palette_ref = state_data.palette_ref
 	load_entity()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)

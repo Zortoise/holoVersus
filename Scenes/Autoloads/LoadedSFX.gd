@@ -548,7 +548,7 @@ var modulate_animations = {
 		}
 	},
 	"mob_hit_flash" :{
-		"duration": 6,
+		"duration": 7,
 		"loop" : false,
 		"timestamps" : {
 			0 :
@@ -559,7 +559,7 @@ var modulate_animations = {
 			{
 				"modulate" : Color(2.0, 0.0, 0.0),
 			},
-			3 :
+			5 :
 			{
 				"modulate" : Color(1.5, 0.5, 0.5),
 			},

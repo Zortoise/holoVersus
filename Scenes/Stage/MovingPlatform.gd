@@ -25,7 +25,7 @@ func move_platform():
 		
 		# apply position_change vector to all riding entities
 		for rider_box in rider_boxes:
-			if rider_box.is_in_group("Players") or rider_box.is_in_group("Entities"):
+			if rider_box.is_in_group("Players") or rider_box.is_in_group("Mobs") or rider_box.is_in_group("Entities"):
 				 # rider is player character/grounded entity
 				# position_change need to be in integer!'
 				var rider = rider_box.get_parent()

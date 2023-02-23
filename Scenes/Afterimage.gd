@@ -79,7 +79,7 @@ func apply_shader():
 			pass
 		Globals.afterimage_shader.MASTER:
 			if mob_ref != null:
-				if mob_palette_ref != null:
+				if mob_palette_ref in Globals.Game.LevelControl.mob_data[mob_ref].palettes:
 					$Sprite.material = ShaderMaterial.new()
 					$Sprite.material.shader = Globals.loaded_palette_shader
 					$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[mob_ref].palettes[mob_palette_ref])

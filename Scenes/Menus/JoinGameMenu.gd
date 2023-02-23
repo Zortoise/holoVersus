@@ -98,6 +98,8 @@ func start_game():
 	if Globals.time_limit is String: Globals.time_limit = 0
 	Globals.assists = host_net_game_config.assists
 	Globals.static_stage = host_net_game_config.static_stage
+	Globals.survival_level = null
+	Globals.player_count = 2
 	
 
 func focused(focused_node):

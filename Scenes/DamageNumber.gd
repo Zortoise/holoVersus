@@ -1,7 +1,7 @@
 extends Node2D
 
-const MAX_HEIGHT = -500
-const FADE_HEIGHT = -400
+const MAX_HEIGHT = -50
+const FADE_HEIGHT = -40
 const RED = Color(1.5, 0.2, 0.2)
 const GRAY = Color(0.75, 0.75, 0.75)
 const GREEN = Color(0.65, 1.5, 0.65)
@@ -24,7 +24,7 @@ func init(in_number: int, in_position: Vector2, in_color = null):
 			$Label.modulate = GREEN
 
 func simulate():
-	$Label.rect_position.y -= 10
+	$Label.rect_position.y -= 1
 	if $Label.rect_position.y <= MAX_HEIGHT:
 		free = true
 	elif $Label.rect_position.y < FADE_HEIGHT:

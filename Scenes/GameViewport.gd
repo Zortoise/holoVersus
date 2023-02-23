@@ -9,6 +9,9 @@ func _ready():
 	$HUD/P1_HUDRect/Inputs.hide()
 	$HUD/P2_HUDRect/Inputs.hide()
 	
+	if Globals.survival_level == null:
+		$HUD/Announcer2.hide()
+	
 	if Netplay.is_netplay():
 # warning-ignore:return_value_discarded
 		get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
@@ -84,9 +87,13 @@ func _physics_process(_delta):
 		volume = lerp(volume, -60.0, 0.2)
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("GameFade"), volume)
 		
-		
-	if Globals.Game.frametime == 36:
-		$HUD/Announcer/AnimationPlayer.play("start_battle")
+	if Globals.survival_level == null:
+		if Globals.Game.frametime == 36:
+			$HUD/Announcer/AnimationPlayer.play("start_battle")
+	else:
+		Globals.Game.input_lock = false
+		if Globals.Game.frametime == 20:
+			$HUD/Announcer/AnimationPlayer.play("start_survival")
 	
 
 func start_battle(): # called from game, as need to be called when during simulation
@@ -122,6 +129,23 @@ func _on_Game_record_ended():
 	$Test/SaveLoad/Timer.wait_time = 0.5
 	$Test/SaveLoad/Timer.start()
 	
+# SURVIVAL MODE ------------------------------------------------------------------------------------------------------------
+	
+func _on_wave_start(wave_ID):
+	$HUD/Announcer2/Survival.text = "WAVE " + str(wave_ID)
+	$HUD/Announcer2/AnimationPlayer.play("start_wave")
+	
+func _on_wave_cleared():
+	$HUD/Announcer2/AnimationPlayer.play("wave_cleared")
+	
+func _on_level_cleared():
+	$HUD/Announcer2/Wave.text = "ALL WAVES"
+	$HUD/Announcer2/Cleared.text = "CLEARED!"
+	$HUD/Announcer2/AnimationPlayer.play("all_wave_cleared")
+	
+func _on_level_failed():
+	$HUD/Announcer2/Survival.text = "DEFEATED"
+	$HUD/Announcer2/AnimationPlayer.play("defeated")
 
 # ------------------------------------------------------------------------------------------------------------
 	
@@ -137,7 +161,12 @@ func change_scene(new_scene: String): # called by animation
 	Settings.change_input_map(Settings.load_input_map())
 
 	Netcode.game_ongoing = false
-	if Netplay.is_netplay():
+	
+	if Globals.survival_level != null:
+		if new_scene == "res://Scenes/Menus/VictoryScreen.tscn":
+			new_scene = "res://Scenes/Menus/VictoryScreenSurvival.tscn" # route to VictoryScreenSurvival for survival
+	
+	elif Netplay.is_netplay():
 		if new_scene == "res://Scenes/Menus/VictoryScreen.tscn":
 			new_scene = "res://Scenes/Menus/VictoryScreenNet.tscn" # route to VictoryScreenNet for netgames
 			
@@ -153,6 +182,8 @@ func change_scene(new_scene: String): # called by animation
 		
 	get_tree().change_scene(new_scene)
 	
+	
+# NETPLAY ------------------------------------------------------------------------------------------------------------
 	
 func force_game_over(winner_ID):
 	Globals.winner = [winner_ID, Globals.Game.get_player_node(winner_ID).UniqChar.NAME]

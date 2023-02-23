@@ -38,7 +38,7 @@ func move_amount(move_amount:Vector2, collision_box, soft_platform_dbox, ledge_s
 		# velocity.x can be stopped by walls and players (for characters)
 		elif !is_against_wall(collision_box, soft_platform_dbox, sign(move_amount.x)):
 			# for players, has to test collision with other players as well
-			if collision_box.is_in_group("Players"):
+			if collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs"):
 				# no collision with other players during launched hitstun or while being non-collidable
 				if get("state") == Globals.char_state.LAUNCHED_HITSTUN or (has_method("check_collidable") and !call("check_collidable")):
 					position.x += sign(move_amount.x)
@@ -156,7 +156,8 @@ func move_sequence_player_by(move_amount: Vector2): # in some special cases wher
 	
 	
 func not_in_sequence(collision_box): # when object is in sequence, will not be killed at ceiling and sides but will die at bottom
-	if collision_box.is_in_group("Players") and get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+	if (collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs")) and \
+			get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 		return false
 	return true
 	
@@ -202,7 +203,7 @@ func get_colliding_characters_side(collision_box, direction):
 #	var tester = collision_box.get_parent()
 	
 	# get an array of character nodes in the way
-	var characters_detected = Detection.detect_return([collision_box], ["Players"], Vector2(direction, 0))
+	var characters_detected = Detection.detect_return([collision_box], ["Players", "Mobs"], Vector2(direction, 0))
 	for character in characters_detected:
 		if "MOB" in self and "MOB" in character:
 			continue # mobs do not collide with each other
@@ -220,7 +221,8 @@ func get_colliding_characters_side(collision_box, direction):
 # return true if a wall in "direction", 1 is right, -1 is left
 func is_against_wall(collision_box, soft_platform_dbox, direction):
 	var to_check := ["SolidPlatforms", "BlastBarriers"]
-	if collision_box.is_in_group("Players") and has_method("is_killable") and call("is_killable", get("velocity").x):
+	if (collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs")) and has_method("is_killable") and \
+		call("is_killable", get("velocity").x):
 		to_check = ["SolidPlatforms"]
 		
 	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):
@@ -253,7 +255,8 @@ func is_against_ledge(soft_platform_dbox, direction):
 		
 func is_against_ceiling(collision_box, soft_platform_dbox): # return true if there is a solid platform above
 	var to_check := ["SolidPlatforms", "BlastBarriers"]
-	if collision_box.is_in_group("Players") and has_method("is_killable") and call("is_killable", get("velocity").y):
+	if (collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs")) and has_method("is_killable") and \
+			call("is_killable", get("velocity").y):
 		to_check = ["SolidPlatforms"]
 		
 	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):

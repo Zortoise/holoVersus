@@ -25,8 +25,6 @@ const MOVE_DATABASE = {
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
 		"proj_level" : 1,
 		"atk_attr" : [],
@@ -40,8 +38,6 @@ const MOVE_DATABASE = {
 		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
 		"proj_level" : 2,
 		"atk_attr" : [Globals.atk_attr.DRAG_KB],
@@ -55,8 +51,6 @@ const MOVE_DATABASE = {
 		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
 		"proj_level" : 3,
 		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.DRAG_KB],
@@ -70,8 +64,6 @@ const MOVE_DATABASE = {
 		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "blue",
 		"KB_angle" : -45,
 		"proj_level" : 3,
 		"atk_attr" : [Globals.atk_attr.DRAG_KB, Globals.atk_attr.NO_REPEAT_MOVE],
@@ -138,7 +130,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 3
 			Entity.life_point = 4
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_ID)
+					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : "master"}, Entity.master_ID)
 		"[ex]Spawn", "[u][ex]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
@@ -146,7 +138,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 3
 			Entity.life_point = 3
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.master_ID)
+					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : "master"}, Entity.master_ID)
 #
 #		"[u][c1]Spawn":
 #			Entity.velocity.set_vector(500 * FMath.S, 0)

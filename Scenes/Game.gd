@@ -47,6 +47,7 @@ var P2_facing: int
 
 var HUD
 var frame_viewer
+var viewport
 
 onready var match_input_log = Globals.match_input_log
 var true_frametime := 0 # to set target to simulate to
@@ -109,8 +110,15 @@ func _ready():
 	Globals.debug_mode = false
 	Globals.match_input_log.reset()
 	
-	Globals.survival_level = "Test" # test
-	Globals.player_count = 1
+#	Globals.survival_level = "Test" # test
+#	Globals.player_count = 1
+	
+	HUD = get_node("../../../HUD")
+	frame_viewer = get_node("../../../HUD/FrameViewer")
+	viewport = get_node("../../..")
+	
+	if Globals.player_count == 1:
+		HUD.get_node("P1_HUDRect").rect_position.x = 0
 	
 	if Globals.survival_level != null:
 		LevelControl = load("res://Scenes/Survival/LevelControl.tscn").instance()
@@ -145,17 +153,14 @@ func setup():
 	matchtime = Globals.time_limit * 60
 
 	# remove test stage node and add the real stage node
-	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
-	test_stage.free()
+#	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
+#	test_stage.free()
 
 	stage = load("res://Stages/" + stage_ref + "/" + stage_ref + ".tscn").instance()
 	$Stage.add_child(stage)
 	stage.init()
 
 	set_camera_limit()
-	
-	HUD = get_node("../../../HUD")
-	frame_viewer = get_node("../../../HUD/FrameViewer")
 	
 	if Globals.time_limit == 0: # no time limit
 		HUD.get_node("MatchTime").hide()
@@ -468,25 +473,49 @@ func _process(delta):
 	if Globals.survival_level == null:
 		
 		for player in $Players.get_children():
+			var valid := true
 			if player.state == Globals.char_state.DEAD:
-				var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
-				if time_diff > 30 or time_diff < 0:
-					continue
-			focused_player_count += 1
-			players_position += player.position # add together to find midpoint
+				if player.stock_points_left > 0:
+					var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
+					if time_diff > 30 or time_diff < 0:
+						valid = false
+				else: valid = false
+			if valid:
+				focused_player_count += 1
+				players_position += player.position # add together to find midpoint
 			
 	else: # survival mode
 		var player_1 = get_player_node(0)
-		if player_1.state != Globals.char_state.DEAD:
+		
+		var p1_valid := true
+		if player_1.state == Globals.char_state.DEAD:
+			if player_1.stock_points_left > 0:
+				var time_diff = Globals.RespawnTimer_WAIT_TIME - player_1.get_node("RespawnTimer").time
+				if time_diff > 30 or time_diff < 0:
+					p1_valid = false
+			else: p1_valid = false
+					
+		if p1_valid:
 			focused_player_count += 1
 			players_position += player_1.position
 			var target = player_1.get_target()
 			if target != player_1:
 				focused_player_count += 1
 				players_position += target.position
+				
+				
 		if Globals.player_count == 2:
 			var player_2 = get_player_node(1)
-			if player_2.state != Globals.char_state.DEAD:
+			
+			var p2_valid := true
+			if player_2.state == Globals.char_state.DEAD:
+				if player_2.stock_points_left > 0:
+					var time_diff = Globals.RespawnTimer_WAIT_TIME - player_2.get_node("RespawnTimer").time
+					if time_diff > 30 or time_diff < 0:
+						p2_valid = false
+				else: p2_valid = false
+			
+			if p2_valid:
 				focused_player_count += 1
 				players_position += player_2.position
 				var target = player_2.get_target()
@@ -499,8 +528,8 @@ func _process(delta):
 			players_position += middle_point
 				
 	var point_btw_char = players_position / focused_player_count # get midpoint
-	if Globals.survival_level == null:
-		point_btw_char.y -= get_viewport_rect().size.y / 10.0 # lower it by a little
+#	if Globals.survival_level == null:
+	point_btw_char.y -= get_viewport_rect().size.y / 10.0 # lower it by a little
 	$CameraRef.position = point_btw_char
 	
 	
@@ -526,14 +555,15 @@ func input_capture(input_delay = 0):
 				toggled_keys.append(converted_key) # record toggled key
 			
 	# player 2
-	if !Netplay.is_netplay() or Netplay.my_player_id() == 1: # in netplay, ignore P1 buttons not being pressed
-		for key_array in Globals.INPUTS[1].values():
-			var converted_key: int = key_array[1] # get int form of the key
-			if Input.is_action_pressed(key_array[0]): # use string form for this
-				if !converted_key in captured_input_state["pressed"]: # new button pressed
-					toggled_keys.append(converted_key) # record toggled key
-			elif converted_key in captured_input_state["pressed"]: # released a held button
-				toggled_keys.append(converted_key) # record toggled key	
+	if Globals.player_count > 1:
+		if !Netplay.is_netplay() or Netplay.my_player_id() == 1: # in netplay, ignore P1 buttons not being pressed
+			for key_array in Globals.INPUTS[1].values():
+				var converted_key: int = key_array[1] # get int form of the key
+				if Input.is_action_pressed(key_array[0]): # use string form for this
+					if !converted_key in captured_input_state["pressed"]: # new button pressed
+						toggled_keys.append(converted_key) # record toggled key
+				elif converted_key in captured_input_state["pressed"]: # released a held button
+					toggled_keys.append(converted_key) # record toggled key	
 			
 	# save toggled keys in match_input_log
 	if toggled_keys.size() > 0:
@@ -643,6 +673,7 @@ func simulate(rendering = true):
 	
 # simulate CHILDREN NODES --------------------------------------------------------------------------------------------------
 
+#	rng_randomize()
 	to_superfreeze = null
 	to_lethalfreeze = null
 
@@ -874,7 +905,16 @@ func load_state(game_state, loading_autosave = true):
 	current_rng_seed = loaded_game_state.current_rng_seed
 #	game_set = loaded_game_state.game_state.match_data.game_set
 
-
+	for mob in get_tree().get_nodes_in_group("MobNodes"):
+		mob.free()
+	for load_player_id in loaded_game_state.player_data.keys():
+		if load_player_id >= 0:
+			get_player_node(load_player_id).load_state(loaded_game_state.player_data[load_player_id])
+		else:
+			var new_mob = LevelControl.loaded_mob_scene.instance()
+			$Players.add_child(new_mob)
+			new_mob.load_state(loaded_game_state.player_data[load_player_id])
+		
 	for player in $Players.get_children():
 		player.load_state(loaded_game_state.player_data[player.player_ID])
 	
@@ -913,7 +953,7 @@ func load_state(game_state, loading_autosave = true):
 		new_entity.load_state(state_data)
 		
 	for state_data in loaded_game_state.mob_entities_data:
-		var new_entity = Globals.loaded_mob_entity_scene.instance()
+		var new_entity = LevelControl.loaded_mob_entity_scene.instance()
 		$MobEntities.add_child(new_entity)
 		new_entity.load_state(state_data)
 		
@@ -1152,7 +1192,7 @@ func detect_hit():
 		
 		defender.being_hit(hit_data) # will add stuff to hit_data, passing by reference
 		
-		if !"sequence" in hit_data.move_data:
+		if !"sequence" in hit_data.move_data and !"cancelled" in hit_data:
 			if !"entity_nodepath" in hit_data:
 				attacker.landed_a_hit(hit_data)
 	#				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
@@ -1167,7 +1207,15 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 				continue # defender must not be owner of hitbox
 			
 			var attacker = get_player_node(hitbox.owner_ID)
+			var attacker_or_entity
+			if "entity_nodepath" in hitbox:
+				attacker_or_entity = get_node(hitbox.entity_nodepath)
+			else:
+				attacker_or_entity = attacker
 			var defender = get_player_node(hurtbox.owner_ID)
+
+			if attacker_or_entity == null or defender == null: continue # invalid attack
+			
 #			if defender_command_grab_dodge(hitbox, hurtbox):
 #				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
 			if !"entity_nodepath" in hitbox:
@@ -1182,34 +1230,34 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 				if attacker.is_player_in_ignore_list(defender.player_ID):
 					continue # defender must not be in attacker's ignore list
 			else: # for entities
-				if get_node(hitbox.entity_nodepath).is_hitcount_maxed(defender.player_ID, hitbox.move_data):
+				if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
 					continue # entity must still have hitcount left
-				if get_node(hitbox.entity_nodepath).is_player_in_ignore_list(defender.player_ID):
+				if attacker_or_entity.is_player_in_ignore_list(defender.player_ID):
 					continue # defender must not be in entity's ignore list
 						
 			# get an array of PoolVector2Arrays of the intersecting polygons
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.polygon)
 			if intersect_polygons.size() > 0: # detected a hit
 				
-				if defender_semi_invul(hitbox, attacker, hurtbox, defender):
+				if defender_semi_invul(hitbox, attacker_or_entity, hurtbox, defender):
 					pass # attacker must not be attacking a semi-invul defender unless with certain moves
 				else:
-					create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker, hurtbox)
+					create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox)
 				
 			elif "sdhurtbox" in hurtbox: # detecting a semi-disjoint hit
 				var intersect_polygons_sd = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.sdhurtbox)
 				if intersect_polygons_sd.size() > 0:
 					
-					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, attacker, hurtbox, true)
+					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, attacker_or_entity, hurtbox, true)
 					
 						
-func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker, hurtbox, semi_disjoint = false):
+func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox, semi_disjoint = false):
 	
 	# calculate hit_center (used for emitting hitspark and sweetspotting)
 	var point_array := []
 	for intersect_polygon in intersect_polygons:
 		point_array.append_array(intersect_polygon)
-	var hit_center: Vector2 = FMath.find_center(point_array, attacker.facing)
+	var hit_center: Vector2 = FMath.find_center(point_array, attacker_or_entity.facing)
 	
 #	var sum := Vector2.ZERO
 #	var number_of_points := 0.0
@@ -1262,7 +1310,7 @@ func test_priority(hitbox, attacker, _hurtbox, defender): # return false if atta
 		# this allow higher priority attack to beat lower priority ones after the frame 1 invincibility of Rule 1
 		# sweetspots should at least be 3 frames long (50ms)
 		elif attacker.Animator.time <= 1:
-			if hitbox.move_data.priority < defender.query_priority():
+			if attacker.query_priority(hitbox.move_name) < defender.query_priority():
 				return false
 	return true
 	
@@ -1287,7 +1335,7 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 			if attacker_tier == 0: return true # air normals can be anti-aired by anything
 			elif attacker_tier > defender_tier: return false # cannot anti-air attacks of higher tier
 			elif attacker_tier == defender_tier:
-				if hitbox.move_data.priority >= defender_move_data.priority:
+				if attacker.query_priority(hitbox.move_name) >= defender.query_priority():
 					return false # if same tier, cannot anti-air attacks of equal or higher priority
 				else:
 					return true # defender successfully anti-aired
@@ -1356,12 +1404,17 @@ func handle_zoom(delta):
 	if Globals.survival_level == null:
 		
 		for player in $Players.get_children():
+			var valid := true
 			if player.state == Globals.char_state.DEAD:
-				var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
-				if time_diff > 30 or time_diff < 0:
-					continue
-			array_of_horizontal_diff.append(abs(player.position.x - $CameraRef.position.x))
-			array_of_vertical_diff.append(abs(player.position.y - $CameraRef.position.y))
+				if player.stock_points_left > 0:
+					var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
+					if time_diff > 30 or time_diff < 0:
+						valid = false
+				else: valid = false
+					
+			if valid:
+				array_of_horizontal_diff.append(abs(player.position.x - $CameraRef.position.x))
+				array_of_vertical_diff.append(abs(player.position.y - $CameraRef.position.y))
 			
 	else: # survival mode
 		var player_1 = get_player_node(0)
@@ -1687,15 +1740,23 @@ func stock_points_update(character):
 #		stock_loss_indicator.text = str(stock_points_change)
 #		stock_loss_indicator.get_node("AnimationPlayer").play("stock_loss")
 	
+	if Globals.survival_level != null and character.stock_points_left <= 0:
+		var dmg_val_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageNode/DamageValue")
+		dmg_val_indicator.text = "DEAD"
+		dmg_val_indicator.get_node("../AnimationPlayer2").stop()
+		dmg_val_indicator.modulate = Color(0.6, 0.6, 0.6)
+	
 	if character.stock_points_left <= 0 and !game_set:
-		game_set = true
-		emit_signal("game_set")
 		
-		match character.player_ID:
-			0:
-				Globals.winner = [1, get_player_node(1).UniqChar.NAME]
-			1:
-				Globals.winner = [0, get_player_node(0).UniqChar.NAME]
+		if Globals.survival_level == null:
+			game_set = true
+			emit_signal("game_set")
+			
+			match character.player_ID:
+				0:
+					Globals.winner = [1, get_player_node(1).UniqChar.NAME]
+				1:
+					Globals.winner = [0, get_player_node(0).UniqChar.NAME]
 				
 				
 func burst_update(character):
@@ -1713,9 +1774,14 @@ func set_uniqueHUD(player_ID, uniqueHUD):
 				
 				
 func get_player_node(player_ID):
-	for player in $Players.get_children():
-		if player.player_ID == player_ID:
-			return player
+	if player_ID >= 0:
+		for player in get_tree().get_nodes_in_group("PlayerNodes"):
+			if player.player_ID == player_ID:
+				return player
+	else:
+		for player in get_tree().get_nodes_in_group("MobNodes"):
+			if player.player_ID == player_ID:
+				return player
 	return null
 
 
@@ -1725,8 +1791,12 @@ func HUD_fade():
 	$TopHUDBoxP1.rect_size.x = get_viewport_rect().size.x / 6.0
 	$TopHUDBoxP1.rect_size.y = get_viewport_rect().size.y / 8.75
 	$TopHUDBoxP1.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-	$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 2.0
+	if Globals.player_count != 1:
+		$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 2.0
+	else:
+		$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 2.75
 	$TopHUDBoxP1.rect_position.y -= $TopHUDBoxP1.rect_size.y * 4
+	
 	if Detection.detect_bool([$TopHUDBoxP1], ["Players"]):
 		HUD.get_node("P1_HUDRect/Portrait").modulate.a = HUD_FADE
 	else:
@@ -1735,44 +1805,53 @@ func HUD_fade():
 	$BottomHUDBoxP1.rect_size = get_viewport_rect().size / 6.0
 	$BottomHUDBoxP1.rect_size.y = get_viewport_rect().size.y / 8.75
 	$BottomHUDBoxP1.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-	$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 2.0
-	$BottomHUDBoxP1.rect_position.y += $BottomHUDBoxP1.rect_size.y * 3	
+	if Globals.player_count != 1:
+		$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 2.0
+	else:
+		$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 2.75
+	$BottomHUDBoxP1.rect_position.y += $BottomHUDBoxP1.rect_size.y * 3
+	
 	if Detection.detect_bool([$BottomHUDBoxP1], ["Players"]):
 		HUD.get_node("P1_HUDRect/GaugesUnder").modulate.a = HUD_FADE
 	else:
 		HUD.get_node("P1_HUDRect/GaugesUnder").modulate.a = 1.0
 	
-	$TopHUDBoxP2.rect_size.x = get_viewport_rect().size.x / 6.0
-	$TopHUDBoxP2.rect_size.y = get_viewport_rect().size.y / 8.75
-	$TopHUDBoxP2.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-	$TopHUDBoxP2.rect_position.x += $TopHUDBoxP2.rect_size.x * 1.0
-	$TopHUDBoxP2.rect_position.y -= $TopHUDBoxP2.rect_size.y * 4
-	if Detection.detect_bool([$TopHUDBoxP2], ["Players"]):
-		HUD.get_node("P2_HUDRect/Portrait").modulate.a = HUD_FADE
-	else:
-		HUD.get_node("P2_HUDRect/Portrait").modulate.a = 1.0
-
-	$BottomHUDBoxP2.rect_size = get_viewport_rect().size / 6.0
-	$BottomHUDBoxP2.rect_size.y = get_viewport_rect().size.y / 8.75
-	$BottomHUDBoxP2.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-	$BottomHUDBoxP2.rect_position.x += $BottomHUDBoxP2.rect_size.x * 1.0
-	$BottomHUDBoxP2.rect_position.y += $BottomHUDBoxP2.rect_size.y * 3	
-	if Detection.detect_bool([$BottomHUDBoxP2], ["Players"]):
-		HUD.get_node("P2_HUDRect/GaugesUnder").modulate.a = HUD_FADE
-	else:
-		HUD.get_node("P2_HUDRect/GaugesUnder").modulate.a = 1.0
+	if Globals.player_count > 1:
+		$TopHUDBoxP2.rect_size.x = get_viewport_rect().size.x / 6.0
+		$TopHUDBoxP2.rect_size.y = get_viewport_rect().size.y / 8.75
+		$TopHUDBoxP2.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
+		$TopHUDBoxP2.rect_position.x += $TopHUDBoxP2.rect_size.x * 1.0
+		$TopHUDBoxP2.rect_position.y -= $TopHUDBoxP2.rect_size.y * 4
 		
-	$TimeHUDBox.rect_size = get_viewport_rect().size / 15.0
-	$TimeHUDBox.rect_size.y = get_viewport_rect().size.y / 14.0
-	$TimeHUDBox.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-	$TimeHUDBox.rect_position.x -= $TimeHUDBox.rect_size.x * 0.5
-	$TimeHUDBox.rect_position.y += $TimeHUDBox.rect_size.y * 5.35	
-	if Detection.detect_bool([$TimeHUDBox], ["Players"]):
-		HUD.get_node("MatchTime").modulate.a = HUD_FADE
-		HUD.get_node("TimeFrame").modulate.a = HUD_FADE
-	else:
-		HUD.get_node("MatchTime").modulate.a = 1.0
-		HUD.get_node("TimeFrame").modulate.a = 1.0
+		if Detection.detect_bool([$TopHUDBoxP2], ["Players"]):
+			HUD.get_node("P2_HUDRect/Portrait").modulate.a = HUD_FADE
+		else:
+			HUD.get_node("P2_HUDRect/Portrait").modulate.a = 1.0
+
+		$BottomHUDBoxP2.rect_size = get_viewport_rect().size / 6.0
+		$BottomHUDBoxP2.rect_size.y = get_viewport_rect().size.y / 8.75
+		$BottomHUDBoxP2.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
+		$BottomHUDBoxP2.rect_position.x += $BottomHUDBoxP2.rect_size.x * 1.0
+		$BottomHUDBoxP2.rect_position.y += $BottomHUDBoxP2.rect_size.y * 3	
+		
+		if Detection.detect_bool([$BottomHUDBoxP2], ["Players"]):
+			HUD.get_node("P2_HUDRect/GaugesUnder").modulate.a = HUD_FADE
+		else:
+			HUD.get_node("P2_HUDRect/GaugesUnder").modulate.a = 1.0
+		
+	if Globals.time_limit != 0:
+		$TimeHUDBox.rect_size = get_viewport_rect().size / 15.0
+		$TimeHUDBox.rect_size.y = get_viewport_rect().size.y / 14.0
+		$TimeHUDBox.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
+		$TimeHUDBox.rect_position.x -= $TimeHUDBox.rect_size.x * 0.5
+		$TimeHUDBox.rect_position.y += $TimeHUDBox.rect_size.y * 5.35	
+		
+		if Detection.detect_bool([$TimeHUDBox], ["Players"]):
+			HUD.get_node("MatchTime").modulate.a = HUD_FADE
+			HUD.get_node("TimeFrame").modulate.a = HUD_FADE
+		else:
+			HUD.get_node("MatchTime").modulate.a = 1.0
+			HUD.get_node("TimeFrame").modulate.a = 1.0
 			
 # RNG GENERATOR --------------------------------------------------------------------------------------------------
 
@@ -1794,7 +1873,8 @@ func rng_bool():
 		return false
 		
 func rng_array(array: Array):
-	return array[rng_generate(array.size())]
+	var index = rng_generate(array.size())
+	return array[index]
 	
 			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------

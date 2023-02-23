@@ -1,7 +1,5 @@
 extends "res://Characters/Gura/GuraBase.gd"
 
-#const STYLE = 0
-
 # Steps to add an attack:
 # 1. Add it in MOVE_DATABASE and STARTERS, also in EX_MOVES/SUPERS, and in UP_TILTS if needed (even for EX Moves)
 # 2. Add it in state_detect()
@@ -22,6 +20,7 @@ extends "res://Characters/Gura/GuraBase.gd"
 # 7. Add frame-by-frame movement for the opponent in simulate_sequence_after() as "move_sequence_target(grab_point)" and "rotate_partner(Partner)"
 # 8. Add final Steps and branching Steps in end_sequence_step(), for final Step place in "Partner.sequence_launch()" there
 # 9. Add GrabRec animations into refine_move_name()
+# 10. For hitgrabs, add the conditions in UniqChar.landed_a_hit()
 	
 # --------------------------------------------------------------------------------------------------
 
@@ -599,7 +598,8 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 func process_move(new_state, attack_ref: String, has_acted: Array): # return true if button consumed
 	
 	 # no attacking during respawn grace
-	if Character.query_status_effect(Globals.status_effect.RESPAWN_GRACE):
+	if Character.query_status_effect(Globals.status_effect.RESPAWN_GRACE) or \
+			Character.query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
 		return true
 	
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
@@ -775,7 +775,14 @@ func unique_flash():
 # GET DATA --------------------------------------------------------------------------------------------------
 
 func get_stat(stat: String): # later can have effects that changes stats
+	
+	if Globals.survival_level != null:
+		match stat:
+			"DAMAGE_VALUE_LIMIT":
+				return 500
+			
 	return get(stat)
+	
 	
 func query_traits(): # may have special conditions
 	return TRAITS
@@ -861,6 +868,10 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	move_data["atk_attr"] = query_atk_attr(orig_move_name)
 	
+	match orig_move_name:
+		_:
+			pass
+	
 	return move_data
 	
 	
@@ -878,7 +889,7 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		"F3[h]":
-			atk_attr.append_array([Globals.atk_attr.NORMALARMOR_STARTUP, Globals.atk_attr.NORMALARMOR_ACTIVE])
+			atk_attr.append_array([Globals.atk_attr.NORMALARMOR_STARTUP])
 
 		"SP3", "SP3b", "SP3[h]", "SP3b[h]": 
 			atk_attr.append_array([Globals.atk_attr.ANTI_AIR])
@@ -941,7 +952,8 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 	match Animator.to_play_animation:
 		"SP6[ex]SeqA":
 			if Animator.time == 10:
-				Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", Animator.query_point("grabpoint"), {"facing":-Character.facing, "palette":"blue"})
+				Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", Animator.query_point("grabpoint"), {"facing":-Character.facing, \
+						"palette":Character.get_default_hitspark_palette()})
 				Character.play_audio("cut1", {"vol":-12})
 		"SP6[ex]SeqB":
 			if Character.dir != 0: # can air strafe when going up
@@ -994,7 +1006,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
 			Character.play_audio("cut2", {"vol":-20})
 			Globals.Game.spawn_SFX("HitsparkC", "HitsparkC", Animator.query_point("grabpoint"), {"facing":-Character.facing, \
-					"rot":deg2rad(-70), "palette":"blue"})
+					"rot":deg2rad(-70), "palette":Character.get_default_hitspark_palette()})
 		"aF2SeqB":
 			Character.velocity.set_vector(150 * FMath.S * Character.facing, 0)
 			Character.velocity.rotate(70 * Character.facing)
@@ -1014,14 +1026,14 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
 			if Character.grounded:
 				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
+						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true, "palette":"master"}, Character.player_ID)
 				Character.play_audio("water4", {"vol" : -20})
 #				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 #				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP6[ex]SeqC":
 			Character.velocity.set_vector(0, 600 * FMath.S)  # dive down
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, \
-					{"facing":Character.facing, "rot":PI/2}, Character.player_ID)
+					{"facing":Character.facing, "rot":PI/2, "palette":"master"}, Character.player_ID)
 			Character.play_audio("water14", {})
 		"SP6[ex]SeqE":  # you hit ground
 			Partner.sequence_hit(0)
@@ -1029,8 +1041,9 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.player_ID)
-			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "palette":"master"}, Character.player_ID)
+			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, \
+					"palette":Character.get_default_hitspark_palette(), "rot":PI/2})
 			Globals.Game.set_screenshake()
 			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
 			Character.play_audio("rock3", {})
@@ -1038,9 +1051,10 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.sequence_hit(0)
 			Character.velocity.set_vector(0, 0)
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.player_ID)
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "palette":"master"}, Character.player_ID)
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "palette":"blue", "rot":PI/2})
+			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, \
+					"palette":Character.get_default_hitspark_palette(), "rot":PI/2})
 			Globals.Game.set_screenshake()
 			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
 			Character.play_audio("rock3", {"vol":-5})
@@ -1311,7 +1325,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aL2Startup":
 			Character.animate("aL2Active")
 		"aL2Rec":
-			if Globals.survival_level == null and Character.held_version(Character.button_light):
+			if Character.held_version(Character.button_light):
 				Character.animate("aL2Startup")
 			else:
 				Character.animate("aL2bRec")
@@ -1509,22 +1523,24 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			else:
 				Character.animate("SP3Active")
 				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
+						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true, "palette":"master"}, Character.player_ID)
 		"aSP3Startup":
 			if Character.held_version(Character.button_fierce):
 				Character.animate("aSP3[h]Startup")
 			else:
 				Character.animate("aSP3Active")
-				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.player_ID)
+				Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2, "palette":"master"}, \
+						Character.player_ID)
 #		"aSP3bStartup":
 #			Character.animate("aSP3Active")
 		"SP3[h]Startup":
 			Character.animate("SP3[h]Active")
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true, "palette":"master"}, Character.player_ID)
 		"aSP3[h]Startup":
 			Character.animate("aSP3[h]Active")
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.player_ID)
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2, "palette":"master"}, \
+					Character.player_ID)
 		"aSP3Active":
 			Character.animate("aSP3bActive")
 		"aSP3[h]Active":
@@ -1543,10 +1559,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP3[ex]Startup":
 			Character.animate("SP3[ex]Active")
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.player_ID)
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true, "palette":"master"}, Character.player_ID)
 		"aSP3[ex]Startup":
 			Character.animate("aSP3[ex]Active")
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, Character.player_ID)
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2, "palette":"master"}, \
+					Character.player_ID)
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
@@ -1848,18 +1865,21 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 50
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.player_ID)
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing, "palette":"master"}, \
+					Character.player_ID)
 		"aSP2[h]Active":
 			Character.velocity.set_vector(Character.facing * 600 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.player_ID)
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing, "palette":"master"}, \
+					Character.player_ID)
 		"aSP2[ex]Active":
 			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 50
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, Character.player_ID)
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing, "palette":"master"}, \
+					Character.player_ID)
 		"aSP2[h]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)

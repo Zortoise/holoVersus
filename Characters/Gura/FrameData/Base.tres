@@ -441,6 +441,19 @@ frame_data = {
 },
 "vframes": 17
 },
+"Death": {
+"duration": 36,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 77,
+"hurtbox": [  ]
+}
+},
+"vframes": 17
+},
 "Dodge": {
 "duration": 10,
 "hframes": 6,

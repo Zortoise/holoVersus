@@ -73,10 +73,11 @@ func palette():
 		$Sprite.material.shader = Globals.loaded_palette_shader
 		$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[palette_ref])
 			
-	elif mob_ref != null and palette_ref in Globals.Game.LevelControl.mob_data[mob_ref].palettes:
-		$Sprite.material = ShaderMaterial.new()
-		$Sprite.material.shader = Globals.loaded_palette_shader
-		$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[mob_ref].palettes[palette_ref])
+	elif mob_ref != null:
+		if palette_ref in Globals.Game.LevelControl.mob_data[mob_ref].palettes:
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Globals.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[mob_ref].palettes[palette_ref])
 			
 	elif master_ID != null and palette_ref == "master" and master_node.loaded_palette != null: # same palette as master
 		$Sprite.material = ShaderMaterial.new()

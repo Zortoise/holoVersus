@@ -62,6 +62,8 @@ func triggered(triggered_node):
 				$Transition.play("transit_to_char_select")
 				Globals.assists = training_config.assists
 				Globals.static_stage = training_config.static_stage
+				Globals.survival_level = null
+				Globals.player_count = 2
 			"Return":
 				play_audio("ui_back", {})
 				$Transition.play("transit_to_main")
