@@ -105,6 +105,7 @@ const STRONGBLOCK_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is push
 const STRONGBLOCK_KNOCKBACK_MOD = 50 # % of knockback defender experience when strongblocking
 const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 
+const SUPERARMOR_CHIP_DMG_MOD = 50
 #const SUPERARMOR_GUARD_DRAIN_MOD = 150
 
 
@@ -1315,39 +1316,46 @@ func simulate2(): # only ran if not in hitstop
 			if Animator.query_current(["SDash"]):
 				if button_dash in input_state.pressed:
 					sdashing = true
-					if !grounded: # if airborne, change to aSDash
-						animate("aSDash")
+#					if !grounded: # if airborne, change to aSDash
+#						animate("aSDash")
 				else:
 					if !grounded:
 						animate("aDashBrake")
 					else:
 						animate("DashBrake")
-			elif Animator.query_current(["aSDash"]):
-				if button_dash in input_state.pressed:
-					sdashing = true
-#					if grounded: # if landed on ground, change to SDash
-#						animate("SDash")
-				else:
-					if !grounded:
-						animate("aDashBrake")
-					else:
-						animate("DashBrake")
+#			elif Animator.query_current(["aSDash"]):
+#				if button_dash in input_state.pressed:
+#					sdashing = true
+##					if grounded: # if landed on ground, change to SDash
+##						animate("SDash")
+#				else:
+#					if !grounded:
+#						animate("aDashBrake")
+#					else:
+#						animate("DashBrake")
 				
 			if sdashing:
-				if grounded and posmod(Globals.Game.frametime, 5) == 0: # drag rocks on ground
-					Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
-					
-				var vel_angle = velocity.angle() # rotation and navigation
-				var rotated := false
-				if dir != 0 or v_dir != 0:
-					var target_angle = Globals.dir_to_angle(dir, v_dir, facing)
-					var new_angle = Globals.navigate(vel_angle, target_angle, UniqChar.get_stat("SDASH_TURN_RATE"))
-					if new_angle != vel_angle:
-						velocity.rotate(new_angle - vel_angle)
-						rotate_sprite(new_angle)
-						rotated = true
-				if !rotated:
-					rotate_sprite(vel_angle)
+				
+				if !velocity.is_longer_than(FMath.percent(UniqChar.get_stat("SDASH_SPEED"), 90)):
+					if !grounded:
+						animate("aDashBrake")
+					else:
+						animate("DashBrake")
+				else:
+					if grounded and posmod(Globals.Game.frametime, 5) == 0: # drag rocks on ground
+						Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
+						
+					var vel_angle = velocity.angle() # rotation and navigation
+					var rotated := false
+					if dir != 0 or v_dir != 0:
+						var target_angle = Globals.dir_to_angle(dir, v_dir, facing)
+						var new_angle = Globals.navigate(vel_angle, target_angle, UniqChar.get_stat("SDASH_TURN_RATE"))
+						if new_angle != vel_angle:
+							velocity.rotate(new_angle - vel_angle)
+							rotate_sprite(new_angle)
+							rotated = true
+					if !rotated:
+						rotate_sprite(vel_angle)
 					
 						
 			elif Animator.query_current(["Dodge"]):
@@ -1362,7 +1370,7 @@ func simulate2(): # only ran if not in hitstop
 					animate("BlockRec")
 				else:
 					animate("BlockCRec")
-			else:
+			elif !success_block:
 				change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_GG_COST"))
 				if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 					animate("BlockRec")
@@ -1377,7 +1385,7 @@ func simulate2(): # only ran if not in hitstop
 					animate("aBlockRec")
 				else:
 					animate("aBlockCRec")
-			else:
+			elif !success_block:
 				change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_GG_COST"))
 				if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 					animate("aBlockRec")
@@ -1504,7 +1512,7 @@ func simulate2(): # only ran if not in hitstop
 		else:
 			if results[0]: check_landing()
 			
-			if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["SDash", "aSDash"]):
+			if new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["SDash"]):
 				check_sdash_crash()
 			elif new_state == Globals.char_state.LAUNCHED_HITSTUN:
 				bounce(results[0])
@@ -2403,7 +2411,7 @@ func state_detect(anim):
 		"BurstCRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
-		"AReset", "SDash", "aSDash":
+		"AReset", "SDash":
 			return Globals.char_state.AIR_RECOVERY
 		"AResetCRec":
 			return Globals.char_state.AIR_C_RECOVERY
@@ -2627,7 +2635,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("BlockRec")
 				UniqChar.landing_sound()
 				
-			elif Animator.query_to_play(["DodgeTransit", "Dodge", "DodgeRec", "AReset", "SDash", "aSDash"]) or \
+			elif Animator.query_to_play(["DodgeTransit", "Dodge", "DodgeRec", "AReset", "SDash"]) or \
 					Animator.to_play_animation.begins_with("Burst"): # no landing
 				pass
 				
@@ -2676,7 +2684,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
-#					remove_status_effect(Globals.status_effect.POS_FLOW)
+				remove_status_effect(Globals.status_effect.POS_FLOW)
 					
 			animate("BlockLanding")
 
@@ -2726,7 +2734,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 				change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
-#					remove_status_effect(Globals.status_effect.POS_FLOW)
+				remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("aBlock")
 
 
@@ -2750,7 +2758,7 @@ func check_collidable(): # called by Physics.gd
 #					and chain_memory.size() == 0:
 				return false
 		Globals.char_state.AIR_RECOVERY:
-			if Animator.query_to_play(["Dodge", "SDash", "aSDash"]):
+			if Animator.query_to_play(["Dodge"]):
 				return false
 			
 	return UniqChar.check_collidable()
@@ -2762,7 +2770,7 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 	elif state == Globals.char_state.SEQUENCE_TARGET:
 		return true # when being grabbed, always fall through soft platforms
 #		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
-	elif new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge", "SDash", "aSDash"]):
+	elif new_state == Globals.char_state.AIR_RECOVERY and Animator.query_to_play(["Dodge", "SDash"]):
 		return true
 	elif !grounded and is_attacking():
 		if button_down in input_state.pressed:
@@ -3999,7 +4007,39 @@ func query_priority(in_move_name = null):
 	var move_data = UniqChar.query_move_data(move_name)
 	if "priority" in move_data:
 		return move_data.priority
-	else: return 0
+	else:
+		match move_data.atk_type:
+			Globals.atk_type.LIGHT:
+				if "aerial" in move_data:
+					return Globals.priority.aL
+				else:
+					return Globals.priority.gL
+			Globals.atk_type.FIERCE:
+				if "aerial" in move_data:
+					return Globals.priority.aF
+				else:
+					return Globals.priority.gF
+			Globals.atk_type.HEAVY:
+				if "aerial" in move_data:
+					return Globals.priority.aH
+				else:
+					return Globals.priority.gH
+			Globals.atk_type.SPECIAL:
+				if "aerial" in move_data:
+					return Globals.priority.aSp
+				else:
+					return Globals.priority.gSp
+			Globals.atk_type.EX:
+				if "aerial" in move_data:
+					return Globals.priority.aEX
+				else:
+					return Globals.priority.gEX
+			Globals.atk_type.SUPER:
+				return Globals.priority.SUPER
+
+			
+		
+
 	
 	
 func query_move_data(in_move_name = null):
@@ -4151,7 +4191,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 		
-	if hit_data.block_state == Globals.block_state.UNBLOCKED and "hit_sound" in hit_data.move_data:
+	if (Globals.survival_level != null and !"no_hit_sound" in hit_data) or \
+			(Globals.survival_level == null and hit_data.block_state == Globals.block_state.UNBLOCKED and "hit_sound" in hit_data.move_data):
 		
 		var volume_change = 0
 		if hit_data.lethal_hit or hit_data.stun or hit_data.crush or hit_data.sweetspotted:
@@ -4331,8 +4372,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data["superarmored"] = true
 						
 						
-			Globals.char_state.AIR_STARTUP: # sdash startup has projectile superarmor against non-strong projectiles
-				if Animator.query_current(["SDashTransit"]) and "non_strong_proj" in hit_data:
+			Globals.char_state.AIR_RECOVERY:
+				 # air superdash has projectile superarmor against non-strong projectiles
+				if Animator.query_current(["SDash"]) and "non_strong_proj" in hit_data:
 					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 				
@@ -4529,8 +4571,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
 	# gain POS_FLOW on strongblock
-	if hit_data.block_state == Globals.block_state.STRONG and current_guard_gauge < 0:
-		add_status_effect(Globals.status_effect.POS_FLOW, null)
+#	if hit_data.block_state == Globals.block_state.STRONG and current_guard_gauge < 0:
+#		add_status_effect(Globals.status_effect.POS_FLOW, null)
 
 	if hit_data.double_repeat:
 		$ModulatePlayer.play("repeat")
@@ -4693,18 +4735,19 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var no_impact_and_vel_change := false
 	
 	if "superarmored" in hit_data:
-		var knock_dir := 0
-		var segment = Globals.split_angle(knockback_dir, Globals.angle_split.FOUR, hit_data.attack_facing)
-		match segment:
-			Globals.compass.E:
-				knock_dir = 1
-			Globals.compass.W:
-				knock_dir = -1
-		if knock_dir != 0:
-			move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $SoftPlatformDBox, true)
-			set_true_position()
+		if grounded:
+			var knock_dir := 0
+			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.FOUR, hit_data.attack_facing)
+			match segment:
+				Globals.compass.E:
+					knock_dir = 1
+				Globals.compass.W:
+					knock_dir = -1
+			if knock_dir != 0:
+				move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $SoftPlatformDBox, true)
+				set_true_position()
 		return
-		
+
 
 	if hit_data.block_state == Globals.block_state.UNBLOCKED:
 			
@@ -4933,7 +4976,10 @@ func calculate_damage(hit_data) -> int:
 	if hit_data.block_state != Globals.block_state.UNBLOCKED:
 		if hit_data.block_state == Globals.block_state.WEAK:
 			# each character take different amount of chip damage
-			scaled_damage = FMath.percent(scaled_damage, UniqChar.get_stat("WEAKBLOCK_CHIP_DMG_MOD"))
+			if "superarmored" in hit_data:
+				scaled_damage = FMath.percent(scaled_damage, SUPERARMOR_CHIP_DMG_MOD)
+			else:
+				scaled_damage = FMath.percent(scaled_damage, UniqChar.get_stat("WEAKBLOCK_CHIP_DMG_MOD"))
 		else:
 			return 0
 
@@ -5271,17 +5317,17 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		
 		
 	if !"hitspark_type" in hit_data.move_data:
-		if hit_data.attacker_or_entity.has_method("get_default_hitspark_type"):
-			hit_data.move_data["hitspark_type"] = hit_data.attacker_or_entity.get_default_hitspark_type()
-		elif hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_type"):
+#		if hit_data.attacker_or_entity.has_method("get_default_hitspark_type"):
+#			hit_data.move_data["hitspark_type"] = hit_data.attacker_or_entity.get_default_hitspark_type()
+		if hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_type"):
 			hit_data.move_data["hitspark_type"] = hit_data.attacker.get_default_hitspark_type()
 		else:
 			hit_data.move_data["hitspark_type"] = Globals.hitspark_type.HIT
 			
 	if !"hitspark_palette" in hit_data.move_data:
-		if hit_data.attacker_or_entity.has_method("get_default_hitspark_palette"):
-			hit_data.move_data["hitspark_palette"] = hit_data.attacker_or_entity.get_default_hitspark_palette()
-		elif hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_palette"):
+#		if hit_data.attacker_or_entity.has_method("get_default_hitspark_palette"):
+#			hit_data.move_data["hitspark_palette"] = hit_data.attacker_or_entity.get_default_hitspark_palette()
+		if hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_palette"):
 			hit_data.move_data["hitspark_palette"] = hit_data.attacker.get_default_hitspark_palette()
 		else:
 			hit_data.move_data["hitspark_palette"] = "red"
@@ -5640,7 +5686,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
-#				remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
+			remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
 			animate("Block")
 		"BlockRec":
 			animate("Idle")
@@ -5651,7 +5697,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
-#				remove_status_effect(Globals.status_effect.POS_FLOW)
+			remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("aBlock")
 		"aBlockRec":
 			animate("FallTransit")
@@ -5686,8 +5732,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("FallTransit")
 		"SDashTransit":
 			animate("SDash")
-		"aSDash":
-			animate("aDashBrake")
+		"SDash":
+			if !grounded:
+				animate("aDashBrake")
+			else:
+				animate("DashBrake")
 			
 		"SeqFlinchAStop":
 			animate("SeqFlinchA")
@@ -5936,10 +5985,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "RingDust", "RingDust", position, {"rot":deg2rad(sdash_angle), "back":true})
 			rotate_sprite(sdash_angle)
-		"aSDash":
-			anim_gravity_mod = 0
-			anim_friction_mod = 0
-			afterimage_timer = 1 # sync afterimage trail
+#		"SDash":
+#			anim_gravity_mod = 0
+#			anim_friction_mod = 0
+#			afterimage_timer = 1 # sync afterimage trail
 			
 	UniqChar._on_SpritePlayer_anim_started(anim_name)
 	

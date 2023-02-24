@@ -100,7 +100,7 @@ frame_data = {
 "vframes": 17
 },
 "BlockStartup": {
-"duration": 3,
+"duration": 5,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -957,9 +957,9 @@ frame_data = {
 "vframes": 17
 },
 "SDash": {
-"duration": 8,
+"duration": 24,
 "hframes": 6,
-"loop": true,
+"loop": false,
 "spritesheet": "BaseSprite",
 "timestamps": {
 0: {
@@ -967,6 +967,22 @@ frame_data = {
 "hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
 },
 4: {
+"frame": 53,
+"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
+},
+8: {
+"frame": 52,
+"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
+},
+12: {
+"frame": 53,
+"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
+},
+16: {
+"frame": 52,
+"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
+},
+20: {
 "frame": 53,
 "hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
 }
@@ -1282,7 +1298,7 @@ frame_data = {
 "vframes": 17
 },
 "aBlockStartup": {
-"duration": 3,
+"duration": 5,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1508,39 +1524,6 @@ frame_data = {
 0: {
 "frame": 18,
 "hurtbox": [ Vector2( -11, -9 ), Vector2( 9, -9 ), Vector2( 9, -26 ), Vector2( -11, -26 ) ]
-}
-},
-"vframes": 17
-},
-"aSDash": {
-"duration": 24,
-"hframes": 6,
-"loop": false,
-"spritesheet": "BaseSprite",
-"timestamps": {
-0: {
-"frame": 52,
-"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
-},
-4: {
-"frame": 53,
-"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
-},
-8: {
-"frame": 52,
-"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
-},
-12: {
-"frame": 53,
-"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
-},
-16: {
-"frame": 52,
-"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
-},
-20: {
-"frame": 53,
-"hurtbox": [ Vector2( -11, 11 ), Vector2( 11, 11 ), Vector2( 11, -11 ), Vector2( -11, -11 ) ]
 }
 },
 "vframes": 17

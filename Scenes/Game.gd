@@ -1317,28 +1317,29 @@ func test_priority(hitbox, attacker, _hurtbox, defender): # return false if atta
 	
 func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 
+	if attacker.grounded:
+		return false
+	elif attacker.get_feet_pos().y > defender.get_feet_pos().y:
+		return false # if attacker is airborne, they must be above defender
+		
 	if defender.is_atk_startup() or defender.is_atk_active():
 		
 		var defender_move_data = defender.query_move_data()
 		
 		if Globals.atk_attr.ANTI_AIR in defender_move_data.atk_attr:
-			if attacker.grounded: # can anti-air grounded aerials
-				if !Globals.atk_attr.AERIAL in hitbox.move_data.atk_attr: return false
-			else: # if attacker is airborne, they must be above defender
-				if attacker.get_feet_pos().y > defender.get_feet_pos().y: return false
-				
+
 			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
-			# and the attacker must be using an AERIAL on ground, or be airborne and above defender
+			# and the attacker must be airborne and above defender
 			var defender_tier = Globals.atk_type_to_tier(defender_move_data.atk_type)
 			var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
 			
 			if attacker_tier == 0: return true # air normals can be anti-aired by anything
 			elif attacker_tier > defender_tier: return false # cannot anti-air attacks of higher tier
-			elif attacker_tier == defender_tier:
-				if attacker.query_priority(hitbox.move_name) >= defender.query_priority():
-					return false # if same tier, cannot anti-air attacks of equal or higher priority
-				else:
-					return true # defender successfully anti-aired
+#			elif attacker_tier == defender_tier:
+#				if attacker.query_priority(hitbox.move_name) >= defender.query_priority():
+#					return false # if same tier, cannot anti-air attacks of equal or higher priority
+			else:
+				return true # defender successfully anti-aired
 					
 	return false
 	

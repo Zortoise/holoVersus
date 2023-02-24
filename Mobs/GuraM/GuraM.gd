@@ -36,27 +36,30 @@ const SPEED = 340 * FMath.S # ground speed
 const SPEED_MOD = 100
 const AIR_STRAFE_SPEED_MOD = 5 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 600 # speed limit of air strafing, limit depends on calculated air strafe speed
-const GRAVITY_MOD = 65 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 650 # affect terminal velocity downward
+const GRAVITY_MOD = 100 # make sure variable's a float
+const TERMINAL_VELOCITY_MOD = 800 # affect terminal velocity downward
 const FRICTION = 15 # between 0.0 and 1.0
 const ACCELERATION = 15 # between 0.0 and 1.0
 const AIR_RESISTANCE = 3 # between 0.0 and 1.0
 const FALL_GRAV_MOD = 100 # reduced gravity when going down
+const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 
 const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when Character's Guard Gauge is at 100%, light Characters have higher
 
 const DAMAGE_VALUE_LIMIT = 500
 
-const GG_REGEN = 100 # exact GG regened per frame when GG < 100%
+#const GUARD_DRAIN_MOD = 300
+#const GG_REGEN = 5 # exact GG regened per frame when GG < 100%
 const GUARD_GAUGE_SWELL_RATE = 50
 
-const GUARDED_DMG_MOD = 50 # % of damage taken when attacked outside Guardbroken state
-const GUARDED_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked outside Guardbroken state
+const ARMOR_TIME = 60 # frames of special armor after recovering from hitstun
+const ARMOR_DMG_MOD = 50 # % of damage taken when attacked outside armorbroken state
+const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked outside armorbroken state
 
 # level bonus to stats
-const HP_LEVEL_MOD_ARRAY = [100, 120, 140, 200, 240, 280, 320, 360, 400, 440]
-const GG_REGEN_MOD_ARRAY = [80, 90, 100, 110, 120, 130, 140, 150, 160, 170]
-const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0, 0]
+const HP_LEVEL_MOD_ARRAY = [100, 120, 140, 180, 220, 260, 300, 340, 380]
+#const GDRAIN_MOD_ARRAY = [100, 95, 90, 85, 80, 75, 70, 65, 60]
+const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0]
 
 const TRAITS = []
 
@@ -128,6 +131,7 @@ const MOVE_DATABASE = {
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
+		"priority": Globals.priority.aF,
 		"KB_angle" : 0,
 		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh1", aux_data = {"vol" : -12,} },
@@ -152,7 +156,6 @@ const MOVE_DATABASE = {
 		"knockback" : 150 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 6,
-		"priority": 5,
 		"KB_angle" : -75,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
 		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
@@ -165,7 +168,6 @@ const MOVE_DATABASE = {
 		"knockback" : 550 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 6,
-		"priority": 5,
 		"KB_angle" : -75,
 		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
@@ -179,7 +181,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"atk_level" : 2,
 		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.AERIAL],
+		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12} },
 		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
@@ -190,9 +192,8 @@ const MOVE_DATABASE = {
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 3,
-		"priority": 1,
 		"KB_angle" : -80,
-		"atk_attr" : [Globals.atk_attr.AERIAL],
+		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12, "bus" : "PitchDown"} },
 		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
@@ -204,7 +205,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.RADIAL,
 		"atk_level" : 3,
 		"KB_angle" : 72,
-		"atk_attr" : [Globals.atk_attr.AERIAL],
+		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh14", aux_data = {"vol" : -9, "bus": "PitchDown"} },
 		"hit_sound" : { ref = "impact12", aux_data = {"vol" : -15} },
 	},
@@ -239,7 +240,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"KB_angle" : -72,
-		"atk_attr" : [Globals.atk_attr.AERIAL],
+		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
 		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -10} },
 	},
@@ -251,7 +252,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 6,
 		"KB_angle" : 45,
-		"atk_attr" : [Globals.atk_attr.AERIAL],
+		"atk_attr" : [],
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
 	},
@@ -270,7 +271,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"KB_angle" : -45,
 		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
-		"atk_attr" : [Globals.atk_attr.AERIAL],
+		"atk_attr" : [],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},
@@ -934,9 +935,9 @@ func filter(atk_range: int):
 			match Character.mob_level:
 				0, 1, 2: # mass enemies, remove annoying moves
 					results = ATK_LOOKUP[atk_range][rank.LOW]
-				3, 4, 5, 6: # early enemies, remove powerful moves
+				3, 4, 5: # early enemies, remove powerful moves
 					results = ATK_LOOKUP[atk_range][rank.MID]
-				7, 8, 9: # late-game enemies, remove weaker moves
+				6, 7, 8: # late-game enemies, remove weaker moves
 					results = ATK_LOOKUP[atk_range][rank.HIGH]
 			
 	if Character.air_dashed:

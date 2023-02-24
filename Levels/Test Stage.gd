@@ -23,29 +23,23 @@ var RESOURCE_ADD = {
 }
 
 
-#enum mob_attr {POWER, HP, TOUGH, FRAGILE, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
+#enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
 #		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE}
 # extra ones: "weak_zone"
 
-# CHAIN: X, TOUGH: 0-3, SPEED: 0-6 (0 and 1 are slow), HP: 0-5 (0 and 1 are lower, 0 is 1 hp)
-# POWER: 0-5 (0 and 1 are lower), PROJ_SPEED: 0-3 (0 and 1 are slow)
+# CHAIN: X, TOUGH: 0-3, SPEED: 0-6 (0/1 are slow), HP: 0-5 (0/1 are lower, 0 is 1 hp)
+# POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow)
 
 const WAVES = {
 	1 : { # wave ID
 		"timestamps" :
 			{ # wave time
 				48 : [
-
-					{"mob" : "GuraM", "level" : 3, "variant" : "zone", "offset" : Vector2(0, 0),
+					{"mob" : "GuraM", "level" : 8, "variant" : "base", "offset" : Vector2(50, 0),
 					"attr" : {
-						Globals.mob_attr.HP : 5,
-#						Globals.mob_attr.CHAIN : 10,
-#						Globals.mob_attr.SPEED : 2,
 #						Globals.mob_attr.PROJ_SPEED : 3,
-#						Globals.mob_attr.BLACK_TRAIL : true,
-#						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+						Globals.mob_attr.BLACK_TRAIL : true,
 						} },
-
 				],
 			}
 	},

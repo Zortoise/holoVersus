@@ -353,13 +353,31 @@ var modulate_animations = {
 			},
 		}
 	},
+	"armor_time" :{
+		"duration": 6,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(0.0, 0.0, 0.0),
+			},
+			2 :
+			{
+				"modulate" : Color(1.5, 0.0, 0.0),
+			},
+			4 :
+			{
+				"modulate" : Color(1.2, 0.7, 0.7),
+			},
+		}
+	},
 	"armor_flash" :{
 		"duration": 10,
 		"loop" : false,
 		"timestamps" : {
 			0 :
 			{
-				"modulate" : Color(0.5, 0.0, 0.0),
+				"modulate" : Color(0.0, 0.0, 0.0),
 			},
 			2 :
 			{

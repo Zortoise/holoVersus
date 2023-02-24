@@ -13,15 +13,30 @@ const TERMINAL_THRESHOLD = 150 # if velocity.y is over this during hitstun, no t
 
 const GUARD_GAUGE_FLOOR = -10000
 
+const HITSTUN_TERMINAL_VELOCITY_MOD = 650
 const PLAYER_PUSH_SLOWDOWN = 95 # how much characters are slowed when they push against each other
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
 const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Guard Gauge is at 100%
-const ATK_LEVEL_TO_F_HITSTUN = [35, 40, 45, 50, 55, 60, 65, 70]
-const ATK_LEVEL_TO_L_HITSTUN = [55, 60, 65, 70, 75, 80, 85, 90]
-const ATK_LEVEL_TO_GDRAIN = [0, 1500, 1750, 2000, 2250, 2500, 2750, 3000]
+
+# old hitstun
+#const ATK_LEVEL_TO_F_HITSTUN = [35, 40, 45, 50, 55, 60, 65, 70]
+#const ATK_LEVEL_TO_L_HITSTUN = [55, 60, 65, 70, 75, 80, 85, 90]
+#const ATK_LEVEL_TO_GDRAIN = [0, 1500, 1750, 2000, 2250, 2500, 2750, 3000]
+
+# original character hitstun
+#const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
+#const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
+
+const ATK_LEVEL_TO_F_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
+const ATK_LEVEL_TO_L_HITSTUN = [40, 45, 50, 55, 60, 65, 70, 75]
+
+
+const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
+const HITSTUN_FRICTION = 15  # friction during hitstun
+const HITSTUN_AIR_RES = 3 # air resistance during hitstun
 
 const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
@@ -119,7 +134,7 @@ var current_command: String = "start" # key to a COMMANDS dictionary on UniqChar
 var command_timer := 0 # timer that counts up
 var command_style : String # to mark some command variants
 var command_array_num := 0 # some commands have an array of animations to go through
-var guardbroken := false # when GG is depleted, mob enters a guardbroken state where they no longer has superarmor till GG refills
+var armorbroken := false # when GG is depleted, mob enters a armorbroken state where they no longer has superarmor till GG refills
 var chaining := false
 var air_dashed := false
 var failed_air_low := false
@@ -142,7 +157,7 @@ func init(mob_name: String, level: int, variant: String, attr: Dictionary, start
 	face_opponent()
 	
 	mob_ref = mob_name
-	mob_level = int(clamp(level, 0, 9))
+	mob_level = int(clamp(level, 0, 8))
 	mob_variant = variant
 	mob_attr = attr
 	
@@ -163,6 +178,7 @@ func init(mob_name: String, level: int, variant: String, attr: Dictionary, start
 	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
 	
 	animate("Idle")
+	$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
 	
 	Globals.Game.spawn_SFX("Respawn", "Respawn", position, {"palette":"white", "back":true, "facing":Globals.Game.rng_facing(), \
 			"v_mirror":Globals.Game.rng_bool()})
@@ -297,7 +313,7 @@ func test1():
 func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
-		"\n" + str(velocity.y) + " " + str(velocity_previous_frame.y) + " " + str(guardbroken) + " " + str(target_ID) + \
+		"\n" + str(velocity.y) + " " + str(velocity_previous_frame.y) + " " + str(armorbroken) + " " + str(target_ID) + \
 		"\ngrounded: " + str(grounded) + " command: " + current_command + "\nchain_mem: " + str(chain_memory)
 			
 			
@@ -336,19 +352,18 @@ func simulate(_new_input_state):
 	else:
 		$MobStats.hide()
 		
-	if Globals.mob_attr.FRAGILE in mob_attr:
-		if current_guard_gauge == 0:
-			$MobStats/GG.hide()
-		else:
-			$MobStats/GG.show()
-		
-	if !guardbroken:
-		$MobStats/GG.modulate = Color(1.0, 0.5, 0.0)
+	if current_guard_gauge == 0:
+		$MobStats/GG.hide()
 	else:
+		$MobStats/GG.show()
+		
+#	if !armorbroken:
+#		$MobStats/GG.modulate = Color(1.0, 0.5, 0.0)
+	if armorbroken:
 		var value = posmod(Globals.Game.frametime, 10)
 		if value < 5:
 			$MobStats/GG.modulate = Color(0.9, 0.0, 0.0)
-		elif value < 7:
+		elif value < 6:
 			$MobStats/GG.modulate = Color(1.5, 1.5, 1.5)
 		else:
 			$MobStats/GG.modulate = Color(1.2, 0.65, 0.0)
@@ -384,25 +399,33 @@ func simulate2(): # only ran if not in hitstop
 	if !is_attacking():
 		chain_memory = []
 		
-	# GG Swell during guardbroken state
+	# GG Swell during armorbroken state
 	if !$HitStopTimer.is_running() and !state in [Globals.char_state.SEQUENCE_TARGET] and get_damage_percent() < 100:
-		if guardbroken:
+		if armorbroken:
 			current_guard_gauge = int(min(0, current_guard_gauge + UniqChar.get_stat("GUARD_GAUGE_SWELL_RATE")))
-			if !$HitStunTimer.is_running(): # guardbroken and out of hitstun, instantly gain back all Guard Gauge
+			if !$HitStunTimer.is_running(): # armorbroken and out of hitstun, instantly gain back all Guard Gauge
 				reset_guard_gauge()
-				guardbroken = false
+				armorbroken = false
+				$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
+				play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
+				Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+					"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
 			else:
 				if current_guard_gauge == 0: # instantly recover from hitstun if GG swell back to max
 					$HitStunTimer.stop()
-					guardbroken = false
+					armorbroken = false
+					$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
+					play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
+					Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+						"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
 				
 			guard_gauge_update()
-		else:
-			if current_guard_gauge < 0:
-				var guard_gauge_regen: int = 0
-				guard_gauge_regen = UniqChar.get_stat("GG_REGEN")
-				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen))
-				guard_gauge_update()
+#		else:
+#			if current_guard_gauge < 0:
+#				var guard_gauge_regen: int = 0
+#				guard_gauge_regen = UniqChar.get_stat("GG_REGEN")
+#				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen))
+#				guard_gauge_update()
 		
 	if state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
 		simulate_sequence()
@@ -454,6 +477,11 @@ func simulate2(): # only ran if not in hitstop
 
 	var gravity_temp: int = FMath.percent(GRAVITY, UniqChar.get_stat("GRAVITY_MOD"))
 		
+	if is_hitstunned(): # fix and lower gravity during hitstun
+		gravity_temp = FMath.percent(GRAVITY, HITSTUN_GRAV_MOD)
+	else:
+		gravity_temp = FMath.percent(GRAVITY, UniqChar.get_stat("GRAVITY_MOD")) # each character are affected by gravity differently out of hitstun
+		
 	if anim_gravity_mod != 100:
 		gravity_temp = FMath.percent(GRAVITY, anim_gravity_mod) # anim_gravity_mod is based off current animation
 
@@ -480,6 +508,9 @@ func simulate2(): # only ran if not in hitstop
 	
 	var has_terminal := true
 
+	if new_state == Globals.char_state.DEAD:
+		has_terminal = false
+
 #	if is_atk_startup():
 #		if Globals.atk_attr.NO_TERMINAL_VEL_STARTUP in query_atk_attr():
 #			 has_terminal = false
@@ -488,22 +519,18 @@ func simulate2(): # only ran if not in hitstop
 			 has_terminal = false
 
 	if has_terminal:
-		terminal = FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD"))
-
-		if velocity.y > terminal:
-			velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
-			
 		if is_hitstunned(): # during hitstun, only slowdown within a certain range
-			terminal = FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD"))
+			terminal = FMath.percent(GRAVITY, HITSTUN_TERMINAL_VELOCITY_MOD)
 			
 			if velocity.y < FMath.percent(terminal, TERMINAL_THRESHOLD) and velocity.y > terminal:
 				velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
-				
+		
 		else:
 			terminal = FMath.percent(GRAVITY, UniqChar.get_stat("TERMINAL_VELOCITY_MOD"))
 
 			if velocity.y > terminal:
 				velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
+
 		
 
 # FRICTION/AIR RESISTANCE AND TRIGGERED ANIMATION CHANGES ----------------------------------------------------------
@@ -514,8 +541,12 @@ func simulate2(): # only ran if not in hitstop
 	var friction_this_frame: int # 15
 	var air_res_this_frame: int
 	
-	friction_this_frame = UniqChar.get_stat("FRICTION")
-	air_res_this_frame = UniqChar.get_stat("AIR_RESISTANCE")
+	if !is_hitstunned():
+		friction_this_frame = UniqChar.get_stat("FRICTION")
+		air_res_this_frame = UniqChar.get_stat("AIR_RESISTANCE")
+	else:
+		friction_this_frame = HITSTUN_FRICTION # 15
+		air_res_this_frame = HITSTUN_AIR_RES # 3
 	
 	match state:
 		Globals.char_state.GROUND_STANDBY:
@@ -678,6 +709,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		if !$HitStunTimer.is_running():
 			$RageTimer.simulate()
 
+		armor_flash()
 		UniqChar.unique_flash()
 		process_afterimage_trail() 	# do afterimage trails
 		if state == Globals.char_state.DEAD:
@@ -694,6 +726,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		$HitStopTimer.time = hitstop
 		
 	$ModulatePlayer.simulate() # modulate animations continue even in hitstop
+	$ArmorTimer.simulate()
 	
 	test2()
 		
@@ -914,22 +947,26 @@ func general_stat_mods(to_return, stat):
 	match stat: # increase stats as level raise
 		"DAMAGE_VALUE_LIMIT":
 			to_return = FMath.percent(to_return, UniqChar.HP_LEVEL_MOD_ARRAY[mob_level])
-		"GG_REGEN":
-			to_return = FMath.percent(to_return, UniqChar.GG_REGEN_MOD_ARRAY[mob_level])
+#		"GUARD_DRAIN_MOD":
+#			to_return = FMath.percent(to_return, UniqChar.GDRAIN_MOD_ARRAY[mob_level])
 			
 	if Globals.player_count > 1: # increased stats for 2 players
 		match stat:
-			"DAMAGE_VALUE_LIMIT", "GG_REGEN":
+#			"GUARD_DRAIN_MOD":
+#				to_return = FMath.percent(to_return, 80)
+			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
 				to_return = FMath.percent(to_return, 150)
 	
 	if Globals.mob_attr.TOUGH in mob_attr:
 		match stat:
-			"GG_REGEN":
+			"GUARD_GAUGE_SWELL_RATE":
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [150, 200, 250, 300])
+			"ARMOR_TIME":
 				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [125, 150, 175, 200])
-			"GUARDED_DMG_MOD":
-				to_return = 1
-			"GUARDED_KNOCKBACK_MOD":
-				to_return = 0
+			"ARMOR_DMG_MOD":
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
+			"ARMOR_KNOCKBACK_MOD":
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
 	if Globals.mob_attr.SPEED in mob_attr:
 		match stat:
 			"SPEED_MOD":
@@ -940,6 +977,10 @@ func general_stat_mods(to_return, stat):
 				if mob_attr[Globals.mob_attr.HP] == 0:
 					return 1
 				to_return = modify_stat(to_return, Globals.mob_attr.HP, [1, 50, 150, 200, 250, 300])
+#	if Globals.mob_attr.GDRAIN in mob_attr:
+#		match stat:
+#			"GUARD_DRAIN_MOD":
+#				to_return = modify_stat(to_return, Globals.mob_attr.GDRAIN, [999, 130, 120, 110, 90, 80, 70])
 				
 	return to_return
 
@@ -1280,6 +1321,17 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 			if palette != "":
 				aux_data["palette"] = palette
 			Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data)
+		
+func armor_flash():
+	if $ArmorTimer.is_running():
+		if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["armor_time", "armor_flash"]):
+			return
+		else:
+			$ModulatePlayer.play("armor_time")
+			return
+				
+	if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["armor_time"]): # stop flashing
+		reset_modulate()
 		
 #func get_spritesheets():
 #	pass
@@ -1711,8 +1763,43 @@ func query_atk_attr_current(): # used for the FrameViewer only
 	return UniqChar.query_atk_attr(move_name)
 	
 	
-func query_priority(_in_move_name = null):
-	return 0
+func query_priority(in_move_name = null):
+	var move_name = in_move_name
+	if move_name == null:
+		move_name = get_move_name()
+	
+	var move_data = UniqChar.query_move_data(move_name)
+	if "priority" in move_data:
+		return move_data.priority
+	else:
+		match move_data.atk_type:
+			Globals.atk_type.LIGHT:
+				if grounded:
+					return Globals.priority.gL
+				else:
+					return Globals.priority.aL
+			Globals.atk_type.FIERCE:
+				if grounded:
+					return Globals.priority.gF
+				else:
+					return Globals.priority.aF
+			Globals.atk_type.HEAVY:
+				if grounded:
+					return Globals.priority.gH
+				else:
+					return Globals.priority.aH
+			Globals.atk_type.SPECIAL:
+				if grounded:
+					return Globals.priority.gSp
+				else:
+					return Globals.priority.aSp
+			Globals.atk_type.EX:
+				if grounded:
+					return Globals.priority.gEX
+				else:
+					return Globals.priority.aEX
+			Globals.atk_type.SUPER:
+				return Globals.priority.SUPER
 	
 	
 func query_move_data(in_move_name = null):
@@ -1891,11 +1978,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		adjusted_atk_level = adjusted_atk_level(hit_data)
 		hit_data["adjusted_atk_level"] = adjusted_atk_level
 		
-		if !guardbroken:
+		if !armorbroken:
 			change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 			if get_guard_gauge_percent_below() == 0:
 				hit_data["mob_break"] = true
-				guardbroken = true
+				armorbroken = true
 				repeat_memory = [] # reset move memory for getting a Break
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
 				Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
@@ -1904,7 +1991,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		var damage = calculate_damage(hit_data)
 		take_damage(damage) # do damage calculation
 		if damage > 0:
-			if guardbroken:
+			if armorbroken:
 				if hit_data.double_repeat or adjusted_atk_level == 1:
 					Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
 				else:
@@ -1918,15 +2005,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	# FIRST REACTION ---------------------------------------------------------------------------------
 	
-	if Globals.trait.NO_LAUNCH in query_traits():
+	if Globals.trait.NO_LAUNCH in query_traits() or $ArmorTimer.is_running():
 		hit_data["tough_mob"] = true
 	
-	if !Globals.mob_attr.FRAGILE in mob_attr:
-		if !guardbroken: # not guardbroken mobs
-			if !"sequence" in hit_data.move_data: # hitgrabs can still connect if the hit guardbreaks them
-				hit_data["tough_mob"] = true
-			elif current_guard_gauge == 0: # natural command grabs can still grab them if they have below 100% GG
-				hit_data["tough_mob"] = true
+#	if !(Globals.mob_attr.GDRAIN in mob_attr and mob_attr[Globals.mob_attr.GDRAIN] == 0):
+#		if !armorbroken: # not armorbroken mobs, hitgrabs can still connect if the hit guardbreaks them
+#			if !"sequence" in hit_data.move_data:
+#				hit_data["tough_mob"] = true
+#			elif get_guard_gauge_percent_below() >= 50: # natural command grabs can still grab them if they have below 50% GG
+#				hit_data["tough_mob"] = true
 
 	# unique reactions
 	if "entity_nodepath" in hit_data:
@@ -1970,15 +2057,19 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Globals.Game.set_screenshake()
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		$ModulatePlayer.play("stun_flash")
-		if !guardbroken: # death from chip damage
+		if !armorbroken: # death from chip damage
 			play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
 			Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
 		
 	elif "mob_break" in hit_data:
 		$ModulatePlayer.play("punish_sweet_flash")
-		start_command("standby")
-			
+		
+	elif !armorbroken:
+		$ModulatePlayer.play("armor_flash")
+		play_audio("block3", {"vol" : -15})
+		hit_data["no_hit_sound"] = true
+		
 	elif hit_data.sweetspotted:
 		$ModulatePlayer.play("punish_sweet_flash")
 		play_audio("break2", {"vol" : -15})
@@ -1992,13 +2083,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
-	if guardbroken:
+	if armorbroken:
 		if !hit_data.double_repeat and adjusted_atk_level <= 1 and $HitStunTimer.is_running():
 			# for atk level 1 hits on hitstunned opponent, add their hitstun to existing hitstun
 			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			$HitStunTimer.time = calculate_hitstun(hit_data)
 			launchstun_rotate = 0 # used to calculation sprite rotation during launched state
+		if $HitStunTimer.time > 0:
+			start_command("standby")
 	
 	# HITSTOP ---------------------------------------------------------------------------------------------------
 	
@@ -2012,6 +2105,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hitstop = FMath.percent(hitstop, MOB_BREAK_HITSTOP_MOD)
 		
 	hit_data["hitstop"] = hitstop # send this to attacker as well
+	if !armorbroken and !hit_data.weak_hit and !"autochain" in hit_data:
+		hitstop += 10 # extra hitstop just for defender on guarded hit
+		if "entity_nodepath" in hit_data: # for projectiles as well
+			hit_data.hitstop = hitstop
 		
 	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
 		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
@@ -2032,7 +2129,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
-	generate_hitspark(hit_data)
+	if !armorbroken:
+		Globals.Game.spawn_SFX("Superarmorspark", "Blocksparks", hit_data.hit_center, {"rot" : deg2rad(hit_data.angle_to_atker)})
+	else:
+		generate_hitspark(hit_data)
 	
 	# ---------------------------------------------------------------------------------------------------
 			
@@ -2040,7 +2140,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	var no_impact_and_vel_change := false
 
-	if guardbroken:
+	if armorbroken:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
 		if Globals.trait.NO_LAUNCH in query_traits() or knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
@@ -2142,7 +2242,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					launch_starting_rot = PI/4
 			animate("LaunchStop")
 									
-	else: # not guardbroken
+	else: # not armorbroken
 		if (is_atk_startup() or is_atk_active()) and is_special_move(get_move_name()):
 			no_impact_and_vel_change = true # no KB if mob is doing a special move
 					
@@ -2151,8 +2251,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		velocity.set_vector(knockback_strength, 0)  # reset momentum
 		velocity.rotate(knockback_dir)
 		
-		if !guardbroken and grounded and !hit_data.lethal_hit:
-			velocity.y = 0 # set to horizontal pushback on non-guardbroken defender
+		if !armorbroken and grounded and !hit_data.lethal_hit:
+			velocity.y = 0 # set to horizontal pushback on non-armorbroken defender
 			
 	if hit_data.lethal_hit:				
 		animate("Death")
@@ -2178,8 +2278,8 @@ func calculate_damage(hit_data) -> int:
 		if hit_data.sweetspotted:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
 			
-	if !guardbroken:
-		scaled_damage = FMath.percent(scaled_damage, UniqChar.get_stat("GUARDED_DMG_MOD"))
+	if !armorbroken:
+		scaled_damage = FMath.percent(scaled_damage, UniqChar.get_stat("ARMOR_DMG_MOD"))
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
 	
@@ -2190,15 +2290,18 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	# for multi-hit/autochain moves, only first hit affect GG
 		return 0
 
-	if guardbroken: # if guardbroken, no Guard Drain
+	if armorbroken: # if armorbroken, no Guard Drain
 		return 0
 		
-	if Globals.mob_attr.FRAGILE in mob_attr: # 1 hit break for FRAGILE
-		return GUARD_GAUGE_FLOOR
-	else:
-		return GUARD_GAUGE_FLOOR + 1
+	if $ArmorTimer.is_running():
+		return 0
 		
+	return GUARD_GAUGE_FLOOR
 
+#	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+#	guard_drain = FMath.percent(guard_drain, UniqChar.get_stat("GUARD_DRAIN_MOD"))
+#
+#	return guard_drain # Guard Drain on 1st hit of the combo depends on Attack Level
 	
 	
 func calculate_knockback_strength(hit_data) -> int:
@@ -2216,14 +2319,14 @@ func calculate_knockback_strength(hit_data) -> int:
 	if hit_data.sweetspotted:
 		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
 		
-	if !guardbroken:
-		knockback_strength = FMath.percent(knockback_strength, UniqChar.get_stat("GUARDED_KNOCKBACK_MOD")) # KB for non-guardbreal
-
 	# for rekkas and combo-type moves/supers, no KB boost for non-finishers
 	if "autochain" in hit_data or "multihit" in hit_data:
 		return knockback_strength
+	elif !armorbroken: # KB for non-guardbreak
+		knockback_strength = FMath.percent(knockback_strength, UniqChar.get_stat("ARMOR_KNOCKBACK_MOD"))
+			
 
-	if guardbroken and !hit_data.weak_hit:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
+	if armorbroken and !hit_data.weak_hit:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
 		var weight = get_guard_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
@@ -2302,8 +2405,8 @@ func calculate_knockback_dir(hit_data) -> int:
 			knockback_dir = posmod(knockback_dir, 360)
 #			else: print("Error: No KBOrigin found for knockback_type.RADIAL")
 			
-	# for weak hit/non-guardbroken and grounded mob, if the hit is towards left/right instead of up/down, level it
-	if grounded and (!guardbroken or hit_data.weak_hit or hit_data.adjusted_atk_level <= 1):
+	# for weak hit/non-armorbroken and grounded mob, if the hit is towards left/right instead of up/down, level it
+	if grounded and (!armorbroken or hit_data.weak_hit or hit_data.adjusted_atk_level <= 1):
 		var segment = Globals.split_angle(knockback_dir, Globals.angle_split.FOUR, hit_data.attack_facing)
 		match segment:
 			Globals.compass.E:
@@ -2345,7 +2448,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 	else:
 		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 		
-	if guardbroken:
+	if armorbroken: # start scaling down when over 50% guard gauge
 		var weight = get_guard_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
@@ -2356,7 +2459,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
 		
-	if !guardbroken:
+	if !armorbroken:
 		if hit_data.sweetspotted:
 			if "fixed_ss_hitstop" in hit_data.move_data:
 				return hit_data.move_data.fixed_ss_hitstop # for Normal hitpulls
@@ -2385,7 +2488,6 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 	
 
 func generate_hitspark(hit_data): # hitspark size determined by knockback power
-	
 
 	var hitspark_level: int
 	
@@ -2409,17 +2511,21 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		
 		if hit_data.sweetspotted: # if sweetspotted, hitspark level increased by 1
 			hitspark_level = int(clamp(hitspark_level + 1, 1, 5)) # max is 5
-		
-		
+
+			
 	if !"hitspark_type" in hit_data.move_data:
-		if hit_data.attacker_or_entity.has_method("get_default_hitspark_type"):
-			hit_data.move_data["hitspark_type"] = hit_data.attacker_or_entity.get_default_hitspark_type()
+#		if hit_data.attacker_or_entity.has_method("get_default_hitspark_type"):
+#			hit_data.move_data["hitspark_type"] = hit_data.attacker_or_entity.get_default_hitspark_type()
+		if hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_type"):
+			hit_data.move_data["hitspark_type"] = hit_data.attacker.get_default_hitspark_type()
 		else:
 			hit_data.move_data["hitspark_type"] = Globals.hitspark_type.HIT
 			
 	if !"hitspark_palette" in hit_data.move_data:
-		if hit_data.attacker_or_entity.has_method("get_default_hitspark_palette"):
-			hit_data.move_data["hitspark_palette"] = hit_data.attacker_or_entity.get_default_hitspark_palette()
+#		if hit_data.attacker_or_entity.has_method("get_default_hitspark_palette"):
+#			hit_data.move_data["hitspark_palette"] = hit_data.attacker_or_entity.get_default_hitspark_palette()
+		if hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_palette"):
+			hit_data.move_data["hitspark_palette"] = hit_data.attacker.get_default_hitspark_palette()
 		else:
 			hit_data.move_data["hitspark_palette"] = "red"
 		
@@ -2570,15 +2676,12 @@ func sequence_launch():
 			hitstop = seq_data.hitstop
 			seq_user.hitstop = hitstop
 		
-	if !guardbroken and !"weak" in seq_data:
-		var guard_drain: int
-		if Globals.mob_attr.FRAGILE in mob_attr: # 1 hit break for FRAGILE
-			guard_drain = GUARD_GAUGE_FLOOR
-		else:
-			guard_drain = GUARD_GAUGE_FLOOR + 1
-		change_guard_gauge(guard_drain)
+	if !armorbroken and !"weak" in seq_data:
+		
+		change_guard_gauge(GUARD_GAUGE_FLOOR)
+		
 		if get_guard_gauge_percent_below() == 0:
-			guardbroken = true
+			armorbroken = true
 			repeat_memory = [] # reset move memory for getting a Break
 			$ModulatePlayer.play("punish_sweet_flash")
 			play_audio("rock2", {"vol" : -10})
@@ -2653,11 +2756,11 @@ func sequence_launch():
 	
 	if get_damage_percent() >= 100:				
 		animate("Death")
-		if velocity.x == 0 and velocity.y == 0:
+		if launch_power == 0:
 			velocity.set_vector(-500 * FMath.S * facing, 0)
 			velocity.rotate(26 * facing)
 		else:
-			velocity.set_vector(500 * FMath.S * facing, 0)
+			velocity.set_vector(500 * FMath.S, 0) # don't add facing here
 			velocity.rotate(launch_angle)
 	
 		
@@ -2892,12 +2995,13 @@ func save_state():
 		"HitStopTimer_time" : $HitStopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
 		"RageTimer_time" : $RageTimer.time,
+		"ArmorTimer_time" : $ArmorTimer.time,
 		
 		"current_command" : current_command,
 		"command_timer" : command_timer,
 		"command_style" : command_style,
 		"command_array_num" : command_array_num,
-		"guardbroken" : guardbroken,
+		"armorbroken" : armorbroken,
 		"chaining" : chaining,
 		"air_dashed" : air_dashed,
 		"failed_air_low" : failed_air_low,
@@ -2973,10 +3077,11 @@ func load_state(state_data):
 	$HitStopTimer.time = state_data.HitStopTimer_time
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
 	$RageTimer.time = state_data.RageTimer_time
+	$ArmorTimer.time = state_data.ArmorTimer_time
 
 	current_command = state_data.current_command
 	command_timer = state_data.command_timer
-	guardbroken = state_data.guardbroken
+	armorbroken = state_data.armorbroken
 	command_style = state_data.command_style
 	command_array_num = state_data.command_array_num
 	chaining = state_data.chaining
