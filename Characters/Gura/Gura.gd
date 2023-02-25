@@ -779,7 +779,7 @@ func get_stat(stat: String): # later can have effects that changes stats
 	if Globals.survival_level != null:
 		match stat:
 			"DAMAGE_VALUE_LIMIT":
-				return 500
+				return FMath.percent(DAMAGE_VALUE_LIMIT, 50)
 			
 	return get(stat)
 	
@@ -895,6 +895,13 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 			atk_attr.append_array([Globals.atk_attr.ANTI_AIR])
 		"SP3[ex]", "SP3b[ex]": 
 			atk_attr.append_array([Globals.atk_attr.ANTI_AIR, Globals.atk_attr.SEMI_INVUL_STARTUP])
+		
+	if Globals.survival_level != null: # no anti-air normals during Survival Mode
+		if move_name in MOVE_DATABASE and "atk_type" in MOVE_DATABASE[move_name] and \
+				MOVE_DATABASE[move_name].atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] and \
+				Globals.atk_attr.ANTI_AIR in atk_attr:
+			while Globals.atk_attr.ANTI_AIR in atk_attr:	
+				atk_attr.erase(Globals.atk_attr.ANTI_AIR)
 		
 	return atk_attr
 	
@@ -1021,7 +1028,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.face(-Character.facing)
 			rotate_partner(Partner)
 			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
-			Character.play_audio("bling6", {"vol":-20})
+			Character.play_audio("impact29", {"vol":-27})
 		"SP6[ex]SeqB":
 			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
 			if Character.grounded:
@@ -1291,7 +1298,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"F3Startup":
-			if Character.held_version(Character.button_fierce):
+			if Globals.survival_level == null and Character.held_version(Character.button_fierce):
 				Character.animate("F3[h]Startup")
 			else:
 				Character.animate("F3[b]Startup")
@@ -2031,8 +2038,8 @@ func start_audio(anim_name):
 		"aDash", "aDashD", "aDashU":
 			Character.play_audio("dash1", {"vol" : -6})
 		"SDash":
-			Character.play_audio("dash1", {"vol" : -8})
-			Character.play_audio("launch1", {"vol" : -15})
+			Character.play_audio("dash1", {"vol" : -6})
+			Character.play_audio("launch1", {"vol" : -11})
 
 			
 		

@@ -80,11 +80,24 @@ valign = 1
 
 [node name="MobStats" type="Node2D" parent="."]
 
+[node name="Level" type="Label" parent="MobStats"]
+modulate = Color( 0.8, 0.8, 0.8, 1 )
+margin_left = -32.0
+margin_top = 28.0
+margin_right = 608.0
+margin_bottom = 86.0
+grow_horizontal = 2
+rect_scale = Vector2( 0.1, 0.1 )
+custom_fonts/font = SubResource( 29 )
+text = "Lvl 1"
+align = 1
+valign = 1
+
 [node name="HP" type="Label" parent="MobStats"]
 margin_left = -32.0
-margin_top = 27.0
+margin_top = 36.0
 margin_right = 608.0
-margin_bottom = 85.0
+margin_bottom = 94.0
 grow_horizontal = 2
 rect_scale = Vector2( 0.1, 0.1 )
 custom_fonts/font = SubResource( 29 )
@@ -94,7 +107,7 @@ valign = 1
 
 [node name="GG" type="Sprite" parent="MobStats"]
 modulate = Color( 1, 0.7, 0.1, 1 )
-position = Vector2( 0, 39 )
+position = Vector2( 0, 48 )
 texture = ExtResource( 3 )
 hframes = 21
 frame = 15

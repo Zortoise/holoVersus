@@ -181,9 +181,11 @@ var grounded := true
 var soft_grounded := false
 var hitstop = null # holder to influct hitstop at end of frame
 var status_effect_to_remove = [] # holder to remove status effects at end of frame
+var status_effect_to_add = [] # holder to add status effects at end of frame after removal
 var startup_cancel_flag := false # allow cancelling of startup frames without rebuffering
 var instant_actions_temp := [] # used to transfer instant actions captured this frame into instant_actions array after stored ones are processed
 #var alt_block := false # neutral dash can be used to block as well
+var attacked_this_frame
 
 var player_ID: int # player number controlling this character, 0 for P1, 1 for P2
 
@@ -221,6 +223,7 @@ onready var current_ex_gauge: int = 10000
 onready var super_ex_lock = null # starting EXSealTimer time
 onready var burst_token = Globals.burst.AVAILABLE
 var stock_points_left: int
+var coin_count := 0
 
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
 var ignore_list = [] # some moves has ignore_time, after hitting will ignore that player for a number of frames, used for multi-hit specials
@@ -253,6 +256,8 @@ var last_dir := 0 # dir last frame
 var GG_swell_flag := false # set to true after 1st attack taken during a combo
 var first_hit_flag := false # will not swell GG during hitstun of 1st attack taken during combo
 var lethal_flag := false # flag the hitstun as a lethal hit, can only kill during lethal hitstun
+
+
 
 # controls
 var button_up
@@ -351,6 +356,8 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.stock_points_update(self)
 	Globals.Game.burst_update(self)
+	if Globals.survival_level != null:
+		Globals.Game.coin_update(self)
 	
 	
 func set_player_id(in_player_ID): # can use this to change player you are controlling during training mode
@@ -662,6 +669,8 @@ func simulate(new_input_state):
 	
 	hitstop = null
 	status_effect_to_remove = []
+	status_effect_to_add = []
+	attacked_this_frame = false
 	
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
@@ -709,7 +718,7 @@ func simulate2(): # only ran if not in hitstop
 		soft_grounded = false
 		
 	ignore_list_progress_timer()
-	process_status_effects_timer() # remove expired status effects before running hit detection since that can add effects
+	process_status_effects_timer() # remove expired status effects
 	
 	# clearing repeat memory
 	if !is_hitstunned() and !state in [Globals.char_state.SEQUENCE_TARGET]:
@@ -909,12 +918,12 @@ func simulate2(): # only ran if not in hitstop
 					var move_data = query_move_data()
 					if !can_air_strafe(move_data):
 						continue # some attacks cannot be air strafed
-					if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
-						if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
-							continue # cannot strafe during some aerial normals
-					else: # non-Normal
-						if !Globals.atk_attr.STRAFE_NON_NORMAL in move_data.atk_attr:
-							continue # can strafe during some aerial non-normals
+#					if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
+#						if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
+#							continue # cannot strafe during some aerial normals
+#					else: # non-Normal
+#						if !Globals.atk_attr.STRAFE_NON_NORMAL in move_data.atk_attr:
+#							continue # can strafe during some aerial non-normals
 				
 				if !grounded:
 					if state == Globals.char_state.AIR_STANDBY and dir != facing: # flipping over
@@ -1370,10 +1379,10 @@ func simulate2(): # only ran if not in hitstop
 					animate("BlockRec")
 				else:
 					animate("BlockCRec")
-			elif !success_block:
-				change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_GG_COST"))
-				if current_guard_gauge <= GUARD_GAUGE_FLOOR:
-					animate("BlockRec")
+#			elif !success_block:
+			change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_GG_COST"))
+			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
+				animate("BlockRec")
 			
 #		Globals.char_state.GROUND_BLOCKSTUN:
 #			if !$BlockStunTimer.is_running():
@@ -1385,10 +1394,10 @@ func simulate2(): # only ran if not in hitstop
 					animate("aBlockRec")
 				else:
 					animate("aBlockCRec")
-			elif !success_block:
-				change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_GG_COST"))
-				if current_guard_gauge <= GUARD_GAUGE_FLOOR:
-					animate("aBlockRec")
+#			elif !success_block:
+			change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_GG_COST"))
+			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
+				animate("aBlockRec")
 					
 			air_res_this_frame = 5
 			
@@ -1542,6 +1551,9 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
 										   # useful for status effects that are removed after being hit
 		remove_status_effect(effect)
+		
+	for effect in status_effect_to_add:
+		add_status_effect(effect[0], effect[1])
 		
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
 		hitstop = null
@@ -2684,7 +2696,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
-				remove_status_effect(Globals.status_effect.POS_FLOW)
+#				remove_status_effect(Globals.status_effect.POS_FLOW)
 					
 			animate("BlockLanding")
 
@@ -2734,7 +2746,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 				change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
-				remove_status_effect(Globals.status_effect.POS_FLOW)
+#				remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("aBlock")
 
 
@@ -3307,8 +3319,10 @@ func tech():
 				$ModulatePlayer.play("unlaunch_flash")
 				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 				return true
-			elif button_aux in input_state.pressed and dodge_check():
+			elif button_aux in input_state.pressed:
 				animate("DodgeTransit")
+				if current_guard_gauge > 0:
+					reset_guard_gauge()
 				return true
 	return false
 	
@@ -3317,11 +3331,12 @@ func dodge_check():
 		return false
 	if !grounded and air_dodge <= 0:
 		return false
-	
+		
 	if current_guard_gauge > 0:
 		reset_guard_gauge()
 	else:
 		change_guard_gauge(-UniqChar.get_stat("DODGE_GG_COST"))
+		
 	return true
 	
 #func guardtech():
@@ -3972,6 +3987,11 @@ func change_burst_token(new_burst_token: int):
 	if !Globals.training_mode:
 		burst_token = new_burst_token
 		Globals.Game.burst_update(self)
+		
+func gain_coin(to_gain: int):
+	if Globals.survival_level != null:
+		coin_count += to_gain
+		Globals.Game.coin_update(self)
 	
 	
 # QUERY UNIQUE CHARACTER DATA ---------------------------------------------------------------------------------------------- 
@@ -4005,37 +4025,42 @@ func query_priority(in_move_name = null):
 		move_name = get_move_name()
 	
 	var move_data = UniqChar.query_move_data(move_name)
-	if "priority" in move_data:
-		return move_data.priority
+	if !"atk_type" in move_data: return 0 # just in case
+	
+	var priority: int
+	match move_data.atk_type:
+		Globals.atk_type.LIGHT:
+			if grounded:
+				priority = Globals.priority.gL
+			else:
+				priority = Globals.priority.aL
+		Globals.atk_type.FIERCE:
+			if grounded:
+				priority = Globals.priority.gF
+			else:
+				priority = Globals.priority.aF
+		Globals.atk_type.HEAVY:
+			if grounded:
+				priority = Globals.priority.gH
+			else:
+				priority = Globals.priority.aH
+		Globals.atk_type.SPECIAL:
+			if grounded:
+				priority = Globals.priority.gSp
+			else:
+				priority = Globals.priority.aSp
+		Globals.atk_type.EX:
+			if grounded:
+				priority = Globals.priority.gEX
+			else:
+				priority = Globals.priority.aEX
+		Globals.atk_type.SUPER:
+			priority = Globals.priority.SUPER
+				
+	if "priority_add" in move_data:
+		return priority + move_data.priority_add
 	else:
-		match move_data.atk_type:
-			Globals.atk_type.LIGHT:
-				if "aerial" in move_data:
-					return Globals.priority.aL
-				else:
-					return Globals.priority.gL
-			Globals.atk_type.FIERCE:
-				if "aerial" in move_data:
-					return Globals.priority.aF
-				else:
-					return Globals.priority.gF
-			Globals.atk_type.HEAVY:
-				if "aerial" in move_data:
-					return Globals.priority.aH
-				else:
-					return Globals.priority.gH
-			Globals.atk_type.SPECIAL:
-				if "aerial" in move_data:
-					return Globals.priority.aSp
-				else:
-					return Globals.priority.gSp
-			Globals.atk_type.EX:
-				if "aerial" in move_data:
-					return Globals.priority.aEX
-				else:
-					return Globals.priority.gEX
-			Globals.atk_type.SUPER:
-				return Globals.priority.SUPER
+		return priority
 
 			
 		
@@ -4223,7 +4248,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 func being_hit(hit_data): # called by main game node when taking a hit
 	
-	if Globals.survival_level != null and query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
+	if Globals.survival_level != null and attacked_this_frame:
 		hit_data["cancelled"] = true
 		return # cannot be attacked twice during survival mode
 	
@@ -4391,15 +4416,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					if attacker != null and check_if_crossed_up(attacker, hit_data.angle_to_atker):
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
-						if !attacker_vec.is_longer_than(STRONGBLOCK_RANGE):
+						# to strongblock a physical attack, you need to either perfect block them or
+						# block at close range, but the later is not allowed during Survival Mode
+						if Animator.query_current(["BlockStartup", "aBlockStartup"]) or \
+							(Globals.survival_level == null and !attacker_vec.is_longer_than(STRONGBLOCK_RANGE)):
 #							if Globals.survival_level != null:
 #								hit_data.block_state = Globals.block_state.WEAK # no proximity parry for Survival Mode
 							if Globals.atk_attr.ANTI_AIR in hit_data.move_data.atk_attr and !grounded:
 								hit_data.block_state = Globals.block_state.WEAK # anti-air normals force weakblock on airblockers
 							else:
-								# if blocking attacker close enough, a Strongblock occurs
-								# this give defender a chunk of Guard Gauge while draining a chuck of Guard Gauge from attacker
-								# attacker is pushed back, and cannot chain into anything except Burst Counter and Parry
+								# if perfect blocked or blocking attacker close enough, a Strongblock occurs
+								# attacker is pushed back, and cannot chain into anything except Burst Counter
 								hit_data.block_state = Globals.block_state.STRONG
 						else:
 							# if blocking attacker too far away, a Weakblock occurs
@@ -4417,7 +4444,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					if Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
-						if Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
+						if !check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker) and \
+								Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
 							hit_data.block_state = Globals.block_state.STRONG
 						else:
 							hit_data.block_state = Globals.block_state.WEAK
@@ -4553,6 +4581,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			# Burst Counter grants attacker Positive Flow
 			if attacker.current_guard_gauge < 0:
 				attacker.add_status_effect(Globals.status_effect.POS_FLOW, null)
+				attacker.status_effect_to_add.append([Globals.status_effect.POS_FLOW, null])
 				
 		elif hit_data.move_data.burst == "BurstEscape":
 			attacker.reset_jumps()
@@ -4571,8 +4600,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
 	# gain POS_FLOW on strongblock
-#	if hit_data.block_state == Globals.block_state.STRONG and current_guard_gauge < 0:
-#		add_status_effect(Globals.status_effect.POS_FLOW, null)
+	if hit_data.block_state == Globals.block_state.STRONG and current_guard_gauge < 0:
+		add_status_effect(Globals.status_effect.POS_FLOW, null)
 
 	if hit_data.double_repeat:
 		$ModulatePlayer.play("repeat")
@@ -4582,23 +4611,28 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		play_audio("bling3", {"bus" : "LowPass"})
 		
 	elif hit_data.stun:
-		add_status_effect(Globals.status_effect.STUN, 0)
-		add_status_effect(Globals.status_effect.STUN_RECOVER, null) # null means no duration
+#		add_status_effect(Globals.status_effect.STUN, 0)
+		status_effect_to_add.append([Globals.status_effect.STUN, 0])
+		status_effect_to_add.append([Globals.status_effect.STUN_RECOVER, null])
+#		add_status_effect(Globals.status_effect.STUN_RECOVER, null) # null means no duration
 		repeat_memory = [] # reset move memory for getting a Break
 		Globals.Game.set_screenshake() # screenshake
 		$ModulatePlayer.play("stun_flash")
 		play_audio("break1", {"vol" : -18})
 		
 	elif hit_data.lethal_hit:
-		add_status_effect(Globals.status_effect.LETHAL, 0)
+#		add_status_effect(Globals.status_effect.LETHAL, 0)
+		status_effect_to_add.append([Globals.status_effect.LETHAL, 0])
 		Globals.Game.set_screenshake()
 		$ModulatePlayer.play("lethal_flash")
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		if Globals.survival_level != null:
-			add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
+#			add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
+			status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
 		
 	elif hit_data.crush:
-		add_status_effect(Globals.status_effect.CRUSH, 0)
+#		add_status_effect(Globals.status_effect.CRUSH, 0)
+		status_effect_to_add.append([Globals.status_effect.CRUSH, 0])
 		$ModulatePlayer.play("stun_flash")
 		play_audio("rock2", {"vol" : -7})
 		
@@ -4630,7 +4664,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 
 	elif Globals.survival_level != null and !hit_data.weak_hit and !"autochain" in hit_data:
-		add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
+#		add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
+		status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
 		$ModulatePlayer.play("punish_sweet_flash")
 		play_audio("impact29", {"vol" : -10, "bus" : "LowPass"})
 				
@@ -4893,6 +4928,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		if hit_data.block_state != Globals.block_state.UNBLOCKED and grounded:
 			velocity.y = 0 # set to horizontal pushback on blocking defender
+			
+	if Globals.survival_level != null and $HitStunTimer.is_running():
+		attacked_this_frame = true
 		
 #	print(knockback_dir)
 #	print(velocity.x)
@@ -5433,11 +5471,14 @@ func landed_a_sequence(hit_data):
 
 	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
 	
+	if Globals.survival_level != null and "attacked_this_frame" in defender:
+		defender.attacked_this_frame = true
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
 	
 	if current_guard_gauge < 0: # gain positive flow
-		add_status_effect(Globals.status_effect.POS_FLOW, null)
+#		add_status_effect(Globals.status_effect.POS_FLOW, null)
+		status_effect_to_add.append([Globals.status_effect.POS_FLOW, null])
 		
 	chain_combo = Globals.chain_combo.NO_CHAIN
 	defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# defender lose positive flow
@@ -5481,7 +5522,8 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 	if "hitstop" in seq_hit_data and !"weak" in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
 		if lethal:
 			hitstop = LETHAL_HITSTOP
-			add_status_effect(Globals.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
+#			add_status_effect(Globals.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
+			status_effect_to_add.append([Globals.status_effect.LETHAL, 0])
 			Globals.Game.set_screenshake()
 			$ModulatePlayer.play("lethal_flash")
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
@@ -5514,7 +5556,8 @@ func sequence_launch():
 	if damage > 0 and seq_data.hitstop > 0: # launch is a hit (rare)
 		if lethal and !"weak" in seq_data:
 			hitstop = LETHAL_HITSTOP
-			add_status_effect(Globals.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
+#			add_status_effect(Globals.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
+			status_effect_to_add.append([Globals.status_effect.LETHAL, 0])
 			Globals.Game.set_screenshake()
 			$ModulatePlayer.play("lethal_flash")
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
@@ -5552,6 +5595,9 @@ func sequence_launch():
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
 	launchstun_rotate = 0 # used to calculation sprite rotation during launched state
+	
+	if Globals.survival_level != null and !"weak" in seq_data:
+		status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
 		
 	# LAUNCH POWER
 	var launch_power = seq_data.launch_power # scaled
@@ -5686,7 +5732,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
-			remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
+#			remove_status_effect(Globals.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
 			animate("Block")
 		"BlockRec":
 			animate("Idle")
@@ -5697,7 +5743,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
-			remove_status_effect(Globals.status_effect.POS_FLOW)
+#			remove_status_effect(Globals.status_effect.POS_FLOW)
 			animate("aBlock")
 		"aBlockRec":
 			animate("FallTransit")
@@ -5907,7 +5953,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			afterimage_timer = 1 # sync afterimage trail
 #			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", position, {})
 			$ModulatePlayer.play("dodge_flash")
-			play_audio("bling1", {"vol" : -18})
+			play_audio("bling1", {"vol" : -15, "bus": "PitchDown"})
 		"DodgeRec", "DodgeCRec":
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
@@ -6124,6 +6170,7 @@ func save_state():
 		"current_ex_gauge" : current_ex_gauge,
 		"super_ex_lock" : super_ex_lock,
 		"stock_points_left" : stock_points_left,
+		"coin_count" : coin_count,
 		
 		"unique_data" : unique_data,
 		"repeat_memory" : repeat_memory,
@@ -6206,11 +6253,14 @@ func load_state(state_data):
 	current_ex_gauge = state_data.current_ex_gauge
 	super_ex_lock = state_data.super_ex_lock
 	stock_points_left = state_data.stock_points_left
+	coin_count = state_data.coin_count
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.stock_points_update(self)
 	Globals.Game.burst_update(self)
+	if Globals.survival_level != null:
+		Globals.Game.coin_update(self)
 	
 	unique_data = state_data.unique_data
 	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()

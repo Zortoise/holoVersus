@@ -166,6 +166,10 @@ func setup():
 		HUD.get_node("MatchTime").hide()
 		HUD.get_node("TimeFrame").hide()
 	
+	if Globals.survival_level == null:
+		HUD.get_node("P1_HUDRect/Portrait/Coin").hide()
+		HUD.get_node("P2_HUDRect/Portrait/Coin").hide()
+	
 # ADD PLAYERS --------------------------------------------------------------------------------------------------
 	
 	if Globals.survival_level == null or Globals.player_count > 1:
@@ -327,7 +331,8 @@ func _physics_process(_delta):
 			
 	if Globals.debug_mode:
 		$PolygonDrawer.show()
-		frame_viewer.show()
+		if Globals.survival_level == null:
+			frame_viewer.show()
 	else:
 		$PolygonDrawer.hide()
 		frame_viewer.hide()
@@ -706,6 +711,12 @@ func simulate(rendering = true):
 			entity.free()
 		else:
 			entity.simulate()
+			
+	for pickup in $PickUps.get_children():
+		if pickup.free:
+			pickup.free()
+		else:
+			pickup.simulate()
 
 	if !is_stage_paused():
 		detect_hit()
@@ -723,6 +734,9 @@ func simulate(rendering = true):
 		
 	for entity in $MobEntities.get_children():
 		entity.simulate_after()
+		
+	for pickup in $PickUps.get_children():
+		pickup.simulate_after()
 
 
 	for afterimage in $Afterimages.get_children():
@@ -814,6 +828,7 @@ func save_state(timestamp):
 		"SFX_back_data" : [],
 		"SFX_front_data" : [],
 		"mob_entities_data" : [],
+		"pickups_data" : [],
 		"damage_numbers_data" : [],
 #		"audio_data" : [],
 		"stage_data" : {},
@@ -854,6 +869,9 @@ func save_state(timestamp):
 		
 	for SFX in $SFXBack.get_children():
 		game_state.SFX_back_data.append(SFX.save_state())
+		
+	for pickup in $PickUps.get_children():
+		game_state.pickups_data.append(pickup.save_state())
 		
 	for number in $DamageNumbers.get_children():
 		game_state.damage_numbers_data.append(number.save_state())
@@ -931,6 +949,8 @@ func load_state(game_state, loading_autosave = true):
 		SFX.free()
 	for SFX in $SFXBack.get_children():
 		SFX.free()
+	for pickup in $PickUps.get_children():
+		pickup.free()
 	for number in $DamageNumbers.get_children():
 		number.free()
 #	for AudioManager in $AudioPlayers.get_children():
@@ -966,6 +986,11 @@ func load_state(game_state, loading_autosave = true):
 		var new_SFX = Globals.loaded_SFX_scene.instance()
 		$SFXBack.add_child(new_SFX)
 		new_SFX.load_state(state_data)
+		
+	for state_data in loaded_game_state.pickups_data:
+		var new_pickup = LevelControl.loaded_pickup_scene.instance()
+		$PickUps.add_child(new_pickup)
+		new_pickup.load_state(state_data)
 		
 	for state_data in loaded_game_state.damage_numbers_data:
 		var new_number = Globals.loaded_dmg_num_scene.instance()
@@ -1769,6 +1794,10 @@ func burst_update(character):
 	elif character.burst_token == Globals.burst.EXHAUSTED:
 		burst_token.get_node("AnimationPlayer").play("gray")
 		
+func coin_update(character):	
+	var coin_counter = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Coin/Amount")
+	coin_counter.text = str(character.coin_count)
+		
 				
 func set_uniqueHUD(player_ID, uniqueHUD):
 	HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Unique").add_child(uniqueHUD)
@@ -1857,9 +1886,12 @@ func HUD_fade():
 # RNG GENERATOR --------------------------------------------------------------------------------------------------
 
 func rng_generate(upper_limit: int) -> int: # will return a number from 0 to (upper_limit - 1)
-	var result: int = current_rng_seed + posmod(frametime, 10000)
+	var result: int = current_rng_seed * Globals.PI_NUMBERS[posmod(current_rng_seed + frametime, 100)] + posmod(frametime, 10000)
 	current_rng_seed = wrapi(result, 1, 10000) # each call to generate a number changes the current seed
 	return posmod(result, upper_limit)
+			
+func rng_range(lower_limit: int, upper_limit: int) -> int:
+	return lower_limit + rng_generate(upper_limit - lower_limit)
 			
 func rng_facing():
 	if rng_generate(2) == 0:
@@ -1889,23 +1921,40 @@ func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Di
 	entity.init(master_ID, entity_ref, out_position, aux_data)
 	
 
-# for unique sfx, pass in the master_path as well
+# for unique sfx, pass in the master_ID as well
 # aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
-func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, master_ID = null, mob_ref = null):
+func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, master_ID = null):
 	var sfx = Globals.loaded_SFX_scene.instance()
 	if !"back" in aux_data:
 		$SFXFront.add_child(sfx)
 	else:
 		$SFXBack.add_child(sfx)
-	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, master_ID, mob_ref)
+	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, master_ID, null)
+	
+
+func spawn_mob_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, mob_ref = null):
+	var sfx = Globals.loaded_SFX_scene.instance()
+	if !"back" in aux_data:
+		$SFXFront.add_child(sfx)
+	else:
+		$SFXBack.add_child(sfx)
+	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, null, mob_ref)
 	
 	
 func spawn_afterimage(master_ID: int, spritesheet_ref: String, sprite_node_path: NodePath, color_modulate = null, starting_modulate_a = 0.5, \
-		lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER, mob_ref = null, mob_palette_ref = null):
+		lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
 	var afterimage = Globals.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
-	afterimage.init(master_ID, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader, \
+	afterimage.init(master_ID, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader)
+			
+			
+func spawn_mob_afterimage(mob_ref, mob_palette_ref, spritesheet_ref: String, sprite_node_path: NodePath, color_modulate = null, starting_modulate_a = 0.5, \
+		lifetime = 10, afterimage_shader = null):
+	var afterimage = Globals.loaded_afterimage_scene.instance()
+	$Afterimages.add_child(afterimage)
+	afterimage.init(0, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader, \
 			mob_ref, mob_palette_ref)
+
 			
 func spawn_damage_number(in_number: int, in_position: Vector2, in_color = null):
 	if Globals.damage_numbers:

@@ -6,20 +6,39 @@ signal level_cleared
 # warning-ignore:unused_signal
 signal level_failed
 
+const STARTING_TIME = -48
 
 onready var loaded_mob_scene := load("res://Scenes/Survival/Mob.tscn")
 onready var loaded_mob_entity_scene := load("res://Scenes/Survival/MobEntity.tscn")
+onready var loaded_pickup_scene := load("res://Scenes/Survival/PickUp.tscn")
 
 var UniqLevel
 
 # to save
 var level_active := true
 var wave_active := true
-var wave_timer := 0
+var wave_timer := STARTING_TIME
 var wave_ID := 1
 var mob_ID_ref := -1
 var time_of_last_spawn = null
 var wave_standby_timer := 120
+
+var to_spawn = {
+#	0: {
+#		"offset" : _,
+#		"mob_data" : _,
+#	}
+}
+
+var item_data = {
+#	"Coin": {
+#		"scene" : load("res://Items/Coin/Coin.tscn"),
+#		"frame_data" : ResourceLoader.load("res://Items/Coin/FrameData/Coin.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Items/Coin/Spritesheets/CoinSprite.png"),
+#		"palettes" : {}
+#	}
+}
+
 
 var mob_data = {
 	
@@ -79,6 +98,8 @@ func init():
 	
 	Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
 	Globals.Game.stage_ref = UniqLevel.STAGE
+	
+	load_items()
 	
 	for mob in UniqLevel.MOB_LIST:
 		
@@ -224,6 +245,27 @@ func set_up_sfx(mob_name: String, directory_name): # scan all .tres files within
 					ResourceLoader.load(directory_name + "SFX/Spritesheets/" + file_name2 + "Sprite.png")
 			file_name = directory.get_next()
 	else: print("Error: Cannot open SFX folder for mob")
+	
+	
+func load_items():
+	for item in UniqLevel.ITEMS:
+		item_data[item] = {}
+		item_data[item]["scene"] = load("res://Items/" + item + "/" + item + ".tscn")
+		item_data[item]["frame_data"] = ResourceLoader.load("res://Items/" + item + "/FrameData/" + item + ".tres")
+		item_data[item]["spritesheet"] = ResourceLoader.load("res://Items/" + item + "/Spritesheets/" + item + "Sprite.png")
+		item_data[item]["palettes"] = {}
+		
+		var directory = Directory.new()
+		if directory.open("res://Items/" + item + "/Palettes/") == OK:
+			directory.list_dir_begin(true)
+			var file_name = directory.get_next()
+			while file_name != "":
+				# load all palettes and add them to the dictionary
+				if file_name.ends_with(".png.import"):
+					var file_name2 = file_name.get_file().trim_suffix(".png.import")
+					item_data[item].palettes[file_name2] = ResourceLoader.load("res://Items/" + item + "/Palettes/" + file_name2 + ".png")
+				file_name = directory.get_next()
+		else: print("No Palettes folder for item: " + item)
 
 #-----------------------------------------------------------------------------------------------------------------------------
 
@@ -247,17 +289,34 @@ func simulate():
 			wave_standby_timer -= 1
 		else:
 	
-			if wave_timer in UniqLevel.WAVES[wave_ID].timestamps:
-				for spawn in UniqLevel.WAVES[wave_ID].timestamps[wave_timer]:
-					spawn_mob(spawn.mob, spawn.level, spawn.variant, spawn.attr, spawn.offset)
+#			if wave_timer in UniqLevel.WAVES[wave_ID].timestamps:
+#				for spawn in UniqLevel.WAVES[wave_ID].timestamps[wave_timer]:
+#					spawn_mob(spawn.mob, spawn.level, spawn.variant, spawn.attr, spawn.offset)
 				
 			if wave_timer + 48 in UniqLevel.WAVES[wave_ID].timestamps: # place warning
+				to_spawn[wave_timer + 48] = []
 				for spawn in UniqLevel.WAVES[wave_ID].timestamps[wave_timer + 48]:
-					var out_position = Globals.Game.middle_point + spawn.offset
-					out_position.y -= 25
-					Globals.Game.spawn_SFX("Warning", "Warning", out_position, {})
 					time_of_last_spawn = wave_timer + 48
+					
+					if "offset" in spawn:
+						var out_position = Globals.Game.middle_point + spawn.offset
+						out_position.y -= 25
+						Globals.Game.spawn_SFX("Warning", "Warning", out_position, {})
+						to_spawn[wave_timer + 48].append({"offset": spawn.offset, "mob_data": spawn,})
 						
+					else: # if no listed offset, random spot
+						var new_spawn_point := Vector2(Globals.Game.rng_range(Globals.Game.left_corner, Globals.Game.right_corner), 0)
+						var out_position = Globals.Game.middle_point + new_spawn_point
+						out_position.y -= 25
+						Globals.Game.spawn_SFX("Warning", "Warning", out_position, {})
+						to_spawn[wave_timer + 48].append({"offset": new_spawn_point, "mob_data": spawn,})
+					
+			if wave_timer in to_spawn:
+				for spawn_dict in to_spawn[wave_timer]:
+					spawn_mob(spawn_dict.mob_data.mob, spawn_dict.mob_data.level, spawn_dict.mob_data.variant, spawn_dict.mob_data.attr, \
+							spawn_dict.offset)
+					
+	
 			if wave_timer > UniqLevel.WAVES[wave_ID].timestamps.keys().max():
 				wave_active = false
 				
@@ -290,8 +349,9 @@ func next_wave():
 		all_waves_cleared()
 		return
 	else:
+		to_spawn = {}
 		wave_active = true
-		wave_timer = 0
+		wave_timer = STARTING_TIME
 		time_of_last_spawn = null
 		wave_standby_timer = 120
 		emit_signal("wave_cleared")
@@ -319,6 +379,12 @@ func spawn_mob_entity(master_ID: int, creator_mob_ref: String, entity_ref: Strin
 	var mob_entity = loaded_mob_entity_scene.instance()
 	Globals.Game.get_node("MobEntities").add_child(mob_entity)
 	mob_entity.init(master_ID, creator_mob_ref, entity_ref, out_position, aux_data, mob_attr, out_palette_ref)
+	
+# in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan: int = BASE_LIFESPAN, in_palette_ref = null
+func spawn_item(item_ref: String, out_position: Vector2, aux_data: Dictionary, lifespan = null, palette_ref = null):
+	var pickup = loaded_pickup_scene.instance()
+	Globals.Game.get_node("PickUps").add_child(pickup)
+	pickup.init(item_ref, out_position, aux_data, lifespan, palette_ref)
 	
 # SAVE AND LOAD-----------------------------------------------------------------------------------------------------------------------------
 

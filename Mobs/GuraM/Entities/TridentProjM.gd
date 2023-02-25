@@ -30,7 +30,7 @@ const MOVE_DATABASE = {
 }
 
 func _ready():
-	get_node("TestSprite").hide() # test sprite is for sizing collision box
+	get_node("TestSprite").free() # test sprite is for sizing collision box
 
 func init(aux_data: Dictionary):
 	
@@ -68,15 +68,15 @@ func init(aux_data: Dictionary):
 			if "2_hits_proj" in Entity.unique_data:
 				Entity.absorption_value += 1
 				Entity.life_point += 1
-			Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : Entity.palette_ref}, null, Entity.creator_mob_ref)
+			Globals.Game.spawn_mob_SFX("TridentRing", "TridentRing", Entity.position, \
+					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : Entity.palette_ref}, Entity.creator_mob_ref)
 			# if Entity.creater_mob_ref is passed in, ignores master_ID and will search for "palette" in LevelControl
 			# set "palette" to Entity.palette_ref under Entity.creater_mob_ref in LevelControl instead of "master"
 
-func spin():
-	match Animator.to_play_animation:
-		"[c1]Active", "[u][c1]Active":
-			Animator.play("[c1]Spin")
+#func spin():
+#	match Animator.to_play_animation:
+#		"[c1]Active", "[u][c1]Active":
+#			Animator.play("[c1]Spin")
 
 func turn_to_enemy():
 	
@@ -257,14 +257,14 @@ func simulate():
 				# set palette to Entity.palette_ref under Entity.creater_mob_ref in LevelControl
 			if posmod(Entity.lifetime, 2) == 0:
 				if Globals.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0, \
-							Globals.afterimage_shader.WHITE, Entity.creator_mob_ref, Entity.palette_ref)
+					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), null, \
+							0.5, 10.0, Globals.afterimage_shader.WHITE)
 				if Globals.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(0.0, 0.0, 0.0), 0.5, 10.0, \
-							Globals.afterimage_shader.MASTER, Entity.creator_mob_ref, Entity.palette_ref)
+					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 				else:
-					Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0, \
-							Globals.afterimage_shader.MASTER, Entity.creator_mob_ref, Entity.palette_ref)
+					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 		
 		"[c1]Active", "[u][c1]Active":
 			if Entity.lifetime > 25 and Entity.unique_data.spun == false:
@@ -275,14 +275,14 @@ func simulate():
 		_:
 			if posmod(Entity.lifetime, 2) == 0:
 				if Globals.mob_attr.PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0, \
-							Globals.afterimage_shader.MASTER, Entity.creator_mob_ref, Entity.palette_ref)
+					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 				elif Globals.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), null, 0.5, 10.0, \
-							Globals.afterimage_shader.WHITE, Entity.creator_mob_ref, Entity.palette_ref)
+					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), null, \
+							0.5, 10.0, Globals.afterimage_shader.WHITE)
 				elif Globals.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(0.0, 0.0, 0.0), 0.5, 10.0, \
-							Globals.afterimage_shader.MASTER, Entity.creator_mob_ref, Entity.palette_ref)
+					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 						
 	
 func kill(sound = true):
@@ -334,4 +334,9 @@ func _on_SpritePlayer_anim_finished(anim_name):
 func _on_SpritePlayer_anim_started(anim_name):
 	if anim_name.ends_with("Kill"):
 		Entity.velocity.set_vector(0, 0)
-
+		
+	else:
+		match anim_name:
+			"[c1]Spin", "[c2]Spin":
+				if Entity.v_facing == -1:
+					Entity.v_face(1)

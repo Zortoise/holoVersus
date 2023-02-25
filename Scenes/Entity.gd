@@ -111,11 +111,11 @@ func load_entity():
 		$EntitySpriteBox.free()
 		
 	if "PALETTE" in UniqEntity: # load palette
-		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palette
-			if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
+		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palettes
+			if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palettes:
 				$Sprite.material = ShaderMaterial.new()
 				$Sprite.material.shader = Globals.loaded_palette_shader
-				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqEntity.PALETTE])
+				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palettes[UniqEntity.PALETTE])
 				
 		elif get_node(creator_path).loaded_palette != null: # same palette as creator, just set UniqEntity.PALETTE to null
 			$Sprite.material = ShaderMaterial.new()
@@ -199,8 +199,20 @@ func simulate2(): # only ran if not in hitstop
 		true_position.y += velocity.y
 		position = true_position.convert_to_vec()
 		
+#	if !Globals.entity_trait.PICKUP in UniqEntity.TRAITS:
 	interactions() # do this after movement!
-	
+		
+#	else:
+#		if UniqEntity.has_method("picked_up"):
+#			pickup()
+#
+#func pickup():
+#	var character_array = get_tree().get_nodes_in_group("PlayerNodes")
+#	for character in character_array:
+#		if Detection.detect_duo(character.get_node("PlayerCollisionBox"), $EntityCollisionBox):
+#			if UniqEntity.picked_up(character):
+#				break
+			
 	
 func interactions():
 	
@@ -568,6 +580,7 @@ func save_state():
 		"facing" : facing,
 		"v_facing" : v_facing,
 		"rotation" : $Sprite.rotation,
+		"visible" : $Sprite.visible,
 		
 		"entity_ref" : entity_ref,
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
@@ -599,6 +612,7 @@ func load_state(state_data):
 	v_facing = state_data.v_facing
 	$Sprite.scale.y = v_facing
 	$Sprite.rotation = state_data.rotation
+	$Sprite.visible = state_data.visible
 
 	entity_ref = state_data.entity_ref
 	master_ID = state_data.master_ID

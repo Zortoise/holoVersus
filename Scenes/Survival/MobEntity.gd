@@ -101,11 +101,11 @@ func load_entity():
 		$EntitySpriteBox.free()
 		
 	if "PALETTE" in UniqEntity: # load palette
-#		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palette
-		if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palette:
+#		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palettes
+		if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palettes:
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[UniqEntity.PALETTE])
+			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palettes[UniqEntity.PALETTE])
 				
 		elif palette_ref != "" and palette_ref in Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes:
 			$Sprite.material = ShaderMaterial.new()

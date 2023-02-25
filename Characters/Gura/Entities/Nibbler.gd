@@ -34,7 +34,7 @@ const MOVE_DATABASE = {
 }
 
 func _ready():
-	get_node("TestSprite").hide() # test sprite is for sizing collision box
+	get_node("TestSprite").free() # test sprite is for sizing collision box
 
 func init(_aux_data: Dictionary):
 	 # starting animation
@@ -86,7 +86,7 @@ func simulate():
 	match Animator.to_play_animation: # afterimage trail
 		"Active", "bActive":
 			if posmod(Entity.lifetime, 5) == 0:
-				Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), null, 1.0, 10.0, \
+				Globals.Game.spawn_afterimage(get_node(Entity.creator_path).player_ID, Entity.entity_ref, sprite.get_path(), null, 1.0, 10.0, \
 						Globals.afterimage_shader.WHITE)
 	
 func kill(sound = true):
@@ -101,7 +101,8 @@ func kill(sound = true):
 func collision(): # collided with a platform
 	var splash_pos = Entity.position + Vector2(0, Entity.get_node("EntityCollisionBox").rect_position.y + \
 			Entity.get_node("EntityCollisionBox").rect_size.y) # get feet pos
-	Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", splash_pos, {"facing":Entity.facing, "grounded":true}, Entity.master_ID)
+	Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", splash_pos, {"facing":Entity.facing, "grounded":true, "palette" : "master"}, \
+			get_node(Entity.creator_path).player_ID)
 	kill()
 	
 #func ledge_drop():

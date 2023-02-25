@@ -16,7 +16,7 @@ var loaded_sfx = {} # code in _ready() will load this with frame_data and sprite
 #		}
 #	}
 
-var loaded_sfx_palette = { # code in _ready() will load this with .png files at start
+var loaded_sfx_palettes = { # code in _ready() will load this with .png files at start
 # example:
 #	"blue" : ResourceLoader.load("res://Assets/Palettes/blue.png")
 }
@@ -200,7 +200,7 @@ var modulate_animations = {
 			},
 			3 :
 			{
-				"modulate" : Color(1.0, 1.0, 1.0),
+				"modulate" : Color(0.8, 0.8, 0.8),
 			},
 		}
 	},
@@ -868,7 +868,7 @@ func _ready():
 			# load all needed directories
 			if file_name.ends_with(".png.import"):
 				var file_name2 = file_name.trim_suffix(".png.import")
-				loaded_sfx_palette[file_name2] = ResourceLoader.load("res://Assets/Palettes/" + file_name2 + ".png")
+				loaded_sfx_palettes[file_name2] = ResourceLoader.load("res://Assets/Palettes/" + file_name2 + ".png")
 			file_name = dir.get_next()
 	else: print("Error: Cannot open Assets/Palettes folder from LoadedSFX.gd")
 	

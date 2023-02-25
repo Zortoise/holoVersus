@@ -68,10 +68,10 @@ func load_sfx_ref(): # load frame data and spritesheet
 
 
 func palette():
-	if palette_ref in LoadedSFX.loaded_sfx_palette:
+	if palette_ref in LoadedSFX.loaded_sfx_palettes:
 		$Sprite.material = ShaderMaterial.new()
 		$Sprite.material.shader = Globals.loaded_palette_shader
-		$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palette[palette_ref])
+		$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palettes[palette_ref])
 			
 	elif mob_ref != null:
 		if palette_ref in Globals.Game.LevelControl.mob_data[mob_ref].palettes:

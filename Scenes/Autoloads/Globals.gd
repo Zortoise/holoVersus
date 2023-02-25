@@ -73,13 +73,14 @@ enum reset_type {STARTUP_RESET, NON_ATK_RESET, EARLY_RESET, FULL_ACTIVE_RESET}
 # EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special
 # FULL_ACTIVE_RESET = can a_reset anytime during active frames of this Special
 
-enum entity_trait {GROUNDED, LEDGE_STOP}
+enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 enum moving_platform {MOVING, WARPING}
 enum dmg_num_col {WHITE, RED, GRAY, GREEN}
 enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
 		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE}
 enum peak_flag {GROUNDED, JUMPING, PEAK, PEAK_SPENT} # for mob AI command
+enum strafe_style {NONE, TOWARDS, AWAY, AWAY_ON_DESCEND}
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
 		P1_UNIQUE, P1_PAUSE,
@@ -216,6 +217,19 @@ onready var INPUTS = [ # acts like a const, need "onready var" since using enums
 		pause = ["P2_pause", Globals.button.P2_PAUSE]
 	},
 ]
+
+const PI_NUMBERS = [
+	3,1,4,1,5, 9,2,6,5,3, 
+	5,8,9,7,9, 3,2,3,8,4,
+	6,2,6,4,3, 3,8,3,2,7,
+	9,5,0,2,8, 8,4,1,9,7,
+	1,6,9,3,9, 9,3,7,5,1,
+	0,5,8,2,0, 9,7,4,9,4,
+	4,5,9,2,3, 0,7,8,1,6,
+	4,0,6,2,8, 6,2,0,8,9,
+	9,8,6,2,8, 0,3,4,8,2,
+	5,3,4,2,1, 1,7,0,6,7]
+
 
 func _ready():
 	self.set_pause_mode(2)

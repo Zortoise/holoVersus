@@ -1,0 +1,86 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"duration": 28,
+"hframes": 6,
+"loop": true,
+"spritesheet": "CoinSprite",
+"timestamps": {
+0: {
+"frame": 3
+},
+5: {
+"frame": 4
+},
+9: {
+"frame": 5
+},
+12: {
+"frame": 6
+},
+15: {
+"frame": 7
+},
+18: {
+"frame": 8
+},
+21: {
+"frame": 9
+},
+24: {
+"frame": 10
+}
+},
+"vframes": 3
+},
+"Pickup": {
+"duration": 12,
+"hframes": 6,
+"loop": false,
+"spritesheet": "CoinSprite",
+"timestamps": {
+0: {
+"frame": 2
+},
+2: {
+"frame": 11
+},
+4: {
+"frame": 12
+},
+6: {
+"frame": 13
+},
+8: {
+"frame": 14
+},
+10: {
+"frame": 15
+}
+},
+"vframes": 3
+},
+"Spawn": {
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "CoinSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+3: {
+"frame": 1
+},
+6: {
+"frame": 2
+}
+},
+"vframes": 3
+}
+}

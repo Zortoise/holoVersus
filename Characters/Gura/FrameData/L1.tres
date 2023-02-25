@@ -102,7 +102,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( 28, 15 ), Vector2( 52, 15 ), Vector2( 52, 1 ), Vector2( 28, 1 ) ]
 },
 9: {
-"frame": 0,
+"frame": 9,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -10, 22 ), Vector2( 14, 22 ), Vector2( 14, -22 ), Vector2( -10, -22 ) ],
 "sdhurtbox": [  ]

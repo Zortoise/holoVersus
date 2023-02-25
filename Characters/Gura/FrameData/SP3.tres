@@ -44,7 +44,7 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxUnder_frame": 15,
-"frame": 0,
+"frame": 11,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -15, 22 ), Vector2( 12, 22 ), Vector2( 12, -4 ), Vector2( -15, -4 ) ],
 "kborigin": null,
@@ -52,7 +52,7 @@ frame_data = {
 },
 4: {
 "SfxUnder_frame": 15,
-"frame": 11,
+"frame": 12,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -15, 22 ), Vector2( 12, 22 ), Vector2( 12, -4 ), Vector2( -15, -4 ) ],
 "kborigin": null,
@@ -60,7 +60,7 @@ frame_data = {
 },
 8: {
 "SfxUnder_frame": 15,
-"frame": 12,
+"frame": 13,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -15, 22 ), Vector2( 12, 22 ), Vector2( 12, -4 ), Vector2( -15, -4 ) ],
 "kborigin": null,
@@ -68,7 +68,7 @@ frame_data = {
 },
 12: {
 "SfxUnder_frame": 15,
-"frame": 13,
+"frame": 14,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -13 ), Vector2( -12, -13 ) ],
 "kborigin": null,
@@ -152,7 +152,7 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxUnder_frame": 0,
-"frame": 0,
+"frame": 11,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -14, 22 ), Vector2( 12, 22 ), Vector2( 12, -7 ), Vector2( -14, -7 ) ],
 "kborigin": null,

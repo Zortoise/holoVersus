@@ -34,8 +34,8 @@ const NAME = "Gura"
 # Character movement stats, use to overwrite
 const SPEED = 340 * FMath.S # ground speed
 const SPEED_MOD = 100
-const AIR_STRAFE_SPEED_MOD = 5 # percent of ground speed
-const AIR_STRAFE_LIMIT_MOD = 600 # speed limit of air strafing, limit depends on calculated air strafe speed
+const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
+const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const GRAVITY_MOD = 100 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 800 # affect terminal velocity downward
 const FRICTION = 15 # between 0.0 and 1.0
@@ -71,6 +71,7 @@ const UNIQUE_DATA_REF = {
 
 const STARTERS = ["L1", "L3", "F1", "F2", "F3", "H", "aL1", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "aSP1", \
 	"aSP2", "SP3"]
+const NO_IMPULSE = ["SP1"]
 
 
 const MOVE_DATABASE = {
@@ -107,6 +108,7 @@ const MOVE_DATABASE = {
 		"knockback" : 445 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
+		"priority_add" : 2,
 		"KB_angle" : -80,
 		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh9", aux_data = {"vol" : -18} },
@@ -131,7 +133,7 @@ const MOVE_DATABASE = {
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
-		"priority": Globals.priority.aF,
+		"priority_add" : -1,
 		"KB_angle" : 0,
 		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh1", aux_data = {"vol" : -12,} },
@@ -192,6 +194,7 @@ const MOVE_DATABASE = {
 		"knockback" : 400 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 3,
+		"priority_add": 1,
 		"KB_angle" : -80,
 		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12, "bus" : "PitchDown"} },
@@ -239,6 +242,7 @@ const MOVE_DATABASE = {
 		"knockback" : 350 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
+		"priority_add" : 1,
 		"KB_angle" : -72,
 		"atk_attr" : [],
 		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
@@ -315,9 +319,9 @@ const COMMANDS = {
 				"decision" : "point_blank",},
 				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100),
 				"decision" : "close_range",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(250, 100),
+				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(270, 100),
 				"decision" : "mid_range",},
-				{"type" : "zone", "origin" : Vector2(0, -100), "size" : Vector2(100, 150),
+				{"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100),
 				"decision" : "anti_air_short",},
 				{"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(180, 300),
 				"decision" : "anti_air",},
@@ -331,9 +335,9 @@ const COMMANDS = {
 				"decision" : "point_blank",},
 				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100),
 				"decision" : "close_range",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(250, 100),
+				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(270, 100),
 				"decision" : "mid_range",},
-				{"type" : "zone", "origin" : Vector2(0, -100), "size" : Vector2(100, 150),
+				{"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100),
 				"decision" : "anti_air_short",},
 				{"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(180, 150),
 				"decision" : "anti_air",},
@@ -347,9 +351,9 @@ const COMMANDS = {
 				"decision" : "point_blank",},
 				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100),
 				"decision" : "close_range",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(250, 100),
+				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(270, 100),
 				"decision" : "mid_range",},
-				{"type" : "zone", "origin" : Vector2(0, -100), "size" : Vector2(100, 150),
+				{"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100),
 				"decision" : "anti_air_short",},
 				{"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(180, 150),
 				"decision" : "anti_air",},
@@ -379,6 +383,8 @@ const COMMANDS = {
 			"triggers" : [
 				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100), "low_height" : true,
 				"decision" : "air_close",},
+				{"type" : "zone", "origin" : Vector2(0, 50), "size" : Vector2(80, 100), "downward" : true,
+				"decision" : "air_low_short",},
 			]
 		},
 		
@@ -397,6 +403,16 @@ const COMMANDS = {
 			"anim" : "DashTransit",	
 #			"decision" : "retreat",
 		},
+		"dash_dance": {
+			"action": "anim",
+			"no_c_rec" : true,
+			"dir": "retreat",
+			"anim" : "DashTransit",	
+			"style" : "dash_dance",
+			"next" : "option_close"
+#			"decision" : "retreat",
+		},
+		
 		
 		"air_dash": {
 			"action": "anim",
@@ -440,7 +456,7 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : "JumpTransit",
 			"style" : "cross_jump",
-			"next" : "option_air_short"
+			"next" : "option_close"
 		},
 	
 		# GROUND ATTACKS ------------------------------------------------------------------------------------------------
@@ -462,6 +478,11 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : "F1Startup",
 		},
+		"backswing_combo": {
+			"action": "anim",
+			"anim" : ["F1Startup", "F2Startup"],
+		},
+		
 		"rush_upthrust": {
 			"action": "anim",
 			"anim" : "L3Startup",
@@ -475,6 +496,10 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : "F2Startup",
 		},
+		"thrust_combo": {
+			"action": "anim",
+			"anim" : ["F2Startup", "SP1Startup"],
+		},
 		
 		"overhead": {
 			"action": "anim",
@@ -485,15 +510,15 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : "HStartup",
 		},
-		"sharkstomp_dash": {
+#		"sharkstomp_dash": {
+#			"action": "anim",
+#			"no_c_rec" : true,
+#			"anim" : ["DashTransit", "HStartup"],
+#		},
+		"sharkstomp_combo": {
 			"action": "anim",
 			"no_c_rec" : true,
-			"anim" : ["DashTransit", "HStartup"],
-		},
-		"sharkstomp_dash_combo": {
-			"action": "anim",
-			"no_c_rec" : true,
-			"anim" : ["DashTransit", "HStartup", "SP3Startup", "aSP1Startup"],
+			"anim" : ["HStartup", "SP3Startup", "aSP1Startup"],
 		},
 		
 		"hammerhead": {
@@ -504,11 +529,11 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : ["SP3Startup", "aSP1Startup"],
 		},
-		"hammerhead_dash":{
-			"action": "anim",
-			"no_c_rec" : true,
-			"anim" : ["DashTransit", "SP3Startup"],
-		},
+#		"hammerhead_dash":{
+#			"action": "anim",
+#			"no_c_rec" : true,
+#			"anim" : ["DashTransit", "SP3Startup"],
+#		},
 			
 
 		
@@ -584,23 +609,27 @@ const ATK_LOOKUP = {
 		rank.LOW : ["double_stab"],
 		rank.MID : ["double_stab_combo1", "hammerhead"],
 		rank.HIGH : ["double_stab_combo2", "hammerhead_combo"],
+		rank.RUSH : ["double_stab_combo2", "hammerhead"],
 		rank.SHARK : ["hammerhead"],
 		rank.ZONE : ["back_dash"]
 	},
 	atk_range.CLOSE_RANGE : {
 		rank.LOW : ["double_stab", "backswing", "rush_upthrust"],
-		rank.MID : ["double_stab_combo1", "thrust", "backswing", "sharkstomp", "rush_upthrust", "overhead"],
-		rank.HIGH : ["double_stab_combo2", "thrust", "backswing", "sharkstomp", "hammerhead_combo", \
-				"rush_upthrust_combo", "overhead"],
-		rank.SHARK : ["sharkstomp", "hammerhead", "shorthop"],
+		rank.MID : ["dash_dance", "shorthop", "double_stab_combo1", "thrust", "backswing", "sharkstomp", "rush_upthrust", "overhead"],
+		rank.HIGH : ["dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust_combo", "backswing_combo", "sharkstomp_combo", \
+				"hammerhead_combo", "rush_upthrust_combo", "overhead"],
+		rank.RUSH : ["dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust", "backswing_combo", "sharkstomp", \
+				"rush_upthrust_combo", "hammerhead"],
+		rank.SHARK : ["dash_dance", "shorthop", "sharkstomp", "hammerhead", "shorthop"],
 		rank.ZONE : ["back_dash", "back_jump"]
 	},
 	atk_range.MID_RANGE : {
-		rank.LOW : ["rush_upthrust", "dash"],
-		rank.MID : ["thrust", "rush_upthrust_combo", "dash", "throw_trident"],
-		rank.HIGH : ["sharkstomp_dash", "sharkstomp_dash_combo", "thrust", "rush_upthrust_combo", "throw_trident", "tri_throw_trident"],
-		rank.SHARK : ["sharkstomp", "sharkstomp_dash", "dash", "shorthop"],
-		rank.RUSH : ["thrust", "rush_upthrust", "rush_upthrust_combo", "dash"],
+		rank.LOW : ["rush_upthrust", "thrust", "backswing", "dash"],
+		rank.MID : ["shorthop", "thrust", "backswing_combo", "rush_upthrust_combo", "dash", "throw_trident"],
+		rank.HIGH : ["shorthop", "shorthop", "sharkstomp_combo", "thrust_combo", "backswing_combo", "rush_upthrust_combo", \
+				"throw_trident"],
+		rank.SHARK : ["shorthop", "sharkstomp", "dash", "shorthop"],
+		rank.RUSH : ["shorthop", "shorthop", "thrust", "backswing_combo", "rush_upthrust", "rush_upthrust_combo"],
 		rank.ZONE : ["back_dash", "back_jump", "back_dash", "back_jump", "throw_trident"]
 	},
 	atk_range.LONG_RANGE : {
@@ -613,15 +642,16 @@ const ATK_LOOKUP = {
 	},
 	atk_range.ANTI_AIR_SHORT: {
 		rank.LOW : ["overhead"],
-		rank.MID : ["overhead"],
-		rank.HIGH : ["sharkstomp", "overhead", "hammerhead_combo"],
+		rank.MID : ["overhead", "sharkstomp"],
+		rank.HIGH : ["sharkstomp_combo", "overhead", "hammerhead_combo"],
+		rank.RUSH : ["overhead", "sharkstomp", "hammerhead"],
 		rank.SHARK : ["sharkstomp", "hammerhead"],
 		rank.ZONE : ["back_dash", "up_throw_trident"]
 	},
 	atk_range.ANTI_AIR: {
 		rank.LOW : ["neutral_jump"],
 		rank.MID : ["neutral_jump", "hammerhead", "up_throw_trident"],
-		rank.HIGH : ["hammerhead_combo", "up_throw_trident", "up_tri_throw_trident"],
+		rank.HIGH : ["neutral_jump", "hammerhead_combo", "up_throw_trident"],
 		rank.SHARK : ["neutral_jump", "hammerhead"],
 		rank.RUSH : ["neutral_jump"],
 		rank.ZONE : ["up_throw_trident", "up_tri_throw_trident"]
@@ -629,7 +659,7 @@ const ATK_LOOKUP = {
 	atk_range.AIR_CLOSE: {
 		rank.LOW : ["air_tail"],
 		rank.MID : ["air_uptail", "air_tail", "air_overhead"],
-		rank.HIGH : ["air_uptail", "air_overhead", "air_shark", "air_surf"],
+		rank.HIGH : ["air_uptail", "air_overhead", "air_shark"],
 		rank.SHARK : ["air_shark"],
 		rank.ZONE : ["air_back_dash", "air_trident"]
 	},
@@ -644,6 +674,7 @@ const ATK_LOOKUP = {
 		rank.LOW : ["air_tail"],
 		rank.MID : ["air_hitgrab", "air_tail"],
 		rank.HIGH : ["air_hitgrab", "air_tail", "air_down_trident"],
+		rank.RUSH : ["air_hitgrab", "air_tail"],
 		rank.SHARK : ["air_shark"],
 		rank.ZONE : ["air_down_trident"]
 	},
@@ -651,6 +682,7 @@ const ATK_LOOKUP = {
 		rank.LOW : ["option_air"],
 		rank.MID : ["option_air", "air_down_trident"],
 		rank.HIGH : ["air_down_trident"],
+		rank.RUSH : ["option_air"],
 		rank.SHARK : ["options_air"],
 		rank.ZONE : ["air_down_trident"]
 	},
@@ -677,12 +709,15 @@ func decision(decision_ref = null) -> bool:
 	match Character.mob_variant:
 		"test":
 			match decision_ref:
-#				"air_close":
-#					Character.target_closest()
-#					Character.start_command("air_uptail")
+#				"air_low_short":
+#					Character.start_command("air_hitgrab")
 #					return true
-				_:
-					Character.start_command("hammerhead_dash")
+				"close_range":
+					Character.target_closest()
+					filter(atk_range.CLOSE_RANGE)
+					return true
+				"start", "passive", "standby", null:
+					Character.start_command("dash_dance")
 					return true
 					
 		"base":
@@ -694,7 +729,7 @@ func decision(decision_ref = null) -> bool:
 					if Globals.Game.rng_generate(100) < idle_chance():
 						Character.start_command("idle")
 					else:
-						Character.start_command(Globals.Game.rng_array(["seek", "seek", "forward_jump", "dash"]))
+						Character.start_command(Globals.Game.rng_array(["seek", "seek", "forward_jump", "shorthop", "dash"]))
 					return true
 					
 				"point_blank":
@@ -749,12 +784,13 @@ func decision(decision_ref = null) -> bool:
 					filter(atk_range.AIR_FAR)
 					return true
 
-				_: # if opponent is close, do offense, if not has a chance to do LONG_RANGE
+				"standby", null: # if opponent is close, do offense, if not has a chance to do LONG_RANGE
 					if Globals.Game.rng_generate(100) < idle_chance():
 						Character.start_command("idle")
 						return true
-					elif Character.get_opponent_x_dist() <= 100 or Globals.Game.rng_generate(100) < 70:
-						return decision("offense")
+					elif Character.get_opponent_x_dist() <= 150 or Globals.Game.rng_generate(100) < 70:
+						Character.start_command("option_close")
+						return true
 					else:
 						filter(atk_range.LONG_RANGE)
 						return true
@@ -771,7 +807,7 @@ func decision(decision_ref = null) -> bool:
 					if Globals.Game.rng_generate(100) < idle_chance():
 						Character.start_command("idle")
 					else:
-						Character.start_command(Globals.Game.rng_array(["seek", "seek", "forward_jump", "dash"]))
+						Character.start_command(Globals.Game.rng_array(["seek", "seek", "forward_jump", "shorthop", "dash"]))
 					return true
 					
 				"point_blank":
@@ -801,6 +837,7 @@ func decision(decision_ref = null) -> bool:
 							Character.start_command("air_dash")
 						else:
 							Character.start_command("option_air")
+						return true
 				"air_close":
 					Character.target_closest()
 					filter(atk_range.AIR_CLOSE)
@@ -828,12 +865,13 @@ func decision(decision_ref = null) -> bool:
 					filter(atk_range.AIR_FAR)
 					return true
 
-				_:
+				"standby", null:
 					if Globals.Game.rng_generate(100) < idle_chance():
 						Character.start_command("idle")
 						return true
 					else:
-						return decision("offense")
+						Character.start_command("option_close")
+						return true
 					
 		"zone":		
 			match decision_ref:
@@ -887,11 +925,11 @@ func decision(decision_ref = null) -> bool:
 					filter(atk_range.AIR_FAR)
 					return true
 
-				_:
+				"standby", null:
 					var idle_chance = idle_chance()
-					if Globals.Game.rng_generate(100) < idle_chance + FMath.percent(100 - idle_chance, 50):
+					if Globals.Game.rng_generate(100) < idle_chance:
 						Character.start_command("idle")
-					elif Character.get_opponent_x_dist() < 250 and Globals.Game.rng_generate(100) < 80:
+					elif Character.get_opponent_x_dist() < 250 and Globals.Game.rng_generate(100) < 50:
 						if !Character.is_at_corners(): 
 							Character.start_command(Globals.Game.rng_array(["back_dash", "back_jump"]))
 						else:
@@ -967,38 +1005,58 @@ func get_stat(stat: String): # later can have effects that changes stats
 	
 	
 func jump_style_check(): # from main character node
+	Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+	Character.strafe_style = Globals.strafe_style.NONE
+	
 	match Character.command_style:
 		"forward_jump":
-			Character.velocity.y = -850 * FMath.S
-			Character.velocity.x += FMath.percent(Character.facing * 250 * FMath.S, get_stat("SPEED_MOD"))
-			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			if Globals.Game.rng_bool():
-				Character.command_style = "strafe_forward"
-				return
-		"back_jump":
-			Character.velocity.y = -850 * FMath.S
-			Character.velocity.x -= FMath.percent(Character.facing * 250 * FMath.S, get_stat("SPEED_MOD"))
-			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			if Globals.Game.rng_bool():
-				Character.command_style = "strafe_backward"
-				return
-		"neutral_jump":
 			Character.velocity.y = -1000 * FMath.S
-			Character.command_style = "strafe_forward"
-			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			return
-		"shorthop":
-			Character.velocity.y = -500 * FMath.S
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 150)
-			var sfx_point = Character.get_feet_pos()
-			sfx_point.x -= Character.facing * 5 # spawn the dust behind slightly
-			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", sfx_point, {"facing":Character.facing, "grounded":true})
-		"cross_jump":
-			Character.velocity.y = -850 * FMath.S
 			Character.velocity.x += FMath.percent(Character.facing * 400 * FMath.S, get_stat("SPEED_MOD"))
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			
+			if Globals.Game.rng_bool():
+				Character.strafe_style = Globals.strafe_style.TOWARDS
+		"back_jump":
+			Character.velocity.y = -1000 * FMath.S
+			Character.velocity.x -= FMath.percent(Character.facing * 400 * FMath.S, get_stat("SPEED_MOD"))
+			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Character.strafe_style = Globals.strafe_style.AWAY
+		"neutral_jump":
+			Character.velocity.y = -1000 * FMath.S
+			Character.strafe_style = Globals.strafe_style.TOWARDS
+			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"shorthop":
+			Character.velocity.y = -625 * FMath.S
+			Character.velocity.x += FMath.percent(Character.facing * 450 * FMath.S, get_stat("SPEED_MOD"))
+			var sfx_point = Character.get_feet_pos()
+			sfx_point.x -= Character.facing * 5 # spawn the dust behind slightly
+			Character.strafe_style = Globals.strafe_style.TOWARDS
+			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", sfx_point, {"facing":Character.facing, "grounded":true})
+		"cross_jump":
+			Character.velocity.y = -1000 * FMath.S
+			Character.velocity.x += FMath.percent(Character.facing * 800 * FMath.S, get_stat("SPEED_MOD"))
+			Character.strafe_style = Globals.strafe_style.AWAY_ON_DESCEND
+			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 	Character.command_style = ""
+
+
+func generate_loot() -> Array:
+	var loot = []
+	match Character.mob_level:
+		0, 1:
+			loot.append_array(["Coin", "Coin", "Coin"])
+		2, 3:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin"])
+		4, 5:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin"])
+		6, 7:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+		8:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+	
+	return loot
+
+
+# ------------------------------------------------------------------------------------------------------------------------------------
 
 func _ready():
 	get_node("TestSprite").free() # test sprite is for sizing collision box
@@ -1083,7 +1141,11 @@ func check_semi_invuln():
 
 func simulate():
 	
-	pass
+	# can strafe up/down while doing air surf
+	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aSP2Active"]):
+		var v_dir = Character.get_opponent_v_dir()  # if +1, target is under, if -1, target is above
+		if v_dir != 0:
+			Character.velocity.y += v_dir * 100 * FMath.S
 			
 
 
@@ -1307,7 +1369,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"DashTransit":
 			Character.animate("Dash")
 		"Dash":
-			Character.animate("DashBrake")
+			if Character.command_style == "dash_dance":
+				Character.face(-Character.facing)
+				Character.animate("DashTransit")
+				Character.command_style = ""
+			else:
+				Character.animate("DashBrake")
 		"DashBrake":
 			Character.animate("Idle")
 		"aDashTransit":
@@ -1510,9 +1577,9 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 		"SP3Startup":
 			Character.animate("SP3Active")
-			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+			Globals.Game.spawn_mob_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
 					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true, \
-					"palette":Character.palette_ref}, null, Character.mob_ref)
+					"palette":Character.palette_ref}, Character.mob_ref)
 		"SP3Active":
 			Character.animate("SP3bActive")
 		"SP3bActive":
@@ -1523,7 +1590,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 	if Globals.mob_attr.CHAIN in Character.mob_attr:
 		if Character.is_atk_recovery():
-			if Character.chain_memory.size() < Character.rand_max_chain_size:
+			if Character.chain_memory.size() < Character.rand_max_chain_size and !Character.is_opponent_crossing_mob():
 				Character.chaining = true
 				var select = []
 				if Character.grounded:
@@ -1536,6 +1603,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 						select.erase(chained)
 				
 				if select.size() > 0:
+					Character.afterimage_cancel()
 					Character.animate(Globals.Game.rng_array(select))
 				else:
 					Character.chaining = false
@@ -1550,14 +1618,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 		Character.chain_memory.append(anim_name)
 						
 	if Character.chaining:
-		Character.afterimage_cancel()
+#		Character.afterimage_cancel()
 		Character.face_opponent()
 		Character.chaining = false
+		
+	if Character.is_atk_startup() and !refine_move_name(Character.get_move_name()) in NO_IMPULSE: # impulse
+		Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 		if Character.grounded:
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 150)
-#			Character.velocity.x = int(clamp(Character.velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 200)
+	#			Character.velocity.x = int(clamp(Character.velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
+		else:
+			Character.velocity.y = FMath.percent(Character.velocity.y, 50)
 
 	match anim_name:
 		"Dash":
@@ -1589,9 +1662,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 		
 		
 		"L3Startup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 250)
-			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-				{"facing":Character.facing, "grounded":true})
+			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 100)
+#			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
+#				{"facing":Character.facing, "grounded":true})
 		
 		"F1Startup":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
@@ -1688,8 +1761,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 50
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing, "palette":Character.palette_ref}, \
-					null, Character.mob_ref)
+			Globals.Game.spawn_mob_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing, "palette":Character.palette_ref}, \
+					Character.mob_ref)
 		"aSP2Rec", "aSP2CRec":
 			Character.velocity_limiter.down = 70
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)

@@ -17,19 +17,19 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 7,
+"frame": 27,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 },
 2: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 8,
+"frame": 28,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 },
 4: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 9,
+"frame": 29,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 },
 6: {
@@ -137,7 +137,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 40, -15 ),
-"frame": 6,
+"frame": 21,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 }
 },
@@ -197,7 +197,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 40, -15 ),
-"frame": 6,
+"frame": 21,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 }
 },
@@ -275,7 +275,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 40, -15 ),
-"frame": 6,
+"frame": 21,
 "hurtbox": [ Vector2( -12, 6 ), Vector2( -1, 6 ), Vector2( -1, 22 ), Vector2( 27, 22 ), Vector2( 27, -9 ), Vector2( -12, -9 ) ]
 }
 },
@@ -401,7 +401,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 7,
 "entityspawn": null,
-"frame": 21,
+"frame": 22,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 1: {
@@ -443,7 +443,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 7,
 "entityspawn": null,
-"frame": 22,
+"frame": 23,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 3: {
@@ -503,7 +503,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 10,
 "entityspawn": null,
-"frame": 23,
+"frame": 24,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 3: {
@@ -515,19 +515,19 @@ frame_data = {
 6: {
 "SfxOver_frame": 12,
 "entityspawn": null,
-"frame": 22,
+"frame": 23,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 9: {
 "SfxOver_frame": 11,
 "entityspawn": null,
-"frame": 24,
+"frame": 25,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 },
 12: {
 "SfxOver_frame": 13,
 "entityspawn": null,
-"frame": 25,
+"frame": 26,
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 15, 22 ), Vector2( 15, -20 ), Vector2( -12, -20 ) ]
 }
 },
@@ -641,37 +641,37 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 51,
+"frame": 55,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
 2: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 52,
+"frame": 56,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
 4: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 53,
+"frame": 57,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
 6: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 54,
+"frame": 58,
 "hurtbox": [ Vector2( -9, 18 ), Vector2( 15, 18 ), Vector2( 15, -19 ), Vector2( -9, -19 ) ]
 },
 12: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 55,
+"frame": 59,
 "hurtbox": [ Vector2( -13, 18 ), Vector2( 10, 18 ), Vector2( 10, -20 ), Vector2( -13, -20 ) ]
 },
 18: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 37,
+"frame": 41,
 "hurtbox": [ Vector2( -11, 14 ), Vector2( 11, 14 ), Vector2( 11, -21 ), Vector2( -11, -21 ) ]
 }
 },
@@ -689,13 +689,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 26,
+"frame": 30,
 "hurtbox": [ Vector2( -12, 15 ), Vector2( 12, 15 ), Vector2( 12, -22 ), Vector2( -12, -22 ) ]
 },
 3: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 27,
+"frame": 31,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 }
 },
@@ -713,13 +713,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 28,
+"frame": 32,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 1: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 29,
+"frame": 33,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 }
 },
@@ -737,13 +737,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 29,
+"frame": 33,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 2: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 30,
+"frame": 34,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
 }
 },
@@ -761,7 +761,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 33, 1 ),
-"frame": 44,
+"frame": 48,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 }
 },
@@ -779,13 +779,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 14,
 "entityspawn": null,
-"frame": 41,
+"frame": 45,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 3: {
 "SfxOver_frame": 15,
 "entityspawn": null,
-"frame": 42,
+"frame": 46,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 }
 },
@@ -803,7 +803,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 30,
+"frame": 34,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
 }
 },
@@ -821,7 +821,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 33, 1 ),
-"frame": 44,
+"frame": 48,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 }
 },
@@ -839,31 +839,31 @@ frame_data = {
 0: {
 "SfxOver_frame": 16,
 "entityspawn": null,
-"frame": 43,
+"frame": 47,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 3: {
 "SfxOver_frame": 17,
 "entityspawn": null,
-"frame": 29,
+"frame": 33,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 6: {
 "SfxOver_frame": 18,
 "entityspawn": null,
-"frame": 41,
+"frame": 45,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 9: {
 "SfxOver_frame": 17,
 "entityspawn": null,
-"frame": 42,
+"frame": 46,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 },
 12: {
 "SfxOver_frame": 19,
 "entityspawn": null,
-"frame": 28,
+"frame": 32,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 }
 },
@@ -881,7 +881,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 30,
+"frame": 34,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
 }
 },
@@ -899,7 +899,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 33, 1 ),
-"frame": 44,
+"frame": 48,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 }
 },
@@ -917,7 +917,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 30,
+"frame": 34,
 "hurtbox": [ Vector2( -11, 0 ), Vector2( -17, 0 ), Vector2( -17, 17 ), Vector2( 16, 17 ), Vector2( 16, -16 ), Vector2( -11, -16 ) ]
 }
 },
@@ -935,13 +935,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 20,
 "entityspawn": null,
-"frame": 45,
+"frame": 49,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 },
 1: {
 "SfxOver_frame": 21,
 "entityspawn": null,
-"frame": 38,
+"frame": 42,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 }
 },
@@ -959,7 +959,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 19, 25 ),
-"frame": 50,
+"frame": 54,
 "hurtbox": [ Vector2( -21, 14 ), Vector2( 22, 14 ), Vector2( 22, -8 ), Vector2( -21, -8 ) ]
 }
 },
@@ -977,13 +977,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 20,
 "entityspawn": null,
-"frame": 46,
+"frame": 50,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 },
 3: {
 "SfxOver_frame": 21,
 "entityspawn": null,
-"frame": 47,
+"frame": 51,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 }
 },
@@ -1001,7 +1001,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 39,
+"frame": 43,
 "hurtbox": [ Vector2( -4, -7 ), Vector2( -14, -7 ), Vector2( -14, 14 ), Vector2( 3, 14 ), Vector2( 3, 11 ), Vector2( 20, 11 ), Vector2( 20, -13 ), Vector2( -4, -13 ) ]
 }
 },
@@ -1019,7 +1019,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 19, 25 ),
-"frame": 50,
+"frame": 54,
 "hurtbox": [ Vector2( -21, 14 ), Vector2( 22, 14 ), Vector2( 22, -8 ), Vector2( -21, -8 ) ]
 }
 },
@@ -1037,31 +1037,31 @@ frame_data = {
 0: {
 "SfxOver_frame": 22,
 "entityspawn": null,
-"frame": 48,
+"frame": 52,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 },
 3: {
 "SfxOver_frame": 23,
 "entityspawn": null,
-"frame": 38,
+"frame": 42,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 },
 6: {
 "SfxOver_frame": 24,
 "entityspawn": null,
-"frame": 46,
+"frame": 50,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 },
 9: {
 "SfxOver_frame": 23,
 "entityspawn": null,
-"frame": 47,
+"frame": 51,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 },
 12: {
 "SfxOver_frame": 25,
 "entityspawn": null,
-"frame": 49,
+"frame": 53,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 }
 },
@@ -1079,7 +1079,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 39,
+"frame": 43,
 "hurtbox": [ Vector2( -4, -7 ), Vector2( -14, -7 ), Vector2( -14, 14 ), Vector2( 3, 14 ), Vector2( 3, 11 ), Vector2( 20, 11 ), Vector2( 20, -13 ), Vector2( -4, -13 ) ]
 }
 },
@@ -1097,7 +1097,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 19, 25 ),
-"frame": 50,
+"frame": 54,
 "hurtbox": [ Vector2( -21, 14 ), Vector2( 22, 14 ), Vector2( 22, -8 ), Vector2( -21, -8 ) ]
 }
 },
@@ -1115,7 +1115,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 39,
+"frame": 43,
 "hurtbox": [ Vector2( -4, -7 ), Vector2( -14, -7 ), Vector2( -14, 14 ), Vector2( 3, 14 ), Vector2( 3, 11 ), Vector2( 20, 11 ), Vector2( 20, -13 ), Vector2( -4, -13 ) ]
 }
 },
@@ -1133,7 +1133,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 19, 25 ),
-"frame": 40,
+"frame": 44,
 "hurtbox": [ Vector2( -21, 14 ), Vector2( 23, 14 ), Vector2( 23, -8 ), Vector2( -21, -8 ) ]
 }
 },
@@ -1151,13 +1151,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 38,
+"frame": 42,
 "hurtbox": [ Vector2( -12, 17 ), Vector2( 13, 17 ), Vector2( 13, -16 ), Vector2( -12, -16 ) ]
 },
 2: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 39,
+"frame": 43,
 "hurtbox": [ Vector2( -4, -7 ), Vector2( -14, -7 ), Vector2( -14, 14 ), Vector2( 3, 14 ), Vector2( 3, 11 ), Vector2( 20, 11 ), Vector2( 20, -13 ), Vector2( -4, -13 ) ]
 }
 },
@@ -1175,7 +1175,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": Vector2( 33, 1 ),
-"frame": 31,
+"frame": 35,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 }
 },
@@ -1193,37 +1193,37 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 32,
+"frame": 36,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
 3: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 33,
+"frame": 37,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
 6: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 34,
+"frame": 38,
 "hurtbox": [ Vector2( -19, 14 ), Vector2( 23, 14 ), Vector2( 23, -12 ), Vector2( -19, -12 ) ]
 },
 9: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 35,
+"frame": 39,
 "hurtbox": [ Vector2( -9, 18 ), Vector2( 15, 18 ), Vector2( 15, -19 ), Vector2( -9, -19 ) ]
 },
 15: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 36,
+"frame": 40,
 "hurtbox": [ Vector2( -13, 18 ), Vector2( 10, 18 ), Vector2( 10, -20 ), Vector2( -13, -20 ) ]
 },
 21: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 37,
+"frame": 41,
 "hurtbox": [ Vector2( -11, 14 ), Vector2( 11, 14 ), Vector2( 11, -21 ), Vector2( -11, -21 ) ]
 }
 },
@@ -1241,13 +1241,13 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 26,
+"frame": 30,
 "hurtbox": [ Vector2( -12, 15 ), Vector2( 12, 15 ), Vector2( 12, -22 ), Vector2( -12, -22 ) ]
 },
 3: {
 "SfxOver_frame": 0,
 "entityspawn": null,
-"frame": 27,
+"frame": 31,
 "hurtbox": [ Vector2( -13, 17 ), Vector2( 11, 17 ), Vector2( 11, -16 ), Vector2( -13, -16 ) ]
 }
 },

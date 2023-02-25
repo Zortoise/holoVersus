@@ -220,24 +220,33 @@ func get_colliding_characters_side(collision_box, direction):
 	
 # return true if a wall in "direction", 1 is right, -1 is left
 func is_against_wall(collision_box, soft_platform_dbox, direction):
+	
+	if has_method("check_passthrough") and call("check_passthrough"):
+		return false
+	
 	var to_check := ["SolidPlatforms", "BlastBarriers"]
 	if (collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs")) and has_method("is_killable") and \
 		call("is_killable", get("velocity").x):
 		to_check = ["SolidPlatforms"]
 		
-	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):
-		to_check = ["SolidPlatforms"]
+	if collision_box.is_in_group("Entities"):
+		if Globals.entity_trait.BLAST_BARRIER_COLLIDE in get("UniqEntity").TRAITS:
+			pass
+		elif get("UniqEntity").has_method("on_offstage"):
+			to_check = ["SolidPlatforms"]
 		
 	if Detection.detect_bool([collision_box], to_check, Vector2(direction, 0)) and \
 			!Detection.detect_bool([soft_platform_dbox], to_check):
-		if has_method("check_passthrough") and call("check_passthrough"):
-			return false
 		return true
 	else:
 		return false
 		
 		
 func is_in_wall(soft_platform_dbox):
+	
+	if has_method("check_passthrough") and call("check_passthrough"):
+		return false
+	
 	if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
 		return true
 	else:
@@ -254,18 +263,23 @@ func is_against_ledge(soft_platform_dbox, direction):
 		
 		
 func is_against_ceiling(collision_box, soft_platform_dbox): # return true if there is a solid platform above
+	
+	if has_method("check_passthrough") and call("check_passthrough"):
+		return false
+	
 	var to_check := ["SolidPlatforms", "BlastBarriers"]
 	if (collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs")) and has_method("is_killable") and \
 			call("is_killable", get("velocity").y):
 		to_check = ["SolidPlatforms"]
 		
-	if collision_box.is_in_group("Entities") and get("UniqEntity").has_method("on_offstage"):
-		to_check = ["SolidPlatforms"]
+	if collision_box.is_in_group("Entities"):
+		if Globals.entity_trait.BLAST_BARRIER_COLLIDE in get("UniqEntity").TRAITS:
+			pass
+		elif get("UniqEntity").has_method("on_offstage"):
+			to_check = ["SolidPlatforms"]
 		
 	if Detection.detect_bool([collision_box], to_check, Vector2.UP) and \
 			!Detection.detect_bool([soft_platform_dbox], to_check):
-		if has_method("check_passthrough") and call("check_passthrough"):
-			return false
 #		if collision_box.is_in_group("Players") and get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 #			return false # no hitting ceiling in sequences
 		return true

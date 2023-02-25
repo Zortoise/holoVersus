@@ -17,7 +17,7 @@ frame_data = {
 0: {
 "SfxUnder_frame": 6,
 "entityspawn": Vector2( 36, 22 ),
-"frame": 4,
+"frame": 5,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 13, 22 ), Vector2( 13, -20 ), Vector2( -9, -20 ) ]
 }
 },
@@ -35,25 +35,25 @@ frame_data = {
 0: {
 "SfxUnder_frame": 7,
 "entityspawn": null,
-"frame": 5,
+"frame": 6,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 13, 22 ), Vector2( 13, -20 ), Vector2( -9, -20 ) ]
 },
 2: {
 "SfxUnder_frame": 8,
 "entityspawn": null,
-"frame": 6,
+"frame": 7,
 "hurtbox": [ Vector2( -14, 22 ), Vector2( 6, 22 ), Vector2( 6, -19 ), Vector2( -14, -19 ) ]
 },
 6: {
 "SfxUnder_frame": 9,
 "entityspawn": null,
-"frame": 7,
+"frame": 8,
 "hurtbox": [ Vector2( -15, 22 ), Vector2( 7, 22 ), Vector2( 7, -18 ), Vector2( -15, -18 ) ]
 },
 10: {
 "SfxUnder_frame": 10,
 "entityspawn": null,
-"frame": 8,
+"frame": 9,
 "hurtbox": [ Vector2( -19, 22 ), Vector2( 10, 22 ), Vector2( 10, -2 ), Vector2( 3, -2 ), Vector2( 3, -20 ), Vector2( -19, -20 ) ]
 }
 },
@@ -119,7 +119,7 @@ frame_data = {
 0: {
 "SfxUnder_frame": 6,
 "entityspawn": Vector2( 36, 22 ),
-"frame": 4,
+"frame": 5,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 13, 22 ), Vector2( 13, -20 ), Vector2( -9, -20 ) ]
 }
 },
@@ -137,25 +137,25 @@ frame_data = {
 0: {
 "SfxUnder_frame": 7,
 "entityspawn": null,
-"frame": 5,
+"frame": 6,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 13, 22 ), Vector2( 13, -20 ), Vector2( -9, -20 ) ]
 },
 2: {
 "SfxUnder_frame": 8,
 "entityspawn": null,
-"frame": 6,
+"frame": 7,
 "hurtbox": [ Vector2( -14, 22 ), Vector2( 6, 22 ), Vector2( 6, -19 ), Vector2( -14, -19 ) ]
 },
 6: {
 "SfxUnder_frame": 9,
 "entityspawn": null,
-"frame": 7,
+"frame": 8,
 "hurtbox": [ Vector2( -15, 22 ), Vector2( 7, 22 ), Vector2( 7, -18 ), Vector2( -15, -18 ) ]
 },
 10: {
 "SfxUnder_frame": 10,
 "entityspawn": null,
-"frame": 8,
+"frame": 9,
 "hurtbox": [ Vector2( -19, 22 ), Vector2( 10, 22 ), Vector2( 10, -2 ), Vector2( 3, -2 ), Vector2( 3, -20 ), Vector2( -19, -20 ) ]
 }
 },
@@ -203,7 +203,7 @@ frame_data = {
 14: {
 "SfxUnder_frame": 5,
 "entityspawn": null,
-"frame": 3,
+"frame": 4,
 "hurtbox": [ Vector2( -2, -1 ), Vector2( -7, -1 ), Vector2( -7, 22 ), Vector2( 7, 22 ), Vector2( 7, 10 ), Vector2( 20, 10 ), Vector2( 20, -19 ), Vector2( -2, -19 ) ]
 }
 },
@@ -221,7 +221,7 @@ frame_data = {
 0: {
 "SfxUnder_frame": 6,
 "entityspawn": Vector2( 36, 22 ),
-"frame": 4,
+"frame": 5,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 13, 22 ), Vector2( 13, -20 ), Vector2( -9, -20 ) ]
 }
 },
