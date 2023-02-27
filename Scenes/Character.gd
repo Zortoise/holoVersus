@@ -112,7 +112,7 @@ const SUPERARMOR_CHIP_DMG_MOD = 50
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
 const LAUNCH_BOOST = 250 * FMath.S # increased knockback strength when a flinch becomes a launch
 const LAUNCH_ROT_SPEED = 5*PI # speed of sprite rotation when launched, don't need fixed-point as sprite rotation is only visuals
-const UNLAUNCH_THRESHOLD = 450 * FMath.S # max velocity when hitting the ground to tech land
+const TECHLAND_THRESHOLD = 450 * FMath.S # max velocity when hitting the ground to tech land
 
 const STRONG_HIT_AUDIO_BOOST = 3
 const WEAK_HIT_AUDIO_NERF = -9
@@ -185,7 +185,7 @@ var status_effect_to_add = [] # holder to add status effects at end of frame aft
 var startup_cancel_flag := false # allow cancelling of startup frames without rebuffering
 var instant_actions_temp := [] # used to transfer instant actions captured this frame into instant_actions array after stored ones are processed
 #var alt_block := false # neutral dash can be used to block as well
-var attacked_this_frame
+var attacked_this_frame := false
 
 var player_ID: int # player number controlling this character, 0 for P1, 1 for P2
 
@@ -245,6 +245,7 @@ var aerial_sp_memory = [] # appended whenever an air normal attack is made, cann
 var success_block := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
 var success_dodge := false # set to true after iframing through an attack, turn later part of dodge cancellable, reset outside dodge
 var target_ID = null # ID of the opponent, changes whenever you land a hit on an opponent or is attacked
+var seq_partner_ID = null # not always target_ID during Mimic Raid
 var tap_memory = []
 var release_memory = []
 var impulse_used := false
@@ -529,6 +530,12 @@ func initial_targeting(): # target random players at start, cannot do in init() 
 	else:
 		target_ID = player_ID
 	
+func get_seq_partner():
+	var Partner = Globals.Game.get_player_node(seq_partner_ID)
+	if Partner == null or Partner == self: return null
+	if Partner.seq_partner_ID != player_ID: return null
+	return Partner
+	
 func get_target():
 	if Globals.survival_level == null:
 		var target = Globals.Game.get_player_node(target_ID)
@@ -583,7 +590,7 @@ func test2():
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
 		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-		" " + str(success_dodge)
+		" " + str(seq_partner_ID)
 			
 			
 func _process(_delta):
@@ -731,6 +738,9 @@ func simulate2(): # only ran if not in hitstop
 		DI_seal = false
 		lethal_flag = false
 		
+	if !state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+		seq_partner_ID = null
+		
 	if Globals.survival_level != null:
 		if current_damage_value > 0 and Globals.Game.LevelControl.wave_standby_timer > 0:
 			if Globals.Game.LevelControl.wave_standby_timer == 1:
@@ -739,10 +749,10 @@ func simulate2(): # only ran if not in hitstop
 			else:
 				take_damage(-20) # heal between waves
 		
-		if !is_hitstunned() and query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
-			remove_status_effect(Globals.status_effect.SURVIVAL_GRACE)
+#		if !is_hitstunned() and query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
+#			remove_status_effect(Globals.status_effect.SURVIVAL_GRACE)
 		
-	if success_dodge and (new_state != Globals.char_state.AIR_RECOVERY or !Animator.query_to_play(["Dodge"])):
+	if success_dodge and (new_state != Globals.char_state.AIR_RECOVERY or !Animator.query_to_play(["DodgeTransit", "Dodge"])):
 		success_dodge = false # reset success_dodge outside dodge
 		
 	# GG Swell during hitstun
@@ -811,7 +821,7 @@ func simulate2(): # only ran if not in hitstop
 							continue # no whiff EX Gain for Survival
 						if is_attacking() and new_state != Globals.char_state.SEQUENCE_USER:
 							var move_data = query_move_data()
-							if "reset_type" in move_data and move_data.reset_type == Globals.reset_type.NON_ATK_RESET:
+							if !"damage" in move_data:
 								ex_change = FMath.percent(ex_change, NON_ATTACK_EX_REGEN_MOD) # for non-attacks, reduce EX regen
 							else:
 								ex_change = FMath.percent(ex_change, ATTACK_EX_REGEN_MOD) # physical attack, raise EX regen
@@ -966,12 +976,12 @@ func simulate2(): # only ran if not in hitstop
 					var DDI_speed: int
 					var DDI_speed_limit: int
 					
-					if Globals.survival_level == null:
-						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
-						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
-					else:
-						DDI_speed = DDI_SIDE_MAX
-						DDI_speed_limit = MAX_DDI_SIDE_SPEED
+#					if Globals.survival_level == null:
+					DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
+					DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
+#					else:
+#						DDI_speed = DDI_SIDE_MAX
+#						DDI_speed_limit = MAX_DDI_SIDE_SPEED
 					
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
 						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit (can scale speed limit to guard gauge?)
@@ -1221,16 +1231,16 @@ func simulate2(): # only ran if not in hitstop
 		
 		if is_hitstunned():
 			if can_DI(): # up/down DI, depends on Guard Gauge
-				if Globals.survival_level == null:
-					if v_dir == -1: # DIing upward
-						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
-					elif v_dir == 1: # DIing downward
-						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
-				else:
-					if v_dir == -1: # DIing upward
-						gravity_temp = FMath.percent(gravity_temp, GDI_UP_MAX)
-					elif v_dir == 1: # DIing downward
-						gravity_temp = FMath.percent(gravity_temp, GDI_DOWN_MAX)
+#				if Globals.survival_level == null:
+				if v_dir == -1: # DIing upward
+					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
+				elif v_dir == 1: # DIing downward
+					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
+#				else:
+#					if v_dir == -1: # DIing upward
+#						gravity_temp = FMath.percent(gravity_temp, GDI_UP_MAX)
+#					elif v_dir == 1: # DIing downward
+#						gravity_temp = FMath.percent(gravity_temp, GDI_DOWN_MAX)
 					
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
@@ -1468,7 +1478,10 @@ func simulate2(): # only ran if not in hitstop
 		
 		Globals.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
-			if !$HitStunTimer.is_running() and new_state != Globals.char_state.LAUNCHED_HITSTUN:
+			if $HitStunTimer.time == 1:
+				$ModulatePlayer.play("unlaunch_flash")
+				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
+			elif !$HitStunTimer.is_running():
 				tech()
 #					animate("FallTransit")]
 #					$ModulatePlayer.play("unlaunch_flash")
@@ -2700,13 +2713,13 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				else:
 					vector_to_check = velocity_previous_frame
 				
-				if !vector_to_check.is_longer_than(UNLAUNCH_THRESHOLD):
+				if !vector_to_check.is_longer_than(TECHLAND_THRESHOLD):
 					if !tech():
 						animate("HardLanding")
 						$HitStunTimer.stop()
 						velocity.y = 0 # stop bouncing
-						$ModulatePlayer.play("unlaunch_flash")
-						play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
+						$ModulatePlayer.play("unflinch_flash")
+#						play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			
 		Globals.char_state.AIR_BLOCK: # air block to ground block
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
@@ -2820,7 +2833,7 @@ func check_semi_invuln():
 				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
 					return true
 			Globals.char_state.AIR_RECOVERY:
-				if Animator.query_to_play(["Dodge"]):
+				if Animator.query_to_play(["DodgeTransit", "Dodge"]):
 #					and Animator.time <= DODGE_SEMI_IFRAMES:
 					return true
 	return false	
@@ -2879,7 +2892,8 @@ func can_DI(): # already checked for HitStunTimer
 
 func process_VDI():
 	# to be able to DI, must be entering knockback animation and has a directional key pressed
-	if Globals.survival_level == null and current_guard_gauge <= 0: return
+#	if Globals.survival_level == null and current_guard_gauge <= 0: return
+	if current_guard_gauge <= 0: return
 	
 	if (dir != 0 or v_dir != 0) and !DI_seal and get_damage_percent() < 100 and \
 		((state == Globals.char_state.LAUNCHED_HITSTUN and Animator.query_to_play(["LaunchTransit"]) and \
@@ -2892,10 +2906,10 @@ func process_VDI():
 		var VDI_amount_max: int = FMath.percent(velocity_length, VDI_MAX)
 		var VDI_amount: int
 		
-		if Globals.survival_level == null:
-			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
-		else:
-			VDI_amount = VDI_amount_max
+#		if Globals.survival_level == null:
+		VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
+#		else:
+#			VDI_amount = VDI_amount_max
 		
 		if dir != 0 and v_dir != 0: # diagonal, multiply by 0.71
 			VDI_amount = FMath.percent(VDI_amount, 71)
@@ -3341,8 +3355,8 @@ func tech():
 		if dir != 0 or v_dir != 0:
 			if button_block in input_state.pressed:
 				animate("SDashTransit")
-				$ModulatePlayer.play("unlaunch_flash")
-				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
+#				$ModulatePlayer.play("unlaunch_flash")
+#				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 				return true
 			elif button_aux in input_state.pressed:
 				animate("DodgeTransit")
@@ -3437,13 +3451,14 @@ func a_reset_check(move_name):
 					Globals.reset_type.EARLY_RESET: # can only reset during first 3 frames of active frames
 						if is_atk_active() and Animator.time > 0 and Animator.time <= 3:
 							filter = true
-					Globals.reset_type.FULL_ACTIVE_RESET: # can only reset during active frames
-						if is_atk_active() and Animator.time > 0:
-							filter = true
-					Globals.reset_type.NON_ATK_RESET: # can only reset during active frames if targeted opponent not in hit
-						if is_atk_active() and Animator.time > 1: # not on frame 1
-							if !get_target().get_node("HitStunTimer").is_running():
+					Globals.reset_type.ACTIVE_RESET: # can only reset during active frames
+						if "damage" in move_data:
+							if is_atk_active() and Animator.time > 0:
 								filter = true
+						else: # for non-attacks, can only reset during active frames if targeted opponent not in hit
+							if is_atk_active() and Animator.time > 1: # not on frame 1
+								if !get_target().get_node("HitStunTimer").is_running():
+									filter = true
 
 	if filter == false: return false
 			
@@ -4454,6 +4469,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								# if perfect blocked or blocking attacker close enough, a Strongblock occurs
 								# attacker is pushed back, and cannot chain into anything except Burst Counter
 								hit_data.block_state = Globals.block_state.STRONG
+						elif success_block:
+							hit_data.block_state = Globals.block_state.STRONG
 						else:
 							# if blocking attacker too far away, a Weakblock occurs
 							# this cause defender to be pushed back and take Chip Damage
@@ -4471,7 +4488,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
 						if !check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker) and \
-								Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
+								(success_block or Animator.query_current(["BlockStartup", "aBlockStartup"])): # can perfect block projectiles
 							hit_data.block_state = Globals.block_state.STRONG
 						else:
 							hit_data.block_state = Globals.block_state.WEAK
@@ -4513,7 +4530,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data.crush = true
 			
 	# GUARD SWELL ---------------------------------------------------------------------------------
-						
+					
+#	if Globals.survival_level == null:	
 	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:
 		pass # multi-hit moves not the first hit and autochain follow-ups do not proc Guard Swell
 	else:
@@ -4652,9 +4670,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Globals.Game.set_screenshake()
 		$ModulatePlayer.play("lethal_flash")
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
-		if Globals.survival_level != null:
-#			add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
-			status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
+#		if Globals.survival_level != null:
+##			add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
+#			status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
 		
 	elif hit_data.crush:
 #		add_status_effect(Globals.status_effect.CRUSH, 0)
@@ -4691,7 +4709,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	elif Globals.survival_level != null and !hit_data.weak_hit and !"autochain" in hit_data:
 #		add_status_effect(Globals.status_effect.SURVIVAL_GRACE, null)
-		status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
+#		status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
 		$ModulatePlayer.play("punish_sweet_flash")
 		play_audio("impact29", {"vol" : -10, "bus" : "LowPass"})
 				
@@ -5461,8 +5479,13 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	
 	test0()
 	
+	var Partner = get_seq_partner()
+	if Partner == null:
+		animate("Idle")
+		return
+	
 	if state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		if get_target().state != Globals.char_state.SEQUENCE_USER:
+		if Partner.state != Globals.char_state.SEQUENCE_USER:
 			animate("Idle") # auto release if not released proberly, just in case
 		
 	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
@@ -5493,12 +5516,18 @@ func landed_a_sequence(hit_data):
 	if new_state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
 		return # no sequencing multiple players at once, just in case
 
-	if hit_data.double_repeat == true: return # repeat penalty, cannot grab if repeated
-
 	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
 	
-	if Globals.survival_level != null and "attacked_this_frame" in defender:
-		defender.attacked_this_frame = true
+	if defender == null or defender.seq_partner_ID != null or defender.new_state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
+		return # no sequencing multiple players at once, just in case
+		
+	if hit_data.double_repeat == true: return # repeat penalty, cannot grab if repeated
+	
+	seq_partner_ID = defender.player_ID
+	defender.seq_partner_ID = player_ID
+	
+#	if Globals.survival_level != null and "attacked_this_frame" in defender:
+#		defender.attacked_this_frame = true
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
 	
@@ -5541,7 +5570,12 @@ func take_seq_damage(base_damage: int) -> bool: # return true if lethal
 	
 	
 func sequence_hit(hit_key: int): # most auto sequences deal damage during the sequence outside of the launch
-	var seq_user = get_target()
+	
+	var seq_user = get_seq_partner()
+	if seq_user == null:
+		animate("Idle")
+		return
+	
 	var seq_hit_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
 	var lethal = take_seq_damage(seq_hit_data.damage)
 	
@@ -5559,7 +5593,12 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 
 
 func sequence_launch():
-	var seq_user = get_target()
+	
+	var seq_user = get_seq_partner()
+	if seq_user == null:
+		animate("Idle")
+		return
+		
 	var dir_to_attacker = sign(position.x - seq_user.position.x)
 	if dir_to_attacker == 0: dir_to_attacker = facing
 	
@@ -5622,8 +5661,8 @@ func sequence_launch():
 	$HitStunTimer.time = hitstun
 	launchstun_rotate = 0 # used to calculation sprite rotation during launched state
 	
-	if Globals.survival_level != null and !"weak" in seq_data:
-		status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
+#	if Globals.survival_level != null and !"weak" in seq_data:
+#		status_effect_to_add.append([Globals.status_effect.SURVIVAL_GRACE, null])
 		
 	# LAUNCH POWER
 	var launch_power = seq_data.launch_power # scaled
@@ -5754,7 +5793,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Launch")
 			
 		"BlockStartup":
-			success_block = false
 			change_guard_gauge(-UniqChar.get_stat("GROUND_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
@@ -5765,7 +5803,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"BlockCRec":
 			animate("Idle")
 		"aBlockStartup":
-			success_block = false
 			change_guard_gauge(-UniqChar.get_stat("AIR_BLOCK_INITIAL_GG_COST"))
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
@@ -5960,6 +5997,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"SoftLanding":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			
+		"BlockStartup", "aBlockStartup":
+			success_block = false
 			
 		"DodgeTransit":
 			air_dodge -= 1
@@ -6188,6 +6228,7 @@ func save_state():
 		"success_block" : success_block,
 		"success_dodge" : success_dodge,
 		"target_ID" : target_ID,
+		"seq_partner_ID" : seq_partner_ID,
 		"burst_token": burst_token,
 		"impulse_used" : impulse_used,
 		"quick_turn_used" : quick_turn_used,
@@ -6273,6 +6314,7 @@ func load_state(state_data):
 	success_block = state_data.success_block
 	success_dodge = state_data.success_dodge
 	target_ID = state_data.target_ID
+	seq_partner_ID = state_data.seq_partner_ID
 	burst_token = state_data.burst_token
 	impulse_used = state_data.impulse_used
 	quick_turn_used = state_data.quick_turn_used

@@ -353,7 +353,7 @@ const MOVE_DATABASE = {
 	
 	"SP1": {
 		"atk_type" : Globals.atk_type.SPECIAL, # used for chaining
-		"reset_type" : Globals.reset_type.NON_ATK_RESET,
+		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"atk_attr" : [],
 	},
 	"SP1[ex]": {
@@ -372,7 +372,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"KB_angle" : -45,
-		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
+		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"atk_attr" : [],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -387,7 +387,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"priority_add": 1,
 		"KB_angle" : -90,
-		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
+		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"atk_attr" : [],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -485,13 +485,13 @@ const MOVE_DATABASE = {
 	"SP4": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"atk_attr" : [],
-		"reset_type" : Globals.reset_type.NON_ATK_RESET,
+		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[h]": {
 		"atk_type" : Globals.atk_type.SPECIAL,
 		"atk_attr" : [],
-		"reset_type" : Globals.reset_type.NON_ATK_RESET,
+		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -16,} }, { ref = "blast4", aux_data = {"vol" : -16,} }],
 	},
 	"SP4[ex]": {
@@ -595,7 +595,7 @@ const MOVE_DATABASE = {
 	
 	"SP7": {
 		"atk_type" : Globals.atk_type.SPECIAL,
-		"reset_type" : Globals.reset_type.NON_ATK_RESET,
+		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"atk_attr" : [Globals.atk_attr.NO_TURN, Globals.atk_attr.NO_QUICK_CANCEL],
 	},
 

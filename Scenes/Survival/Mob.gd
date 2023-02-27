@@ -50,7 +50,7 @@ const MOB_BREAK_HITSTOP_MOD = 150 # increase hitstop when guardbreaking
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
 const LAUNCH_BOOST = 250 * FMath.S # increased knockback strength when a flinch becomes a launch
 const LAUNCH_ROT_SPEED = 5*PI # speed of sprite rotation when launched, don't need fixed-point as sprite rotation is only visuals
-const UNLAUNCH_THRESHOLD = 450 * FMath.S # max velocity when hitting the ground to tech land
+const TECHLAND_THRESHOLD = 450 * FMath.S # max velocity when hitting the ground to tech land
 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
 const WALL_SLAM_VEL_LIMIT_MOD = 500
@@ -133,7 +133,7 @@ var repeat_memory = [] # appended whenever hit by a move, cleared whenever you r
 					# each entry is an array with [0] being the move name and [1] being the player_ID
 
 var target_ID = null # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
-
+var seq_partner_ID = null
 
 var current_command: String = "start" # key to a COMMANDS dictionary on UniqChar
 var command_timer := 0 # timer that counts up
@@ -278,6 +278,12 @@ func initial_targeting(): # target closest player at start
 		target_ID = target_node.player_ID
 		return target_node
 	
+func get_seq_partner():
+	var Partner = Globals.Game.get_player_node(seq_partner_ID)
+	if Partner == null or Partner == self: return null
+	if Partner.seq_partner_ID != player_ID: return null
+	return Partner
+	
 func get_target():
 	var target_node = Globals.Game.get_player_node(target_ID)
 	
@@ -322,7 +328,7 @@ func test2():
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
 		"\n" + str(velocity.y) + " " + str(velocity_previous_frame.y) + " " + str(armorbroken) + " " + str(target_ID) + \
-		"\ngrounded: " + str(grounded) + " command: " + current_command + "\nchain_mem: " + str(chain_memory)
+		"\ngrounded: " + str(grounded) + " command: " + current_command + "\nchain_mem: " + str(chain_memory) + " " + str(seq_partner_ID)
 			
 			
 func _process(_delta):
@@ -418,6 +424,9 @@ func simulate2(): # only ran if not in hitstop
 	# clearing repeat memory
 	if !is_hitstunned() and !state in [Globals.char_state.SEQUENCE_TARGET]:
 		repeat_memory = []
+		
+	if !state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+		seq_partner_ID = null
 		
 	if !is_attacking():
 		chain_memory = []
@@ -650,8 +659,8 @@ func simulate2(): # only ran if not in hitstop
 			# when out of hitstun, recover
 			if !$HitStunTimer.is_running() and Animator.query_to_play(["Launch", "LaunchTransit"]):
 				animate("FallTransit")
-				$ModulatePlayer.play("unlaunch_flash")
-				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
+#				$ModulatePlayer.play("unlaunch_flash")
+#				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			friction_this_frame = FMath.percent(friction_this_frame, 25) # lower friction during launch hitstun
 							
 	
@@ -1352,12 +1361,12 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				else:
 					vector_to_check = velocity_previous_frame
 				
-				if !vector_to_check.is_longer_than(UNLAUNCH_THRESHOLD):
+				if !vector_to_check.is_longer_than(TECHLAND_THRESHOLD):
 					animate("SoftLanding")
 					$HitStunTimer.stop()
 					velocity.y = 0 # stop bouncing
-					$ModulatePlayer.play("unlaunch_flash")
-					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
+#					$ModulatePlayer.play("unflinch_flash")
+#					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			
 
 
@@ -2706,8 +2715,13 @@ func get_default_hitspark_palette():
 
 func simulate_sequence(): # cut into this during simulate2() during sequences
 	
+	var Partner = get_seq_partner()
+	if Partner == null:
+		animate("Idle")
+		return
+	
 	if state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		if get_target().state != Globals.char_state.SEQUENCE_USER:
+		if Partner.state != Globals.char_state.SEQUENCE_USER:
 			animate("Idle") # auto release if not released proberly, just in case
 		
 	elif state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
@@ -2739,6 +2753,15 @@ func landed_a_sequence(hit_data):
 
 	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
 	
+	if defender == null or defender.seq_partner_ID != null or defender.new_state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
+		return # no sequencing multiple players at once, just in case
+	
+	if "attacked_this_frame" in defender:
+		defender.attacked_this_frame = true
+		
+	seq_partner_ID = defender.player_ID
+	defender.seq_partner_ID = player_ID
+		
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
 	
@@ -2761,7 +2784,12 @@ func take_seq_damage(base_damage: int) -> bool: # return true if lethal
 	
 	
 func sequence_hit(hit_key: int): # most auto sequences deal damage during the sequence outside of the launch
-	var seq_user = get_target()
+	
+	var seq_user = get_seq_partner()
+	if seq_user == null:
+		animate("Idle")
+		return
+		
 	var seq_hit_data = seq_user.UniqChar.MOVE_DATABASE[seq_user.Animator.to_play_animation].sequence_hits[hit_key]
 	var lethal = take_seq_damage(seq_hit_data.damage)
 	
@@ -2780,7 +2808,11 @@ func sequence_launch():
 	
 	start_command("standby")
 	
-	var seq_user = get_target()
+	var seq_user = get_seq_partner()
+	if seq_user == null:
+		animate("Idle")
+		return
+		
 	var dir_to_attacker = sign(position.x - seq_user.position.x)
 	if dir_to_attacker == 0: dir_to_attacker = facing
 	
@@ -3105,6 +3137,7 @@ func save_state():
 		"launch_starting_rot" : launch_starting_rot,
 		"launchstun_rotate" : launchstun_rotate,
 		"target_ID" : target_ID,
+		"seq_partner_ID" : seq_partner_ID,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -3179,6 +3212,7 @@ func load_state(state_data):
 	launch_starting_rot = state_data.launch_starting_rot
 	launchstun_rotate = state_data.launchstun_rotate
 	target_ID = state_data.target_ID
+	seq_partner_ID = state_data.seq_partner_ID
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	

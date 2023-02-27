@@ -205,7 +205,7 @@ func setup():
 		you_label = load("res://Scenes/YouLabel.tscn").instance()
 		get_player_node(Netplay.my_player_id()).add_child(you_label)
 		
-#	P1.test = true # testing purposes
+	P1.test = true # testing purposes
 #	P2.test = true # testing purposes
 	
 	for player in $Players.get_children(): # each player target a random other player
@@ -1817,6 +1817,8 @@ func set_uniqueHUD(player_ID, uniqueHUD):
 				
 				
 func get_player_node(player_ID):
+	if player_ID == null: return null
+	
 	if player_ID >= 0:
 		for player in get_tree().get_nodes_in_group("PlayerNodes"):
 			if player.player_ID == player_ID:
@@ -1827,10 +1829,23 @@ func get_player_node(player_ID):
 				return player
 	return null
 	
-func get_entity_node(entity_ID):
+func get_player_entity_node(entity_ID):
+	if entity_ID == null: return null
+	
 	for entity in get_tree().get_nodes_in_group("EntityNodes"):
 		if entity.entity_ID == entity_ID:
 			return entity
+#	for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
+#		if entity.entity_ID == entity_ID:
+#			return entity
+	return null
+	
+func get_mob_entity_node(entity_ID):
+	if entity_ID == null: return null
+	
+#	for entity in get_tree().get_nodes_in_group("EntityNodes"):
+#		if entity.entity_ID == entity_ID:
+#			return entity
 	for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
 		if entity.entity_ID == entity_ID:
 			return entity

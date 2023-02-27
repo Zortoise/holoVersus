@@ -776,10 +776,10 @@ func unique_flash():
 
 func get_stat(stat: String): # later can have effects that changes stats
 	
-	if Globals.survival_level != null:
-		match stat:
-			"DAMAGE_VALUE_LIMIT":
-				return FMath.percent(DAMAGE_VALUE_LIMIT, 50)
+#	if Globals.survival_level != null:
+#		match stat:
+#			"DAMAGE_VALUE_LIMIT":
+#				return FMath.percent(DAMAGE_VALUE_LIMIT, 50)
 			
 	return get(stat)
 	
@@ -954,7 +954,10 @@ func being_hit(hit_data):
 # AUTO SEQUENCES --------------------------------------------------------------------------------------------------
 
 func simulate_sequence(): # this is ran on every frame during a sequence
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
 	
 	match Animator.to_play_animation:
 		"SP6[ex]SeqA":
@@ -981,7 +984,11 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 						
 func simulate_sequence_after(): # called after moving and animating every frame, grab_point and grab_rot_dir are only updated then
 	
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
+		
 	var grab_point = Animator.query_point("grabpoint")
 	
 	match Animator.to_play_animation:
@@ -1000,7 +1007,10 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 			
 						
 func start_sequence_step(): # this is ran at the start of every sequence_step
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
 
 	match Animator.to_play_animation:
 		"aF2SeqA":
@@ -1068,7 +1078,10 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 							
 func end_sequence_step(trigger = null): # this is ran at the end of certain sequence_step, or to end a trigger sequence_step
 	# return true if sequence_step ended
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
 	
 	if trigger == "break": # grab break
 		Character.animate("Idle")
@@ -1109,7 +1122,11 @@ func rotate_partner(Partner): # rotate partner according to grabrotdir
 func move_sequence_target(new_position): # move sequence_target to new position
 	if new_position == null: return # no grab point
 	
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
+		
 	var results = Partner.move_sequence_player_to(new_position) # [landing_check, collision_check, ledgedrop_check]
 	
 	if results[0]: # Grabbed hit the ground, ends sequence step if it is triggered by Grabbed being grounded
@@ -1169,7 +1186,7 @@ func unique_chaining_rules(move_name, attack_ref):
 func test_instinct(): # to determine if move is usable
 	if Character.unique_data.last_trident == null: return false
 	
-	var last_trident = Globals.Game.get_entity_node(Character.unique_data.last_trident)
+	var last_trident = Globals.Game.get_player_entity_node(Character.unique_data.last_trident)
 	if last_trident == null: return false
 	
 	if last_trident.hitcount_record.size() == 0 and last_trident.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
@@ -1184,7 +1201,7 @@ func instinct():
 	
 	if Character.unique_data.last_trident == null: return
 	
-	var last_trident = Globals.Game.get_entity_node(Character.unique_data.last_trident)
+	var last_trident = Globals.Game.get_player_entity_node(Character.unique_data.last_trident)
 	if last_trident == null: return
 	
 	last_trident.UniqEntity.spin()

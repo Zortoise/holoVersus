@@ -67,11 +67,10 @@ enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, 
 enum block_state {UNBLOCKED, STRONG, WEAK}
 enum trait {CHAIN_DASH, AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK,
 		DASH_BLOCK, AIR_DASH_BLOCK, NO_LAUNCH}
-enum reset_type {STARTUP_RESET, NON_ATK_RESET, EARLY_RESET, FULL_ACTIVE_RESET}
+enum reset_type {STARTUP_RESET, EARLY_RESET, ACTIVE_RESET}
 # STARTUP_RESET = can only a_reset this Special during startup just like Normals
-# NON_ATK_RESET = projectiles and stuff, cannot be a_reseted if targeted opponent is in hitstun
 # EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special
-# FULL_ACTIVE_RESET = can a_reset anytime during active frames of this Special
+# ACTIVE_RESET = can a_reset anytime during active frames of this Special
 
 enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}

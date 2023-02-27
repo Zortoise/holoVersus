@@ -279,8 +279,8 @@ func load_game_config():
 	# default game_config
 	return {
 			"game_mode" : 0,
-			"stock_points" : 2,
-			"time_limit" : 6,
+			"stock_points" : 4,
+			"time_limit" : 10,
 			"assists" : 0,
 			"static_stage" : 0,
 			"custom_playlist" : 0,

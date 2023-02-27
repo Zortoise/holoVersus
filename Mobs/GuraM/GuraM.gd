@@ -276,7 +276,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"KB_angle" : -45,
-		"reset_type" : Globals.reset_type.FULL_ACTIVE_RESET,
+		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"atk_attr" : [],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -1375,7 +1375,10 @@ func being_hit(hit_data):
 # AUTO SEQUENCES --------------------------------------------------------------------------------------------------
 
 func simulate_sequence(): # this is ran on every frame during a sequence
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
 	
 	match Animator.to_play_animation:
 		"SP6[ex]SeqA":
@@ -1401,7 +1404,12 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 			pass
 						
 func simulate_sequence_after(): # called after moving and animating every frame, grab_point and grab_rot_dir are only updated then
-	var Partner = Character.get_target()
+	
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
+		
 	var grab_point = Animator.query_point("grabpoint")
 	
 	match Animator.to_play_animation:
@@ -1417,7 +1425,11 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 						
 
 func start_sequence_step(): # this is ran at the start of every sequence_step
-	var Partner = Character.get_target()
+	
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
 
 	match Animator.to_play_animation:
 		"aF2SeqA":
@@ -1475,7 +1487,10 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 							
 func end_sequence_step(trigger = null): # this is ran at the end of certain sequence_step, or to end a trigger sequence_step
 	# return true if sequence_step ended
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
 	
 	if trigger == "break": # grab break
 		Character.animate("Idle")
@@ -1512,7 +1527,11 @@ func rotate_partner(Partner): # rotate partner according to grabrotdir
 func move_sequence_target(new_position): # move sequence_target to new position
 	if new_position == null: return # no grab point
 	
-	var Partner = Character.get_target()
+	var Partner = Character.get_seq_partner()
+	if Partner == null:
+		Character.animate("Idle")
+		return
+		
 	var results = Partner.move_sequence_player_to(new_position) # [landing_check, collision_check, ledgedrop_check]
 	
 	if results[0]: # Grabbed hit the ground, ends sequence step if it is triggered by Grabbed being grounded
