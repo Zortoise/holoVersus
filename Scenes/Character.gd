@@ -248,6 +248,8 @@ var target_ID = null # ID of the opponent, changes whenever you land a hit on an
 var tap_memory = []
 var release_memory = []
 var impulse_used := false
+var quick_turn_used := false # can only quick turn once per attack
+var strafe_lock_dir := 0 # when pressing left/right when doing an aerial, lock the air strafe direction during startup
 var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout the duration of BurstLockTimer, also lock GG Swell
 var instant_actions := [] # when an instant action is inputed it is stored here for 1 frame, only process next frame
 						 # this allows for quick cancels and triggering entities
@@ -914,24 +916,32 @@ func simulate2(): # only ran if not in hitstop
 				Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
 				Globals.char_state.AIR_BLOCK:
 					
-				if new_state == Globals.char_state.AIR_ATK_ACTIVE:
-					var move_data = query_move_data()
-					if !can_air_strafe(move_data):
-						continue # some attacks cannot be air strafed
-#					if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
-#						if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
-#							continue # cannot strafe during some aerial normals
-#					else: # non-Normal
-#						if !Globals.atk_attr.STRAFE_NON_NORMAL in move_data.atk_attr:
-#							continue # can strafe during some aerial non-normals
-				
 				if !grounded:
-					if state == Globals.char_state.AIR_STANDBY and dir != facing: # flipping over
-						if (button_light in input_state.pressed or button_fierce in input_state.pressed or \
-								button_aux in input_state.pressed) and button_dash in input_state.pressed:
-							pass # if pressing attack + dash in the air, will not turn
-						else:
-							face(dir)
+					var strafe_dir = dir
+						
+					match new_state:
+						Globals.char_state.AIR_ATK_STARTUP: # locked strafe during startup
+							strafe_dir = strafe_lock_dir
+							
+						Globals.char_state.AIR_ATK_ACTIVE:
+							var move_data = query_move_data()
+							if !can_air_strafe(move_data):
+								continue # some attacks cannot be air strafed
+		#					if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
+		#						if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
+		#							continue # cannot strafe during some aerial normals
+		#					else: # non-Normal
+		#						if !Globals.atk_attr.STRAFE_NON_NORMAL in move_data.atk_attr:
+		#							continue # can strafe during some aerial non-normals
+						Globals.char_state.AIR_STANDBY:
+							face(strafe_dir) # turning in air
+					
+#					if state == Globals.char_state.AIR_STANDBY and strafe_dir != facing: # flipping over
+##						if (button_light in input_state.pressed or button_fierce in input_state.pressed or \
+##								button_aux in input_state.pressed) and button_dash in input_state.pressed:
+##							pass # if pressing attack + dash in the air, will not turn
+##						else:
+#						face(strafe_dir)
 					
 					var air_strafe_speed_temp: int = FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("AIR_STRAFE_SPEED_MOD"))
 					var air_strafe_limit_temp: int = FMath.percent(air_strafe_speed_temp, UniqChar.get_stat("AIR_STRAFE_LIMIT_MOD"))
@@ -941,11 +951,11 @@ func simulate2(): # only ran if not in hitstop
 						air_strafe_speed_temp = FMath.percent(air_strafe_speed_temp, AERIAL_STRAFE_MOD)
 						air_strafe_limit_temp = FMath.percent(air_strafe_limit_temp, AERIAL_STRAFE_MOD)
 					
-					if abs(velocity.x + (dir * air_strafe_speed_temp)) > abs(velocity.x): # if speeding up
+					if abs(velocity.x + (strafe_dir * air_strafe_speed_temp)) > abs(velocity.x): # if speeding up
 						if abs(velocity.x) < air_strafe_limit_temp: # only allow strafing if below speed limit
-							velocity.x = int(clamp(velocity.x + dir * air_strafe_speed_temp, -air_strafe_limit_temp, air_strafe_limit_temp))
+							velocity.x = int(clamp(velocity.x + strafe_dir * air_strafe_speed_temp, -air_strafe_limit_temp, air_strafe_limit_temp))
 					else: # slowing down
-						velocity.x += dir * air_strafe_speed_temp
+						velocity.x += strafe_dir * air_strafe_speed_temp
 					
 	# LEFT/RIGHT DI --------------------------------------------------------------------------------------------------
 					
@@ -975,22 +985,31 @@ func simulate2(): # only ran if not in hitstop
 		if facing != dir:
 				
 			if check_quick_turn():
+				quick_turn_used = true
 				face(dir)
 				
 		# quick impulse
-		if state == Globals.char_state.GROUND_ATK_STARTUP and !impulse_used and Animator.time <= 1:
-			var move_name = Animator.to_play_animation.trim_suffix("Startup")
-			if move_name in UniqChar.STARTERS:
-				if !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
-					impulse_used = true
-					var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
-					# some moves have their own impulse mod
-#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
-#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
-#						impulse = FMath.percent(impulse, impulse_mod)
-					velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
-					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
-
+		match state:
+			Globals.char_state.GROUND_ATK_STARTUP:
+				if !impulse_used and Animator.time <= 1:
+					var move_name = Animator.to_play_animation.trim_suffix("Startup")
+					if move_name in UniqChar.STARTERS:
+						if !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
+							impulse_used = true
+							var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
+							# some moves have their own impulse mod
+		#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
+		#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
+		#						impulse = FMath.percent(impulse, impulse_mod)
+							velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
+							Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+			
+		# quick strafe-lock
+			Globals.char_state.AIR_ATK_STARTUP:
+				if strafe_lock_dir == 0 and Animator.time <= 1:
+					var move_name = Animator.to_play_animation.trim_suffix("Startup")
+					if move_name in UniqChar.STARTERS:
+						strafe_lock_dir = dir
 
 
 #	if instant_dir != 0 and facing != instant_dir: # this allow for quick turns when you tap a direction while holding another direction
@@ -2765,10 +2784,10 @@ func check_collidable(): # called by Physics.gd
 	match new_state:
 		Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER:
 			return false
-		Globals.char_state.GROUND_ATK_STARTUP: # crossover attack
-			if button_dash in input_state.pressed:
-#					and chain_memory.size() == 0:
-				return false
+#		Globals.char_state.GROUND_ATK_STARTUP: # crossover attack
+#			if button_dash in input_state.pressed:
+##					and chain_memory.size() == 0:
+#				return false
 		Globals.char_state.AIR_RECOVERY:
 			if Animator.query_to_play(["Dodge"]):
 				return false
@@ -3038,44 +3057,50 @@ func get_move_name():
 	return move_name
 	
 func check_quick_turn():
+	if quick_turn_used: return false
+	
+	var can_turn := false
+	
 	match state:
 		Globals.char_state.GROUND_STARTUP:
-			return true
+			can_turn = true
 		Globals.char_state.AIR_STARTUP:
-			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
-				button_dash in input_state.pressed:
-				return false  # if attacking + holding dash, will not turn on 1st frame
-			elif Animator.to_play_animation.begins_with("Burst"):
-				return false
+#			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
+#				button_dash in input_state.pressed:
+#				return false  # if attacking + holding dash, will not turn on 1st frame
+			if Animator.to_play_animation.begins_with("Burst"):
+				can_turn = false
 			else:
-				return true
+				can_turn =  true
 	match new_state:
 		Globals.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
 			if Animator.time <= 6 and Animator.time != 0:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqChar.STARTERS:
-					return false
-				if Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
-					return false
+					can_turn = false
+				elif Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
+					can_turn = false
 #				if Globals.atk_attr.QUICK_TURN_LIMIT in query_atk_attr(move_name): # some moves lock quick turn after a few (3) frames
 #					if Animator.time > 3:
 #						return false
-				return true
-		Globals.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st 3 frames and if dash is not held
-			if Animator.time <= 3 and Animator.time != 0 and !button_dash in input_state.pressed:
+				else: can_turn = true
+		Globals.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st 3 frames
+			if Animator.time <= 3 and Animator.time != 0:
+#				 and !button_dash in input_state.pressed:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqChar.STARTERS:
-					return false
-				if Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
-					return false
-				return true
+					can_turn = false
+				elif Globals.atk_attr.NO_TURN in query_atk_attr(move_name):
+					can_turn = false
+				else: can_turn = true
 		Globals.char_state.GROUND_BLOCK:
 			if Animator.query(["BlockStartup"]):
-				return true
+				can_turn = true
 		Globals.char_state.AIR_BLOCK:
 			if Animator.query(["aBlockStartup"]):
-				return true
-	return false
+				can_turn = true
+
+	return can_turn
 
 	
 func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
@@ -4261,6 +4286,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var attacker_or_entity = attacker # cleaner code
 	if "entity_nodepath" in hit_data:
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
+#		print(attacker_or_entity.entity_ID)
 		
 	if attacker_or_entity == null:
 		hit_data["cancelled"] = true
@@ -5808,21 +5834,28 @@ func _on_SpritePlayer_anim_started(anim_name):
 		var move_name = anim_name.trim_suffix("Startup")
 				
 		if dir != 0: # impulse
-			if state == Globals.char_state.GROUND_ATK_STARTUP:
-#				var move_name = Animator.to_play_animation.trim_suffix("Startup")
-				if !impulse_used and move_name in UniqChar.STARTERS and !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
-					impulse_used = true
-					var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
-					if instant_dir != 0: # perfect impulse
-						impulse = FMath.percent(impulse, PERFECT_IMPULSE_MOD)
-#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
-#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
-#						impulse = FMath.percent(impulse, impulse_mod)
-					velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
-					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+			match state:
+				Globals.char_state.GROUND_ATK_STARTUP:
+					if !impulse_used and move_name in UniqChar.STARTERS and !Globals.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
+						impulse_used = true
+						var impulse: int = dir * FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("IMPULSE_MOD"))
+						if instant_dir != 0: # perfect impulse
+							impulse = FMath.percent(impulse, PERFECT_IMPULSE_MOD)
+	#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
+	#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
+	#						impulse = FMath.percent(impulse, impulse_mod)
+						velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
+						Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+						
+				Globals.char_state.AIR_ATK_STARTUP:
+					if strafe_lock_dir == 0 and move_name in UniqChar.STARTERS:
+						strafe_lock_dir = dir
+						
 						
 	else:
 		impulse_used = false
+		quick_turn_used = false
+		strafe_lock_dir = 0
 		
 		if is_atk_active():
 			var move_name = UniqChar.get_root(anim_name.trim_suffix("Active"))
@@ -6157,6 +6190,8 @@ func save_state():
 		"target_ID" : target_ID,
 		"burst_token": burst_token,
 		"impulse_used" : impulse_used,
+		"quick_turn_used" : quick_turn_used,
+		"strafe_lock_dir" : strafe_lock_dir,
 		"DI_seal" : DI_seal,
 		"last_dir": last_dir,
 		"first_hit_flag" : first_hit_flag,
@@ -6240,6 +6275,8 @@ func load_state(state_data):
 	target_ID = state_data.target_ID
 	burst_token = state_data.burst_token
 	impulse_used = state_data.impulse_used
+	quick_turn_used = state_data.quick_turn_used
+	strafe_lock_dir = state_data.strafe_lock_dir
 	DI_seal = state_data.DI_seal
 	last_dir = state_data.last_dir
 	first_hit_flag = state_data.first_hit_flag

@@ -975,7 +975,7 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 			Character.velocity.x = FMath.f_lerp(Character.velocity.x, 0, 20) # air res
 		"SP6[ex]SeqD":
 			Partner.afterimage_trail()
-			if Character.grounded: end_sequence_step("ground") # secondary trigger, in case the one in Character.simulate_sequence() fails
+			if Character.grounded: end_sequence_step("ground")
 		"SP6[ex]SeqE":
 			pass
 						
@@ -1138,11 +1138,11 @@ func sequence_passthrough(): # which step in sequence ignore all platforms (for 
 func sequence_partner_passthrough(): # which step in sequence has partner ignore all platforms
 	return false
 	
-func sequence_passfloor(): # which step in sequence ignore hard floor
-	match Animator.to_play_animation:
-		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
-			return true
-	return false
+#func sequence_passfloor(): # which step in sequence ignore hard floor
+#	match Animator.to_play_animation:
+#		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
+#			return true
+#	return false
 	
 	
 # CODE FOR CERTAIN MOVES ---------------------------------------------------------------------------------------------------
@@ -1157,31 +1157,49 @@ func unique_chaining_rules(move_name, attack_ref):
 		return true
 	return false
 	
-func get_trident_array(): # return array of all spinnable tridents
-	var trident_array := []
-	for entity in Globals.Game.get_node("EntitiesFront").get_children():
-		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
-			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
-					"[u][ex]Active", "[c3]Active", "[u][c3]Active"]:
-				trident_array.append(entity)
-	return trident_array
+#func get_trident_array(): # return array of all spinnable tridents
+#	var trident_array := []
+#	for entity in Globals.Game.get_node("EntitiesFront").get_children():
+#		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
+#			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
+#					"[u][ex]Active", "[c3]Active", "[u][c3]Active"]:
+#				trident_array.append(entity)
+#	return trident_array
 			
 func test_instinct(): # to determine if move is usable
-	if get_trident_array().size() > 0: return true
+	if Character.unique_data.last_trident == null: return false
+	
+	var last_trident = Globals.Game.get_entity_node(Character.unique_data.last_trident)
+	if last_trident == null: return false
+	
+	if last_trident.hitcount_record.size() == 0 and last_trident.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
+			"[u][ex]Active", "[c3]Active", "[u][c3]Active"]:
+		return true	
 	return false
 	
-func instinct():
-	var trident_array = get_trident_array()
+#	if get_trident_array().size() > 0: return true
+#	return false
 	
-	var to_spin = null
-	var lowest_lifetime = null
-	for trident in trident_array: # get youngest trident
-		if lowest_lifetime == null or trident.lifetime < lowest_lifetime:
-			to_spin = trident
-			lowest_lifetime = trident.lifetime
-			
-	if to_spin != null:
-		to_spin.UniqEntity.spin()
+func instinct():
+	
+	if Character.unique_data.last_trident == null: return
+	
+	var last_trident = Globals.Game.get_entity_node(Character.unique_data.last_trident)
+	if last_trident == null: return
+	
+	last_trident.UniqEntity.spin()
+	
+#	var trident_array = get_trident_array()
+#
+#	var to_spin = null
+#	var lowest_lifetime = null
+#	for trident in trident_array: # get youngest trident
+#		if lowest_lifetime == null or trident.lifetime < lowest_lifetime:
+#			to_spin = trident
+#			lowest_lifetime = trident.lifetime
+#
+#	if to_spin != null:
+#		to_spin.UniqEntity.spin()
 			
 
 
@@ -1812,28 +1830,34 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"charge_lvl" : 2}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"charge_lvl" : 3}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[ex]Active":
 			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"charge_lvl" : 4}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			
 		"SP1[u][c1]Active": # spawn projectile at EntitySpawn
 			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1, "alt_aim" : true})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c2]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 2, "alt_aim" : true})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"charge_lvl" : 2, "alt_aim" : true}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c3]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 3, "alt_aim" : true})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"charge_lvl" : 3, "alt_aim" : true}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][ex]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 4, "alt_aim" : true})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"charge_lvl" : 4, "alt_aim" : true}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			
 		"aSP1[c1]Active":
@@ -1844,20 +1868,26 @@ func _on_SpritePlayer_anim_started(anim_name):
 #				Globals.Game.spawn_entity(Character.player_ID, "TridentProj", point, \
 #						{"aerial" : true, "charge_lvl" : 1})
 		"aSP1[c2]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2}).entity_ID
 		"aSP1[c3]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3}).entity_ID
 		"aSP1[ex]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4}).entity_ID
 
 		"aSP1[d][c1]Active":
 			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1, "alt_aim" : true})
 		"aSP1[d][c2]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2, "alt_aim" : true})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2, "alt_aim" : true}).entity_ID
 		"aSP1[d][c3]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3, "alt_aim" : true})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 3, "alt_aim" : true}).entity_ID
 		"aSP1[d][ex]Active":
-			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4, "alt_aim" : true})
+			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 4, "alt_aim" : true}).entity_ID
 
 		"aSP1Rec", "aSP1[ex]Rec":
 			Character.velocity_limiter.x = 70

@@ -953,21 +953,25 @@ func is_ground_anim(anim): # for AI commands
 			return true
 	return false
 		
+func is_passive():
+	if !$RageTimer.is_running() and !Globals.mob_attr.RAGE in mob_attr:
+		var target = get_target()
+		if target == self or target.get_target() != self:
+			if Globals.player_count > 1 and Globals.Game.get_player_node(0).target_ID == Globals.Game.get_player_node(1).target_ID:
+				return false # if both players target the same mob, no passivity
+			return true
+	return false
+	
+		
 func start_command(command: String):
 	
-#	if Globals.Game.rng_generate(100) <= UniqChar.fool_chance():
-#		command = "fool"
-	
-	if !$RageTimer.is_running() and !Globals.mob_attr.RAGE in mob_attr:
-		var target = get_target() # less aggressive if not being targeted
-		if target == self or target.get_target() != self or \
-				(Globals.player_count > 1 and Globals.Game.get_player_node(0).target_ID == Globals.Game.get_player_node(1).target_ID):
-					# if both players target the same mob, no passivity
-			if command in UniqChar.COMMANDS and UniqChar.COMMANDS[command].action == "run":
-				if Globals.Game.rng_generate(100) < 80:
-					command = "idle"
-			elif Globals.Game.rng_generate(100) < 50:
+	if is_passive():
+		if command in UniqChar.COMMANDS and UniqChar.COMMANDS[command].action == "run":
+			if Globals.Game.rng_generate(100) < 80:
 				command = "idle"
+		elif Globals.Game.rng_generate(100) < 50:
+			command = "idle"
+			
 			
 	current_command = command
 	command_timer = 0
@@ -1040,8 +1044,8 @@ func general_stat_mods(to_return, stat):
 				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [125, 150, 175, 200])
 			"ARMOR_DMG_MOD":
 				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
-			"ARMOR_KNOCKBACK_MOD":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
+#			"ARMOR_KNOCKBACK_MOD":
+#				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
 	if Globals.mob_attr.SPEED in mob_attr:
 		match stat:
 			"SPEED_MOD":
@@ -2112,7 +2116,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if get_guard_gauge_percent_below() == 0:
 				hit_data["mob_break"] = true
 				armorbroken = true
-				repeat_memory = [] # reset move memory for getting a Break
+#				repeat_memory = [] # reset move memory for getting a Break
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
 				Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
 						"v_mirror":Globals.Game.rng_bool()})
@@ -2234,10 +2238,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hitstop = FMath.percent(hitstop, MOB_BREAK_HITSTOP_MOD)
 		
 	hit_data["hitstop"] = hitstop # send this to attacker as well
-	if !armorbroken and !hit_data.lethal_hit and !hit_data.weak_hit and !"autochain" in hit_data:
-		hitstop += 10 # extra hitstop just for defender on guarded hit
-		if "entity_nodepath" in hit_data: # for projectiles as well
-			hit_data.hitstop = hitstop
+#	if !armorbroken and !hit_data.lethal_hit and !hit_data.weak_hit and !"autochain" in hit_data:
+#		hitstop += 10 # extra hitstop just for defender on guarded hit
+#		if "entity_nodepath" in hit_data: # for projectiles as well
+#			hit_data.hitstop = hitstop
 		
 	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
 		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
@@ -2413,11 +2417,11 @@ func calculate_damage(hit_data) -> int:
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
 	
 
-func calculate_guard_gauge_change(hit_data) -> int:
+func calculate_guard_gauge_change(_hit_data) -> int:
 	
-	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:  
-	# for multi-hit/autochain moves, only first hit affect GG
-		return 0
+#	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:  
+#	# for multi-hit/autochain moves, only first hit affect GG
+#		return 0
 
 	if armorbroken: # if armorbroken, no Guard Drain
 		return 0
@@ -2451,8 +2455,8 @@ func calculate_knockback_strength(hit_data) -> int:
 	# for rekkas and combo-type moves/supers, no KB boost for non-finishers
 	if "autochain" in hit_data or "multihit" in hit_data:
 		return knockback_strength
-	elif !armorbroken: # KB for non-guardbreak
-		knockback_strength = FMath.percent(knockback_strength, UniqChar.get_stat("ARMOR_KNOCKBACK_MOD"))
+#	elif !armorbroken: # KB for non-guardbreak
+#		knockback_strength = FMath.percent(knockback_strength, UniqChar.get_stat("ARMOR_KNOCKBACK_MOD"))
 			
 
 	if armorbroken and !hit_data.weak_hit:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
@@ -2811,7 +2815,7 @@ func sequence_launch():
 		
 		if get_guard_gauge_percent_below() == 0:
 			armorbroken = true
-			repeat_memory = [] # reset move memory for getting a Break
+#			repeat_memory = [] # reset move memory for getting a Break
 			$ModulatePlayer.play("punish_sweet_flash")
 			play_audio("rock2", {"vol" : -10})
 			start_command("standby")

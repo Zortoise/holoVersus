@@ -77,6 +77,7 @@ const UNIQUE_DATA_REF = {
 	"groundfin_trigger" : false,
 	"nibbler_count" : 0,
 	"nibbler_cancel" : 0, # a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
+	"last_trident" : null
 }
 
 const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
@@ -564,7 +565,6 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"sequence": "SP6[ex]SeqA",
 		"hitcount" : 1,
-		"hitspark_type" : Globals.hitspark_type.NONE,
 		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.CANNOT_CHAIN_INTO]
 	},
 	

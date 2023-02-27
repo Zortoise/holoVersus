@@ -373,18 +373,21 @@ func spawn_mob(mob_name: String, level: int, variant: String, attr: Dictionary, 
 	Globals.Game.get_node("Players").move_child(mob, 0)
 	var out_position = Globals.Game.middle_point + offset
 	mob.init(mob_name, level, variant, attr, out_position)
+	return mob
 	
 func spawn_mob_entity(master_ID: int, creator_mob_ref: String, entity_ref: String, out_position, aux_data: Dictionary, \
 		mob_attr: Dictionary, out_palette_ref = null):
 	var mob_entity = loaded_mob_entity_scene.instance()
 	Globals.Game.get_node("MobEntities").add_child(mob_entity)
 	mob_entity.init(master_ID, creator_mob_ref, entity_ref, out_position, aux_data, mob_attr, out_palette_ref)
+	return mob_entity
 	
 # in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan: int = BASE_LIFESPAN, in_palette_ref = null
 func spawn_item(item_ref: String, out_position: Vector2, aux_data: Dictionary, lifespan = null, palette_ref = null):
 	var pickup = loaded_pickup_scene.instance()
 	Globals.Game.get_node("PickUps").add_child(pickup)
 	pickup.init(item_ref, out_position, aux_data, lifespan, palette_ref)
+	return pickup
 	
 # SAVE AND LOAD-----------------------------------------------------------------------------------------------------------------------------
 

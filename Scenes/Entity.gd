@@ -23,12 +23,18 @@ var life_point = null # loses 1 on each hit, cannot depend on hitcount (piercing
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
 var ignore_list = [] # some moves has ignore_time, after hitting will ignore that player for a number of frames, used for multi-hit specials
 var unique_data = {} # data unique for the entity, stored as a dictionary
+var entity_ID := 0
+var birth_time := 0
 
 # not saved
 var hitstop = null
 var to_destroy := false
 
 func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary):
+	
+	entity_ID = Globals.Game.entity_ID_ref
+	Globals.Game.entity_ID_ref += 1
+	birth_time = Globals.Game.frametime
 	
 	master_ID = in_master_ID
 	creator_path = Globals.Game.get_player_node(master_ID).get_path()
@@ -64,6 +70,8 @@ func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_da
 	
 		
 func load_entity():
+
+	add_to_group("EntityNodes")
 
 	var is_common = entity_ref in Globals.common_entity_data # check if UniqEntity scene is common or character-unique
 	
@@ -237,7 +245,7 @@ func interactions():
 			 # get characters that can destroy this entity
 			var character_array = []
 			if Globals.survival_level == null:
-				character_array = Globals.Game.get_node("Players").get_children()
+				character_array = get_tree().get_nodes_in_group("PlayerNodes")
 			else:
 				character_array = get_tree().get_nodes_in_group("MobNodes")
 			var destroyer_array = []
@@ -250,8 +258,7 @@ func interactions():
 					
 			if Globals.survival_level == null:
 				 # get entities that can destroy or clash with this entity
-				var entity_array = Globals.Game.get_node("EntitiesFront").get_children()
-				entity_array.append_array(Globals.Game.get_node("EntitiesBack").get_children())
+				var entity_array = get_tree().get_nodes_in_group("EntityNodes")
 				var clash_array := []
 				for entity in entity_array:
 					if entity.master_ID != master_ID:
@@ -599,6 +606,8 @@ func save_state():
 		"hitcount_record" : hitcount_record,
 		"ignore_list" : ignore_list,
 		"unique_data" : unique_data,
+		"entity_ID" : entity_ID,
+		"birth_time" : birth_time,
 		
 		"HitStopTimer_time" : $HitStopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
@@ -617,6 +626,8 @@ func load_state(state_data):
 	entity_ref = state_data.entity_ref
 	master_ID = state_data.master_ID
 	creator_path = state_data.creator_path
+	entity_ID = state_data.entity_ID
+	birth_time = state_data.birth_time
 	load_entity()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)

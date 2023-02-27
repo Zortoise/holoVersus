@@ -81,6 +81,9 @@ var darken := false # stage will turn dark
 var input_lock := true
 var screenstop := 0 # when set to a number pause game for that number of frames, used mostly for non-lethal last hit of supers
 					# (especially projectile and beam supers), often used with screenshake
+var entity_ID_ref := 0 # used to assign entity ID to entities
+
+# -----------------------------------------------------------------------------------------------------------------------
 
 var game_set := false # caused issue when save/loaded, need more testing
 
@@ -91,6 +94,8 @@ var orig_rng_seed: int	# saved in replay file, starting rng_seed, host must send
 var you_label # node
 var to_superfreeze = null # set superfreeze at end of frame after players/entities have animated
 var to_lethalfreeze = null # set lethalfreeze at end of frame after players/entities have animated
+
+# -----------------------------------------------------------------------------------------------------------------------
 
 var audio_queue := [] # contain audio created while the game is being simulated without rendering
 const AUDIO_QUEUE_LIFE = 5
@@ -835,6 +840,7 @@ func save_state(timestamp):
 		"screenfreeze" : null,
 		"darken" : false,
 		"screenstop" : 0,
+		"entity_ID_ref" : 0
 	}
 	
 	game_state.match_data.frametime = frametime
@@ -847,6 +853,7 @@ func save_state(timestamp):
 	game_state.screenfreeze = screenfreeze
 	game_state.darken = darken
 	game_state.screenstop = screenstop
+	game_state.entity_ID_ref = entity_ID_ref
 	
 
 	for player in $Players.get_children():
@@ -921,6 +928,7 @@ func load_state(game_state, loading_autosave = true):
 	captured_input_state = loaded_game_state.match_data.captured_input_state
 	input_lock = loaded_game_state.match_data.input_lock
 	current_rng_seed = loaded_game_state.current_rng_seed
+	entity_ID_ref = loaded_game_state.entity_ID_ref
 #	game_set = loaded_game_state.game_state.match_data.game_set
 
 	for mob in get_tree().get_nodes_in_group("MobNodes"):
@@ -1213,16 +1221,23 @@ func detect_hit():
 	for hit_data in hit_data_array:
 		
 		var attacker = get_player_node(hit_data.attacker_ID)
+		var attacker_or_entity = attacker
+		if "entity_nodepath" in hit_data:
+			attacker_or_entity = get_node(hit_data.entity_nodepath)
+			
 		var defender = get_player_node(hit_data.defender_ID)
+		
+		if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hit_data.move_data):
+			continue # attacker/entity must still have hitcount left, some attacks changes hitcount record of other attacks, so put this here
 		
 		defender.being_hit(hit_data) # will add stuff to hit_data, passing by reference
 		
 		if !"sequence" in hit_data.move_data and !"cancelled" in hit_data:
-			if !"entity_nodepath" in hit_data:
-				attacker.landed_a_hit(hit_data)
-	#				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
-			else:
-				get_node(hit_data.entity_nodepath).landed_a_hit(hit_data)
+#			if !"entity_nodepath" in hit_data:
+#				attacker.landed_a_hit(hit_data)
+#	#				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
+#			else:
+			attacker_or_entity.landed_a_hit(hit_data)
 				
 		
 func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
@@ -1232,11 +1247,9 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 				continue # defender must not be owner of hitbox
 			
 			var attacker = get_player_node(hitbox.owner_ID)
-			var attacker_or_entity
+			var attacker_or_entity = attacker
 			if "entity_nodepath" in hitbox:
 				attacker_or_entity = get_node(hitbox.entity_nodepath)
-			else:
-				attacker_or_entity = attacker
 			var defender = get_player_node(hurtbox.owner_ID)
 
 			if attacker_or_entity == null or defender == null: continue # invalid attack
@@ -1250,15 +1263,15 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 					continue # attacker must not be using an aerial against an anti-airing defender
 #				if defender_backdash(hitbox, hurtbox):
 #					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/ANTI_GUARD attack
-				if attacker.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
-					continue # attacker must still have hitcount left
-				if attacker.is_player_in_ignore_list(defender.player_ID):
-					continue # defender must not be in attacker's ignore list
-			else: # for entities
-				if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
-					continue # entity must still have hitcount left
-				if attacker_or_entity.is_player_in_ignore_list(defender.player_ID):
-					continue # defender must not be in entity's ignore list
+#				if attacker.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
+#					continue # attacker must still have hitcount left
+#				if attacker.is_player_in_ignore_list(defender.player_ID):
+#					continue # defender must not be in attacker's ignore list
+#			else: # for entities
+#				if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
+#					continue # entity must still have hitcount left
+			if attacker_or_entity.is_player_in_ignore_list(defender.player_ID):
+				continue # defender must not be in entity's ignore list
 						
 			# get an array of PoolVector2Arrays of the intersecting polygons
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.polygon)
@@ -1813,6 +1826,15 @@ func get_player_node(player_ID):
 			if player.player_ID == player_ID:
 				return player
 	return null
+	
+func get_entity_node(entity_ID):
+	for entity in get_tree().get_nodes_in_group("EntityNodes"):
+		if entity.entity_ID == entity_ID:
+			return entity
+	for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
+		if entity.entity_ID == entity_ID:
+			return entity
+	return null
 
 
 # fade out HUD elements if there is a player behind them
@@ -1919,6 +1941,7 @@ func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Di
 	else:
 		$EntitiesBack.add_child(entity)
 	entity.init(master_ID, entity_ref, out_position, aux_data)
+	return entity
 	
 
 # for unique sfx, pass in the master_ID as well
@@ -1930,6 +1953,7 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary,
 	else:
 		$SFXBack.add_child(sfx)
 	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, master_ID, null)
+	return sfx
 	
 
 func spawn_mob_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, mob_ref = null):
@@ -1939,6 +1963,7 @@ func spawn_mob_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Diction
 	else:
 		$SFXBack.add_child(sfx)
 	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, null, mob_ref)
+	return sfx
 	
 	
 func spawn_afterimage(master_ID: int, spritesheet_ref: String, sprite_node_path: NodePath, color_modulate = null, starting_modulate_a = 0.5, \
@@ -1946,7 +1971,8 @@ func spawn_afterimage(master_ID: int, spritesheet_ref: String, sprite_node_path:
 	var afterimage = Globals.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
 	afterimage.init(master_ID, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader)
-			
+	return afterimage
+	
 			
 func spawn_mob_afterimage(mob_ref, mob_palette_ref, spritesheet_ref: String, sprite_node_path: NodePath, color_modulate = null, starting_modulate_a = 0.5, \
 		lifetime = 10, afterimage_shader = null):
@@ -1954,6 +1980,7 @@ func spawn_mob_afterimage(mob_ref, mob_palette_ref, spritesheet_ref: String, spr
 	$Afterimages.add_child(afterimage)
 	afterimage.init(0, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader, \
 			mob_ref, mob_palette_ref)
+	return afterimage
 
 			
 func spawn_damage_number(in_number: int, in_position: Vector2, in_color = null):
@@ -1961,6 +1988,7 @@ func spawn_damage_number(in_number: int, in_position: Vector2, in_color = null):
 		var number = Globals.loaded_dmg_num_scene.instance()
 		$DamageNumbers.add_child(number)
 		number.init(in_number, in_position, in_color)
+		
 	
 # aux_data contain "vol", "bus"
 func play_audio(audio_ref: String, aux_data: Dictionary):

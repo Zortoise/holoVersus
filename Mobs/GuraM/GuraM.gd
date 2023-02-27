@@ -54,7 +54,9 @@ const GUARD_GAUGE_SWELL_RATE = 50
 
 const ARMOR_TIME = 60 # frames of special armor after recovering from hitstun
 const ARMOR_DMG_MOD = 50 # % of damage taken when attacked outside armorbroken state
-const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked outside armorbroken state
+#const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked outside armorbroken state
+
+const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move
 
 # level bonus to stats
 const HP_LEVEL_MOD_ARRAY = [100, 120, 140, 180, 220, 260, 300, 340, 380]
@@ -70,7 +72,7 @@ const UNIQUE_DATA_REF = {
 }
 
 const STARTERS = ["L1", "L3", "F1", "F2", "F3", "H", "aL1", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "aSP1", \
-	"aSP2", "SP3"]
+	"aSP2", "SP3", "SP6[ex]"]
 const NO_IMPULSE = ["SP1"]
 
 
@@ -302,6 +304,24 @@ const MOVE_DATABASE = {
 		"KB_angle" : 0,
 		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
+	},
+	
+	"aSP6[ex]" : {
+		"atk_type" : Globals.atk_type.EX,
+		"sequence": "SP6[ex]SeqA",
+		"hitcount" : 1,
+		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE]
+	},
+	
+	"SP6[ex]SeqE": {
+		"sequence_hits" : [{"damage":150, "hitstop": 15}], # for hits during sequence, has a key, only contain damage
+		"sequence_launch" : { # for final hit of sequence
+			"damage" : 0,
+			"hitstop" : 0,
+			"launch_power" : 800 * FMath.S,
+			"launch_angle" : -103, # launch backwards
+			"atk_level" : 4,
+		}
 	},
 
 }
@@ -535,7 +555,10 @@ const COMMANDS = {
 #			"anim" : ["DashTransit", "SP3Startup"],
 #		},
 			
-
+		"command_grab": {
+			"action": "anim",
+			"anim" : "SP6[ex]Startup",
+		},
 		
 		# PROJECTILES ------------------------------------------------------------------------------------------------
 		
@@ -608,8 +631,8 @@ const ATK_LOOKUP = {
 	atk_range.POINTBLANK : {
 		rank.LOW : ["double_stab"],
 		rank.MID : ["double_stab_combo1", "hammerhead"],
-		rank.HIGH : ["double_stab_combo2", "hammerhead_combo"],
-		rank.RUSH : ["double_stab_combo2", "hammerhead"],
+		rank.HIGH : ["command_grab", "double_stab_combo2", "hammerhead_combo"],
+		rank.RUSH : ["command_grab", "double_stab_combo2", "hammerhead"],
 		rank.SHARK : ["hammerhead"],
 		rank.ZONE : ["back_dash"]
 	},
@@ -712,12 +735,12 @@ func decision(decision_ref = null) -> bool:
 #				"air_low_short":
 #					Character.start_command("air_hitgrab")
 #					return true
-				"close_range":
-					Character.target_closest()
-					filter(atk_range.CLOSE_RANGE)
-					return true
+#				"close_range":
+#					Character.target_closest()
+#					filter(atk_range.CLOSE_RANGE)
+#					return true
 				"start", "passive", "standby", null:
-					Character.start_command("dash_dance")
+					Character.start_command("command_grab")
 					return true
 					
 		"base":
@@ -790,6 +813,9 @@ func decision(decision_ref = null) -> bool:
 						return true
 					elif Character.get_opponent_x_dist() <= 150 or Globals.Game.rng_generate(100) < 70:
 						Character.start_command("option_close")
+						return true
+					elif Character.is_passive() and Globals.Game.rng_generate(100) < LONG_RANGE_PASSIVE_CHANCE:
+						Character.start_command("idle")
 						return true
 					else:
 						filter(atk_range.LONG_RANGE)
@@ -926,17 +952,96 @@ func decision(decision_ref = null) -> bool:
 					return true
 
 				"standby", null:
-					var idle_chance = idle_chance()
-					if Globals.Game.rng_generate(100) < idle_chance:
+					if Globals.Game.rng_generate(100) < idle_chance():
 						Character.start_command("idle")
 					elif Character.get_opponent_x_dist() < 250 and Globals.Game.rng_generate(100) < 50:
 						if !Character.is_at_corners(): 
 							Character.start_command(Globals.Game.rng_array(["back_dash", "back_jump"]))
 						else:
 							Character.start_command("cross_jump")
+					elif Character.is_passive() and Globals.Game.rng_generate(100) < LONG_RANGE_PASSIVE_CHANCE:
+						Character.start_command("idle")
 					else:
 						filter(atk_range.LONG_RANGE)
 					return true
+					
+		"jump":
+			match decision_ref:
+				"start":
+					Character.start_command("forward_jump")
+					return true
+				"passive":
+					Character.start_command("idle")
+					return true
+				"offense":
+					if Globals.Game.rng_generate(100) < idle_chance():
+						Character.start_command("idle")
+					else:
+						Character.start_command(Globals.Game.rng_array(["forward_jump", "shorthop"]))
+					return true
+					
+				"point_blank":
+					Character.target_closest()
+					Character.start_command("shorthop")
+					return true
+				"close_range":
+					Character.target_closest()
+					Character.start_command(Globals.Game.rng_array(["forward_jump", "shorthop"]))
+					return true
+				"mid_range":
+					Character.target_closest()
+					Character.start_command(Globals.Game.rng_array(["forward_jump", "shorthop"]))
+					return true
+				"anti_air_short":
+					Character.target_closest()
+					Character.start_command("neutral_jump")
+					return true
+				"anti_air":
+					Character.target_closest()
+					Character.start_command("neutral_jump")
+					return true
+					
+				"jump_peak":
+					if Character.get_opponent_x_dist() > 100:
+						if !Character.air_dashed:
+							Character.start_command("air_dash")
+						else:
+							Character.start_command("option_air")
+						return true
+				"air_close":
+					Character.target_closest()
+					filter(atk_range.AIR_CLOSE)
+					return true
+				"air_high":
+					Character.target_closest()
+					filter(atk_range.AIR_HIGH)
+					return true
+				"air_low_short":
+					Character.target_closest()
+					filter(atk_range.AIR_LOW_SHORT)
+					return true
+				"air_low":
+					if !Character.failed_air_low:
+						Character.start_command("option_air")
+						return true
+					else:
+						Character.target_closest()
+						filter(atk_range.AIR_LOW)
+						if Character.current_command == "option_air":
+							Character.failed_air_low = true
+						return true
+				"air_far":
+					Character.target_closest()
+					filter(atk_range.AIR_FAR)
+					return true
+
+				"standby", null:
+					if Globals.Game.rng_generate(100) < idle_chance():
+						Character.start_command("idle")
+						return true
+					else:
+						Character.start_command("option_close")
+						return true
 					
 	return false
 
@@ -961,7 +1066,7 @@ func filter(atk_range: int):
 		"zone":
 			if rank.ZONE in ATK_LOOKUP[atk_range]:
 				results = ATK_LOOKUP[atk_range][rank.ZONE]
-				if "weak_zone" in Character.mob_attr:
+				if Character.mob_level <= 5:
 					Globals.remove_instances(results, "tri_throw_trident")
 					Globals.remove_instances(results, "up_tri_throw_trident")
 			else: continue
@@ -1002,6 +1107,7 @@ func get_stat(stat: String): # later can have effects that changes stats
 	to_return = Character.general_stat_mods(to_return, stat)
 	
 	return to_return
+	
 	
 	
 func jump_style_check(): # from main character node
@@ -1064,10 +1170,8 @@ func _ready():
 
 func load_palette():
 	match Character.mob_variant:
-		"test", "base", "rush", "zone", "shark":
+		_:
 			Character.palette_ref = "mimic"
-#		"zone":
-#			Character.palette_ref = ""
 			
 	if Character.palette_ref != "":
 		Character.loaded_palette = Globals.Game.LevelControl.mob_data[Character.mob_ref].palettes[Character.palette_ref]
@@ -1125,6 +1229,14 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aSP3Rec":
 			return Globals.char_state.AIR_ATK_RECOVERY
 			
+		"SP6[ex]Startup":
+			return Globals.char_state.GROUND_ATK_STARTUP
+		"aSP6[ex]Active":
+			return Globals.char_state.AIR_ATK_ACTIVE
+		"SP6[ex]Rec", "SP6[ex]GrabRec":
+			return Globals.char_state.GROUND_ATK_RECOVERY
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
+			return Globals.char_state.SEQUENCE_USER
 		
 	print("Error: " + anim + " not found.")
 		
@@ -1199,6 +1311,9 @@ func refine_move_name(move_name):
 			"aSP1[d]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c1]b", "aSP1[d][c2]b", "aSP1[d][c3]":
 			return "SP1"
 			
+		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
+			return "aSP6[ex]"
+			
 	return move_name
 			
 			
@@ -1260,10 +1375,29 @@ func being_hit(hit_data):
 # AUTO SEQUENCES --------------------------------------------------------------------------------------------------
 
 func simulate_sequence(): # this is ran on every frame during a sequence
-#	var Partner = Character.get_target()
+	var Partner = Character.get_target()
 	
 	match Animator.to_play_animation:
-		_:
+		"SP6[ex]SeqA":
+			if Animator.time == 10:
+				Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", Animator.query_point("grabpoint"), {"facing":-Character.facing, \
+						"palette":Character.get_default_hitspark_palette()})
+				Character.play_audio("cut1", {"vol":-12})
+		"SP6[ex]SeqB":
+			if Character.dir != 0: # can air strafe when going up
+				Character.velocity.x += Character.dir * 10 * FMath.S
+			else:
+				Character.velocity.x = FMath.f_lerp(Character.velocity.x, 0, 20) # air res
+			Character.velocity.x = clamp(Character.velocity.x, -100 * FMath.S, 100 * FMath.S) # max air strafe speed
+			Character.velocity.y += 18 * FMath.S # gravity
+			if Animator.time in [0, 21]:
+				Character.play_audio("whoosh3", {"vol":-10})
+		"SP6[ex]SeqC":
+			Character.velocity.x = FMath.f_lerp(Character.velocity.x, 0, 20) # air res
+		"SP6[ex]SeqD":
+			Partner.afterimage_trail()
+			if Character.grounded: end_sequence_step("ground")
+		"SP6[ex]SeqE":
 			pass
 						
 func simulate_sequence_after(): # called after moving and animating every frame, grab_point and grab_rot_dir are only updated then
@@ -1274,6 +1408,12 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 		"aF2SeqA", "aF2SeqB":
 			move_sequence_target(grab_point)
 			rotate_partner(Partner)
+			
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
+			move_sequence_target(grab_point)
+			rotate_partner(Partner)
+#		"SP6[ex]SeqE":
+#			pass
 						
 
 func start_sequence_step(): # this is ran at the start of every sequence_step
@@ -1297,6 +1437,41 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Character.play_audio("whoosh15", {"vol":-8})
 			Character.play_audio("whoosh3", {"vol":-13, "bus":"PitchDown"})
 			
+		"SP6[ex]SeqA":
+			Globals.Game.get_node("Players").move_child(Character, 0) # move Grabber to back, some grabs move Grabbed to back
+			Character.velocity.set_vector(0, 0) # freeze first
+			Partner.velocity.set_vector(0, 0)
+			Partner.animate("aSeqFlinchAFreeze")
+			Partner.face(-Character.facing)
+			rotate_partner(Partner)
+			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
+			Character.play_audio("impact29", {"vol":-27})
+		"SP6[ex]SeqB":
+			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
+			if Character.grounded:
+				Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+						{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true, "palette":"master"}, Character.player_ID)
+				Character.play_audio("water4", {"vol" : -20})
+#				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+#				Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP6[ex]SeqC":
+			Character.velocity.set_vector(0, 600 * FMath.S)  # dive down
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, \
+					{"facing":Character.facing, "rot":PI/2, "palette":"master"}, Character.player_ID)
+			Character.play_audio("water14", {})
+		"SP6[ex]SeqE":  # you hit ground
+			Partner.sequence_hit(0)
+			Character.velocity.set_vector(0, 0)
+			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true, "palette":"master"}, Character.player_ID)
+			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, \
+					"palette":Character.get_default_hitspark_palette(), "rot":PI/2})
+			Globals.Game.set_screenshake()
+			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
+			Character.play_audio("rock3", {})
+			
 							
 func end_sequence_step(trigger = null): # this is ran at the end of certain sequence_step, or to end a trigger sequence_step
 	# return true if sequence_step ended
@@ -1309,6 +1484,17 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 	
 	match Animator.to_play_animation:
 		"aF2SeqB":
+			Partner.sequence_launch()
+			return true
+			
+		"SP6[ex]SeqD": # ends when either you or parther hit the ground
+			if trigger == "ground" or trigger == "target_ground": # you/target hit the ground
+				Character.animate("SP6[ex]SeqE")
+				return true
+#			elif trigger == "target_ground": # parther hit the ground but not you
+#				Character.animate("aSP6[ex]SeqE")
+#				return true
+		"SP6[ex]SeqE":
 			Partner.sequence_launch()
 			return true
 			
@@ -1352,8 +1538,8 @@ func sequence_passthrough(): # which step in sequence ignore all platforms (for 
 func sequence_partner_passthrough(): # which step in sequence has partner ignore all platforms
 	return false
 	
-func sequence_passfloor(): # which step in sequence ignore hard floor
-	return false
+#func sequence_passfloor(): # which step in sequence ignore hard floor
+#	return false
 	
 	
 # CODE FOR CERTAIN MOVES ---------------------------------------------------------------------------------------------------
@@ -1587,6 +1773,25 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP3Rec":
 			Character.animate("FallTransit")
 			
+		"SP6[ex]Startup":
+			Character.animate("aSP6[ex]Active")
+		"aSP6[ex]Active":
+			Character.animate("SP6[ex]Rec")
+		"SP6[ex]Rec":
+			Character.animate("Idle")
+			
+		"SP6[ex]SeqA":
+			Character.animate("SP6[ex]SeqB")
+		"SP6[ex]SeqB":
+			Character.animate("SP6[ex]SeqC")
+		"SP6[ex]SeqC":
+			Character.animate("SP6[ex]SeqD")
+		"SP6[ex]SeqE":
+			end_sequence_step()
+			Character.animate("SP6[ex]GrabRec")
+		"SP6[ex]GrabRec":
+			Character.animate("Idle")
+			
 			
 	if Globals.mob_attr.CHAIN in Character.mob_attr:
 		if Character.is_atk_recovery():
@@ -1777,6 +1982,20 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 		"aSP3Rec":
 			Character.velocity_limiter.x = 70
+			
+#		"SP6[ex]Startup":
+#			Character.anim_friction_mod = 200
+		"aSP6[ex]Active":
+			Character.velocity.x = FMath.percent(100 * FMath.S * Character.facing, get_stat("SPEED_MOD"))
+			Character.velocity.y = 0
+			Character.anim_gravity_mod = 0
+		"SP6[ex]Rec": # whiff grab
+			Character.play_audio("fail1", {"vol":-20})
+		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
+			start_sequence_step()
+		"SP6[ex]GrabRec":
+			Character.face(-Character.facing)
+			
 			
 	start_audio(anim_name)
 
