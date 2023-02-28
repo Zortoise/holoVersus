@@ -81,7 +81,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 12,
+"duration": 15,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP3Sprite",
@@ -94,7 +94,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-4: {
+5: {
 "SfxUnder_frame": 1,
 "frame": 1,
 "hitbox": [  ],
@@ -102,7 +102,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-8: {
+10: {
 "SfxUnder_frame": 2,
 "frame": 1,
 "hitbox": [  ],
@@ -145,7 +145,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 10,
+"duration": 12,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP3Sprite",
@@ -158,8 +158,16 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-5: {
+4: {
 "SfxUnder_frame": 1,
+"frame": 1,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -14, 22 ), Vector2( 12, 22 ), Vector2( 12, -7 ), Vector2( -14, -7 ) ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+8: {
+"SfxUnder_frame": 2,
 "frame": 1,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -14, 22 ), Vector2( 12, 22 ), Vector2( 12, -7 ), Vector2( -14, -7 ) ],
@@ -201,7 +209,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 4,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP3Sprite",
@@ -409,7 +417,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 12,
+"duration": 15,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP3Sprite",
@@ -422,7 +430,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-4: {
+5: {
 "SfxUnder_frame": 4,
 "frame": 2,
 "hitbox": [  ],
@@ -430,7 +438,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-8: {
+10: {
 "SfxUnder_frame": 5,
 "frame": 2,
 "hitbox": [  ],
@@ -538,8 +546,16 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-6: {
+4: {
 "SfxUnder_frame": 4,
+"frame": 2,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -14, 13 ), Vector2( 11, 13 ), Vector2( 11, -13 ), Vector2( -14, -13 ) ],
+"kborigin": null,
+"sweetbox": [  ]
+},
+8: {
+"SfxUnder_frame": 5,
 "frame": 2,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -14, 13 ), Vector2( 11, 13 ), Vector2( 11, -13 ), Vector2( -14, -13 ) ],
@@ -581,7 +597,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 4,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP3Sprite",

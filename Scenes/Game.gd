@@ -1126,7 +1126,6 @@ func detect_hit():
 		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var move_data_and_name = player.query_move_data_and_name()
 			var hitbox = {
-				"mob" : "MOB" in player,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : player.player_ID,
 				"facing": player.facing,
@@ -1147,7 +1146,6 @@ func detect_hit():
 			
 		if polygons_queried.hurtbox != null:
 			var hurtbox = {
-				"mob" : "MOB" in player,
 				"polygon" : polygons_queried.hurtbox,
 				"owner_ID" : player.player_ID,
 				"facing": player.facing,
@@ -1170,7 +1168,6 @@ func detect_hit():
 		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var move_data_and_name = entity.query_move_data_and_name()
 			var hitbox = {
-				"mob" : false,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : entity.master_ID,
 				"entity_nodepath" : entity.get_path(),
@@ -1360,6 +1357,8 @@ func test_priority(hitbox, attacker, _hurtbox, defender): # return false if atta
 	
 	
 func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
+
+	if Globals.survival_level != null: return false # anti-air is not a thing in Survival
 
 	if attacker.grounded:
 		return false

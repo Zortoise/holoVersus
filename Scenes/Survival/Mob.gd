@@ -62,9 +62,11 @@ const HORIZ_WALL_SLAM_UP_BOOST = 500 * FMath.S # if bounce horizontally on groun
 
 const LAUNCH_DUST_THRESHOLD = 1400 * FMath.S # velocity where launch dust increase in frequency
 
-const RageTimer_TIME = 300 # no passivity if got hit for a while
+#const RageTimer_TIME = 300 # no passivity if got hit for a while
 const LOOT_UNSCALED_SPEED_RANGE = [500, 1000]
 const LOOT_ANGLE_RANGE = [225, 315]
+
+const LEARN_RATE = 20
 
 
 # variables used, don't touch these
@@ -151,7 +153,8 @@ var peak_flag = Globals.peak_flag.GROUNDED
 var chain_memory := []
 var rand_max_chain_size := 0
 var break_level := 0 # set when mob_break according to atk_level, determine Guard Swell Rate
-var proj_break := false # set to true when mob_break via projectile, increase armor time
+var proj_only_combo := false # set to true when mob_break via projectile, false if hit with physical attack during combo, increase armor time
+var no_jump_chance := 0 # chance of removing all jumps from decision, increased if hit in air, decreased when hit on ground
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -443,11 +446,11 @@ func simulate2(): # only ran if not in hitstop
 			if !$HitStunTimer.is_running(): # armorbroken and out of hitstun, instantly gain back all Guard Gauge
 				reset_guard_gauge()
 				armorbroken = false
-				if !proj_break:
+				if !proj_only_combo:
 					$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
 				else:
-					$ArmorTimer.time = FMath.percent(UniqChar.get_stat("ARMOR_TIME"), 200)
-					proj_break = false
+					$ArmorTimer.time = FMath.percent(UniqChar.get_stat("ARMOR_TIME"), 400)
+					proj_only_combo = false
 				play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 				Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
@@ -455,11 +458,11 @@ func simulate2(): # only ran if not in hitstop
 				if current_guard_gauge == 0: # instantly recover from hitstun if GG swell back to max
 					$HitStunTimer.stop()
 					armorbroken = false
-					if !proj_break:
+					if !proj_only_combo:
 						$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
 					else:
 						$ArmorTimer.time = FMath.percent(UniqChar.get_stat("ARMOR_TIME"), 200)
-						proj_break = false
+						proj_only_combo = false
 					play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 					Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 						"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
@@ -780,8 +783,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			$HitStunTimer.simulate()
 			$NoCollideTimer.simulate()
 
-		if !$HitStunTimer.is_running():
-			$RageTimer.simulate()
+#		if !$HitStunTimer.is_running():
+#			$RageTimer.simulate()
 
 		armor_flash()
 		UniqChar.unique_flash()
@@ -976,7 +979,8 @@ func is_ground_anim(anim): # for AI commands
 	return false
 		
 func is_passive():
-	if !$RageTimer.is_running() and !Globals.mob_attr.RAGE in mob_attr:
+#	if !$RageTimer.is_running() and !Globals.mob_attr.RAGE in mob_attr:
+	if !Globals.mob_attr.RAGE in mob_attr:
 		var target = get_target()
 		if target == self or target.get_target() != self:
 			if Globals.player_count > 1 and Globals.Game.get_player_node(0).target_ID == Globals.Game.get_player_node(1).target_ID:
@@ -1027,6 +1031,16 @@ func advance_command():
 			else:
 				UniqChar.decision()
 			command_timer = 0
+
+func learn():
+	if is_atk_recovery():
+		return
+	if grounded:
+		no_jump_chance -= LEARN_RATE
+	else:
+		no_jump_chance += LEARN_RATE
+		
+	no_jump_chance = int(clamp(no_jump_chance, 0, 100))
 
 # STAT MODS --------------------------------------------------------------------------------------------------	
 
@@ -2043,7 +2057,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	remove_status_effect(Globals.status_effect.CRUSH)
 	$HitStopTimer.stop() # cancel pre-existing hitstop
-	$RageTimer.time = RageTimer_TIME
+#	$RageTimer.time = RageTimer_TIME
 	
 	# get direction to attacker
 	var vec_to_attacker: Vector2 = attacker_or_entity.position - position
@@ -2195,6 +2209,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# ---------------------------------------------------------------------------------
 	
+	if !is_hitstunned():
+		learn()
+	
 	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
 		if !hit_data.double_repeat and !"tough_mob" in hit_data:
 			attacker_or_entity.landed_a_sequence(hit_data)
@@ -2216,6 +2233,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
+	if !is_hitstunned(): # first hit
+		if "entity_nodepath" in hit_data:
+			proj_only_combo = true
+		else:
+			proj_only_combo = false
+	else: # additional hits turn off proj_only_combo if not a projectile
+		if proj_only_combo and !"entity_nodepath" in hit_data:
+			proj_only_combo = false
+
 		
 	if hit_data.double_repeat:
 		$ModulatePlayer.play("repeat")
@@ -2233,10 +2259,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif "mob_break" in hit_data:
 		$ModulatePlayer.play("punish_sweet_flash")
 		break_level = adjusted_atk_level - 1
-		if "entity_nodepath" in hit_data:
-			proj_break = true
-		else:
-			proj_break = false
 		
 	elif !armorbroken:
 		$ModulatePlayer.play("armor_flash")
@@ -2595,11 +2617,13 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 
 	if hit_data.double_repeat:
 		return 1 # double repeat is forced attack level 1
-	
+		
 	var atk_level: int = hit_data.move_data.atk_level
+	
 	if hit_data.sweetspotted and !Globals.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data.move_data.atk_attr: # sweetspotted give more hitstun
 		atk_level += 2
-		atk_level = int(clamp(atk_level, 1, 8))
+		
+	atk_level = int(clamp(atk_level, 1, 8))
 		
 	return atk_level
 	
@@ -2628,6 +2652,9 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
 			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), weight)
+
+	if "mob_break" in hit_data and "entity_nodepath" in hit_data: # reduce hitstun of projectile starters
+		scaled_hitstun = FMath.percent(scaled_hitstun, 70)
 
 	return FMath.round_and_descale(scaled_hitstun)
 
@@ -2888,7 +2915,8 @@ func sequence_launch():
 				"v_mirror":Globals.Game.rng_bool()})
 		
 			break_level = seq_data.atk_level - 1
-			proj_break = false
+			
+	proj_only_combo = false
 		
 	# HITSTUN
 	var hitstun: int
@@ -3204,7 +3232,7 @@ func save_state():
 		"HitStunTimer_time" : $HitStunTimer.time,
 		"HitStopTimer_time" : $HitStopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
-		"RageTimer_time" : $RageTimer.time,
+#		"RageTimer_time" : $RageTimer.time,
 		"ArmorTimer_time" : $ArmorTimer.time,
 		
 		"current_command" : current_command,
@@ -3221,7 +3249,8 @@ func save_state():
 		"chain_memory" : chain_memory,
 		"rand_max_chain_size" : rand_max_chain_size,
 		"break_level" : break_level,
-		"proj_break" : proj_break,
+		"proj_only_combo" : proj_only_combo,
+		"no_jump_chance" : no_jump_chance,
 		
 	}
 
@@ -3290,7 +3319,7 @@ func load_state(state_data):
 	$HitStunTimer.time = state_data.HitStunTimer_time
 	$HitStopTimer.time = state_data.HitStopTimer_time
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
-	$RageTimer.time = state_data.RageTimer_time
+#	$RageTimer.time = state_data.RageTimer_time
 	$ArmorTimer.time = state_data.ArmorTimer_time
 
 	current_command = state_data.current_command
@@ -3307,7 +3336,8 @@ func load_state(state_data):
 	chain_memory = state_data.chain_memory
 	rand_max_chain_size = state_data.rand_max_chain_size
 	break_level = state_data.break_level
-	proj_break = state_data.proj_break
+	proj_only_combo = state_data.proj_only_combo
+	no_jump_chance = state_data.no_jump_chance
 
 	
 #--------------------------------------------------------------------------------------------------

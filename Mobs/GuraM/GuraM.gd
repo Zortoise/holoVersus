@@ -52,7 +52,7 @@ const DAMAGE_VALUE_LIMIT = 500
 #const GG_REGEN = 5 # exact GG regened per frame when GG < 100%
 const GUARD_GAUGE_SWELL_RATE = 50
 
-const ARMOR_TIME = 60 # frames of special armor after recovering from hitstun
+const ARMOR_TIME = 30 # frames of special armor after recovering from hitstun
 const ARMOR_DMG_MOD = 50 # % of damage taken when attacked outside armorbroken state
 #const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked outside armorbroken state
 
@@ -752,7 +752,9 @@ func decision(decision_ref = null) -> bool:
 					if Globals.Game.rng_generate(100) < idle_chance():
 						Character.start_command("idle")
 					else:
-						Character.start_command(Globals.Game.rng_array(["seek", "seek", "forward_jump", "shorthop", "dash"]))
+						var array = ["seek", "seek", "forward_jump", "shorthop", "dash"]
+						jump_filter(array)
+						Character.start_command(Globals.Game.rng_array(array))
 					return true
 					
 				"point_blank":
@@ -836,7 +838,9 @@ func decision(decision_ref = null) -> bool:
 					if Globals.Game.rng_generate(100) < idle_chance():
 						Character.start_command("idle")
 					else:
-						Character.start_command(Globals.Game.rng_array(["seek", "seek", "forward_jump", "shorthop", "dash"]))
+						var array = ["seek", "seek", "forward_jump", "shorthop", "dash"]
+						jump_filter(array)
+						Character.start_command(Globals.Game.rng_array(array))
 					return true
 					
 				"point_blank":
@@ -1061,6 +1065,14 @@ func idle_chance():
 		chance = FMath.percent(chance, 25)
 	return chance
 	
+	
+func jump_filter(array: Array):
+	var to_filter = Globals.Game.rng_generate(100) <= Character.no_jump_chance
+	if !to_filter: return
+	
+	Globals.remove_instances(array, "forward_jump")
+	Globals.remove_instances(array, "shorthop")
+	
 
 func filter(atk_range: int):
 	var results = []
@@ -1088,6 +1100,8 @@ func filter(atk_range: int):
 					results = ATK_LOOKUP[atk_range][rank.MID]
 				6, 7, 8: # late-game enemies, remove weaker moves
 					results = ATK_LOOKUP[atk_range][rank.HIGH]
+					
+	jump_filter(results)		
 			
 	if Character.air_dashed:
 		Globals.remove_instances(results, "air_dash") # can only air_dash once per airtime

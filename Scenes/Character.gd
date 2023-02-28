@@ -981,8 +981,10 @@ func simulate2(): # only ran if not in hitstop
 						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
 						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
 					else:
-						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_true())
-						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_true())
+#						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_true())
+#						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_true())
+						DDI_speed = DDI_SIDE_MAX
+						DDI_speed_limit = MAX_DDI_SIDE_SPEED
 					
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
 						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit (can scale speed limit to guard gauge?)
@@ -1239,9 +1241,11 @@ func simulate2(): # only ran if not in hitstop
 						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
 				else:
 					if v_dir == -1: # DIing upward
-						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_true())
+#						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_true())
+						gravity_temp = FMath.percent(gravity_temp, GDI_UP_MAX)
 					elif v_dir == 1: # DIing downward
-						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_true())
+#						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_true())
+						gravity_temp = FMath.percent(gravity_temp, GDI_DOWN_MAX)
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
 				gravity_temp = FMath.percent(gravity_temp, UniqChar.get_stat("FALL_GRAV_MOD"))
@@ -2815,6 +2819,9 @@ func check_collidable(): # called by Physics.gd
 		Globals.char_state.AIR_RECOVERY:
 			if Animator.query_to_play(["Dodge"]):
 				return false
+		Globals.char_state.AIR_STARTUP:
+			if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
+				return false
 			
 	return UniqChar.check_collidable()
 	
@@ -2920,7 +2927,8 @@ func process_VDI():
 		if Globals.survival_level == null:
 			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
 		else:
-			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_true()) # adjust according to Guard Gauge
+#			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_true()) # adjust according to Guard Gauge
+			VDI_amount = VDI_amount_max
 		
 		if dir != 0 and v_dir != 0: # diagonal, multiply by 0.71
 			VDI_amount = FMath.percent(VDI_amount, 71)
@@ -3421,15 +3429,25 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 		return false
 	if get_damage_percent() >= 100: # cannot Burst Escape at lethal range
 		return false
-	if current_guard_gauge >= GUARD_GAUGE_CEIL:
-		change_guard_gauge(-10000) # higher cost if GG is full, but cost no Burst Token
+		
+	if Globals.survival_level == null:
+		
+		if current_guard_gauge >= GUARD_GAUGE_CEIL:
+			change_guard_gauge(-10000) # higher cost if GG is full, but cost no Burst Token
+			return true
+		if burst_token != Globals.burst.AVAILABLE or current_guard_gauge <= 0:
+			return false # not enough resouces to use it
+		
+		change_guard_gauge(-BURSTESCAPE_GG_COST)
+		change_burst_token(Globals.burst.EXHAUSTED)
 		return true
-	if burst_token != Globals.burst.AVAILABLE or current_guard_gauge <= 0:
-		return false # not enough resouces to use it
-	change_guard_gauge(-BURSTESCAPE_GG_COST)
-	change_burst_token(Globals.burst.EXHAUSTED)
-	return true
 	
+	else: # during Survival Burst Escape cost 1 bar of EX Gauge
+		if current_ex_gauge < BURSTCOUNTER_EX_COST:
+			return false # not enough EX Gauge to use it
+			
+		change_ex_gauge(-BURSTCOUNTER_EX_COST)
+		return true
 	
 #func burst_extend_check(move_name): # check if have resources to do it, then take away those resources and return a bool
 #	if !is_atk_active(): # active frames only
