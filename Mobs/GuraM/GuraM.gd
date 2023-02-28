@@ -818,7 +818,10 @@ func decision(decision_ref = null) -> bool:
 						Character.start_command("idle")
 						return true
 					else:
-						filter(atk_range.LONG_RANGE)
+						if Character.get_target().is_hitstunned_or_sequenced():
+							Character.start_command("option_close")
+						else:
+							filter(atk_range.LONG_RANGE)
 						return true
 					
 		"rush", "shark":
@@ -962,7 +965,10 @@ func decision(decision_ref = null) -> bool:
 					elif Character.is_passive() and Globals.Game.rng_generate(100) < LONG_RANGE_PASSIVE_CHANCE:
 						Character.start_command("idle")
 					else:
-						filter(atk_range.LONG_RANGE)
+						if Character.get_target().is_hitstunned_or_sequenced():
+							Character.start_command("idle")
+						else:
+							filter(atk_range.LONG_RANGE)
 					return true
 					
 		"jump":

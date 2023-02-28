@@ -203,7 +203,9 @@ func turn_to_enemy():
 	Entity.hitcount_record = []
 	
 	var master_node = Globals.Game.get_player_node(get_node(Entity.creator_path).player_ID)
-	var enemy_node = Globals.Game.get_player_node(master_node.target_ID)
+	var enemy_node = master_node.get_target()
+	if enemy_node == null:
+		enemy_node = master_node
 	
 	var angle_finder := FVector.new()
 	angle_finder.set_from_vec(enemy_node.position - Entity.position)

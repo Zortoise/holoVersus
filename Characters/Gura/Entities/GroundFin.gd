@@ -54,7 +54,7 @@ func simulate():
 #				if breach_facing == 0:
 #					breach_facing = Entity.facing
 				var breach_facing = Entity.facing
-				var new_facing_ref = Globals.Game.get_player_node(master_node.target_ID).position.x - Entity.position.x
+				var new_facing_ref = master_node.get_target().position.x - Entity.position.x
 				if new_facing_ref != 0: # turn to face targeted opponent
 					breach_facing = sign(new_facing_ref)
 				Globals.Game.spawn_entity(get_node(Entity.creator_path).player_ID, "SharkBreach", Entity.position, {"facing" : breach_facing})

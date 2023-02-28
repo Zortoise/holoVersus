@@ -38,10 +38,97 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "test", "offset" : Vector2.ZERO,
+					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "test", "offset" : Vector2.ZERO,
+				],
+			}
+	},
+	2 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	3 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "rush",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	4 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "jump",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	5 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "shark",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	6 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	7 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	8 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "rush",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	9 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "jump",
+					"attr" : {
+						} },
+				],
+			}
+	},
+	10 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 0, "variant" : "shark",
 					"attr" : {
 						} },
 				],
@@ -102,3 +189,26 @@ const WAVES = {
 #				],
 #			}
 #	},
+
+
+#				0 : [
+#					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+#					"attr" : {
+#						Globals.mob_attr.SPEED : 6,
+#						Globals.mob_attr.CHAIN : 10,
+#						Globals.mob_attr.BLACK_TRAIL : true,
+#						Globals.mob_attr.PROJ_SPEED : 3,
+#						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+#						} },
+#				],
+
+#				0 : [
+#					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+#					"attr" : {
+#						Globals.mob_attr.BLACK_TRAIL : true,
+#						} },
+#					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+#					"attr" : {
+#						Globals.mob_attr.BLACK_TRAIL : true,
+#						} },
+#				],

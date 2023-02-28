@@ -776,10 +776,11 @@ func unique_flash():
 
 func get_stat(stat: String): # later can have effects that changes stats
 	
-#	if Globals.survival_level != null:
-#		match stat:
-#			"DAMAGE_VALUE_LIMIT":
-#				return FMath.percent(DAMAGE_VALUE_LIMIT, 50)
+	if Globals.survival_level != null:
+		match stat:
+			"DAMAGE_VALUE_LIMIT":
+				var hp_mod_array = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100] 
+				return FMath.percent(DAMAGE_VALUE_LIMIT, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
 			
 	return get(stat)
 	

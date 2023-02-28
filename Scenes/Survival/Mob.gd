@@ -31,9 +31,11 @@ const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Gu
 #const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
 #const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
 
-const ATK_LEVEL_TO_F_HITSTUN = [[25, 30, 35, 40, 45, 50, 55, 60], [21, 26, 31, 36, 41, 46, 51, 56], [17, 22, 27, 32, 37, 42, 47, 52]]
-const ATK_LEVEL_TO_L_HITSTUN = [[40, 45, 50, 55, 60, 65, 70, 75], [35, 40, 45, 50, 55, 60, 65, 70], [30, 35, 40, 45, 50, 55, 60, 65]]
-
+#const ATK_LEVEL_TO_F_HITSTUN = [[25, 30, 35, 40, 45, 50, 55, 60], [21, 26, 31, 36, 41, 46, 51, 56], [17, 22, 27, 32, 37, 42, 47, 52]]
+#const ATK_LEVEL_TO_L_HITSTUN = [[40, 45, 50, 55, 60, 65, 70, 75], [35, 40, 45, 50, 55, 60, 65, 70], [30, 35, 40, 45, 50, 55, 60, 65]]
+const ATK_LEVEL_TO_F_HITSTUN = [33, 36, 39, 42, 45, 48, 51, 54]
+const ATK_LEVEL_TO_L_HITSTUN = [48, 51, 54, 57, 60, 63, 66, 69]
+const BREAK_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 15  # friction during hitstun
@@ -50,7 +52,7 @@ const MOB_BREAK_HITSTOP_MOD = 150 # increase hitstop when guardbreaking
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
 const LAUNCH_BOOST = 250 * FMath.S # increased knockback strength when a flinch becomes a launch
 const LAUNCH_ROT_SPEED = 5*PI # speed of sprite rotation when launched, don't need fixed-point as sprite rotation is only visuals
-const TECHLAND_THRESHOLD = 450 * FMath.S # max velocity when hitting the ground to tech land
+const TECHLAND_THRESHOLD = 300 * FMath.S # max velocity when hitting the ground to tech land
 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
 const WALL_SLAM_VEL_LIMIT_MOD = 500
@@ -148,6 +150,8 @@ var rand_time = null
 var peak_flag = Globals.peak_flag.GROUNDED
 var chain_memory := []
 var rand_max_chain_size := 0
+var break_level := 0 # set when mob_break according to atk_level, determine Guard Swell Rate
+var proj_break := false # set to true when mob_break via projectile, increase armor time
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -422,8 +426,9 @@ func simulate2(): # only ran if not in hitstop
 	process_status_effects_timer() # remove expired status effects before running hit detection since that can add effects
 	
 	# clearing repeat memory
-	if !is_hitstunned() and !state in [Globals.char_state.SEQUENCE_TARGET]:
+	if !is_hitstunned_or_sequenced():
 		repeat_memory = []
+		break_level = 0
 		
 	if !state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
@@ -438,7 +443,11 @@ func simulate2(): # only ran if not in hitstop
 			if !$HitStunTimer.is_running(): # armorbroken and out of hitstun, instantly gain back all Guard Gauge
 				reset_guard_gauge()
 				armorbroken = false
-				$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
+				if !proj_break:
+					$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
+				else:
+					$ArmorTimer.time = FMath.percent(UniqChar.get_stat("ARMOR_TIME"), 200)
+					proj_break = false
 				play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 				Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
@@ -446,7 +455,11 @@ func simulate2(): # only ran if not in hitstop
 				if current_guard_gauge == 0: # instantly recover from hitstun if GG swell back to max
 					$HitStunTimer.stop()
 					armorbroken = false
-					$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
+					if !proj_break:
+						$ArmorTimer.time = UniqChar.get_stat("ARMOR_TIME")
+					else:
+						$ArmorTimer.time = FMath.percent(UniqChar.get_stat("ARMOR_TIME"), 200)
+						proj_break = false
 					play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 					Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 						"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
@@ -975,6 +988,8 @@ func is_passive():
 func start_command(command: String):
 	
 	if is_passive():
+		if get_target().is_hitstunned_or_sequenced():
+			command = "idle" # will not attack if target is not attacking it and is in hitstun
 		if command in UniqChar.COMMANDS and UniqChar.COMMANDS[command].action == "run":
 			if Globals.Game.rng_generate(100) < 80:
 				command = "idle"
@@ -1035,6 +1050,9 @@ func general_stat_mods(to_return, stat):
 		"GUARD_GAUGE_SWELL_RATE":
 			var values = [100, 125, 150]
 			to_return = FMath.percent(to_return, values[mob_level_to_tier()])
+			
+			# break level affects Guard Swell
+			to_return = FMath.percent(to_return, BREAK_LEVEL_TO_GUARD_SWELL_MOD[break_level])
 #		"GUARD_DRAIN_MOD":
 #			to_return = FMath.percent(to_return, UniqChar.GDRAIN_MOD_ARRAY[mob_level])
 			
@@ -1567,6 +1585,13 @@ func is_hitstunned():
 			return true
 	return false
 	
+func is_hitstunned_or_sequenced():
+	match state: # use non-new state
+		Globals.char_state.AIR_FLINCH_HITSTUN, Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.LAUNCHED_HITSTUN, \
+				Globals.char_state.SEQUENCE_TARGET:
+			return true
+	return false
+	
 func is_attacking():
 	match new_state:
 		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
@@ -2007,6 +2032,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		attacker_or_entity = get_node(hit_data.entity_nodepath)
 
 	if attacker_or_entity == null:
+		hit_data["cancelled"] = true
 		return # attacked by something that is already deleted, return
 
 	hit_data["attacker"] = attacker # for other functions
@@ -2206,6 +2232,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	elif "mob_break" in hit_data:
 		$ModulatePlayer.play("punish_sweet_flash")
+		break_level = adjusted_atk_level - 1
+		if "entity_nodepath" in hit_data:
+			proj_break = true
+		else:
+			proj_break = false
 		
 	elif !armorbroken:
 		$ModulatePlayer.play("armor_flash")
@@ -2586,9 +2617,11 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 
 	var scaled_hitstun := 0
 	if Globals.trait.NO_LAUNCH in query_traits() or hit_data.knockback_strength < LAUNCH_THRESHOLD:
-		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
+#		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
+		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 	else:
-		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
+#		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
+		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 		
 	if armorbroken: # start scaling down when over 50% guard gauge
 		var weight = get_guard_gauge_percent_below()
@@ -2854,12 +2887,20 @@ func sequence_launch():
 			Globals.Game.spawn_SFX("Crushspark", "Stunspark", position, {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()})
 		
+			break_level = seq_data.atk_level - 1
+			proj_break = false
+		
 	# HITSTUN
 	var hitstun: int
 	if "fixed_hitstun" in seq_data:
 		hitstun = seq_data.fixed_hitstun
 	else:
-		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][seq_data.atk_level - 1] * FMath.S
+#		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][seq_data.atk_level - 1] * FMath.S
+		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[seq_data.atk_level - 1] * FMath.S
+		var weight = get_guard_gauge_percent_below()
+		if weight > 50:
+			weight = FMath.get_fraction_percent((weight - 50), 50)
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), weight)
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
 	launchstun_rotate = 0 # used to calculation sprite rotation during launched state
@@ -3179,6 +3220,8 @@ func save_state():
 		"peak_flag" : peak_flag,
 		"chain_memory" : chain_memory,
 		"rand_max_chain_size" : rand_max_chain_size,
+		"break_level" : break_level,
+		"proj_break" : proj_break,
 		
 	}
 
@@ -3263,6 +3306,8 @@ func load_state(state_data):
 	peak_flag = state_data.peak_flag
 	chain_memory = state_data.chain_memory
 	rand_max_chain_size = state_data.rand_max_chain_size
+	break_level = state_data.break_level
+	proj_break = state_data.proj_break
 
 	
 #--------------------------------------------------------------------------------------------------

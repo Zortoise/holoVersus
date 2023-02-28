@@ -1126,6 +1126,7 @@ func detect_hit():
 		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var move_data_and_name = player.query_move_data_and_name()
 			var hitbox = {
+				"mob" : "MOB" in player,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : player.player_ID,
 				"facing": player.facing,
@@ -1146,6 +1147,7 @@ func detect_hit():
 			
 		if polygons_queried.hurtbox != null:
 			var hurtbox = {
+				"mob" : "MOB" in player,
 				"polygon" : polygons_queried.hurtbox,
 				"owner_ID" : player.player_ID,
 				"facing": player.facing,
@@ -1168,6 +1170,7 @@ func detect_hit():
 		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var move_data_and_name = entity.query_move_data_and_name()
 			var hitbox = {
+				"mob" : false,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : entity.master_ID,
 				"entity_nodepath" : entity.get_path(),
@@ -1189,6 +1192,7 @@ func detect_hit():
 		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var move_data_and_name = mob_entity.query_move_data_and_name()
 			var hitbox = {
+				"mob" : true,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : mob_entity.master_ID,
 				"entity_nodepath" : mob_entity.get_path(),
@@ -1272,6 +1276,8 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 #					continue # entity must still have hitcount left
 			if attacker_or_entity.is_player_in_ignore_list(defender.player_ID):
 				continue # defender must not be in entity's ignore list
+#			if Globals.survival_level != null and defender_mob_grace(hitbox, attacker, hurtbox, defender):
+#				continue # attacking mob cannot hit hitstunned player if not being targeted
 						
 			# get an array of PoolVector2Arrays of the intersecting polygons
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.polygon)
@@ -1380,6 +1386,23 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 				return true # defender successfully anti-aired
 					
 	return false
+	
+#func defender_mob_grace(hitbox, attacker, hurtbox, defender):
+#
+#	if hitbox.mob == true and hurtbox.mob == false: pass # attacker must be a mob, defender a player
+#	else: return
+#
+#	if !defender.get_node("HitStunTimer").is_running(): return false # defender must be in hitstun
+#
+#	var attacker_ID: int
+#	if !"entity_nodepath" in hitbox: # not entity
+#		attacker_ID = attacker.player_ID
+#	else:
+#		attacker_ID = get_node(hitbox.entity_nodepath).master_ID
+#
+#	if defender.target_ID != attacker_ID: return true # attacking mob is not targeted by player, cannot hit hitstunned player
+#	else:
+#		return false
 	
 	
 func defender_semi_invul(hitbox, attacker, _hurtbox, defender):

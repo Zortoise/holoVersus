@@ -507,7 +507,7 @@ const MOVE_DATABASE = {
 		"damage" : 80,
 		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 3,
+		"atk_level" : 5,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
 		"reset_type" : Globals.reset_type.STARTUP_RESET,
@@ -522,7 +522,7 @@ const MOVE_DATABASE = {
 		"damage" : 50,
 		"knockback" : 200 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 3,
+		"atk_level" : 5,
 		"fixed_hitstop" : 10,
 		"fixed_atker_hitstop" : 1,
 		"hitspark_palette" : "red",
@@ -539,7 +539,7 @@ const MOVE_DATABASE = {
 		"damage" : 50,
 		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 3,
+		"atk_level" : 5,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
 		"atk_attr" : [Globals.atk_attr.FOLLOW_UP, Globals.atk_attr.DESTROY_ENTITIES, Globals.atk_attr.NO_IMPULSE],
@@ -553,7 +553,7 @@ const MOVE_DATABASE = {
 		"damage" : 100,
 		"knockback" : 550 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
+		"atk_level" : 6,
 		"hitspark_palette" : "red",
 		"KB_angle" : -45,
 		"atk_attr" : [Globals.atk_attr.DESTROY_ENTITIES],
@@ -577,7 +577,7 @@ const MOVE_DATABASE = {
 #			"EX_gain": 0,
 			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103, # launch backwards
-			"atk_level" : 4,
+			"atk_level" : 6,
 		}
 	},
 	"aSP6[ex]SeqE": { # if Grabbed hit a ledge while Grabber doesn't
@@ -589,7 +589,7 @@ const MOVE_DATABASE = {
 #			"EX_gain": 0,
 			"launch_power" : 800 * FMath.S,
 			"launch_angle" : -103,
-			"atk_level" : 4,
+			"atk_level" : 6,
 		}
 	},
 	

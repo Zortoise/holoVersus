@@ -38,7 +38,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
 		"Kill":
-			var new_facing_ref = Globals.Game.get_player_node(get_node(Entity.creator_path).target_ID).position.x - \
+			var new_facing_ref = get_node(Entity.creator_path).get_target().position.x - \
 					Entity.position.x
 			if new_facing_ref != 0: # turn to face targeted opponent on the start of "Kill" animation
 				Entity.face(sign(new_facing_ref))

@@ -112,7 +112,7 @@ const SUPERARMOR_CHIP_DMG_MOD = 50
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
 const LAUNCH_BOOST = 250 * FMath.S # increased knockback strength when a flinch becomes a launch
 const LAUNCH_ROT_SPEED = 5*PI # speed of sprite rotation when launched, don't need fixed-point as sprite rotation is only visuals
-const TECHLAND_THRESHOLD = 450 * FMath.S # max velocity when hitting the ground to tech land
+const TECHLAND_THRESHOLD = 300 * FMath.S # max velocity when hitting the ground to tech land
 
 const STRONG_HIT_AUDIO_BOOST = 3
 const WEAK_HIT_AUDIO_NERF = -9
@@ -185,7 +185,7 @@ var status_effect_to_add = [] # holder to add status effects at end of frame aft
 var startup_cancel_flag := false # allow cancelling of startup frames without rebuffering
 var instant_actions_temp := [] # used to transfer instant actions captured this frame into instant_actions array after stored ones are processed
 #var alt_block := false # neutral dash can be used to block as well
-var attacked_this_frame := false
+#var attacked_this_frame := false
 
 var player_ID: int # player number controlling this character, 0 for P1, 1 for P2
 
@@ -679,7 +679,7 @@ func simulate(new_input_state):
 	hitstop = null
 	status_effect_to_remove = []
 	status_effect_to_add = []
-	attacked_this_frame = false
+#	attacked_this_frame = false
 	
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
@@ -730,7 +730,7 @@ func simulate2(): # only ran if not in hitstop
 	process_status_effects_timer() # remove expired status effects
 	
 	# clearing repeat memory
-	if !is_hitstunned() and !state in [Globals.char_state.SEQUENCE_TARGET]:
+	if !is_hitstunned_or_sequenced():
 		repeat_memory = []
 		first_hit_flag = false
 		GG_swell_flag = false
@@ -742,7 +742,7 @@ func simulate2(): # only ran if not in hitstop
 		seq_partner_ID = null
 		
 	if Globals.survival_level != null:
-		if current_damage_value > 0 and Globals.Game.LevelControl.wave_standby_timer > 0:
+		if Globals.Game.LevelControl.wave_standby_timer > 0:
 			if Globals.Game.LevelControl.wave_standby_timer == 1:
 				current_damage_value = 0
 				Globals.Game.damage_update(self)
@@ -763,7 +763,7 @@ func simulate2(): # only ran if not in hitstop
 			Globals.Game.guard_gauge_update(self)
 
 	# regen/degen GG
-	elif !is_hitstunned():
+	elif !is_hitstunned_or_sequenced():
 		
 		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.gganchor == 5):
 			if current_guard_gauge < 0 and !is_blocking(): # regen GG when GG is under 100%
@@ -928,7 +928,7 @@ func simulate2(): # only ran if not in hitstop
 					
 				if !grounded:
 					var strafe_dir = dir
-						
+					var can_strafe := true
 					match new_state:
 						Globals.char_state.AIR_ATK_STARTUP: # locked strafe during startup
 							strafe_dir = strafe_lock_dir
@@ -936,7 +936,7 @@ func simulate2(): # only ran if not in hitstop
 						Globals.char_state.AIR_ATK_ACTIVE:
 							var move_data = query_move_data()
 							if !can_air_strafe(move_data):
-								continue # some attacks cannot be air strafed
+								can_strafe = false # some attacks cannot be air strafed
 		#					if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
 		#						if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
 		#							continue # cannot strafe during some aerial normals
@@ -952,20 +952,21 @@ func simulate2(): # only ran if not in hitstop
 ##							pass # if pressing attack + dash in the air, will not turn
 ##						else:
 #						face(strafe_dir)
-					
-					var air_strafe_speed_temp: int = FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("AIR_STRAFE_SPEED_MOD"))
-					var air_strafe_limit_temp: int = FMath.percent(air_strafe_speed_temp, UniqChar.get_stat("AIR_STRAFE_LIMIT_MOD"))
-					
-					# reduce air_strafe_speed and air_strafe_limit during AIR_ATK_STARTUP
-					if state != Globals.char_state.AIR_STANDBY:
-						air_strafe_speed_temp = FMath.percent(air_strafe_speed_temp, AERIAL_STRAFE_MOD)
-						air_strafe_limit_temp = FMath.percent(air_strafe_limit_temp, AERIAL_STRAFE_MOD)
-					
-					if abs(velocity.x + (strafe_dir * air_strafe_speed_temp)) > abs(velocity.x): # if speeding up
-						if abs(velocity.x) < air_strafe_limit_temp: # only allow strafing if below speed limit
-							velocity.x = int(clamp(velocity.x + strafe_dir * air_strafe_speed_temp, -air_strafe_limit_temp, air_strafe_limit_temp))
-					else: # slowing down
-						velocity.x += strafe_dir * air_strafe_speed_temp
+
+					if can_strafe:
+						var air_strafe_speed_temp: int = FMath.percent(UniqChar.get_stat("SPEED"), UniqChar.get_stat("AIR_STRAFE_SPEED_MOD"))
+						var air_strafe_limit_temp: int = FMath.percent(air_strafe_speed_temp, UniqChar.get_stat("AIR_STRAFE_LIMIT_MOD"))
+						
+						# reduce air_strafe_speed and air_strafe_limit during AIR_ATK_STARTUP
+						if state != Globals.char_state.AIR_STANDBY:
+							air_strafe_speed_temp = FMath.percent(air_strafe_speed_temp, AERIAL_STRAFE_MOD)
+							air_strafe_limit_temp = FMath.percent(air_strafe_limit_temp, AERIAL_STRAFE_MOD)
+						
+						if abs(velocity.x + (strafe_dir * air_strafe_speed_temp)) > abs(velocity.x): # if speeding up
+							if abs(velocity.x) < air_strafe_limit_temp: # only allow strafing if below speed limit
+								velocity.x = int(clamp(velocity.x + strafe_dir * air_strafe_speed_temp, -air_strafe_limit_temp, air_strafe_limit_temp))
+						else: # slowing down
+							velocity.x += strafe_dir * air_strafe_speed_temp
 					
 	# LEFT/RIGHT DI --------------------------------------------------------------------------------------------------
 					
@@ -976,12 +977,12 @@ func simulate2(): # only ran if not in hitstop
 					var DDI_speed: int
 					var DDI_speed_limit: int
 					
-#					if Globals.survival_level == null:
-					DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
-					DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
-#					else:
-#						DDI_speed = DDI_SIDE_MAX
-#						DDI_speed_limit = MAX_DDI_SIDE_SPEED
+					if Globals.survival_level == null:
+						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
+						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
+					else:
+						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_true())
+						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_true())
 					
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
 						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit (can scale speed limit to guard gauge?)
@@ -1231,17 +1232,16 @@ func simulate2(): # only ran if not in hitstop
 		
 		if is_hitstunned():
 			if can_DI(): # up/down DI, depends on Guard Gauge
-#				if Globals.survival_level == null:
-				if v_dir == -1: # DIing upward
-					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
-				elif v_dir == 1: # DIing downward
-					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
-#				else:
-#					if v_dir == -1: # DIing upward
-#						gravity_temp = FMath.percent(gravity_temp, GDI_UP_MAX)
-#					elif v_dir == 1: # DIing downward
-#						gravity_temp = FMath.percent(gravity_temp, GDI_DOWN_MAX)
-					
+				if Globals.survival_level == null:
+					if v_dir == -1: # DIing upward
+						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
+					elif v_dir == 1: # DIing downward
+						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
+				else:
+					if v_dir == -1: # DIing upward
+						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_true())
+					elif v_dir == 1: # DIing downward
+						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_true())
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
 				gravity_temp = FMath.percent(gravity_temp, UniqChar.get_stat("FALL_GRAV_MOD"))
@@ -1610,15 +1610,15 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$BurstLockTimer.simulate()
 				$NoCollideTimer.simulate()
 				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
-					if !get_target().is_hitstunned() and state != Globals.char_state.SEQUENCE_USER:
-						# no counting down EX Seal if opponent is hitstunned or you are using a sequeue
+					if !get_target().is_hitstunned_or_sequenced():
+						# no counting down EX Seal if opponent is hitstunned or sequenced
 						$EXSealTimer.simulate()
 				else: # EX Seal from using super, count down during opponent hitstun as well
 					if is_attacking() and is_super(get_move_name()): # no counting down EX Seal during Super animation
 						pass
 					else:
 						$EXSealTimer.simulate()
-				if !is_hitstunned() and state != Globals.char_state.SEQUENCE_TARGET:
+				if !is_hitstunned_or_sequenced():
 #					$HitStunGraceTimer.simulate()
 					if Globals.training_mode:
 						$TrainingRegenTimer.simulate()
@@ -1986,6 +1986,13 @@ func count_tap(button, x_time):
 	
 func held_version(button): # for held version of moves, called 8 frames after startup
 	if !button in input_state.pressed:
+		return false
+	if is_button_tapped_in_last_X_frames(button, 7): # if this button is pressed in the last X frames, return false
+		return false
+	return true
+	
+func perfect_release(button): # always at least 8 frames after startup
+	if !button in input_state.just_released:
 		return false
 	if is_button_tapped_in_last_X_frames(button, 7): # if this button is pressed in the last X frames, return false
 		return false
@@ -2398,7 +2405,9 @@ func state_detect(anim):
 			return Globals.char_state.CROUCHING
 		"JumpTransit", "DashTransit":
 			return Globals.char_state.GROUND_STARTUP
-		"Dash", "BlockRec":
+		"Dash":
+			return Globals.char_state.GROUND_RECOVERY
+		"BlockRec":
 			return Globals.char_state.GROUND_RECOVERY
 		"SoftLanding", "DashBrake", "WaveDashBrake", "BlockCRec", "HardLanding":
 			return Globals.char_state.GROUND_C_RECOVERY
@@ -2408,7 +2417,9 @@ func state_detect(anim):
 		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "JumpTransit2", "DodgeTransit":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Globals.char_state.AIR_STARTUP
-		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU", "aBlockRec", "Dodge", "DodgeRec":
+		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU":
+			return Globals.char_state.AIR_RECOVERY
+		"aBlockRec", "Dodge", "DodgeRec":
 			return Globals.char_state.AIR_RECOVERY
 		"aDashBrake", "aBlockCRec", "DodgeCRec":
 			return Globals.char_state.AIR_C_RECOVERY
@@ -2906,10 +2917,10 @@ func process_VDI():
 		var VDI_amount_max: int = FMath.percent(velocity_length, VDI_MAX)
 		var VDI_amount: int
 		
-#		if Globals.survival_level == null:
-		VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
-#		else:
-#			VDI_amount = VDI_amount_max
+		if Globals.survival_level == null:
+			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
+		else:
+			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_true()) # adjust according to Guard Gauge
 		
 		if dir != 0 and v_dir != 0: # diagonal, multiply by 0.71
 			VDI_amount = FMath.percent(VDI_amount, 71)
@@ -3221,6 +3232,13 @@ func is_blocking():
 func is_hitstunned():
 	match state: # use non-new state
 		Globals.char_state.AIR_FLINCH_HITSTUN, Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.LAUNCHED_HITSTUN:
+			return true
+	return false
+	
+func is_hitstunned_or_sequenced():
+	match state: # use non-new state
+		Globals.char_state.AIR_FLINCH_HITSTUN, Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.LAUNCHED_HITSTUN, \
+				Globals.char_state.SEQUENCE_TARGET:
 			return true
 	return false
 	
@@ -3607,7 +3625,7 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 				
 		match status_effect[0]:
 			Globals.status_effect.STUN_RECOVER: # when recovering from a combo where a Stun occur, restore Guard Gauge to 50%
-				if !is_hitstunned():
+				if !is_hitstunned_or_sequenced():
 					status_effect_to_remove.append(status_effect[0])
 					if current_guard_gauge < -5000:
 						current_guard_gauge = -5000
@@ -3945,11 +3963,9 @@ func get_guard_gauge_percent_above() -> int:
 		return FMath.get_fraction_percent(current_guard_gauge, GUARD_GAUGE_CEIL)
 	else: return 0
 	
-#func get_guard_gauge_percent_true(): # from 0.0 to 2.0
-#	if current_guard_gauge <= 0:
-#		return get_guard_gauge_percent_below()
-#	else:
-#		return 1.0 + get_guard_gauge_percent_above()
+func get_guard_gauge_percent_true(): # from 0 to 100
+	var value = current_guard_gauge - GUARD_GAUGE_FLOOR
+	return FMath.get_fraction_percent(value, GUARD_GAUGE_CEIL - GUARD_GAUGE_FLOOR)
 		
 func take_damage(damage: int): # called by attacker
 	current_damage_value += damage
@@ -4032,6 +4048,7 @@ func gain_coin(to_gain: int):
 	if Globals.survival_level != null:
 		coin_count += to_gain
 		Globals.Game.coin_update(self)
+		change_ex_gauge(3000)
 	
 	
 # QUERY UNIQUE CHARACTER DATA ---------------------------------------------------------------------------------------------- 
@@ -4288,9 +4305,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 func being_hit(hit_data): # called by main game node when taking a hit
 	
-	if Globals.survival_level != null and attacked_this_frame:
-		hit_data["cancelled"] = true
-		return # cannot be attacked twice during survival mode
+#	if Globals.survival_level != null and attacked_this_frame:
+#		hit_data["cancelled"] = true
+#		return # cannot be attacked twice during survival mode
 	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
@@ -4973,8 +4990,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if hit_data.block_state != Globals.block_state.UNBLOCKED and grounded:
 			velocity.y = 0 # set to horizontal pushback on blocking defender
 			
-	if Globals.survival_level != null and $HitStunTimer.is_running():
-		attacked_this_frame = true
+#	if Globals.survival_level != null and $HitStunTimer.is_running():
+#		attacked_this_frame = true
 		
 #	print(knockback_dir)
 #	print(velocity.x)
