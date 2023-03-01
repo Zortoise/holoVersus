@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Scenes/FrameTimer.tscn" type="PackedScene" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://Scenes/Animators/FadePlayer.gd" type="Script" id=6]
 [ext_resource path="res://Scenes/Animators/SpritePlayer.gd" type="Script" id=7]
 [ext_resource path="res://Scenes/Survival/Mob.gd" type="Script" id=8]
+[ext_resource path="res://Scenes/Survival/ZoneDrawer.gd" type="Script" id=9]
 
 [sub_resource type="DynamicFont" id=28]
 size = 50
@@ -61,6 +62,8 @@ color = Color( 0.945098, 1, 0.282353, 1 )
 
 [node name="ArmorTimer" parent="." instance=ExtResource( 2 )]
 
+[node name="LongFailTimer" parent="." instance=ExtResource( 2 )]
+
 [node name="TestNode2D" type="Node2D" parent="."]
 visible = false
 position = Vector2( 0, 24 )
@@ -96,6 +99,10 @@ position = Vector2( 0, 40 )
 texture = ExtResource( 3 )
 hframes = 21
 frame = 15
+
+[node name="ZoneDrawer" type="Node2D" parent="."]
+visible = false
+script = ExtResource( 9 )
 
 [connection signal="anim_finished" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_finished"]
 [connection signal="anim_started" from="SpritePlayer" to="." method="_on_SpritePlayer_anim_started"]

@@ -57,6 +57,7 @@ const ARMOR_DMG_MOD = 50 # % of damage taken when attacked outside armorbroken s
 #const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked outside armorbroken state
 
 const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move
+const LONG_FAIL_CHANCE = 20 # chance of ignoring long zones to get closer instead
 
 # level bonus to stats
 const HP_LEVEL_MOD_ARRAY = [100, 125, 150, 200, 250, 300, 350, 400, 450]
@@ -254,9 +255,9 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.HEAVY,
 		"hitcount" : 1,
 		"damage" : 90,
-		"knockback" : 475 * FMath.S,
+		"knockback" : 450 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 6,
+		"atk_level" : 5,
 		"KB_angle" : 45,
 		"atk_attr" : [],
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
@@ -326,6 +327,25 @@ const MOVE_DATABASE = {
 
 }
 
+const TRIGGERS = {
+	
+	"point_blank" : {"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 80), "decision" : "point_blank",},
+	"close_range" : {"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100), "decision" : "close_range",},
+	"mid_range" : {"type" : "zone", "long" : true, "origin" : Vector2.ZERO, "size" : Vector2(270, 100), "decision" : "mid_range",},
+	"anti_air_short" : {"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100), "decision" : "anti_air_short",},
+	"anti_air" : {"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(150, 300), "decision" : "anti_air",},
+	"anti_air_long" : {"type" : "zone", "long" : true, "origin" : Vector2(0, -75), "size" : Vector2(270, 100),"decision" : "anti_air_long",},
+	
+	"jump_peak" :{"type" : "peak", "decision" : "jump_peak",},
+	"air_close" : {"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100), "decision" : "air_close",},
+	"air_high" : {"type" : "zone", "origin" : Vector2(0, -100), "size" : Vector2(100, 150), "low_height" : true, "decision" : "air_high",},
+	"air_high_long" : {"type" : "zone", "long" : true, "origin" : Vector2(0, -75), "size" : Vector2(250, 100), "low_height" : true, "decision" : "air_high_long",},
+	"air_low_short" : {"type" : "zone", "origin" : Vector2(0, 50), "size" : Vector2(100, 100), "downward" : true, "decision" : "air_low_short",},
+	"air_low_long" : {"type" : "zone", "long" : true, "origin" : Vector2(0, 75), "size" : Vector2(250, 100), "downward" : true, "decision" : "air_low_long",},
+	"air_low" : {"type" : "zone", "long" : true, "origin" : Vector2(0, 150), "size" : Vector2(150, 200), "decision" : "air_low",},
+	"air_far" : {"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(200, 100), "decision" : "air_far",},
+	
+}
 
 const COMMANDS = {
 	
@@ -335,76 +355,58 @@ const COMMANDS = {
 			"action": "idle",
 			"rand_time" :[0, 30],
 			"triggers" : [
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100),
-				"decision" : "point_blank",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100),
-				"decision" : "close_range",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(270, 100),
-				"decision" : "mid_range",},
-				{"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100),
-				"decision" : "anti_air_short",},
-				{"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(180, 300),
-				"decision" : "anti_air",},
+				TRIGGERS.point_blank,
+				TRIGGERS.anti_air_short,
+				TRIGGERS.close_range,
+				TRIGGERS.mid_range,
+				TRIGGERS.anti_air,
+				TRIGGERS.anti_air_long,
 			]
 		},
 		"seek": { # run towards player, attack if player is close or cross above them
 			"action": "run",
 			"rand_time" :[0, 60],
 			"triggers" : [
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100),
-				"decision" : "point_blank",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100),
-				"decision" : "close_range",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(270, 100),
-				"decision" : "mid_range",},
-				{"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100),
-				"decision" : "anti_air_short",},
-				{"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(180, 150),
-				"decision" : "anti_air",},
+				TRIGGERS.point_blank,
+				TRIGGERS.anti_air_short,
+				TRIGGERS.close_range,
+				TRIGGERS.mid_range,
+				TRIGGERS.anti_air,
+				TRIGGERS.anti_air_long,
 			]
 		},
 		"option_close": { # special ground stance that last 1 frame on ground, attack if player is close
 			"action": "option",
 			"decision" : "offense",
 			"triggers" : [
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100),
-				"decision" : "point_blank",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100),
-				"decision" : "close_range",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(270, 100),
-				"decision" : "mid_range",},
-				{"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100),
-				"decision" : "anti_air_short",},
-				{"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(180, 150),
-				"decision" : "anti_air",},
+				TRIGGERS.point_blank,
+				TRIGGERS.anti_air_short,
+				TRIGGERS.close_range,
+				TRIGGERS.mid_range,
+				TRIGGERS.anti_air,
+				TRIGGERS.anti_air_long,
 			]
 		},
 		"option_air": { # special air stance that last till hit the ground, do air attacks if player is close
 			"action": "option",
 			"next" : "option_close",
 			"triggers" : [
-				{"type" : "peak",
-				"decision" : "jump_peak",},
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100),
-				"decision" : "air_close",},
-				{"type" : "zone", "origin" : Vector2(0, -100), "size" : Vector2(100, 150), "low_height" : true,
-				"decision" : "air_high",},
-				{"type" : "zone", "origin" : Vector2(0, 50), "size" : Vector2(100, 100), "downward" : true,
-				"decision" : "air_low_short",},
-				{"type" : "zone", "origin" : Vector2(0, 150), "size" : Vector2(150, 200),
-				"decision" : "air_low",},
-				{"type" : "zone", "origin" : Vector2(0, 25), "size" : Vector2(200, 100),
-				"decision" : "air_far",},
+				TRIGGERS.jump_peak,
+				TRIGGERS.air_close,
+				TRIGGERS.air_high,
+				TRIGGERS.air_high_long,
+				TRIGGERS.air_low_short,
+				TRIGGERS.air_low,
+				TRIGGERS.air_low_long,
+				TRIGGERS.air_far,
 			]
 		},
 		"option_air_short": { # shorthop
 			"action": "option",
 			"next" : "option_close",
 			"triggers" : [
-				{"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100), "low_height" : true,
-				"decision" : "air_close",},
-				{"type" : "zone", "origin" : Vector2(0, 50), "size" : Vector2(80, 100), "downward" : true,
-				"decision" : "air_low_short",},
+				TRIGGERS.air_close,
+				TRIGGERS.air_low_short,
 			]
 		},
 		
@@ -530,16 +532,18 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : "HStartup",
 		},
-#		"sharkstomp_dash": {
-#			"action": "anim",
-#			"no_c_rec" : true,
-#			"anim" : ["DashTransit", "HStartup"],
-#		},
-		"sharkstomp_combo": {
+		"sharkstomp_dash": {
 			"action": "anim",
 			"no_c_rec" : true,
-			"anim" : ["HStartup", "SP3Startup", "aSP1Startup"],
+			"anti_air_dash" : true,
+			"anim" : ["DashTransit", "HStartup"],
 		},
+		
+#		"sharkstomp_combo": {
+#			"action": "anim",
+#			"no_c_rec" : true,
+#			"anim" : ["HStartup", "SP3Startup", "aSP1Startup"],
+#		},
 		
 		"hammerhead": {
 			"action": "anim",
@@ -552,6 +556,7 @@ const COMMANDS = {
 #		"hammerhead_dash":{
 #			"action": "anim",
 #			"no_c_rec" : true,
+#			"anti_air_dash" : true,
 #			"anim" : ["DashTransit", "SP3Startup"],
 #		},
 			
@@ -624,7 +629,8 @@ const COMMANDS = {
 		
 	}
 	
-enum atk_range {POINTBLANK, CLOSE_RANGE, MID_RANGE, LONG_RANGE, ANTI_AIR_SHORT, ANTI_AIR, AIR_CLOSE, AIR_HIGH, AIR_LOW_SHORT, AIR_LOW, AIR_FAR, AIR_LONG}
+enum atk_range {POINTBLANK, CLOSE_RANGE, MID_RANGE, LONG_RANGE, ANTI_AIR_SHORT, ANTI_AIR, ANTI_AIR_LONG, 
+		AIR_CLOSE, AIR_HIGH, AIR_HIGH_LONG, AIR_LOW_SHORT, AIR_LOW, AIR_LOW_LONG, AIR_FAR, AIR_LONG}
 enum rank {LOW, MID, HIGH, SHARK, RUSH, ZONE}
 	
 const ATK_LOOKUP = {
@@ -679,6 +685,14 @@ const ATK_LOOKUP = {
 		rank.RUSH : ["neutral_jump"],
 		rank.ZONE : ["up_throw_trident", "up_tri_throw_trident"]
 	},
+	atk_range.ANTI_AIR_LONG: {
+		rank.LOW : ["forward_jump"],
+		rank.MID : ["forward_jump", "dash", "up_throw_trident"],
+		rank.HIGH : ["forward_jump", "dash", "dash", "up_throw_trident"],
+		rank.SHARK : ["forward_jump", "dash", "dash"],
+		rank.RUSH : ["forward_jump", "dash", "dash"],
+		rank.ZONE : ["up_throw_trident", "up_tri_throw_trident"]
+	},
 	atk_range.AIR_CLOSE: {
 		rank.LOW : ["air_tail"],
 		rank.MID : ["air_uptail", "air_tail", "air_overhead"],
@@ -693,6 +707,13 @@ const ATK_LOOKUP = {
 		rank.SHARK : ["options_air"],
 		rank.ZONE : ["air_back_dash"]
 	},
+	atk_range.AIR_HIGH_LONG: {
+		rank.LOW : ["option_air"],
+		rank.MID : ["air_dash", "option_air", "air_surf"],
+		rank.HIGH : ["air_dash", "air_surf"],
+		rank.SHARK : ["air_dash"],
+		rank.ZONE : ["option_air"]
+	},
 	atk_range.AIR_LOW_SHORT: {
 		rank.LOW : ["air_tail"],
 		rank.MID : ["air_hitgrab", "air_tail"],
@@ -702,6 +723,14 @@ const ATK_LOOKUP = {
 		rank.ZONE : ["air_down_trident"]
 	},
 	atk_range.AIR_LOW: {
+		rank.LOW : ["option_air"],
+		rank.MID : ["option_air", "air_down_trident"],
+		rank.HIGH : ["air_down_trident"],
+		rank.RUSH : ["option_air"],
+		rank.SHARK : ["options_air"],
+		rank.ZONE : ["air_down_trident"]
+	},
+	atk_range.AIR_LOW_LONG: {
 		rank.LOW : ["option_air"],
 		rank.MID : ["option_air", "air_down_trident"],
 		rank.HIGH : ["air_down_trident"],
@@ -766,12 +795,22 @@ func decision(decision_ref = null) -> bool:
 					filter(atk_range.CLOSE_RANGE)
 					return true
 				"mid_range":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
 					Character.target_closest()
 					filter(atk_range.MID_RANGE)
 					return true
 				"anti_air_short":
 					Character.target_closest()
 					filter(atk_range.ANTI_AIR_SHORT)
+					return true
+				"anti_air_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.ANTI_AIR_LONG)
 					return true
 				"anti_air":
 					Character.target_closest()
@@ -790,20 +829,31 @@ func decision(decision_ref = null) -> bool:
 					Character.target_closest()
 					filter(atk_range.AIR_HIGH)
 					return true
+				"air_high_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_HIGH_LONG)
+					return true
 				"air_low_short":
 					Character.target_closest()
 					filter(atk_range.AIR_LOW_SHORT)
 					return true
+				"air_low_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_LOW_LONG)
+					return true
 				"air_low":
-					if !Character.failed_air_low:
-						Character.start_command("option_air")
-						return true
-					else:
-						Character.target_closest()
-						filter(atk_range.AIR_LOW)
-						if Character.current_command == "option_air":
-							Character.failed_air_low = true
-						return true
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_LOW)
+					return true
 				"air_far":
 					Character.target_closest()
 					filter(atk_range.AIR_FAR)
@@ -852,12 +902,22 @@ func decision(decision_ref = null) -> bool:
 					filter(atk_range.CLOSE_RANGE)
 					return true
 				"mid_range":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
 					Character.target_closest()
 					filter(atk_range.MID_RANGE)
 					return true
 				"anti_air_short":
 					Character.target_closest()
 					filter(atk_range.ANTI_AIR_SHORT)
+					return true
+				"anti_air_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.ANTI_AIR_LONG)
 					return true
 				"anti_air":
 					Character.target_closest()
@@ -879,20 +939,31 @@ func decision(decision_ref = null) -> bool:
 					Character.target_closest()
 					filter(atk_range.AIR_HIGH)
 					return true
+				"air_high_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_HIGH_LONG)
+					return true
 				"air_low_short":
 					Character.target_closest()
 					filter(atk_range.AIR_LOW_SHORT)
 					return true
+				"air_low_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_LOW_LONG)
+					return true
 				"air_low":
-					if !Character.failed_air_low:
-						Character.start_command("option_air")
-						return true
-					else:
-						Character.target_closest()
-						filter(atk_range.AIR_LOW)
-						if Character.current_command == "option_air":
-							Character.failed_air_low = true
-						return true
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_LOW)
+					return true
 				"air_far":
 					Character.target_closest()
 					filter(atk_range.AIR_FAR)
@@ -928,6 +999,10 @@ func decision(decision_ref = null) -> bool:
 					Character.target_closest()
 					filter(atk_range.ANTI_AIR_SHORT)
 					return true
+				"anti_air_long":
+					Character.target_closest()
+					filter(atk_range.ANTI_AIR_LONG)
+					return true
 				"anti_air":
 					Character.target_closest()
 					filter(atk_range.ANTI_AIR)
@@ -945,9 +1020,17 @@ func decision(decision_ref = null) -> bool:
 					Character.target_closest()
 					filter(atk_range.AIR_HIGH)
 					return true
+				"air_high_long":
+					Character.target_closest()
+					filter(atk_range.AIR_HIGH_LONG)
+					return true
 				"air_low_short":
 					Character.target_closest()
 					filter(atk_range.AIR_LOW_SHORT)
+					return true
+				"air_low_long":
+					Character.target_closest()
+					filter(atk_range.AIR_LOW_LONG)
 					return true
 				"air_low":
 					Character.target_closest()
@@ -1006,6 +1089,10 @@ func decision(decision_ref = null) -> bool:
 					Character.target_closest()
 					Character.start_command("neutral_jump")
 					return true
+				"anti_air_long":
+					Character.target_closest()
+					Character.start_command("forward_jump")
+					return true
 				"anti_air":
 					Character.target_closest()
 					Character.start_command("neutral_jump")
@@ -1026,20 +1113,31 @@ func decision(decision_ref = null) -> bool:
 					Character.target_closest()
 					filter(atk_range.AIR_HIGH)
 					return true
+				"air_high_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_HIGH_LONG)
+					return true
 				"air_low_short":
 					Character.target_closest()
 					filter(atk_range.AIR_LOW_SHORT)
 					return true
+				"air_low_long":
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_LOW_LONG)
+					return true
 				"air_low":
-					if !Character.failed_air_low:
-						Character.start_command("option_air")
-						return true
-					else:
-						Character.target_closest()
-						filter(atk_range.AIR_LOW)
-						if Character.current_command == "option_air":
-							Character.failed_air_low = true
-						return true
+					if Globals.Game.rng_generate(100) <= LONG_FAIL_CHANCE:
+						Character.long_fail()
+						return false
+					Character.target_closest()
+					filter(atk_range.AIR_LOW)
+					return true
 				"air_far":
 					Character.target_closest()
 					filter(atk_range.AIR_FAR)

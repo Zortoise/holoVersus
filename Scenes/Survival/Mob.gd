@@ -67,6 +67,7 @@ const LOOT_UNSCALED_SPEED_RANGE = [500, 1000]
 const LOOT_ANGLE_RANGE = [225, 315]
 
 const LEARN_RATE = 20
+const LongFailTimer_TIME = 60 # if failed a long range zone roll, will not roll again while timer is running
 
 
 # variables used, don't touch these
@@ -147,7 +148,6 @@ var command_array_num := 0 # some commands have an array of animations to go thr
 var armorbroken := false # when GG is depleted, mob enters a armorbroken state where they no longer has superarmor till GG refills
 var chaining := false
 var air_dashed := false
-var failed_air_low := false
 var rand_time = null
 var peak_flag = Globals.peak_flag.GROUNDED
 var chain_memory := []
@@ -483,9 +483,10 @@ func simulate2(): # only ran if not in hitstop
 	
 	if grounded:
 		air_dashed = false
-		failed_air_low = false
 	
 	process_command()
+	if $ZoneDrawer.visible:
+		$ZoneDrawer.activate()
 	
 	match new_state: # quick turn
 		Globals.char_state.GROUND_ATK_STARTUP:
@@ -804,6 +805,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		
 	$ModulatePlayer.simulate() # modulate animations continue even in hitstop
 	$ArmorTimer.simulate()
+	$LongFailTimer.simulate()
 	
 	test2()
 		
@@ -839,6 +841,15 @@ func process_command():
 			
 	else:
 		if "triggers" in UniqChar.COMMANDS[current_command]:
+			
+			if $ZoneDrawer.visible:
+				for trigger in UniqChar.COMMANDS[current_command].triggers:
+					if trigger.type == "zone":
+						if "long" in trigger:
+							if $LongFailTimer.is_running():	
+								continue
+						$ZoneDrawer.drawer(trigger.origin, trigger.size, trigger.decision)
+					
 			for trigger in UniqChar.COMMANDS[current_command].triggers:
 				var active_trigger = null
 				match trigger.type:
@@ -846,10 +857,10 @@ func process_command():
 						if peak_flag == Globals.peak_flag.PEAK:
 							active_trigger = trigger
 							peak_flag = Globals.peak_flag.PEAK_SPENT
-					"cross":
-						if get_opponent_dir() != facing:
-							active_trigger = trigger
 					"zone":
+						if "long" in trigger:
+							if $LongFailTimer.is_running():
+								continue
 						if velocity.y < 0: # when ascending
 							if "downward" in trigger: # some triggers only activate when not going upwards in air
 								continue
@@ -914,6 +925,7 @@ func process_command():
 							is_array = true
 							
 						# break out of combo if opponent is too high above
+#						if command_array_num > 0 and is_opponent_crossing_mob() and !"anti_air_dash" in UniqChar.COMMANDS[current_command]:
 						if command_array_num > 0 and is_opponent_crossing_mob():
 							UniqChar.decision()
 							return
@@ -1041,6 +1053,9 @@ func learn():
 		no_jump_chance += LEARN_RATE
 		
 	no_jump_chance = int(clamp(no_jump_chance, 0, 100))
+	
+func long_fail():
+	$LongFailTimer.time = LongFailTimer_TIME
 
 # STAT MODS --------------------------------------------------------------------------------------------------	
 
@@ -3259,6 +3274,7 @@ func save_state():
 		"NoCollideTimer_time" : $NoCollideTimer.time,
 #		"RageTimer_time" : $RageTimer.time,
 		"ArmorTimer_time" : $ArmorTimer.time,
+		"LongFailTimer_time" : $LongFailTimer.time,
 		
 		"current_command" : current_command,
 		"command_timer" : command_timer,
@@ -3268,7 +3284,6 @@ func save_state():
 		"armorbroken" : armorbroken,
 		"chaining" : chaining,
 		"air_dashed" : air_dashed,
-		"failed_air_low" : failed_air_low,
 		"rand_time" : rand_time,
 		"peak_flag" : peak_flag,
 		"chain_memory" : chain_memory,
@@ -3346,6 +3361,7 @@ func load_state(state_data):
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
 #	$RageTimer.time = state_data.RageTimer_time
 	$ArmorTimer.time = state_data.ArmorTimer_time
+	$LongFailTimer.time = state_data.LongFailTimer_time
 
 	current_command = state_data.current_command
 	command_timer = state_data.command_timer
@@ -3355,7 +3371,6 @@ func load_state(state_data):
 	command_array_num = state_data.command_array_num
 	chaining = state_data.chaining
 	air_dashed = state_data.air_dashed
-	failed_air_low = state_data.failed_air_low
 	rand_time = state_data.rand_time
 	peak_flag = state_data.peak_flag
 	chain_memory = state_data.chain_memory

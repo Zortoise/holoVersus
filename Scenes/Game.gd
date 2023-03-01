@@ -1206,7 +1206,9 @@ func detect_hit():
 				
 			mob_hitboxes.append(hitbox)
 	
-	$PolygonDrawer.activate(player_hitboxes, mob_hitboxes, player_hurtboxes, mob_hurtboxes) # draw the polygons, only visible during training/debugging
+	if $PolygonDrawer.visible:
+		$PolygonDrawer.activate(player_hitboxes, mob_hitboxes, player_hurtboxes, mob_hurtboxes)
+		# draw the polygons, only visible during training/debugging
 	
 	# ACTUAL HIT DETECTION --------------------------------------------------------------------------------------------------
 	

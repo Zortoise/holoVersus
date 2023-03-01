@@ -38,10 +38,7 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 3, "variant" : "rush",
-					"attr" : {
-						} },
-					{"mob" : "GuraM", "level" : 3, "variant" : "rush",
+					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
 						} },
 				],
