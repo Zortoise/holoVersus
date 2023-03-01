@@ -29,7 +29,7 @@ const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const MAX_AIR_DODGE = 1
 const MAX_SUPER_DASH = 1
-const GROUND_DASH_SPEED = 450 * FMath.S # duration in animation data
+const GROUND_DASH_SPEED = 500 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
 const SDASH_SPEED = 450 * FMath.S # super dash
 const SDASH_TURN_RATE = 5 # exact navigate speed when sdashing
@@ -40,7 +40,7 @@ const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const HOP_JUMP_MOD = 80 # multiply by JUMP_SPEED to get shorthop height
 const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gain when doing long hops
 #const SUPER_JUMP_MOD = 150
-const WAVE_DASH_SPEED_MOD = 120 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
+const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
 #const F_HITSTUN_REDUCTION_AT_MAX_GG = 50 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
 const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
@@ -54,7 +54,7 @@ const GROUND_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking on groun
 const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
 const WEAKBLOCK_CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
 
-const TRAITS = [Globals.trait.CHAIN_DASH, Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
+const TRAITS = [Globals.trait.VULN_GRD_DASH, Globals.trait.VULN_AIR_DASH]
 
 const DEFAULT_HITSPARK_TYPE = Globals.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "blue"
@@ -413,7 +413,7 @@ const MOVE_DATABASE = {
 		"damage" : 40,
 		"knockback" : 600 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 5,
+		"atk_level" : 4,
 		"KB_angle" : -90,
 		"reset_type" : Globals.reset_type.EARLY_RESET,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
@@ -426,7 +426,7 @@ const MOVE_DATABASE = {
 		"damage" : 70,
 		"knockback" : 475 * FMath.S,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 5,
+		"atk_level" : 4,
 		"KB_angle" : 0,
 		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
@@ -438,7 +438,7 @@ const MOVE_DATABASE = {
 		"damage" : 40,
 		"knockback" : 650 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 5,
+		"atk_level" : 4,
 		"KB_angle" : -90,
 		"reset_type" : Globals.reset_type.EARLY_RESET,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
@@ -453,7 +453,7 @@ const MOVE_DATABASE = {
 		"damage" : 70,
 		"knockback" : 500 * FMath.S,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 5,
+		"atk_level" : 4,
 		"KB_angle" : 0,
 		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
@@ -464,7 +464,7 @@ const MOVE_DATABASE = {
 		"damage" : 60,
 		"knockback" : 650 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 6,
+		"atk_level" : 5,
 		"KB_angle" : -90,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
@@ -476,7 +476,7 @@ const MOVE_DATABASE = {
 		"damage" : 120,
 		"knockback" : 525 * FMath.S,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 6,
+		"atk_level" : 5,
 		"KB_angle" : 0,
 		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
@@ -565,7 +565,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"sequence": "SP6[ex]SeqA",
 		"hitcount" : 1,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.CANNOT_CHAIN_INTO]
+		"atk_attr" : [Globals.atk_attr.QUICK_GRAB, Globals.atk_attr.CANNOT_CHAIN_INTO]
 	},
 	
 	"SP6[ex]SeqE": {

@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "Killburst": {
-"duration": 11,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "ParticlesSprite",
@@ -25,9 +25,6 @@ frame_data = {
 },
 9: {
 "frame": 9
-},
-10: {
-"frame": 10
 }
 },
 "vframes": 2

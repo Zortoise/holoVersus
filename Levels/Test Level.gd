@@ -28,17 +28,20 @@ var RESOURCE_ADD = {
 
 
 #enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
-#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE}
+#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN}
 
 # CHAIN: X, TOUGH: 0-3, SPEED: 0-6 (0/1 are slow), HP: 0-5 (0/1 are lower, 0 is 1 hp)
-# POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow)
+# POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), COIN: X (around 40 limit)
 
 const WAVES = {
 	1 : { # wave ID
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 3, "variant" : "rush",
+					"attr" : {
+						} },
+					{"mob" : "GuraM", "level" : 3, "variant" : "rush",
 					"attr" : {
 						} },
 				],

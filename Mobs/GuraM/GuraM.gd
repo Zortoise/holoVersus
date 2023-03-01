@@ -59,7 +59,7 @@ const ARMOR_DMG_MOD = 50 # % of damage taken when attacked outside armorbroken s
 const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move
 
 # level bonus to stats
-const HP_LEVEL_MOD_ARRAY = [100, 120, 140, 180, 220, 260, 300, 340, 380]
+const HP_LEVEL_MOD_ARRAY = [100, 125, 150, 200, 250, 300, 350, 400, 450]
 #const GDRAIN_MOD_ARRAY = [100, 95, 90, 85, 80, 75, 70, 65, 60]
 const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0]
 
@@ -287,7 +287,7 @@ const MOVE_DATABASE = {
 		"damage" : 40,
 		"knockback" : 600 * FMath.S,
 		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 5,
+		"atk_level" : 4,
 		"KB_angle" : -90,
 		"reset_type" : Globals.reset_type.EARLY_RESET,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
@@ -300,7 +300,7 @@ const MOVE_DATABASE = {
 		"damage" : 70,
 		"knockback" : 475 * FMath.S,
 		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 5,
+		"atk_level" : 4,
 		"KB_angle" : 0,
 		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
@@ -310,7 +310,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"sequence": "SP6[ex]SeqA",
 		"hitcount" : 1,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE]
+		"atk_attr" : []
 	},
 	
 	"SP6[ex]SeqE": {
@@ -1167,17 +1167,23 @@ func jump_style_check(): # from main character node
 
 func generate_loot() -> Array:
 	var loot = []
-	match Character.mob_level:
-		0, 1:
-			loot.append_array(["Coin", "Coin", "Coin"])
-		2, 3:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin"])
-		4, 5:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin"])
-		6, 7:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
-		8:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+	
+	if Globals.mob_attr.COIN in Character.mob_attr:
+		for x in min(Character.mob_attr[Globals.mob_attr.COIN], Globals.Game.LevelControl.ITEM_LIMIT):
+			loot.append("Coin")
+			
+	else:	
+		match Character.mob_level:
+			0, 1:
+				loot.append_array(["Coin", "Coin", "Coin"])
+			2, 3:
+				loot.append_array(["Coin", "Coin", "Coin", "Coin"])
+			4, 5:
+				loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin"])
+			6, 7:
+				loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+			8:
+				loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
 	
 	return loot
 

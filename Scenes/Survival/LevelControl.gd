@@ -7,6 +7,7 @@ signal level_cleared
 signal level_failed
 
 const STARTING_TIME = -48
+const ITEM_LIMIT = 40
 
 onready var loaded_mob_scene := load("res://Scenes/Survival/Mob.tscn")
 onready var loaded_mob_entity_scene := load("res://Scenes/Survival/MobEntity.tscn")
@@ -384,10 +385,11 @@ func spawn_mob_entity(master_ID: int, creator_mob_ref: String, entity_ref: Strin
 	
 # in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan: int = BASE_LIFESPAN, in_palette_ref = null
 func spawn_item(item_ref: String, out_position: Vector2, aux_data: Dictionary, lifespan = null, palette_ref = null):
-	var pickup = loaded_pickup_scene.instance()
-	Globals.Game.get_node("PickUps").add_child(pickup)
-	pickup.init(item_ref, out_position, aux_data, lifespan, palette_ref)
-	return pickup
+	if Globals.Game.get_node("PickUps").get_child_count() <= ITEM_LIMIT:
+		var pickup = loaded_pickup_scene.instance()
+		Globals.Game.get_node("PickUps").add_child(pickup)
+		pickup.init(item_ref, out_position, aux_data, lifespan, palette_ref)
+		return pickup
 	
 # SAVE AND LOAD-----------------------------------------------------------------------------------------------------------------------------
 

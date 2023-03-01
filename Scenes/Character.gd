@@ -658,11 +658,13 @@ func simulate(new_input_state):
 #			unique_data.nibbler_count = 3
 #			UniqChar.update_uniqueHUD()
 			
-			Globals.Game.LevelControl.spawn_mob("TestMobBase", Vector2.ZERO)
+#			Globals.Game.LevelControl.spawn_mob("TestMobBase", Vector2.ZERO)
+			pass
 
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
-			Globals.Game.superfreeze(get_path())
+			pass
+#			Globals.Game.superfreeze(get_path())
 #			Globals.Game.set_screenstop()
 #			Globals.Game.set_screenshake()
 	
@@ -826,8 +828,12 @@ func simulate2(): # only ran if not in hitstop
 							else:
 								ex_change = FMath.percent(ex_change, ATTACK_EX_REGEN_MOD) # physical attack, raise EX regen
 
-			if Globals.survival_level != null and ex_change == BASE_EX_REGEN * FMath.S:
-				pass# no passive EX Gain for Survival
+			if Globals.survival_level != null:
+				if ex_change == BASE_EX_REGEN * FMath.S:
+					pass# no passive EX Gain for Survival
+				else:
+					ex_change = FMath.percent(ex_change, 150) # increase EX Gain for survival mode
+					change_ex_gauge(FMath.round_and_descale(ex_change))
 			else:
 				change_ex_gauge(FMath.round_and_descale(ex_change))
 			
@@ -1072,10 +1078,11 @@ func simulate2(): # only ran if not in hitstop
 			Globals.char_state.GROUND_C_RECOVERY:
 				if Animator.query(["SoftLanding", "HardLanding"]):
 					animate("Crouch")
-				elif Animator.query(["DashBrake"]):
-					if Globals.trait.CHAIN_DASH in query_traits():
-						animate("CrouchTransit")
-				elif !Animator.query(["WaveDashBrake"]):
+				elif Animator.query(["DashBrake", "WaveDashBrake"]):
+					pass
+#					if Globals.trait.CHAIN_DASH in query_traits():
+#						animate("CrouchTransit")
+				else:
 					animate("CrouchTransit")
 
 		# FASTFALL --------------------------------------------------------------------------------------------------
@@ -1156,8 +1163,8 @@ func simulate2(): # only ran if not in hitstop
 				Globals.char_state.GROUND_C_RECOVERY:
 #					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
 #						continue
-					if Animator.query(["DashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
-						if Globals.trait.DASH_BLOCK in query_traits():
+					if Animator.query(["WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
+						if Globals.trait.WAVE_DASH_BLOCK in query_traits():
 							animate("BlockStartup")
 					elif Animator.query(["HardLanding"]):
 						pass # cannot block on hardlanding
@@ -2845,7 +2852,9 @@ func check_semi_invuln():
 	else:
 		match new_state:
 			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
-				if Globals.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
+				if is_super(get_move_name()):
+					return true
+				elif Globals.survival_level == null and Globals.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
 					return true
 			Globals.char_state.AIR_STARTUP:
 				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
@@ -4451,7 +4460,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
-	if !Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
+	if !Globals.atk_attr.UNBLOCKABLE_PROJ in hit_data.move_data.atk_attr:
 		match state: # not new_state, cannot block on exact frame attack is detected
 			
 			# SUPERARMOR --------------------------------------------------------------------------------------------------
@@ -4516,10 +4525,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					# cannot block Heavy/Specials/Supers
 					hit_data.block_state = Globals.block_state.UNBLOCKED
 					
-				Globals.atk_type.ENTITY: # projectiles always cause Weakblock, but some projectiles are unblockable
+				Globals.atk_type.ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE_PROJ
 #					if check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker):
 #						hit_data.block_state = Globals.block_state.UNBLOCKED
-					if Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
+					if Globals.atk_attr.UNBLOCKABLE_PROJ in hit_data.move_data.atk_attr:
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
 						if !check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker) and \
@@ -4629,8 +4638,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# ---------------------------------------------------------------------------------
 	
 	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-		if !hit_data.semi_disjoint and !hit_data.double_repeat:
-			attacker_or_entity.landed_a_sequence(hit_data)
+		if hit_data.semi_disjoint or hit_data.double_repeat:
+			return
+		if Globals.atk_attr.QUICK_GRAB in hit_data.move_data.atk_attr and new_state in [Globals.char_state.GROUND_STARTUP, \
+				Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY]:
+			return # quick grabs fail if target is in movement animations
+		attacker_or_entity.landed_a_sequence(hit_data)
 		return
 		
 	if !"entity_nodepath" in hit_data and attacker != null:

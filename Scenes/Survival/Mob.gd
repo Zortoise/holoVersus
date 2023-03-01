@@ -238,7 +238,7 @@ func load_mob():
 	sfx_under.hide()
 	sfx_over.hide()
 	
-	$MobStats/Level.text = "Lvl " + str(mob_level + 1)
+#	$MobStats/Level.text = "Lvl " + str(mob_level + 1)
 	
 #	damage_update()
 #	guard_gauge_update()
@@ -1052,6 +1052,17 @@ func mob_level_to_tier():
 			return 1
 		6, 7, 8:
 			return 2
+			
+func hp_left_to_tier():
+	var dmg_percent = get_damage_percent()
+	if dmg_percent < 25:
+		return 0
+	elif dmg_percent < 50:
+		return 1
+	elif dmg_percent < 75:
+		return 2
+	else:
+		return 3
 
 func modify_stat(to_return, attr: int, values: Array):
 	return FMath.percent(to_return, values[int(clamp(mob_attr[attr], 0, values.size() - 1))])
@@ -1062,8 +1073,11 @@ func general_stat_mods(to_return, stat):
 		"DAMAGE_VALUE_LIMIT":
 			to_return = FMath.percent(to_return, UniqChar.HP_LEVEL_MOD_ARRAY[mob_level])
 		"GUARD_GAUGE_SWELL_RATE":
-			var values = [100, 125, 150]
-			to_return = FMath.percent(to_return, values[mob_level_to_tier()])
+			var mob_level_values = [100, 125, 150]
+			to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
+			
+			var hp_left_values = [200, 150, 100, 50] # remaining HP affects Guard Swell
+			to_return = FMath.percent(to_return, hp_left_values[hp_left_to_tier()])
 			
 			# break level affects Guard Swell
 			to_return = FMath.percent(to_return, BREAK_LEVEL_TO_GUARD_SWELL_MOD[break_level])
@@ -1074,8 +1088,10 @@ func general_stat_mods(to_return, stat):
 		match stat:
 #			"GUARD_DRAIN_MOD":
 #				to_return = FMath.percent(to_return, 80)
-			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
-				to_return = FMath.percent(to_return, 150)
+#			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
+#				to_return = FMath.percent(to_return, 150)
+			"DAMAGE_VALUE_LIMIT":
+				to_return = FMath.percent(to_return, 175)
 	
 	if Globals.mob_attr.TOUGH in mob_attr:
 		match stat:
@@ -2212,10 +2228,19 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !is_hitstunned():
 		learn()
 	
+#	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
+#		if !hit_data.double_repeat and !"tough_mob" in hit_data:
+#			attacker_or_entity.landed_a_sequence(hit_data)
+#		return
+		
 	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-		if !hit_data.double_repeat and !"tough_mob" in hit_data:
-			attacker_or_entity.landed_a_sequence(hit_data)
-		return
+		if "tough_mob" in hit_data or hit_data.double_repeat:
+			return
+		if Globals.atk_attr.QUICK_GRAB in hit_data.move_data.atk_attr and new_state in [Globals.char_state.GROUND_STARTUP, \
+				Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY]:
+			return # quick grabs fail if target is in movement animations
+		attacker_or_entity.landed_a_sequence(hit_data)
+		return		
 		
 
 	if !"entity_nodepath" in hit_data:

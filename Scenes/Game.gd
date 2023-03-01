@@ -1263,7 +1263,7 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 				if defender_anti_airing(hitbox, attacker, hurtbox, defender):
 					continue # attacker must not be using an aerial against an anti-airing defender
 #				if defender_backdash(hitbox, hurtbox):
-#					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/ANTI_GUARD attack
+#					continue # defender must not be backdashing away from attacker's UNBLOCKABLE_PROJ/ANTI_GUARD attack
 #				if attacker.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
 #					continue # attacker must still have hitcount left
 #				if attacker.is_player_in_ignore_list(defender.player_ID):
@@ -1411,7 +1411,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 	else:
 		attacker_or_entity = get_node(hitbox.entity_nodepath)
 		
-#	if Globals.atk_attr.UNBLOCKABLE in hitbox.move_data.atk_attr or \
+#	if Globals.atk_attr.UNBLOCKABLE_PROJ in hitbox.move_data.atk_attr or \
 #			hitbox.move_data.atk_type in [Globals.atk_type.SUPER]:
 #		return false # defender's semi-invul failed
 		
@@ -1431,7 +1431,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 #	var attacker = get_node(hitbox.owner_nodepath)
 #	var defender = get_node(hurtbox.owner_nodepath)
 #	var attacker_attr = hitbox.move_data.atk_attr
-#	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
+#	if Globals.atk_attr.UNBLOCKABLE_PROJ in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
 #		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
 #				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
 #			if defender.Animator.query_to_play(["Tech", "GuardTech"]):

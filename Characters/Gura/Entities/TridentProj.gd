@@ -53,7 +53,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"KB_angle" : -45,
 		"proj_level" : 3,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.DRAG_KB],
+		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE_PROJ, Globals.atk_attr.DRAG_KB],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
