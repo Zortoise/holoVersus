@@ -1172,6 +1172,10 @@ func simulate2(): # only ran if not in hitstop
 	#					continue
 						animate("BlockStartup")
 						
+				Globals.char_state.GROUND_ATK_RECOVERY:
+					if chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
+						animate("BlockStartup")
+						
 			# air blocking
 	#		if current_guard_gauge + GUARD_GAUGE_CEIL >= -UniqChar.get_stat("AIR_BLOCK_GG_COST"):
 
@@ -1194,6 +1198,9 @@ func simulate2(): # only ran if not in hitstop
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 			
+				Globals.char_state.AIR_ATK_RECOVERY:
+					if chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
+						animate("BlockStartup")
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
 	

@@ -53,8 +53,8 @@ const DAMAGE_VALUE_LIMIT = 500
 const GUARD_GAUGE_SWELL_RATE = 50
 
 const ARMOR_TIME = 30 # frames of special armor after recovering from hitstun
-const ARMOR_DMG_MOD = 50 # % of damage taken when attacked outside armorbroken state
-#const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked outside armorbroken state
+const ARMOR_DMG_MOD = 50 # % of damage taken when attacked during special armor
+#const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked during special armor
 
 const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move
 const LONG_FAIL_CHANCE = 20 # chance of ignoring long zones to get closer instead

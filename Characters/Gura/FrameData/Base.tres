@@ -906,6 +906,64 @@ frame_data = {
 },
 "vframes": 17
 },
+"ResistA": {
+"duration": 13,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 66,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+1: {
+"frame": 67,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+4: {
+"frame": 68,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+7: {
+"frame": 69,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+10: {
+"frame": 70,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+}
+},
+"vframes": 17
+},
+"ResistB": {
+"duration": 13,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 71,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+1: {
+"frame": 72,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+4: {
+"frame": 73,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+7: {
+"frame": 74,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+10: {
+"frame": 75,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+}
+},
+"vframes": 17
+},
 "Run": {
 "duration": 36,
 "hframes": 6,
@@ -1524,6 +1582,64 @@ frame_data = {
 0: {
 "frame": 18,
 "hurtbox": [ Vector2( -11, -9 ), Vector2( 9, -9 ), Vector2( 9, -26 ), Vector2( -11, -26 ) ]
+}
+},
+"vframes": 17
+},
+"aResistA": {
+"duration": 13,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 76,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+1: {
+"frame": 77,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+4: {
+"frame": 78,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+7: {
+"frame": 79,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+10: {
+"frame": 80,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+}
+},
+"vframes": 17
+},
+"aResistB": {
+"duration": 13,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 81,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+1: {
+"frame": 82,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+4: {
+"frame": 83,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+7: {
+"frame": 84,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
+},
+10: {
+"frame": 85,
+"hurtbox": [ Vector2( -13, 22 ), Vector2( 12, 22 ), Vector2( 12, -21 ), Vector2( -13, -21 ) ]
 }
 },
 "vframes": 17
