@@ -930,6 +930,12 @@ func load_state(game_state, loading_autosave = true):
 	current_rng_seed = loaded_game_state.current_rng_seed
 	entity_ID_ref = loaded_game_state.entity_ID_ref
 #	game_set = loaded_game_state.game_state.match_data.game_set
+		
+	if Globals.survival_level != null:
+		LevelControl.load_state(game_state.level_data)
+
+	if Globals.static_stage == 0:
+		stage.load_state(loaded_game_state.stage_data)
 
 	for mob in get_tree().get_nodes_in_group("MobNodes"):
 		mob.free()
@@ -963,6 +969,7 @@ func load_state(game_state, loading_autosave = true):
 		number.free()
 #	for AudioManager in $AudioPlayers.get_children():
 #		AudioManager.kill()
+		
 		
 	# re-add children
 	for state_data in loaded_game_state.afterimage_data:
@@ -1009,12 +1016,7 @@ func load_state(game_state, loading_autosave = true):
 #		var new_audio = Globals.loaded_audio_scene.instance()
 #		$AudioPlayers.add_child(new_audio)
 #		new_audio.load_state(state_data)
-		
-	if Globals.static_stage == 0:
-		stage.load_state(loaded_game_state.stage_data)
-		
-	if Globals.survival_level != null:
-		LevelControl.load_state(game_state.level_data)
+	
 		
 	# do these after re-adding the children
 	screenfreeze = loaded_game_state.screenfreeze
@@ -1270,6 +1272,8 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 #					continue # attacker must still have hitcount left
 #				if attacker.is_player_in_ignore_list(defender.player_ID):
 #					continue # defender must not be in attacker's ignore list
+			elif mob_projectile_miss(attacker_or_entity, defender):
+				continue # mob projectiles cannot hit hitstunned players
 #			else: # for entities
 #				if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
 #					continue # entity must still have hitcount left
@@ -1356,6 +1360,23 @@ func test_priority(hitbox, attacker, _hurtbox, defender): # return false if atta
 			if attacker.query_priority(hitbox.move_name) < defender.query_priority():
 				return false
 	return true
+	
+	
+func mob_projectile_miss(entity, defender):
+	
+	if Globals.survival_level == null: return false
+	
+	if entity == null or defender == null:
+		return false
+	if !entity.is_in_group("MobEntityNodes"):
+		return false
+	if !defender.is_in_group("PlayerNodes"):
+		return false
+	if "can_combo" in entity.unique_data:
+		return false
+	if defender.is_hitstunned():
+		return true
+	return false
 	
 	
 func defender_anti_airing(hitbox, attacker, _hurtbox, defender):

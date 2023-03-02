@@ -1091,7 +1091,7 @@ func general_stat_mods(to_return, stat):
 			var mob_level_values = [100, 125, 150]
 			to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
 			
-			var hp_left_values = [200, 150, 100, 50] # remaining HP affects Guard Swell
+			var hp_left_values = [125, 100, 75, 50] # remaining HP affects Guard Swell
 			to_return = FMath.percent(to_return, hp_left_values[hp_left_to_tier()])
 			
 			# break level affects Guard Swell
@@ -1105,17 +1105,19 @@ func general_stat_mods(to_return, stat):
 #				to_return = FMath.percent(to_return, 80)
 #			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
 #				to_return = FMath.percent(to_return, 150)
+			"ARMOR_TIME":
+				to_return = FMath.percent(to_return, 300)
 			"DAMAGE_VALUE_LIMIT":
 				to_return = FMath.percent(to_return, 175)
 	
 	if Globals.mob_attr.TOUGH in mob_attr:
 		match stat:
 			"GUARD_GAUGE_SWELL_RATE":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [150, 200, 250, 300])
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [50, 75, 150, 200, 250, 300])
 			"ARMOR_TIME":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [125, 150, 175, 200])
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [50, 75, 125, 150, 175, 200])
 			"ARMOR_DMG_MOD":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [150, 125, 75, 50, 25, 1])
 #			"ARMOR_KNOCKBACK_MOD":
 #				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
 	if Globals.mob_attr.SPEED in mob_attr:
@@ -2166,7 +2168,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# RESISTED HIT ----------------------------------------------------------------------------------------------
 	
 	if !$ArmorTimer.is_running() and !guardbroken and !is_attacking():
-		hit_data["resisted"] = true
+		if Globals.mob_attr.TOUGH in mob_attr and mob_attr[Globals.mob_attr.TOUGH] <= 1:
+			pass
+		if hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
+			pass
+		else:
+			hit_data["resisted"] = true
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
 	

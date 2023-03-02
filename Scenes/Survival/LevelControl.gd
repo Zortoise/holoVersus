@@ -97,7 +97,10 @@ func init():
 	add_child(UniqLevel)
 	move_child(UniqLevel, 0)
 	
-	Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
+	if Globals.player_count == 1:
+		Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
+	else:
+		Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
 	Globals.Game.stage_ref = UniqLevel.STAGE
 	
 	load_items()
@@ -359,9 +362,11 @@ func next_wave():
 		
 	
 func all_waves_cleared():
-	emit_signal("level_cleared")
 	level_active = false
-	pass
+	
+#	return
+	emit_signal("level_cleared")
+
 	
 	
 	

@@ -269,7 +269,9 @@ func simulate():
 		"[c1]Active", "[u][c1]Active":
 			if Entity.lifetime > 25 and Entity.unique_data.spun == false:
 				Entity.unique_data.spun = true
-				Animator.play("[c1]Spin")
+				var master_node = Globals.Game.get_player_node(Entity.master_ID)
+				if master_node != null and !master_node.is_hitstunned_or_sequenced():
+					Animator.play("[c1]Spin")
 			continue
 			
 		_:
