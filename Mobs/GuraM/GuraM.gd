@@ -33,7 +33,6 @@ const NAME = "Gura"
 
 # Character movement stats, use to overwrite
 const SPEED = 340 * FMath.S # ground speed
-const SPEED_MOD = 100
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const GRAVITY_MOD = 100 # make sure variable's a float
@@ -52,17 +51,9 @@ const DAMAGE_VALUE_LIMIT = 500
 #const GG_REGEN = 5 # exact GG regened per frame when GG < 100%
 const GUARD_GAUGE_SWELL_RATE = 50
 
-const ARMOR_TIME = 30 # frames of special armor after recovering from hitstun
-const ARMOR_DMG_MOD = 50 # % of damage taken when attacked during special armor
-#const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked during special armor
-
 const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move
 const LONG_FAIL_CHANCE = 20 # chance of ignoring long zones to get closer instead
 
-# level bonus to stats
-const HP_LEVEL_MOD_ARRAY = [100, 125, 150, 200, 250, 300, 350, 400, 450]
-#const GDRAIN_MOD_ARRAY = [100, 95, 90, 85, 80, 75, 70, 65, 60]
-const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0]
 
 const TRAITS = []
 
@@ -229,6 +220,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
 	},
 	"aF2SeqB": {
+		"starter" : "aF2",
 		"sequence_launch" : {
 			"damage" : 30,
 			"hitstop" : 0,
@@ -315,6 +307,7 @@ const MOVE_DATABASE = {
 	},
 	
 	"SP6[ex]SeqE": {
+		"starter" : "aSP6[ex]",
 		"sequence_hits" : [{"damage":150, "hitstop": 15}], # for hits during sequence, has a key, only contain damage
 		"sequence_launch" : { # for final hit of sequence
 			"damage" : 0,
@@ -1155,7 +1148,7 @@ func decision(decision_ref = null) -> bool:
 
 
 func idle_chance():
-	var chance = IDLE_CHANCE[Character.mob_level]
+	var chance = Character.IDLE_CHANCE[Character.mob_level]
 	var mobs_left = get_tree().get_nodes_in_group("MobNodes").size()
 	if mobs_left == 2:
 		chance = FMath.percent(chance, 50)
@@ -1220,10 +1213,6 @@ func get_stat(stat: String): # later can have effects that changes stats
 	
 	var to_return = get(stat)
 	
-	if stat == "SPEED": to_return =  FMath.percent(SPEED, get_stat("SPEED_MOD"))
-	
-	to_return = Character.general_stat_mods(to_return, stat)
-	
 	return to_return
 	
 	
@@ -1235,13 +1224,13 @@ func jump_style_check(): # from main character node
 	match Character.command_style:
 		"forward_jump":
 			Character.velocity.y = -1000 * FMath.S
-			Character.velocity.x += FMath.percent(Character.facing * 400 * FMath.S, get_stat("SPEED_MOD"))
+			Character.velocity.x += FMath.percent(Character.facing * 400 * FMath.S, Character.get_stat("SPEED_MOD"))
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			if Globals.Game.rng_bool():
 				Character.strafe_style = Globals.strafe_style.TOWARDS
 		"back_jump":
 			Character.velocity.y = -1000 * FMath.S
-			Character.velocity.x -= FMath.percent(Character.facing * 400 * FMath.S, get_stat("SPEED_MOD"))
+			Character.velocity.x -= FMath.percent(Character.facing * 400 * FMath.S, Character.get_stat("SPEED_MOD"))
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Character.strafe_style = Globals.strafe_style.AWAY
 		"neutral_jump":
@@ -1250,14 +1239,14 @@ func jump_style_check(): # from main character node
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"shorthop":
 			Character.velocity.y = -625 * FMath.S
-			Character.velocity.x += FMath.percent(Character.facing * 450 * FMath.S, get_stat("SPEED_MOD"))
+			Character.velocity.x += FMath.percent(Character.facing * 450 * FMath.S, Character.get_stat("SPEED_MOD"))
 			var sfx_point = Character.get_feet_pos()
 			sfx_point.x -= Character.facing * 5 # spawn the dust behind slightly
 			Character.strafe_style = Globals.strafe_style.TOWARDS
 			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", sfx_point, {"facing":Character.facing, "grounded":true})
 		"cross_jump":
 			Character.velocity.y = -1000 * FMath.S
-			Character.velocity.x += FMath.percent(Character.facing * 800 * FMath.S, get_stat("SPEED_MOD"))
+			Character.velocity.x += FMath.percent(Character.facing * 800 * FMath.S, Character.get_stat("SPEED_MOD"))
 			Character.strafe_style = Globals.strafe_style.AWAY_ON_DESCEND
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 	Character.command_style = ""
@@ -1452,6 +1441,9 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	move_data["atk_attr"] = query_atk_attr(orig_move_name)
+	
+	if "damage" in move_data:
+		move_data.damage = FMath.percent(move_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
 	
 	if Globals.mob_attr.POWER in Character.mob_attr:
 		if "damage" in move_data:
@@ -1667,6 +1659,31 @@ func move_sequence_target(new_position): # move sequence_target to new position
 		var reposition_results = Character.move_sequence_player_to(reposition) # [landing_check, collision_check, ledgedrop_check]
 		if reposition_results[1]: # fail to reposition properly
 			end_sequence_step("break") # break grab
+			
+			
+func get_seq_hit_data(hit_key: int):
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key]
+	
+	if "damage" in seq_hit_data:
+		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
+	
+		if Globals.mob_attr.POWER in Character.mob_attr:
+			seq_hit_data.damage = Character.modify_stat(seq_hit_data.damage, Globals.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
+	
+	return seq_hit_data
+	
+	
+	
+func get_seq_launch_data():
+	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch
+
+	if "damage" in seq_data:
+		seq_data.damage = FMath.percent(seq_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
+	
+		if Globals.mob_attr.POWER in Character.mob_attr:
+			seq_data.damage = Character.modify_stat(seq_data.damage, Globals.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
+
+	return seq_data
 			
 			
 func sequence_fallthrough(): # which step in sequence ignore soft platforms
@@ -1973,8 +1990,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 	if Character.is_atk_startup() and !refine_move_name(Character.get_move_name()) in NO_IMPULSE: # impulse
 		Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 		if Character.grounded:
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 200)
-	#			Character.velocity.x = int(clamp(Character.velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 200)
+	#			Character.velocity.x = int(clamp(Character.velocity.x, -Character.get_stat("SPEED"), Character.get_stat("SPEED")))
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 		else:
@@ -1982,26 +1999,26 @@ func _on_SpritePlayer_anim_started(anim_name):
 
 	match anim_name:
 		"Dash":
-			Character.velocity.x = FMath.percent(450 * FMath.S * Character.facing, get_stat("SPEED_MOD"))
+			Character.velocity.x = FMath.percent(450 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD"))
 			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 		"aDash":
-			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, get_stat("SPEED_MOD")), 0)
+			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD")), 0)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 			Character.air_dashed = true
 		"aDashD":
-			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, get_stat("SPEED_MOD")), 0)
+			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD")), 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 			Character.air_dashed = true
 		"aDashU":
-			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, get_stat("SPEED_MOD")), 0)
+			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD")), 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
@@ -2010,19 +2027,19 @@ func _on_SpritePlayer_anim_started(anim_name):
 		
 		
 		"L3Startup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 100)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 100)
 #			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 #				{"facing":Character.facing, "grounded":true})
 		
 		"F1Startup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 		"F1Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 		"F2Startup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			
 		"HStartup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			
 		"aL1Startup", "aL3Startup":
 			Character.velocity_limiter.x = 85
@@ -2082,20 +2099,23 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "GuraM", "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID}, Character.mob_attr, Character.palette_ref)
+					{"facing": Character.facing, "target_ID" : Character.target_ID}, Character.mob_level, Character.mob_attr, Character.palette_ref)
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c1]Active": # spawn projectile at EntitySpawn
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "GuraM", "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID, "alt_aim" : true}, Character.mob_attr, Character.palette_ref)
+					{"facing": Character.facing, "target_ID" : Character.target_ID, "alt_aim" : true}, Character.mob_level, Character.mob_attr, \
+					Character.palette_ref)
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP1[c1]Active":
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "GuraM", "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID, "aerial" : true}, Character.mob_attr, Character.palette_ref)
+					{"facing": Character.facing, "target_ID" : Character.target_ID, "aerial" : true}, Character.mob_level, Character.mob_attr, \
+					Character.palette_ref)
 		"aSP1[d][c1]Active":
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "GuraM", "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID, "aerial" : true, "alt_aim" : true}, Character.mob_attr, Character.palette_ref)
+					{"facing": Character.facing, "target_ID" : Character.target_ID, "aerial" : true, "alt_aim" : true}, Character.mob_level, \
+					Character.mob_attr, Character.palette_ref)
 		"aSP1Rec":
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
@@ -2120,7 +2140,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			if Character.get_opponent_x_dist() <= 50 or Character.get_opponent_dir() != Character.facing:
 				Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			else:
-				Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+				Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.velocity.y = -700 * FMath.S
 			Character.anim_gravity_mod = 0
 		"aSP3Rec":
@@ -2129,7 +2149,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #		"SP6[ex]Startup":
 #			Character.anim_friction_mod = 200
 		"aSP6[ex]Active":
-			Character.velocity.x = FMath.percent(100 * FMath.S * Character.facing, get_stat("SPEED_MOD"))
+			Character.velocity.x = FMath.percent(100 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD"))
 			Character.velocity.y = 0
 			Character.anim_gravity_mod = 0
 		"SP6[ex]Rec": # whiff grab

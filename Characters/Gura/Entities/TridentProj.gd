@@ -347,6 +347,10 @@ func query_move_data(move_name) -> Dictionary:
 				if Entity.v_facing == -1:
 					move_data.KB_angle = -25
 	
+	if Globals.survival_level != null and "damage" in move_data:
+		move_data.damage = FMath.percent(move_data.damage, 60)	
+		move_data.damage = FMath.percent(move_data.damage, Inventory.modifier(Entity.master_ID, Cards.stat_ref.PROJ_DMG_MOD))
+	
 	return move_data
 	
 

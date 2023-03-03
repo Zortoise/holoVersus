@@ -420,7 +420,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					
 					Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 						
-						if Animator.query(["aDashBrake"]) and !Globals.trait.AIR_CHAIN_DASH in query_traits():
+						if Animator.query(["aDashBrake"]) and !Character.has_trait(Globals.trait.AIR_CHAIN_DASH):
 							continue
 						
 						if Character.air_dash > 0:
@@ -753,7 +753,7 @@ func consume_one_air_dash(): # different characters can have different types of 
 	Character.air_dash = max(Character.air_dash - 1, 0)
 	
 #func gain_one_air_dash(): # different characters can have different types of air_dash consumption
-#	if Character.air_dash < get_stat("MAX_AIR_DASH"): # cannot go over
+#	if Character.air_dash < Character.get_stat("MAX_AIR_DASH"): # cannot go over
 #		Character.air_dash += 1
 
 func afterimage_trail():# process afterimage trail
@@ -775,14 +775,11 @@ func unique_flash():
 # GET DATA --------------------------------------------------------------------------------------------------
 
 func get_stat(stat: String): # later can have effects that changes stats
+	var to_return = get(stat)
 	
-	if Globals.survival_level != null:
-		match stat:
-			"DAMAGE_VALUE_LIMIT":
-				var hp_mod_array = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100] 
-				return FMath.percent(DAMAGE_VALUE_LIMIT, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
-			
-	return get(stat)
+	
+	
+	return to_return
 	
 	
 func query_traits(): # may have special conditions
@@ -872,10 +869,47 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 	match orig_move_name:
 		_:
 			pass
-	
+			
+	if Globals.survival_level != null and "damage" in move_data:
+		move_data.damage = FMath.percent(move_data.damage, Character.SURV_BASE_DMG)
+		move_data.damage = FMath.percent(move_data.damage, mod_damage(move_name))
+
+
 	return move_data
+
+
+func mod_damage(move_name):
+	var mod := 100
+	
+	match MOVE_DATABASE[move_name].atk_type:
+		Globals.atk_type.LIGHT:
+			if move_name.begins_with("a"):
+				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.AIR_LIGHT_DMG_MOD)
+			else:
+				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.GROUND_LIGHT_DMG_MOD)
+				
+		Globals.atk_type.FIERCE:
+			if move_name.begins_with("a"):
+				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.AIR_FIERCE_DMG_MOD)
+			else:
+				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.GROUND_FIERCE_DMG_MOD)
+				
+		Globals.atk_type.HEAVY:
+			if move_name.begins_with("a"):
+				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.AIR_HEAVY_DMG_MOD)
+			else:
+				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.GROUND_HEAVY_DMG_MOD)
+				
+		Globals.atk_type.SPECIAL, Globals.atk_type.EX:
+			mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.SPECIAL_DMG_MOD)
+			
+		Globals.atk_type.SUPER:
+			mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.SUPER_DMG_MOD)
+			
+	return mod
 	
 	
+						
 func query_atk_attr(move_name) -> Array: # can change under conditions
 
 	var orig_move_name = move_name
@@ -1139,6 +1173,28 @@ func move_sequence_target(new_position): # move sequence_target to new position
 		var reposition_results = Character.move_sequence_player_to(reposition) # [landing_check, collision_check, ledgedrop_check]
 		if reposition_results[1]: # fail to reposition properly
 			end_sequence_step("break") # break grab
+		
+			
+func get_seq_hit_data(hit_key: int):
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key]
+
+	if Globals.survival_level != null and "damage" in seq_hit_data:
+		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.SURV_BASE_DMG)	
+		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
+
+	return seq_hit_data
+	
+	
+	
+func get_seq_launch_data():
+	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch
+
+	if Globals.survival_level != null and "damage" in seq_data:
+		seq_data.damage = FMath.percent(seq_data.damage, Character.SURV_BASE_DMG)	
+		seq_data.damage = FMath.percent(seq_data.damage, mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
+
+	return seq_data
+			
 			
 			
 func sequence_fallthrough(): # which step in sequence ignore soft platforms
@@ -1709,7 +1765,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 
 	match anim_name:
 		"Dash":
-			Character.velocity.x = get_stat("GROUND_DASH_SPEED") * Character.facing
+			Character.velocity.x = Character.get_stat("GROUND_DASH_SPEED") * Character.facing
 			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
@@ -1717,14 +1773,14 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aDash":
 			consume_one_air_dash()
 			Character.aerial_memory = []
-			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
+			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 		"aDashD":
 			consume_one_air_dash()
 			Character.aerial_memory = []
-			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
+			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
@@ -1732,7 +1788,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aDashU":
 			consume_one_air_dash()
 			Character.aerial_memory = []
-			Character.velocity.set_vector(get_stat("AIR_DASH_SPEED") * Character.facing, 0)
+			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
@@ -1741,9 +1797,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"L1Startup":
 			Character.anim_friction_mod = 150
 		"L2Startup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 80)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 80)
 		"L2Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 120)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 120)
 			Character.anim_friction_mod = 0
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
@@ -1751,15 +1807,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.set_vector(500 * FMath.S * Character.facing, 0)
 			Character.velocity.rotate(-78 * Character.facing)
 		"F1Startup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 		"F1Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 		"F2Startup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 		"F3[h]Startup":
 			Character.get_node("ModulatePlayer").play("armor_flash")
 		"HStartup":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.anim_friction_mod = 150
 			
 		"aL1Startup", "aL3Startup":
@@ -1843,21 +1899,21 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 20
 			Character.velocity_limiter.down = 20
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1})
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 2}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 3}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[ex]Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 50)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 4}).entity_ID
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
@@ -1962,15 +2018,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 70
 			
 		"SP4Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", Animator.query_point("entityspawn"), {})
 			Character.unique_data.groundfin_count += 1
 		"SP4[h]Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", Animator.query_point("entityspawn"), {"held" : true})
 			Character.unique_data.groundfin_count += 1
 		"SP4[ex]Active":
-			Character.velocity.x += Character.facing * FMath.percent(get_stat("SPEED"), 25)
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 			var spawn_point = Animator.query_point("entityspawn")
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"ex" : true})
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"held" : true, "ex" : true})

@@ -1722,7 +1722,7 @@ func set_input_indicator():
 
 func damage_update(character, damage: int = 0):
 	var dmg_val_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/DamageNode/DamageValue")
-	dmg_val_indicator.text = str(character.UniqChar.get_stat("DAMAGE_VALUE_LIMIT") - character.current_damage_value)
+	dmg_val_indicator.text = str(character.get_stat("DAMAGE_VALUE_LIMIT") - character.current_damage_value)
 	
 	# change color
 	var dmg_percent = character.get_damage_percent()

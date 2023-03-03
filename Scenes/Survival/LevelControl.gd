@@ -382,10 +382,10 @@ func spawn_mob(mob_name: String, level: int, variant: String, attr: Dictionary, 
 	return mob
 	
 func spawn_mob_entity(master_ID: int, creator_mob_ref: String, entity_ref: String, out_position, aux_data: Dictionary, \
-		mob_attr: Dictionary, out_palette_ref = null):
+		mob_level: int, mob_attr: Dictionary, out_palette_ref = null):
 	var mob_entity = loaded_mob_entity_scene.instance()
 	Globals.Game.get_node("MobEntities").add_child(mob_entity)
-	mob_entity.init(master_ID, creator_mob_ref, entity_ref, out_position, aux_data, mob_attr, out_palette_ref)
+	mob_entity.init(master_ID, creator_mob_ref, entity_ref, out_position, aux_data, mob_level, mob_attr, out_palette_ref)
 	return mob_entity
 	
 # in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan: int = BASE_LIFESPAN, in_palette_ref = null

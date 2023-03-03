@@ -65,8 +65,7 @@ enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, 
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, STRONG, WEAK}
-enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK,
-		WAVE_DASH_BLOCK, AIR_DASH_BLOCK, NO_LAUNCH}
+enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK, WAVE_DASH_BLOCK, AIR_DASH_BLOCK, NO_LAUNCH}
 enum reset_type {STARTUP_RESET, EARLY_RESET, ACTIVE_RESET}
 # STARTUP_RESET = can only a_reset this Special during startup just like Normals
 # EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special

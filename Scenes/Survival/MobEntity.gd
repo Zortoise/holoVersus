@@ -4,6 +4,8 @@ const MOB_ENTITY = true
 var UniqEntity
 onready var Animator = $SpritePlayer
 
+const MOB_LEVEL_TO_DMG = [50, 60, 70, 80, 90, 100, 110, 120, 130]
+
 # to save:
 var free := false
 var facing := 1
@@ -13,6 +15,7 @@ var reflected := false
 var master_ID: int # for special cases where an entity has a special effect that affects its master
 var entity_ref: String
 var creator_mob_ref: String # name of creator, so can look up mob_data in LevelControl under entity_ref
+var mob_level: int
 var mob_attr: Dictionary
 var palette_ref: String
 
@@ -33,7 +36,7 @@ var hitstop = null
 
 
 func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary, \
-		in_mob_attr: Dictionary, in_palette_ref = null):
+		in_mob_level: int, in_mob_attr: Dictionary, in_palette_ref = null):
 	
 	entity_ID = Globals.Game.entity_ID_ref
 	Globals.Game.entity_ID_ref += 1
@@ -42,6 +45,7 @@ func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, 
 	master_ID = in_master_ID
 	creator_mob_ref = in_creator_mob_ref
 	entity_ref = in_entity_ref
+	mob_level = in_mob_level
 	mob_attr = in_mob_attr
 	if in_palette_ref != null:
 		palette_ref = in_palette_ref
@@ -525,6 +529,7 @@ func save_state():
 		"master_ID" : master_ID,
 		"entity_ref" : entity_ref,
 		"creator_mob_ref" : creator_mob_ref,
+		"mob_level" : mob_level,
 		"mob_attr": mob_attr,
 		"palette_ref" : palette_ref,
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
@@ -560,6 +565,7 @@ func load_state(state_data):
 	master_ID = state_data.master_ID
 	entity_ref = state_data.entity_ref
 	creator_mob_ref = state_data.creator_mob_ref
+	mob_level = state_data.mob_level
 	mob_attr = state_data.mob_attr
 	palette_ref = state_data.palette_ref
 	entity_ID = state_data.entity_ID

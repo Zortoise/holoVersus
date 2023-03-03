@@ -47,9 +47,7 @@ const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard
 
 const DAMAGE_VALUE_LIMIT = 1100
 
-const GUARD_GAUGE_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
-const GROUND_BLOCK_INITIAL_GG_COST = 500
-const AIR_BLOCK_INITIAL_GG_COST = 500
+const GG_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
 const GROUND_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking on ground
 const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
 const WEAKBLOCK_CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
@@ -316,6 +314,7 @@ const MOVE_DATABASE = {
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
 	},
 	"aF2SeqB": {
+		"starter" : "aF2",
 		"sequence_launch" : {
 			"damage" : 30,
 			"hitstop" : 0,
@@ -569,6 +568,7 @@ const MOVE_DATABASE = {
 	},
 	
 	"SP6[ex]SeqE": {
+		"starter" : "aSP6[ex]", # for cards in survival mode
 		"sequence_hits" : [{"damage":200, "hitstop": 15}], # for hits during sequence, has a key, only contain damage
 		"sequence_launch" : { # for final hit of sequence
 			"damage" : 0,
@@ -581,6 +581,7 @@ const MOVE_DATABASE = {
 		}
 	},
 	"aSP6[ex]SeqE": { # if Grabbed hit a ledge while Grabber doesn't
+		"starter" : "aSP6[ex]",
 		"sequence_hits" : [{"damage":200, "hitstop": 15}],
 		"sequence_launch" : {
 			"damage" : 0,
