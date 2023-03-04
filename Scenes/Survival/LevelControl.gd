@@ -1,4 +1,4 @@
-extends Node
+extends "res://Scenes/Survival/LoadCards.gd"
 
 signal wave_start (wave_ID)
 signal wave_cleared
@@ -12,6 +12,7 @@ const ITEM_LIMIT = 40
 onready var loaded_mob_scene := load("res://Scenes/Survival/Mob.tscn")
 onready var loaded_mob_entity_scene := load("res://Scenes/Survival/MobEntity.tscn")
 onready var loaded_pickup_scene := load("res://Scenes/Survival/PickUp.tscn")
+onready var loaded_card_scene :=load("res://Scenes/Survival/Card.tscn")
 
 var UniqLevel
 
@@ -142,6 +143,10 @@ func init():
 #			if "sfx_data" in UniqLevel.RESOURCE_ADD[mob]:
 #				mob_data[mob].sfx_data.merge(UniqLevel.RESOURCE_ADD[mob].sfx_data)
 	
+	Inventory.stock_pool()
+
+		
+# ------------------------------------------------------------------------------------------------------------------------------------
 	
 func set_up_frame_data(mob_name: String, directory_name):
 	# open the FrameData folder and get the filenames of all files in it

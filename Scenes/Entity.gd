@@ -80,6 +80,11 @@ func load_entity():
 		$SpritePlayer.init_with_loaded_frame_data($Sprite, Globals.common_entity_data[entity_ref].frame_data) # load frame data
 		$Sprite.texture = Globals.common_entity_data[entity_ref].spritesheet # load spritesheet
 		
+	elif Globals.survival_level != null and entity_ref in  Globals.Game.LevelControl.entity_data:
+		UniqEntity =  Globals.Game.LevelControl.entity_data[entity_ref].scene.instance() # load UniqEntity scene
+		$SpritePlayer.init_with_loaded_frame_data($Sprite,  Globals.Game.LevelControl.entity_data[entity_ref].frame_data) # load frame data
+		$Sprite.texture =  Globals.Game.LevelControl.entity_data[entity_ref].spritesheet # load spritesheet
+		
 	else: # character-unique entity with loaded data stored in master's node
 		var entity_data = get_node(creator_path).entity_data[entity_ref]
 		UniqEntity = entity_data.scene.instance() # load UniqEntity scene

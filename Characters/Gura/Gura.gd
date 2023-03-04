@@ -598,8 +598,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 func process_move(new_state, attack_ref: String, has_acted: Array): # return true if button consumed
 	
 	 # no attacking during respawn grace
-	if Character.query_status_effect(Globals.status_effect.RESPAWN_GRACE) or \
-			Character.query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
+	if Character.query_status_effect(Globals.status_effect.RESPAWN_GRACE):
 		return true
 	
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
@@ -625,8 +624,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 			
 		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
 			if Character.grounded and attack_ref in STARTERS:
-#				if new_state == Globals.char_state.GROUND_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr(attack_ref):
-#					continue # certain moves cannot be performed during cancellable recovery
+				if new_state == Globals.char_state.GROUND_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr(attack_ref):
+					continue # certain moves cannot be performed during cancellable recovery
 				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					has_acted[0] = true
@@ -643,8 +642,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-#					if new_state == Globals.char_state.AIR_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr("a" + attack_ref):
-#						continue # certain moves cannot be performed during cancellable recovery
+					if new_state == Globals.char_state.AIR_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr("a" + attack_ref):
+						continue # certain moves cannot be performed during cancellable recovery
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						has_acted[0] = true
@@ -872,41 +871,13 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 			
 	if Globals.survival_level != null and "damage" in move_data:
 		move_data.damage = FMath.percent(move_data.damage, Character.SURV_BASE_DMG)
-		move_data.damage = FMath.percent(move_data.damage, mod_damage(move_name))
+		move_data.damage = FMath.percent(move_data.damage, Character.mod_damage(move_name))
 
 
 	return move_data
 
 
-func mod_damage(move_name):
-	var mod := 100
-	
-	match MOVE_DATABASE[move_name].atk_type:
-		Globals.atk_type.LIGHT:
-			if move_name.begins_with("a"):
-				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.AIR_LIGHT_DMG_MOD)
-			else:
-				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.GROUND_LIGHT_DMG_MOD)
-				
-		Globals.atk_type.FIERCE:
-			if move_name.begins_with("a"):
-				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.AIR_FIERCE_DMG_MOD)
-			else:
-				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.GROUND_FIERCE_DMG_MOD)
-				
-		Globals.atk_type.HEAVY:
-			if move_name.begins_with("a"):
-				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.AIR_HEAVY_DMG_MOD)
-			else:
-				mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.GROUND_HEAVY_DMG_MOD)
-				
-		Globals.atk_type.SPECIAL, Globals.atk_type.EX:
-			mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.SPECIAL_DMG_MOD)
-			
-		Globals.atk_type.SUPER:
-			mod = Inventory.modifier(Character.player_ID, Cards.stat_ref.SUPER_DMG_MOD)
-			
-	return mod
+
 	
 	
 						
@@ -931,12 +902,12 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 		"SP3[ex]", "SP3b[ex]": 
 			atk_attr.append_array([Globals.atk_attr.ANTI_AIR, Globals.atk_attr.SEMI_INVUL_STARTUP])
 		
-	if Globals.survival_level != null: # no anti-air normals during Survival Mode
-		if move_name in MOVE_DATABASE and "atk_type" in MOVE_DATABASE[move_name] and \
-				MOVE_DATABASE[move_name].atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] and \
-				Globals.atk_attr.ANTI_AIR in atk_attr:
-			while Globals.atk_attr.ANTI_AIR in atk_attr:	
-				atk_attr.erase(Globals.atk_attr.ANTI_AIR)
+#	if Globals.survival_level != null: # no anti-air normals during Survival Mode
+#		if move_name in MOVE_DATABASE and "atk_type" in MOVE_DATABASE[move_name] and \
+#				MOVE_DATABASE[move_name].atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] and \
+#				Globals.atk_attr.ANTI_AIR in atk_attr:
+#			while Globals.atk_attr.ANTI_AIR in atk_attr:	
+#				atk_attr.erase(Globals.atk_attr.ANTI_AIR)
 		
 	return atk_attr
 	
@@ -1180,7 +1151,7 @@ func get_seq_hit_data(hit_key: int):
 
 	if Globals.survival_level != null and "damage" in seq_hit_data:
 		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.SURV_BASE_DMG)	
-		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
+		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
 
 	return seq_hit_data
 	
@@ -1191,7 +1162,7 @@ func get_seq_launch_data():
 
 	if Globals.survival_level != null and "damage" in seq_data:
 		seq_data.damage = FMath.percent(seq_data.damage, Character.SURV_BASE_DMG)	
-		seq_data.damage = FMath.percent(seq_data.damage, mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
+		seq_data.damage = FMath.percent(seq_data.damage, Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
 
 	return seq_data
 			

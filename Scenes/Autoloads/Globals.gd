@@ -15,13 +15,13 @@ enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, SUPER}
 enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, SUPER}
-enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL
+enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_C_REC
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE_PROJ, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
 		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
 		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
-		STRONG_ENTITY, NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB}
+		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB}
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
@@ -30,6 +30,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
 # NO_QUICK_CANCEL = prevent quick canceling during startup
+# NOT_FROM_C_REC = cannot do from cancellable recovery
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers
 # UNBLOCKABLE_PROJ = certain entities are unblockable
 # SCREEN_SHAKE = cause screen to shake on hit
@@ -55,13 +56,12 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
 # INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
 # HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)
-# STRONG_ENTITY = entity can lethal and guardbreak
 # NO_TERMINAL_VEL_ACTIVE = no terminal velocity on active frames
 # FIXED_KNOCKBACK_STR = fixed knockback, used for nothing currently but may be useful
 # NO_SS_ATK_LVL_BOOST = no sweetspot boost in atk level, for sweetspot hitgrabs
 # QUICK_GRAB = command grab that fails if target is in movement STARTUP/RECOVERY
 
-enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, SURVIVAL_GRACE}
+enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, STRONG, WEAK}

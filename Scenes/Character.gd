@@ -137,7 +137,6 @@ const VDI_MAX = 30 # change in knockback vector when using Vector DI at 200% Gua
 const SURVIVAL_HITSTOP = 15
 #const MOB_GRACE_DURATION = 30 # how long invincibility last after being hit by a mob
 const SURV_BASE_DMG = 70
-const TRIP_CHANCE = 5
 
 # variables used, don't touch these
 var loaded_palette = null
@@ -261,8 +260,8 @@ var last_dir := 0 # dir last frame
 var GG_swell_flag := false # set to true after 1st attack taken during a combo
 var first_hit_flag := false # will not swell GG during hitstun of 1st attack taken during combo
 var lethal_flag := false # flag the hitstun as a lethal hit, can only kill during lethal hitstun
-
-
+var from_c_rec := false # to prevent QCing into NOT_FROM_C_REC moves
+var enchance_cooldowns := {} # each key contain the cooldown
 
 # controls
 var button_up
@@ -532,129 +531,6 @@ func initial_targeting(): # target random players at start, cannot do in init() 
 	else:
 		target_ID = player_ID
 	
-func get_seq_partner():
-	var Partner = Globals.Game.get_player_node(seq_partner_ID)
-	if Partner == null or Partner == self: return null
-	if Partner.seq_partner_ID != player_ID: return null
-	return Partner
-	
-func get_target():
-	if Globals.survival_level == null:
-		var target = Globals.Game.get_player_node(target_ID)
-		if target.state == Globals.char_state.DEAD:
-			return self
-		else:
-			return target
-			
-	else: # get targeted mob
-		if target_ID != null and target_ID != player_ID:
-			var target_node = Globals.Game.get_player_node(target_ID)
-			if target_node != null and target_node.state != Globals.char_state.DEAD:
-				return target_node
-				
-		# not yet target a mob, or targeted mob is dead
-		if Globals.Game.get_node("Players").get_children().size() == Globals.player_count:
-			target_ID = player_ID
-			return self # no mobs, target self
-		else: # find closest alive mob
-			var targets = get_tree().get_nodes_in_group("MobNodes")
-			for target in targets:
-				if target.state == Globals.char_state.DEAD:
-					targets.erase(target)
-			if targets.size() == 0:
-				return self # no mobs, target self
-			else:
-				var target_node = FMath.get_closest(targets, position)
-				target_ID = target_node.player_ID
-				return target_node
-			
-			
-#func get_surv_stat(stat: String):
-#	var to_return = get(stat)
-#
-#	match stat:
-#		_:
-#			pass
-#
-#	return to_return
-
-func get_stat(stat: String) -> int:
-	
-	var to_return
-	
-	if stat in self:
-		to_return = get(stat)
-	elif stat in UniqChar:
-		to_return = UniqChar.get_stat(stat)
-		
-	if Globals.survival_level != null:
-		match stat:
-			"DAMAGE_VALUE_LIMIT":
-#				var hp_mod_array = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100] 
-#				to_return = FMath.percent(to_return, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.HP))
-		
-			"SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.SPEED))
-			"JUMP_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.JUMP_SPEED))
-			"GRAVITY_MOD":
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.GRAVITY_MOD))
-				
-			"MAX_AIR_JUMP":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
-				to_return += Inventory.modifier(player_ID, Cards.stat_ref.MAX_AIR_JUMP)
-			"MAX_AIR_DASH":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
-				to_return += Inventory.modifier(player_ID, Cards.stat_ref.MAX_AIR_DASH)
-			"MAX_AIR_DODGE":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
-				to_return += Inventory.modifier(player_ID, Cards.stat_ref.MAX_AIR_DODGE)
-			"MAX_SUPER_DASH":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
-				to_return += Inventory.modifier(player_ID, Cards.stat_ref.MAX_SUPER_DASH)
-				
-			"GROUND_DASH_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.GROUND_DASH_SPEED))
-			"AIR_DASH_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.AIR_DASH_SPEED))
-			"SDASH_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.SDASH_SPEED))
-#			"SDASH_TURN_RATE":
-#				if Globals.survival_level != null: to_return = int(max(to_return - 4, 1))
-#				to_return += Inventory.modifier(player_ID, Cards.stat_ref.SDASH_TURN_RATE)
-			"DODGE_GG_COST":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.DODGE_GG_COST))
-			"DODGE_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.DODGE_SPEED))
-	
-			"GG_REGEN_AMOUNT":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.GG_REGEN_AMOUNT))
-			"GROUND_BLOCK_GG_COST", "AIR_BLOCK_GG_COST":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.BLOCK_GG_COST))
-			"WEAKBLOCK_CHIP_DMG_MOD":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.stat_ref.WEAKBLOCK_CHIP_DMG_MOD))
-
-	return to_return
-	
-				
-func has_trait(trait: int) -> bool:
-	if trait in UniqChar.query_traits():
-		return true
-		
-	return false
-	
 	
 # TESTING --------------------------------------------------------------------------------------------------
 
@@ -679,7 +555,7 @@ func test2():
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
 		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-		" " + str(seq_partner_ID)
+		" " + str(from_c_rec)
 			
 			
 func _process(_delta):
@@ -748,6 +624,7 @@ func simulate(new_input_state):
 #			UniqChar.update_uniqueHUD()
 			
 #			Globals.Game.LevelControl.spawn_mob("TestMobBase", Vector2.ZERO)
+			enchance_card(Globals.Game.LevelControl.effect_ref.SHARK)
 			pass
 
 		
@@ -942,12 +819,12 @@ func simulate2(): # only ran if not in hitstop
 			if Globals.survival_level != null:
 				if ex_change == BASE_EX_REGEN * FMath.S:
 					# no passive EX Gain for Survival unless with cards
-					ex_change = Inventory.modifier(player_ID, Cards.stat_ref.PASSIVE_EX_REGEN)
+					ex_change = Inventory.modifier(player_ID, Cards.effect_ref.PASSIVE_EX_REGEN)
 					if ex_change != 0:
 						change_ex_gauge(ex_change)
 				else:
 					ex_change = FMath.percent(ex_change, 60) # EX Gain for survival mode
-					ex_change = FMath.percent(ex_change, Inventory.modifier(player_ID, Cards.stat_ref.LANDED_EX_REGEN))
+					ex_change = FMath.percent(ex_change, Inventory.modifier(player_ID, Cards.effect_ref.LANDED_EX_REGEN))
 					change_ex_gauge(FMath.round_and_descale(ex_change))
 			else:
 				change_ex_gauge(FMath.round_and_descale(ex_change))
@@ -980,6 +857,8 @@ func simulate2(): # only ran if not in hitstop
 		reset_cancels()
 		chain_memory = []
 		
+	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
+		timed_enchance()
 	
 #	if pos_flow_seal and !$PosFlowSealTimer.is_running():
 #		if !get_node(targeted_opponent_path).get_node("HitStunTimer").is_running():
@@ -1772,6 +1651,9 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			$HitStopTimer.time = hitstop
 			
 		$ModulatePlayer.simulate() # modulate animations continue even in hitstop
+		
+		if Globals.survival_level != null and enchance_cooldowns.size() > 0:
+			enchance_cooldown()
 	
 	test2()
 		
@@ -2612,6 +2494,215 @@ func state_detect(anim):
 	
 # ---------------------------------------------------------------------------------------------------
 
+func get_seq_partner():
+	var Partner = Globals.Game.get_player_node(seq_partner_ID)
+	if Partner == null or Partner == self: return null
+	if Partner.seq_partner_ID != player_ID: return null
+	return Partner
+	
+func get_target():
+	if Globals.survival_level == null:
+		var target = Globals.Game.get_player_node(target_ID)
+		if target.state == Globals.char_state.DEAD:
+			return self
+		else:
+			return target
+			
+	else: # get targeted mob
+		if target_ID != null and target_ID != player_ID:
+			var target_node = Globals.Game.get_player_node(target_ID)
+			if target_node != null and target_node.state != Globals.char_state.DEAD:
+				return target_node
+				
+		# not yet target a mob, or targeted mob is dead
+		if Globals.Game.get_node("Players").get_children().size() == Globals.player_count:
+			target_ID = player_ID
+			return self # no mobs, target self
+		else: # find closest alive mob
+			var targets = get_tree().get_nodes_in_group("MobNodes")
+			for target in targets:
+				if target.state == Globals.char_state.DEAD:
+					targets.erase(target)
+			if targets.size() == 0:
+				return self # no mobs, target self
+			else:
+				var target_node = FMath.get_closest(targets, position)
+				target_ID = target_node.player_ID
+				return target_node
+			
+			
+#func get_surv_stat(stat: String):
+#	var to_return = get(stat)
+#
+#	match stat:
+#		_:
+#			pass
+#
+#	return to_return
+
+# MODIFERS AND ENCHANCE -----------------------------------------------------------------------------------------------------------------
+
+func get_stat(stat: String) -> int:
+	
+	var to_return
+	
+	if stat in self:
+		to_return = get(stat)
+	elif stat in UniqChar:
+		to_return = UniqChar.get_stat(stat)
+		
+	if Globals.survival_level != null:
+		match stat:
+			"DAMAGE_VALUE_LIMIT":
+#				var hp_mod_array = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100] 
+#				to_return = FMath.percent(to_return, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.HP))
+		
+			"SPEED":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.SPEED))
+			"JUMP_SPEED":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.JUMP_SPEED))
+			"GRAVITY_MOD":
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GRAVITY_MOD))
+			"FRICTION":
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.FRICTION))
+				
+			"MAX_AIR_JUMP":
+				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_AIR_JUMP)
+			"MAX_AIR_DASH":
+				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_AIR_DASH)
+			"MAX_AIR_DODGE":
+				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_AIR_DODGE)
+			"MAX_SUPER_DASH":
+				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_SUPER_DASH)
+				
+			"GROUND_DASH_SPEED":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GROUND_DASH_SPEED))
+			"AIR_DASH_SPEED":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.AIR_DASH_SPEED))
+			"SDASH_SPEED":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.SDASH_SPEED))
+#			"SDASH_TURN_RATE":
+#				if Globals.survival_level != null: to_return = int(max(to_return - 4, 1))
+#				to_return += Inventory.modifier(player_ID, Cards.effect_ref.SDASH_TURN_RATE)
+			"DODGE_GG_COST":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_GG_COST))
+			"DODGE_SPEED":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 85)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_SPEED))
+	
+			"GG_REGEN_AMOUNT":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GG_REGEN_AMOUNT))
+			"GROUND_BLOCK_GG_COST", "AIR_BLOCK_GG_COST":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.BLOCK_GG_COST))
+			"WEAKBLOCK_CHIP_DMG_MOD":
+				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.WEAKBLOCK_CHIP_DMG_MOD))
+
+	return to_return
+	
+				
+func has_trait(trait: int) -> bool:
+	if trait in UniqChar.query_traits():
+		return true
+		
+	return false
+	
+	
+func mod_damage(move_name):
+	var mod := 100
+	
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.REVENGE):
+		var percent = get_damage_percent()
+		if percent > 50:
+			var weight = FMath.get_fraction_percent(percent - 50, 50)
+			mod = FMath.f_lerp(100, 300, weight)
+	
+	match UniqChar.MOVE_DATABASE[move_name].atk_type:
+		Globals.atk_type.LIGHT:
+			mod = Inventory.modifier(player_ID, Cards.effect_ref.LIGHT_DMG_MOD)
+			if move_name.begins_with("a"):
+				mod = Inventory.modifier(player_ID, Cards.effect_ref.AIR_NORMAL_DMG_MOD)
+			else:
+				mod = Inventory.modifier(player_ID, Cards.effect_ref.GROUND_NORMAL_DMG_MOD)
+				
+		Globals.atk_type.FIERCE:
+			mod = Inventory.modifier(player_ID, Cards.effect_ref.FIERCE_DMG_MOD)
+			if move_name.begins_with("a"):
+				mod = Inventory.modifier(player_ID, Cards.effect_ref.AIR_NORMAL_DMG_MOD)
+			else:
+				mod = Inventory.modifier(player_ID, Cards.effect_ref.GROUND_NORMAL_DMG_MOD)
+				
+		Globals.atk_type.HEAVY:
+			mod = Inventory.modifier(player_ID, Cards.effect_ref.HEAVY_DMG_MOD)
+				
+		Globals.atk_type.SPECIAL, Globals.atk_type.EX:
+			mod = Inventory.modifier(player_ID, Cards.effect_ref.SPECIAL_DMG_MOD)
+			
+		Globals.atk_type.SUPER:
+			mod = Inventory.modifier(player_ID, Cards.effect_ref.SUPER_DMG_MOD)
+			
+	return mod
+	
+	
+func enchance_cooldown():
+	for cooldown in enchance_cooldowns.keys():
+		enchance_cooldowns[cooldown] -= 1
+		if enchance_cooldowns[cooldown] <= 0:
+# warning-ignore:return_value_discarded
+			enchance_cooldowns.erase(cooldown)
+	
+func enchance_card(effect_ref: int):
+	match effect_ref:
+		Globals.Game.LevelControl.effect_ref.SHARK:
+			if !Globals.Game.LevelControl.effect_ref.SHARK in enchance_cooldowns:
+				var spawn_point = position
+				spawn_point = Detection.ground_finder(spawn_point, facing, Vector2(0, 150), Vector2(10, 300), 1)
+				if spawn_point != null:
+					Globals.Game.spawn_entity(player_ID, "NibblerSpawnE", spawn_point, {})
+					play_audio("water15", {"surv" : true})
+					enchance_cooldowns[Globals.Game.LevelControl.effect_ref.SHARK] = Cards.SHARK_COOLDOWN
+				
+func timed_enchance():
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_SHARK):
+		enchance_card(Globals.Game.LevelControl.effect_ref.SHARK)
+		
+		
+func ground_dash_enchance():
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.CAN_TRIP) and Globals.Game.rng_generate(100) < Cards.TRIP_CHANCE:
+		trip()
+		return false
+
+	return true
+	
+		
+func trip():
+	face(-facing)
+	animate("LaunchStop")
+	velocity.x = get_stat("GROUND_DASH_SPEED") * -facing
+	velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), 50)
+	launch_starting_rot = 0
+	launchstun_rotate = 0
+#	$HitStunTimer.time = 30
+	play_audio("whoosh11", {"vol" : -25})
+	Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+		
+# ---------------------------------------------------------------------------------------------------------------------
+		
+		
 func is_killable(vel_value):
 	if !lethal_flag: # must be in lethal hitstun off a lethal hit
 		return false
@@ -2812,9 +2903,8 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			
 		Globals.char_state.AIR_RECOVERY:
 			if Animator.to_play_animation.begins_with("aDash") and !Animator.to_play_animation.ends_with("DD"): # wave landing
-				if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.CAN_TRIP) and \
-						Globals.Game.rng_generate(100) < TRIP_CHANCE:
-					trip()
+				if Globals.survival_level != null and !ground_dash_enchance():
+					pass
 				else:
 					animate("WaveDashBrake")
 					UniqChar.dash_sound()
@@ -2949,12 +3039,24 @@ func check_collidable(): # called by Physics.gd
 #			if button_dash in input_state.pressed:
 ##					and chain_memory.size() == 0:
 #				return false
-		Globals.char_state.AIR_RECOVERY:
-			if Animator.query_to_play(["Dodge"]):
-				return false
 		Globals.char_state.AIR_STARTUP:
 			if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
 				return false
+		Globals.char_state.AIR_RECOVERY:
+			if Animator.query_to_play(["Dodge"]):
+				return false
+			if Globals.survival_level != null:
+				if Animator.query_to_play(["SDash"]):
+					if Inventory.has_quirk(player_ID, Cards.effect_ref.SDASH_IFRAME):
+						return false
+				elif Animator.query_to_play(["aDash", "aDashU", "aDashD", "aDashUU", "aDashDD"]):
+					if Inventory.has_quirk(player_ID, Cards.effect_ref.AIR_DASH_IFRAME):
+						return false
+		Globals.char_state.GROUND_RECOVERY:
+			if Globals.survival_level != null:
+				if Animator.query_to_play(["Dash"]):
+					if Inventory.has_quirk(player_ID, Cards.effect_ref.GROUND_DASH_IFRAME):
+						return false
 			
 	return UniqChar.check_collidable()
 	
@@ -2989,6 +3091,19 @@ func check_semi_invuln():
 				if Animator.query_to_play(["DodgeTransit", "Dodge"]):
 #					and Animator.time <= DODGE_SEMI_IFRAMES:
 					return true
+				if Globals.survival_level != null:
+					if Animator.query_to_play(["SDash"]):
+						if Inventory.has_quirk(player_ID, Cards.effect_ref.SDASH_IFRAME):
+							return true
+					elif Animator.query_to_play(["aDash", "aDashU", "aDashD", "aDashUU", "aDashDD"]):
+						if Inventory.has_quirk(player_ID, Cards.effect_ref.AIR_DASH_IFRAME):
+							return true
+			Globals.char_state.GROUND_RECOVERY:
+				if Globals.survival_level != null:
+					if Animator.query_to_play(["Dash"]):
+						if Inventory.has_quirk(player_ID, Cards.effect_ref.GROUND_DASH_IFRAME):
+							return true
+			
 	return false	
 	
 func check_passthrough():
@@ -3213,7 +3328,7 @@ func launch_trail():
 			Globals.Game.spawn_SFX("LaunchDust", "DustClouds", position, {"back":true, "facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
 		else:
-			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
+			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"back":true, "facing":Globals.Game.rng_facing(), "grounded":true})
 			
 	
 # QUICK STATE CHECK ---------------------------------------------------------------------------------------------------
@@ -3277,6 +3392,9 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	if !move_name in UniqChar.STARTERS or is_super(move_name): return false
 	
 	if Globals.atk_attr.NO_QUICK_CANCEL in query_atk_attr(move_name):
+		return false
+		
+	if from_c_rec and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr(attack_ref):
 		return false
 	
 	if is_ex_move(move_name): # cancelling from ex move, only other ex moves are possible
@@ -3554,7 +3672,7 @@ func dodge_check():
 func burst_counter_check(): # check if have resources to do it, then take away those resources and return a bool
 	
 	var cost = BURSTCOUNTER_EX_COST
-	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.HALF_BURST_COST):
+	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.HALF_BURST_COST):
 		cost = FMath.percent(cost, 50)
 	
 	if current_ex_gauge < cost:
@@ -3584,7 +3702,7 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 	
 	else: # during Survival Burst Escape cost 1 bar of EX Gauge
 		var cost = BURSTCOUNTER_EX_COST
-		if Inventory.has_quirk(player_ID, Cards.stat_ref.HALF_BURST_COST):
+		if Inventory.has_quirk(player_ID, Cards.effect_ref.HALF_BURST_COST):
 			cost = FMath.percent(cost, 50)
 			
 		if current_ex_gauge < cost:
@@ -3608,7 +3726,7 @@ func a_reset_check(move_name):
 	
 	var move_data = UniqChar.query_move_data(move_name)
 	var cost = ALPHARESET_EX_COST
-	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.FREE_RESET):
+	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.FREE_RESET):
 		cost = 0
 		
 	if !chain_combo in [Globals.chain_combo.RESET]: # can only be used on whiff
@@ -3694,7 +3812,7 @@ func test_sdash_cancel():
 				
 	elif is_atk_active() and is_non_EX_special_move(move_name):
 		var cost = BETARESET_EX_COST
-		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.FREE_RESET):
+		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.FREE_RESET):
 			cost = 0
 			
 		if current_ex_gauge < cost:
@@ -3835,7 +3953,7 @@ func continue_visual_effect_of_status(effect): # run every frame, will not add v
 			particle("Sparkle", "Particles", "red", 4, 1, 25)
 			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
 			sprite_shake()
-		Globals.status_effect.RESPAWN_GRACE, Globals.status_effect.SURVIVAL_GRACE:
+		Globals.status_effect.RESPAWN_GRACE:
 			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["respawn_grace", "punish_sweet_flash"]):
 				$ModulatePlayer.play("respawn_grace")
 
@@ -3865,7 +3983,7 @@ func clear_visual_effect_of_status(effect): # must run this when removing status
 #		Globals.status_effect.REPEAT:
 #			if monochrome:
 #				reset_modulate()
-		Globals.status_effect.RESPAWN_GRACE, Globals.status_effect.SURVIVAL_GRACE:
+		Globals.status_effect.RESPAWN_GRACE:
 			if $ModulatePlayer.query_current(["respawn_grace"]):
 				reset_modulate()
 		Globals.status_effect.POS_FLOW:
@@ -3919,7 +4037,7 @@ func query_polygons(): # requested by main game node when doing hit detection
 			if Globals.survival_level == null: # no semi-disjoint mechanic in Survival
 				polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
 			
-		if query_status_effect(Globals.status_effect.RESPAWN_GRACE) or query_status_effect(Globals.status_effect.SURVIVAL_GRACE):
+		if query_status_effect(Globals.status_effect.RESPAWN_GRACE):
 			pass  # no hurtbox during respawn grace
 		else:
 			polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
@@ -3980,11 +4098,12 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 			if is_normal_attack(attack_ref):
 				return false
 		Globals.atk_type.SPECIAL:
-			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.SPECIAL_CHAIN):
-				if is_special_move(attack_ref):
-					pass
-				else:
-					return false
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.SPECIAL_CHAIN):
+				pass
+#				if is_special_move(attack_ref):
+#					pass
+#				else:
+#					return false
 			else:
 				return false
 		_:  # only Light/Fierce normals can be chain cancelled from
@@ -4228,7 +4347,7 @@ func change_burst_token(new_burst_token: int):
 		
 func gain_coin(to_gain: int):
 	if Globals.survival_level != null:
-		to_gain = FMath.percent(to_gain, Inventory.modifier(player_ID, Cards.stat_ref.COIN_GAIN))
+		to_gain = FMath.percent(to_gain, Inventory.modifier(player_ID, Cards.effect_ref.COIN_GAIN))
 		coin_count += to_gain
 		Globals.Game.coin_update(self)
 		change_ex_gauge(3000)
@@ -4423,8 +4542,18 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		match hit_data.block_state:
 			Globals.block_state.UNBLOCKED:
 				
+				if Globals.survival_level != null: # mob pushback when resisting or armoring
+					if "resisted" in hit_data or "mob_armored" in hit_data:
+						var pushback_strength = WEAKBLOCK_ATKER_PUSHBACK
+						
+						var pushback_dir_enum = Globals.split_angle(hit_data.angle_to_atker, Globals.angle_split.SIX, facing)
+						var pushback_dir = Globals.compass_to_angle(pushback_dir_enum)
+						
+						velocity.set_vector(pushback_strength, 0)
+						velocity.rotate(pushback_dir)
+							
 				# if attacking at the corner unblocked, pushback depending on defender's Guard Gauge
-				if "cornered" in hit_data:
+				elif "cornered" in hit_data:
 					var pushback_strength: int = CORNER_PUSHBACK
 					if defender.current_guard_gauge > 0:
 						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
@@ -4485,11 +4614,12 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 # ----------------------------------------------------------------------------------------------
 
 	if Globals.survival_level != null:
-		if "dealt_damage" in hit_data and Inventory.has_stat_mod(player_ID, Cards.stat_ref.LIFESTEAL_RATE):
-			var heal = FMath.percent(hit_data.dealt_damage, Inventory.modifier(player_ID, Cards.stat_ref.LIFESTEAL_RATE, true))
-			var healed = take_damage(-heal)
-			if healed != null and healed > 0:
-				Globals.Game.spawn_damage_number(healed, position, Globals.dmg_num_col.GREEN)
+		if "dealt_damage" in hit_data:
+			var heal = FMath.percent(hit_data.dealt_damage, Inventory.modifier(player_ID, Cards.effect_ref.LIFESTEAL_RATE, true))
+			if heal > 0:
+				var healed = take_damage(-heal)
+				if healed != null and healed > 0:
+					Globals.Game.spawn_damage_number(healed, position, Globals.dmg_num_col.GREEN)
 	
 
 # TAKING A HIT ---------------------------------------------------------------------------------------------- 	
@@ -4698,7 +4828,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						if !check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker):
 							if (success_block or Animator.query_current(["BlockStartup", "aBlockStartup"])): # can perfect block projectiles
 								hit_data.block_state = Globals.block_state.STRONG
-							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.AUTO_PBLOCK_PROJ):
+							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PBLOCK_PROJ):
 								hit_data.block_state = Globals.block_state.STRONG
 							else:
 								hit_data.block_state = Globals.block_state.WEAK
@@ -5302,7 +5432,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on block
 		return 0
 		
-	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.NO_GUARD_DRAIN):
+	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_GUARD_DRAIN):
 		return 0
 
 	return -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1] # Guard Drain on 1st hit of the combo depends on Attack Level
@@ -5499,7 +5629,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 #		return int(min(scaled_hitstun, MOB_GRACE_DURATION)) # limited hitstun for mob attack
 
 	if Globals.survival_level != null and !hit_data.lethal_hit and !"multihit" in hit_data and !"autochain" in hit_data:
-		 scaled_hitstun = FMath.percent(scaled_hitstun, Inventory.modifier(player_ID, Cards.stat_ref.HITSTUN_REDUCE))
+		 scaled_hitstun = FMath.percent(scaled_hitstun, Inventory.modifier(player_ID, Cards.effect_ref.HITSTUN_REDUCE))
 		
 	if hit_data.lethal_hit:
 		# increased hitstun on a lethal hit and no reduction from high Guard Gauge
@@ -5521,7 +5651,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 	
 func check_if_crossed_up(attacker, angle_to_atker: int):
 	
-	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.NO_CROSSUP):
+	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CROSSUP):
 		return false
 	
 # warning-ignore:narrowing_conversion
@@ -5955,17 +6085,7 @@ func sequence_launch():
 	velocity.set_vector(launch_power, 0)  # reset momentum
 	velocity.rotate(launch_angle)
 	
-		
-func trip():
-	face(-facing)
-	animate("LaunchStop")
-	velocity.x = get_stat("GROUND_DASH_SPEED") * -facing
-	velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), 50)
-	launch_starting_rot = 0
-	launchstun_rotate = 0
-#	$HitStunTimer.time = 30
-	play_audio("whoosh11", {"vol" : -25})
-	Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+	
 		
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 	
@@ -6100,10 +6220,19 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 	UniqChar._on_SpritePlayer_anim_finished(anim_name)
 
+	# do this at end of _on_SpritePlayer_anim_finished() as well
+	if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY]:
+		from_c_rec = true
+		
 
 func _on_SpritePlayer_anim_started(anim_name):
 	
 	state = state_detect(Animator.current_animation) # update state
+	
+	if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY]:
+		from_c_rec = true
+	elif !is_atk_startup():
+		from_c_rec = false
 	
 	if is_atk_startup():
 		var move_name = anim_name.trim_suffix("Startup")
@@ -6159,9 +6288,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		
 		"Dash":
-			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.stat_ref.CAN_TRIP) and \
-					Globals.Game.rng_generate(100) < TRIP_CHANCE:
-				trip()
+			if Globals.survival_level != null and !ground_dash_enchance():
 				return
 			
 		"JumpTransit2":
@@ -6485,6 +6612,7 @@ func save_state():
 		"first_hit_flag" : first_hit_flag,
 		"GG_swell_flag" : GG_swell_flag,
 		"lethal_flag" : lethal_flag,
+		"from_c_rec" : from_c_rec,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -6528,6 +6656,9 @@ func save_state():
 	
 	if Globals.training_mode:
 		state_data["TrainingRegenTimer_time"] = $TrainingRegenTimer.time
+		
+	if Globals.survival_level != null:
+		state_data["enchance_cooldowns"] = enchance_cooldowns
 
 	return state_data
 	
@@ -6571,6 +6702,9 @@ func load_state(state_data):
 	first_hit_flag = state_data.first_hit_flag
 	GG_swell_flag = state_data.GG_swell_flag
 	lethal_flag = state_data.lethal_flag
+	from_c_rec = state_data.from_c_rec
+	if Globals.survival_level != null:
+		enchance_cooldowns = state_data.enchance_cooldowns
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	

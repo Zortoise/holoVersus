@@ -564,7 +564,7 @@ const MOVE_DATABASE = {
 		"atk_type" : Globals.atk_type.EX,
 		"sequence": "SP6[ex]SeqA",
 		"hitcount" : 1,
-		"atk_attr" : [Globals.atk_attr.QUICK_GRAB, Globals.atk_attr.CANNOT_CHAIN_INTO]
+		"atk_attr" : [Globals.atk_attr.QUICK_GRAB, Globals.atk_attr.CANNOT_CHAIN_INTO, Globals.atk_attr.NOT_FROM_C_REC]
 	},
 	
 	"SP6[ex]SeqE": {

@@ -1,7 +1,9 @@
 extends Node
 
+var pool = []
 
-		
+var shop = []
+var bought = []
 
 var inventory = [
 	[ # P1
@@ -9,7 +11,9 @@ var inventory = [
 	],
 	
 	[ # P2
-		
+		Cards.card_ref.AYAME,
+		Cards.card_ref.IROHA,
+		Cards.card_ref.KORONE,
 	]
 ]
 
@@ -18,9 +22,25 @@ func _ready():
 #	print(get_describe(Cards.card_ref.INA))
 	pass
 
-
-func get_card_name(card: int) -> String:
-	return Cards.DATABASE[card].name
+func stock_pool():
+	pool = []
+	for card in Cards.LIST:
+		pool.append(card)
+		
+func open_shop(): # draw 5 random cards from pool
+	shop = []
+	bought = []
+	for x in 5:
+		if pool.size() == 0:
+			return
+		var select = pool[Globals.Game.rng_generate(pool.size())]
+		shop.append(select)
+		pool.erase(select)
+		
+func close_shop(): # return unbought cards to pool
+	for bought_card in bought:
+		shop.erase(bought_card)
+	pool.append_array([shop]) 
 
 
 func get_describe(card: int) -> String:

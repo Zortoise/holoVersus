@@ -52,17 +52,23 @@ func init(in_anim: String, in_sfx_ref: String, in_position: Vector2, aux_data: D
 	
 	
 func load_sfx_ref(): # load frame data and spritesheet
+	
 	if sfx_ref in LoadedSFX.loaded_sfx: # common sfx
 		$Sprite.texture = LoadedSFX.loaded_sfx[sfx_ref].spritesheet
 		$SpritePlayer.init_with_loaded_frame_data($Sprite, LoadedSFX.loaded_sfx[sfx_ref].frame_data)
+		
+	elif master_ID != null and sfx_ref in master_node.sfx_data: # unique sfx
+		$Sprite.texture = master_node.sfx_data[sfx_ref].spritesheet
+		$SpritePlayer.init_with_loaded_frame_data($Sprite, master_node.sfx_data[sfx_ref].frame_data)
 		
 	elif mob_ref != null and sfx_ref in Globals.Game.LevelControl.mob_data[mob_ref].sfx_data:
 		$Sprite.texture = Globals.Game.LevelControl.mob_data[mob_ref].sfx_data[sfx_ref].spritesheet
 		$SpritePlayer.init_with_loaded_frame_data($Sprite, Globals.Game.LevelControl.mob_data[mob_ref].sfx_data[sfx_ref].frame_data)
 		
-	elif master_ID != null and sfx_ref in master_node.sfx_data: # unique sfx
-		$Sprite.texture = master_node.sfx_data[sfx_ref].spritesheet
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, master_node.sfx_data[sfx_ref].frame_data)
+	elif Globals.survival_level != null and sfx_ref in  Globals.Game.LevelControl.loaded_sfx: # survival sfx
+		$Sprite.texture = Globals.Game.LevelControl.loaded_sfx[sfx_ref].spritesheet
+		$SpritePlayer.init_with_loaded_frame_data($Sprite, Globals.Game.LevelControl.loaded_sfx[sfx_ref].frame_data)	
+		
 	else:
 		print("Error: sfx_ref not found.")
 

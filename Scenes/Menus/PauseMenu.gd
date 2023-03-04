@@ -68,7 +68,7 @@ func open():
 	show()
 	$CanvasLayer.show()
 	$AltInputs.active = true
-	play_audio("ui_accept2", {"vol":-5})
+	get_parent().play_audio("ui_accept2", {"vol":-5})
 	
 	$CanvasLayer/Cursor.show()
 	if !Globals.training_mode:
@@ -100,14 +100,14 @@ func close(yielding = true):
 func _process(_delta):
 	if visible and Input.is_action_just_pressed("ui_cancel"):
 		if $CanvasLayer/TrainingControl/TrainingSettings.visible:
-			play_audio("ui_accept2", {"vol":-5})
+			get_parent().play_audio("ui_accept2", {"vol":-5})
 			$CanvasLayer/TrainingControl/TrainingList.show()
 			$CanvasLayer/TrainingControl/TrainingSettings.hide()
 			$CanvasLayer/TrainingControl/TrainingList/TrainingSettings.initial_focus()
 			last_picked = $CanvasLayer/TrainingControl/TrainingList/TrainingSettings
 			set_training_settings()
 		else:
-			play_audio("ui_back", {})
+			get_parent().play_audio("ui_back", {})
 			close()
 		
 func focused(focused_node):
@@ -119,10 +119,10 @@ func triggered(triggered_node):
 	
 	match triggered_node.name:
 		"Resume":
-			play_audio("ui_back", {})
+			get_parent().play_audio("ui_back", {})
 			close()
 		"ReturnToCharSelect":
-			play_audio("ui_accept", {"vol":-8})
+			get_parent().play_audio("ui_accept", {"vol":-8})
 			close(false)
 			if Globals.survival_level != null:
 				get_node("../Transition").play("transit_to_survival")
@@ -131,12 +131,12 @@ func triggered(triggered_node):
 			else:
 				get_node("../Transition").play("transit_to_char_select_training")
 		"ReturnToMainMenu":
-			play_audio("ui_accept", {"vol":-8})
+			get_parent().play_audio("ui_accept", {"vol":-8})
 			close(false)
 			get_node("../Transition").play("transit_to_main")
 			
 		"LoadState":
-			play_audio("ui_accept", {"vol":-8})
+			get_parent().play_audio("ui_accept", {"vol":-8})
 			close()
 			if Globals.Game.playback_mode == false:
 				if Globals.Game.training_save_state != null:
@@ -147,13 +147,13 @@ func triggered(triggered_node):
 				else:
 					print("Error: Saved game state not found")
 		"SaveState":
-			play_audio("ui_accept", {"vol":-8})
+			get_parent().play_audio("ui_accept", {"vol":-8})
 			close()
 			Globals.Game.save_state("training_save_state")
 			Globals.Game.emit_signal("saved_state") 
 			$CanvasLayer/TrainingControl/TrainingList/LoadState.disabled = false
 		"SwapControls":
-			play_audio("ui_accept", {"vol":-8})
+			get_parent().play_audio("ui_accept", {"vol":-8})
 			close()
 			var player_1 = Globals.Game.get_player_node(0)
 			var player_2 = Globals.Game.get_player_node(1)
@@ -164,12 +164,12 @@ func triggered(triggered_node):
 			if player_2.player_ID == 0: player_2.set_player_id(1)
 			elif player_2.player_ID == 1: player_2.set_player_id(0)
 		"TrainingSettings":
-			play_audio("ui_accept", {"vol":-8})
+			get_parent().play_audio("ui_accept", {"vol":-8})
 			$CanvasLayer/TrainingControl/TrainingList.hide()
 			$CanvasLayer/TrainingControl/TrainingSettings.show()
 			$CanvasLayer/TrainingControl/TrainingSettings/GuardGaugeAnchor.initial_focus()
 		"Return":
-			play_audio("ui_accept", {"vol":-8})
+			get_parent().play_audio("ui_accept", {"vol":-8})
 			$CanvasLayer/TrainingControl/TrainingList.show()
 			$CanvasLayer/TrainingControl/TrainingSettings.hide()
 			$CanvasLayer/TrainingControl/TrainingList/TrainingSettings.initial_focus()
@@ -178,8 +178,8 @@ func triggered(triggered_node):
 
 # ------------------------------------------------------------------------------------------------------------
 
-func play_audio(audio_ref, aux_data):
-	var new_audio = Globals.loaded_ui_audio_scene.instance()
-	get_tree().get_root().add_child(new_audio)
-	new_audio.init(audio_ref, aux_data)
+#func play_audio(audio_ref, aux_data):
+#	var new_audio = Globals.loaded_ui_audio_scene.instance()
+#	get_tree().get_root().add_child(new_audio)
+#	new_audio.init(audio_ref, aux_data)
 	

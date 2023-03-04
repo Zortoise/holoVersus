@@ -35,7 +35,9 @@ const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Gu
 #const ATK_LEVEL_TO_L_HITSTUN = [[40, 45, 50, 55, 60, 65, 70, 75], [35, 40, 45, 50, 55, 60, 65, 70], [30, 35, 40, 45, 50, 55, 60, 65]]
 const ATK_LEVEL_TO_F_HITSTUN = [33, 36, 39, 42, 45, 48, 51, 54]
 const ATK_LEVEL_TO_L_HITSTUN = [48, 51, 54, 57, 60, 63, 66, 69]
-const BREAK_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
+const COMBO_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
+
+const ATK_LEVEL_TO_GDRAIN = [0, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
 
 const MOB_LEVEL_TO_HP = [100, 125, 150, 200, 250, 300, 350, 400, 450]
 const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0]
@@ -79,8 +81,8 @@ const LongFailTimer_TIME = 60 # if failed a long range zone roll, will not roll 
 #const ResistTimer_TIME = 60 # if in Resisted Hitstun for a while, gain armor
 const ARMOR_TIME = 30 # frames of special armor after recovering from hitstun
 const ARMOR_DMG_MOD = 50 # % of damage taken when attacked during special armor
-#const ARMOR_KNOCKBACK_MOD = 200 # % of knockback mob experience when attacked during special armor
-
+#const ARMOR_KNOCKBACK_MOD = 150 # % of knockback mob experience when attacked during special armor
+#const RESISTED_KB_MOD = 200 # % of knockback mob experience
 
 # variables used, don't touch these
 var loaded_palette = null
@@ -164,7 +166,7 @@ var rand_time = null
 var peak_flag = Globals.peak_flag.GROUNDED
 var chain_memory := []
 var rand_max_chain_size := 0
-var break_level := 0 # set when mob_break according to atk_level, determine Guard Swell Rate
+var combo_level := 0 # set when mob_break according to atk_level, determine Guard Swell Rate
 #var proj_only_combo := false # set to true when mob_break via projectile, false if hit with physical attack during combo, increase armor time
 var no_jump_chance := 0 # chance of removing all jumps from decision, increased if hit in air, decreased when hit on ground
 
@@ -413,6 +415,8 @@ func simulate(_new_input_state):
 			$MobStats/GG.modulate = Color(1.5, 1.5, 1.5)
 		else:
 			$MobStats/GG.modulate = Color(1.2, 0.65, 0.0)
+	else:
+		$MobStats/GG.modulate = Color(1.2, 0.65, 0.0)
 			
 # RESET NON-SAVEABLE VARIABLES --------------------------------------------------------------------------------------------------
 
@@ -447,7 +451,7 @@ func simulate2(): # only ran if not in hitstop
 	# clearing repeat memory
 	if !is_hitstunned_or_sequenced():
 		repeat_memory = []
-		break_level = 0
+		combo_level = 0
 		
 	if !state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
@@ -484,12 +488,11 @@ func simulate2(): # only ran if not in hitstop
 						"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
 				
 			guard_gauge_update()
-#		else:
-#			if current_guard_gauge < 0:
-#				var guard_gauge_regen: int = 0
-#				guard_gauge_regen = get_stat("GG_REGEN")
-#				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen))
-#				guard_gauge_update()
+		else:
+			if current_guard_gauge < 0:
+				var guard_gauge_regen: int = get_stat("GG_REGEN_AMOUNT")
+				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen))
+				guard_gauge_update()
 		
 		
 	if state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
@@ -1140,15 +1143,17 @@ func get_stat(stat):
 			var hp_left_values = [125, 100, 75, 50] # remaining HP affects Guard Swell
 			to_return = FMath.percent(to_return, hp_left_values[hp_left_to_tier()])
 			
-			# break level affects Guard Swell
-			to_return = FMath.percent(to_return, BREAK_LEVEL_TO_GUARD_SWELL_MOD[break_level])
-#		"GUARD_DRAIN_MOD":
-#			to_return = FMath.percent(to_return, UniqChar.GDRAIN_MOD_ARRAY[mob_level])
+			# combo level affects Guard Swell
+			to_return = FMath.percent(to_return, COMBO_LEVEL_TO_GUARD_SWELL_MOD[combo_level])
+		"GUARD_DRAIN_MOD":
+			var mob_level_values = [100, 80, 60]
+			to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
+			
 			
 	if Globals.player_count > 1: # increased stats for 2 players
 		match stat:
-#			"GUARD_DRAIN_MOD":
-#				to_return = FMath.percent(to_return, 80)
+			"GUARD_DRAIN_MOD":
+				to_return = FMath.percent(to_return, 70)
 #			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
 #				to_return = FMath.percent(to_return, 150)
 			"ARMOR_TIME":
@@ -1164,6 +1169,10 @@ func get_stat(stat):
 				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [50, 75, 125, 150, 175, 200])
 			"ARMOR_DMG_MOD":
 				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [150, 125, 75, 50, 25, 1])
+			"GUARD_DRAIN_MOD":
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [140, 120, 80, 60, 40, 20])
+			"GG_REGEN_AMOUNT":
+				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [0, 50, 125, 150, 175, 200])
 #			"ARMOR_KNOCKBACK_MOD":
 #				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
 	if Globals.mob_attr.SPEED in mob_attr:
@@ -1670,7 +1679,7 @@ func launch_trail():
 			Globals.Game.spawn_SFX("LaunchDust", "DustClouds", position, {"back":true, "facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
 		else:
-			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
+			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"back":true, "facing":Globals.Game.rng_facing(), "grounded":true})
 		
 func death_anim():
 	if !$ModulatePlayer.playing or !$ModulatePlayer.query(["crush", "stun_flash"]):
@@ -2186,6 +2195,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
 		attacker_or_entity.append_ignore_list(player_ID, hit_data.move_data.ignore_time)
+		
+	if hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER] or \
+			("proj_level" in hit_data.move_data and hit_data.move_data.proj_level >= 3):
+		hit_data["ignore_armor"] = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -2200,7 +2213,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
 		
-		if !Inventory.has_quirk(hit_data.attacker_ID, Cards.stat_ref.CAN_REPEAT):
+		if !Inventory.has_quirk(hit_data.attacker_ID, Cards.effect_ref.CAN_REPEAT):
 		
 			for array in repeat_memory:
 				if array[0] == hit_data.attacker_ID and array[1] == root_move_name:
@@ -2241,22 +2254,26 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	# RESISTED HIT ----------------------------------------------------------------------------------------------
 	
-	if !$ArmorTimer.is_running() and !guardbroken and !is_attacking():
-		if Globals.mob_attr.TOUGH in mob_attr and mob_attr[Globals.mob_attr.TOUGH] <= 1:
-			pass
-		elif hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER]:
-			pass
-		elif "atk_level" in hit_data and hit_data.move_data.atk_level <= 1:
-			pass
-		else:
-			hit_data["resisted"] = true
-#			if !$ResistTimer.is_running():
-			if !"multihit" in hit_data and !"autochain" in hit_data and \
-					state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
-					Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
-				$ArmorTimer.time = ARMOR_TIME # gain armor if hit during Resisted Hitstun
-#				else:
-#					$ResistTimer.time = ResistTimer_TIME
+	if "ignore_armor" in hit_data:
+		pass
+	elif current_guard_gauge == GUARD_GAUGE_FLOOR:
+		pass
+	elif $ArmorTimer.is_running() or $HitStunTimer.is_running():
+		pass
+	elif is_atk_active() or is_atk_recovery():
+		pass
+	elif Globals.mob_attr.TOUGH in mob_attr and mob_attr[Globals.mob_attr.TOUGH] <= 1:
+		pass
+	elif "atk_level" in hit_data and hit_data.move_data.atk_level <= 1:
+		pass
+	else:
+		hit_data["resisted"] = true
+#		if !"multihit" in hit_data and !"autochain" in hit_data and \
+#				state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
+#				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
+#			$ArmorTimer.time = ARMOR_TIME # gain armor if hit during Resisted Hitstun
+##				else:
+##					$ResistTimer.time = ResistTimer_TIME
 		
 	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
 	
@@ -2283,6 +2300,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 			if get_guard_gauge_percent_below() == 0:
 				hit_data["mob_break"] = true
+				$ArmorTimer.time = 0
 				guardbroken = true
 #				repeat_memory = [] # reset move memory for getting a Break
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
@@ -2307,7 +2325,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	# FIRST REACTION ---------------------------------------------------------------------------------
 	
-	if has_trait(Globals.trait.NO_LAUNCH) or $ArmorTimer.is_running() or "resisted" in hit_data:
+	if has_trait(Globals.trait.NO_LAUNCH) or $ArmorTimer.is_running() or ("resisted" in hit_data and !guardbroken):
 		hit_data["tough_mob"] = true
 	
 #	if !(Globals.mob_attr.GDRAIN in mob_attr and mob_attr[Globals.mob_attr.GDRAIN] == 0):
@@ -2387,9 +2405,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	elif "mob_break" in hit_data:
 		$ModulatePlayer.play("punish_sweet_flash")
-		break_level = adjusted_atk_level - 1
-		break_level += Inventory.modifier(attacker.player_ID, Cards.stat_ref.BREAK_LEVEL)
-		break_level = int(clamp(break_level, 0, 7))
+		combo_level = adjusted_atk_level - 1
+		combo_level += Inventory.modifier(attacker.player_ID, Cards.effect_ref.COMBO_LEVEL)
+		combo_level = int(clamp(combo_level, 0, 7))
 		
 	elif "resisted" in hit_data:
 		$ModulatePlayer.play("weakblock_flash")
@@ -2441,8 +2459,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if "entity_nodepath" in hit_data: # for projectiles as well
 #			hit_data.hitstop = hitstop
 
-	if "resisted" in hit_data and !"entity_nodepath" in hit_data and !hit_data.weak_hit:
+	if "resisted" in hit_data and !guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit:
 		hitstop += 10
+		
+	if guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit and !"autochain" in hit_data:
+		hitstop += Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.EXTRA_HITSTOP)
 		
 	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
 		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
@@ -2580,7 +2601,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			animate("LaunchStop")
 									
 	else: # not guardbroken
-		if "resisted" in hit_data and !hit_data.weak_hit:
+		if "resisted" in hit_data and hit_data.move_data.atk_level > 1:
 			
 			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
 			if !"pull" in hit_data:
@@ -2607,8 +2628,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				else:
 					animate("aResistB")
 					
-		elif (is_atk_startup() or is_atk_active()) and is_special_move(get_move_name()):
-			no_impact_and_vel_change = true # no KB if mob is doing a special move
+		else:
+			hit_data["mob_armored"] = true # for attacker knockback
+			if (is_atk_startup() or is_atk_active()) and is_special_move(get_move_name()):
+				no_impact_and_vel_change = true # no KB if mob is doing a special move
 					
 					
 	if !no_impact_and_vel_change:
@@ -2642,7 +2665,7 @@ func calculate_damage(hit_data) -> int:
 		if hit_data.sweetspotted:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
 			
-	if !guardbroken and !Inventory.has_quirk(hit_data.attacker_ID, Cards.stat_ref.ARMOR_PIERCE):
+	if !guardbroken and !Inventory.has_quirk(hit_data.attacker_ID, Cards.effect_ref.ARMOR_PIERCE):
 		scaled_damage = FMath.percent(scaled_damage, get_stat("ARMOR_DMG_MOD"))
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
@@ -2657,8 +2680,12 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if guardbroken: # if guardbroken, no Guard Drain
 		return 0
 		
-	if $ArmorTimer.is_running():
-		return 0
+	if $ArmorTimer.is_running() and !"ignore_armor" in hit_data: # halves GDrain on armored
+		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
+		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.GUARD_DRAIN_MOD))
+		guard_drain = FMath.percent(guard_drain, 50)
+		return guard_drain
 		
 #	if state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.AIR_STANDBY, 
 #			Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, 
@@ -2667,7 +2694,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 #		return 0
 
 	if "resisted" in hit_data:
-		return 0
+		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
+		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.GUARD_DRAIN_MOD))
+		return guard_drain
 		
 	return GUARD_GAUGE_FLOOR
 
@@ -2698,8 +2728,14 @@ func calculate_knockback_strength(hit_data) -> int:
 #	elif !guardbroken: # KB for non-guardbreak
 #		knockback_strength = FMath.percent(knockback_strength, get_stat("ARMOR_KNOCKBACK_MOD"))
 			
-#	if "resisted" in hit_data:
-#		knockback_strength = FMath.percent(knockback_strength, RESISTED_KB_MOD)
+#	if "resisted" in hit_data and !guardbroken:
+#		knockback_strength = FMath.percent(knockback_strength, get_stat("RESISTED_KB_MOD"))
+##		if grounded:
+##			knockback_strength = FMath.percent(knockback_strength, 200)
+#	elif $ArmorTimer.is_running():
+#		knockback_strength = FMath.percent(knockback_strength, get_stat("ARMOR_KNOCKBACK_MOD"))
+#		if grounded:
+#			knockback_strength = FMath.percent(knockback_strength, 200)
 
 
 	if guardbroken and !hit_data.weak_hit:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
@@ -3095,9 +3131,9 @@ func sequence_launch():
 			Globals.Game.spawn_SFX("Crushspark", "Stunspark", position, {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()})
 		
-			break_level = seq_data.atk_level - 1
-			break_level += Inventory.modifier(seq_user.player_ID, Cards.stat_ref.BREAK_LEVEL)
-			break_level = int(clamp(break_level, 0, 7))
+			combo_level = seq_data.atk_level - 1
+			combo_level += Inventory.modifier(seq_user.player_ID, Cards.effect_ref.COMBO_LEVEL)
+			combo_level = int(clamp(combo_level, 0, 7))
 			
 #	proj_only_combo = false
 		
@@ -3437,7 +3473,7 @@ func save_state():
 		"peak_flag" : peak_flag,
 		"chain_memory" : chain_memory,
 		"rand_max_chain_size" : rand_max_chain_size,
-		"break_level" : break_level,
+		"combo_level" : combo_level,
 #		"proj_only_combo" : proj_only_combo,
 		"no_jump_chance" : no_jump_chance,
 		
@@ -3525,7 +3561,7 @@ func load_state(state_data):
 	peak_flag = state_data.peak_flag
 	chain_memory = state_data.chain_memory
 	rand_max_chain_size = state_data.rand_max_chain_size
-	break_level = state_data.break_level
+	combo_level = state_data.combo_level
 #	proj_only_combo = state_data.proj_only_combo
 	no_jump_chance = state_data.no_jump_chance
 

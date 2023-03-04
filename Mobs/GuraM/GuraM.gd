@@ -47,8 +47,8 @@ const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when Character's Guar
 
 const DAMAGE_VALUE_LIMIT = 500
 
-#const GUARD_DRAIN_MOD = 300
-#const GG_REGEN = 5 # exact GG regened per frame when GG < 100%
+const GUARD_DRAIN_MOD = 100
+const GG_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
 const GUARD_GAUGE_SWELL_RATE = 50
 
 const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move

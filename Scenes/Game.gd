@@ -48,6 +48,7 @@ var P2_facing: int
 var HUD
 var frame_viewer
 var viewport
+var card_menu
 
 onready var match_input_log = Globals.match_input_log
 var true_frametime := 0 # to set target to simulate to
@@ -121,6 +122,7 @@ func _ready():
 	HUD = get_node("../../../HUD")
 	frame_viewer = get_node("../../../HUD/FrameViewer")
 	viewport = get_node("../../..")
+	card_menu = get_node("../../../CardMenu")
 	
 	if Globals.player_count == 1:
 		HUD.get_node("P1_HUDRect").rect_position.x = 0

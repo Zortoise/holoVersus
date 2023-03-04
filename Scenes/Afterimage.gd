@@ -55,12 +55,17 @@ func init(in_master_ID: int, in_spritesheet_ref: String, sprite_node_path: NodeP
 		
 func set_texture():
 	if mob_ref == null:
-		master_node = Globals.Game.get_player_node(master_ID)
-		if spritesheet_ref in master_node.spritesheets:
-			$Sprite.texture = master_node.spritesheets[spritesheet_ref]
-			player_image = true
-		elif spritesheet_ref in master_node.entity_data: # entity ref passed in instead
-			$Sprite.texture = master_node.entity_data[spritesheet_ref].spritesheet
+		if master_ID != 999:
+			master_node = Globals.Game.get_player_node(master_ID)
+			if spritesheet_ref in master_node.spritesheets:
+				$Sprite.texture = master_node.spritesheets[spritesheet_ref]
+				player_image = true
+			elif spritesheet_ref in master_node.entity_data: # entity ref passed in instead
+				$Sprite.texture = master_node.entity_data[spritesheet_ref].spritesheet
+			else:
+				print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
+		elif spritesheet_ref in Globals.Game.LevelControl.entity_data: # card effects
+			$Sprite.texture = Globals.Game.LevelControl.entity_data[spritesheet_ref].spritesheet
 		else:
 			print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
 	else:

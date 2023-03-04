@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/coin.png-59bd64c31c2d3c574fc2bf9cf5ecb903.stex"
+path="res://.import/P2_picker.png-1f64861d35524e47025394ad94e39fa9.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/UI/coin.png"
-dest_files=[ "res://.import/coin.png-59bd64c31c2d3c574fc2bf9cf5ecb903.stex" ]
+source_file="res://Assets/UI/card/P2_picker.png"
+dest_files=[ "res://.import/P2_picker.png-1f64861d35524e47025394ad94e39fa9.stex" ]
 
 [params]
 

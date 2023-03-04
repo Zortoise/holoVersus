@@ -1,0 +1,87 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Assets/UI/card/coin.png" type="Texture" id=3]
+[ext_resource path="res://Characters/Gura/Spritesheets/BaseSprite.png" type="Texture" id=4]
+[ext_resource path="res://Assets/UI/card/frame.png" type="Texture" id=5]
+[ext_resource path="res://Assets/UI/card/back.png" type="Texture" id=6]
+[ext_resource path="res://Scenes/Survival/Card.gd" type="Script" id=7]
+
+[sub_resource type="DynamicFont" id=151]
+size = 28
+outline_size = 3
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=152]
+size = 15
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=150]
+size = 28
+outline_size = 3
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 2 )
+
+[node name="Card" type="Node2D"]
+script = ExtResource( 7 )
+
+[node name="Back" type="Sprite" parent="."]
+position = Vector2( 0, -24 )
+texture = ExtResource( 6 )
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 0, -24 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
+hframes = 6
+vframes = 18
+
+[node name="Frame" type="Sprite" parent="."]
+texture = ExtResource( 5 )
+
+[node name="Name" type="Label" parent="."]
+margin_left = -80.0
+margin_top = -128.0
+margin_right = 80.0
+margin_bottom = -88.0
+custom_colors/font_color = Color( 1, 0.952941, 0.721569, 1 )
+custom_fonts/font = SubResource( 151 )
+text = "Iofifteen"
+align = 1
+valign = 1
+clip_text = true
+
+[node name="Type" type="Label" parent="."]
+margin_left = -80.0
+margin_top = 51.0
+margin_right = 80.0
+margin_bottom = 80.0
+rect_scale = Vector2( 1, 1.2 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+custom_fonts/font = SubResource( 152 )
+text = "Type: Enchance"
+align = 1
+valign = 1
+clip_text = true
+
+[node name="Price" type="Node2D" parent="."]
+
+[node name="Coin" type="Sprite" parent="Price"]
+position = Vector2( -67, 107 )
+texture = ExtResource( 3 )
+
+[node name="Cost" type="Label" parent="Price"]
+margin_left = -47.0
+margin_top = 94.0
+margin_right = 80.0
+margin_bottom = 122.0
+custom_colors/font_color = Color( 0.890196, 0.819608, 0.47451, 1 )
+custom_fonts/font = SubResource( 150 )
+text = "8888"
+valign = 1

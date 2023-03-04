@@ -19,7 +19,9 @@ func init(in_audio_ref: String, aux_data: Dictionary):
 	if "bus" in aux_data:
 		bus = aux_data.bus
 		
-	if "unique_path" in aux_data: # load unique audio
+	if Globals.survival_level != null and "surv" in aux_data:
+		stream = Globals.Game.LevelControl.unique_audio[audio_ref]
+	elif "unique_path" in aux_data: # load unique audio
 		stream = get_node(aux_data.unique_path).unique_audio[audio_ref]
 	elif "mob_ref" in aux_data:
 		stream = Globals.Game.LevelControl.mob_data[aux_data.mob_ref].unique_audio[audio_ref]
