@@ -24,7 +24,7 @@ func _ready():
 				node.connect("triggered", self, "triggered")
 				
 		if Globals.survival_level != null:
-			$CanvasLayer/Control/PauseList/ReturnToCharSelect.text = "Return to Raid Menu"
+			$CanvasLayer/Control/PauseList/ReturnToCharSelect.text = "Return to Survival Menu"
 	
 	else:
 		$CanvasLayer/TrainingControl/TrainingList.show()

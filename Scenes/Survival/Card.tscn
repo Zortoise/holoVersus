@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=2]
@@ -7,6 +7,38 @@
 [ext_resource path="res://Assets/UI/card/frame.png" type="Texture" id=5]
 [ext_resource path="res://Assets/UI/card/back.png" type="Texture" id=6]
 [ext_resource path="res://Scenes/Survival/Card.gd" type="Script" id=7]
+
+[sub_resource type="Animation" id=153]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=154]
+resource_name = "buy"
+length = 0.15
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 10, 10, 10, 1 ), Color( 0.5, 0.5, 0.5, 1 ) ]
+}
 
 [sub_resource type="DynamicFont" id=151]
 size = 28
@@ -30,6 +62,11 @@ font_data = ExtResource( 2 )
 
 [node name="Card" type="Node2D"]
 script = ExtResource( 7 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+autoplay = "RESET"
+anims/RESET = SubResource( 153 )
+anims/buy = SubResource( 154 )
 
 [node name="Back" type="Sprite" parent="."]
 position = Vector2( 0, -24 )

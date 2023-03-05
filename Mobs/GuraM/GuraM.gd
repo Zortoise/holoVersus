@@ -1272,6 +1272,10 @@ func generate_loot() -> Array:
 			8:
 				loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
 	
+	var random = Globals.Game.rng_generate(3)
+	if random == 0: loot.append("Coin")
+	elif random == 1: loot.erase("Coin")
+	
 	return loot
 
 

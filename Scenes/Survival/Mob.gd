@@ -39,10 +39,10 @@ const COMBO_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
 
 const ATK_LEVEL_TO_GDRAIN = [0, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
 
-const MOB_LEVEL_TO_HP = [100, 125, 150, 200, 250, 300, 350, 400, 450]
+const MOB_LEVEL_TO_HP = [100, 125, 150, 175, 200, 225, 250, 300, 350]
 const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0]
 const MOB_LEVEL_TO_DMG = [50, 60, 70, 80, 90, 100, 110, 120, 130]
-const MOB_LEVEL_TO_SPEED = [84, 88, 92, 96, 100, 104, 108, 112, 116]
+const MOB_LEVEL_TO_SPEED = [80, 85, 90, 95, 100, 105, 110, 115, 120]
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 15  # friction during hitstun
@@ -521,6 +521,9 @@ func simulate2(): # only ran if not in hitstop
 	
 	if grounded:
 		air_dashed = false
+		
+	if status_effects.size() > 0:
+		timed_status()
 	
 	process_command()
 	if $ZoneDrawer.visible:
@@ -695,7 +698,7 @@ func simulate2(): # only ran if not in hitstop
 					animate("FlinchAReturn")
 				elif Animator.query_to_play(["FlinchB"]):
 					animate("FlinchBReturn")
-				$ModulatePlayer.play("unflinch_flash")
+				modulate_play("unflinch_flash")
 			else:
 				friction_this_frame = FMath.percent(friction_this_frame, 50) # lower friction during flinch hitstun
 					
@@ -708,13 +711,13 @@ func simulate2(): # only ran if not in hitstop
 					animate("aFlinchAReturn")
 				elif Animator.query_to_play(["aFlinchB"]):
 					animate("aFlinchBReturn")
-				$ModulatePlayer.play("unflinch_flash")
+				modulate_play("unflinch_flash")
 		
 		Globals.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
 			if !$HitStunTimer.is_running() and Animator.query_to_play(["Launch", "LaunchTransit"]):
 				animate("FallTransit")
-#				$ModulatePlayer.play("unlaunch_flash")
+#				modulate_play("unlaunch_flash")
 #				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			friction_this_frame = FMath.percent(friction_this_frame, 25) # lower friction during launch hitstun
 							
@@ -753,8 +756,8 @@ func simulate2(): # only ran if not in hitstop
 	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
 		launch_trail() # do launch trail before moving
 		
-	if grounded and abs(velocity.x) < 30 * FMath.S:
-		velocity.x = 0  # this reduces slippiness by canceling grounded horizontal velocity when moving less than 0.5 pixels per frame
+#	if grounded and abs(velocity.x) < 30 * FMath.S:
+#		velocity.x = 0  # this reduces slippiness by canceling grounded horizontal velocity when moving less than 0.5 pixels per frame
 
 	velocity_previous_frame.x = velocity.x
 	velocity_previous_frame.y = velocity.y
@@ -803,7 +806,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 										   # useful for status effects that are removed after being hit
 		remove_status_effect(effect)
 	for effect in status_effect_to_add:
-		add_status_effect(effect[0], effect[1])
+		add_status_effect(effect)
 		
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
 		hitstop = null
@@ -1130,6 +1133,16 @@ func get_stat(stat):
 		to_return = UniqChar.get_stat(stat)
 		
 	if stat == "SPEED": to_return = FMath.percent(to_return, get_stat("SPEED_MOD"))
+	
+	match stat: # status effects
+		"SPEED_MOD":
+			var mod = query_status_effect_aux(Globals.status_effect.CHILL)
+			if mod != null:
+				to_return = FMath.percent(to_return, mod)
+		"GRAVITY_MOD":
+			var mod = query_status_effect_aux(Globals.status_effect.GRAVITIZE)
+			if mod != null:
+				to_return = FMath.percent(to_return, mod)
 		
 	match stat: # increase stats as level raise
 		"SPEED_MOD":
@@ -1189,6 +1202,10 @@ func get_stat(stat):
 #		match stat:
 #			"GUARD_DRAIN_MOD":
 #				to_return = modify_stat(to_return, Globals.mob_attr.GDRAIN, [999, 130, 120, 110, 90, 80, 70])
+#
+#	match stat: # limits
+#		"SPEED_MOD":
+#			to_return = int(max(to_return, 50))
 				
 	return to_return
 	
@@ -1202,6 +1219,13 @@ func has_trait(trait: int) -> bool:
 
 func loot_drop():
 	var loot_array = UniqChar.generate_loot()
+	
+	if target_ID >= 0:
+		var coin_change = Inventory.modifier(target_ID, Cards.effect_ref.COIN_GAIN)
+		if coin_change > 0:
+			for x in coin_change:
+				loot_array.append("Coin")
+	
 	var angle_segment = int((LOOT_ANGLE_RANGE[1] - LOOT_ANGLE_RANGE[0]) / (loot_array.size() + 1))
 	var angle = LOOT_ANGLE_RANGE[0] + angle_segment
 	
@@ -1314,9 +1338,9 @@ func state_detect(anim):
 			return Globals.char_state.LAUNCHED_HITSTUN
 			
 		"ResistA", "ResistB":
-			return Globals.char_state.GROUND_RECOVERY
+			return Globals.char_state.GROUND_RESISTED_HITSTUN
 		"aResistA", "aResistB":
-			return Globals.char_state.AIR_RECOVERY
+			return Globals.char_state.AIR_RESISTED_HITSTUN
 		
 		"SeqFlinchAFreeze", "SeqFlinchBFreeze":
 			return Globals.char_state.SEQUENCE_TARGET
@@ -1461,6 +1485,12 @@ func check_drop():
 					animate("aFlinchA")
 				"FlinchBStop", "FlinchB":
 					animate("aFlinchB")
+		Globals.char_state.GROUND_RESISTED_HITSTUN:
+			match Animator.to_play_animation:
+				"ResistA":
+					animate("aResistA")
+				"ResistB":
+					animate("aResistB")
 		_:
 			animate("FallTransit")
 	
@@ -1469,7 +1499,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 		Globals.char_state.AIR_STANDBY:
 			animate("SoftLanding")
 			
-		Globals.char_state.AIR_RECOVERY:
+		Globals.char_state.AIR_RESISTED_HITSTUN:
 			match Animator.to_play_animation:
 				"aResistA":
 					animate("ResistA")
@@ -1503,7 +1533,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 					animate("SoftLanding")
 					$HitStunTimer.stop()
 					velocity.y = 0 # stop bouncing
-#					$ModulatePlayer.play("unflinch_flash")
+#					modulate_play("unflinch_flash")
 #					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			
 
@@ -1575,11 +1605,8 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 		
 func armor_flash():
 	if $ArmorTimer.is_running():
-		if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["armor_time", "armor_flash"]):
-			return
-		else:
-			$ModulatePlayer.play("armor_time")
-			return
+		modulate_play("armor_time")
+		return
 				
 	if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["armor_time"]): # stop flashing
 		reset_modulate()
@@ -1682,8 +1709,7 @@ func launch_trail():
 			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"back":true, "facing":Globals.Game.rng_facing(), "grounded":true})
 		
 func death_anim():
-	if !$ModulatePlayer.playing or !$ModulatePlayer.query(["crush", "stun_flash"]):
-		$ModulatePlayer.play("crush")
+	modulate_play("crush")
 	if Animator.time > 9:
 		if posmod(Globals.Game.frametime, 5) == 0:
 			play_audio("kill2", {"vol": -5, "bus": "LowPass"})
@@ -1762,7 +1788,10 @@ func can_air_strafe(move_data):
 # STATUS EFFECTS ---------------------------------------------------------------------------------------------------
 	# rule: status_effect is array contain [effect, lifetime], effect can be a Globals.status_effect enum or a string
 	
-func add_status_effect(effect, lifetime):
+func add_status_effect(status_effect: Array):
+	
+	var effect = status_effect[0]
+	var lifetime = status_effect[1]
 	
 	for status_effect in status_effects: # look to see if already inflicted with the same one, if so, overwrite its lifetime if new one last longer
 		if status_effect[0] == effect: # found effect already inflicted
@@ -1771,12 +1800,14 @@ func add_status_effect(effect, lifetime):
 			return # return after finding effect already inflicted regardless of whether you overwrite it
 			
 	 # new status effect, add it to the array in order of visual priority
-	for index in status_effects.size() + 1:
-		if index >= status_effects.size(): # end of array, add new effect at the end with the highest priority
-			status_effects.append([effect, lifetime])
-		elif Globals.status_effect_priority(effect) < Globals.status_effect_priority(status_effects[index][0]):
-			status_effects.insert(index, [effect, lifetime]) # if found an existing effect with higher priority, insert before it
-			break
+#	for index in status_effects.size() + 1:
+#		if index >= status_effects.size(): # end of array, add new effect at the end with the highest priority
+#			status_effects.append([effect, lifetime])
+#		elif Globals.status_effect_priority(effect) > Globals.status_effect_priority(status_effects[index][0]):
+#			status_effects.insert(index, [effect, lifetime]) # if found an existing effect with lower priority, insert before it
+#			break
+			
+	status_effects.append(status_effect)
 	new_status_effect(effect)
 	
 func load_status_effects(): # loading game state, reapply all one-time visual changes from status_effects
@@ -1788,6 +1819,13 @@ func query_status_effect(effect):
 		if status_effect[0] == effect:
 			return true
 	return false
+	
+func query_status_effect_aux(effect):
+	for status_effect in status_effects:
+		if status_effect[0] == effect:
+			if status_effect.size() > 2:
+				return status_effect[2]
+	return null
 	
 func process_status_effects_visual(): # called during hitstop as well
 	for status_effect in status_effects:
@@ -1818,16 +1856,24 @@ func new_status_effect(effect): # run on frame the status effect is inflicted/st
 		
 func continue_visual_effect_of_status(effect): # run every frame, will not add visual effect if there is already one of higher priority
 	match effect:
-		_:
-			pass
+		Globals.status_effect.POISON:
+			modulate_play("poison")
+		Globals.status_effect.CHILL:
+			modulate_play("freeze")
+		Globals.status_effect.IGNITE:
+			modulate_play("ignite")
+		Globals.status_effect.GRAVITIZE:
+			modulate_play("gravitize")
+		Globals.status_effect.ENFEEBLE:
+			modulate_play("enfeeble")
 #		Globals.status_effect.LETHAL:
 #			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["lethal", "lethal_flash"]):
-#				$ModulatePlayer.play("lethal")
+#				modulate_play("lethal")
 #			set_monochrome()
 #			sprite_shake()
 #		Globals.status_effect.CRUSH:
 #			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["crush", "stun_flash"]):
-#				$ModulatePlayer.play("crush")
+#				modulate_play("crush")
 #			particle("Sparkle", "Particles", "red", 4, 1, 25)
 #			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
 #			sprite_shake()
@@ -1845,11 +1891,28 @@ func remove_all_status_effects():
 	for status_effect in status_effects:
 		clear_visual_effect_of_status(status_effect[0])
 	status_effects = []
+	
+func remove_status_effect_on_landing_hit():
+	status_effect_to_remove.append(Globals.status_effect.POISON)
+	status_effect_to_remove.append(Globals.status_effect.CHILL)
+	status_effect_to_remove.append(Globals.status_effect.IGNITE)
+	status_effect_to_remove.append(Globals.status_effect.GRAVITIZE)
+	
+func remove_status_effect_on_taking_hit():
+	pass
 		
 func clear_visual_effect_of_status(effect): # must run this when removing status effects to remove the visual effect
 	match effect:
-		_:
-			pass
+		Globals.status_effect.POISON:
+			reset_modulate()
+		Globals.status_effect.CHILL:
+			reset_modulate()
+		Globals.status_effect.IGNITE:
+			reset_modulate()
+		Globals.status_effect.GRAVITIZE:
+			reset_modulate()
+		Globals.status_effect.ENFEEBLE:
+			reset_modulate()
 #		Globals.status_effect.LETHAL:
 #			Globals.Game.lethalfreeze("unfreeze")
 #			continue
@@ -1858,9 +1921,9 @@ func clear_visual_effect_of_status(effect): # must run this when removing status
 #				reset_modulate()
 #				sprite.position = Vector2.ZERO
 				
-func test_status_visual_effect_priority():
-	# visual effects of status effects like Poison has lower priority over effects like EX
-	pass
+#func test_status_visual_effect_priority():
+#	# visual effects of status effects like Poison has lower priority over effects like EX
+#	pass
 	
 func sprite_shake(): # used for Break and lethal blows
 	if posmod(Globals.Game.frametime, 2) == 0:  # only shake every 2 frames
@@ -1880,6 +1943,23 @@ func sprite_shake(): # used for Break and lethal blows
 				shake.x = -2
 		sprite.position = shake
 				
+func timed_status():
+	for status_effect in status_effects:
+		match status_effect[0]:
+			
+			Globals.status_effect.POISON:
+				if posmod(status_effect[1], 30) == 1:
+					var damage = int(min(status_effect[2], get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value - 1))
+					if damage > 0:
+						take_damage(damage)
+						Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+						
+			Globals.status_effect.IGNITE:
+				if posmod(status_effect[1], 30) == 15:
+					var damage = int(min(status_effect[2], get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value - 1))
+					if damage > 0:
+						take_damage(damage)
+						Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
 	
 # HIT DETECTION AND PROCESSING ---------------------------------------------------------------------------------------------------
 
@@ -2109,6 +2189,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	if defender == null:
 		return # defender is deleted
 	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
+	
+	match hit_data.block_state:
+		Globals.block_state.UNBLOCKED:
+			remove_status_effect_on_landing_hit()
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
@@ -2349,6 +2433,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if !is_hitstunned():
 		learn()
+		
+	if adjusted_atk_level > 1 and guardbroken:
+		remove_status_effect_on_taking_hit()
 	
 #	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
 #		if !hit_data.double_repeat and !"tough_mob" in hit_data:
@@ -2391,40 +2478,40 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 		
 	if hit_data.double_repeat:
-		$ModulatePlayer.play("repeat")
+		modulate_play("repeat")
 #		add_status_effect(Globals.status_effect.REPEAT, 10)
 	
 	elif hit_data.lethal_hit:
 		Globals.Game.set_screenshake()
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
-		$ModulatePlayer.play("stun_flash")
-		if !guardbroken: # death from chip damage
+		modulate_play("stun_flash")
+		if !$HitStunTimer.is_running(): # death from chip damage
 			play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
 			Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
 		
 	elif "mob_break" in hit_data:
-		$ModulatePlayer.play("punish_sweet_flash")
+		modulate_play("punish_sweet_flash")
 		combo_level = adjusted_atk_level - 1
 		combo_level += Inventory.modifier(attacker.player_ID, Cards.effect_ref.COMBO_LEVEL)
 		combo_level = int(clamp(combo_level, 0, 7))
 		
 	elif "resisted" in hit_data:
-		$ModulatePlayer.play("weakblock_flash")
+		modulate_play("weakblock_flash")
 		play_audio("block3", {"vol" : -15})
 		hit_data["no_hit_sound"] = true
 		
 	elif !guardbroken:
-		$ModulatePlayer.play("armor_flash")
+		modulate_play("armor_flash")
 		play_audio("block3", {"vol" : -15})
 		hit_data["no_hit_sound"] = true
 		
 	elif hit_data.sweetspotted:
-		$ModulatePlayer.play("punish_sweet_flash")
+		modulate_play("punish_sweet_flash")
 		play_audio("break2", {"vol" : -15})
 		
 	else:
-		$ModulatePlayer.play("mob_hit_flash")
+		modulate_play("mob_hit_flash")
 		
 	if Globals.atk_attr.SCREEN_SHAKE in hit_data.move_data.atk_attr:
 		Globals.Game.set_screenshake()
@@ -3042,7 +3129,7 @@ func landed_a_sequence(hit_data):
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
 	
-	defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# defender lose positive flow
+#	defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# defender lose positive flow
 
 	
 func take_seq_damage(base_damage: int) -> bool: # return true if lethal
@@ -3125,7 +3212,7 @@ func sequence_launch():
 		if get_guard_gauge_percent_below() == 0:
 			guardbroken = true
 #			repeat_memory = [] # reset move memory for getting a Break
-			$ModulatePlayer.play("punish_sweet_flash")
+			modulate_play("punish_sweet_flash")
 			play_audio("rock2", {"vol" : -10})
 			start_command("standby")
 			Globals.Game.spawn_SFX("Crushspark", "Stunspark", position, {"facing":Globals.Game.rng_facing(), \
@@ -3225,6 +3312,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:
 		"Death":
 			loot_drop()
+			if target_ID >= 0:
+				if Inventory.has_quirk(target_ID, Cards.effect_ref.HEAL_ON_KILL):
+					var killer = Globals.Game.get_player_node(target_ID)
+					var healed = killer.take_damage(-FMath.percent(get_stat("DAMAGE_VALUE_LIMIT"), Cards.KILL_HEAL_PERCENT))
+					if healed != null and healed > 0:
+						Globals.Game.spawn_damage_number(healed, killer.position, Globals.dmg_num_col.GREEN)
+						
 #			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), null, \
 #					1.0, 20, Globals.afterimage_shader.WHITE, mob_ref, palette_ref)
 			Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sprite, sprite.get_path(), null, \
@@ -3324,7 +3418,8 @@ func _on_SpritePlayer_frame_update(): # emitted after every frame update, useful
 # may do follow-up modulate animation
 func _on_ModulatePlayer_anim_finished(anim_name):
 	if LoadedSFX.modulate_animations[anim_name].has("followup"):
-		$ModulatePlayer.play(LoadedSFX.modulate_animations[anim_name]["followup"])
+		reset_modulate()
+		modulate_play(LoadedSFX.modulate_animations[anim_name]["followup"])
 	else:
 		reset_modulate()
 	
@@ -3334,6 +3429,7 @@ func _on_ModulatePlayer_anim_started(anim_name):
 	
 func _on_FadePlayer_anim_finished(anim_name):
 	if LoadedSFX.fade_animations[anim_name].has("followup"):
+		reset_fade()
 		$FadePlayer.play(LoadedSFX.fade_animations[anim_name]["followup"])
 	else:
 		reset_fade()
@@ -3353,6 +3449,18 @@ func rotate_sprite(angle: int):
 				sprite.rotation = deg2rad(angle)
 			else:
 				sprite.rotation = deg2rad(posmod(angle + 180, 360))
+		
+func modulate_play(anim: String):
+	if !$ModulatePlayer.playing:
+		pass # always play if no animation playing
+	elif anim == $ModulatePlayer.current_animation:
+		return # no playing if animation is already being played
+	elif "priority" in $ModulatePlayer.animations[anim] and "priority" in $ModulatePlayer.animations[$ModulatePlayer.current_animation]:
+		if $ModulatePlayer.animations[anim].priority <= $ModulatePlayer.animations[$ModulatePlayer.current_animation].priority:
+			pass # only play effect if effect has higher priority than currently played animation, lower priority number = higher
+		else:
+			return
+	$ModulatePlayer.play(anim)
 		
 func reset_modulate():
 	palette()

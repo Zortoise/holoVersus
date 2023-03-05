@@ -439,7 +439,7 @@ text = "Tutorial"
 margin_top = 65.0
 margin_bottom = 123.0
 rect_pivot_offset = Vector2( -1698, -24 )
-text = "Mimic Raid"
+text = "Survival"
 
 [node name="Local" parent="MainMenuList" instance=ExtResource( 3 )]
 margin_top = 130.0

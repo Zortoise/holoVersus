@@ -12,10 +12,17 @@ func init(card_ref: int, hide_price = false):
 		$Price.show()
 	else:
 		$Price.hide()
-
-func buy():
+		
+func blank():
 	$Sprite.hide()
 	$Name.hide()
 	$Type.hide()
 	$Price.hide()
 	modulate = Color(0.5, 0.5, 0.5)
+
+func buy():
+	$AnimationPlayer.play("buy")
+	$Sprite.hide()
+	$Name.hide()
+	$Type.hide()
+	$Price.hide()

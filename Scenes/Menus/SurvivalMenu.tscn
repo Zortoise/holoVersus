@@ -272,7 +272,7 @@ margin_right = 623.0
 margin_bottom = 192.0
 custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
 custom_fonts/font = SubResource( 23 )
-text = "MIMIC RAID"
+text = "SURVIVAL"
 
 [node name="ColorRect" type="ColorRect" parent="Background"]
 margin_top = 192.0

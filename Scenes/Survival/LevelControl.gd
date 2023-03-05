@@ -25,6 +25,8 @@ var mob_ID_ref := -1
 var time_of_last_spawn = null
 var wave_standby_timer := 120
 
+var starting_coin := 0
+
 var to_spawn = {
 #	0: {
 #		"offset" : _,
@@ -100,8 +102,10 @@ func init():
 	
 	if Globals.player_count == 1:
 		Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
+		starting_coin = UniqLevel.STARTING_COIN
 	else:
 		Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
+		starting_coin = FMath.percent(UniqLevel.STARTING_COIN, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
 	
 	load_items()
@@ -293,7 +297,9 @@ func simulate():
 		
 	if level_active:
 		if wave_standby_timer > 0:
-			if wave_standby_timer == 60:
+			if wave_ID > 1 and wave_standby_timer == 90:
+				Globals.Game.card_menu.open_shop()
+			elif wave_standby_timer == 60:
 				emit_signal("wave_start", wave_ID)
 			wave_standby_timer -= 1
 		else:
@@ -362,7 +368,7 @@ func next_wave():
 		wave_active = true
 		wave_timer = STARTING_TIME
 		time_of_last_spawn = null
-		wave_standby_timer = 120
+		wave_standby_timer = 210
 		emit_signal("wave_cleared")
 		
 	

@@ -133,6 +133,7 @@ func _ready():
 		move_child(LevelControl, 0)
 		LevelControl.init()
 		setup()
+		input_lock = false
 		
 	elif Netplay.is_netplay():
 		var NetgameSetup = load("res://Scenes/Netplay/NetgameSetup.tscn").instance()
@@ -655,7 +656,7 @@ func simulate(rendering = true):
 		test_auto_savestate()
 	
 	if rendering: # not loading inputs for log, capture new ones
-		if !Globals.Game.input_lock: # no inputs when input lock is on
+		if !input_lock: # no inputs when input lock is on
 			if Netplay.is_netplay():
 				input_capture(Netcode.input_delay)
 			else:
@@ -689,11 +690,10 @@ func simulate(rendering = true):
 	to_superfreeze = null
 	to_lethalfreeze = null
 
-	if Globals.survival_level != null and !input_lock:
+	if Globals.survival_level != null and !Inventory.shop_open:
 		LevelControl.simulate()
 
 	# activate player's physics
-	
 
 	for player in $Players.get_children():
 		if "free" in player and player.free:

@@ -2,6 +2,7 @@ extends Node
 
 const STAGE = "Grid"
 const STARTING_STOCKS = 5
+const STARTING_COIN = 100
 
 const MOB_LIST = [
 	["GuraM", "Gura"],
@@ -70,7 +71,7 @@ const WAVES = {
 						} },
 				],
 				1500 : [
-					{"mob" : "GuraM", "level" : 3, "variant" : "jump",
+					{"mob" : "GuraM", "level" : 3, "variant" : "shark",
 					"attr" : {
 						} },
 				],
@@ -100,7 +101,7 @@ const WAVES = {
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						} },
-					{"mob" : "GuraM", "level" : 0, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "jump",
 					"attr" : {
 						} },
 				],
@@ -162,6 +163,7 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
+						Globals.mob_attr.COIN: 15
 						} },
 				],
 			}
@@ -189,66 +191,66 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
 				],
 				1800 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
 				],
 				3600 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,
 						} },
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.HP : 0,
 						Globals.mob_attr.RAGE : true,

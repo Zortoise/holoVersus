@@ -4,8 +4,8 @@ const VERSION = "Test Build 6"
 
 enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_RECOVERY,
 		GROUND_C_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, GROUND_FLINCH_HITSTUN,
-		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_ATK_STARTUP, GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY,
-		AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, AIR_BLOCK,
+		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_RESISTED_HITSTUN, AIR_RESISTED_HITSTUN, GROUND_ATK_STARTUP, 
+		GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY, AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, AIR_BLOCK,
 		SEQUENCE_USER, SEQUENCE_TARGET}
 enum burst {AVAILABLE, CONSUMED, EXHAUSTED}
 enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
@@ -61,7 +61,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # NO_SS_ATK_LVL_BOOST = no sweetspot boost in atk level, for sweetspot hitgrabs
 # QUICK_GRAB = command grab that fails if target is in movement STARTUP/RECOVERY
 
-enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW}
+enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, GRAVITIZE, ENFEEBLE}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, STRONG, WEAK}
@@ -337,6 +337,10 @@ func char_state_to_string(state):
 			return "AIR_FLINCH_HITSTUN"
 		Globals.char_state.LAUNCHED_HITSTUN:
 			return "LAUNCHED_HITSTUN"
+		Globals.char_state.GROUND_RESISTED_HITSTUN:
+			return "GROUND_RESISTED_HITSTUN"
+		Globals.char_state.AIR_RESISTED_HITSTUN:
+			return "AIR_RESISTED_HITSTUN"
 		Globals.char_state.GROUND_ATK_STARTUP:
 			return "GROUND_ATK_STARTUP"
 		Globals.char_state.GROUND_ATK_ACTIVE:
@@ -640,17 +644,23 @@ func atk_type_to_tier(atk_type):
 		Globals.atk_type.ENTITY: # just in case
 			return -1
 	
-func status_effect_priority(effect):
-	match effect:
-#		Globals.status_effect.REPEAT:
-#			return 3
-		Globals.status_effect.STUN:
-			return 3
-		Globals.status_effect.LETHAL:
-			return 2
-		Globals.status_effect.RESPAWN_GRACE:
-			return 1	
-	return 0 # no visual effect
+#enum status_priority {
+#	GRACE, LETHAL, STUN, VISUAL, HARMFUL, BUFF, UNIQUE
+#}
+#
+#func status_effect_priority(effect):
+#	match effect:
+##		Globals.status_effect.REPEAT:
+##			return 3
+#		Globals.status_effect.STUN, Globals.status_effect.CRUSH:
+#			return status_priority.STUN
+#		Globals.status_effect.LETHAL:
+#			return status_priority.LETHAL
+#		Globals.status_effect.RESPAWN_GRACE:
+#			return status_priority.GRACE
+#		Globals.status_effect.POISON:
+#			return status_priority.HARMFUL
+#	return 0 # no visual effect
 			
 #func trait_lookup(trait):
 #	match trait:

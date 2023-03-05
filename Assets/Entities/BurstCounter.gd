@@ -28,6 +28,7 @@ const MOVE_DATABASE = {
 		"hitspark_type" : Globals.hitspark_type.HIT,
 		"hitspark_palette" : "yellow",
 		"KB_angle" : 0,
+		"proj_level" : 3,
 		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE_PROJ, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DESTROY_ENTITIES],
 		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
 	}

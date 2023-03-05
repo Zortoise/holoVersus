@@ -31,9 +31,14 @@ var loaded_ui_audio = { # code in _ready() will load this with .wav files at sta
 #	"ui_move" : ResourceLoader.load("res://Assets/Audio/UI/ui_move.wav")
 }
 
+enum priority {
+	GRACE, FLASH, LETHAL, STUN, MOB_ARMOR, REPEAT, ACTION, VISUAL, HARMFUL, BUFF, UNIQUE, DARKEN
+}
+
 # also contain modulate animations
 var modulate_animations = {
 	"darken" : {
+		"priority" : priority.DARKEN,
 		"duration": 2,
 		"loop" : false,
 		"timestamps" : {
@@ -44,6 +49,7 @@ var modulate_animations = {
 		}
 	},
 	"yellow_burst" : {
+		"priority" : priority.ACTION,
 		"duration": 22,
 		"loop" : false,
 		"timestamps" : {
@@ -78,6 +84,7 @@ var modulate_animations = {
 		}
 	},
 	"blue_burst" : {
+		"priority" : priority.ACTION,
 		"duration": 22,
 		"loop" : false,
 		"timestamps" : {
@@ -112,6 +119,7 @@ var modulate_animations = {
 		}
 	},
 	"white_burst" :{
+		"priority" : priority.ACTION,
 		"duration": 25,
 		"loop" : false,
 		"timestamps" : {
@@ -168,6 +176,7 @@ var modulate_animations = {
 #		}
 #	},
 	"pink_reset" : {
+		"priority" : priority.ACTION,
 		"duration": 12,
 		"loop" : false,
 		"afterimage_trail" : 0,
@@ -191,6 +200,7 @@ var modulate_animations = {
 		}
 	},
 	"respawn_grace" :{
+		"priority" : priority.GRACE,
 		"duration": 6,
 		"loop" : true,
 		"timestamps" : {
@@ -205,6 +215,7 @@ var modulate_animations = {
 		}
 	},
 	"unlaunch_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 5,
 		"loop" : false,
 		"timestamps" : {
@@ -215,6 +226,7 @@ var modulate_animations = {
 		}
 	},
 	"unflinch_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 5,
 		"loop" : false,
 		"timestamps" : {
@@ -225,6 +237,7 @@ var modulate_animations = {
 		}
 	},
 	"repeat" :{
+		"priority" : priority.REPEAT,
 		"duration": 15,
 		"loop" : false,
 		"monochrome" : true,
@@ -236,6 +249,7 @@ var modulate_animations = {
 		}
 	},
 	"dodge_flash" :{
+		"priority" : priority.ACTION,
 		"duration": 10,
 		"loop" : false,
 		"monochrome" : true,
@@ -263,6 +277,7 @@ var modulate_animations = {
 		}
 	},
 	"block" :{
+		"priority" : priority.ACTION,
 		"duration": 16,
 		"loop" : true,
 		"timestamps" : {
@@ -301,6 +316,7 @@ var modulate_animations = {
 		}
 	},
 	"strongblock_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 10,
 		"loop" : false,
 		"timestamps" : {
@@ -327,6 +343,7 @@ var modulate_animations = {
 		}
 	},
 	"weakblock_flash" :{
+		"priority" : priority.FLASH,
 		"priority_lvl": 0,
 		"duration": 10,
 		"loop" : false,
@@ -354,6 +371,7 @@ var modulate_animations = {
 		}
 	},
 	"armor_time" :{
+		"priority" : priority.MOB_ARMOR,
 		"duration": 6,
 		"loop" : true,
 		"timestamps" : {
@@ -372,6 +390,7 @@ var modulate_animations = {
 		}
 	},
 	"armor_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 10,
 		"loop" : false,
 		"timestamps" : {
@@ -398,6 +417,7 @@ var modulate_animations = {
 		}
 	},
 	"perfect_guard_flash" : {
+		"priority" : priority.FLASH,
 		"duration": 5,
 		"loop" : false,
 		"timestamps" : {
@@ -408,6 +428,7 @@ var modulate_animations = {
 		}
 	},
 	"EX_flash" : {
+		"priority" : priority.FLASH,
 		"duration": 4,
 		"loop" : false,
 		"followup" : "EX_flash2",
@@ -419,6 +440,7 @@ var modulate_animations = {
 		}
 	},
 	"EX_flash2" : {
+		"priority" : priority.ACTION,
 		"duration": 18,
 		"loop" : true,
 		"afterimage_trail" : 0,
@@ -450,6 +472,7 @@ var modulate_animations = {
 		}
 	},
 	"blue_reset" : {
+		"priority" : priority.ACTION,
 		"duration": 24,
 		"loop" : false,
 		"timestamps" : {
@@ -479,40 +502,40 @@ var modulate_animations = {
 			},
 		}
 	},
-	"fdash_cancel2" : {
-		"duration": 22,
-		"loop" : false,
-		"timestamps" : {
-			0 :
-			{
-				"modulate" : Color(4.0, 4.0, 4.0),
-			},
-			4 : # this is the timestamp of the key
-			{
-				"modulate" : Color(1.2, 0.8, 0.8), # red
-			},
-			7 :
-			{
-				"modulate" : Color(1.2, 1.2, 0.8), # yellow
-			},
-			10 :
-			{
-				"modulate" : Color(0.8, 1.2, 0.8), # green
-			},
-			13 :
-			{
-				"modulate" : Color(0.8, 1.2, 1.2), # cyan
-			},
-			17 :
-			{
-				"modulate" : Color(0.8, 0.8, 1.2), # blue
-			},
-			19 :
-			{
-				"modulate" : Color(1.2, 0.8, 1.2), # purple
-			},
-		}
-	},
+#	"fdash_cancel2" : {
+#		"duration": 22,
+#		"loop" : false,
+#		"timestamps" : {
+#			0 :
+#			{
+#				"modulate" : Color(4.0, 4.0, 4.0),
+#			},
+#			4 : # this is the timestamp of the key
+#			{
+#				"modulate" : Color(1.2, 0.8, 0.8), # red
+#			},
+#			7 :
+#			{
+#				"modulate" : Color(1.2, 1.2, 0.8), # yellow
+#			},
+#			10 :
+#			{
+#				"modulate" : Color(0.8, 1.2, 0.8), # green
+#			},
+#			13 :
+#			{
+#				"modulate" : Color(0.8, 1.2, 1.2), # cyan
+#			},
+#			17 :
+#			{
+#				"modulate" : Color(0.8, 0.8, 1.2), # blue
+#			},
+#			19 :
+#			{
+#				"modulate" : Color(1.2, 0.8, 1.2), # purple
+#			},
+#		}
+#	},
 #	"air_block_flash" : {
 #		"duration": 4,
 #		"loop" : false,
@@ -556,6 +579,7 @@ var modulate_animations = {
 #		}
 #	},
 	"punish_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 6,
 		"loop" : false,
 		"timestamps" : {
@@ -566,6 +590,7 @@ var modulate_animations = {
 		}
 	},
 	"mob_hit_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 7,
 		"loop" : false,
 		"timestamps" : {
@@ -584,6 +609,7 @@ var modulate_animations = {
 		}
 	},
 	"sweet_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 8,
 		"loop" : false,
 		"timestamps" : {
@@ -598,6 +624,7 @@ var modulate_animations = {
 		}
 	},
 	"punish_sweet_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 16,
 		"loop" : false,
 		"timestamps" : {
@@ -620,6 +647,7 @@ var modulate_animations = {
 		}
 	},
 	"stun_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 10,
 		"loop" : false,
 		"timestamps" : {
@@ -634,6 +662,7 @@ var modulate_animations = {
 		}
 	},
 	"stun" : {
+		"priority" : priority.STUN,
 		"duration": 12,
 		"loop" : true,
 		"timestamps" : {
@@ -652,6 +681,7 @@ var modulate_animations = {
 		},
 	},
 	"crush" : {
+		"priority" : priority.STUN,
 		"duration": 12,
 		"loop" : true,
 		"timestamps" : {
@@ -670,6 +700,7 @@ var modulate_animations = {
 		}
 	},
 	"lethal_flash" :{
+		"priority" : priority.FLASH,
 		"duration": 12,
 		"loop" : false,
 		"timestamps" : {
@@ -692,6 +723,7 @@ var modulate_animations = {
 		}
 	},
 	"lethal" : {
+		"priority" : priority.LETHAL,
 		"duration": 12,
 		"loop" : true,
 		"timestamps" : {
@@ -710,6 +742,7 @@ var modulate_animations = {
 		}
 	},
 	"aflame" : {
+		"priority" : priority.VISUAL,
 		"duration": 12,
 		"loop" : true,
 		"timestamps" : {
@@ -728,6 +761,7 @@ var modulate_animations = {
 		}
 	},
 	"aflame_purple" : { # for puple flame and shock
+		"priority" : priority.VISUAL,
 		"duration": 12,
 		"loop" : true,
 		"timestamps" : {
@@ -745,7 +779,8 @@ var modulate_animations = {
 			},
 		}
 	},
-	"aflame_blue" : { # for blue fire, freeze and shock
+	"aflame_blue" : { # for blue fire and shock
+		"priority" : priority.VISUAL,
 		"duration": 12,
 		"loop" : true,
 		"timestamps" : {
@@ -763,17 +798,94 @@ var modulate_animations = {
 			},
 		}
 	},
+	"gravitize" : {
+		"priority" : priority.HARMFUL,
+		"duration": 12,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(0.3, 0.2, 0.65),
+			},
+			4 :
+			{
+				"modulate" : Color(0.7, 0.7, 1.5),
+			},
+			8 :
+			{
+				"modulate" : Color(0.9, 0.9, 1.0),
+			},
+		}
+	},
+	"ignite" : {
+		"priority" : priority.HARMFUL,
+		"duration": 12,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(4.0, 0.8, 0.8), # red
+			},
+			4 :
+			{
+				"modulate" : Color(2.5, 0.8, 0.3), # orange
+			},
+			8 :
+			{
+				"modulate" : Color(3.0, 1.25, 0.8), # yellow
+			},
+		}
+	},
+	"enfeeble" : {
+		"priority" : priority.HARMFUL,
+		"duration": 12,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(2.5, 1.0, 2.0),
+			},
+			4 :
+			{
+				"modulate" : Color(2.0, 0.7, 1.3),
+			},
+			10 :
+			{
+				"modulate" : Color(1.5, 1.0, 1.0),
+			},
+		}
+	},
+	"freeze" : {
+		"priority" : priority.HARMFUL,
+		"duration": 12,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(2.5, 2.5, 3.5),
+			},
+			4 :
+			{
+				"modulate" : Color(0.9, 1.5, 3.0),
+			},
+			10 :
+			{
+				"modulate" : Color(1.2, 1.2, 1.8),
+			},
+		}
+	},
 	"poison" : {
+		"priority" : priority.HARMFUL,
 		"duration": 40,
 		"loop" : true,
 		"timestamps" : {
 			0 :
 			{
-				"modulate" : Color(0.9, 0.65, 1.0),
+				"modulate" : Color(0.8, 0.4, 0.6),
 			},
 			10 :
 			{
-				"modulate" : Color(1.2, 0.8, 1.2),
+				"modulate" : Color(1.1, 0.6, 1.0),
 			},
 			20 :
 			{

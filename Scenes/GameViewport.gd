@@ -91,7 +91,6 @@ func _physics_process(_delta):
 		if Globals.Game.frametime == 36:
 			$HUD/Announcer/AnimationPlayer.play("start_battle")
 	else:
-		Globals.Game.input_lock = false
 		if Globals.Game.frametime == 20:
 			$HUD/Announcer/AnimationPlayer.play("start_survival")
 	

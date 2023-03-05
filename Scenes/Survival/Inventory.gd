@@ -1,9 +1,11 @@
 extends Node
 
+var shop_open := false
+
 var pool = []
 
 var shop = []
-var bought = []
+var bought_index = [] # array of indexes
 
 var inventory = [
 	[ # P1
@@ -11,9 +13,7 @@ var inventory = [
 	],
 	
 	[ # P2
-		Cards.card_ref.AYAME,
-		Cards.card_ref.IROHA,
-		Cards.card_ref.KORONE,
+
 	]
 ]
 
@@ -23,32 +23,69 @@ func _ready():
 	pass
 
 func stock_pool():
+	inventory = [[],[]]
 	pool = []
 	for card in Cards.LIST:
 		pool.append(card)
 		
 func open_shop(): # draw 5 random cards from pool
 	shop = []
-	bought = []
+	bought_index = []
+	wildcards()
+	
 	for x in 5:
-		if pool.size() == 0:
-			return
-		var select = pool[Globals.Game.rng_generate(pool.size())]
-		shop.append(select)
-		pool.erase(select)
+		if pool.size() > 0:
+			var select = pool[Globals.Game.rng_generate(pool.size())]
+			shop.append(select)
+			pool.erase(select)
+		else: # empty card
+			bought_index.append(x)
+			
+			
+func wildcards():
+	for slot in inventory[0].size():
+		if "quirks" in Cards.DATABASE[inventory[0][slot]] and Cards.effect_ref.WILDCARD in Cards.DATABASE[inventory[0][slot]].quirks:
+			var random_array = Cards.DATABASE[inventory[0][slot]].random
+			random_array.erase(inventory[0][slot])
+			inventory[0][slot] = Globals.Game.rng_array(random_array)
+			
+	for slot in inventory[1].size():
+		if "quirks" in Cards.DATABASE[inventory[1][slot]] and Cards.effect_ref.WILDCARD in Cards.DATABASE[inventory[1][slot]].quirks:
+			var random_array = Cards.DATABASE[inventory[1][slot]].random
+			random_array.erase(inventory[1][slot])
+			inventory[1][slot] = Globals.Game.rng_array(random_array)
+		
 		
 func close_shop(): # return unbought cards to pool
-	for bought_card in bought:
-		shop.erase(bought_card)
-	pool.append_array([shop]) 
+	for shop_card_index in shop.size():
+		if !shop_card_index in bought_index:
+			pool.append(shop[shop_card_index])
 
 
-func get_describe(card: int) -> String:
+func can_player_afford(player_ID: int, shop_index: int) -> bool:
+	if Globals.Game.get_player_node(player_ID).coin_count >= Cards.DATABASE[shop[shop_index]].price:
+		return true
+	else: return false
+	
+func can_player_afford_ref(player_ID: int, in_card_ref: int) -> bool:
+	if Globals.Game.get_player_node(player_ID).coin_count >= Cards.DATABASE[in_card_ref].price:
+		return true
+	else: return false
+	
+func pay_coin(player_ID: int, shop_index: int):
+	var player = Globals.Game.get_player_node(player_ID)
+	player.coin_count -= Cards.DATABASE[shop[shop_index]].price
+	Globals.Game.coin_update(player)
+
+
+func get_describe(card: int, shop_describe := true) -> String:
 	var full_string := ""
 	
 	for key in Cards.DATABASE[card]:
 		if key is String and key == "price":
 			continue
+		elif shop_describe and key is String and key == "replace":
+			return Cards.DATABASE[card].replace
 		elif key is String and key == "quirks":
 			for quirk in Cards.DATABASE[card][key]:
 				if full_string != "":

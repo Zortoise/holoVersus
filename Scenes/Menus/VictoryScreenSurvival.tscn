@@ -565,7 +565,7 @@ margin_bottom = 148.0
 [node name="ReturnToSurvival" parent="VictoryMenu/VictoryList" instance=ExtResource( 6 )]
 margin_right = 498.0
 focus_neighbour_top = NodePath("../ReturnToMainMenu")
-text = "Return to Raid Menu"
+text = "Return to Survival Menu"
 
 [node name="ReturnToMainMenu" parent="VictoryMenu/VictoryList" instance=ExtResource( 6 )]
 margin_top = 60.0

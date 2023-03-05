@@ -2772,11 +2772,17 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0.2 ),
-"transitions": PoolRealArray( 1 ),
+"times": PoolRealArray( 0, 0.2, 0.201 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
 "values": [ {
+"args": [ false ],
+"method": "set_active"
+}, {
 "args": [  ],
 "method": "hide"
+}, {
+"args": [  ],
+"method": "finish_clear"
 } ]
 }
 tracks/2/type = "value"
@@ -2911,14 +2917,17 @@ tracks/7/loop_wrap = true
 tracks/7/imported = false
 tracks/7/enabled = true
 tracks/7/keys = {
-"times": PoolRealArray( 0, 0.25 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PoolRealArray( 0, 0.25, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
 "values": [ {
 "args": [  ],
 "method": "show"
 }, {
 "args": [  ],
 "method": "update_pickers"
+}, {
+"args": [ true ],
+"method": "set_active"
 } ]
 }
 tracks/8/type = "value"
@@ -4227,7 +4236,7 @@ margin_top = 940.0
 margin_right = 1200.0
 margin_bottom = 1028.0
 theme = SubResource( 164 )
-custom_colors/font_color = Color( 0.784314, 0.784314, 0.784314, 1 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 text = "LEAVE SHOP"
 align = 1
 valign = 1
@@ -4323,7 +4332,7 @@ margin_left = 24.0
 margin_top = 341.0
 margin_right = 376.0
 margin_bottom = 361.0
-custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
 custom_fonts/font = SubResource( 154 )
 text = "Hold Light to purchase"
 align = 1
