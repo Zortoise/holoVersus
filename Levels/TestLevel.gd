@@ -1,5 +1,7 @@
 extends Node
 
+const LEVEL_NAME = "Test Level"
+
 const STAGE = "Grid"
 const STARTING_STOCKS = 5
 const STARTING_COIN = 100
@@ -130,6 +132,7 @@ const WAVES = {
 				1800 : [
 					{"mob" : "GuraM", "level" : 7, "variant" : "zone",
 					"attr" : {
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.TOUGH : 1
 						} },
 				],
@@ -163,7 +166,8 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.COIN: 15
+						Globals.mob_attr.COIN: 15,
+						Globals.mob_attr.HP : 2,
 						} },
 				],
 			}
@@ -172,17 +176,25 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 7, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
 					"attr" : {
 						Globals.mob_attr.PROJ_SPEED: 0,
 						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.TOUGH : 0,
 						} },
-					{"mob" : "GuraM", "level" : 7, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
 					"attr" : {
 						Globals.mob_attr.PROJ_SPEED: 0,
 						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.TOUGH : 0,
+						} },
+				],
+				4200 : [
+					{"mob" : "GuraM", "level" : 6, "variant" : "base",
+					"attr" : {
+						} },
+					{"mob" : "GuraM", "level" : 6, "variant" : "base",
+					"attr" : {
 						} },
 				],
 			}
@@ -193,66 +205,66 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 				],
 				1800 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 				],
 				3600 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.RAGE : true,
 						} },
 				],
@@ -264,10 +276,10 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "rush",
 					"attr" : {
-						Globals.mob_attr.CHAIN : 7,
 						Globals.mob_attr.SPEED : 0,
-						Globals.mob_attr.HP : 1,
+						Globals.mob_attr.HP : 5,
 						Globals.mob_attr.TOUGH : 5,
+						Globals.mob_attr.TRAIL : true,
 						} },
 				],
 				600 : [
@@ -309,6 +321,22 @@ const WAVES = {
 						} },
 				],
 				6300 : [
+					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					"attr" : {
+						Globals.mob_attr.SPEED : 6,
+						Globals.mob_attr.PROJ_SPEED : 3,
+						Globals.mob_attr.BLACK_TRAIL : true,
+						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+						} },
+				],
+				12600 : [
+					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					"attr" : {
+						Globals.mob_attr.CHAIN : 7,
+						Globals.mob_attr.PROJ_SPEED : 0,
+						Globals.mob_attr.WHITE_TRAIL : true,
+						Globals.mob_attr.WHITE_PROJ_TRAIL : true,
+						} },
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
 						Globals.mob_attr.SPEED : 6,

@@ -66,7 +66,7 @@ func query_move_data(move_name) -> Dictionary:
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	
 	if Globals.survival_level != null and "damage" in move_data:
-		move_data.damage = FMath.percent(move_data.damage, 60)	
+#		move_data.damage = FMath.percent(move_data.damage, 60)	
 		move_data.damage = FMath.percent(move_data.damage, Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
 	
 	return move_data

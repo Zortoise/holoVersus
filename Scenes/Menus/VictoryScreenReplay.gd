@@ -3,6 +3,8 @@ extends Node2D
 
 func _ready():
 	
+	BGM.bgm(BGM.common_music["victory"])
+	
 	$AltInputs.active = false
 	
 	# load the winner
@@ -48,6 +50,7 @@ func triggered(triggered_node):
 # ------------------------------------------------------------------------------------------------------------------------
 
 func change_scene(new_scene: String): # called by animation
+	BGM.fade()
 # warning-ignore:return_value_discarded
 	get_tree().change_scene(new_scene)
 

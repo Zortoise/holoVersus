@@ -39,9 +39,9 @@ const COMBO_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
 
 const ATK_LEVEL_TO_GDRAIN = [0, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
 
-const MOB_LEVEL_TO_HP = [100, 125, 150, 175, 200, 225, 250, 300, 350]
+const MOB_LEVEL_TO_HP = [100, 125, 150, 200, 250, 300, 350, 400, 450]
 const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0]
-const MOB_LEVEL_TO_DMG = [50, 60, 70, 80, 90, 100, 110, 120, 130]
+const MOB_LEVEL_TO_DMG = [100, 110, 120, 130, 140, 150, 160, 170, 180]
 const MOB_LEVEL_TO_SPEED = [80, 85, 90, 95, 100, 105, 110, 115, 120]
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
@@ -1159,7 +1159,7 @@ func get_stat(stat):
 			# combo level affects Guard Swell
 			to_return = FMath.percent(to_return, COMBO_LEVEL_TO_GUARD_SWELL_MOD[combo_level])
 		"GUARD_DRAIN_MOD":
-			var mob_level_values = [100, 80, 60]
+			var mob_level_values = [125, 100, 75]
 			to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
 			
 			
@@ -1858,10 +1858,13 @@ func continue_visual_effect_of_status(effect): # run every frame, will not add v
 	match effect:
 		Globals.status_effect.POISON:
 			modulate_play("poison")
+			particle("Mote", "Particles", "purple", 4, 1, 25)
 		Globals.status_effect.CHILL:
 			modulate_play("freeze")
+			particle("Mote", "Particles", "blue", 4, 1, 25)
 		Globals.status_effect.IGNITE:
 			modulate_play("ignite")
+			particle("Mote", "Particles", "yellow", 4, 1, 25)
 		Globals.status_effect.GRAVITIZE:
 			modulate_play("gravitize")
 		Globals.status_effect.ENFEEBLE:
@@ -1894,9 +1897,9 @@ func remove_all_status_effects():
 	
 func remove_status_effect_on_landing_hit():
 	status_effect_to_remove.append(Globals.status_effect.POISON)
-	status_effect_to_remove.append(Globals.status_effect.CHILL)
+#	status_effect_to_remove.append(Globals.status_effect.CHILL)
 	status_effect_to_remove.append(Globals.status_effect.IGNITE)
-	status_effect_to_remove.append(Globals.status_effect.GRAVITIZE)
+#	status_effect_to_remove.append(Globals.status_effect.GRAVITIZE)
 	
 func remove_status_effect_on_taking_hit():
 	pass
@@ -2760,9 +2763,9 @@ func calculate_damage(hit_data) -> int:
 
 func calculate_guard_gauge_change(hit_data) -> int:
 	
-#	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:  
-#	# for multi-hit/autochain moves, only first hit affect GG
-#		return 0
+	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:  
+	# for multi-hit/autochain moves, only first hit affect GG
+		return 0
 
 	if guardbroken: # if guardbroken, no Guard Drain
 		return 0

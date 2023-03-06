@@ -11,6 +11,7 @@ var character_data = { # to be filled at _ready()
 	"Random" : {
 		"portrait" : ResourceLoader.load("res://Assets/UI/portrait_question.png"),
 		"art" : ResourceLoader.load("res://Assets/UI/random.png"),
+		"name" : "Random"
 	}
 #	"Gura" : {
 #		"portrait" : ResourceLoader.load("res://Characters/Gura/UI/portrait.png"), 
@@ -47,7 +48,7 @@ var P2_palette_picked := 1
 func _ready():
 	Globals.pausing = false
 	
-	BGM.bgm(BGM.common_music["char_select"])
+#	BGM.bgm(BGM.common_music["char_select"])
 	
 	# load characters
 	var dir = Directory.new()
@@ -60,6 +61,7 @@ func _ready():
 				character_data[character_name]["portrait"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/portrait.png")
 				character_data[character_name]["art"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/full_art.png")
 				character_data[character_name]["select_sprite"] = load("res://Characters/" + character_name + "/SelectSprite.tscn")
+				character_data[character_name]["name"] = load("res://Characters/" + character_name + "/" + character_name + ".tscn").instance().NAME
 				
 				# load in palettes
 				character_data[character_name]["palettes"] = {}
@@ -355,7 +357,7 @@ func P1_changed_character():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			$P1_Sprite.add_child(new_sprite)
-		$P1_Name.text = char_name
+		$P1_Name.text = character_data[char_name]["name"]
 	else: # blank panel
 		$P1_FullArt.texture = null
 		if $P1_Sprite.get_child_count() > 0:
@@ -375,7 +377,7 @@ func P2_changed_character():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			$P2_Sprite.add_child(new_sprite)
-		$P2_Name.text = char_name
+		$P2_Name.text = character_data[char_name]["name"]
 	else:
 		$P2_FullArt.texture = null
 		if $P2_Sprite.get_child_count() > 0:

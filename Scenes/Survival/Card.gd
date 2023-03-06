@@ -5,13 +5,12 @@ extends Node2D
 #	init(Cards.card_ref.AQUA)
 
 
-func init(card_ref: int, hide_price = false):
+func init(card_ref: int, half_price = false):
 	$Name.text = Cards.DATABASE[card_ref].name
-	if !hide_price:
+	if !half_price:
 		$Price/Cost.text = str(Cards.DATABASE[card_ref].price)
-		$Price.show()
 	else:
-		$Price.hide()
+		$Price/Cost.text = str(FMath.percent(Cards.DATABASE[card_ref].price, 50))
 		
 func blank():
 	$Sprite.hide()

@@ -11,6 +11,7 @@ var character_data = { # to be filled at _ready()
 	"Random" : {
 		"portrait" : ResourceLoader.load("res://Assets/UI/portrait_question.png"),
 		"art" : ResourceLoader.load("res://Assets/UI/random.png"),
+		"name" : "Random"
 	}
 #	"Gura" : {
 #		"portrait" : ResourceLoader.load("res://Characters/Gura/UI/portrait.png"), 
@@ -68,7 +69,7 @@ var my_payload = {
 
 func _ready():
 	
-	BGM.bgm(BGM.common_music["char_select"])
+#	BGM.bgm(BGM.common_music["char_select"])
 	
 # warning-ignore:return_value_discarded
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
@@ -116,6 +117,7 @@ func _ready():
 				character_data[character_name]["portrait"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/portrait.png")
 				character_data[character_name]["art"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/full_art.png")
 				character_data[character_name]["select_sprite"] = load("res://Characters/" + character_name + "/SelectSprite.tscn")
+				character_data[character_name]["name"] = load("res://Characters/" + character_name + "/" + character_name + ".tscn").instance().NAME
 				
 				# load in palettes
 				character_data[character_name]["palettes"] = {}
@@ -389,7 +391,7 @@ func changed_character():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			my_sprite.add_child(new_sprite)
-		my_name.text = char_name
+		my_name.text = character_data[char_name]["name"]
 	else: # blank panel
 		my_fullart.texture = null
 		if my_sprite.get_child_count() > 0:
@@ -624,7 +626,7 @@ func start_battle():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			get_node(opponent + "_Sprite").add_child(new_sprite)
-		get_node(opponent + "_Name").text = char_name
+		get_node(opponent + "_Name").text = character_data[char_name]["name"]
 	else: # opponent pick random character, hide their data
 		get_node(opponent + "_FullArt").texture = character_data["Random"]["art"]
 		if get_node(opponent + "_Sprite").get_child_count() > 0:

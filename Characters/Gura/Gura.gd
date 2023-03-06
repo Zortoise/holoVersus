@@ -870,7 +870,7 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 			pass
 			
 	if Globals.survival_level != null and "damage" in move_data:
-		move_data.damage = FMath.percent(move_data.damage, Character.SURV_BASE_DMG)
+#		move_data.damage = FMath.percent(move_data.damage, Character.SURV_BASE_DMG)
 		move_data.damage = FMath.percent(move_data.damage, Character.mod_damage(move_name))
 
 
@@ -1147,10 +1147,10 @@ func move_sequence_target(new_position): # move sequence_target to new position
 		
 			
 func get_seq_hit_data(hit_key: int):
-	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key]
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key].duplicate(true)
 
 	if Globals.survival_level != null and "damage" in seq_hit_data:
-		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.SURV_BASE_DMG)	
+#		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.SURV_BASE_DMG)	
 		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
 
 	return seq_hit_data
@@ -1158,10 +1158,10 @@ func get_seq_hit_data(hit_key: int):
 	
 	
 func get_seq_launch_data():
-	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch
+	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch.duplicate(true)
 
 	if Globals.survival_level != null and "damage" in seq_data:
-		seq_data.damage = FMath.percent(seq_data.damage, Character.SURV_BASE_DMG)	
+#		seq_data.damage = FMath.percent(seq_data.damage, Character.SURV_BASE_DMG)	
 		seq_data.damage = FMath.percent(seq_data.damage, Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
 
 	return seq_data

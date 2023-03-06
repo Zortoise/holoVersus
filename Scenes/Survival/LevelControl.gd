@@ -12,7 +12,7 @@ const ITEM_LIMIT = 40
 onready var loaded_mob_scene := load("res://Scenes/Survival/Mob.tscn")
 onready var loaded_mob_entity_scene := load("res://Scenes/Survival/MobEntity.tscn")
 onready var loaded_pickup_scene := load("res://Scenes/Survival/PickUp.tscn")
-onready var loaded_card_scene :=load("res://Scenes/Survival/Card.tscn")
+onready var loaded_card_scene := load("res://Scenes/Survival/Card.tscn")
 
 var UniqLevel
 

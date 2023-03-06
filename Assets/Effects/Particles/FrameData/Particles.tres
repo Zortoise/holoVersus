@@ -12,22 +12,70 @@ frame_data = {
 "spritesheet": "ParticlesSprite",
 "timestamps": {
 0: {
-"frame": 5
+"frame": 20
 },
 3: {
-"frame": 6
+"frame": 21
 },
 5: {
-"frame": 7
+"frame": 22
 },
 7: {
+"frame": 23
+},
+9: {
+"frame": 24
+}
+},
+"vframes": 5
+},
+"Mote": {
+"duration": 39,
+"hframes": 6,
+"loop": false,
+"spritesheet": "ParticlesSprite",
+"timestamps": {
+0: {
+"frame": 6
+},
+3: {
+"frame": 7
+},
+6: {
 "frame": 8
 },
 9: {
 "frame": 9
+},
+12: {
+"frame": 10
+},
+15: {
+"frame": 11
+},
+18: {
+"frame": 12
+},
+21: {
+"frame": 13
+},
+24: {
+"frame": 14
+},
+27: {
+"frame": 15
+},
+30: {
+"frame": 16
+},
+33: {
+"frame": 17
+},
+36: {
+"frame": 18
 }
 },
-"vframes": 2
+"vframes": 5
 },
 "Sparkle": {
 "duration": 15,
@@ -51,6 +99,6 @@ frame_data = {
 "frame": 4
 }
 },
-"vframes": 2
+"vframes": 5
 }
 }

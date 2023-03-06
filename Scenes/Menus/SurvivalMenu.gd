@@ -1,6 +1,7 @@
 extends Node2D
 
 var LEVEL_SELECT_OPTIONS = []
+var level_select_filenames = []
 const PLAYER_COUNT_OPTIONS = [1, 2]
 
 func _ready():
@@ -14,7 +15,9 @@ func _ready():
 		var file_name = directory.get_next()
 		while file_name != "":
 			if file_name.ends_with(".tscn"):
-				LEVEL_SELECT_OPTIONS.append(file_name.get_file().trim_suffix(".tscn"))
+				var level_name = load("res://Levels/" + file_name).instance().LEVEL_NAME
+				LEVEL_SELECT_OPTIONS.append(level_name)
+				level_select_filenames.append(file_name.get_file().trim_suffix(".tscn"))
 			file_name = directory.get_next()
 	else: print("Error: Cannot open FrameData folder for mob")
 
@@ -54,7 +57,7 @@ func triggered(triggered_node):
 				play_audio("ui_accept2", {"vol":-5})
 				BGM.fade()
 				$Transition.play("transit_to_char_select_surv")
-				Globals.survival_level = LEVEL_SELECT_OPTIONS[survival_config.level_select]
+				Globals.survival_level = level_select_filenames[survival_config.level_select]
 				Globals.player_count = PLAYER_COUNT_OPTIONS[survival_config.player_count]
 				Globals.time_limit = 0
 			"Return":

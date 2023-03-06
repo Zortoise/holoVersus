@@ -134,6 +134,7 @@ func _ready():
 		LevelControl.init()
 		setup()
 		input_lock = false
+		Inventory.shop_open = false
 		
 	elif Netplay.is_netplay():
 		var NetgameSetup = load("res://Scenes/Netplay/NetgameSetup.tscn").instance()

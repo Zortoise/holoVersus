@@ -4,7 +4,7 @@ const MOB_ENTITY = true
 var UniqEntity
 onready var Animator = $SpritePlayer
 
-const MOB_LEVEL_TO_DMG = [50, 60, 70, 80, 90, 100, 110, 120, 130]
+const MOB_LEVEL_TO_DMG = [100, 110, 120, 130, 140, 150, 160, 170, 180]
 
 # to save:
 var free := false

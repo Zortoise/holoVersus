@@ -45,7 +45,7 @@ const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 
 const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when Character's Guard Gauge is at 100%, light Characters have higher
 
-const DAMAGE_VALUE_LIMIT = 500
+const DAMAGE_VALUE_LIMIT = 700
 
 const GUARD_DRAIN_MOD = 100
 const GG_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
@@ -1666,7 +1666,7 @@ func move_sequence_target(new_position): # move sequence_target to new position
 			
 			
 func get_seq_hit_data(hit_key: int):
-	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key]
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key].duplicate(true)
 	
 	if "damage" in seq_hit_data:
 		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
@@ -1679,7 +1679,7 @@ func get_seq_hit_data(hit_key: int):
 	
 	
 func get_seq_launch_data():
-	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch
+	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch.duplicate(true)
 
 	if "damage" in seq_data:
 		seq_data.damage = FMath.percent(seq_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])

@@ -6,12 +6,12 @@ var BGMPlayerScene = load("res://Scenes/Audio/BGMPlayer.tscn")
 var common_music = {
 	"title_theme" : {
 		"name" : "title_theme", # to not play the same music as the one currently being played
-		"audio" : ResourceLoader.load("res://Assets/Music/Title Theme.ogg"),
+		"audio" : ResourceLoader.load("res://Assets/Music/TitleTheme.ogg"),
 		"loop_end": 208.0
 		},
-	"char_select" : {
-		"name" : "char_select",
-		"audio" : ResourceLoader.load("res://Assets/Music/Character Select.ogg"),
+	"victory" : {
+		"name" : "victory",
+		"audio" : ResourceLoader.load("res://Assets/Music/VictoryScreen.ogg"),
 		"loop_end": 90.66,
 		"vol" : -4,
 		}

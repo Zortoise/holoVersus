@@ -7,6 +7,9 @@ var replay
 
 
 func _ready():
+	
+	BGM.bgm(BGM.common_music["victory"])
+	
 	$ReplayMenu.hide()
 	
 	$AltInputs.active = false
@@ -133,6 +136,7 @@ func unset_rematch(player_ID):
 # ------------------------------------------------------------------------------------------------------------------------
 
 func change_scene(new_scene: String): # called by animation
+	BGM.fade()
 # warning-ignore:return_value_discarded
 	get_tree().change_scene(new_scene)
 

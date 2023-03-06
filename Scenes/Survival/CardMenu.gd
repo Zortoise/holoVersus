@@ -321,7 +321,7 @@ func update_description(player: int, card_ref: int, shop := true): # update name
 			box.get_node("Action").self_modulate = Color(0.89, 0.81, 0.47)
 			box.get_node("ProgressBar").self_modulate = Color(0.89, 0.81, 0.47)
 	else:
-		box.get_node("Action").text = "Hold Fierce to Discard"
+		box.get_node("Action").text = "Hold Fierce to Sell"
 		box.get_node("Action").self_modulate = Color(0.93, 0.29, 0.29)
 		box.get_node("ProgressBar").self_modulate = Color(0.93, 0.29, 0.29)
 	box.get_node("ProgressBar").show()
@@ -375,7 +375,7 @@ func timer_check():
 				P1_buying = P1_picker_pos[1]
 			1:
 				get_parent().play_audio("ui_accept2", {"vol":-5})
-				P1_discard()
+				P1_sell()
 		
 	if Globals.player_count > 1 and P2_held_timer >= 45:
 		P2_held_timer = 0
@@ -385,7 +385,7 @@ func timer_check():
 				P2_buying = P2_picker_pos[1]
 			1:
 				get_parent().play_audio("ui_accept2", {"vol":-5})
-				P2_discard()
+				P2_sell()
 				
 	if Globals.player_count > 1 and P1_buying != null and P2_buying != null and P1_buying == P2_buying: # both players buying at the same time
 		if Globals.Game.rng_bool():
@@ -403,7 +403,7 @@ func timer_check():
 	
 		
 		
-func P1_discard():
+func P1_sell():
 	for x in range(P1_picker_pos[1], Inventory.inventory[0].size()):
 		if x == P1_picker_pos[1]:
 			$P1/Hand.get_child(x).get_child(0).queue_free()
@@ -412,7 +412,7 @@ func P1_discard():
 			$P1/Hand.get_child(x).remove_child(card)
 			$P1/Hand.get_child(x - 1).add_child(card)
 		
-	Inventory.inventory[0].remove(P1_picker_pos[1])
+	Inventory.sell_card(0, P1_picker_pos[1])
 	
 	if Inventory.inventory[0].size() == 0: # discarded all cards in hand
 		$P1/Hand.get_child(0).show_behind_parent = true
@@ -427,7 +427,7 @@ func P1_discard():
 		update_description(0, Inventory.inventory[0][P1_picker_pos[1]], false)
 	
 	
-func P2_discard():
+func P2_sell():
 	for x in range(P2_picker_pos[1], Inventory.inventory[1].size()):
 		if x == P2_picker_pos[1]:
 			$P2/Hand.get_child(x).get_child(0).queue_free()
@@ -436,7 +436,7 @@ func P2_discard():
 			$P2/Hand.get_child(x).remove_child(card)
 			$P2/Hand.get_child(x - 1).add_child(card)
 		
-	Inventory.inventory[1].remove(P2_picker_pos[1])
+	Inventory.sell_card(1, P2_picker_pos[1])
 	
 	if Inventory.inventory[1].size() == 0: # discarded all cards in hand
 		$P2/Hand.get_child(0).show_behind_parent = true

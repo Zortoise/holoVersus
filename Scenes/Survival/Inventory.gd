@@ -78,6 +78,14 @@ func pay_coin(player_ID: int, shop_index: int):
 	Globals.Game.coin_update(player)
 
 
+func sell_card(player_ID: int, index: int):
+	var player = Globals.Game.get_player_node(player_ID)
+	player.coin_count += FMath.percent(Cards.DATABASE[inventory[player_ID][index]].price, 50)
+	Globals.Game.coin_update(player)
+	
+	inventory[0].remove(index)
+
+
 func get_describe(card: int, shop_describe := true) -> String:
 	var full_string := ""
 	

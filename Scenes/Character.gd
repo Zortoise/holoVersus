@@ -136,7 +136,7 @@ const VDI_MAX = 30 # change in knockback vector when using Vector DI at 200% Gua
 
 const SURVIVAL_HITSTOP = 15
 #const MOB_GRACE_DURATION = 30 # how long invincibility last after being hit by a mob
-const SURV_BASE_DMG = 70
+#const SURV_BASE_DMG = 70
 
 # variables used, don't touch these
 var loaded_palette = null
@@ -2579,16 +2579,16 @@ func get_stat(stat: String) -> int:
 			"DAMAGE_VALUE_LIMIT":
 #				var hp_mod_array = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100] 
 #				to_return = FMath.percent(to_return, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.HP))
 				to_return = int(max(to_return, 1))
 		
 			"SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.SPEED))
 				to_return = int(max(to_return, 10))
 			"JUMP_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.JUMP_SPEED))
 				to_return = int(max(to_return, 10))
 			"GRAVITY_MOD":
@@ -2616,15 +2616,15 @@ func get_stat(stat: String) -> int:
 				to_return = int(max(to_return, 0))
 				
 			"GROUND_DASH_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GROUND_DASH_SPEED))
 				to_return = int(max(to_return, 10))
 			"AIR_DASH_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.AIR_DASH_SPEED))
 				to_return = int(max(to_return, 10))
 			"SDASH_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.SDASH_SPEED))
 				to_return = int(max(to_return, 10))
 #			"SDASH_TURN_RATE":
@@ -2635,7 +2635,7 @@ func get_stat(stat: String) -> int:
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_GG_COST))
 				to_return = int(max(to_return, 0))
 			"DODGE_SPEED":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_SPEED))
 				to_return = int(max(to_return, 10))
 	
@@ -3127,7 +3127,7 @@ func check_semi_invuln():
 			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
 				if is_super(get_move_name()):
 					return true
-				elif Globals.survival_level == null and Globals.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
+				elif Globals.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
 					return true
 			Globals.char_state.AIR_STARTUP:
 				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
@@ -6017,6 +6017,12 @@ func take_seq_damage(base_damage: int) -> bool: # return true if lethal
 	
 	if current_guard_gauge > 0: # damage is reduced by Guard Gauge when it is > 100%
 		scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
+		
+	var seq_user = get_seq_partner()
+	if Globals.survival_level != null and seq_user != null:
+		var mod = seq_user.query_status_effect_aux(Globals.status_effect.ENFEEBLE)
+		if mod != null:
+			scaled_damage = FMath.percent(scaled_damage, mod)
 		
 	var damage: int = int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum damage is 1
 	

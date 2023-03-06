@@ -8,6 +8,9 @@ var replay
 
 
 func _ready():
+	
+	BGM.bgm(BGM.common_music["victory"])
+	
 	$ReplayMenu.hide()
 	
 	Netcode.force_game_over_to_opponent(Globals.winner[0]) # just in case opponent is still playing due to rollback issues
@@ -191,6 +194,7 @@ remote func unset_return_to_char_select_acknowledged(player_ID):
 # ----------------------------------------------------------------------------------------------------------------------------------------
 
 func change_scene(new_scene: String): # called by animation
+	BGM.fade()
 # warning-ignore:return_value_discarded
 	get_tree().change_scene(new_scene)
 
