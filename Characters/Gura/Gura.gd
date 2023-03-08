@@ -599,7 +599,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 	
 	 # no attacking during respawn grace
 	if Character.query_status_effect(Globals.status_effect.RESPAWN_GRACE):
-		return true
+		if Globals.survival_level != null and Inventory.has_quirk(Character.player_ID, Cards.effect_ref.RESPAWN_POWER):
+			pass
+		else:
+			return true
 	
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
 		return false # since this will trigger instant aerial
@@ -1735,6 +1738,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 func _on_SpritePlayer_anim_started(anim_name):
 
 	match anim_name:
+		"aDashTransit":
+			if Character.button_down in Character.input_state.pressed:
+				Character.velocity.y = 0 # for faster wavedashes
+#			Character.velocity_limiter.y_slow = 75
 		"Dash":
 			Character.velocity.x = Character.get_stat("GROUND_DASH_SPEED") * Character.facing
 			Character.anim_friction_mod = 0

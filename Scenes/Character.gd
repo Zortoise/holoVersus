@@ -895,10 +895,10 @@ func simulate2(): # only ran if not in hitstop
 		
 	last_dir = dir
 	
-	if Globals.survival_level != null and Inventory.shop_open:
-		dir = 0
-		v_dir = 0
-		instant_dir = 0
+#	if Globals.survival_level != null and Inventory.shop_open:
+#		dir = 0
+#		v_dir = 0
+#		instant_dir = 0
 		
 
 #	if button_right in input_state.just_pressed:
@@ -1252,7 +1252,7 @@ func simulate2(): # only ran if not in hitstop
 		var weight: int = FMath.get_fraction_percent(PEAK_DAMPER_LIMIT - abs(velocity.y), PEAK_DAMPER_LIMIT)
 		gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, PEAK_DAMPER_MOD), weight)
 		# transit from jump to fall animation
-		if Animator.query_to_play(["Jump"]): # don't use query() for this one
+		if new_state == Globals.char_state.AIR_STANDBY and Animator.query_to_play(["Jump"]): # don't use query() for this one
 			animate("FallTransit")
 
 	if !grounded: # gravity only pulls you if you are in the air
@@ -1276,7 +1276,7 @@ func simulate2(): # only ran if not in hitstop
 				gravity_temp = FMath.percent(gravity_temp, get_stat("FALL_GRAV_MOD"))
 				if state == Globals.char_state.AIR_BLOCK: # air blocking reduce gravity
 					gravity_temp = FMath.percent(gravity_temp, AIRBLOCK_GRAV_MOD)
-					
+
 #			# during aerial startup and active, can control gravity a little as well by pressing up/down
 #			if state in [Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE]:
 #				if v_dir == -1:
@@ -1319,6 +1319,13 @@ func simulate2(): # only ran if not in hitstop
 
 			if velocity.y > terminal:
 				velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
+				
+	if velocity.y < 0 and $VarJumpTimer.is_running() and abs(velocity.y) > PEAK_DAMPER_LIMIT:
+		if (button_jump in input_state.pressed or button_up in input_state.pressed):
+			if $VarJumpTimer.time <= get_stat("VAR_JUMP_SLOW_POINT"):
+				velocity.y = FMath.f_lerp(velocity.y, PEAK_DAMPER_LIMIT, get_stat("HIGH_JUMP_SLOW"))
+		else:
+			velocity.y = FMath.f_lerp(velocity.y, PEAK_DAMPER_LIMIT, get_stat("SHORT_JUMP_SLOW"))
 		
 
 # FRICTION/AIR RESISTANCE AND TRIGGERED ANIMATION CHANGES ----------------------------------------------------------
@@ -1561,7 +1568,7 @@ func simulate2(): # only ran if not in hitstop
 	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
 		launch_trail() # do launch trail before moving
 		
-	if grounded and abs(velocity.x) < 30 * FMath.S:
+	if grounded and dir == 0 and abs(velocity.x) < 30 * FMath.S:
 		velocity.x = 0  # this reduces slippiness by canceling grounded horizontal velocity when moving less than 0.5 pixels per frame
 
 	
@@ -2599,19 +2606,19 @@ func get_stat(stat: String) -> int:
 				to_return = int(max(to_return, 10))
 				
 			"MAX_AIR_JUMP":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+#				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
 				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_AIR_JUMP)
 				to_return = int(max(to_return, 0))
 			"MAX_AIR_DASH":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+#				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
 				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_AIR_DASH)
 				to_return = int(max(to_return, 0))
 			"MAX_AIR_DODGE":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+#				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
 				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_AIR_DODGE)
 				to_return = int(max(to_return, 0))
 			"MAX_SUPER_DASH":
-				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
+#				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
 				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_SUPER_DASH)
 				to_return = int(max(to_return, 0))
 				
@@ -2631,25 +2638,31 @@ func get_stat(stat: String) -> int:
 #				if Globals.survival_level != null: to_return = int(max(to_return - 4, 1))
 #				to_return += Inventory.modifier(player_ID, Cards.effect_ref.SDASH_TURN_RATE)
 			"DODGE_GG_COST":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_GG_COST))
-				to_return = int(max(to_return, 0))
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
+#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_GG_COST))
+#				to_return = int(max(to_return, 0))
+				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_DODGE_COST):
+					to_return = 0
 			"DODGE_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_SPEED))
 				to_return = int(max(to_return, 10))
 	
 			"GG_REGEN_AMOUNT":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GG_REGEN_AMOUNT))
 			"GROUND_BLOCK_GG_COST", "AIR_BLOCK_GG_COST":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.BLOCK_GG_COST))
-				to_return = int(max(to_return, 0))
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
+#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.BLOCK_GG_COST))
+#				to_return = int(max(to_return, 0))
+				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_BLOCK_COST):
+					to_return = 0
 			"WEAKBLOCK_CHIP_DMG_MOD":
-				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.WEAKBLOCK_CHIP_DMG_MOD))
-				to_return = int(max(to_return, 0))
+#				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
+#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.WEAKBLOCK_CHIP_DMG_MOD))
+#				to_return = int(max(to_return, 0))
+				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CHIP_DMG):
+					to_return = 0
 
 	return to_return
 	
@@ -2668,7 +2681,7 @@ func mod_damage(move_name):
 		var percent = get_damage_percent()
 		if percent > 50:
 			var weight = FMath.get_fraction_percent(percent - 50, 50)
-			mod += FMath.f_lerp(0, 200, weight)
+			mod += FMath.f_lerp(100, 300, weight)
 			
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.EX_RAISE_DMG):
 		var weight = FMath.get_fraction_percent(current_ex_gauge, MAX_EX_GAUGE)
@@ -2850,6 +2863,10 @@ func respawn():
 	current_guard_gauge = 0
 	if Globals.survival_level == null:
 		change_burst_token(Globals.burst.AVAILABLE) # gain Burst on death
+	else:
+		if Inventory.has_quirk(player_ID, Cards.effect_ref.RESPAWN_POWER):
+			current_ex_gauge = MAX_EX_GAUGE
+		
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
@@ -4186,7 +4203,12 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #					return false
 			else:
 				return false
-		_:  # only Light/Fierce normals can be chain cancelled from
+		Globals.atk_type.EX:
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.SPECIAL_CHAIN):
+				pass
+			else:
+				return false
+		_:
 			return false
 	
 	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL, Globals.chain_combo.WEAKBLOCKED]:
@@ -4893,8 +4915,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					else:
 						# to strongblock a physical attack, you need to either perfect block them or
 						# block at close range, but the later is not allowed during Survival Mode
-						if Animator.query_current(["BlockStartup", "aBlockStartup"]) or \
-							(Globals.survival_level == null and !attacker_vec.is_longer_than(STRONGBLOCK_RANGE)):
+						
+						var close_enough = !attacker_vec.is_longer_than(STRONGBLOCK_RANGE)
+						if Globals.survival_level != null and close_enough:
+							if !Inventory.has_quirk(player_ID, Cards.effect_ref.PROXIMITY_PARRY):
+								close_enough = false
+
+						if Animator.query_current(["BlockStartup", "aBlockStartup"]) or close_enough:
 #							if Globals.survival_level != null:
 #								hit_data.block_state = Globals.block_state.WEAK # no proximity parry for Survival Mode
 							if Globals.atk_attr.ANTI_AIR in hit_data.move_data.atk_attr and !grounded:
@@ -6403,31 +6430,38 @@ func _on_SpritePlayer_anim_started(anim_name):
 				return
 			
 		"JumpTransit2":
-			if button_jump in input_state.pressed and (button_down in input_state.pressed or button_block in input_state.pressed):
-				# block and jump to shorthop
-				$ShorthopTimer.time = ShorthopTimer_TIME
-				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("HOP_JUMP_MOD"))
-				if dir != 0: # when hopping can press left/right for a long hop
-					var boost: int = dir * FMath.percent(get_stat("SPEED"), get_stat("LONG_HOP_JUMP_MOD"))
-					velocity.x += boost
-					velocity.x = int(clamp(velocity.x, -abs(boost), abs(boost)))
-					var sfx_point = get_feet_pos()
-					sfx_point.x -= dir * 5 # spawn the dust behind slightly
-					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", sfx_point, {"facing":dir, "grounded":true})
-				else:
-					Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+#			if button_jump in input_state.pressed and (button_down in input_state.pressed or button_block in input_state.pressed):
+#				# block and jump to shorthop
+#				$ShorthopTimer.time = ShorthopTimer_TIME
+#				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("HOP_JUMP_MOD"))
+#				if dir != 0: # when hopping can press left/right for a long hop
+#					var boost: int = dir * FMath.percent(get_stat("SPEED"), get_stat("LONG_HOP_JUMP_MOD"))
+#					velocity.x += boost
+#					velocity.x = int(clamp(velocity.x, -abs(boost), abs(boost)))
+#					var sfx_point = get_feet_pos()
+#					sfx_point.x -= dir * 5 # spawn the dust behind slightly
+#					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", sfx_point, {"facing":dir, "grounded":true})
+#				else:
+#					Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 #			elif button_up in input_state.pressed and button_jump in input_state.pressed: # up and jump to super jump, cannot adjust height
 #				velocity.y = -FMath.percent(UniqChar.JUMP_SPEED, UniqChar.SUPER_JUMP_MOD)
 #				velocity.x = 0
-			else:
-				velocity.y = -get_stat("JUMP_SPEED")
-				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
-				if dir != 0: # when jumping can press left/right for a long jump
-					if abs(velocity.x) < get_stat("SPEED"): # cannot surpass SPEED
-						velocity.x += dir * get_stat("JUMP_HORIZONTAL_SPEED")
-						velocity.x = int(clamp(velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
+#			else:
+			velocity.y = -get_stat("JUMP_SPEED")
+			if dir != 0:
+				velocity.x += dir * FMath.percent(get_stat("SPEED"), get_stat("HORIZ_JUMP_BOOST_MOD"))
+				if velocity.x > get_stat("SPEED"):
+					velocity.x = FMath.f_lerp(velocity.x, get_stat("SPEED"), 50)
+				elif velocity.x < -get_stat("SPEED"):
+					velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 50)
+				velocity.x = FMath.percent(velocity.x, get_stat("HORIZ_JUMP_SPEED_MOD"))
+			$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
+#			if dir != 0: # when jumping can press left/right for a long jump
+#				if abs(velocity.x) < get_stat("SPEED"): # cannot surpass SPEED
+#					velocity.x += dir * get_stat("JUMP_HORIZONTAL_SPEED")
+#					velocity.x = int(clamp(velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
 #					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
-				Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		"aJumpTransit2":
 			aerial_memory = []
 			if !check_wall_jump():
@@ -6437,7 +6471,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 					if dir * velocity.x < 0: # air jump change direction (no change in velocity if same direction)
 						velocity.x += dir * FMath.percent(get_stat("SPEED"), get_stat("REVERSE_AIR_JUMP_MOD"))
 					else:
-						velocity.x = FMath.percent(velocity.x, 90) # air jump is slower horizontally since no friction
+						if velocity.x > get_stat("SPEED"):
+							velocity.x = FMath.f_lerp(velocity.x, get_stat("SPEED"), 50)
+						elif velocity.x < -get_stat("SPEED"):
+							velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 50)
+						velocity.x = FMath.percent(velocity.x, get_stat("AIR_HORIZ_JUMP_SPEED_MOD"))
+						
+#						velocity.x = FMath.percent(velocity.x, 90) # air jump is slower horizontally since no friction
 				else: # neutral air jump
 					velocity.x = FMath.percent(velocity.x, 70)
 				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))

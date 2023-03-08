@@ -1971,7 +1971,8 @@ func HUD_fade():
 # RNG GENERATOR --------------------------------------------------------------------------------------------------
 
 func rng_generate(upper_limit: int) -> int: # will return a number from 0 to (upper_limit - 1)
-	var result: int = current_rng_seed * Globals.PI_NUMBERS[posmod(current_rng_seed + frametime, 100)] + posmod(frametime, 10000)
+	var result: int = current_rng_seed * Globals.PI_NUMBERS[posmod(current_rng_seed + frametime, 100)] + \
+			Globals.PI_NUMBERS[posmod(current_rng_seed, 100)] + posmod(frametime, 10000)
 	current_rng_seed = wrapi(result, 1, 10000) # each call to generate a number changes the current seed
 	return posmod(result, upper_limit)
 			

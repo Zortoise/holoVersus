@@ -5,14 +5,15 @@ enum type {PERCENT, LINEAR, QUIRK}
 enum effect_ref {
 		STOCK, HP, COMBO_LEVEL, LANDED_EX_REGEN, PASSIVE_EX_REGEN,
 		SPEED, FRICTION, JUMP_SPEED, GRAVITY_MOD, MAX_AIR_JUMP, MAX_AIR_DASH, MAX_AIR_DODGE, MAX_SUPER_DASH, 
-		GROUND_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_GG_COST, DODGE_SPEED, GG_REGEN_AMOUNT, 
-		BLOCK_GG_COST, WEAKBLOCK_CHIP_DMG_MOD, GUARD_DRAIN_MOD,
+		GROUND_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_SPEED, GG_REGEN_AMOUNT, 
+		GUARD_DRAIN_MOD,
 		GROUND_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
 		HEAVY_DMG_MOD, SPECIAL_DMG_MOD, PROJ_DMG_MOD, SUPER_DMG_MOD, 
 		COIN_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
 		NO_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, ARMOR_PIERCE, AUTO_PBLOCK_PROJ, FREE_RESET, HALF_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, GROUND_DASH_IFRAME, AIR_DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
-		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, GRAVITIZING_ATK, ENFEEBLING_ATK, WILDCARD
+		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, GRAVITIZING_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
+		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, PROXIMITY_PARRY
 }
 # NO_CROSSUP = can perfect block too
 # ARMOR_PIERCE = full damage on armored mobs
@@ -88,10 +89,6 @@ const DESCRIBE = {
 		"type" : type.PERCENT,
 		"suffix" :"Super Dash Speed",
 	},
-	effect_ref.DODGE_GG_COST : {
-		"type" : type.PERCENT,
-		"suffix" :"Dodge GG Cost",
-	},
 	effect_ref.DODGE_SPEED : {
 		"type" : type.PERCENT,
 		"suffix" :"Dodge Speed",
@@ -101,14 +98,7 @@ const DESCRIBE = {
 		"type" : type.PERCENT,
 		"suffix" :"GG Regen",
 	},
-	effect_ref.BLOCK_GG_COST : {
-		"type" : type.PERCENT,
-		"suffix" :"Block GG Cost",
-	},
-	effect_ref.WEAKBLOCK_CHIP_DMG_MOD : {
-		"type" : type.PERCENT,
-		"suffix" :"Chip Dmg Taken",
-	},
+	
 	effect_ref.GUARD_DRAIN_MOD : {
 		"type" : type.PERCENT,
 		"suffix" :"Guard Drain",
@@ -250,9 +240,30 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"Enfeebling Touch",	
 	},
+	effect_ref.RESPAWN_POWER : {
+		"type" : type.QUIRK,
+		"suffix" :"Full Power on Respawn",	
+	},
 	effect_ref.WILDCARD : {
 		"type" : type.QUIRK,
 		"suffix" :"Changes Every Wave",	
+	},
+	
+	effect_ref.NO_BLOCK_COST : {
+		"type" : type.QUIRK,
+		"suffix" :"Blocking cost no GG",
+	},
+	effect_ref.NO_CHIP_DMG : {
+		"type" : type.QUIRK,
+		"suffix" :"No Chip Dmg Taken",
+	},
+	effect_ref.NO_DODGE_COST : {
+		"type" : type.QUIRK,
+		"suffix" :"Dodging cost no GG",
+	},
+	effect_ref.PROXIMITY_PARRY : {
+		"type" : type.QUIRK,
+		"suffix" :"PBlock at Close Range",
 	},
 }
 
@@ -322,14 +333,14 @@ const DATABASE = {
 		effect_ref.MAX_AIR_JUMP : 1,
 		effect_ref.MAX_AIR_DASH : 1,
 		effect_ref.JUMP_SPEED : 20,
-		effect_ref.AIR_NORMAL_DMG_MOD : 20,
+		effect_ref.AIR_NORMAL_DMG_MOD : 50,
 	},
 	card_ref.MARINE : {
 		"name" : "Marine",
 		"price" : 120,
 		effect_ref.COIN_GAIN : 2,
 		effect_ref.HITSTUN_TAKEN : -30,
-		effect_ref.HEAVY_DMG_MOD : 20,
+		effect_ref.HEAVY_DMG_MOD : 50,
 	},
 	card_ref.AQUA : {
 		"name" : "Aqua",
@@ -344,7 +355,7 @@ const DATABASE = {
 		"price" : 120,
 		effect_ref.SPEED : 10,
 		effect_ref.AIR_DASH_SPEED : 25,
-		effect_ref.PROJ_DMG_MOD : 30,
+		effect_ref.PROJ_DMG_MOD : 40,
 		"quirks" : [effect_ref.SPECIAL_CHAIN]
 	},
 	card_ref.NOEL : {
@@ -352,9 +363,8 @@ const DATABASE = {
 		"price" : 120,
 		effect_ref.SPEED : -10,
 		effect_ref.HP: 30,
-		effect_ref.WEAKBLOCK_CHIP_DMG_MOD : -50,
 		effect_ref.HEAVY_DMG_MOD : 50,
-		"quirks" : [effect_ref.NO_GUARD_DRAIN],
+		"quirks" : [effect_ref.PROXIMITY_PARRY],
 	},
 	card_ref.ROBOCO : {
 		"name" : "Roboco",
@@ -362,14 +372,14 @@ const DATABASE = {
 		effect_ref.SPEED : -10,
 		effect_ref.AIR_DASH_SPEED : 40,
 		effect_ref.GROUND_DASH_SPEED : 40,
-		effect_ref.SPECIAL_DMG_MOD : 50,
+		effect_ref.SPECIAL_DMG_MOD : 60,
 		"quirks" : [effect_ref.NO_GUARD_DRAIN],
 	},
 	card_ref.SHION : {
 		"name" : "Shion",
 		"price" : 120,
-		effect_ref.PASSIVE_EX_REGEN : 10,
-		effect_ref.LANDED_EX_REGEN : 30,
+		effect_ref.PASSIVE_EX_REGEN : 15,
+		effect_ref.LANDED_EX_REGEN : 40,
 		effect_ref.PROJ_DMG_MOD : 50
 	},
 	card_ref.BOTAN : {
@@ -390,17 +400,16 @@ const DATABASE = {
 	card_ref.AYAME : {
 		"name" : "Ayame",
 		"price" : 120,
-		effect_ref.FIERCE_DMG_MOD : 30,
+		effect_ref.FIERCE_DMG_MOD : 50,
 		effect_ref.COMBO_LEVEL : 1,
 		"quirks" : [effect_ref.NO_CROSSUP, effect_ref.REVENGE],
 	},
 	card_ref.IROHA : {
 		"name" : "Iroha",
 		"price" : 120,
-		effect_ref.SPEED : 10,
-		effect_ref.DODGE_GG_COST : -50,
-		effect_ref.DODGE_SPEED : 50,
-		effect_ref.MAX_AIR_DODGE : 1
+		effect_ref.DODGE_SPEED : 30,
+		effect_ref.MAX_AIR_DODGE : 1,
+		"quirks" : [effect_ref.NO_DODGE_COST]
 	},
 	card_ref.KORONE : {
 		"name" : "Korone",
@@ -415,15 +424,13 @@ const DATABASE = {
 		"price" : 120,
 		effect_ref.SDASH_SPEED : 60,
 		effect_ref.MAX_SUPER_DASH : 1,
-		effect_ref.AIR_NORMAL_DMG_MOD : 20,
+		effect_ref.AIR_NORMAL_DMG_MOD : 50,
 	},
 	card_ref.KIARA : {
 		"name" : "Kiara",
 		"price" : 120,
 		effect_ref.STOCK : 1,
-		effect_ref.HP: 20,
-		effect_ref.FIERCE_DMG_MOD : 20,
-		"quirks" : [effect_ref.AUTO_PBLOCK_PROJ, effect_ref.IGNITION_ATK],
+		"quirks" : [effect_ref.AUTO_PBLOCK_PROJ, effect_ref.RESPAWN_POWER, effect_ref.IGNITION_ATK],
 	},
 	card_ref.MORI : {
 		"name" : "Mori",
@@ -504,15 +511,16 @@ const DATABASE = {
 		effect_ref.MAX_AIR_JUMP : 1,
 		effect_ref.MAX_AIR_DASH : 1,
 		effect_ref.MAX_AIR_DODGE : 1,
+		"quirks" : [effect_ref.AIR_DASH_IFRAME]
 	},
 	card_ref.HAATO : {
 		"name" : "Haato",
 		"price" : 120,
 		"random" : [card_ref.HAATO, card_ref.HAATO_b],
 		"replace" : "Random Out of 2 Sets\nChanges Every Wave",
-		effect_ref.HP : 40,
-		effect_ref.HITSTUN_TAKEN : -30,
-		effect_ref.GG_REGEN_AMOUNT : 50,
+		effect_ref.HP : 50,
+		effect_ref.HITSTUN_TAKEN : -50,
+		effect_ref.GG_REGEN_AMOUNT : 100,
 		"quirks" : [effect_ref.HALF_BURST_COST, effect_ref.WILDCARD]
 	},
 	card_ref.HAATO_b : {
@@ -527,7 +535,8 @@ const DATABASE = {
 		"name" : "Suisei",
 		"price" : 120,
 		effect_ref.AIR_DASH_SPEED : 30,
-		effect_ref.COMBO_LEVEL : 1,
+		effect_ref.SDASH_SPEED : 30,
+		effect_ref.COMBO_LEVEL : 2,
 		effect_ref.FIERCE_DMG_MOD : 50,
 	},
 	card_ref.KANATA : {
@@ -544,7 +553,7 @@ const DATABASE = {
 		effect_ref.MAX_AIR_DASH : 2,
 		effect_ref.AIR_DASH_SPEED : 30,
 		effect_ref.SDASH_SPEED : 30,
-		effect_ref.AIR_NORMAL_DMG_MOD : 20,
+		effect_ref.AIR_NORMAL_DMG_MOD : 50,
 	},
 	card_ref.ANYA : {
 		"name" : "Anya",
@@ -559,7 +568,7 @@ const DATABASE = {
 		"price" : 120,
 		effect_ref.HEAVY_DMG_MOD : 50,
 		effect_ref.SPECIAL_DMG_MOD : 50,
-		"quirks" : [effect_ref.IGNITION_ATK],
+		"quirks" : [effect_ref.IGNITION_ATK, effect_ref.NO_CHIP_DMG],
 	},
 	card_ref.RUSHIA : {
 		"name" : "Rushia",
@@ -589,33 +598,34 @@ const DATABASE = {
 		"price" : 120,
 		effect_ref.STOCK: 1,
 		effect_ref.HITSTUN_TAKEN : -50,
-		effect_ref.GROUND_NORMAL_DMG_MOD : 30,
+		"quirks" : [effect_ref.RESPAWN_POWER, effect_ref.POISON_ATK]
 	},
 	card_ref.AKI : {
 		"name" : "Aki",
 		"price" : 120,
-		effect_ref.HP : 40,
-		effect_ref.HITSTUN_TAKEN : -25,
-		effect_ref.GROUND_NORMAL_DMG_MOD : 30,
+		effect_ref.HP : 30,
+		effect_ref.HITSTUN_TAKEN : -50,
+		effect_ref.GG_REGEN_AMOUNT : 100,
+		effect_ref.GROUND_NORMAL_DMG_MOD : 50,
+		"quirks" : [effect_ref.NO_CHIP_DMG]
 	},
 	card_ref.WATAME : {
 		"name" : "Watame",
 		"price" : 120,
+		effect_ref.STOCK: 1,
 		effect_ref.HP : 25,
-		effect_ref.BLOCK_GG_COST : -50,
-		effect_ref.GG_REGEN_AMOUNT : 50,
-		"quirks" : [effect_ref.NO_GUARD_DRAIN],
+		effect_ref.GG_REGEN_AMOUNT : 100,
+		"quirks": [effect_ref.NO_BLOCK_COST, effect_ref.NO_GUARD_DRAIN],
 	},
 	card_ref.BAELZ : {
 		"name" : "Baelz",
 		"price" : 120,
 		"random" : [card_ref.BAELZ, card_ref.BAELZ_b, card_ref.BAELZ_c, card_ref.BAELZ_d, card_ref.BAELZ_e, card_ref.BAELZ_f],
 		"replace" : "Random Out of 6 Sets\nChanges Every Wave",
-		effect_ref.SPEED : -20,
-		effect_ref.MAX_AIR_JUMP : 9,
-		effect_ref.MAX_AIR_DASH : 9,
-		effect_ref.MAX_AIR_DODGE : 9,
-		effect_ref.MAX_SUPER_DASH : 9,
+		effect_ref.SPEED : -50,
+		effect_ref.GROUND_DASH_SPEED : 50,
+		effect_ref.AIR_DASH_SPEED : 50,
+		effect_ref.SDASH_SPEED : 50,
 		"quirks" : [effect_ref.WILDCARD],
 	},
 	card_ref.BAELZ_b : {
@@ -630,8 +640,6 @@ const DATABASE = {
 		"name" : "Baelz",
 		"price" : 120,
 		"random" : [card_ref.BAELZ, card_ref.BAELZ_b, card_ref.BAELZ_c, card_ref.BAELZ_d, card_ref.BAELZ_e, card_ref.BAELZ_f],
-		effect_ref.BLOCK_GG_COST : 200,
-		effect_ref.DODGE_GG_COST : 200,
 		"quirks" : [effect_ref.GROUND_DASH_IFRAME, effect_ref.AIR_DASH_IFRAME, effect_ref.SDASH_IFRAME, effect_ref.WILDCARD],
 	},
 	card_ref.BAELZ_d : {
@@ -662,9 +670,8 @@ const DATABASE = {
 		"name" : "Kaela",
 		"price" : 120,
 		effect_ref.HITSTUN_TAKEN : -50,
-		effect_ref.WEAKBLOCK_CHIP_DMG_MOD : -50,
-		effect_ref.BLOCK_GG_COST : -30,
-		effect_ref.HEAVY_DMG_MOD : 20,
+		effect_ref.FIERCE_DMG_MOD : 50,
+		"quirks": [effect_ref.PROXIMITY_PARRY, effect_ref.NO_CHIP_DMG]
 	},
 	card_ref.MEL: {
 		"name" : "Mel",
@@ -682,17 +689,16 @@ const DATABASE = {
 	card_ref.LUNA : {
 		"name" : "Luna",
 		"price" : 120,
-		effect_ref.HP : 40,
+		effect_ref.HP : 25,
 		effect_ref.COIN_GAIN : 1,
 		"quirks" : [effect_ref.EX_RAISE_DMG]
 	},
 	card_ref.CHLOE : {
 		"name" : "Chloe",
 		"price" : 120,
-		effect_ref.SPEED : 10,
-		effect_ref.JUMP_SPEED : 20,
 		effect_ref.LIGHT_DMG_MOD : 30,
-		"quirks" : [effect_ref.FREE_RESET],
+		effect_ref.GUARD_DRAIN_MOD : 30,
+		"quirks" : [effect_ref.FREE_RESET, effect_ref.NO_DODGE_COST],
 	},
 	card_ref.KOYORI : {
 		"name" : "Koyori",
@@ -706,10 +712,8 @@ const DATABASE = {
 	card_ref.KOYORI_b : {
 		"name" : "Koyori",
 		"price" : 120,
-		effect_ref.DODGE_GG_COST: 150,
 		effect_ref.DODGE_SPEED: 50,
-		effect_ref.BLOCK_GG_COST: -90,
-		"quirks" : [effect_ref.NO_CROSSUP, effect_ref.CHILLING_ATK]
+		"quirks" : [effect_ref.NO_BLOCK_COST, effect_ref.NO_CROSSUP, effect_ref.CHILLING_ATK]
 	},
 	card_ref.KOYORI_c : {
 		"name" : "Koyori",
@@ -726,7 +730,7 @@ const DATABASE = {
 		effect_ref.SPEED : 10,
 		effect_ref.JUMP_SPEED : 20,
 		effect_ref.MAX_AIR_JUMP : 1,
-		effect_ref.AIR_NORMAL_DMG_MOD : 30
+		effect_ref.AIR_NORMAL_DMG_MOD : 50
 	},
 	card_ref.ALOE : {
 		"name" : "Aloe",
@@ -738,9 +742,9 @@ const DATABASE = {
 	card_ref.AZKI : {
 		"name" : "AZKi",
 		"price" : 120,
-		effect_ref.HP : 25,
-		effect_ref.SPECIAL_DMG_MOD : 30,
-		effect_ref.LANDED_EX_REGEN : 30,
+		effect_ref.HP : 20,
+		effect_ref.SPECIAL_DMG_MOD : 20,
+		effect_ref.LANDED_EX_REGEN : 20,
 		"quirks" : [effect_ref.EX_RAISE_DMG]
 	},
 	card_ref.OKAYU : {
@@ -761,15 +765,16 @@ const DATABASE = {
 		"name" : "Moona",
 		"price" : 120,
 		effect_ref.GRAVITY_MOD : -40,
-		effect_ref.HP : 30,
-		effect_ref.HEAVY_DMG_MOD : 50,
-		effect_ref.SPECIAL_DMG_MOD : 50,
+		effect_ref.HP : 20,
+		effect_ref.HEAVY_DMG_MOD : 30,
+		effect_ref.SPECIAL_DMG_MOD : 30,
+		"quirks": [effect_ref.NO_BLOCK_COST]
 	},
 	card_ref.IOFIFTEEN : {
 		"name" : "Iofifteen",
 		"price" : 120,
 		effect_ref.HP : 25,
-		effect_ref.SPECIAL_DMG_MOD : 50,
+		effect_ref.SPECIAL_DMG_MOD : 20,
 		effect_ref.PASSIVE_EX_REGEN : 5,
 		"quirks" : [effect_ref.EX_RAISE_DMG]
 	},
@@ -779,21 +784,24 @@ const DATABASE = {
 		effect_ref.SPEED : 10,
 		effect_ref.JUMP_SPEED : 20,
 		effect_ref.FIERCE_DMG_MOD : 50,
-		effect_ref.LANDED_EX_REGEN : 30,
+		effect_ref.LIGHT_DMG_MOD : 50,
+		"quirks" : [effect_ref.NO_GUARD_DRAIN]
 	},
 	card_ref.NENE : {
 		"name" : "Nene",
 		"price" : 120,
 		effect_ref.HP : 25,
-		effect_ref.LIGHT_DMG_MOD : 50,
-		effect_ref.PASSIVE_EX_REGEN : 5,
+		effect_ref.PASSIVE_EX_REGEN : 10,
+		effect_ref.LANDED_EX_REGEN : 25,
+		effect_ref.SPECIAL_DMG_MOD : 25,
 		"quirks" : [effect_ref.HALF_BURST_COST],
 	},
 	card_ref.ZETA : {
 		"name" : "Zeta",
 		"price" : 120,
 		effect_ref.SPEED : 10,
-		effect_ref.FIERCE_DMG_MOD : 50,
+		effect_ref.LIGHT_DMG_MOD : 35,
+		effect_ref.FIERCE_DMG_MOD : 35,
 		"quirks" : [effect_ref.AIR_DASH_IFRAME, effect_ref.NO_CROSSUP],
 	},
 	card_ref.REINE : {
@@ -806,9 +814,10 @@ const DATABASE = {
 	card_ref.RISU : {
 		"name" : "Risu",
 		"price" : 120,
-		effect_ref.JUMP_SPEED : 20,
-		effect_ref.SPEED : 20,
+		effect_ref.JUMP_SPEED : 15,
+		effect_ref.SPEED : 15,
 		effect_ref.LIGHT_DMG_MOD : 50,
+		"quirks" : [effect_ref.GROUND_DASH_IFRAME]
 	},
 	card_ref.LAPLUS : {
 		"name" : "La+",
@@ -825,7 +834,7 @@ const DATABASE = {
 		effect_ref.SPEED : -10,
 		effect_ref.GRAVITY_MOD : -60,
 		effect_ref.HP : 50,
-		effect_ref.HEAVY_DMG_MOD : 50,
+		effect_ref.HEAVY_DMG_MOD : 70,
 		"quirks" : [effect_ref.GRAVITIZING_ATK],
 	},
 

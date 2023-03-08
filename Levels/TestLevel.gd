@@ -34,7 +34,7 @@ var RESOURCE_ADD = {
 #		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN}
 
 # CHAIN: X, TOUGH: 0-5 (0/1 are weaker), SPEED: 0-6 (0/1 are slow), HP: 0-5 (0/1 are lower, 0 is 1 hp)
-# POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), COIN: X (around 40 limit)
+# POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), COIN: X (add to loot pool, 40 limit)
 
 const WAVES2 = {
 	1 : { # wave ID
@@ -72,7 +72,7 @@ const WAVES = {
 					"attr" : {
 						} },
 				],
-				1500 : [
+				3000 : [
 					{"mob" : "GuraM", "level" : 3, "variant" : "shark",
 					"attr" : {
 						} },
@@ -88,7 +88,7 @@ const WAVES = {
 						} },
 				],
 				1800 : [
-					{"mob" : "GuraM", "level" : 3, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 2, "variant" : "zone",
 					"attr" : {
 						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.TOUGH : 0
@@ -130,7 +130,7 @@ const WAVES = {
 						} },
 				],
 				1800 : [
-					{"mob" : "GuraM", "level" : 7, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 5, "variant" : "zone",
 					"attr" : {
 						Globals.mob_attr.HP : 1,
 						Globals.mob_attr.TOUGH : 1
@@ -166,7 +166,7 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.COIN: 15,
+						Globals.mob_attr.COIN: 8,
 						Globals.mob_attr.HP : 2,
 						} },
 				],

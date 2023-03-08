@@ -607,7 +607,7 @@ func simulate2(): # only ran if not in hitstop
 		var weight: int = FMath.get_fraction_percent(PEAK_DAMPER_LIMIT - abs(velocity.y), PEAK_DAMPER_LIMIT)
 		gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, PEAK_DAMPER_MOD), weight)
 		# transit from jump to fall animation
-		if Animator.query_to_play(["Jump"]): # don't use query() for this one
+		if new_state == Globals.char_state.AIR_STANDBY and Animator.query_to_play(["Jump"]): # don't use query() for this one
 			animate("FallTransit")
 
 	if !grounded: # gravity only pulls you if you are in the air
@@ -1219,6 +1219,10 @@ func has_trait(trait: int) -> bool:
 
 func loot_drop():
 	var loot_array = UniqChar.generate_loot()
+	
+	if Globals.mob_attr.COIN in mob_attr:
+		for x in min(mob_attr[Globals.mob_attr.COIN], Globals.Game.LevelControl.ITEM_LIMIT):
+			loot_array.append("Coin")
 	
 	if target_ID >= 0:
 		var coin_change = Inventory.modifier(target_ID, Cards.effect_ref.COIN_GAIN)
@@ -3131,6 +3135,8 @@ func landed_a_sequence(hit_data):
 		
 	animate(hit_data.move_data.sequence)
 	UniqChar.start_sequence_step()
+	
+	remove_status_effect_on_landing_hit()
 	
 #	defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# defender lose positive flow
 

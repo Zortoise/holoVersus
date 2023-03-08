@@ -326,8 +326,8 @@ const TRIGGERS = {
 	"close_range" : {"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(180, 100), "decision" : "close_range",},
 	"mid_range" : {"type" : "zone", "long" : true, "origin" : Vector2.ZERO, "size" : Vector2(270, 100), "decision" : "mid_range",},
 	"anti_air_short" : {"type" : "zone", "origin" : Vector2(0, -50), "size" : Vector2(100, 100), "decision" : "anti_air_short",},
-	"anti_air" : {"type" : "zone", "origin" : Vector2(0, -200), "size" : Vector2(150, 300), "decision" : "anti_air",},
-	"anti_air_long" : {"type" : "zone", "long" : true, "origin" : Vector2(0, -75), "size" : Vector2(270, 100),"decision" : "anti_air_long",},
+	"anti_air" : {"type" : "zone", "origin" : Vector2(0, -120), "size" : Vector2(150, 150), "decision" : "anti_air",},
+	"anti_air_long" : {"type" : "zone", "long" : true, "origin" : Vector2(0, -100), "size" : Vector2(270, 100),"decision" : "anti_air_long",},
 	
 	"jump_peak" :{"type" : "peak", "decision" : "jump_peak",},
 	"air_close" : {"type" : "zone", "origin" : Vector2.ZERO, "size" : Vector2(100, 100), "decision" : "air_close",},
@@ -628,12 +628,12 @@ enum rank {LOW, MID, HIGH, SHARK, RUSH, ZONE}
 	
 const ATK_LOOKUP = {
 	atk_range.POINTBLANK : {
-		rank.LOW : ["double_stab"],
+		rank.LOW : ["back_dash", "double_stab", "double_stab"],
 		rank.MID : ["double_stab_combo1", "hammerhead"],
 		rank.HIGH : ["command_grab", "double_stab_combo2", "hammerhead_combo"],
 		rank.RUSH : ["command_grab", "double_stab_combo2", "hammerhead"],
 		rank.SHARK : ["hammerhead"],
-		rank.ZONE : ["back_dash"]
+		rank.ZONE : ["back_dash", "hammerhead"]
 	},
 	atk_range.CLOSE_RANGE : {
 		rank.LOW : ["double_stab", "backswing", "rush_upthrust"],
@@ -643,7 +643,7 @@ const ATK_LOOKUP = {
 		rank.RUSH : ["dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust", "backswing_combo", "sharkstomp", \
 				"rush_upthrust_combo", "hammerhead"],
 		rank.SHARK : ["dash_dance", "shorthop", "sharkstomp", "hammerhead", "shorthop"],
-		rank.ZONE : ["back_dash", "back_jump"]
+		rank.ZONE : ["back_dash", "back_jump", "hammerhead"]
 	},
 	atk_range.MID_RANGE : {
 		rank.LOW : ["rush_upthrust", "thrust", "backswing", "dash"],
@@ -668,7 +668,7 @@ const ATK_LOOKUP = {
 		rank.HIGH : ["sharkstomp_combo", "overhead", "hammerhead_combo"],
 		rank.RUSH : ["overhead", "sharkstomp", "hammerhead"],
 		rank.SHARK : ["sharkstomp", "hammerhead"],
-		rank.ZONE : ["back_dash", "up_throw_trident"]
+		rank.ZONE : ["back_dash", "hammerhead", "hammerhead", "up_throw_trident"]
 	},
 	atk_range.ANTI_AIR: {
 		rank.LOW : ["neutral_jump"],
@@ -676,7 +676,7 @@ const ATK_LOOKUP = {
 		rank.HIGH : ["neutral_jump", "hammerhead_combo", "up_throw_trident"],
 		rank.SHARK : ["neutral_jump", "hammerhead"],
 		rank.RUSH : ["neutral_jump"],
-		rank.ZONE : ["up_throw_trident", "up_tri_throw_trident"]
+		rank.ZONE : ["up_throw_trident", "hammerhead", "hammerhead", "up_tri_throw_trident"]
 	},
 	atk_range.ANTI_AIR_LONG: {
 		rank.LOW : ["forward_jump"],
@@ -1039,7 +1039,7 @@ func decision(decision_ref = null) -> bool:
 						Character.start_command("idle")
 					elif Character.get_opponent_x_dist() < 250 and Globals.Game.rng_generate(100) < 50:
 						if !Character.is_at_corners(): 
-							Character.start_command(Globals.Game.rng_array(["back_dash", "back_jump"]))
+							Character.start_command("option_close")
 						else:
 							Character.start_command("cross_jump")
 					elif Character.is_passive() and Globals.Game.rng_generate(100) < LONG_RANGE_PASSIVE_CHANCE:
@@ -1170,27 +1170,29 @@ func filter(atk_range: int):
 	match Character.mob_variant:
 		"rush":
 			if rank.RUSH in ATK_LOOKUP[atk_range]:
-				results = ATK_LOOKUP[atk_range][rank.RUSH]
+				results = ATK_LOOKUP[atk_range][rank.RUSH].duplicate()
 			else: continue
 		"zone":
 			if rank.ZONE in ATK_LOOKUP[atk_range]:
-				results = ATK_LOOKUP[atk_range][rank.ZONE]
-				if Character.mob_level <= 5:
+				results = ATK_LOOKUP[atk_range][rank.ZONE].duplicate()
+				if Character.mob_level < 3:
 					Globals.remove_instances(results, "tri_throw_trident")
 					Globals.remove_instances(results, "up_tri_throw_trident")
+				if Character.mob_level < 6:
+					Globals.remove_instances(results, "hammerhead")
 			else: continue
 		"shark":
 			if rank.SHARK in ATK_LOOKUP[atk_range]:
-				results = ATK_LOOKUP[atk_range][rank.SHARK]
+				results = ATK_LOOKUP[atk_range][rank.SHARK].duplicate()
 			else: continue
 		_:		
 			match Character.mob_level:
 				0, 1, 2: # mass enemies, remove annoying moves
-					results = ATK_LOOKUP[atk_range][rank.LOW]
+					results = ATK_LOOKUP[atk_range][rank.LOW].duplicate()
 				3, 4, 5: # early enemies, remove powerful moves
-					results = ATK_LOOKUP[atk_range][rank.MID]
+					results = ATK_LOOKUP[atk_range][rank.MID].duplicate()
 				6, 7, 8: # late-game enemies, remove weaker moves
-					results = ATK_LOOKUP[atk_range][rank.HIGH]
+					results = ATK_LOOKUP[atk_range][rank.HIGH].duplicate()
 					
 	jump_filter(results)		
 			
@@ -1254,23 +1256,19 @@ func jump_style_check(): # from main character node
 
 func generate_loot() -> Array:
 	var loot = []
-	
-	if Globals.mob_attr.COIN in Character.mob_attr:
-		for x in min(Character.mob_attr[Globals.mob_attr.COIN], Globals.Game.LevelControl.ITEM_LIMIT):
-			loot.append("Coin")
 			
-	else:	
-		match Character.mob_level:
-			0, 1:
-				loot.append_array(["Coin", "Coin", "Coin"])
-			2, 3:
-				loot.append_array(["Coin", "Coin", "Coin", "Coin"])
-			4, 5:
-				loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin"])
-			6, 7:
-				loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
-			8:
-				loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+#	else:	
+	match Character.mob_level:
+		0, 1:
+			loot.append_array(["Coin", "Coin", "Coin"])
+		2, 3:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin"])
+		4, 5:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin"])
+		6, 7:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+		8:
+			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
 	
 	var random = Globals.Game.rng_generate(3)
 	if random == 0: loot.append("Coin")
