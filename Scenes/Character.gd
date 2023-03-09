@@ -17,6 +17,7 @@ const TAP_MEMORY_DURATION = 20
 const ShorthopTimer_TIME = 15 # frames after shorthopping where you cannot block
 
 const MAX_EX_GAUGE = 30000
+const EX_LEVEL = 10000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
 
 const BASE_EX_REGEN = 20
@@ -105,6 +106,9 @@ const STRONGBLOCK_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is push
 const STRONGBLOCK_KNOCKBACK_MOD = 50 # % of knockback defender experience when strongblocking
 const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 
+const SPECIAL_GDRAIN_MOD = 100 # extra GDrain when blocking heavy/special/ex moves
+const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
+
 #const SUPERARMOR_CHIP_DMG_MOD = 50
 #const SUPERARMOR_GUARD_DRAIN_MOD = 150
 
@@ -139,7 +143,7 @@ const SURVIVAL_HITSTOP = 15
 #const SURV_BASE_DMG = 70
 
 # variables used, don't touch these
-var loaded_palette = null
+#var loaded_palette = null
 onready var Animator = $SpritePlayer # clean code
 onready var sprite = $Sprites/Sprite # clean code
 onready var sfx_under = $Sprites/SfxUnder # clean code
@@ -147,25 +151,25 @@ onready var sfx_over = $Sprites/SfxOver # clean code
 var UniqChar # unique character node
 var directory_name
 var palette_number
-var spritesheets = { # filled up at initialization via set_up_spritesheets()
-#	"Base" : load("res://Characters/___/Spritesheets/Base.png") # example
-	}
-var unique_audio = { # filled up at initialization
-#	"example" : load("res://Characters/___/UniqueAudio/example.wav") # example
-}
-var entity_data = { # filled up at initialization
-#	"TridentProj" : { # example
-#		"scene" : load("res://Characters/Gura/Entities/TridentProj.tscn"),
-#		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
-#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
-#	},
-}
-var sfx_data = { # filled up at initialization
-#	"WaterJet" : { # example
-#		"frame_data" : load("res://Characters/Gura/SFX/FrameData/WaterJet.tres"),
-#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/WaterJetSprite.png")
-#	},
-}
+#var spritesheet = { # filled up at initialization via set_up_spritesheet()
+##	"Base" : load("res://Characters/___/Spritesheets/Base.png") # example
+#	}
+##var unique_audio = { # filled up at initialization
+###	"example" : load("res://Characters/___/UniqueAudio/example.wav") # example
+##}
+#var entity_data = { # filled up at initialization
+##	"TridentProj" : { # example
+##		"scene" : load("res://Characters/Gura/Entities/TridentProj.tscn"),
+##		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+##		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
+##	},
+#}
+#var sfx_data = { # filled up at initialization
+##	"WaterJet" : { # example
+##		"frame_data" : load("res://Characters/Gura/SFX/FrameData/WaterJet.tres"),
+##		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/WaterJetSprite.png")
+##	},
+#}
 var floor_level
 #var left_ledge
 #var right_ledge
@@ -212,7 +216,7 @@ var input_buffer = []
 var afterimage_timer := 0 # for use by unique character node
 var monochrome := false
 
-var sprite_texture_ref = { # used for afterimages
+var sprite_texture_ref = { # used for afterimages, each contain spritesheet_filename, a string ref to the spritesheet in loaded data
 	"sprite" : null,
 	"sfx_over" : null,
 	"sfx_under" : null
@@ -299,13 +303,25 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	move_child(UniqChar, 0)
 	directory_name = "res://Characters/" + UniqChar.NAME + "/"
 	
-	set_up_spritesheets() # scan all .png files within Spritesheet folder and add them to "spritesheets" dictionary
-	set_up_unique_audio() # scan all .wav files within Audio folder and add them to "unique_audio" dictionary
-	set_up_entities() # scan all .tscn files within Entities folder and add them to "entities_data" dictionary
-	set_up_sfx() # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
+	# setup load_data
+	if !UniqChar.NAME in Loader.char_data:
+		Loader.char_data[UniqChar.NAME] = {
+	#		"scene" : load("res://Characters/Gura/Gura.tscn"),
+			"frame_data_array" : [
+			],
+			"spritesheet" : {
+			},
+			"palettes" : {
+			}
+		}
+		set_up_spritesheet() # scan all .png files within Spritesheet folder and add them to "spritesheet" dictionary in char_data in Loader
+		set_up_unique_audio() # scan all .wav files within Audio folder and add them to "Loader.audio" dictionary
+		set_up_entities() # scan all .tscn files within Entities folder and add them to "entities_data" dictionary
+		set_up_sfx() # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
+	
 	
 	UniqChar.sprite = sprite
-#	sprite.texture = spritesheets["BaseSprite"]
+#	sprite.texture = spritesheet["BaseSprite"]
 	
 	# set up animators
 	UniqChar.Animator = $SpritePlayer
@@ -333,7 +349,10 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 		
 	palette_number = in_palette_number
 	if palette_number > 1:
-		loaded_palette = ResourceLoader.load(directory_name + "Palettes/" + str(palette_number) + ".png")
+#		loaded_palette = ResourceLoader.load(directory_name + "Palettes/" + str(palette_number) + ".png")
+		Loader.add_loaded(Loader.char_data[UniqChar.NAME]["palettes"], palette_number, \
+				ResourceLoader.load(directory_name + "Palettes/" + str(palette_number) + ".png"))
+		
 	palette()
 	sfx_under.hide()
 	sfx_over.hide()
@@ -430,17 +449,22 @@ func palette():
 		sfx_under.material = null
 	else:
 		sprite.material = ShaderMaterial.new()
-		sprite.material.shader = Globals.loaded_palette_shader
-		sprite.material.set_shader_param("swap", loaded_palette)
+		sprite.material.shader = Loader.loaded_palette_shader
+		sprite.material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
 		sfx_over.material = ShaderMaterial.new()
-		sfx_over.material.shader = Globals.loaded_palette_shader
-		sfx_over.material.set_shader_param("swap", loaded_palette)
+		sfx_over.material.shader = Loader.loaded_palette_shader
+		sfx_over.material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
 		sfx_under.material = ShaderMaterial.new()
-		sfx_under.material.shader = Globals.loaded_palette_shader
-		sfx_under.material.set_shader_param("swap", loaded_palette)
+		sfx_under.material.shader = Loader.loaded_palette_shader
+		sfx_under.material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
 		
-# fill up the "spritesheets" dictionary with spritesheets in the "Spritesheets" folder loaded and ready
-func set_up_spritesheets():
+		
+func get_palette(): # called by other functions
+	return Loader.char_data[UniqChar.NAME].palettes[palette_number]
+		
+		
+# fill up the "spritesheet" dictionary with spritesheets in the "Spritesheets" folder loaded and ready
+func set_up_spritesheet():
 	# open the Spritesheet folder and get the filenames of all files in it
 	var directory = Directory.new()
 	if directory.open(directory_name + "Spritesheets/") == OK:
@@ -450,7 +474,9 @@ func set_up_spritesheets():
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".png.import"):
 				var file_name2 = file_name.get_file().trim_suffix(".png.import")
-				spritesheets[file_name2] = ResourceLoader.load(directory_name + "Spritesheets/" + file_name2 + ".png")
+#				spritesheet[file_name2] = ResourceLoader.load(directory_name + "Spritesheets/" + file_name2 + ".png")
+				Loader.add_loaded(Loader.char_data[UniqChar.NAME].spritesheet, file_name2, \
+						ResourceLoader.load(directory_name + "Spritesheets/" + file_name2 + ".png"))
 			file_name = directory.get_next()
 	else: print("Error: Cannot open Spritesheets folder for character")
 	
@@ -464,8 +490,9 @@ func set_up_unique_audio():
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".wav.import"):
 				var file_name2 = file_name.get_file().trim_suffix(".wav.import")
-				unique_audio[file_name2] = \
-					ResourceLoader.load(directory_name + "UniqueAudio/" + file_name2 + ".wav")
+				Loader.add_loaded(Loader.audio, file_name2, ResourceLoader.load(directory_name + "UniqueAudio/" + file_name2 + ".wav"))
+#				unique_audio[file_name2] = \
+#					ResourceLoader.load(directory_name + "UniqueAudio/" + file_name2 + ".wav")
 			file_name = directory.get_next()
 	else: print("Error: Cannot open UniqueAudio folder for character")
 	
@@ -485,14 +512,17 @@ func set_up_entities(): # scan all .tscn files within Entities folder and add th
 		while file_name != "":
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".tscn"):
-				var file_name2 = file_name.get_file().trim_suffix(".tscn")
-				entity_data[file_name2] = {}
-				entity_data[file_name2]["scene"] = \
-					load(directory_name + "Entities/" + file_name)
-				entity_data[file_name2]["frame_data"] = \
-					ResourceLoader.load(directory_name + "Entities/FrameData/" + file_name2 + ".tres")
-				entity_data[file_name2]["spritesheet"] = \
-					ResourceLoader.load(directory_name + "Entities/Spritesheets/" + file_name2 + "Sprite.png")
+				var file_name2 = file_name.get_file().trim_suffix(".tscn")	
+				if !file_name2 in Loader.entity_data:
+					var entity_data = {}
+					entity_data["scene"] = \
+						load(directory_name + "Entities/" + file_name)
+					entity_data["frame_data"] = \
+						ResourceLoader.load(directory_name + "Entities/FrameData/" + file_name2 + ".tres")
+					entity_data["spritesheet"] = \
+						ResourceLoader.load(directory_name + "Entities/Spritesheets/" + file_name2 + "Sprite.png")
+					Loader.add_loaded(Loader.entity_data, file_name2, entity_data)
+					
 			file_name = directory.get_next()
 	else: print("Error: Cannot open Entities folder for character")
 	
@@ -512,11 +542,14 @@ func set_up_sfx(): # scan all .tres files within SFX/FrameData folder and add th
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".tres"):
 				var file_name2 = file_name.get_file().trim_suffix(".tres")
-				sfx_data[file_name2] = {}
-				sfx_data[file_name2]["frame_data"] = \
-					ResourceLoader.load(directory_name + "SFX/FrameData/" + file_name)
-				sfx_data[file_name2]["spritesheet"] = \
-					ResourceLoader.load(directory_name + "SFX/Spritesheets/" + file_name2 + "Sprite.png")
+				if !file_name2 in Loader.sfx:
+					var sfx_data = {}
+					sfx_data["frame_data"] = \
+						ResourceLoader.load(directory_name + "SFX/FrameData/" + file_name)
+					sfx_data["spritesheet"] = \
+						ResourceLoader.load(directory_name + "SFX/Spritesheets/" + file_name2 + "Sprite.png")
+					Loader.add_loaded(Loader.sfx, file_name2, sfx_data)
+				
 			file_name = directory.get_next()
 	else: print("Error: Cannot open SFX folder for character")
 	
@@ -2583,6 +2616,10 @@ func get_stat(stat: String) -> int:
 		
 	if Globals.survival_level != null:
 		match stat:
+			"SPECIAL_GDRAIN_MOD":
+				to_return = FMath.percent(to_return, 300) # increased GDrain on specials during Survival
+				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
+					to_return = FMath.percent(to_return, 50)
 			"DAMAGE_VALUE_LIMIT":
 #				var hp_mod_array = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100] 
 #				to_return = FMath.percent(to_return, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
@@ -2650,7 +2687,9 @@ func get_stat(stat: String) -> int:
 	
 			"GG_REGEN_AMOUNT":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GG_REGEN_AMOUNT))
+				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
+					to_return = FMath.percent(to_return, 200)
+				
 			"GROUND_BLOCK_GG_COST", "AIR_BLOCK_GG_COST":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
 #				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.BLOCK_GG_COST))
@@ -2730,7 +2769,8 @@ func enchance_card(effect_ref: int):
 				var spawn_point = position
 				spawn_point = Detection.ground_finder(spawn_point, facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
-					Globals.Game.spawn_entity(player_ID, "NibblerSpawnE", spawn_point, {})
+#					func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):
+					Globals.Game.spawn_entity(player_ID, "NibblerSpawnE", spawn_point, {}, null, UniqChar.NAME)
 					play_audio("water15", {"surv" : true})
 					enchance_cooldowns[Globals.Game.LevelControl.effect_ref.SHARK] = Cards.SHARK_COOLDOWN
 				
@@ -2775,13 +2815,13 @@ func on_kill():
 		play_audio("kill1", {"vol" : -2})
 		var sfx_facing: int = Globals.Game.rng_facing()
 		var rot = Globals.Game.get_killblast_angle_and_screenshake(position) * -sfx_facing # can be a float, effect is visual
-		var aux_data = {"facing" : sfx_facing, "rot" : rot}
+		var palette
 		match player_ID:
 			0:
-				pass
+				palette = "red"
 			1:
-				aux_data["palette"] = "blue"
-		Globals.Game.spawn_SFX("KillBlast", "KillBlast", position, aux_data)
+				palette = "blue"
+		Globals.Game.spawn_SFX("KillBlast", "KillBlast", position, {"facing" : sfx_facing, "rot" : rot}, palette)
 		
 		$VarJumpTimer.stop()
 		$HitStunTimer.stop()
@@ -2877,14 +2917,15 @@ func respawn():
 	state = Globals.char_state.GROUND_STANDBY
 	add_status_effect([Globals.status_effect.RESPAWN_GRACE, RESPAWN_GRACE_DURATION])
 	
-	var aux_data = {"back":true, "facing":Globals.Game.rng_facing(), "v_mirror":Globals.Game.rng_bool()}
+	var palette
 	match player_ID:
 		0:
-			pass
+			palette = "red"
 		1:
-			aux_data["palette"] = "blue"
+			palette = "blue"
 	
-	Globals.Game.spawn_SFX("Respawn", "Respawn", position, aux_data)
+	Globals.Game.spawn_SFX("Respawn", "Respawn", position, {"back":true, "facing":Globals.Game.rng_facing(), \
+			"v_mirror":Globals.Game.rng_bool()}, palette)
 	play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
 	play_audio("bling7", {"vol" : -7, "bus" : "PitchUp2"})
 
@@ -3268,7 +3309,7 @@ func set_monochrome():
 	if !monochrome:
 		monochrome = true
 		sprite.material = ShaderMaterial.new()
-		sprite.material.shader = Globals.monochrome_shader
+		sprite.material.shader = Loader.monochrome_shader
 
 # particle emitter, visuals only, no need fixed-point
 func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, number, radius, v_mirror_rand = false):
@@ -3283,9 +3324,7 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 			var aux_data = {"facing" : Globals.Game.rng_facing()}
 			if v_mirror_rand:
 				aux_data["v_mirror"] = Globals.Game.rng_bool()
-			if palette != "":
-				aux_data["palette"] = palette
-			Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data)
+			Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data, palette)
 			
 func ex_flash():# process ex flash
 	if is_attacking(): 	# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active/recovery
@@ -3304,18 +3343,18 @@ func block_flash():
 	if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["block"]): # stop flashing
 		reset_modulate()
 		
-#func get_spritesheets():
+#func get_spritesheet():
 #	pass
 			
 func process_afterimage_trail():# process afterimage trail
 	# Character.afterimage_trail() can accept 2 parameters, 1st is the starting modulate, 2nd is the lifetime
 	
 	# afterimage trail for certain modulate animations with the key "afterimage_trail"
-	if LoadedSFX.modulate_animations.has($ModulatePlayer.current_animation) and \
-		LoadedSFX.modulate_animations[$ModulatePlayer.current_animation].has("afterimage_trail") and \
+	if NSAnims.modulate_animations.has($ModulatePlayer.current_animation) and \
+		NSAnims.modulate_animations[$ModulatePlayer.current_animation].has("afterimage_trail") and \
 		$ModulatePlayer.is_playing():
 		# basic afterimage trail for "afterimage_trail" = 0
-		if LoadedSFX.modulate_animations[$ModulatePlayer.current_animation]["afterimage_trail"] == 0:
+		if NSAnims.modulate_animations[$ModulatePlayer.current_animation]["afterimage_trail"] == 0:
 			afterimage_trail()
 			return
 			
@@ -3338,17 +3377,20 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 		else:
 			main_color_modulate = color_modulate
 		
+#func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, palette_ref, color_modulate = null, \
+#		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
-				starting_modulate_a, lifetime, afterimage_shader)
+			Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_number, \
+					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 			
-		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), main_color_modulate, \
-			starting_modulate_a, lifetime, afterimage_shader)
-#		spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
+		Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sprite, sprite.get_path(), palette_number, \
+				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
-				starting_modulate_a, lifetime, afterimage_shader)
+			Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_number, \
+					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
+					
 	else:
 		afterimage_timer -= 1
 		
@@ -3356,14 +3398,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
+		Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_number, null, \
 			starting_modulate_a, lifetime)
 		
-	Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), null, \
+	Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sprite, sprite.get_path(), palette_number, null, \
 		starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
+		Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_number, null, \
 			starting_modulate_a, lifetime)
 		
 		
@@ -3651,8 +3693,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		if current_ex_gauge >= EX_MOVE_COST:
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
-			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), \
-					{"palette":"pink"})
+			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {}, "pink")
 			modulate_play("EX_flash")
 			return true
 		else:
@@ -3663,27 +3704,31 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
-			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), \
-					{"palette":"pink"})
+			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {}, "pink")
 			modulate_play("EX_flash")
 			return true
 		else:
 			return false
 
-func super_test(cost_burst := false):
-	if current_ex_gauge != MAX_EX_GAUGE:
-		return false
-	if cost_burst and burst_token != Globals.burst.AVAILABLE:
+func super_test():
+	if $EXSealTimer.is_running():
 		return false
 	return true
+#	if current_ex_gauge != MAX_EX_GAUGE:
+#		return false
+#	if cost_burst and burst_token != Globals.burst.AVAILABLE:
+#		return false
+#	return true
 		
-func super_cost(ex_lock_time := 0, cost_burst := false):
+func super_cost(lock_time_per_lvl, base_lock_time := 0):
+	var total_lock_time: int = lock_time_per_lvl * (3 - get_ex_level()) + base_lock_time
+	
+	$EXSealTimer.time += total_lock_time
+	super_ex_lock = $EXSealTimer.time
+	
 	change_ex_gauge(-MAX_EX_GAUGE)
-	if ex_lock_time > 0:
-		$EXSealTimer.time = ex_lock_time
-		super_ex_lock = ex_lock_time
-	if cost_burst:
-		change_burst_token(Globals.burst.CONSUMED)
+#	if cost_burst:
+#		change_burst_token(Globals.burst.CONSUMED)
 	
 func tech():
 	if button_dash in input_state.pressed:
@@ -3826,8 +3871,8 @@ func a_reset_check(move_name):
 	
 func test_jump_cancel():
 	
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.WEAKBLOCKED]:
-		return false # can only jump cancel on Normal hit/weakblock
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
+		return false # can only dash cancel on Normal/Heavy hit
 	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
 		
@@ -3839,8 +3884,8 @@ func test_jump_cancel():
 	
 	
 func test_dash_cancel():
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.WEAKBLOCKED]:
-		return false # can only dash cancel on Normal hit/weakblock
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
+		return false # can only dash cancel on Normal/Heavy hit
 		
 	if !grounded and air_dash == 0: return false # if in air, need >1 air dash left
 	
@@ -3853,8 +3898,8 @@ func test_dash_cancel():
 	
 func test_sdash_cancel():
 	
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL, Globals.chain_combo.WEAKBLOCKED]:
-		return false # can only s_dash cancel on Normal hit/Special hit/weakblock
+	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL]:
+		return false # can only s_dash cancel on Normal hit/Special hit
 	
 	var move_name = get_move_name()
 	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name):
@@ -3877,7 +3922,7 @@ func test_sdash_cancel():
 		
 		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
 		Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool(), "palette":"blue", "sticky":true}, player_ID)
+				"v_mirror":Globals.Game.rng_bool(), "sticky_ID":player_ID}, "blue")
 		modulate_play("blue_reset")
 	else:
 		return false	
@@ -3998,7 +4043,7 @@ func new_status_effect(effect): # run on frame the status effect is inflicted/st
 	match effect:
 		Globals.status_effect.POS_FLOW:
 			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
-				Globals.loaded_guard_gauge_pos
+				Loader.loaded_guard_gauge_pos
 		Globals.status_effect.LETHAL:
 			Globals.Game.lethalfreeze(get_path())
 	
@@ -4069,7 +4114,7 @@ func clear_visual_effect_of_status(effect): # must run this when removing status
 			reset_modulate()
 		Globals.status_effect.POS_FLOW:
 			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
-				Globals.loaded_guard_gauge
+				Loader.loaded_guard_gauge
 		Globals.status_effect.POISON:
 			reset_modulate()
 				
@@ -4427,6 +4472,15 @@ func reset_guard_gauge():
 #
 #	change_guard_gauge(guard_gauge_change)
 	
+func get_ex_level():
+	if current_ex_gauge < EX_LEVEL:
+		return 0
+	elif current_ex_gauge < EX_LEVEL * 2:
+		return 1
+	elif current_ex_gauge < MAX_EX_GAUGE:
+		return 2
+	else:
+		return 3
 	
 func change_ex_gauge(ex_gauge_change: int):
 #	current_ex_gauge += ex_gauge_change * 3 # boosted for testing
@@ -4627,28 +4681,30 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 					
 			Globals.block_state.WEAK:
-				match hit_data.move_data.atk_type:
-					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
-						chain_combo = Globals.chain_combo.WEAKBLOCKED
-#						if Globals.atk_attr.NO_CHAIN_ON_WEAKBLOCK in hit_data.move_data.atk_attr:
-#							chain_combo = Globals.chain_combo.NO_CHAIN
-					Globals.atk_type.HEAVY:
-						chain_combo = Globals.chain_combo.HEAVY
-					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
-						chain_combo = Globals.chain_combo.SPECIAL
-					Globals.atk_type.SUPER:
-						chain_combo = Globals.chain_combo.SUPER
+				chain_combo = Globals.chain_combo.WEAKBLOCKED
+#				match hit_data.move_data.atk_type:
+#					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
+#						chain_combo = Globals.chain_combo.WEAKBLOCKED
+##						if Globals.atk_attr.NO_CHAIN_ON_WEAKBLOCK in hit_data.move_data.atk_attr:
+##							chain_combo = Globals.chain_combo.NO_CHAIN
+#					Globals.atk_type.HEAVY:
+#						chain_combo = Globals.chain_combo.WEAKBLOCKED
+#					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
+#						chain_combo = Globals.chain_combo.WEAKBLOCKED
+#					Globals.atk_type.SUPER:
+#						chain_combo = Globals.chain_combo.WEAKBLOCKED
 				
 			Globals.block_state.STRONG:
-				match hit_data.move_data.atk_type:
-					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
-						chain_combo = Globals.chain_combo.STRONGBLOCKED
-					Globals.atk_type.HEAVY:
-						chain_combo = Globals.chain_combo.HEAVY
-					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
-						chain_combo = Globals.chain_combo.SPECIAL
-					Globals.atk_type.SUPER:
-						chain_combo = Globals.chain_combo.SUPER
+				chain_combo = Globals.chain_combo.STRONGBLOCKED
+#				match hit_data.move_data.atk_type:
+#					Globals.atk_type.LIGHT, Globals.atk_type.FIERCE:
+#						chain_combo = Globals.chain_combo.STRONGBLOCKED
+#					Globals.atk_type.HEAVY:
+#						chain_combo = Globals.chain_combo.HEAVY
+#					Globals.atk_type.SPECIAL, Globals.atk_type.EX:
+#						chain_combo = Globals.chain_combo.SPECIAL
+#					Globals.atk_type.SUPER:
+#						chain_combo = Globals.chain_combo.SUPER
 					
 				
 	# PUSHBACK ----------------------------------------------------------------------------------------------
@@ -4872,7 +4928,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
-	if !Globals.atk_attr.UNBLOCKABLE_PROJ in hit_data.move_data.atk_attr:
+	if !Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
 		match state: # not new_state, cannot block on exact frame attack is detected
 			
 			# SUPERARMOR --------------------------------------------------------------------------------------------------
@@ -4938,14 +4994,22 @@ func being_hit(hit_data): # called by main game node when taking a hit
 							# attacker can continue their chain combo or jump/dash as usual
 							hit_data.block_state = Globals.block_state.WEAK
 
-				Globals.atk_type.HEAVY, Globals.atk_type.SPECIAL, Globals.atk_type.EX, Globals.atk_type.SUPER:
-					# cannot block Heavy/Specials/Supers
-					hit_data.block_state = Globals.block_state.UNBLOCKED
+				Globals.atk_type.HEAVY, Globals.atk_type.SPECIAL, Globals.atk_type.EX: # can weakblock heavy/special/EX at high GG cost
+					if attacker != null and check_if_crossed_up(attacker, hit_data.angle_to_atker):
+						hit_data.block_state = Globals.block_state.UNBLOCKED
+					else:
+						hit_data.block_state = Globals.block_state.WEAK
 					
-				Globals.atk_type.ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE_PROJ
+				Globals.atk_type.SUPER: # can weakblock super
+					if attacker != null and check_if_crossed_up(attacker, hit_data.angle_to_atker):
+						hit_data.block_state = Globals.block_state.UNBLOCKED
+					else:
+						hit_data.block_state = Globals.block_state.WEAK
+					
+				Globals.atk_type.ENTITY, Globals.atk_type.SUPER_ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE
 #					if check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker):
 #						hit_data.block_state = Globals.block_state.UNBLOCKED
-					if Globals.atk_attr.UNBLOCKABLE_PROJ in hit_data.move_data.atk_attr:
+					if Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
 						hit_data.block_state = Globals.block_state.UNBLOCKED
 					else:
 						if !check_if_crossed_up(attacker_or_entity, hit_data.angle_to_atker):
@@ -5031,6 +5095,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if can_stun(hit_data):
 			hit_data.stun = true
 			hit_data.block_state = Globals.block_state.UNBLOCKED
+		elif get_guard_gauge_percent_below() == 0:
+			hit_data.block_state = Globals.block_state.UNBLOCKED
 		
 		var damage = calculate_damage(hit_data)
 		take_damage(damage) # do damage calculation
@@ -5097,7 +5163,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker.reset_jumps()
 			# Burst Counter grants attacker Positive Flow
 			if attacker.current_guard_gauge < 0:
-				attacker.add_status_effect(Globals.status_effect.POS_FLOW, null)
+#				attacker.add_status_effect(Globals.status_effect.POS_FLOW, null)
 				attacker.status_effect_to_add.append([Globals.status_effect.POS_FLOW, null])
 				
 		elif hit_data.move_data.burst == "BurstEscape":
@@ -5172,6 +5238,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if "superarmored" in hit_data:
 					modulate_play("armor_flash")
 					play_audio("block3", {"vol" : -15})
+				elif hit_data.move_data.atk_type in [Globals.atk_type.SPECIAL, Globals.atk_type.EX, \
+						Globals.atk_type.SUPER, Globals.atk_type.SUPER_ENTITY]:
+					modulate_play("weakblock_flash")
+					play_audio("block3", {"vol" : -15})
 				else:
 					modulate_play("weakblock_flash")
 					play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
@@ -5224,6 +5294,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								# screenfreeze for everyone but the defender till their hitstop is over
 		
 	hit_data["hitstop"] = hitstop # send this to attacker as well
+	
+#	if hit_data.block_state == Globals.block_state.WEAK and \
+#			hit_data.move_data.atk_type in [Globals.atk_type.HEAVY, Globals.atk_type.SPECIAL, Globals.atk_type.EX, \
+#			Globals.atk_type.SUPER, Globals.atk_type.SUPER_ENTITY]:
+#		hitstop += 10 # extra hitstop when blocking heavy/special/ex/super
 
 	if hit_data.stun:
 		hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
@@ -5489,7 +5564,7 @@ func can_stun(hit_data):
 	if query_status_effect(Globals.status_effect.STUN_RECOVER):
 		return false
 	if hit_data.weak_hit or "autochain" in hit_data or hit_data.move_data.damage <= 0:
-		return false # autochain moves will not guardbreak, only the autochain finisher can
+		return false # autochain moves will not stun, only the autochain finisher can
 	if "non_strong_proj" in hit_data:
 		return false
 	if "MOB" in hit_data.attacker_or_entity or "MOB_ENTITY" in hit_data.attacker_or_entity:
@@ -5559,14 +5634,19 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		return 0
 	
 #	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
-	
-	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on block
-		return 0
-		
-	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_GUARD_DRAIN):
-		return 0
 
-	return -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1] # Guard Drain on 1st hit of the combo depends on Attack Level
+	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+	
+	if hit_data.block_state != Globals.block_state.UNBLOCKED: # no Guard Drain on blocking normals
+		if hit_data.move_data.atk_type in [Globals.atk_type.HEAVY, Globals.atk_type.SPECIAL, Globals.atk_type.EX]:
+			guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # double guard drain when blocking heavy/special/ex
+		else:
+			return 0
+	else:
+		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_GUARD_DRAIN):
+			return 0
+
+	return guard_drain # Guard Drain on 1st hit of the combo depends on Attack Level
 
 	
 	
@@ -5595,6 +5675,10 @@ func calculate_knockback_strength(hit_data) -> int:
 		match hit_data.block_state:
 			Globals.block_state.WEAK:
 				knockback_strength = FMath.percent(knockback_strength, WEAKBLOCK_KNOCKBACK_MOD) # KB for weakblock
+				if  hit_data.move_data.atk_type in [Globals.atk_type.HEAVY, Globals.atk_type.SPECIAL, Globals.atk_type.EX, \
+						Globals.atk_type.SUPER, Globals.atk_type.SUPER_ENTITY]:
+					knockback_strength = FMath.percent(knockback_strength, SPECIAL_BLOCK_KNOCKBACK_MOD)
+					# increased KB when blocking heavy/special/ex/super
 			Globals.block_state.STRONG:
 				knockback_strength = FMath.percent(knockback_strength, STRONGBLOCK_KNOCKBACK_MOD) # KB for strongblock
 			Globals.block_state.PARRY:
@@ -5854,10 +5938,11 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
 	# SD hits have special hitspark, unless has VULN_LIMBS
 	if hit_data.semi_disjoint and !Globals.atk_attr.VULN_LIMBS in query_atk_attr():
-		var aux_data = {"facing":Globals.Game.rng_facing(), "v_mirror":Globals.Game.rng_bool()}
-		if UniqChar.SDHitspark_COLOR != "red":
-			aux_data["palette"] = UniqChar.SDHitspark_COLOR
-		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data.hit_center, aux_data)
+#		var aux_data = {"facing":Globals.Game.rng_facing(), "v_mirror":Globals.Game.rng_bool()}
+#		if UniqChar.SDHitspark_COLOR != "red":
+#			aux_data["palette"] = UniqChar.SDHitspark_COLOR
+		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
+				"v_mirror":Globals.Game.rng_bool()}, UniqChar.SDHitspark_COLOR)
 		return
 	
 	var hitspark_level: int
@@ -5932,10 +6017,11 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	if hitspark != "":
 		var rot_rad : float = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
 		if "pull" in hit_data: rot_rad += PI # flip if pulling
-		var aux_data = {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}
-		if hit_data.move_data["hitspark_palette"] != "red":
-			aux_data["palette"] = hit_data.move_data["hitspark_palette"]
-		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, aux_data)
+#		var aux_data = {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}
+#		if hit_data.move_data["hitspark_palette"] != "red":
+#			aux_data["palette"] = hit_data.move_data["hitspark_palette"]
+		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}, \
+				hit_data.move_data["hitspark_palette"])
 		
 func get_default_hitspark_type():
 	return get_stat("DEFAULT_HITSPARK_TYPE")
@@ -5950,7 +6036,10 @@ func generate_blockspark(hit_data):
 	
 	match hit_data.block_state:
 		Globals.block_state.WEAK:
-			if !"superarmored" in hit_data:
+			if hit_data.move_data.atk_type in [Globals.atk_type.HEAVY, Globals.atk_type.SPECIAL, Globals.atk_type.EX, \
+					Globals.atk_type.SUPER, Globals.atk_type.SUPER_ENTITY]:
+				blockspark = "WBlockspark2"
+			elif !"superarmored" in hit_data:
 				blockspark = "WBlockspark"
 			else:
 				blockspark = "Superarmorspark"
@@ -6598,7 +6687,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			anim_friction_mod = 0
 			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
 			Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool(), "palette":"pink"})
+				"v_mirror":Globals.Game.rng_bool()}, "pink")
 			modulate_play("pink_reset")
 		"AResetCRec":
 			anim_gravity_mod = 0
@@ -6643,20 +6732,20 @@ func _on_SpritePlayer_frame_update(): # emitted after every frame update, useful
 # return modulate to normal after ModulatePlayer finishes playing
 # may do follow-up modulate animation
 func _on_ModulatePlayer_anim_finished(anim_name):
-	if LoadedSFX.modulate_animations[anim_name].has("followup"):
+	if NSAnims.modulate_animations[anim_name].has("followup"):
 		reset_modulate()
-		modulate_play(LoadedSFX.modulate_animations[anim_name]["followup"])
+		modulate_play(NSAnims.modulate_animations[anim_name]["followup"])
 	else:
 		reset_modulate()
 	
 func _on_ModulatePlayer_anim_started(anim_name):
-	if LoadedSFX.modulate_animations[anim_name].has("monochrome"):
+	if NSAnims.modulate_animations[anim_name].has("monochrome"):
 		set_monochrome()
 	
 func _on_FadePlayer_anim_finished(anim_name):
-	if LoadedSFX.fade_animations[anim_name].has("followup"):
+	if NSAnims.fade_animations[anim_name].has("followup"):
 		reset_fade()
-		$FadePlayer.play(LoadedSFX.fade_animations[anim_name]["followup"])
+		$FadePlayer.play(NSAnims.fade_animations[anim_name]["followup"])
 	else:
 		reset_fade()
 		
@@ -6707,8 +6796,8 @@ func reset_fade():
 # aux_data contain "vol", "bus" and "unique_path" (added by this function)
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	
-	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
-		aux_data["unique_path"] = get_path() # add a new key to aux_data
+#	if !Loader.audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
+#		aux_data["unique_path"] = get_path() # add a new key to aux_data
 		
 	Globals.Game.play_audio(audio_ref, aux_data)
 
@@ -6716,12 +6805,12 @@ func play_audio(audio_ref: String, aux_data: Dictionary):
 
 # triggered by SpritePlayer at start of each animation
 func _on_change_spritesheet(spritesheet_filename):
-	sprite.texture = spritesheets[spritesheet_filename]
+	sprite.texture = Loader.char_data[UniqChar.NAME].spritesheet[spritesheet_filename]
 	sprite_texture_ref.sprite = spritesheet_filename
 	
 func _on_change_SfxOver_spritesheet(SfxOver_spritesheet_filename):
 	sfx_over.show()
-	sfx_over.texture = spritesheets[SfxOver_spritesheet_filename]
+	sfx_over.texture = Loader.char_data[UniqChar.NAME].spritesheet[SfxOver_spritesheet_filename]
 	sprite_texture_ref.sfx_over = SfxOver_spritesheet_filename
 	
 func hide_SfxOver():
@@ -6729,7 +6818,7 @@ func hide_SfxOver():
 	
 func _on_change_SfxUnder_spritesheet(SfxUnder_spritesheet_filename):
 	sfx_under.show()
-	sfx_under.texture = spritesheets[SfxUnder_spritesheet_filename]
+	sfx_under.texture = Loader.char_data[UniqChar.NAME].spritesheet[SfxUnder_spritesheet_filename]
 	sprite_texture_ref.sfx_under = SfxUnder_spritesheet_filename
 	
 func hide_SfxUnder():
@@ -6912,8 +7001,8 @@ func load_state(state_data):
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	reset_modulate()
 	$ModulatePlayer.load_state(state_data.ModulatePlayer_data)
-	if $ModulatePlayer.current_animation in LoadedSFX.modulate_animations and \
-			LoadedSFX.modulate_animations[$ModulatePlayer.current_animation].has("monochrome"): set_monochrome()
+	if $ModulatePlayer.current_animation in NSAnims.modulate_animations and \
+			NSAnims.modulate_animations[$ModulatePlayer.current_animation].has("monochrome"): set_monochrome()
 	reset_fade()
 	$FadePlayer.load_state(state_data.FadePlayer_data)
 #	palette()

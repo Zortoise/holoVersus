@@ -1,41 +1,11 @@
 extends Node
 
-# global variables that contain preloaded SFX animation data
-# does not contain unique character's SFX data, store those on the unique character's node
-
-var loaded_sfx = {} # code in _ready() will load this with frame_data and spritesheets from res://Assets/Effects/ at start
-# example:
-#	loaded_sfx = {
-#		"DustClouds" : {
-#			"frame_data" : load("res://Assets/Effects/DustClouds/FrameData/DustClouds.tres")
-#			"spritesheet" : ResourceLoader.load("res://Assets/Effects/DustClouds/Spritesheets/DustCloudsSprite.png")
-#		}
-#		"HitsparkB" : {
-#			"frame_data" : load("res://Assets/Effects/Hitsparks/FrameData/HitsparkB.tres")
-#			"spritesheet" : ResourceLoader.load("res://Assets/Effects/Hitsparks/Spritesheets/HitsparkBSprite.png")
-#		}
-#	}
-
-var loaded_sfx_palettes = { # code in _ready() will load this with .png files at start
-# example:
-#	"blue" : ResourceLoader.load("res://Assets/Palettes/blue.png")
-}
-
-var loaded_audio = { # code in _ready() will load this with .wav files at start
-# example:
-#	"jump1" : ResourceLoader.load("res://Assets/Audio/Common/jump1.wav")
-}
-
-var loaded_ui_audio = { # code in _ready() will load this with .wav files at start
-# example:
-#	"ui_move" : ResourceLoader.load("res://Assets/Audio/UI/ui_move.wav")
-}
+# NSAnims = Non-Sprite Animations, contain modulate animations and fade animations
 
 enum priority {
 	GRACE, FLASH, LETHAL, STUN, MOB_ARMOR, REPEAT, ACTION, VISUAL, HARMFUL, BUFF, UNIQUE, DARKEN
 }
 
-# also contain modulate animations
 var modulate_animations = {
 	"darken" : {
 		"priority" : priority.DARKEN,
@@ -958,75 +928,5 @@ var fade_animations = {
 }
 
 
-func _ready():
-	
-	# load directories from res://Assets/Effects/
-	var dir = Directory.new()
-	if dir.open("res://Assets/Effects/") == OK:
-		dir.list_dir_begin(true)
-		var folder_name = dir.get_next()
-		while folder_name != "":
-			# load all needed directories
-			if !folder_name.begins_with("."):
-				load_sfx(folder_name)
-			folder_name = dir.get_next()
-	else: print("Error: Cannot open Effects folder from LoadedSFX.gd")
-	
-	# load .png files from res://Assets/Palettes/
-	if dir.change_dir("res://Assets/Palettes/") == OK:
-		dir.list_dir_begin(true)
-		var file_name = dir.get_next()
-		while file_name != "":
-			# load all needed directories
-			if file_name.ends_with(".png.import"):
-				var file_name2 = file_name.trim_suffix(".png.import")
-				loaded_sfx_palettes[file_name2] = ResourceLoader.load("res://Assets/Palettes/" + file_name2 + ".png")
-			file_name = dir.get_next()
-	else: print("Error: Cannot open Assets/Palettes folder from LoadedSFX.gd")
-	
-	# load .wav files from res://Assets/Audio/Common
-	if dir.change_dir("res://Assets/Audio/Common/") == OK:
-		dir.list_dir_begin(true)
-		var file_name = dir.get_next()
-		while file_name != "":
-			# load all needed directories
-			if file_name.ends_with(".wav.import"):
-				var file_name2 = file_name.trim_suffix(".wav.import")
-				loaded_audio[file_name2] = ResourceLoader.load("res://Assets/Audio/Common/" + file_name2 + ".wav")
-			file_name = dir.get_next()
-	else: print("Error: Cannot open Audio/Common folder from LoadedSFX.gd")
-	
-	# load .wav files from res://Assets/Audio/UI
-	if dir.change_dir("res://Assets/Audio/UI/") == OK:
-		dir.list_dir_begin(true)
-		var file_name = dir.get_next()
-		while file_name != "":
-			# load all needed directories
-			if file_name.ends_with(".wav.import"):
-				var file_name2 = file_name.trim_suffix(".wav.import")
-				loaded_ui_audio[file_name2] = ResourceLoader.load("res://Assets/Audio/UI/" + file_name2 + ".wav")
-			file_name = dir.get_next()
-	else: print("Error: Cannot open Audio/UI folder from LoadedSFX.gd")
-	
-	
-func load_sfx(folder_name):
-	
-	# load sfx from res://Assets/Effects/
-	var dir = Directory.new()
-	if dir.open("res://Assets/Effects/" + folder_name + "/FrameData/") == OK:
-		dir.list_dir_begin(true)
-		var frame_data_file_name = dir.get_next()
-		while frame_data_file_name != "":
-			# load all needed files and add them to the dictionary
-			if frame_data_file_name.ends_with(".tres"):
-				frame_data_file_name = frame_data_file_name.trim_suffix(".tres")
-				
-				loaded_sfx[frame_data_file_name] = {}
-				loaded_sfx[frame_data_file_name]["frame_data"] = \
-						load("res://Assets/Effects/" + folder_name + "/FrameData/" + frame_data_file_name + ".tres")
-				loaded_sfx[frame_data_file_name]["spritesheet"] = \
-						load("res://Assets/Effects/" + folder_name + "/Spritesheets/" + frame_data_file_name + "Sprite.png")
-				
-			frame_data_file_name = dir.get_next()
-	else: print("Error: Cannot open FrameData folder for Effects from LoadedSFX.gd")
+
 	

@@ -1,6 +1,5 @@
 extends Node2D
 
-const PALETTE = null
 
 const TRAITS = [Globals.entity_trait.GROUNDED]
 

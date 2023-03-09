@@ -140,7 +140,7 @@ func load_last_picked(last_picked):
 				$P1_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
 			else:
 				$P1_Sprite.get_child(0).material = ShaderMaterial.new()
-				$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+				$P1_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 				$P1_Sprite.get_child(0).material.set_shader_param("swap", \
 						character_data[char_grid[P1_picker_pos]]["palettes"][str(P1_palette_picked)])
 		
@@ -151,7 +151,7 @@ func load_last_picked(last_picked):
 				$P2_Sprite.get_child(0).material = null
 			else:
 				$P2_Sprite.get_child(0).material = ShaderMaterial.new()
-				$P2_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+				$P2_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 				$P2_Sprite.get_child(0).material.set_shader_param("swap", \
 						character_data[char_grid[P2_picker_pos]]["palettes"][str(P2_palette_picked)])
 
@@ -488,7 +488,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 			$P1_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
 		else:
 			$P1_Sprite.get_child(0).material = ShaderMaterial.new()
-			$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+			$P1_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 			$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P1_palette_picked)])
 			
 	if P2_phase == 0 and P2_p_dir != 0 and P2_picker_pos in char_grid and $P2_Sprite.get_child_count() > 0: # last one is just in case
@@ -501,7 +501,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 			$P2_Sprite.get_child(0).material = null
 		else:
 			$P2_Sprite.get_child(0).material = ShaderMaterial.new()
-			$P2_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+			$P2_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 			$P2_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P2_palette_picked)])
 
 
@@ -523,7 +523,7 @@ func P1_picked_character():
 					$P1_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
 				else:
 					$P1_Sprite.get_child(0).material = ShaderMaterial.new()
-					$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+					$P1_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 					$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P1_palette_picked)])
 	
 func P2_picked_character():
@@ -544,7 +544,7 @@ func P2_picked_character():
 					$P2_Sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
 				else:
 					$P2_Sprite.get_child(0).material = ShaderMaterial.new()
-					$P2_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+					$P2_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 					$P2_Sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(P2_palette_picked)])
 		
 		
@@ -660,7 +660,7 @@ func P2_unpicked_stage():
 # ------------------------------------------------------------------------------------------------------------------------
 
 func play_audio(audio_ref, aux_data):
-	var new_audio = Globals.loaded_ui_audio_scene.instance()
+	var new_audio = Loader.loaded_ui_audio_scene.instance()
 	get_tree().get_root().add_child(new_audio)
 	new_audio.init(audio_ref, aux_data)
 	

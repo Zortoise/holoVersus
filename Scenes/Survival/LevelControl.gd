@@ -22,6 +22,7 @@ var wave_active := true
 var wave_timer := STARTING_TIME
 var wave_ID := 1
 var mob_ID_ref := -1
+var mob_entity_ID_ref := -1
 var time_of_last_spawn = null
 var wave_standby_timer := 120
 
@@ -34,17 +35,17 @@ var to_spawn = {
 #	}
 }
 
-var item_data = {
+#var item_data = {
 #	"Coin": {
 #		"scene" : load("res://Items/Coin/Coin.tscn"),
 #		"frame_data" : ResourceLoader.load("res://Items/Coin/FrameData/Coin.tres"),
 #		"spritesheet" : ResourceLoader.load("res://Items/Coin/Spritesheets/CoinSprite.png"),
 #		"palettes" : {}
 #	}
-}
+#}
 
 
-var mob_data = {
+#var mob_data = {
 	
 #	"TestMob": {
 #		"scene" : load("res://Mobs/TestMob/TestMob.tscn")
@@ -56,7 +57,7 @@ var mob_data = {
 #			ResourceLoader.load("res://Mobs/TestMob/FrameData/Base.tres"), 
 #			ResourceLoader.load("res://Mobs/TestMob/FrameData/Act1.tres"), 
 #		]
-#		"spritesheets" : {
+#		"spritesheet" : {
 #			"Base" : ResourceLoader.load("res://Mobs/TestMob/Spritesheets/Base.png")
 #		},
 #		"unique_audio": {
@@ -77,7 +78,7 @@ var mob_data = {
 #		}
 #	}
 	
-}
+#}
 
 
 # SETUP LEVEL --------------------------------------------------------------------------------------------------
@@ -108,6 +109,7 @@ func init():
 		starting_coin = FMath.percent(UniqLevel.STARTING_COIN, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
 	
+	load_cards()
 	load_items()
 	
 	for mob in UniqLevel.MOB_LIST:
@@ -115,11 +117,11 @@ func init():
 		var directory = "res://Mobs/" + mob[0] + "/"
 		var borrow_directory = "res://Characters/" + mob[1] + "/"
 
-		mob_data[mob[0]] = {
+		Loader.char_data[mob[0]] = {
 			"scene" : load(directory + mob[0] + ".tscn"),
 			"palettes" : {},
 			"frame_data_array" : [],
-			"spritesheets" : {},
+			"spritesheet" : {},
 			"unique_audio": {},
 			"entity_data" : {},
 			"sfx_data" : {},
@@ -127,23 +129,25 @@ func init():
 
 		set_up_frame_data(mob[0], borrow_directory)
 #		set_up_palettes(mob[0], directory_name)
-		set_up_spritesheets(mob[0], borrow_directory) # scan all .png files within Spritesheet folder and add them to "spritesheets" dictionary
-		set_up_unique_audio(mob[0], borrow_directory) # scan all .wav files within Audio folder and add them to "unique_audio" dictionary
+		set_up_spritesheet(mob[0], borrow_directory) # scan all .png files within Spritesheet folder and add them to "spritesheet" dictionary
+		
+		set_up_unique_audio(borrow_directory)
 #		set_up_entities(mob[0], directory_name) # scan all .tscn files within Entities folder and add them to "entities_data" dictionary
-		set_up_sfx(mob[0], borrow_directory) # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
+		set_up_sfx(borrow_directory)
 	
 		
 		if mob[0] in UniqLevel.RESOURCE_ADD:
 			if "palettes" in UniqLevel.RESOURCE_ADD[mob[0]]:
-				mob_data[mob[0]].palettes.merge(UniqLevel.RESOURCE_ADD[mob[0]].palettes)
+				Loader.char_data[mob[0]].palettes.merge(UniqLevel.RESOURCE_ADD[mob[0]].palettes)
 #			if "frame_data_array" in UniqLevel.RESOURCE_ADD[mob]:
 #				mob_data[mob].frame_data_array.append_array(UniqLevel.RESOURCE_ADD[mob].frame_data_array)
-#			if "spritesheets" in UniqLevel.RESOURCE_ADD[mob]:
-#				mob_data[mob].spritesheets.merge(UniqLevel.RESOURCE_ADD[mob].spritesheets)
+#			if "spritesheet" in UniqLevel.RESOURCE_ADD[mob]:
+#				mob_data[mob].spritesheet.merge(UniqLevel.RESOURCE_ADD[mob].spritesheet)
 #			if "unique_audio" in UniqLevel.RESOURCE_ADD[mob]:
 #				mob_data[mob].unique_audio.merge(UniqLevel.RESOURCE_ADD[mob].unique_audio)
 			if "entity_data" in UniqLevel.RESOURCE_ADD[mob[0]]:
-				mob_data[mob[0]].entity_data.merge(UniqLevel.RESOURCE_ADD[mob[0]].entity_data)
+				for key in UniqLevel.RESOURCE_ADD[mob[0]].entity_data:
+					Loader.add_loaded(Loader.entity_data, key, UniqLevel.RESOURCE_ADD[mob[0]].entity_data[key])
 #			if "sfx_data" in UniqLevel.RESOURCE_ADD[mob]:
 #				mob_data[mob].sfx_data.merge(UniqLevel.RESOURCE_ADD[mob].sfx_data)
 	
@@ -161,7 +165,7 @@ func set_up_frame_data(mob_name: String, directory_name):
 		while file_name != "":
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".tres"):
-				mob_data[mob_name].frame_data_array.append(ResourceLoader.load(directory_name + "FrameData/" + file_name))
+				Loader.char_data[mob_name].frame_data_array.append(ResourceLoader.load(directory_name + "FrameData/" + file_name))
 			file_name = directory.get_next()
 	else: print("Error: Cannot open FrameData folder for mob")
 
@@ -180,8 +184,8 @@ func set_up_frame_data(mob_name: String, directory_name):
 #			file_name = directory.get_next()
 #	else: print("Error: Cannot open Palettes folder for mob")
 
-# fill up the "spritesheets" dictionary with spritesheets in the "Spritesheets" folder loaded and ready
-func set_up_spritesheets(mob_name: String, directory_name):
+# fill up the "spritesheet" dictionary with spritesheets in the "Spritesheets" folder loaded and ready
+func set_up_spritesheet(mob_name: String, directory_name):
 	# open the Spritesheet folder and get the filenames of all files in it
 	var directory = Directory.new()
 	if directory.open(directory_name + "Spritesheets/") == OK:
@@ -191,11 +195,11 @@ func set_up_spritesheets(mob_name: String, directory_name):
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".png.import"):
 				var file_name2 = file_name.get_file().trim_suffix(".png.import")
-				mob_data[mob_name].spritesheets[file_name2] = ResourceLoader.load(directory_name + "Spritesheets/" + file_name2 + ".png")
+				Loader.char_data[mob_name].spritesheet[file_name2] = ResourceLoader.load(directory_name + "Spritesheets/" + file_name2 + ".png")
 			file_name = directory.get_next()
 	else: print("Error: Cannot open Spritesheets folder for mob")
 
-func set_up_unique_audio(mob_name: String, directory_name):
+func set_up_unique_audio(directory_name):
 	var directory = Directory.new()
 	if directory.open(directory_name + "UniqueAudio/") == OK:
 		directory.list_dir_begin(true)
@@ -204,8 +208,7 @@ func set_up_unique_audio(mob_name: String, directory_name):
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".wav.import"):
 				var file_name2 = file_name.get_file().trim_suffix(".wav.import")
-				mob_data[mob_name].unique_audio[file_name2] = \
-					ResourceLoader.load(directory_name + "UniqueAudio/" + file_name2 + ".wav")
+				Loader.add_loaded(Loader.audio, file_name2, ResourceLoader.load(directory_name + "UniqueAudio/" + file_name2 + ".wav"))
 			file_name = directory.get_next()
 	else: print("Error: Cannot open UniqueAudio folder for mob")
 
@@ -236,7 +239,7 @@ func set_up_unique_audio(mob_name: String, directory_name):
 #	else: print("Error: Cannot open Entities folder for mob")
 
 
-func set_up_sfx(mob_name: String, directory_name): # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
+func set_up_sfx(directory_name): # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
 #	var sfx_data = {
 #	#	"WaterJet" : { # example
 #	#		"frame_data" : load("res://Characters/Gura/SFX/FrameData/WaterJet.tres"),
@@ -251,22 +254,30 @@ func set_up_sfx(mob_name: String, directory_name): # scan all .tres files within
 			# load all needed files and add them to the dictionary
 			if file_name.ends_with(".tres"):
 				var file_name2 = file_name.get_file().trim_suffix(".tres")
-				mob_data[mob_name].sfx_data[file_name2] = {}
-				mob_data[mob_name].sfx_data[file_name2]["frame_data"] = \
-					ResourceLoader.load(directory_name + "SFX/FrameData/" + file_name)
-				mob_data[mob_name].sfx_data[file_name2]["spritesheet"] = \
-					ResourceLoader.load(directory_name + "SFX/Spritesheets/" + file_name2 + "Sprite.png")
+				var sfx_data = {
+					"frame_data" : ResourceLoader.load(directory_name + "SFX/FrameData/" + file_name),
+					"spritesheet" : ResourceLoader.load(directory_name + "SFX/Spritesheets/" + file_name2 + "Sprite.png")
+				}
+				Loader.add_loaded(Loader.sfx, file_name2, sfx_data)
 			file_name = directory.get_next()
 	else: print("Error: Cannot open SFX folder for mob")
 	
 	
+func load_cards():
+	for key in card_entity_data:
+		Loader.add_loaded(Loader.entity_data, key, card_entity_data[key])
+	for key in card_sfx:
+		Loader.add_loaded(Loader.sfx, key, card_sfx[key])
+	for key in card_audio:
+		Loader.add_loaded(Loader.audio, key, card_audio[key])
+	
 func load_items():
 	for item in UniqLevel.ITEMS:
-		item_data[item] = {}
-		item_data[item]["scene"] = load("res://Items/" + item + "/" + item + ".tscn")
-		item_data[item]["frame_data"] = ResourceLoader.load("res://Items/" + item + "/FrameData/" + item + ".tres")
-		item_data[item]["spritesheet"] = ResourceLoader.load("res://Items/" + item + "/Spritesheets/" + item + "Sprite.png")
-		item_data[item]["palettes"] = {}
+		Loader.item_data[item] = {}
+		Loader.item_data[item]["scene"] = load("res://Items/" + item + "/" + item + ".tscn")
+		Loader.item_data[item]["frame_data"] = ResourceLoader.load("res://Items/" + item + "/FrameData/" + item + ".tres")
+		Loader.item_data[item]["spritesheet"] = ResourceLoader.load("res://Items/" + item + "/Spritesheets/" + item + "Sprite.png")
+		Loader.item_data[item]["palettes"] = {}
 		
 		var directory = Directory.new()
 		if directory.open("res://Items/" + item + "/Palettes/") == OK:
@@ -276,7 +287,7 @@ func load_items():
 				# load all palettes and add them to the dictionary
 				if file_name.ends_with(".png.import"):
 					var file_name2 = file_name.get_file().trim_suffix(".png.import")
-					item_data[item].palettes[file_name2] = ResourceLoader.load("res://Items/" + item + "/Palettes/" + file_name2 + ".png")
+					Loader.item_data[item].palettes[file_name2] = ResourceLoader.load("res://Items/" + item + "/Palettes/" + file_name2 + ".png")
 				file_name = directory.get_next()
 		else: print("No Palettes folder for item: " + item)
 
@@ -392,11 +403,12 @@ func spawn_mob(mob_name: String, level: int, variant: String, attr: Dictionary, 
 	mob.init(mob_name, level, variant, attr, out_position)
 	return mob
 	
-func spawn_mob_entity(master_ID: int, creator_mob_ref: String, entity_ref: String, out_position, aux_data: Dictionary, \
-		mob_level: int, mob_attr: Dictionary, out_palette_ref = null):
+	
+func spawn_mob_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, \
+		mob_level: int, mob_attr: Dictionary, out_palette_ref = null, creator_mob_ref = null):
 	var mob_entity = loaded_mob_entity_scene.instance()
 	Globals.Game.get_node("MobEntities").add_child(mob_entity)
-	mob_entity.init(master_ID, creator_mob_ref, entity_ref, out_position, aux_data, mob_level, mob_attr, out_palette_ref)
+	mob_entity.init(master_ID, entity_ref, out_position, aux_data, mob_level, mob_attr, out_palette_ref, creator_mob_ref)
 	return mob_entity
 	
 # in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan: int = BASE_LIFESPAN, in_palette_ref = null
@@ -417,6 +429,7 @@ func save_state():
 		"wave_timer" : wave_timer,
 		"wave_ID" : wave_ID,
 		"mob_ID_ref" : mob_ID_ref,
+		"mob_entity_ID_ref" : mob_entity_ID_ref,
 		"time_of_last_spawn" : time_of_last_spawn,
 		"wave_standby_timer" : wave_standby_timer,
 		
@@ -431,6 +444,7 @@ func load_state(state_data):
 	wave_timer = state_data.wave_timer
 	wave_ID = state_data.wave_ID
 	mob_ID_ref = state_data.mob_ID_ref
+	mob_entity_ID_ref = state_data.mob_entity_ID_ref
 	time_of_last_spawn = state_data.time_of_last_spawn
 	wave_standby_timer = state_data.wave_standby_timer
 

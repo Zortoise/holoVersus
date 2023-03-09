@@ -8,11 +8,16 @@ const WEAK_HIT_AUDIO_NERF = -9
 
 # to save:
 var free := false
-var entity_ref
+
 var facing := 1
 var v_facing := 1
-var master_ID
-var creator_path: NodePath
+var master_ID: int # can be different from creator
+
+var entity_ref: String
+var master_ref # always creator, use it to find palette
+var palette_ref
+
+#var creator_path: NodePath
 #var master_ID: int
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
 var velocity := FVector.new()
@@ -30,21 +35,25 @@ var birth_time := 0
 var hitstop = null
 var to_destroy := false
 
-func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary):
+func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary, in_palette_ref = null, in_master_ref = null):
 	
 	entity_ID = Globals.Game.entity_ID_ref
 	Globals.Game.entity_ID_ref += 1
 	birth_time = Globals.Game.frametime
 	
 	master_ID = in_master_ID
-	creator_path = Globals.Game.get_player_node(master_ID).get_path()
+#	creator_path = Globals.Game.get_player_node(master_ID).get_path()
 #	master_ID = get_node(master_path).player_ID
 	entity_ref = in_entity_ref
+	
+	master_ref = in_master_ref # for palette
+	palette_ref = in_palette_ref
+	
 	position = in_position
 	set_true_position()
 	
 	if !"facing" in aux_data:
-		face(get_node(creator_path).facing) # face in same direction as master
+		face(Globals.Game.get_player_node(master_ID).facing) # face in same direction as master
 	elif aux_data.facing != 0: # just in case
 		face(aux_data.facing)
 	
@@ -73,23 +82,30 @@ func load_entity():
 
 	add_to_group("EntityNodes")
 
-	var is_common = entity_ref in Globals.common_entity_data # check if UniqEntity scene is common or character-unique
+	if entity_ref in Loader.entity_data:
+		UniqEntity = Loader.entity_data[entity_ref].scene.instance() # load UniqEntity scene
+		$SpritePlayer.init_with_loaded_frame_data($Sprite, Loader.entity_data[entity_ref].frame_data) # load frame data
+		$Sprite.texture = Loader.entity_data[entity_ref].spritesheet # load spritesheet
+	else:
+		print("Error: " + entity_ref + " entity not found in Loader.entity_data")
+
+#	var is_common = entity_ref in Loader.common_entity_data # check if UniqEntity scene is common or character-unique
 	
-	if is_common: # common entity with loaded data stored in Globals.gb
-		UniqEntity = Globals.common_entity_data[entity_ref].scene.instance() # load UniqEntity scene
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, Globals.common_entity_data[entity_ref].frame_data) # load frame data
-		$Sprite.texture = Globals.common_entity_data[entity_ref].spritesheet # load spritesheet
-		
-	elif Globals.survival_level != null and entity_ref in  Globals.Game.LevelControl.entity_data:
-		UniqEntity =  Globals.Game.LevelControl.entity_data[entity_ref].scene.instance() # load UniqEntity scene
-		$SpritePlayer.init_with_loaded_frame_data($Sprite,  Globals.Game.LevelControl.entity_data[entity_ref].frame_data) # load frame data
-		$Sprite.texture =  Globals.Game.LevelControl.entity_data[entity_ref].spritesheet # load spritesheet
-		
-	else: # character-unique entity with loaded data stored in master's node
-		var entity_data = get_node(creator_path).entity_data[entity_ref]
-		UniqEntity = entity_data.scene.instance() # load UniqEntity scene
-		$SpritePlayer.init_with_loaded_frame_data($Sprite, entity_data.frame_data) # load frame data
-		$Sprite.texture = entity_data.spritesheet # load spritesheet
+#	if is_common: # common entity with loaded data stored in Globals.gb
+#		UniqEntity = Loader.common_entity_data[entity_ref].scene.instance() # load UniqEntity scene
+#		$SpritePlayer.init_with_loaded_frame_data($Sprite, Loader.common_entity_data[entity_ref].frame_data) # load frame data
+#		$Sprite.texture = Loader.common_entity_data[entity_ref].spritesheet # load spritesheet
+#
+#	elif Globals.survival_level != null and entity_ref in  Globals.Game.LevelControl.entity_data:
+#		UniqEntity =  Globals.Game.LevelControl.entity_data[entity_ref].scene.instance() # load UniqEntity scene
+#		$SpritePlayer.init_with_loaded_frame_data($Sprite,  Globals.Game.LevelControl.entity_data[entity_ref].frame_data) # load frame data
+#		$Sprite.texture =  Globals.Game.LevelControl.entity_data[entity_ref].spritesheet # load spritesheet
+#
+#	else: # character-unique entity with loaded data stored in master's node
+#		var entity_data = get_node(creator_path).entity_data[entity_ref]
+#		UniqEntity = entity_data.scene.instance() # load UniqEntity scene
+#		$SpritePlayer.init_with_loaded_frame_data($Sprite, entity_data.frame_data) # load frame data
+#		$Sprite.texture = entity_data.spritesheet # load spritesheet
 		
 	add_child(UniqEntity)
 	move_child(UniqEntity, 0)
@@ -123,17 +139,24 @@ func load_entity():
 	else:
 		$EntitySpriteBox.free()
 		
-	if "PALETTE" in UniqEntity: # load palette
-		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palettes
-			if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palettes:
+	if "PALETTE" in UniqEntity: # set palette
+		if UniqEntity.PALETTE == null: # no palette
+			pass
+		else:
+			if UniqEntity.PALETTE in Loader.sfx_palettes: # common palette
 				$Sprite.material = ShaderMaterial.new()
-				$Sprite.material.shader = Globals.loaded_palette_shader
-				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palettes[UniqEntity.PALETTE])
+				$Sprite.material.shader = Loader.loaded_palette_shader
+				$Sprite.material.set_shader_param("swap", Loader.sfx_palettes[UniqEntity.PALETTE])
 				
-		elif get_node(creator_path).loaded_palette != null: # same palette as creator, just set UniqEntity.PALETTE to null
+	elif palette_ref != null:
+		if palette_ref in Loader.sfx_palettes: # common palette overwrite
 			$Sprite.material = ShaderMaterial.new()
-			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", get_node(creator_path).loaded_palette)
+			$Sprite.material.shader = Loader.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Loader.sfx_palettes[palette_ref])
+		elif master_ref != null and palette_ref in Loader.char_data[master_ref].palettes: # same palette as creator, just don't add PALETTE to UniqEntity
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Loader.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Loader.char_data[master_ref].palettes[palette_ref])
 				
 
 func simulate():
@@ -579,8 +602,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	
-	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
-		aux_data["unique_path"] = creator_path # add a new key to aux_data
+#	if !audio_ref in Loader.audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
+#		aux_data["unique_path"] = creator_path # add a new key to aux_data
 		
 	Globals.Game.play_audio(audio_ref, aux_data)
 
@@ -595,11 +618,13 @@ func save_state():
 		"visible" : $Sprite.visible,
 		
 		"entity_ref" : entity_ref,
+		"master_ID" : master_ID,
+		"master_ref" : master_ref,
+		"palette_ref" : palette_ref,
+		
 		"SpritePlayer_data" : $SpritePlayer.save_state(),
 		
 		"free" : free,
-		"master_ID" : master_ID,
-		"creator_path" : creator_path,
 		"true_position_x" : true_position.x,
 		"true_position_y" : true_position.y,
 		"velocity_x" : velocity.x,
@@ -630,8 +655,10 @@ func load_state(state_data):
 
 	entity_ref = state_data.entity_ref
 	master_ID = state_data.master_ID
-	creator_path = state_data.creator_path
+	master_ref = state_data.master_ref
+	palette_ref = state_data.palette_ref
 	entity_ID = state_data.entity_ID
+	
 	birth_time = state_data.birth_time
 	load_entity()
 

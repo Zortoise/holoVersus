@@ -1,11 +1,12 @@
 extends Node2D
 
+const PALETTE = null # always same color
+
 const START_SPEED = 500 * FMath.S
 const START_ROTATION = -70 # integer degree, negative for upward
 const GRAVITY = 18 * FMath.S
 const TERMINAL_DOWN_VELOCITY = 300 * FMath.S
 const AIR_RESISTANCE = 1
-const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 #const LIFESPAN = null
 
 const TRAITS = []
@@ -90,8 +91,11 @@ func simulate():
 	match Animator.to_play_animation: # afterimage trail
 		"Active", "bActive":
 			if posmod(Entity.lifetime, 5) == 0:
-				Globals.Game.spawn_afterimage(get_node(Entity.creator_path).player_ID, Entity.entity_ref, sprite.get_path(), null, 1.0, 10.0, \
-						Globals.afterimage_shader.WHITE)
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+						null, 1.0, 10.0, Globals.afterimage_shader.WHITE)
+	
+#func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
+#		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
 	
 func kill(sound = true):
 	if Animator.to_play_animation != "Kill":
@@ -105,8 +109,8 @@ func kill(sound = true):
 func collision(): # collided with a platform
 	var splash_pos = Entity.position + Vector2(0, Entity.get_node("EntityCollisionBox").rect_position.y + \
 			Entity.get_node("EntityCollisionBox").rect_size.y) # get feet pos
-	Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", splash_pos, {"facing":Entity.facing, "grounded":true, "palette" : "master"}, \
-			get_node(Entity.creator_path).player_ID)
+	Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", splash_pos, {"facing":Entity.facing, "grounded":true}, \
+			Entity.palette_ref, Entity.master_ref)
 	kill()
 	
 #func ledge_drop():

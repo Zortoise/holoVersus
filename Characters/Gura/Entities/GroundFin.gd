@@ -1,7 +1,6 @@
 extends Node2D
 
 #const START_SPEED = 500
-const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 
 const TRAITS = [Globals.entity_trait.GROUNDED, Globals.entity_trait.LEDGE_STOP]
 # example: Globals.entity_trait.GROUNDED
@@ -43,7 +42,7 @@ func simulate():
 	
 	match Animator.to_play_animation: # triggering shark breach
 		"Active", "[h]Active", "Turn", "[h]Turn":
-			var master_node = get_node(Entity.creator_path)
+			var master_node = Globals.Game.get_player_node(Entity.master_ID)
 			if master_node.unique_data.groundfin_trigger:
 #				var breach_facing = get_node(Entity.master_path).get_last_tapped_dir()
 #				var turned := false
@@ -57,7 +56,7 @@ func simulate():
 				var new_facing_ref = master_node.get_target().position.x - Entity.position.x
 				if new_facing_ref != 0: # turn to face targeted opponent
 					breach_facing = sign(new_facing_ref)
-				Globals.Game.spawn_entity(get_node(Entity.creator_path).player_ID, "SharkBreach", Entity.position, {"facing" : breach_facing})
+				Globals.Game.spawn_entity(Entity.master_ID, "SharkBreach", Entity.position, {"facing" : breach_facing}, Entity.palette_ref, Entity.master_ref)
 				Entity.play_audio("water4", {"vol" : -23})
 				Entity.play_audio("water8", {"vol" : -13})
 				# reduce ground fin count
@@ -73,7 +72,7 @@ func kill(_sound = true):
 	if !Animator.to_play_animation.ends_with("Kill"):
 		Animator.play("Kill")
 		# reduce ground fin count
-		var master_node = Globals.Game.get_player_node(get_node(Entity.creator_path).player_ID)
+		var master_node = Globals.Game.get_player_node(Entity.master_ID)
 		master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
 	
 	

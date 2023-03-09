@@ -35,11 +35,11 @@ var birth_time := 0
 var hitstop = null
 
 
-func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary, \
-		in_mob_level: int, in_mob_attr: Dictionary, in_palette_ref = null):
+func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary, \
+		in_mob_level: int, in_mob_attr: Dictionary, in_palette_ref = null, in_creator_mob_ref = null):
 	
-	entity_ID = Globals.Game.entity_ID_ref
-	Globals.Game.entity_ID_ref += 1
+	set_entity_ID()
+	
 	birth_time = Globals.Game.frametime
 	
 	master_ID = in_master_ID
@@ -76,13 +76,18 @@ func init(in_master_ID: int, in_creator_mob_ref: String, in_entity_ref: String, 
 		
 	UniqEntity.init(aux_data)
 	
+	
+func set_entity_ID(): # each mob has a unique negative entity_ID, set by order when they spawn during a level
+	entity_ID = Globals.Game.LevelControl.mob_entity_ID_ref
+	Globals.Game.LevelControl.mob_entity_ID_ref -= 1
+		
 		
 func load_entity():
 
 	add_to_group("MobEntityNodes")
 
 	 # character-unique entity with loaded data stored in Globals.Game.LevelControl.mob_data
-	var entity_data = Globals.Game.LevelControl.mob_data[creator_mob_ref].entity_data[entity_ref]
+	var entity_data = Loader.entity_data[entity_ref]
 	UniqEntity = entity_data.scene.instance() # load UniqEntity scene
 	$SpritePlayer.init_with_loaded_frame_data($Sprite, entity_data.frame_data) # load frame data
 	$Sprite.texture = entity_data.spritesheet # load spritesheet
@@ -112,17 +117,36 @@ func load_entity():
 	else:
 		$EntitySpriteBox.free()
 		
-	if "PALETTE" in UniqEntity: # load palette
-#		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palettes
-		if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palettes:
-			$Sprite.material = ShaderMaterial.new()
-			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palettes[UniqEntity.PALETTE])
+#	if "PALETTE" in UniqEntity: # load palette
+##		if is_common: # common palette stored in Loader.sfx_palettes
+#		if UniqEntity.PALETTE in Loader.sfx_palettes:
+#			$Sprite.material = ShaderMaterial.new()
+#			$Sprite.material.shader = Loader.loaded_palette_shader
+#			$Sprite.material.set_shader_param("swap", Loader.sfx_palettes[UniqEntity.PALETTE])
+#
+#		elif palette_ref != "" and palette_ref in Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes:
+#			$Sprite.material = ShaderMaterial.new()
+#			$Sprite.material.shader = Loader.loaded_palette_shader
+#			$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes[palette_ref])
+			
+	if "PALETTE" in UniqEntity: # set palette
+		if UniqEntity.PALETTE == null: # no palette
+			pass
+		else:
+			if UniqEntity.PALETTE in Loader.sfx_palettes: # common palette
+				$Sprite.material = ShaderMaterial.new()
+				$Sprite.material.shader = Loader.loaded_palette_shader
+				$Sprite.material.set_shader_param("swap", Loader.sfx_palettes[UniqEntity.PALETTE])
 				
-		elif palette_ref != "" and palette_ref in Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes:
+	elif palette_ref != null:
+		if palette_ref in Loader.sfx_palettes: # common palette overwrite
 			$Sprite.material = ShaderMaterial.new()
-			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[creator_mob_ref].palettes[palette_ref])
+			$Sprite.material.shader = Loader.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Loader.sfx_palettes[palette_ref])
+		elif creator_mob_ref != null and palette_ref in Loader.char_data[creator_mob_ref].palettes: # same palette as creator, just don't add PALETTE to UniqEntity
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Loader.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Loader.char_data[creator_mob_ref].palettes[palette_ref])
 
 func simulate():
 	hitstop = null
@@ -512,8 +536,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	
-	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
-		aux_data["mob_ref"] = creator_mob_ref # add a new key to aux_data
+#	if !audio_ref in Loader.audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
+#		aux_data["mob_ref"] = creator_mob_ref # add a new key to aux_data
 		
 	Globals.Game.play_audio(audio_ref, aux_data)
 

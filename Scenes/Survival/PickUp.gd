@@ -53,7 +53,7 @@ func load_entity():
 #		"frame_data" : ResourceLoader.load(_),
 #		"spritesheet" : ResourceLoader.load(_),
 #	}
-	var item_data = Globals.Game.LevelControl.item_data[item_ref]
+	var item_data = Loader.item_data[item_ref]
 	UniqEntity = item_data.scene.instance() # load UniqEntity scene
 	$SpritePlayer.init_with_loaded_frame_data($Sprite, item_data.frame_data) # load frame data
 	$Sprite.texture = item_data.spritesheet # load spritesheet
@@ -93,25 +93,25 @@ func load_entity():
 		$EntitySpriteBox.free()
 		
 	if palette_ref != "":
-		if palette_ref in LoadedSFX.loaded_sfx_palettes: # common palettes
+		if palette_ref in Loader.sfx_palettes: # common palettes
 			$Sprite.material = ShaderMaterial.new()
-			$Sprite.material.shader = Globals.loaded_palette_shader
-			$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palettes[palette_ref])
+			$Sprite.material.shader = Loader.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Loader.sfx_palettes[palette_ref])
 		elif palette_ref in item_data.palettes: # palette in loaded item data in LevelControl
 			$Sprite.material = ShaderMaterial.new()
-			$Sprite.material.shader = Globals.loaded_palette_shader
+			$Sprite.material.shader = Loader.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", item_data.palettes[palette_ref])	
 		
 #	if "PALETTE" in UniqEntity: # load palette
-#		if is_common: # common palette stored in LoadedSFX.loaded_sfx_palettes
-#			if UniqEntity.PALETTE in LoadedSFX.loaded_sfx_palettes:
+#		if is_common: # common palette stored in NSAnims.loaded_sfx_palettes
+#			if UniqEntity.PALETTE in NSAnims.loaded_sfx_palettes:
 #				$Sprite.material = ShaderMaterial.new()
-#				$Sprite.material.shader = Globals.loaded_palette_shader
-#				$Sprite.material.set_shader_param("swap", LoadedSFX.loaded_sfx_palettes[UniqEntity.PALETTE])
+#				$Sprite.material.shader = Loader.loaded_palette_shader
+#				$Sprite.material.set_shader_param("swap", NSAnims.loaded_sfx_palettes[UniqEntity.PALETTE])
 #
 #		elif get_node(creator_path).loaded_palette != null: # same palette as creator, just set UniqEntity.PALETTE to null
 #			$Sprite.material = ShaderMaterial.new()
-#			$Sprite.material.shader = Globals.loaded_palette_shader
+#			$Sprite.material.shader = Loader.loaded_palette_shader
 #			$Sprite.material.set_shader_param("swap", get_node(creator_path).loaded_palette)
 
 func simulate():
@@ -271,7 +271,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	
-	if !audio_ref in LoadedSFX.loaded_audio: # use common audio only
+	if !audio_ref in Loader.audio: # use common audio only
 		return
 		
 	Globals.Game.play_audio(audio_ref, aux_data)

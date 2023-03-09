@@ -3,7 +3,7 @@ extends AudioStreamPlayer
 
 func init(audio_ref: String, aux_data: Dictionary):
 	
-	stream = LoadedSFX.loaded_ui_audio[audio_ref]
+	stream = Loader.ui_audio[audio_ref]
 	
 	if "bus" in aux_data:
 		bus = aux_data.bus

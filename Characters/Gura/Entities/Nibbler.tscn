@@ -21,10 +21,10 @@ __meta__ = {
 }
 
 [node name="DefaultCollisionBox" type="ReferenceRect" parent="."]
-margin_left = -8.0
-margin_top = -8.0
-margin_right = 8.0
-margin_bottom = 8.0
+margin_left = -16.0
+margin_top = -16.0
+margin_right = 16.0
+margin_bottom = 16.0
 
 [node name="DefaultSpriteBox" type="ReferenceRect" parent="."]
 margin_left = -24.0

@@ -312,7 +312,7 @@ func force_start_game():
 		start_game()
 	
 func play_audio(audio_ref, aux_data):
-	var new_audio = Globals.loaded_ui_audio_scene.instance()
+	var new_audio = Loader.loaded_ui_audio_scene.instance()
 	get_tree().get_root().add_child(new_audio)
 	new_audio.init(audio_ref, aux_data)
 

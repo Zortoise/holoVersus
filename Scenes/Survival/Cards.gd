@@ -5,7 +5,7 @@ enum type {PERCENT, LINEAR, QUIRK}
 enum effect_ref {
 		STOCK, HP, COMBO_LEVEL, LANDED_EX_REGEN, PASSIVE_EX_REGEN,
 		SPEED, FRICTION, JUMP_SPEED, GRAVITY_MOD, MAX_AIR_JUMP, MAX_AIR_DASH, MAX_AIR_DODGE, MAX_SUPER_DASH, 
-		GROUND_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_SPEED, GG_REGEN_AMOUNT, 
+		GROUND_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_SPEED,
 		GUARD_DRAIN_MOD,
 		GROUND_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
 		HEAVY_DMG_MOD, SPECIAL_DMG_MOD, PROJ_DMG_MOD, SUPER_DMG_MOD, 
@@ -13,7 +13,7 @@ enum effect_ref {
 		NO_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, ARMOR_PIERCE, AUTO_PBLOCK_PROJ, FREE_RESET, HALF_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, GROUND_DASH_IFRAME, AIR_DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, GRAVITIZING_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
-		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, PROXIMITY_PARRY
+		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, PROXIMITY_PARRY, BETTER_BLOCK
 }
 # NO_CROSSUP = can perfect block too
 # ARMOR_PIERCE = full damage on armored mobs
@@ -92,11 +92,6 @@ const DESCRIBE = {
 	effect_ref.DODGE_SPEED : {
 		"type" : type.PERCENT,
 		"suffix" :"Dodge Speed",
-	},
-	
-	effect_ref.GG_REGEN_AMOUNT : {
-		"type" : type.PERCENT,
-		"suffix" :"GG Regen",
 	},
 	
 	effect_ref.GUARD_DRAIN_MOD : {
@@ -265,6 +260,10 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"PBlock at Close Range",
 	},
+	effect_ref.BETTER_BLOCK : {
+		"type" : type.QUIRK,
+		"suffix" :"Improved Blocking",
+	},
 }
 
 const TRIP_CHANCE = 5
@@ -361,10 +360,10 @@ const DATABASE = {
 	card_ref.NOEL : {
 		"name" : "Noel",
 		"price" : 120,
-		effect_ref.SPEED : -10,
+		effect_ref.SPEED : -15,
 		effect_ref.HP: 30,
 		effect_ref.HEAVY_DMG_MOD : 50,
-		"quirks" : [effect_ref.PROXIMITY_PARRY],
+		"quirks" : [effect_ref.BETTER_BLOCK, effect_ref.PROXIMITY_PARRY],
 	},
 	card_ref.ROBOCO : {
 		"name" : "Roboco",
@@ -519,9 +518,8 @@ const DATABASE = {
 		"random" : [card_ref.HAATO, card_ref.HAATO_b],
 		"replace" : "Random Out of 2 Sets\nChanges Every Wave",
 		effect_ref.HP : 50,
-		effect_ref.HITSTUN_TAKEN : -50,
-		effect_ref.GG_REGEN_AMOUNT : 100,
-		"quirks" : [effect_ref.HALF_BURST_COST, effect_ref.WILDCARD]
+		effect_ref.HITSTUN_TAKEN : -70,
+		"quirks" : [effect_ref.HALF_BURST_COST, effect_ref.NO_BLOCK_COST, effect_ref.WILDCARD]
 	},
 	card_ref.HAATO_b : {
 		"name" : "Haachama",
@@ -605,17 +603,15 @@ const DATABASE = {
 		"price" : 120,
 		effect_ref.HP : 30,
 		effect_ref.HITSTUN_TAKEN : -50,
-		effect_ref.GG_REGEN_AMOUNT : 100,
 		effect_ref.GROUND_NORMAL_DMG_MOD : 50,
-		"quirks" : [effect_ref.NO_CHIP_DMG]
+		"quirks" : [effect_ref.BETTER_BLOCK, effect_ref.NO_CHIP_DMG]
 	},
 	card_ref.WATAME : {
 		"name" : "Watame",
 		"price" : 120,
 		effect_ref.STOCK: 1,
 		effect_ref.HP : 25,
-		effect_ref.GG_REGEN_AMOUNT : 100,
-		"quirks": [effect_ref.NO_BLOCK_COST, effect_ref.NO_GUARD_DRAIN],
+		"quirks": [effect_ref.BETTER_BLOCK, effect_ref.NO_BLOCK_COST, effect_ref.NO_GUARD_DRAIN],
 	},
 	card_ref.BAELZ : {
 		"name" : "Baelz",
@@ -682,7 +678,7 @@ const DATABASE = {
 		"name" : "Towa",
 		"price" : 120,
 		effect_ref.SPEED : 10,
-		effect_ref.COMBO_LEVEL : 1,
+		effect_ref.COMBO_LEVEL : 2,
 		effect_ref.PROJ_DMG_MOD : 50,
 		"quirks" : [effect_ref.FREE_RESET],
 	},

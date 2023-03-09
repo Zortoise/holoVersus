@@ -178,7 +178,7 @@ func load_last_picked():
 				my_sprite.get_child(0).material = null
 			else:
 				my_sprite.get_child(0).material = ShaderMaterial.new()
-				my_sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+				my_sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 				my_sprite.get_child(0).material.set_shader_param("swap", \
 						character_data[char_grid[my_picker_pos]]["palettes"][str(my_palette_picked)])
 						
@@ -409,7 +409,7 @@ func change_palette(p_dir):
 			my_sprite.get_child(0).material = null # cannot use $P1_Sprite/SelectSprite since the name will be different
 		else:
 			my_sprite.get_child(0).material = ShaderMaterial.new()
-			my_sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+			my_sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 			my_sprite.get_child(0).material.set_shader_param("swap", character_data[char_name]["palettes"][str(my_palette_picked)])
 
 
@@ -641,7 +641,7 @@ func start_battle():
 			$P1_Sprite.get_child(0).material = null
 		else:
 			$P1_Sprite.get_child(0).material = ShaderMaterial.new()
-			$P1_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+			$P1_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 			$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[Globals.P1_char_ref]["palettes"][str(Globals.P1_palette)])
 
 	if $P2_Sprite.get_child_count() > 0:
@@ -649,7 +649,7 @@ func start_battle():
 			$P2_Sprite.get_child(0).material = null
 		else:
 			$P2_Sprite.get_child(0).material = ShaderMaterial.new()
-			$P2_Sprite.get_child(0).material.shader = Globals.loaded_palette_shader
+			$P2_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
 			$P2_Sprite.get_child(0).material.set_shader_param("swap", character_data[Globals.P2_char_ref]["palettes"][str(Globals.P2_palette)])
 
 	
@@ -665,7 +665,7 @@ func start_battle():
 # ------------------------------------------------------------------------------------------------------------------------
 
 func play_audio(audio_ref, aux_data):
-	var new_audio = Globals.loaded_ui_audio_scene.instance()
+	var new_audio = Loader.loaded_ui_audio_scene.instance()
 	get_tree().get_root().add_child(new_audio)
 	new_audio.init(audio_ref, aux_data)
 	

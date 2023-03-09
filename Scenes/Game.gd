@@ -188,7 +188,7 @@ func setup():
 		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + ".tscn").instance()
 	#	else:
 	#		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + "C.tscn").instance()
-		var P2 = Globals.loaded_character_scene.instance() # main character node, not unique character node
+		var P2 = Loader.loaded_character_scene.instance() # main character node, not unique character node
 		$Players.add_child(P2)
 		P2.init(1, P2_character, P2_position, P2_facing, P2_palette)
 		frame_viewer.P2_node = P2
@@ -200,7 +200,7 @@ func setup():
 	P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + ".tscn").instance()
 #	else:
 #		P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + "C.tscn").instance()
-	var P1 = Globals.loaded_character_scene.instance()
+	var P1 = Loader.loaded_character_scene.instance()
 	$Players.add_child(P1)
 	P1.init(0, P1_character, P1_position, P1_facing, P1_palette)
 	frame_viewer.P1_node = P1
@@ -976,17 +976,17 @@ func load_state(game_state, loading_autosave = true):
 		
 	# re-add children
 	for state_data in loaded_game_state.afterimage_data:
-		var new_afterimage = Globals.loaded_afterimage_scene.instance()
+		var new_afterimage = Loader.loaded_afterimage_scene.instance()
 		$Afterimages.add_child(new_afterimage)
 		new_afterimage.load_state(state_data)
 
 	for state_data in loaded_game_state.entities_back_data:
-		var new_entity = Globals.loaded_entity_scene.instance()
+		var new_entity = Loader.loaded_entity_scene.instance()
 		$EntitiesBack.add_child(new_entity)
 		new_entity.load_state(state_data)
 		
 	for state_data in loaded_game_state.entities_front_data:
-		var new_entity = Globals.loaded_entity_scene.instance()
+		var new_entity = Loader.loaded_entity_scene.instance()
 		$EntitiesFront.add_child(new_entity)
 		new_entity.load_state(state_data)
 		
@@ -996,12 +996,12 @@ func load_state(game_state, loading_autosave = true):
 		new_entity.load_state(state_data)
 		
 	for state_data in loaded_game_state.SFX_front_data:
-		var new_SFX = Globals.loaded_SFX_scene.instance()
+		var new_SFX = Loader.loaded_SFX_scene.instance()
 		$SFXFront.add_child(new_SFX)
 		new_SFX.load_state(state_data)
 		
 	for state_data in loaded_game_state.SFX_back_data:
-		var new_SFX = Globals.loaded_SFX_scene.instance()
+		var new_SFX = Loader.loaded_SFX_scene.instance()
 		$SFXBack.add_child(new_SFX)
 		new_SFX.load_state(state_data)
 		
@@ -1011,7 +1011,7 @@ func load_state(game_state, loading_autosave = true):
 		new_pickup.load_state(state_data)
 		
 	for state_data in loaded_game_state.damage_numbers_data:
-		var new_number = Globals.loaded_dmg_num_scene.instance()
+		var new_number = Loader.loaded_dmg_num_scene.instance()
 		$DamageNumbers.add_child(new_number)
 		new_number.load_state(state_data)
 		
@@ -1270,7 +1270,7 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 				if defender_anti_airing(hitbox, attacker, hurtbox, defender):
 					continue # attacker must not be using an aerial against an anti-airing defender
 #				if defender_backdash(hitbox, hurtbox):
-#					continue # defender must not be backdashing away from attacker's UNBLOCKABLE_PROJ/ANTI_GUARD attack
+#					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/ANTI_GUARD attack
 #				if attacker.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
 #					continue # attacker must still have hitcount left
 #				if attacker.is_player_in_ignore_list(defender.player_ID):
@@ -1437,7 +1437,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 	else:
 		attacker_or_entity = get_node(hitbox.entity_nodepath)
 		
-#	if Globals.atk_attr.UNBLOCKABLE_PROJ in hitbox.move_data.atk_attr or \
+#	if Globals.atk_attr.UNBLOCKABLE in hitbox.move_data.atk_attr or \
 #			hitbox.move_data.atk_type in [Globals.atk_type.SUPER]:
 #		return false # defender's semi-invul failed
 		
@@ -1457,7 +1457,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 #	var attacker = get_node(hitbox.owner_nodepath)
 #	var defender = get_node(hurtbox.owner_nodepath)
 #	var attacker_attr = hitbox.move_data.atk_attr
-#	if Globals.atk_attr.UNBLOCKABLE_PROJ in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
+#	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
 #		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
 #				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
 #			if defender.Animator.query_to_play(["Tech", "GuardTech"]):
@@ -1877,27 +1877,40 @@ func get_player_node(player_ID):
 				return player
 	return null
 	
-func get_player_entity_node(entity_ID):
+func get_entity_node(entity_ID):
 	if entity_ID == null: return null
+	if entity_ID >= 0: # positive is player
+		for entity in get_tree().get_nodes_in_group("EntityNodes"):
+			if entity.entity_ID == entity_ID:
+				return entity
+		return null
+	else: # negative is mob
+		for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
+			if entity.entity_ID == entity_ID:
+				return entity
+		return null
 	
-	for entity in get_tree().get_nodes_in_group("EntityNodes"):
-		if entity.entity_ID == entity_ID:
-			return entity
-#	for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
-#		if entity.entity_ID == entity_ID:
-#			return entity
-	return null
-	
-func get_mob_entity_node(entity_ID):
-	if entity_ID == null: return null
-	
+#func get_player_entity_node(entity_ID):
+#	if entity_ID == null: return null
+#
 #	for entity in get_tree().get_nodes_in_group("EntityNodes"):
 #		if entity.entity_ID == entity_ID:
 #			return entity
-	for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
-		if entity.entity_ID == entity_ID:
-			return entity
-	return null
+##	for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
+##		if entity.entity_ID == entity_ID:
+##			return entity
+#	return null
+#
+#func get_mob_entity_node(entity_ID):
+#	if entity_ID == null: return null
+#
+##	for entity in get_tree().get_nodes_in_group("EntityNodes"):
+##		if entity.entity_ID == entity_ID:
+##			return entity
+#	for entity in get_tree().get_nodes_in_group("MobEntityNodes"):
+#		if entity.entity_ID == entity_ID:
+#			return entity
+#	return null
 
 
 # fade out HUD elements if there is a player behind them
@@ -1998,58 +2011,42 @@ func rng_array(array: Array):
 			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------
 
-func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary):
-	var entity = Globals.loaded_entity_scene.instance()
+
+func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):
+	var entity = Loader.loaded_entity_scene.instance()
 	if !"back" in aux_data:
 		$EntitiesFront.add_child(entity)
 	else:
 		$EntitiesBack.add_child(entity)
-	entity.init(master_ID, entity_ref, out_position, aux_data)
+	entity.init(master_ID, entity_ref, out_position, aux_data, palette_ref, master_ref)
 	return entity
 	
 
-# for unique sfx, pass in the master_ID as well
 # aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
-func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, master_ID = null):
-	var sfx = Globals.loaded_SFX_scene.instance()
+func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):
+	var sfx = Loader.loaded_SFX_scene.instance()
 	if !"back" in aux_data:
 		$SFXFront.add_child(sfx)
 	else:
 		$SFXBack.add_child(sfx)
-	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, master_ID, null)
+	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, palette_ref, master_ref)
 	return sfx
 	
 
-func spawn_mob_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, mob_ref = null):
-	var sfx = Globals.loaded_SFX_scene.instance()
-	if !"back" in aux_data:
-		$SFXFront.add_child(sfx)
-	else:
-		$SFXBack.add_child(sfx)
-	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, null, mob_ref)
-	return sfx
-	
-	
-func spawn_afterimage(master_ID: int, spritesheet_ref: String, sprite_node_path: NodePath, color_modulate = null, starting_modulate_a = 0.5, \
-		lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
-	var afterimage = Globals.loaded_afterimage_scene.instance()
+# master_ID is passed in to freeze afterimages during hitstop
+# master_ref is used to locate spritesheet_ref for character afterimages and locate palettes as well
+func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
+		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+	var afterimage = Loader.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
-	afterimage.init(master_ID, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader)
+	afterimage.init(master_ID, is_entity, master_ref, spritesheet_ref, sprite_node_path, palette_ref, color_modulate, starting_modulate_a, \
+			lifetime, afterimage_shader)
 	return afterimage
 	
-			
-func spawn_mob_afterimage(mob_ref, mob_palette_ref, spritesheet_ref: String, sprite_node_path: NodePath, color_modulate = null, starting_modulate_a = 0.5, \
-		lifetime = 10, afterimage_shader = null):
-	var afterimage = Globals.loaded_afterimage_scene.instance()
-	$Afterimages.add_child(afterimage)
-	afterimage.init(0, spritesheet_ref, sprite_node_path, color_modulate, starting_modulate_a, lifetime, afterimage_shader, \
-			mob_ref, mob_palette_ref)
-	return afterimage
-
-			
+	
 func spawn_damage_number(in_number: int, in_position: Vector2, in_color = null):
 	if Globals.damage_numbers:
-		var number = Globals.loaded_dmg_num_scene.instance()
+		var number = Loader.loaded_dmg_num_scene.instance()
 		$DamageNumbers.add_child(number)
 		number.init(in_number, in_position, in_color)
 		
@@ -2057,7 +2054,7 @@ func spawn_damage_number(in_number: int, in_position: Vector2, in_color = null):
 # aux_data contain "vol", "bus"
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	if rollback_start_frametime == null:
-		var new_audio = Globals.loaded_audio_scene.instance()
+		var new_audio = Loader.loaded_audio_scene.instance()
 		$AudioPlayers.add_child(new_audio)
 		new_audio.init(audio_ref, aux_data)
 	else: # during rollback, add the audio to the audio_queue instead of playing it, remove audio after AUDIO_QUEUE_LIFE frames
@@ -2111,7 +2108,7 @@ func load_queued_audio():
 				
 	for queued_audio in audio_queue:
 		if !queued_audio in to_exclude:
-			var new_audio = Globals.loaded_audio_scene.instance()
+			var new_audio = Loader.loaded_audio_scene.instance()
 			$AudioPlayers.add_child(new_audio)
 			new_audio.init(queued_audio.audio_ref, queued_audio.aux_data)
 			new_audio.confirmed = true

@@ -8,7 +8,7 @@ enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, G
 		GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY, AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, AIR_BLOCK,
 		SEQUENCE_USER, SEQUENCE_TARGET}
 enum burst {AVAILABLE, CONSUMED, EXHAUSTED}
-enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY}
+enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY, SUPER_ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
@@ -16,7 +16,7 @@ enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, SUPER}
 enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, SUPER}
 enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_C_REC
-		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE_PROJ, SCREEN_SHAKE, NO_IMPULSE
+		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
 		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
@@ -32,7 +32,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # NO_QUICK_CANCEL = prevent quick canceling during startup
 # NOT_FROM_C_REC = cannot do from cancellable recovery
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers
-# UNBLOCKABLE_PROJ = certain entities are unblockable
+# UNBLOCKABLE = certain attacks that are not physical specials are unblockable
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
 # SUPERARMOR_STARTUP = weakblock all attacks during startup frames
@@ -90,40 +90,6 @@ const CAMERA_ZOOM_SPEED = 0.000006
 const RespawnTimer_WAIT_TIME = 75
 const FLAT_STOCK_LOSS = 1000
 const CORNER_SIZE = 64
-
-# preloading scenes will cause issues, do them on onready variables instead
-onready var loaded_audio_scene := load("res://Scenes/Audio/AudioManager.tscn")
-onready var loaded_character_scene := load("res://Scenes/Character.tscn")
-onready var loaded_entity_scene := load("res://Scenes/Entity.tscn")
-onready var loaded_SFX_scene := load("res://Scenes/SFX.tscn")
-onready var loaded_afterimage_scene := load("res://Scenes/Afterimage.tscn")
-onready var loaded_palette_shader = load("res://Scenes/Shaders/Palette.gdshader")
-onready var monochrome_shader = load("res://Scenes/Shaders/Monochrome.gdshader")
-onready var white_shader = load("res://Scenes/Shaders/White.gdshader")
-onready var loaded_guard_gauge = ResourceLoader.load("res://Assets/UI/guard_gauge1.png")
-onready var loaded_guard_gauge_pos = load("res://Assets/UI/guard_gauge_pos.tres")
-onready var loaded_dmg_num_scene = load("res://Scenes/DamageNumber.tscn")
-
-onready var loaded_ui_audio_scene := load("res://Scenes/Menus/UIAudio.tscn")
-
-
-onready var common_entity_data = {
-	"BurstCounter" : {
-		"scene" : load("res://Assets/Entities/BurstCounter.tscn"),
-		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
-		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
-	},
-	"BurstEscape" : {
-		"scene" : load("res://Assets/Entities/BurstEscape.tscn"),
-		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
-		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
-	},
-	"BurstAwakening" : {
-		"scene" : load("res://Assets/Entities/BurstAwakening.tscn"),
-		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
-		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
-	},
-}
 
 
 var editor: bool # check if running in editor or not
@@ -641,7 +607,7 @@ func atk_type_to_tier(atk_type):
 			return 2
 		Globals.atk_type.SUPER:
 			return 3
-		Globals.atk_type.ENTITY: # just in case
+		Globals.atk_type.ENTITY, Globals.atk_type.SUPER_ENTITY: # just in case
 			return -1
 	
 #enum status_priority {

@@ -1,7 +1,6 @@
 extends Node2D
 
 
-const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 
 const TRAITS = []
 
@@ -68,8 +67,8 @@ func init(aux_data: Dictionary):
 			if "2_hits_proj" in Entity.unique_data:
 				Entity.absorption_value += 1
 				Entity.life_point += 1
-			Globals.Game.spawn_mob_SFX("TridentRing", "TridentRing", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : Entity.palette_ref}, Entity.creator_mob_ref)
+			Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.palette_ref, Entity.creator_mob_ref)
 			# if Entity.creater_mob_ref is passed in, ignores master_ID and will search for "palette" in LevelControl
 			# set "palette" to Entity.palette_ref under Entity.creater_mob_ref in LevelControl instead of "master"
 
@@ -252,21 +251,26 @@ func simulate():
 		"[c1]Spin":
 			Entity.velocity.percent(80)
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
-#			if posmod(Entity.lifetime, 2) == 0:
-#				Globals.Game.spawn_afterimage(Entity.master_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0, \
-#						Globals.afterimage_shader.MASTER, Entity.creator_mob_ref, Entity.palette_ref)
-				# if Entity.creater_mob_ref is passed in, ignores Entity.master_ID and will search for Entity.entity_ref in LevelControl
-				# set palette to Entity.palette_ref under Entity.creater_mob_ref in LevelControl
+
+#func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
+#		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+
 			if posmod(Entity.lifetime, 2) == 0:
 				if Globals.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), null, \
-							0.5, 10.0, Globals.afterimage_shader.WHITE)
+					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+							null, 0.5, 10.0, Globals.afterimage_shader.WHITE)
+#					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), null, \
+#							0.5, 10.0, Globals.afterimage_shader.WHITE)
 				if Globals.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
 							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
+#					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+#							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 				else:
-					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
 							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
+#					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+#							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 		
 		"[c1]Active", "[u][c1]Active":
 			if Entity.lifetime > 25 and Entity.unique_data.spun == false:
@@ -279,13 +283,13 @@ func simulate():
 		_:
 			if posmod(Entity.lifetime, 2) == 0:
 				if Globals.mob_attr.PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
 							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 				elif Globals.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), null, \
-							0.5, 10.0, Globals.afterimage_shader.WHITE)
+					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+							null, 0.5, 10.0, Globals.afterimage_shader.WHITE)
 				elif Globals.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
-					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
+					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
 							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
 						
 	

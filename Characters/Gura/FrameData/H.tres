@@ -35,7 +35,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "HSfxUnder",
 "SfxUnder_vframes": 2,
-"duration": 17,
+"duration": 16,
 "hframes": 6,
 "loop": false,
 "spritesheet": "HSprite",

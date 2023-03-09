@@ -1,11 +1,12 @@
 extends Node2D
 
+const PALETTE = null # always same color
+
 const START_SPEED = 500 * FMath.S
 const START_ROTATION = -70 # integer degree, negative for upward
 const GRAVITY = 18 * FMath.S
 const TERMINAL_DOWN_VELOCITY = 300 * FMath.S
 const AIR_RESISTANCE = 1
-const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 #const LIFESPAN = null
 
 const TRAITS = []
@@ -90,8 +91,8 @@ func simulate():
 	match Animator.to_play_animation: # afterimage trail
 		"Active", "bActive":
 			if posmod(Entity.lifetime, 5) == 0:
-				Globals.Game.spawn_afterimage(999, Entity.entity_ref, sprite.get_path(), null, 1.0, 10.0, \
-						Globals.afterimage_shader.WHITE)
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+						null, 1.0, 10.0, Globals.afterimage_shader.WHITE)
 	
 func kill(sound = true):
 	if Animator.to_play_animation != "Kill":

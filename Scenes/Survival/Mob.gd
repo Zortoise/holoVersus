@@ -92,7 +92,7 @@ onready var sfx_under = $Sprites/SfxUnder # clean code
 onready var sfx_over = $Sprites/SfxOver # clean code
 var UniqChar # unique character node
 
-var spritesheets
+var spritesheet
 var unique_audio
 var entity_data
 var sfx_data
@@ -207,8 +207,8 @@ func init(mob_name: String, level: int, variant: String, attr: Dictionary, start
 	animate("Idle")
 	$ArmorTimer.time = get_stat("ARMOR_TIME")
 	
-	Globals.Game.spawn_SFX("Respawn", "Respawn", position, {"palette":"white", "back":true, "facing":Globals.Game.rng_facing(), \
-			"v_mirror":Globals.Game.rng_bool()})
+	Globals.Game.spawn_SFX("Respawn", "Respawn", position, {"back":true, "facing":Globals.Game.rng_facing(), \
+			"v_mirror":Globals.Game.rng_bool()}, "white")
 	play_audio("bling7", {"vol" : -30, "bus" : "LowPass"})
 	play_audio("bling7", {"vol" : -12, "bus" : "PitchUp"})
 	
@@ -224,21 +224,21 @@ func load_mob():
 #	test_character.free()
 	add_to_group("MobNodes")
 	
-	UniqChar = Globals.Game.LevelControl.mob_data[mob_ref].scene.instance()
+	UniqChar = Loader.char_data[mob_ref].scene.instance()
 	add_child(UniqChar)
 	move_child(UniqChar, 0)
 	
-	spritesheets = Globals.Game.LevelControl.mob_data[mob_ref].spritesheets
-	unique_audio = Globals.Game.LevelControl.mob_data[mob_ref].unique_audio
-	entity_data = Globals.Game.LevelControl.mob_data[mob_ref].entity_data
-	sfx_data = Globals.Game.LevelControl.mob_data[mob_ref].sfx_data
+	spritesheet = Loader.char_data[mob_ref].spritesheet
+	unique_audio = Loader.char_data[mob_ref].unique_audio
+	entity_data = Loader.char_data[mob_ref].entity_data
+	sfx_data = Loader.char_data[mob_ref].sfx_data
 	
 	UniqChar.sprite = sprite
 	
 	# set up animators
 	UniqChar.Animator = $SpritePlayer
 	# load frame data
-	Animator.init_with_loaded_frame_data_array(sprite, sfx_over, sfx_under, Globals.Game.LevelControl.mob_data[mob_ref].frame_data_array)
+	Animator.init_with_loaded_frame_data_array(sprite, sfx_over, sfx_under, Loader.char_data[mob_ref].frame_data_array)
 	$ModulatePlayer.sprite = sprite
 	$FadePlayer.sprite = sprite
 	
@@ -281,13 +281,13 @@ func palette():
 		sfx_under.material = null
 	else:
 		sprite.material = ShaderMaterial.new()
-		sprite.material.shader = Globals.loaded_palette_shader
+		sprite.material.shader = Loader.loaded_palette_shader
 		sprite.material.set_shader_param("swap", loaded_palette)
 		sfx_over.material = ShaderMaterial.new()
-		sfx_over.material.shader = Globals.loaded_palette_shader
+		sfx_over.material.shader = Loader.loaded_palette_shader
 		sfx_over.material.set_shader_param("swap", loaded_palette)
 		sfx_under.material = ShaderMaterial.new()
-		sfx_under.material.shader = Globals.loaded_palette_shader
+		sfx_under.material.shader = Loader.loaded_palette_shader
 		sfx_under.material.set_shader_param("swap", loaded_palette)
 		
 
@@ -473,7 +473,7 @@ func simulate2(): # only ran if not in hitstop
 #					proj_only_combo = false
 				play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 				Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-					"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
+					"v_mirror":Globals.Game.rng_bool()}, "red")
 			else:
 				if current_guard_gauge == 0: # instantly recover from hitstun if GG swell back to max
 					$HitStunTimer.stop()
@@ -485,7 +485,7 @@ func simulate2(): # only ran if not in hitstop
 #						proj_only_combo = false
 					play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 					Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-						"v_mirror":Globals.Game.rng_bool(), "palette":"red"})
+						"v_mirror":Globals.Game.rng_bool()}, "red")
 				
 			guard_gauge_update()
 		else:
@@ -1588,10 +1588,10 @@ func set_monochrome():
 	if !monochrome:
 		monochrome = true
 		sprite.material = ShaderMaterial.new()
-		sprite.material.shader = Globals.monochrome_shader
+		sprite.material.shader = Loader.monochrome_shader
 
 # particle emitter, visuals only, no need fixed-point
-func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, number, radius, v_mirror_rand = false):
+func particle(anim: String, sfx_ref: String, palette: String, interval, number, radius, v_mirror_rand = false):
 	if Globals.Game.frametime % interval == 0:  # only shake every X frames
 		for x in number:
 			var angle = Globals.Game.rng_generate(10) * PI/5.0
@@ -1603,9 +1603,7 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 			var aux_data = {"facing" : Globals.Game.rng_facing()}
 			if v_mirror_rand:
 				aux_data["v_mirror"] = Globals.Game.rng_bool()
-			if palette != "":
-				aux_data["palette"] = palette
-			Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data)
+			Globals.Game.spawn_SFX(anim, sfx_ref, particle_pos, aux_data, palette)
 		
 func armor_flash():
 	if $ArmorTimer.is_running():
@@ -1615,18 +1613,18 @@ func armor_flash():
 	if $ModulatePlayer.playing and $ModulatePlayer.query_to_play(["armor_time"]): # stop flashing
 		reset_modulate()
 		
-#func get_spritesheets():
+#func get_spritesheet():
 #	pass
 			
 func process_afterimage_trail():# process afterimage trail
 	# Character.afterimage_trail() can accept 2 parameters, 1st is the starting modulate, 2nd is the lifetime
 	
 	# afterimage trail for certain modulate animations with the key "afterimage_trail"
-	if LoadedSFX.modulate_animations.has($ModulatePlayer.current_animation) and \
-		LoadedSFX.modulate_animations[$ModulatePlayer.current_animation].has("afterimage_trail") and \
+	if NSAnims.modulate_animations.has($ModulatePlayer.current_animation) and \
+		NSAnims.modulate_animations[$ModulatePlayer.current_animation].has("afterimage_trail") and \
 		$ModulatePlayer.is_playing():
 		# basic afterimage trail for "afterimage_trail" = 0
-		if LoadedSFX.modulate_animations[$ModulatePlayer.current_animation]["afterimage_trail"] == 0:
+		if NSAnims.modulate_animations[$ModulatePlayer.current_animation]["afterimage_trail"] == 0:
 			afterimage_trail()
 			return
 			
@@ -1649,26 +1647,20 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 		else:
 			main_color_modulate = color_modulate
 		
+#func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, palette_ref, color_modulate = null, \
+#		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+		
 		if sfx_under.visible:
-#			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
-#				starting_modulate_a, lifetime, afterimage_shader, mob_ref, palette_ref)
-			Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), main_color_modulate, \
-					starting_modulate_a, lifetime, afterimage_shader)
-			
-#		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), main_color_modulate, \
-#			starting_modulate_a, lifetime, afterimage_shader, mob_ref, palette_ref)
+			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, \
+					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 
-		Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sprite, sprite.get_path(), main_color_modulate, \
-				starting_modulate_a, lifetime, afterimage_shader)
-				
-#master_ID: int, spritesheet_ref: String, sprite_node_path: NodePath, color_modulate = null, starting_modulate_a = 0.5, \
-#		lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER
+		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, \
+				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-#			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
-#				starting_modulate_a, lifetime, afterimage_shader, mob_ref, palette_ref)
-			Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sfx_over, sfx_over.get_path(), main_color_modulate, \
-					starting_modulate_a, lifetime, afterimage_shader)
+			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, \
+					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
+					
 	else:
 		afterimage_timer -= 1
 		
@@ -1676,20 +1668,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-#		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
-#			starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER, mob_ref, palette_ref)
-		Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), null, \
+		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, null, \
 				starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER)
 		
-#	Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), null, \
-#		starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER, mob_ref, palette_ref)
-	Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sprite, sprite.get_path(), null, \
+	Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, null, \
 			starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER)
 	
 	if sfx_over.visible:
-#		Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
-#			starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER, mob_ref, palette_ref)
-		Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sfx_over, sfx_over.get_path(), null, \
+		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, null, \
 				starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER)
 	
 		
@@ -3071,10 +3057,8 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	if hitspark != "":
 		var rot_rad : float = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
 		if "pull" in hit_data: rot_rad += PI # flip if pulling
-		var aux_data = {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}
-		if hit_data.move_data["hitspark_palette"] != "red":
-			aux_data["palette"] = hit_data.move_data["hitspark_palette"]
-		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, aux_data)
+		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}, \
+				hit_data.move_data["hitspark_palette"])
 		
 func get_default_hitspark_type():
 	return get_stat("DEFAULT_HITSPARK_TYPE")
@@ -3328,9 +3312,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					if healed != null and healed > 0:
 						Globals.Game.spawn_damage_number(healed, killer.position, Globals.dmg_num_col.GREEN)
 						
-#			Globals.Game.spawn_afterimage(player_ID, sprite_texture_ref.sprite, sprite.get_path(), null, \
-#					1.0, 20, Globals.afterimage_shader.WHITE, mob_ref, palette_ref)
-			Globals.Game.spawn_mob_afterimage(mob_ref, palette_ref, sprite_texture_ref.sprite, sprite.get_path(), null, \
+			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, null, \
 					1.0, 20, Globals.afterimage_shader.WHITE)
 			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
@@ -3426,20 +3408,20 @@ func _on_SpritePlayer_frame_update(): # emitted after every frame update, useful
 # return modulate to normal after ModulatePlayer finishes playing
 # may do follow-up modulate animation
 func _on_ModulatePlayer_anim_finished(anim_name):
-	if LoadedSFX.modulate_animations[anim_name].has("followup"):
+	if NSAnims.modulate_animations[anim_name].has("followup"):
 		reset_modulate()
-		modulate_play(LoadedSFX.modulate_animations[anim_name]["followup"])
+		modulate_play(NSAnims.modulate_animations[anim_name]["followup"])
 	else:
 		reset_modulate()
 	
 func _on_ModulatePlayer_anim_started(anim_name):
-	if LoadedSFX.modulate_animations[anim_name].has("monochrome"):
+	if NSAnims.modulate_animations[anim_name].has("monochrome"):
 		set_monochrome()
 	
 func _on_FadePlayer_anim_finished(anim_name):
-	if LoadedSFX.fade_animations[anim_name].has("followup"):
+	if NSAnims.fade_animations[anim_name].has("followup"):
 		reset_fade()
-		$FadePlayer.play(LoadedSFX.fade_animations[anim_name]["followup"])
+		$FadePlayer.play(NSAnims.fade_animations[anim_name]["followup"])
 	else:
 		reset_fade()
 		
@@ -3488,7 +3470,7 @@ func reset_fade():
 # aux_data contain "vol", "bus" and "unique_path" (added by this function)
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	
-	if !audio_ref in LoadedSFX.loaded_audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
+	if !audio_ref in Loader.audio: # custom audio, have the audioplayer search this node's unique_audio dictionary
 		aux_data["mob_ref"] = mob_ref # add a new key to aux_data
 		
 	Globals.Game.play_audio(audio_ref, aux_data)
@@ -3497,12 +3479,12 @@ func play_audio(audio_ref: String, aux_data: Dictionary):
 
 # triggered by SpritePlayer at start of each animation
 func _on_change_spritesheet(spritesheet_filename):
-	sprite.texture = spritesheets[spritesheet_filename]
+	sprite.texture = spritesheet[spritesheet_filename]
 	sprite_texture_ref.sprite = spritesheet_filename
 	
 func _on_change_SfxOver_spritesheet(SfxOver_spritesheet_filename):
 	sfx_over.show()
-	sfx_over.texture = spritesheets[SfxOver_spritesheet_filename]
+	sfx_over.texture = spritesheet[SfxOver_spritesheet_filename]
 	sprite_texture_ref.sfx_over = SfxOver_spritesheet_filename
 	
 func hide_SfxOver():
@@ -3510,7 +3492,7 @@ func hide_SfxOver():
 	
 func _on_change_SfxUnder_spritesheet(SfxUnder_spritesheet_filename):
 	sfx_under.show()
-	sfx_under.texture = spritesheets[SfxUnder_spritesheet_filename]
+	sfx_under.texture = spritesheet[SfxUnder_spritesheet_filename]
 	sprite_texture_ref.sfx_under = SfxUnder_spritesheet_filename
 	
 func hide_SfxUnder():
@@ -3653,8 +3635,8 @@ func load_state(state_data):
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	reset_modulate()
 	$ModulatePlayer.load_state(state_data.ModulatePlayer_data)
-	if $ModulatePlayer.current_animation in LoadedSFX.modulate_animations and \
-			LoadedSFX.modulate_animations[$ModulatePlayer.current_animation].has("monochrome"): set_monochrome()
+	if $ModulatePlayer.current_animation in NSAnims.modulate_animations and \
+			NSAnims.modulate_animations[$ModulatePlayer.current_animation].has("monochrome"): set_monochrome()
 	reset_fade()
 	$FadePlayer.load_state(state_data.FadePlayer_data)
 	

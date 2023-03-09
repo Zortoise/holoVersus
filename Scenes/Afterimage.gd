@@ -1,7 +1,7 @@
 extends Node2D
 
-var master_node = null # not saved, set when loading state
-var player_image := false # not saved, afterimage is that of a player
+#var master_node = null # not saved, set when loading state
+#var player_image := false # not saved, afterimage is that of a player
 
 var free := false
 
@@ -10,21 +10,23 @@ var lifetime
 var color_modulate
 var starting_modulate_a
 
-var master_ID: int
+var original_ID : int
+var is_entity : bool
+var master_ref: String
 var spritesheet_ref: String
+var palette_ref = null
 var afterimage_shader = Globals.afterimage_shader.MASTER
 var ignore_freeze := false
-var mob_ref = null
-var mob_palette_ref = null
 
-func init(in_master_ID: int, in_spritesheet_ref: String, sprite_node_path: NodePath, in_color_modulate = null, \
-		in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Globals.afterimage_shader.MASTER, \
-		in_mob_ref = null, in_mob_palette_ref = null):
+
+func init(in_original_ID : int, in_is_entity: bool, in_master_ref: String, in_spritesheet_ref: String, sprite_node_path: NodePath, in_palette_ref, \
+		in_color_modulate = null, in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Globals.afterimage_shader.MASTER):
 	
-	master_ID = in_master_ID
+	original_ID = in_original_ID
+	is_entity = in_is_entity
+	master_ref = in_master_ref
 	spritesheet_ref = in_spritesheet_ref
-	mob_ref = in_mob_ref
-	mob_palette_ref = in_mob_palette_ref
+	palette_ref = in_palette_ref
 	
 	set_texture()
 
@@ -54,28 +56,40 @@ func init(in_master_ID: int, in_spritesheet_ref: String, sprite_node_path: NodeP
 		ignore_freeze = true
 		
 func set_texture():
-	if mob_ref == null:
-		if master_ID != 999:
-			master_node = Globals.Game.get_player_node(master_ID)
-			if spritesheet_ref in master_node.spritesheets:
-				$Sprite.texture = master_node.spritesheets[spritesheet_ref]
-				player_image = true
-			elif spritesheet_ref in master_node.entity_data: # entity ref passed in instead
-				$Sprite.texture = master_node.entity_data[spritesheet_ref].spritesheet
-			else:
-				print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
-		elif spritesheet_ref in Globals.Game.LevelControl.entity_data: # card effects
-			$Sprite.texture = Globals.Game.LevelControl.entity_data[spritesheet_ref].spritesheet
+	
+	if is_entity:
+		if spritesheet_ref in Loader.entity_data: # entity afterimage
+			$Sprite.texture = Loader.entity_data[spritesheet_ref].spritesheet
 		else:
 			print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
 	else:
-		if spritesheet_ref in Globals.Game.LevelControl.mob_data[mob_ref].spritesheets:
-			$Sprite.texture = Globals.Game.LevelControl.mob_data[mob_ref].spritesheets[spritesheet_ref]
-			player_image = true
-		elif spritesheet_ref in Globals.Game.LevelControl.mob_data[mob_ref].entity_data: # entity ref passed in instead
-			$Sprite.texture = Globals.Game.LevelControl.mob_data[mob_ref].entity_data[spritesheet_ref].spritesheet
+		if master_ref in Loader.char_data: # character afterimage
+			$Sprite.texture = Loader.char_data[master_ref].spritesheet[spritesheet_ref]
 		else:
-			print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
+			print("Error: " + master_ref + " spritesheet not found in Afterimage.gd.")
+	
+#	if mob_ref == null:
+#		if master_ID != 999:
+#			master_node = Globals.Game.get_player_node(master_ID)
+#			if spritesheet_ref in master_node.spritesheet:
+#				$Sprite.texture = master_node.spritesheet[spritesheet_ref]
+#				player_image = true
+#			elif spritesheet_ref in master_node.entity_data: # entity ref passed in instead
+#				$Sprite.texture = master_node.entity_data[spritesheet_ref].spritesheet
+#			else:
+#				print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
+#		elif spritesheet_ref in Globals.Game.LevelControl.entity_data: # card effects
+#			$Sprite.texture = Globals.Game.LevelControl.entity_data[spritesheet_ref].spritesheet
+#		else:
+#			print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
+#	else:
+#		if spritesheet_ref in Globals.Game.LevelControl.mob_data[mob_ref].spritesheet:
+#			$Sprite.texture = Globals.Game.LevelControl.mob_data[mob_ref].spritesheet[spritesheet_ref]
+#			player_image = true
+#		elif spritesheet_ref in Globals.Game.LevelControl.mob_data[mob_ref].entity_data: # entity ref passed in instead
+#			$Sprite.texture = Globals.Game.LevelControl.mob_data[mob_ref].entity_data[spritesheet_ref].spritesheet
+#		else:
+#			print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
 			
 
 func apply_shader():
@@ -83,28 +97,37 @@ func apply_shader():
 		Globals.afterimage_shader.NONE:
 			pass
 		Globals.afterimage_shader.MASTER:
-			if mob_ref != null:
-				if mob_palette_ref in Globals.Game.LevelControl.mob_data[mob_ref].palettes:
-					$Sprite.material = ShaderMaterial.new()
-					$Sprite.material.shader = Globals.loaded_palette_shader
-					$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[mob_ref].palettes[mob_palette_ref])
-			elif master_node.loaded_palette != null:
+			if palette_ref in Loader.char_data[master_ref].palettes:
 				$Sprite.material = ShaderMaterial.new()
-				$Sprite.material.shader = Globals.loaded_palette_shader
-				$Sprite.material.set_shader_param("swap", master_node.loaded_palette)
+				$Sprite.material.shader = Loader.loaded_palette_shader
+				$Sprite.material.set_shader_param("swap", Loader.char_data[master_ref].palettes[palette_ref])
+#			if mob_ref != null:
+#				if mob_palette_ref in Globals.Game.LevelControl.mob_data[mob_ref].palettes:
+#					$Sprite.material = ShaderMaterial.new()
+#					$Sprite.material.shader = Loader.loaded_palette_shader
+#					$Sprite.material.set_shader_param("swap", Globals.Game.LevelControl.mob_data[mob_ref].palettes[mob_palette_ref])
+#			elif master_node.loaded_palette != null:
+#				$Sprite.material = ShaderMaterial.new()
+#				$Sprite.material.shader = Loader.loaded_palette_shader
+#				$Sprite.material.set_shader_param("swap", master_node.loaded_palette)
 		Globals.afterimage_shader.MONOCHROME:
 			$Sprite.material = ShaderMaterial.new()
-			$Sprite.material.shader = Globals.monochrome_shader
+			$Sprite.material.shader = Loader.monochrome_shader
 		Globals.afterimage_shader.WHITE:
 			$Sprite.material = ShaderMaterial.new()
-			$Sprite.material.shader = Globals.white_shader
+			$Sprite.material.shader = Loader.white_shader
 			$Sprite.material.set_shader_param("whitening", 1.0)
 
 func simulate():
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
 	
-	if player_image:
-		master_node = Globals.Game.get_player_node(master_ID)
+	if is_entity:
+		var entity_node = Globals.Game.get_entity_node(original_ID)
+		if entity_node != null and entity_node.get_node("HitStopTimer").is_running():
+			return
+	
+	else:
+		var master_node = Globals.Game.get_player_node(original_ID)
 		if master_node != null and master_node.get_node("HitStopTimer").is_running() and !master_node.get_node("HitStunTimer").is_running():
 			return # does not advance if afterimage owner is a player and is in attacker hitstop
 	
@@ -119,10 +142,11 @@ func simulate():
 
 func save_state():
 	var state_data = {
-		"master_ID" : master_ID,
+		"original_ID" : original_ID,
+		"is_entity" : is_entity,
 		"spritesheet_ref" : spritesheet_ref,
-		"mob_ref" : mob_ref,
-		"mob_palette_ref" : mob_palette_ref,
+		"master_ref" : master_ref,
+		"palette_ref" : palette_ref,
 		"afterimage_shader" : afterimage_shader,
 		"hframes" : $Sprite.hframes,
 		"vframes" : $Sprite.vframes,
@@ -142,11 +166,11 @@ func save_state():
 	
 func load_state(state_data):
 	
-	master_ID = state_data.master_ID
-	master_node = Globals.Game.get_player_node(master_ID)
+	original_ID = state_data.original_ID
+	is_entity = state_data.is_entity
 	spritesheet_ref = state_data.spritesheet_ref
-	mob_ref = state_data.mob_ref
-	mob_palette_ref = state_data.mob_palette_ref
+	master_ref = state_data.master_ref
+	palette_ref = state_data.palette_ref
 	
 	set_texture()
 	

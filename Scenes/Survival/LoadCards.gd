@@ -2,7 +2,7 @@ extends Node
 
 enum effect_ref {SHARK}
 
-var entity_data = {
+var card_entity_data = {
 	"NibblerSpawnE" : {
 		"scene" : load("res://Cards/NibblerSpawnE.tscn"),
 		"frame_data" : ResourceLoader.load("res://Characters/Gura/Entities/FrameData/NibblerSpawn.tres"),
@@ -15,7 +15,7 @@ var entity_data = {
 	},
 }
 
-var loaded_sfx = {
+var card_sfx = {
 	"SmallSplash" : {
 		"frame_data" : ResourceLoader.load("res://Characters/Gura/SFX/FrameData/SmallSplash.tres"),
 		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/SmallSplashSprite.png"),
@@ -26,7 +26,7 @@ var loaded_sfx = {
 	}
 }
 
-var unique_audio = {
+var card_audio = {
 	"water1": ResourceLoader.load("res://Characters/Gura/UniqueAudio/water1.wav"),
 	"water6": ResourceLoader.load("res://Characters/Gura/UniqueAudio/water6.wav"),
 	"water11": ResourceLoader.load("res://Characters/Gura/UniqueAudio/water11.wav"),

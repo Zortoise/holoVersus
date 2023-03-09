@@ -19,14 +19,17 @@ func init(in_audio_ref: String, aux_data: Dictionary):
 	if "bus" in aux_data:
 		bus = aux_data.bus
 		
-	if Globals.survival_level != null and "surv" in aux_data:
-		stream = Globals.Game.LevelControl.unique_audio[audio_ref]
-	elif "unique_path" in aux_data: # load unique audio
-		stream = get_node(aux_data.unique_path).unique_audio[audio_ref]
-	elif "mob_ref" in aux_data:
-		stream = Globals.Game.LevelControl.mob_data[aux_data.mob_ref].unique_audio[audio_ref]
+	if audio_ref in Loader.audio:
+		stream = Loader.audio[audio_ref]
 	else:
-		stream = LoadedSFX.loaded_audio[audio_ref]
+		print("Error: " + audio_ref + " audio data not found in Loader.audio")
+#	elif Globals.survival_level != null and "surv" in aux_data:
+#		stream = Globals.Game.LevelControl.unique_audio[audio_ref]
+#	elif "unique_path" in aux_data: # load unique audio
+#		stream = get_node(aux_data.unique_path).unique_audio[audio_ref]
+#	elif "mob_ref" in aux_data:
+#		stream = Globals.Game.LevelControl.mob_data[aux_data.mob_ref].unique_audio[audio_ref]
+
 		
 	if "vol" in aux_data:
 		volume_target = aux_data.vol
@@ -87,7 +90,7 @@ func kill():
 ##	pitch_scale = state_data.pitch
 #
 #	if !unique_path:
-#		stream = LoadedSFX.loaded_audio[audio_ref]
+#		stream = NSAnims.loaded_audio[audio_ref]
 #	else: # load unique audio
 #		stream = get_node(unique_path).unique_audio[audio_ref]
 

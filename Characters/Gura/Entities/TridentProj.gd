@@ -4,7 +4,6 @@ const ID = "trident" # for master to find it
 
 #const START_SPEED = 500
 #const START_ROTATION = -14 # integer degrees, negative for upward
-const PALETTE = null # setting this to null make it use its master's palette, not having PALETTE make it use default colors
 #const LIFESPAN = null
 
 const TRAITS = []
@@ -53,7 +52,7 @@ const MOVE_DATABASE = {
 		"atk_level" : 4,
 		"KB_angle" : -45,
 		"proj_level" : 3,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE_PROJ, Globals.atk_attr.DRAG_KB],
+		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.DRAG_KB],
 		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
@@ -122,7 +121,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 2
 			Entity.life_point = 2
 			Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : "master"}, get_node(Entity.creator_path).player_ID)
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.palette_ref, Entity.master_ref)
 		"[c3]Spawn", "[u][c3]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
@@ -130,7 +129,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 3
 			Entity.life_point = 4
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : "master"}, get_node(Entity.creator_path).player_ID)
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.palette_ref, Entity.master_ref)
 		"[ex]Spawn", "[u][ex]Spawn":
 			Entity.velocity.set_vector(700 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
@@ -138,7 +137,7 @@ func init(aux_data: Dictionary):
 			Entity.absorption_value = 3
 			Entity.life_point = 3
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot), "palette" : "master"}, get_node(Entity.creator_path).player_ID)
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.palette_ref, Entity.master_ref)
 #
 #		"[u][c1]Spawn":
 #			Entity.velocity.set_vector(500 * FMath.S, 0)
@@ -202,7 +201,7 @@ func turn_to_enemy():
 	
 	Entity.hitcount_record = []
 	
-	var master_node = Globals.Game.get_player_node(get_node(Entity.creator_path).player_ID)
+	var master_node = Globals.Game.get_player_node(Entity.master_ID)
 	var enemy_node = master_node.get_target()
 	if enemy_node == null:
 		enemy_node = master_node
@@ -386,11 +385,15 @@ func simulate():
 			Entity.velocity.percent(80)
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(get_node(Entity.creator_path).player_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+#func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
+#		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 		
 		"[c2]Active", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			if posmod(Entity.lifetime, 3) == 0:
-				Globals.Game.spawn_afterimage(get_node(Entity.creator_path).player_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 			if !Animator.to_play_animation in ["[c2]Active", "[u][c2]Active"]:
 				if Entity.lifetime > 25 and Entity.hitcount_record.size() == 0:
@@ -399,17 +402,19 @@ func simulate():
 				
 		"[c3]Active", "[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(get_node(Entity.creator_path).player_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14), "palette" : "master"}, get_node(Entity.creator_path).player_ID)
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14)}, Entity.palette_ref, Entity.master_ref)
 						
 		"[u][c3]Active", "[u][ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(get_node(Entity.creator_path).player_ID, Entity.entity_ref, sprite.get_path(), Color(1.5, 1.5, 1.5), 0.5, 10.0)
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68), "palette" : "master"}, get_node(Entity.creator_path).player_ID)
+						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68)}, Entity.palette_ref, Entity.master_ref)
 	
 	
 func kill(sound = true):
