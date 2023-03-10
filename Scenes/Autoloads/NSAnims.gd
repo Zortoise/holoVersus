@@ -386,6 +386,45 @@ var modulate_animations = {
 			},
 		}
 	},
+	"passive_armor" :{
+		"priority" : priority.BUFF,
+		"duration": 16,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(0.0, 0.0, 0.0),
+			},
+			2 :
+			{
+				"modulate" : Color(0.8, 0.3, 0.3),
+			},
+			4 :
+			{
+				"modulate" : Color(0.75, 0.5, 0.5),
+			},
+			6 :
+			{
+				"modulate" : Color(0.9, 0.7, 0.7),
+			},
+			8 :
+			{
+				"modulate" : Color(1.0, 0.9, 0.9),
+			},
+			10 :
+			{
+				"modulate" : Color(0.9, 0.7, 0.7),
+			},
+			12 :
+			{
+				"modulate" : Color(0.75, 0.5, 0.5),
+			},
+			14 :
+			{
+				"modulate" : Color(0.8, 0.3, 0.3),
+			},
+		}
+	},
 	"perfect_guard_flash" : {
 		"priority" : priority.FLASH,
 		"duration": 5,

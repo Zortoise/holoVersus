@@ -63,28 +63,33 @@ func close_shop(): # return unbought cards to pool
 
 
 func can_player_afford(player_ID: int, shop_index: int) -> bool:
-	if Globals.Game.get_player_node(player_ID).coin_count >= Cards.DATABASE[shop[shop_index]].price:
+	if Globals.Game.get_player_node(player_ID).coin_count >= get_price(shop[shop_index]):
 		return true
 	else: return false
 	
 func can_player_afford_ref(player_ID: int, in_card_ref: int) -> bool:
-	if Globals.Game.get_player_node(player_ID).coin_count >= Cards.DATABASE[in_card_ref].price:
+	if Globals.Game.get_player_node(player_ID).coin_count >= get_price(in_card_ref):
 		return true
 	else: return false
 	
 func pay_coin(player_ID: int, shop_index: int):
 	var player = Globals.Game.get_player_node(player_ID)
-	player.coin_count -= Cards.DATABASE[shop[shop_index]].price
+	player.coin_count -= get_price(shop[shop_index])
 	Globals.Game.coin_update(player)
 
 
 func sell_card(player_ID: int, index: int):
 	var player = Globals.Game.get_player_node(player_ID)
-	player.coin_count += FMath.percent(Cards.DATABASE[inventory[player_ID][index]].price, 50)
+	player.coin_count += FMath.percent(get_price(inventory[player_ID][index]), 50)
 	Globals.Game.coin_update(player)
 	
 	inventory[0].remove(index)
 
+
+func get_price(card_ref) -> int:
+	var mod: int = 100 + (Globals.Game.LevelControl.wave_ID - 2) * 10
+	return FMath.percent(Cards.DATABASE[card_ref].price, mod)
+	
 
 func get_describe(card: int, shop_describe := true) -> String:
 	var full_string := ""

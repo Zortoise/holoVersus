@@ -48,7 +48,7 @@ const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when Character's Guar
 const DAMAGE_VALUE_LIMIT = 700
 
 const GUARD_DRAIN_MOD = 100
-const GG_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
+const GG_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
 const GUARD_GAUGE_SWELL_RATE = 50
 
 const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move
@@ -767,7 +767,7 @@ func decision(decision_ref = null) -> bool:
 #					filter(atk_range.CLOSE_RANGE)
 #					return true
 				"start", "passive", "standby", null:
-					Character.start_command("command_grab")
+					Character.start_command("sharkstomp")
 					return true
 					
 		"base":
@@ -1475,6 +1475,9 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		_:
 			pass
+
+	if Globals.mob_attr.ARMOR_MOVES in Character.mob_attr:
+		atk_attr.append(Globals.atk_attr.SUPERARMOR_STARTUP)
 			
 	return atk_attr
 	
@@ -1564,7 +1567,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.face(-Character.facing)
 			rotate_partner(Partner)
 			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
-			Character.play_audio("cut2", {"vol":-20})
+			Character.play_audio("cut2", {"vol":-15})
 			Globals.Game.spawn_SFX("HitsparkC", "HitsparkC", Animator.query_point("grabpoint"), {"facing":-Character.facing, \
 					"rot":deg2rad(-70)}, Character.get_default_hitspark_palette())
 		"aF2SeqB":
@@ -1581,7 +1584,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Partner.face(-Character.facing)
 			rotate_partner(Partner)
 			Partner.get_node("ModulatePlayer").play("unlaunch_flash")
-			Character.play_audio("impact29", {"vol":-27})
+			Character.play_audio("impact29", {"vol":-20})
 		"SP6[ex]SeqB":
 			Character.velocity.set_vector(0, -500 * FMath.S)  # jump up
 			if Character.grounded:

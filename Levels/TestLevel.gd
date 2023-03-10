@@ -31,7 +31,7 @@ var RESOURCE_ADD = {
 
 
 #enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
-#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN}
+#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, ARMOR_MOVES, PASSIVE_ARMOR}
 
 # CHAIN: X, TOUGH: 0-5 (0/1 are weaker), SPEED: 0-6 (0/1 are slow), HP: 0-5 (0/1 are lower, 0 is 1 hp)
 # POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), COIN: X (add to loot pool, 40 limit)
@@ -41,21 +41,9 @@ const WAVES2 = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 8, "variant" : "test",
 					"attr" : {
-						Globals.mob_attr.CHAIN : 7,
-						Globals.mob_attr.PROJ_SPEED : 0,
-						Globals.mob_attr.WHITE_TRAIL : true,
-						Globals.mob_attr.WHITE_PROJ_TRAIL : true,
-						} },
-				],
-				7200 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
-					"attr" : {
-						Globals.mob_attr.SPEED : 6,
-						Globals.mob_attr.PROJ_SPEED : 3,
-						Globals.mob_attr.BLACK_TRAIL : true,
-						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+						Globals.mob_attr.PASSIVE_ARMOR : true
 						} },
 				],
 			}
@@ -147,12 +135,12 @@ const WAVES = {
 					"attr" : {
 						} },
 				],
-				2100 : [
+				1800 : [
 					{"mob" : "GuraM", "level" : 5, "variant" : "jump",
 					"attr" : {
 						} },
 				],
-				4200 : [
+				3600 : [
 					{"mob" : "GuraM", "level" : 5, "variant" : "rush",
 					"attr" : {
 						} },
@@ -166,40 +154,17 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.COIN: 8,
-						Globals.mob_attr.HP : 2,
+						} },
+				],
+				3600 : [
+					{"mob" : "GuraM", "level" : 8, "variant" : "shark",
+					"attr" : {
+						Globals.mob_attr.ARMOR_MOVES: true,
 						} },
 				],
 			}
 		},
 	7 : { # wave ID
-		"timestamps" :
-			{ # wave time
-				0 : [
-					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
-					"attr" : {
-						Globals.mob_attr.PROJ_SPEED: 0,
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 0,
-						} },
-					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
-					"attr" : {
-						Globals.mob_attr.PROJ_SPEED: 0,
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 0,
-						} },
-				],
-				4200 : [
-					{"mob" : "GuraM", "level" : 6, "variant" : "base",
-					"attr" : {
-						} },
-					{"mob" : "GuraM", "level" : 6, "variant" : "base",
-					"attr" : {
-						} },
-				],
-			}
-		},
-	8 : { # wave ID
 		"timestamps" :
 			{ # wave time
 				0 : [
@@ -270,6 +235,35 @@ const WAVES = {
 				],
 			}
 		},
+	8 : { # wave ID
+		"timestamps" :
+			{ # wave time
+				0 : [
+					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
+					"attr" : {
+						Globals.mob_attr.PROJ_SPEED: 0,
+						Globals.mob_attr.HP : 1,
+						Globals.mob_attr.TOUGH : 0,
+						} },
+					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
+					"attr" : {
+						Globals.mob_attr.PROJ_SPEED: 0,
+						Globals.mob_attr.HP : 1,
+						Globals.mob_attr.TOUGH : 0,
+						} },
+				],
+				4200 : [
+					{"mob" : "GuraM", "level" : 6, "variant" : "base",
+					"attr" : {
+						Globals.mob_attr.RAGE : true,
+						} },
+					{"mob" : "GuraM", "level" : 6, "variant" : "base",
+					"attr" : {
+						Globals.mob_attr.RAGE : true,
+						} },
+				],
+			}
+		},
 	9 : { # wave ID
 		"timestamps" :
 			{ # wave time
@@ -277,33 +271,35 @@ const WAVES = {
 					{"mob" : "GuraM", "level" : 8, "variant" : "rush",
 					"attr" : {
 						Globals.mob_attr.SPEED : 0,
-						Globals.mob_attr.HP : 5,
+						Globals.mob_attr.HP : 4,
 						Globals.mob_attr.TOUGH : 5,
 						Globals.mob_attr.TRAIL : true,
+						Globals.mob_attr.PASSIVE_ARMOR : true,
+						Globals.mob_attr.RAGE : true,
 						} },
 				],
 				600 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						} },
 				],
 				1200 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						} },
 				],
 				1800 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						} },
 				],
 				2400 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 0,
+						Globals.mob_attr.HP : 1,
 						} },
 				],
 			}

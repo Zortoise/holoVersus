@@ -8,9 +8,9 @@ extends Node2D
 func init(card_ref: int, half_price = false):
 	$Name.text = Cards.DATABASE[card_ref].name
 	if !half_price:
-		$Price/Cost.text = str(Cards.DATABASE[card_ref].price)
+		$Price/Cost.text = str(Inventory.get_price(card_ref))
 	else:
-		$Price/Cost.text = str(FMath.percent(Cards.DATABASE[card_ref].price, 50))
+		$Price/Cost.text = str(FMath.percent(Inventory.get_price(card_ref), 50))
 		
 func blank():
 	$Sprite.hide()

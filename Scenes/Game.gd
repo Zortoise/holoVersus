@@ -1350,6 +1350,7 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_ent
 	
 	
 func test_priority(hitbox, attacker, _hurtbox, defender): # return false if attacker fail the priority check, will not process the hit if so
+#	return true
 	if defender.is_atk_active():
 		# Rule 1: you cannot hit an opponent on the 1st frame of THEIR active frames
 		# you are invincible on the 1st frame of your active frames!

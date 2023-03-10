@@ -25,6 +25,8 @@ var looped_back := false # if true, do not emit anim_started when starting
 # set this in node extending this
 var animations = {}
 
+var sustain := false # not saved
+
 	
 # load and play an animation
 func play(anim: String):
@@ -37,6 +39,7 @@ func play(anim: String):
 			current_animation = to_play_animation
 			set_up_texture()
 			process_timestamp(0)
+		sustain = true
 	else:
 		print("Error: Animation " + anim + " not found.")
 		
@@ -54,6 +57,14 @@ func is_playing():
 func simulate():
 	if playing:
 		current_animation = to_play_animation
+		
+		if !sustain and (current_animation in NSAnims.modulate_animations or current_animation in NSAnims.fade_animations) and \
+				animations[current_animation].loop and get_parent().has_method("reset_modulate"):
+			get_parent().reset_modulate()
+			current_animation = ""
+			stop()
+			return
+		sustain = false
 		
 		if time == 0:
 			if !looped_back:
@@ -77,7 +88,7 @@ func simulate():
 				return
 		else:
 			time += 1
-
+			
 
 func process_timestamp(timestamp):
 	if "frame" in animations[current_animation]["timestamps"][timestamp]:
