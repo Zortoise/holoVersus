@@ -3,7 +3,7 @@ extends Node
 const VERSION = "Test Build 6"
 
 enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_RECOVERY,
-		GROUND_C_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, GROUND_FLINCH_HITSTUN,
+		GROUND_C_RECOVERY, GROUND_D_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, AIR_D_RECOVERY, GROUND_FLINCH_HITSTUN,
 		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_RESISTED_HITSTUN, AIR_RESISTED_HITSTUN, GROUND_ATK_STARTUP, 
 		GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY, AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, AIR_BLOCK,
 		SEQUENCE_USER, SEQUENCE_TARGET}
@@ -15,7 +15,7 @@ enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, SUPER}
 enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, SUPER}
-enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_C_REC
+enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_MOVE_REC
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
@@ -30,7 +30,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
 # NO_QUICK_CANCEL = prevent quick canceling during startup
-# NOT_FROM_C_REC = cannot do from cancellable recovery
+# NOT_FROM_MOVE_REC = cannot do from cancellable recovery
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers
 # UNBLOCKABLE = certain attacks that are not physical specials are unblockable
 # SCREEN_SHAKE = cause screen to shake on hit
@@ -289,6 +289,8 @@ func char_state_to_string(state):
 			return "GROUND_RECOVERY"
 		Globals.char_state.GROUND_C_RECOVERY:
 			return "GROUND_C_RECOVERY"
+		Globals.char_state.GROUND_D_RECOVERY:
+			return "GROUND_D_RECOVERY"
 		Globals.char_state.AIR_STARTUP:
 			return "AIR_STARTUP"
 		Globals.char_state.AIR_ACTIVE:
@@ -297,6 +299,8 @@ func char_state_to_string(state):
 			return "AIR_RECOVERY"
 		Globals.char_state.AIR_C_RECOVERY:
 			return "AIR_C_RECOVERY"
+		Globals.char_state.AIR_D_RECOVERY:
+			return "AIR_D_RECOVERY"
 		Globals.char_state.GROUND_FLINCH_HITSTUN:
 			return "GROUND_FLINCH_HITSTUN"
 		Globals.char_state.AIR_FLINCH_HITSTUN:

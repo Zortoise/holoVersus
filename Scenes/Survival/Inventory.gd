@@ -23,7 +23,7 @@ func _ready():
 	pass
 
 func stock_pool():
-	inventory = [[Cards.card_ref.GURA],[]]
+	inventory = [[],[]]
 	pool = []
 	for card in Cards.LIST:
 		pool.append(card)

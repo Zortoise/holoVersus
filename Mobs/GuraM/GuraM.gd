@@ -445,30 +445,35 @@ const COMMANDS = {
 		
 		"forward_jump": {
 			"action": "anim",
+			"no_move_rec": true, # cannot use from MOVE RECOVERY
 			"anim" : "JumpTransit",
 			"style" : "forward_jump", # provide further instructions even after current_command has changed
 			"next" : "option_air"
 		},
 		"back_jump": {
 			"action": "anim",
+			"no_move_rec": true, # cannot use from MOVE RECOVERY
 			"anim" : "JumpTransit",
 			"style" : "back_jump", # provide further instructions even after current_command has changed
 			"next" : "option_air"
 		},
 		"neutral_jump": {
 			"action": "anim",
+			"no_move_rec": true, # cannot use from MOVE RECOVERY
 			"anim" : "JumpTransit",
 			"style" : "neutral_jump",
 			"next" : "option_air"
 		},
 		"shorthop": {
 			"action": "anim",
+			"no_move_rec": true, # cannot use from MOVE RECOVERY
 			"anim" : "JumpTransit",
 			"style" : "shorthop",
 			"next" : "option_air_short"
 		},
 		"cross_jump": {
 			"action": "anim",
+			"no_move_rec": true, # cannot use from MOVE RECOVERY
 			"anim" : "JumpTransit",
 			"style" : "cross_jump",
 			"next" : "option_close"
@@ -636,22 +641,22 @@ const ATK_LOOKUP = {
 		rank.ZONE : ["back_dash", "hammerhead"]
 	},
 	atk_range.CLOSE_RANGE : {
-		rank.LOW : ["double_stab", "backswing", "rush_upthrust"],
-		rank.MID : ["dash_dance", "shorthop", "double_stab_combo1", "thrust", "backswing", "sharkstomp", "rush_upthrust", "overhead"],
-		rank.HIGH : ["dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust_combo", "backswing_combo", "sharkstomp_combo", \
+		rank.LOW : ["dash", "double_stab", "backswing", "rush_upthrust"],
+		rank.MID : ["dash", "dash_dance", "shorthop", "double_stab_combo1", "thrust", "backswing", "sharkstomp", "rush_upthrust", "overhead"],
+		rank.HIGH : ["dash", "dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust_combo", "backswing_combo", "sharkstomp_combo", \
 				"hammerhead_combo", "rush_upthrust_combo", "overhead"],
-		rank.RUSH : ["dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust", "backswing_combo", "sharkstomp", \
+		rank.RUSH : ["dash", "dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust", "backswing_combo", "sharkstomp", \
 				"rush_upthrust_combo", "hammerhead"],
-		rank.SHARK : ["dash_dance", "shorthop", "sharkstomp", "hammerhead", "shorthop"],
+		rank.SHARK : ["dash", "dash_dance", "shorthop", "sharkstomp", "hammerhead", "shorthop"],
 		rank.ZONE : ["back_dash", "back_jump", "hammerhead"]
 	},
 	atk_range.MID_RANGE : {
-		rank.LOW : ["rush_upthrust", "thrust", "backswing", "dash"],
-		rank.MID : ["shorthop", "thrust", "backswing_combo", "rush_upthrust_combo", "dash", "throw_trident"],
-		rank.HIGH : ["shorthop", "shorthop", "sharkstomp_combo", "thrust_combo", "backswing_combo", "rush_upthrust_combo", \
+		rank.LOW : ["dash", "rush_upthrust", "thrust", "backswing", "dash"],
+		rank.MID : ["dash", "shorthop", "thrust", "backswing_combo", "rush_upthrust_combo", "dash", "throw_trident"],
+		rank.HIGH : ["dash", "shorthop", "shorthop", "sharkstomp_combo", "thrust_combo", "backswing_combo", "rush_upthrust_combo", \
 				"throw_trident"],
 		rank.SHARK : ["shorthop", "sharkstomp", "dash", "shorthop"],
-		rank.RUSH : ["shorthop", "shorthop", "thrust", "backswing_combo", "rush_upthrust", "rush_upthrust_combo"],
+		rank.RUSH : ["dash", "dash", "shorthop", "shorthop", "thrust", "backswing_combo", "rush_upthrust", "rush_upthrust_combo"],
 		rank.ZONE : ["back_dash", "back_jump", "back_dash", "back_jump", "throw_trident"]
 	},
 	atk_range.LONG_RANGE : {
@@ -775,6 +780,7 @@ func decision(decision_ref = null) -> bool:
 						Character.start_command("idle")
 					else:
 						var array = ["seek", "seek", "forward_jump", "shorthop", "dash"]
+#						array = ["dash"]
 						jump_filter(array)
 						Character.start_command(Globals.Game.rng_array(array))
 					return true
@@ -1988,19 +1994,25 @@ func _on_SpritePlayer_anim_started(anim_name):
 		Character.face_opponent()
 		Character.chaining = false
 		
-	if Character.is_atk_startup() and !refine_move_name(Character.get_move_name()) in NO_IMPULSE: # impulse
-		Character.velocity.x = FMath.percent(Character.velocity.x, 50)
-		if Character.grounded:
+	if Character.is_atk_startup():
+		if !Character.grounded: # slow down when doing aerials for more accuracy
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.velocity.y = FMath.percent(Character.velocity.y, 50)
+			
+		elif Character.can_impulse and !refine_move_name(Character.get_move_name()) in NO_IMPULSE: # impulse
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 200)
 	#			Character.velocity.x = int(clamp(Character.velocity.x, -Character.get_stat("SPEED"), Character.get_stat("SPEED")))
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
-		else:
-			Character.velocity.y = FMath.percent(Character.velocity.y, 50)
+				
+	if Character.new_state in [Globals.char_state.GROUND_D_RECOVERY]: # put this after impulse
+		Character.can_impulse = false
+	else:
+		Character.can_impulse = true
 
 	match anim_name:
 		"Dash":
-			Character.velocity.x = FMath.percent(450 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD"))
+			Character.velocity.x = FMath.percent(500 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD"))
 			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \

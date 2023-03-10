@@ -625,9 +625,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						
 	match new_state:
 			
-		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY:
 			if Character.grounded and attack_ref in STARTERS:
-				if new_state == Globals.char_state.GROUND_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr(attack_ref):
+				if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY] and \
+						Globals.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 					continue # certain moves cannot be performed during cancellable recovery
 				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
@@ -642,10 +643,11 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					has_acted[0] = true
 					return true
 					
-		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, Globals.char_state.AIR_D_RECOVERY:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-					if new_state == Globals.char_state.AIR_C_RECOVERY and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr("a" + attack_ref):
+					if new_state in [Globals.char_state.AIR_C_RECOVERY, Globals.char_state.AIR_D_RECOVERY] and \
+							Globals.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr("a" + attack_ref):
 						continue # certain moves cannot be performed during cancellable recovery
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")

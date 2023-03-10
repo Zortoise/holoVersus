@@ -264,7 +264,7 @@ var last_dir := 0 # dir last frame
 var GG_swell_flag := false # set to true after 1st attack taken during a combo
 var first_hit_flag := false # will not swell GG during hitstun of 1st attack taken during combo
 var lethal_flag := false # flag the hitstun as a lethal hit, can only kill during lethal hitstun
-var from_c_rec := false # to prevent QCing into NOT_FROM_C_REC moves
+var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
 var enchance_cooldowns := {} # each key contain the cooldown
 
 # controls
@@ -589,7 +589,7 @@ func test2():
 		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
 		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-		" " + str(from_c_rec)
+		" " + str(from_move_rec)
 			
 			
 func _process(_delta):
@@ -2200,8 +2200,8 @@ func process_input_buffer():
 							
 						# BUFFERING AN INSTANT AIRDASH ---------------------------------------------------------------------------------
 							
-						Globals.char_state.GROUND_RECOVERY:
-							if Animator.query_to_play(["Dash"]) and Animator.time == 0:
+						Globals.char_state.GROUND_D_RECOVERY:
+							if Animator.time == 0:
 								animate("JumpTransit")
 								input_to_add.append([button_dash, Settings.input_buffer_time[player_ID]])
 								has_acted[0] = true
@@ -2301,7 +2301,8 @@ func process_input_buffer():
 						Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
 							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
 							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, \
-							Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY:
+							Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY, \
+							Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY:
 #							if state in [Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK] and \
 #									button_dash in input_state.pressed:
 #								continue # to make fdashing out of block easier
@@ -2368,12 +2369,13 @@ func process_input_buffer():
 								Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
 								Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, \
 								Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY, \
+								Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY, \
 								Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK:
 							if new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP] and \
 									!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
 								continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
 							if new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
-									!Animator.query_to_play(["BlockRec", "aBlockRec", "Dash", "aDash"]):
+									!Animator.query_to_play(["BlockRec", "aBlockRec"]):
 								continue # can only cancel from certain non-attack recovery frames
 							if grounded or super_dash > 0:
 								animate("SDashTransit")
@@ -2386,11 +2388,11 @@ func process_input_buffer():
 					Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
 							Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, \
 							Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, \
-							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, Globals.char_state.GROUND_RECOVERY:
+							Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK, Globals.char_state.GROUND_D_RECOVERY:
 						if new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP] and \
 								!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
 							continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP	
-						if new_state == Globals.char_state.GROUND_RECOVERY and (!Animator.query_to_play(["Dash"]) or Animator.time > 0):
+						if new_state == Globals.char_state.GROUND_D_RECOVERY and Animator.time > 0:
 							continue # can cancel from 1st frame of ground dash
 						if new_state in [Globals.char_state.GROUND_BLOCK, Globals.char_state.AIR_BLOCK] and \
 								!Animator.query_to_play(["BlockStartup", "aBlockStartup"]):
@@ -2484,7 +2486,7 @@ func state_detect(anim):
 		"JumpTransit", "DashTransit":
 			return Globals.char_state.GROUND_STARTUP
 		"Dash":
-			return Globals.char_state.GROUND_RECOVERY
+			return Globals.char_state.GROUND_D_RECOVERY
 		"BlockRec":
 			return Globals.char_state.GROUND_RECOVERY
 		"SoftLanding", "DashBrake", "WaveDashBrake", "BlockCRec", "HardLanding":
@@ -2496,7 +2498,7 @@ func state_detect(anim):
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Globals.char_state.AIR_STARTUP
 		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU":
-			return Globals.char_state.AIR_RECOVERY
+			return Globals.char_state.AIR_D_RECOVERY
 		"aBlockRec", "Dodge", "DodgeRec":
 			return Globals.char_state.AIR_RECOVERY
 		"aDashBrake", "aBlockCRec", "DodgeCRec":
@@ -3004,8 +3006,8 @@ func check_landing(): # called by physics.gd when character stopped by floor
 		Globals.char_state.AIR_ACTIVE:
 			pass # AIR_ACTIVE not used for now
 			
-		Globals.char_state.AIR_RECOVERY:
-			if Animator.to_play_animation.begins_with("aDash") and !Animator.to_play_animation.ends_with("DD"): # wave landing
+		Globals.char_state.AIR_D_RECOVERY:
+			if !Animator.to_play_animation.ends_with("DD"): # wave landing
 				if Globals.survival_level != null and !ground_dash_enchance():
 					pass
 				else:
@@ -3014,8 +3016,10 @@ func check_landing(): # called by physics.gd when character stopped by floor
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 					if dir == facing:
 						velocity.x = facing * FMath.percent(get_stat("GROUND_DASH_SPEED"), get_stat("WAVE_DASH_SPEED_MOD"))
-				
-			elif Animator.query_to_play(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
+			
+			
+		Globals.char_state.AIR_RECOVERY:
+			if Animator.query_to_play(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 				animate("BlockRec")
 				UniqChar.landing_sound()
@@ -3078,7 +3082,8 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 	if anim_gravity_mod <= 0: return
 	match new_state:
 		
-		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
+				Globals.char_state.GROUND_D_RECOVERY:
 			animate("FallTransit")
 			
 		Globals.char_state.GROUND_STARTUP:
@@ -3089,7 +3094,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 				
 		Globals.char_state.GROUND_ACTIVE:
 			pass # GROUND_ACTIVE not used for now
-			
+
 		Globals.char_state.GROUND_RECOVERY:
 			if Animator.query_to_play(["BlockRec"]):
 				animate("aBlockRec")
@@ -3492,7 +3497,7 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	if Globals.atk_attr.NO_QUICK_CANCEL in query_atk_attr(move_name):
 		return false
 		
-	if from_c_rec and Globals.atk_attr.NOT_FROM_C_REC in query_atk_attr(attack_ref):
+	if from_move_rec and Globals.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 		return false
 	
 	if is_ex_move(move_name): # cancelling from ex move, only other ex moves are possible
@@ -6448,18 +6453,20 @@ func _on_SpritePlayer_anim_finished(anim_name):
 	UniqChar._on_SpritePlayer_anim_finished(anim_name)
 
 	# do this at end of _on_SpritePlayer_anim_finished() as well
-	if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY]:
-		from_c_rec = true
+	if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
+			Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY]:
+		from_move_rec = true
 		
 
 func _on_SpritePlayer_anim_started(anim_name):
 	
 	state = state_detect(Animator.current_animation) # update state
 	
-	if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY]:
-		from_c_rec = true
+	if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
+			Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY]:
+		from_move_rec = true
 	elif !is_atk_startup():
-		from_c_rec = false
+		from_move_rec = false
 	
 	if is_atk_startup():
 		var move_name = anim_name.trim_suffix("Startup")
@@ -6482,9 +6489,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 					if strafe_lock_dir == 0 and move_name in UniqChar.STARTERS:
 						strafe_lock_dir = dir
 						
-						
 	else:
-		impulse_used = false
+		if new_state in [Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY]:
+			impulse_used = true  # no impulse if cancelling from dash
+		else:
+			impulse_used = false
+			
 		quick_turn_used = false
 		strafe_lock_dir = 0
 		
@@ -6868,7 +6878,7 @@ func save_state():
 		"first_hit_flag" : first_hit_flag,
 		"GG_swell_flag" : GG_swell_flag,
 		"lethal_flag" : lethal_flag,
-		"from_c_rec" : from_c_rec,
+		"from_move_rec" : from_move_rec,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -6958,7 +6968,7 @@ func load_state(state_data):
 	first_hit_flag = state_data.first_hit_flag
 	GG_swell_flag = state_data.GG_swell_flag
 	lethal_flag = state_data.lethal_flag
-	from_c_rec = state_data.from_c_rec
+	from_move_rec = state_data.from_move_rec
 	if Globals.survival_level != null:
 		enchance_cooldowns = state_data.enchance_cooldowns
 	

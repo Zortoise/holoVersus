@@ -169,6 +169,7 @@ var rand_max_chain_size := 0
 var combo_level := 0 # set when mob_break according to atk_level, determine Guard Swell Rate
 #var proj_only_combo := false # set to true when mob_break via projectile, false if hit with physical attack during combo, increase armor time
 var no_jump_chance := 0 # chance of removing all jumps from decision, increased if hit in air, decreased when hit on ground
+var can_impulse := true # set to false when starting a MOVEMENT RECOVERY, set to true otherwise
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -872,7 +873,7 @@ func process_command():
 			"anim" in UniqChar.COMMANDS[current_command] and UniqChar.COMMANDS[current_command].anim is Array:
 		pass # chain series
 	elif !new_state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.AIR_STANDBY, Globals.char_state.GROUND_C_RECOVERY, \
-			Globals.char_state.AIR_C_RECOVERY]:
+			Globals.char_state.AIR_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY]:
 		return
 	
 	if !current_command in UniqChar.COMMANDS: # standby
@@ -925,10 +926,13 @@ func process_command():
 			match UniqChar.COMMANDS[current_command].action:
 						
 				"idle":
-					if new_state != Globals.char_state.GROUND_C_RECOVERY:
+					if !new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY]:
 						face_opponent()
 							
 				"option": # see if activate triggers for 1 frame, then do "next" or "decision"
+					if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
+							Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY]:
+						return # maintain option during recovery states
 					if grounded:
 						if "next" in UniqChar.COMMANDS[current_command]:
 							start_command(UniqChar.COMMANDS[current_command].next)
@@ -979,6 +983,10 @@ func process_command():
 							Globals.char_state.GROUND_ATK_RECOVERY: # chaining
 								if command_array_num == 0: return
 								else: chaining = true
+							Globals.char_state.GROUND_D_RECOVERY:
+								if command_array_num == 0 and \
+										("no_c_rec" in UniqChar.COMMANDS[current_command] or "no_move_rec" in UniqChar.COMMANDS[current_command]):
+									return # some animations cannot be done during MOVE RECOVERY
 							Globals.char_state.GROUND_C_RECOVERY:
 								if command_array_num == 0 and "no_c_rec" in UniqChar.COMMANDS[current_command]:
 									return # some animations cannot be done during C_RECOVERY
@@ -992,6 +1000,10 @@ func process_command():
 							Globals.char_state.AIR_ATK_RECOVERY: # chaining
 								if command_array_num == 0: return
 								else: chaining = true
+							Globals.char_state.AIR_D_RECOVERY:
+								if command_array_num == 0 and \
+										("no_c_rec" in UniqChar.COMMANDS[current_command] or "no_move_rec" in UniqChar.COMMANDS[current_command]):
+									return # some animations cannot be done during MOVE RECOVERY
 							Globals.char_state.AIR_C_RECOVERY:
 								if command_array_num == 0 and "no_c_rec" in UniqChar.COMMANDS[current_command]:
 									return # some animations cannot be done during C_RECOVERY
@@ -1314,7 +1326,7 @@ func state_detect(anim):
 		"JumpTransit", "DashTransit":
 			return Globals.char_state.GROUND_STARTUP
 		"Dash":
-			return Globals.char_state.GROUND_RECOVERY
+			return Globals.char_state.GROUND_D_RECOVERY
 		"SoftLanding":
 			return Globals.char_state.GROUND_RECOVERY
 		"DashBrake":
@@ -1326,7 +1338,7 @@ func state_detect(anim):
 			return Globals.char_state.AIR_STARTUP
 			
 		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU":
-			return Globals.char_state.AIR_RECOVERY
+			return Globals.char_state.AIR_D_RECOVERY
 		"aDashBrake":
 			return Globals.char_state.AIR_C_RECOVERY
 			
@@ -3575,6 +3587,7 @@ func save_state():
 		"combo_level" : combo_level,
 #		"proj_only_combo" : proj_only_combo,
 		"no_jump_chance" : no_jump_chance,
+		"can_impulse" : can_impulse,
 		
 	}
 
@@ -3663,6 +3676,7 @@ func load_state(state_data):
 	combo_level = state_data.combo_level
 #	proj_only_combo = state_data.proj_only_combo
 	no_jump_chance = state_data.no_jump_chance
+	can_impulse = state_data.can_impulse
 
 	
 #--------------------------------------------------------------------------------------------------
