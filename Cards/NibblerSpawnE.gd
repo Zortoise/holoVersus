@@ -1,7 +1,7 @@
 extends Node2D
 
 
-const TRAITS = [Globals.entity_trait.GROUNDED]
+const TRAITS = []
 
 # cleaner code
 onready var Entity = get_parent()
@@ -21,7 +21,7 @@ func simulate():
 		Globals.Game.spawn_entity(Entity.master_ID, "NibblerE", spawn_point, {"facing" : Entity.facing}, Entity.palette_ref, Entity.master_ref)
 		
 		Globals.Game.spawn_SFX("BigSplash", "BigSplash", Entity.position, {"facing":Entity.facing, "grounded":true})
-		Entity.play_audio("water6", {"vol" : -20, "surv" : true})
+		Entity.play_audio("water6", {"vol" : -20})
 		Entity.free = true
 	
 func _on_SpritePlayer_anim_finished(anim_name):

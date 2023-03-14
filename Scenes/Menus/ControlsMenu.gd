@@ -92,6 +92,8 @@ func _ready():
 	$ControlsListL/Left.load_button("Left", Settings.button_to_string(input_map.P1_left))
 	$ControlsListL/Right.load_button("Right", Settings.button_to_string(input_map.P1_right))
 	$ControlsListL/Jump.load_button("Jump", Settings.button_to_string(input_map.P1_jump))
+	$ControlsListL/Special.load_button("Special", Settings.button_to_string(input_map.P1_special))
+	$ControlsListL/Unique.load_button("Unique", Settings.button_to_string(input_map.P1_unique))
 	$ControlsListL/Pause.load_button("Pause", Settings.button_to_string(input_map.P1_pause))
 	
 	$ControlsListR/Light.load_button("Light", Settings.button_to_string(input_map.P1_light))
@@ -99,8 +101,10 @@ func _ready():
 	$ControlsListR/Dash.load_button("Dash", Settings.button_to_string(input_map.P1_dash))
 	$ControlsListR/Aux.load_button("Aux", Settings.button_to_string(input_map.P1_aux))
 	$ControlsListR/Block.load_button("Block", Settings.button_to_string(input_map.P1_block))
-	$ControlsListR/Special.load_button("Special", Settings.button_to_string(input_map.P1_special))
-	$ControlsListR/Unique.load_button("Unique", Settings.button_to_string(input_map.P1_unique))
+	$ControlsListR/RS_Up.load_button("RS Up", Settings.button_to_string(input_map.P1_rs_up))
+	$ControlsListR/RS_Down.load_button("RS Down", Settings.button_to_string(input_map.P1_rs_down))
+	$ControlsListR/RS_Left.load_button("RS Left", Settings.button_to_string(input_map.P1_rs_left))
+	$ControlsListR/RS_Right.load_button("RS Right", Settings.button_to_string(input_map.P1_rs_right))
 	
 	$ControlsListBottom/TapJump.load_button("Up to Jump", TAP_JUMP_OPTIONS, input_map.P1_tapjump)
 	$ControlsListBottom/DJFastfall.load_button("Down+Jump Fastfall", DJ_FASTFALL_OPTIONS, input_map.P1_dj_fastfall)
@@ -116,23 +120,30 @@ func _ready():
 func _input(event): # remapping input when PopUp is visible
 	if $PopUp.visible:
 		if event is InputEventKey and event.pressed:
+			if event.scancode == KEY_ESCAPE and input_wait_node.name.begins_with("RS"):
+				var key_name = "P" + str(current_player + 1) + "_" + input_wait_node.name.to_lower()
+				play_audio("ui_deny", {"vol" : -5})
+				input_map[key_name] = null
+				input_wait_node.map("")
+				$PopUp.hide()
+				input_lock_time = 2
+			else:
+				var key_name = "P" + str(current_player + 1) + "_" + input_wait_node.name.to_lower()
 
-			var key_name = "P" + str(current_player + 1) + "_" + input_wait_node.name.to_lower()
+	#			for key in input_map: # search for repeated inputs for current player, skip itself
+	#				if key.begins_with("P" + str(current_player + 1)) and key != key_name and input_map[key] == event.scancode:
+	#					$PopUp/Label2/AnimationPlayer.stop()
+	#					$PopUp/Label2/AnimationPlayer.play("default")
+	#					play_audio("ui_deny", {"vol" : -5})
+	#					return
 
-#			for key in input_map: # search for repeated inputs for current player, skip itself
-#				if key.begins_with("P" + str(current_player + 1)) and key != key_name and input_map[key] == event.scancode:
-#					$PopUp/Label2/AnimationPlayer.stop()
-#					$PopUp/Label2/AnimationPlayer.play("default")
-#					play_audio("ui_deny", {"vol" : -9})
-#					return
-
-			play_audio("ui_accept2", {"vol":-7})
-			input_map[key_name] = event.scancode
-			
-			input_wait_node.map(Settings.button_to_string(event.scancode))
-			$PopUp.hide()
-			input_lock_time = 2 # need to wait some time before returning focus to prevent double firing
-			# can't use yield(get_tree(),"idle_frame") or call_deferred() for this... need 2 frames
+				play_audio("ui_accept2", {"vol":-4})
+				input_map[key_name] = event.scancode
+				
+				input_wait_node.map(Settings.button_to_string(event.scancode))
+				$PopUp.hide()
+				input_lock_time = 2 # need to wait some time before returning focus to prevent double firing
+				# can't use yield(get_tree(),"idle_frame") or call_deferred() for this... need 2 frames
 			
 		elif event is InputEventJoypadButton and event.pressed:
 			
@@ -143,10 +154,10 @@ func _input(event): # remapping input when PopUp is visible
 #					input_map[key].hash() == [event.device, event.button_index].hash():
 #					$PopUp/Label2/AnimationPlayer.stop()
 #					$PopUp/Label2/AnimationPlayer.play("default")
-#					play_audio("ui_deny", {"vol" : -9})
+#					play_audio("ui_deny", {"vol" : -5})
 #					return
 
-			play_audio("ui_accept2", {"vol":-7})
+			play_audio("ui_accept2", {"vol":-4})
 			input_map[key_name] = [event.device, event.button_index]
 			
 			input_wait_node.map(Settings.button_to_string([event.device, event.button_index]))
@@ -162,10 +173,10 @@ func _input(event): # remapping input when PopUp is visible
 #					input_map[key].hash() == [event.device, event.axis, axis_sign].hash():
 #					$PopUp/Label2/AnimationPlayer.stop()
 #					$PopUp/Label2/AnimationPlayer.play("default")
-#					play_audio("ui_deny", {"vol" : -9})
+#					play_audio("ui_deny", {"vol" : -5})
 #					return
 				
-			play_audio("ui_accept2", {"vol":-7})
+			play_audio("ui_accept2", {"vol":-4})
 			input_map[key_name] = [event.device, event.axis, sign(event.axis_value)]
 			
 			input_wait_node.map(Settings.button_to_string([event.device, event.axis, sign(event.axis_value)]))
@@ -175,7 +186,7 @@ func _input(event): # remapping input when PopUp is visible
 			
 	elif $PopUpExtra2.visible:
 		if event is InputEventKey and event.pressed:
-			play_audio("ui_accept2", {"vol":-7})
+			play_audio("ui_accept2", {"vol":-4})
 			var extra_button = [action_for_extra_button, event.scancode]
 			input_map["P" + str(current_player + 1) + "_extra_buttons"].append(extra_button)
 			$PopUpExtra2.hide()
@@ -184,7 +195,7 @@ func _input(event): # remapping input when PopUp is visible
 			load_extra_buttons()
 			
 		elif event is InputEventJoypadButton and event.pressed:
-			play_audio("ui_accept2", {"vol":-7})
+			play_audio("ui_accept2", {"vol":-4})
 			var extra_button = [action_for_extra_button, [event.device, event.button_index]]
 			input_map["P" + str(current_player + 1) + "_extra_buttons"].append(extra_button)
 			$PopUpExtra2.hide()
@@ -193,7 +204,7 @@ func _input(event): # remapping input when PopUp is visible
 			load_extra_buttons()
 			
 		elif event is InputEventJoypadMotion and abs(event.axis_value) >= fixed_deadzone:
-			play_audio("ui_accept2", {"vol":-7})
+			play_audio("ui_accept2", {"vol":-4})
 			var extra_button = [action_for_extra_button, [event.device, event.axis, sign(event.axis_value)]]
 			input_map["P" + str(current_player + 1) + "_extra_buttons"].append(extra_button)
 			$PopUpExtra2.hide()
@@ -315,6 +326,8 @@ func load_player_input():
 	$ControlsListL/Left.map(Settings.button_to_string(input_map["P" + player_index + "_left"]))
 	$ControlsListL/Right.map(Settings.button_to_string(input_map["P" + player_index + "_right"]))
 	$ControlsListL/Jump.map(Settings.button_to_string(input_map["P" + player_index + "_jump"]))
+	$ControlsListL/Special.map(Settings.button_to_string(input_map["P" + player_index + "_special"]))
+	$ControlsListL/Unique.map(Settings.button_to_string(input_map["P" + player_index + "_unique"]))
 	$ControlsListL/Pause.map(Settings.button_to_string(input_map["P" + player_index + "_pause"]))
 	
 	$ControlsListR/Light.map(Settings.button_to_string(input_map["P" + player_index + "_light"]))
@@ -322,8 +335,10 @@ func load_player_input():
 	$ControlsListR/Dash.map(Settings.button_to_string(input_map["P" + player_index + "_dash"]))
 	$ControlsListR/Aux.map(Settings.button_to_string(input_map["P" + player_index + "_aux"]))
 	$ControlsListR/Block.map(Settings.button_to_string(input_map["P" + player_index + "_block"]))
-	$ControlsListR/Special.map(Settings.button_to_string(input_map["P" + player_index + "_special"]))
-	$ControlsListR/Unique.map(Settings.button_to_string(input_map["P" + player_index + "_unique"]))
+	$ControlsListR/RS_Up.map(Settings.button_to_string(input_map["P" + player_index + "_rs_up"]))
+	$ControlsListR/RS_Down.map(Settings.button_to_string(input_map["P" + player_index + "_rs_down"]))
+	$ControlsListR/RS_Left.map(Settings.button_to_string(input_map["P" + player_index + "_rs_left"]))
+	$ControlsListR/RS_Right.map(Settings.button_to_string(input_map["P" + player_index + "_rs_right"]))
 	
 	$ControlsListBottom/TapJump.change_pointer(input_map["P" + player_index + "_tapjump"])
 	$ControlsListBottom/DJFastfall.change_pointer(input_map["P" + player_index + "_dj_fastfall"])
@@ -425,7 +440,7 @@ func triggered(triggered_node):
 							$PopUpExtra.show()
 							$PopUpExtra/ExtraButtonActions/Up.initial_focus()
 						else:
-							play_audio("ui_deny", {"vol" : -9})
+							play_audio("ui_deny", {"vol" : -5})
 					"RemoveButton":
 						if $ControlsListExtra2.get_child_count() > 0:
 							play_audio("ui_accept", {"vol":-8})
@@ -433,7 +448,7 @@ func triggered(triggered_node):
 								node.focus_mode = 2
 							$ControlsListExtra2.get_child(0).initial_focus()
 						else:
-							play_audio("ui_deny", {"vol" : -9})
+							play_audio("ui_deny", {"vol" : -5})
 					"ClearButtons":
 						play_audio("ui_accept", {"vol":-8})
 						input_map["P" + str(current_player + 1) + "_extra_buttons"] = []
@@ -490,7 +505,7 @@ func triggered(triggered_node):
 							play_audio("ui_accept", {"vol":-8})
 							$PopUpLoad/SavedPresets/PresetsScroll/PresetsList.get_child(selected_preset).grab_focus()
 						else:
-							play_audio("ui_deny", {"vol" : -9})
+							play_audio("ui_deny", {"vol" : -5})
 					"ConfirmLoadPreset":
 						play_audio("ui_accept2", {"vol":-5})
 						$PopUpLoad.hide()
@@ -517,7 +532,7 @@ func triggered(triggered_node):
 							$PopUpRename.hide()
 							$PopUpLoad/LoadList/RenamePreset.initial_focus()
 						else:
-							play_audio("ui_deny", {"vol" : -9})
+							play_audio("ui_deny", {"vol" : -5})
 					"CancelRename":
 						$PopUpLoad/LoadList/RenamePreset.initial_focus()
 						play_audio("ui_back", {})
@@ -529,6 +544,9 @@ func triggered2(triggered_node): # for sub menu
 	$PopUp.grab_focus()
 	input_wait_node = triggered_node # for regrabbing focus
 	$PopUp/Label.text = "Press input to map \n\"" + input_wait_node.name + "\" to..."
+	if triggered_node.name.begins_with("RS"):
+		$PopUp/RSLabel.show()
+	else: $PopUp/RSLabel.hide()
 	play_audio("ui_accept", {"vol":-8})
 	
 	
@@ -539,7 +557,7 @@ func triggered3(triggered_node): # for preset list
 	
 	
 func triggered4(triggered_node): # for deleting extra buttons
-	play_audio("ui_accept2", {"vol":-7})
+	play_audio("ui_accept2", {"vol":-4})
 #	print(input_map["P" + str(current_player + 1) + "_extra_buttons"])
 #	print(triggered_node.extra_button_stored)
 	input_map["P" + str(current_player + 1) + "_extra_buttons"].erase(triggered_node.extra_button_stored)

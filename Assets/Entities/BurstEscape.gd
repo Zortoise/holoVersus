@@ -34,6 +34,9 @@ const MOVE_DATABASE = {
 	}
 }
 
+func _ready():
+	get_node("TestSprite").free()
+
 func init(_aux_data: Dictionary):
 	
 	# set up starting data

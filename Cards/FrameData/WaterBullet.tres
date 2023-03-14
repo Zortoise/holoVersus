@@ -1,0 +1,95 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"duration": 18,
+"hframes": 6,
+"loop": true,
+"spritesheet": "WaterBulletSprite",
+"timestamps": {
+0: {
+"frame": 1,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+},
+3: {
+"frame": 2,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+},
+6: {
+"frame": 3,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+},
+9: {
+"frame": 4,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+},
+12: {
+"frame": 5,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+},
+15: {
+"frame": 6,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+}
+},
+"vframes": 3
+},
+"Kill": {
+"duration": 16,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WaterBulletSprite",
+"timestamps": {
+0: {
+"frame": 7,
+"hitbox": [  ]
+},
+2: {
+"frame": 8,
+"hitbox": [  ]
+},
+4: {
+"frame": 9,
+"hitbox": [  ]
+},
+6: {
+"frame": 10,
+"hitbox": [  ]
+},
+8: {
+"frame": 11,
+"hitbox": [  ]
+},
+10: {
+"frame": 12,
+"hitbox": [  ]
+},
+12: {
+"frame": 13,
+"hitbox": [  ]
+},
+14: {
+"frame": 14,
+"hitbox": [  ]
+}
+},
+"vframes": 3
+},
+"Spawn": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WaterBulletSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+}
+},
+"vframes": 3
+}
+}

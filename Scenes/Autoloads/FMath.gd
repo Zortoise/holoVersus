@@ -84,6 +84,10 @@ func f_cos(angle_int: int) -> int: # returns a fraction scaled up by 10000
 	return f_sin(angle_int + 90)
 
 
+func harmonic_motion_vel(amplitude: int, ang_freq: int, time: int) -> int:
+	# ang_freq is how many degrees of the period to advance every frame
+	return amplitude * ang_freq * FMath.f_cos(time * ang_freq)
+
 func f_lerp(start: int, end: int, weight_percent: int) -> int:
 	if weight_percent <= 0: return start
 	if weight_percent >= 100: return end
@@ -99,6 +103,15 @@ func sin_lerp(start: int, end: int, weight_percent: int) -> int: # starts and en
 	
 # warning-ignore:integer_division
 	var weight2: int = percent(f_sin(percent(180, weight_percent) - 90) + 10000, 50)/ 100
+	return f_lerp(start, end , weight2)
+	
+	
+func harmonic_lerp(start: int, end: int, weight_percent: int) -> int:
+	if weight_percent <= 0: return start
+	if weight_percent >= 100: return start
+	
+# warning-ignore:integer_division
+	var weight2: int = f_sin(percent(360, weight_percent)) / 100
 	return f_lerp(start, end , weight2)
 	
 	

@@ -435,6 +435,7 @@ func simulate(_new_input_state):
 	
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
+	if free: return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -683,7 +684,7 @@ func simulate2(): # only ran if not in hitstop
 			if velocity.y > 0 and Animator.query_to_play(["Jump"]):
 				animate("FallTransit")
 	
-		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
+		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_D_RECOVERY, Globals.char_state.AIR_RECOVERY:
 			air_res_this_frame = 0
 
 		Globals.char_state.AIR_ATK_STARTUP:
@@ -812,13 +813,14 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
 		hitstop = null
 		return
+	if free: return
 	
 	
 	process_status_effects_visual()
+	flashes()
 	
 	if !$HitStopTimer.is_running():
 		
-		flashes()
 		process_afterimage_trail() 	# do afterimage trails
 		
 		# render the next frame, this update the time!
@@ -1622,7 +1624,7 @@ func particle(anim: String, sfx_ref: String, palette: String, interval, number, 
 		
 func flashes():
 	if $ArmorTimer.is_running():
-		modulate_play("armor_time")
+		modulate_play("mob_armor_time")
 
 	if Globals.mob_attr.PASSIVE_ARMOR in mob_attr and get_guard_gauge_percent_below() >= 75:
 		modulate_play("passive_armor")
@@ -1947,6 +1949,7 @@ func timed_status():
 func query_polygons(): # requested by main game node when doing hit detection
 	
 	var polygons_queried = {
+		"rect" : null,
 		"hurtbox" : null,
 		"sdhurtbox" : null,
 		"hitbox" : null,
@@ -1969,6 +1972,9 @@ func query_polygons(): # requested by main game node when doing hit detection
 #			pass  # no hurtbox during respawn grace or after a strongblock/parry
 #		else:
 		polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
+		
+		var sprite_rect = sprite.get_rect()
+		polygons_queried.rect = Rect2(sprite_rect.position + position, sprite_rect.size)
 
 	return polygons_queried
 	
@@ -2269,7 +2275,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	if hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER] or \
 			("proj_level" in hit_data.move_data and hit_data.move_data.proj_level >= 3):
-		hit_data["ignore_armor"] = true
+		hit_data["ignore_resist"] = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -2335,44 +2341,45 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
 				if Globals.atk_attr.SUPERARMOR_STARTUP in query_atk_attr() or \
 						(Globals.atk_attr.NORMALARMOR_STARTUP in query_atk_attr() and "normalarmorable" in hit_data):
-					hit_data.block_state = Globals.block_state.WEAK
+#					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 					
 			Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
 				if Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
 						(Globals.atk_attr.NORMALARMOR_ACTIVE in query_atk_attr() and "normalarmorable" in hit_data) or \
 						(Globals.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr() and "entity_nodepath" in hit_data):
-					hit_data.block_state = Globals.block_state.WEAK
+#					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 						
 						
 			Globals.char_state.AIR_RECOVERY:
 				 # air superdash has projectile superarmor against non-strong projectiles
 				if Animator.query_current(["SDash"]) and "non_strong_proj" in hit_data:
-					hit_data.block_state = Globals.block_state.WEAK
+#					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 					
-		if Globals.mob_attr.PASSIVE_ARMOR in mob_attr:
-			if get_guard_gauge_percent_below() >= 75:
-				hit_data.block_state = Globals.block_state.WEAK
-				hit_data["superarmored"] = true
+		if !is_hitstunned_or_sequenced():
+			if Globals.mob_attr.PASSIVE_ARMOR in mob_attr:
+				if current_guard_gauge >= 0:
+#					hit_data.block_state = Globals.block_state.WEAK
+					hit_data["superarmored"] = true
 					
 	# RESISTED HIT ----------------------------------------------------------------------------------------------
 	
 	if "superarmored" in hit_data:
 		hit_data["resisted"] = true
-	elif "ignore_armor" in hit_data:
-		pass
+	elif "ignore_resist" in hit_data:
+		pass # true hitstun
 	elif current_guard_gauge == GUARD_GAUGE_FLOOR:
-		pass
+		pass # true hitstun
 	elif $ArmorTimer.is_running() or $HitStunTimer.is_running():
-		pass
+		pass # mob_armored or already in hitstun
 	elif is_atk_active() or is_atk_recovery():
-		pass
+		pass # true hitstun
 	elif Globals.mob_attr.TOUGH in mob_attr and mob_attr[Globals.mob_attr.TOUGH] <= 1:
-		pass
+		pass # true hitstun
 	elif "atk_level" in hit_data and hit_data.move_data.atk_level <= 1:
-		pass
+		pass # no hitstun
 	else:
 		hit_data["resisted"] = true
 #		if !"multihit" in hit_data and !"autochain" in hit_data and \
@@ -2407,6 +2414,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 			if get_guard_gauge_percent_below() == 0:
 				hit_data["mob_break"] = true
+				hit_data.erase("superarmored")
 				$ArmorTimer.time = 0
 				guardbroken = true
 #				repeat_memory = [] # reset move memory for getting a Break
@@ -2531,8 +2539,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data["no_hit_sound"] = true
 		
 	elif !guardbroken:
-		modulate_play("armor_flash")
-		play_audio("block3", {"vol" : -15})
+		modulate_play("mob_armor_flash")
+		play_audio("bling2", {"vol" : -5, "bus" : "PitchDown2"})
 		hit_data["no_hit_sound"] = true
 		
 	elif hit_data.sweetspotted:
@@ -2575,8 +2583,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if "entity_nodepath" in hit_data: # for projectiles as well
 #			hit_data.hitstop = hitstop
 
-	if "resisted" in hit_data and !guardbroken and !"superarmored" in hit_data and !"entity_nodepath" in hit_data and !hit_data.weak_hit:
-		hitstop += 10
+	if "resisted" in hit_data and !guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit:
+		if "superarmored" in hit_data:
+			hitstop += 15
+		else:
+			hitstop += 10
 		
 	if guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit and !"autochain" in hit_data:
 		hitstop += Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.EXTRA_HITSTOP)
@@ -2606,7 +2617,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		elif "resisted" in hit_data:
 			Globals.Game.spawn_SFX("WBlockspark2", "Blocksparks", hit_data.hit_center, {"rot" : deg2rad(hit_data.angle_to_atker)})
 		else:
-			Globals.Game.spawn_SFX("Superarmorspark", "Blocksparks", hit_data.hit_center, {"rot" : deg2rad(hit_data.angle_to_atker)})
+			Globals.Game.spawn_SFX("MobArmorspark", "Blocksparks", hit_data.hit_center, {"rot" : deg2rad(hit_data.angle_to_atker)})
 	else:
 		generate_hitspark(hit_data)
 	
@@ -2815,7 +2826,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 #	if "superarmored" in hit_data:
 #		return 0
 		
-	if $ArmorTimer.is_running() and !"ignore_armor" in hit_data: # halves GDrain on armored
+#	if "superarmored" in hit_data or ($ArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
+	if "superarmored" in hit_data or $ArmorTimer.is_running(): # halves GDrain on armored
 		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
 		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
 		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.GUARD_DRAIN_MOD))
@@ -3115,7 +3127,16 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 			pass
 					
 	if hitspark != "":
-		var rot_rad : float = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
+		var rot_rad: float
+		if hit_data.move_data.hitspark_type != Globals.hitspark_type.SLASH:
+			rot_rad = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
+		else: # slash hitspark randomize angle a bit
+			var rand_degree := 0
+			if "multihit" in hit_data or "autochain" in hit_data:
+				rand_degree = Globals.Game.rng_generate(91) * Globals.Game.rng_facing()
+			else:
+				rand_degree = Globals.Game.rng_generate(46) * Globals.Game.rng_facing()
+			rot_rad = (hit_data.knockback_dir + rand_degree) / 360.0 * (2 * PI) + PI # visuals only
 		if "pull" in hit_data: rot_rad += PI # flip if pulling
 		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}, \
 				hit_data.move_data["hitspark_palette"])

@@ -305,7 +305,7 @@ func P2_changed_card(sound := true): # update card currently being hovered over
 func update_description(player: int, card_ref: int, shop := true): # update name and description on box
 	var box = get_node("P" + str(player + 1) + "/Box")
 	box.get_node("Name").text = Cards.DATABASE[card_ref].name
-	box.get_node("Type").text = "Type: Enchance"
+	box.get_node("Type").text = "Type: Enhance"
 	box.get_node("Description").text = Inventory.get_describe(card_ref, shop)
 	if shop:
 		if Inventory.inventory[player].size() >= 10:

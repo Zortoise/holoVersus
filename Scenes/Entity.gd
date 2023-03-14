@@ -163,6 +163,7 @@ func simulate():
 	hitstop = null
 	
 	if Globals.Game.is_stage_paused(): return
+	if free: return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -231,9 +232,7 @@ func simulate2(): # only ran if not in hitstop
 					UniqEntity.ledge_stop()
 		
 	else: # no collision with platforms
-		true_position.x += velocity.x
-		true_position.y += velocity.y
-		position = true_position.convert_to_vec()
+		move_no_collision()
 		
 #	if !Globals.entity_trait.PICKUP in UniqEntity.TRAITS:
 	interactions() # do this after movement!
@@ -255,6 +254,9 @@ func interactions():
 	if !to_destroy and UniqEntity.has_method("kill") and !Animator.to_play_animation.ends_with("Kill"):
 		var my_hitbox = Animator.query_polygon("hitbox")
 		if my_hitbox != null:
+			
+			var sprite_rect = $Sprite.get_rect()
+			var my_rect = Rect2(sprite_rect.position + position, sprite_rect.size)
 			
 			to_destroy = false
 			
@@ -280,7 +282,7 @@ func interactions():
 			
 			if !indestructible:
 				for character in character_array:
-					if character.player_ID != master_ID and character.is_atk_active() and \
+					if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
 						(easy_destructible or Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
 						destroyer_array.append(character)
 					
@@ -289,7 +291,7 @@ func interactions():
 				var entity_array = get_tree().get_nodes_in_group("EntityNodes")
 				var clash_array := []
 				for entity in entity_array:
-					if entity.master_ID != master_ID:
+					if entity.master_ID != master_ID and !entity.free:
 						if !indestructible and Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
 							destroyer_array.append(entity)
 						elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
@@ -299,11 +301,15 @@ func interactions():
 				for destroyer in destroyer_array:
 					var second_hitbox = destroyer.Animator.query_polygon("hitbox")
 					if second_hitbox != null:
-						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
-						if intersect_polygons.size() > 0: # detected intersection
-							UniqEntity.kill()
-							to_destroy = true
-							break
+						var their_sprite_rect = destroyer.sprite.get_rect()
+						var their_rect = Rect2(their_sprite_rect.position + destroyer.position, their_sprite_rect.size)
+						
+						if my_rect.intersects(their_rect):
+							var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+							if intersect_polygons.size() > 0: # detected intersection
+								UniqEntity.kill()
+								to_destroy = true
+								break
 						
 				# check for clashes
 				if !to_destroy and can_clash:
@@ -311,9 +317,13 @@ func interactions():
 					for entity in clash_array:
 						var second_hitbox = entity.Animator.query_polygon("hitbox")
 						if second_hitbox != null:
-							var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
-							if intersect_polygons.size() > 0: # detected intersection
-								clash_array2.append(entity) 
+							var their_sprite_rect = entity.get_node("Sprite").get_rect()
+							var their_rect = Rect2(their_sprite_rect.position + entity.position, their_sprite_rect.size)
+							
+							if my_rect.intersects(their_rect):
+								var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+								if intersect_polygons.size() > 0: # detected intersection
+									clash_array2.append(entity) 
 			
 					if clash_array2.size() > 0:
 						var lowest_AV = absorption_value # find lowest absorption_value
@@ -334,13 +344,14 @@ func interactions():
 	
 func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
+	if free: return
 	
 	if !$HitStopTimer.is_running():
 		$SpritePlayer.simulate()
 		
 		lifetime += 1
-		if lifespan != null and lifetime >= lifespan:
-			UniqEntity.kill()
+		if lifespan != null and lifetime >= lifespan and UniqEntity.has_method("expire"):
+			UniqEntity.expire()
 			
 		if !hitstop:
 			$NoCollideTimer.simulate()
@@ -401,6 +412,7 @@ func on_offstage(): # what to do if entity leaves stage
 func query_polygons(): # requested by main game node when doing hit detection
 
 	var polygons_queried = {
+		"rect" : null,
 		"hitbox" : null,
 		"sweetbox": null,
 		"kborigin": null,
@@ -410,9 +422,13 @@ func query_polygons(): # requested by main game node when doing hit detection
 	if !$HitStopTimer.is_running(): # no hitbox during hitstop
 		if !Globals.atk_attr.HARMLESS_ENTITY in query_atk_attr():
 			polygons_queried.hitbox = Animator.query_polygon("hitbox")
-		polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
-		polygons_queried.kborigin = Animator.query_point("kborigin")
-		polygons_queried.vacpoint = Animator.query_point("vacpoint")
+			polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
+			polygons_queried.kborigin = Animator.query_point("kborigin")
+			polygons_queried.vacpoint = Animator.query_point("vacpoint")
+
+		if polygons_queried.hitbox != null:
+			var sprite_rect = $Sprite.get_rect()
+			polygons_queried.rect = Rect2(sprite_rect.position + position, sprite_rect.size)
 
 	return polygons_queried
 
@@ -583,7 +599,7 @@ func is_player_in_ignore_list(in_ID):
 
 func _on_SpritePlayer_anim_finished(anim_name):
 	
-	if anim_name.ends_with("Kill"):
+	if anim_name.ends_with("Kill") or anim_name.ends_with("Expire"):
 		free = true # don't use queue_free!
 		
 #	match anim_name:
@@ -599,6 +615,24 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 	UniqEntity._on_SpritePlayer_anim_started(anim_name)
 	
+func rotate_sprite(angle: int):
+	angle = posmod(angle, 360)
+	match facing:
+		1:
+			if angle > 90 and angle < 270:
+				face(-facing)
+				$Sprite.rotation = deg2rad(posmod(angle + 180, 360))
+			else:
+				$Sprite.rotation = deg2rad(angle)
+		-1:
+			if angle < 90 or angle > 270:
+				face(-facing)
+				$Sprite.rotation = deg2rad(angle)
+			else:
+				$Sprite.rotation = deg2rad(posmod(angle + 180, 360))
+				
+func rotate_sprite_x_axis(angle: int): # use to rotate sprite without changing facing
+	$Sprite.rotation += deg2rad(angle * facing)
 
 func play_audio(audio_ref: String, aux_data: Dictionary):
 	

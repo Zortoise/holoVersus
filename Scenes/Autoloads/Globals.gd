@@ -12,7 +12,7 @@ enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY, SUPER_ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
-enum knockback_type {FIXED, RADIAL, MIRRORED}
+enum knockback_type {FIXED, RADIAL, MIRRORED, VELOCITY}
 enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, SUPER}
 enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, SUPER}
 enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_MOVE_REC
@@ -79,14 +79,14 @@ enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 enum moving_platform {MOVING, WARPING}
 enum dmg_num_col {WHITE, RED, GRAY, GREEN}
 enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
-		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, ARMOR_MOVES, PASSIVE_ARMOR}
+		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, PASSIVE_ARMOR}
 enum peak_flag {GROUNDED, JUMPING, PEAK, PEAK_SPENT} # for mob AI command
 enum strafe_style {NONE, TOWARDS, AWAY, AWAY_ON_DESCEND}
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
-		P1_UNIQUE, P1_PAUSE,
+		P1_UNIQUE, P1_PAUSE, P1_RS_LEFT, P1_RS_RIGHT, P1_RS_UP, P1_RS_DOWN
 		P2_UP, P2_DOWN, P2_LEFT, P2_RIGHT, P2_JUMP, P2_LIGHT, P2_FIERCE, P2_DASH, P2_BLOCK, P2_AUX, P2_SPECIAL, P2_UNIQUE,
-		P2_PAUSE}
+		P2_PAUSE, P2_RS_LEFT, P2_RS_RIGHT, P2_RS_UP, P2_RS_DOWN}
 
 const FRAME = 1.0/60.0
 const CAMERA_ZOOM_SPEED = 0.000006
@@ -116,10 +116,10 @@ var player_count = 2
 var stage_ref = "Grid"
 var P1_char_ref = "Gura"
 var P1_palette = 1
-var P1_input_style = 0
+#var P1_input_style = 0
 var P2_char_ref = "Gura"
 var P2_palette = 2
-var P2_input_style = 0
+#var P2_input_style = 0
 var starting_stock_pts = 3
 var time_limit = 445
 var assists = 0
@@ -152,7 +152,7 @@ var survival_level = null
 #onready var debugger = load("res://Scenes/Debugger.gd").new()
 
 
-onready var INPUTS = [ # acts like a const, need "onready var" since using enums
+onready var INPUTS = [
 	{
 		up = ["P1_up", Globals.button.P1_UP],
 		down = ["P1_down", Globals.button.P1_DOWN],
@@ -166,7 +166,11 @@ onready var INPUTS = [ # acts like a const, need "onready var" since using enums
 		block = ["P1_block", Globals.button.P1_BLOCK],
 		special = ["P1_special", Globals.button.P1_SPECIAL],
 		unique = ["P1_unique", Globals.button.P1_UNIQUE],
-		pause = ["P1_pause", Globals.button.P1_PAUSE]
+		pause = ["P1_pause", Globals.button.P1_PAUSE],
+		rs_up = ["P1_rs_up", Globals.button.P1_RS_UP],
+		rs_down = ["P1_rs_down", Globals.button.P1_RS_DOWN],
+		rs_left = ["P1_rs_left", Globals.button.P1_RS_LEFT],
+		rs_right = ["P1_rs_right", Globals.button.P1_RS_RIGHT],
 	},
 	{
 		up = ["P2_up", Globals.button.P2_UP],
@@ -181,7 +185,11 @@ onready var INPUTS = [ # acts like a const, need "onready var" since using enums
 		block = ["P2_block", Globals.button.P2_BLOCK],
 		special = ["P2_special", Globals.button.P2_SPECIAL],
 		unique = ["P2_unique", Globals.button.P2_UNIQUE],
-		pause = ["P2_pause", Globals.button.P2_PAUSE]
+		pause = ["P2_pause", Globals.button.P2_PAUSE],
+		rs_up = ["P2_rs_up", Globals.button.P2_RS_UP],
+		rs_down = ["P2_rs_down", Globals.button.P2_RS_DOWN],
+		rs_left = ["P2_rs_left", Globals.button.P2_RS_LEFT],
+		rs_right = ["P2_rs_right", Globals.button.P2_RS_RIGHT],
 	},
 ]
 
@@ -349,6 +357,7 @@ func point_in_polygon(point: Vector2, polygon: Array):
 		return true
 	else:
 		return false
+		
 
 # ANGLE SPLITTER ---------------------------------------------------------------------------------------------------
 

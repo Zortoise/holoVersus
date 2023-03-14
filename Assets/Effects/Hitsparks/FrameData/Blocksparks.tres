@@ -5,6 +5,42 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"MobArmorspark": {
+"duration": 19,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BlocksparksSprite",
+"timestamps": {
+0: {
+"frame": 32
+},
+3: {
+"frame": 33
+},
+5: {
+"frame": 34
+},
+7: {
+"frame": 35
+},
+9: {
+"frame": 36
+},
+11: {
+"frame": 37
+},
+13: {
+"frame": 22
+},
+15: {
+"frame": 38
+},
+17: {
+"frame": 39
+}
+},
+"vframes": 7
+},
 "SBlockspark": {
 "duration": 19,
 "hframes": 6,
@@ -39,7 +75,7 @@ frame_data = {
 "frame": 24
 }
 },
-"vframes": 6
+"vframes": 7
 },
 "Superarmorspark": {
 "duration": 17,
@@ -72,7 +108,7 @@ frame_data = {
 "frame": 15
 }
 },
-"vframes": 6
+"vframes": 7
 },
 "WBlockspark": {
 "duration": 17,
@@ -105,7 +141,7 @@ frame_data = {
 "frame": 7
 }
 },
-"vframes": 6
+"vframes": 7
 },
 "WBlockspark2": {
 "duration": 17,
@@ -138,6 +174,6 @@ frame_data = {
 "frame": 15
 }
 },
-"vframes": 6
+"vframes": 7
 }
 }

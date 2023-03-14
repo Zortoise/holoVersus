@@ -90,7 +90,7 @@ frame_data = {
 3: {
 "SfxOver_frame": 2,
 "SfxUnder_frame": 2,
-"frame": 4,
+"frame": 5,
 "hitbox": [ Vector2( 26, -48 ), Vector2( 13, -48 ), Vector2( 13, -35 ), Vector2( 0, -35 ), Vector2( 0, 1 ), Vector2( 57, 1 ), Vector2( 57, -60 ), Vector2( 26, -60 ) ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
 "sweetbox": [  ]
@@ -98,7 +98,7 @@ frame_data = {
 4: {
 "SfxOver_frame": 3,
 "SfxUnder_frame": 3,
-"frame": 4,
+"frame": 6,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
 "sweetbox": [  ]
@@ -106,7 +106,7 @@ frame_data = {
 9: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 4,
-"frame": 5,
+"frame": 7,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
 "sweetbox": [  ]
@@ -129,7 +129,7 @@ frame_data = {
 0: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 5,
-"frame": 4,
+"frame": 8,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
 "sweetbox": [  ]
@@ -137,7 +137,7 @@ frame_data = {
 6: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 6,
-"frame": 6,
+"frame": 9,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 21, 22 ), Vector2( 21, -10 ), Vector2( -11, -10 ) ],
 "sweetbox": [  ]
@@ -145,7 +145,7 @@ frame_data = {
 9: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 7,
-"frame": 6,
+"frame": 9,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 11, 22 ), Vector2( 11, -19 ), Vector2( -11, -19 ) ],
 "sweetbox": [  ]
@@ -153,7 +153,7 @@ frame_data = {
 12: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 8,
-"frame": 7,
+"frame": 10,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -24 ), Vector2( -12, -24 ) ],
 "sweetbox": [  ]
@@ -161,7 +161,7 @@ frame_data = {
 15: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 9,
-"frame": 7,
+"frame": 10,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -24 ), Vector2( -12, -24 ) ],
 "sweetbox": [  ]

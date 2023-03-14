@@ -1,7 +1,5 @@
 extends Node2D
 
-const PALETTE = null # always same color
-
 const START_SPEED = 500 * FMath.S
 const START_ROTATION = -70 # integer degree, negative for upward
 const GRAVITY = 18 * FMath.S
@@ -99,8 +97,8 @@ func kill(sound = true):
 		Animator.play("Kill")
 		# splash sound
 		if sound:
-			Entity.play_audio("water11", {"vol" : -12, "surv" : true})
-			Entity.play_audio("water1", {"vol" : -12, "surv" : true})
+			Entity.play_audio("water11", {"vol" : -12,})
+			Entity.play_audio("water1", {"vol" : -12})
 	
 	
 func collision(): # collided with a platform

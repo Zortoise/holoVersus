@@ -2,6 +2,7 @@ extends Node2D
 # let every moveable object extend this script
 
 
+
 # soft_platform_dbox is needed to phase through soft platforms
 func move(collision_box, soft_platform_dbox, ledge_stop = false): # uses the object's velocity
 	
@@ -160,6 +161,18 @@ func not_in_sequence(collision_box): # when object is in sequence, will not be k
 			get("state") in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 		return false
 	return true
+	
+	
+func move_no_collision():
+	call("move_true_position", get("velocity")) # first, move the true position
+	position = call("get_rounded_position")  # then get the new target position derived from the true position
+	
+	# check offstage
+	if self.is_in_group("PlayerNodes") or self.is_in_group("MobNodes"):
+		Globals.Game.detect_kill(get_node("PlayerCollisionBox"))
+	elif self.is_in_group("EntityNodes") or self.is_in_group("MobEntityNodes"):
+		if has_node("EntitySpriteBox"):
+			Globals.Game.detect_offstage(get_node("EntitySpriteBox"))
 	
 	
 func check_offstage(collision_box):

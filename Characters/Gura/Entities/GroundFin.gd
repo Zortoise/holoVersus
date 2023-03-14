@@ -75,6 +75,8 @@ func kill(_sound = true):
 		var master_node = Globals.Game.get_player_node(Entity.master_ID)
 		master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
 	
+func expire():
+	kill()
 	
 func collision(): # collided with a wall, turns
 	ledge_stop()

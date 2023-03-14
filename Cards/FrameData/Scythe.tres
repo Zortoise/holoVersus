@@ -1,0 +1,46 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"duration": 1,
+"hframes": 5,
+"loop": true,
+"spritesheet": "ScytheSprite",
+"timestamps": {
+0: {
+"frame": 4,
+"hitbox": [ Vector2( -24, -24 ), Vector2( -37, -24 ), Vector2( -37, 24 ), Vector2( -24, 24 ), Vector2( -24, 37 ), Vector2( 24, 37 ), Vector2( 24, 24 ), Vector2( 37, 24 ), Vector2( 37, -24 ), Vector2( 24, -24 ), Vector2( 24, -37 ), Vector2( -24, -37 ) ]
+}
+},
+"vframes": 1
+},
+"Spawn": {
+"duration": 39,
+"hframes": 5,
+"loop": false,
+"spritesheet": "ScytheSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [  ]
+},
+3: {
+"frame": 1,
+"hitbox": [  ]
+},
+6: {
+"frame": 2,
+"hitbox": [  ]
+},
+9: {
+"frame": 3,
+"hitbox": [  ]
+}
+},
+"vframes": 1
+}
+}

@@ -4309,7 +4309,7 @@ margin_right = 376.0
 margin_bottom = 82.0
 custom_colors/font_color = Color( 0.784314, 0.784314, 0.784314, 1 )
 custom_fonts/font = SubResource( 153 )
-text = "Type: Enchance"
+text = "Type: Enhance"
 align = 2
 
 [node name="Description" type="Label" parent="CardMenu/P1/Box"]
@@ -4444,7 +4444,7 @@ margin_right = 376.0
 margin_bottom = 82.0
 custom_colors/font_color = Color( 0.784314, 0.784314, 0.784314, 1 )
 custom_fonts/font = SubResource( 153 )
-text = "Type: Enchance"
+text = "Type: Enhance"
 align = 2
 
 [node name="Description" type="Label" parent="CardMenu/P2/Box"]

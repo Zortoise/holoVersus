@@ -22,10 +22,10 @@ const FLASHING_TIME_THRESHOLD = 10
 onready var stage_ref = Globals.stage_ref
 onready var P1_char_ref = Globals.P1_char_ref
 onready var P1_palette = Globals.P1_palette
-onready var P1_input_style = Globals.P1_input_style
+#onready var P1_input_style = Globals.P1_input_style
 onready var P2_char_ref = Globals.P2_char_ref
 onready var P2_palette = Globals.P2_palette
-onready var P2_input_style = Globals.P2_input_style
+#onready var P2_input_style = Globals.P2_input_style
 onready var starting_stock_pts = Globals.starting_stock_pts
 
 # variables for stage box and starting positions/facings, these are set by the stage's node
@@ -1131,6 +1131,7 @@ func detect_hit():
 		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var move_data_and_name = player.query_move_data_and_name()
 			var hitbox = {
+				"rect": polygons_queried.rect,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : player.player_ID,
 				"facing": player.facing,
@@ -1151,6 +1152,7 @@ func detect_hit():
 			
 		if polygons_queried.hurtbox != null:
 			var hurtbox = {
+				"rect": polygons_queried.rect,
 				"polygon" : polygons_queried.hurtbox,
 				"owner_ID" : player.player_ID,
 				"facing": player.facing,
@@ -1173,6 +1175,7 @@ func detect_hit():
 		if polygons_queried.hitbox != null: # if hitbox is not empty
 			var move_data_and_name = entity.query_move_data_and_name()
 			var hitbox = {
+				"rect": polygons_queried.rect,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : entity.master_ID,
 				"entity_nodepath" : entity.get_path(),
@@ -1195,6 +1198,7 @@ func detect_hit():
 			var move_data_and_name = mob_entity.query_move_data_and_name()
 			var hitbox = {
 				"mob" : true,
+				"rect": polygons_queried.rect,
 				"polygon" : polygons_queried.hitbox,
 				"owner_ID" : mob_entity.master_ID,
 				"entity_nodepath" : mob_entity.get_path(),
@@ -1284,6 +1288,9 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 				continue # defender must not be in entity's ignore list
 #			if Globals.survival_level != null and defender_mob_grace(hitbox, attacker, hurtbox, defender):
 #				continue # attacking mob cannot hit hitstunned player if not being targeted
+					
+			if !hitbox.rect.intersects(hurtbox.rect):
+				continue # intersect_polygons_2d is expensive?
 						
 			# get an array of PoolVector2Arrays of the intersecting polygons
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.polygon)

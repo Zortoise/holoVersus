@@ -789,28 +789,35 @@ func get_stat(stat: String): # later can have effects that changes stats
 func query_traits(): # may have special conditions
 	return TRAITS
 			
-func get_root(move_name): # for aerial and chain memory, only needed for versions with active frames not in MOVE_DATABASE
+func get_root(move_name): # for aerial, chain and repeat memory, only needed for versions with active frames not in MOVE_DATABASE
 	
 	if move_name in MOVE_DATABASE and "root" in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name].root
 		
-	match move_name:
-		"F3[h]":
-			return "F3"
+	return refine_move_name(move_name)
 		
-		"SP1[c1]", "SP1[c2]", "SP1[c3]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c3]", \
-				"aSP1[c1]", "aSP1[c2]", "aSP1[c3]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c3]":
-			return "SP1"
-		"SP1[ex]", "SP1[u][ex]", "aSP1[ex]", "aSP1[d][ex]":
-			return "SP1[ex]"
-			
-		"aSP1": # for startup for aerial memory
-			return "SP1"
-
-		"aSP7":
-			return "SP7"
-	
-	return move_name
+#	match move_name:
+#		"F3[h]":
+#			return "F3"
+#
+#		"SP1[c1]", "SP1[c2]", "SP1[c3]", "SP1[u][c1]", "SP1[u][c2]", "SP1[u][c3]", \
+#				"aSP1[c1]", "aSP1[c2]", "aSP1[c3]", "aSP1[d][c1]", "aSP1[d][c2]", "aSP1[d][c3]":
+#			return "SP1"
+#		"SP1[ex]", "SP1[u][ex]", "aSP1[ex]", "aSP1[d][ex]":
+#			return "SP1[ex]"
+#
+#		"aSP1": # for startup for aerial memory
+#			return "SP1"
+#
+##		"aSP3":
+##			return "SP3"
+##		"aSP3[ex]":
+##			return "SP3[ex]"
+#
+#		"aSP7":
+#			return "SP7"
+#
+#	return move_name
 		
 			
 func refine_move_name(move_name):

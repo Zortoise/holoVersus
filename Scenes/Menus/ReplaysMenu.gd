@@ -239,10 +239,10 @@ func watch_replay():
 	Globals.stage_ref = replay.stage_ref
 	Globals.P1_char_ref = replay.P1_char_ref
 	Globals.P1_palette = replay.P1_palette
-	Globals.P1_input_style = replay.P1_input_style
+#	Globals.P1_input_style = replay.P1_input_style
 	Globals.P2_char_ref = replay.P2_char_ref
 	Globals.P2_palette = replay.P2_palette
-	Globals.P2_input_style = replay.P2_input_style
+#	Globals.P2_input_style = replay.P2_input_style
 	Globals.starting_stock_pts = replay.starting_stock_pts
 	Globals.time_limit = replay.time_limit
 	Globals.assists = replay.assists

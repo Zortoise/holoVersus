@@ -1,0 +1,65 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 36,
+"hframes": 6,
+"loop": false,
+"spritesheet": "HorrorSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [  ]
+},
+2: {
+"frame": 1,
+"hitbox": [  ]
+},
+4: {
+"frame": 2,
+"hitbox": [  ]
+},
+7: {
+"frame": 3,
+"hitbox": [ Vector2( -22, 20 ), Vector2( 22, 20 ), Vector2( 22, -55 ), Vector2( -22, -55 ) ]
+},
+11: {
+"frame": 4,
+"hitbox": [ Vector2( -22, 12 ), Vector2( 22, 12 ), Vector2( 22, -57 ), Vector2( -22, -57 ) ]
+},
+15: {
+"frame": 5,
+"hitbox": [ Vector2( -22, 5 ), Vector2( 22, 5 ), Vector2( 22, -59 ), Vector2( -22, -59 ) ]
+},
+18: {
+"frame": 6,
+"hitbox": [ Vector2( -25, -9 ), Vector2( 25, -9 ), Vector2( 25, -59 ), Vector2( -25, -59 ) ]
+},
+21: {
+"frame": 7,
+"hitbox": [ Vector2( -23, -26 ), Vector2( 23, -26 ), Vector2( 23, -61 ), Vector2( -23, -61 ) ]
+},
+24: {
+"frame": 8,
+"hitbox": [  ]
+},
+27: {
+"frame": 9,
+"hitbox": [  ]
+},
+30: {
+"frame": 10,
+"hitbox": [  ]
+},
+33: {
+"frame": 11,
+"hitbox": [  ]
+}
+},
+"vframes": 2
+}
+}

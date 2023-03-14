@@ -31,7 +31,7 @@ var RESOURCE_ADD = {
 
 
 #enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
-#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, ARMOR_MOVES, PASSIVE_ARMOR}
+#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, PASSIVE_ARMOR}
 
 # CHAIN: X, TOUGH: 0-5 (0/1 are weaker), SPEED: 0-6 (0/1 are slow), HP: 0-5 (0/1 are lower, 0 is 1 hp)
 # POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), COIN: X (add to loot pool, 40 limit)
@@ -61,7 +61,7 @@ const WAVES = {
 						} },
 				],
 				3000 : [
-					{"mob" : "GuraM", "level" : 3, "variant" : "shark",
+					{"mob" : "GuraM", "level" : 1, "variant" : "shark",
 					"attr" : {
 						} },
 				],
@@ -140,8 +140,8 @@ const WAVES = {
 					"attr" : {
 						} },
 				],
-				3600 : [
-					{"mob" : "GuraM", "level" : 5, "variant" : "rush",
+				4800 : [
+					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
 						} },
 				],
@@ -152,14 +152,17 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "base",
+					{"mob" : "GuraM", "level" : 5, "variant" : "rush",
+					"attr" : {
+						} },
+					{"mob" : "GuraM", "level" : 5, "variant" : "shark",
 					"attr" : {
 						} },
 				],
-				3600 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "shark",
+				4200 : [
+					{"mob" : "GuraM", "level" : 8, "variant" : "rush",
 					"attr" : {
-						Globals.mob_attr.ARMOR_MOVES: true,
+						Globals.mob_attr.PASSIVE_ARMOR: true,
 						} },
 				],
 			}
@@ -274,7 +277,6 @@ const WAVES = {
 						Globals.mob_attr.HP : 4,
 						Globals.mob_attr.TOUGH : 5,
 						Globals.mob_attr.TRAIL : true,
-						Globals.mob_attr.PASSIVE_ARMOR : true,
 						Globals.mob_attr.RAGE : true,
 						} },
 				],

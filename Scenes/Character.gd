@@ -265,7 +265,7 @@ var GG_swell_flag := false # set to true after 1st attack taken during a combo
 var first_hit_flag := false # will not swell GG during hitstun of 1st attack taken during combo
 var lethal_flag := false # flag the hitstun as a lethal hit, can only kill during lethal hitstun
 var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
-var enchance_cooldowns := {} # each key contain the cooldown
+var enhance_cooldowns := {} # each key contain the cooldown
 
 # controls
 var button_up
@@ -281,6 +281,10 @@ var button_aux
 var button_special
 var button_unique
 var button_pause
+var button_rs_up
+var button_rs_down
+var button_rs_left
+var button_rs_right
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -400,6 +404,10 @@ func set_player_id(in_player_ID): # can use this to change player you are contro
 	button_special = Globals.INPUTS[player_ID].special[1]
 	button_unique = Globals.INPUTS[player_ID].unique[1]
 	button_pause = Globals.INPUTS[player_ID].pause[1]
+	button_rs_up = Globals.INPUTS[player_ID].rs_up[1]
+	button_rs_down = Globals.INPUTS[player_ID].rs_down[1]
+	button_rs_left = Globals.INPUTS[player_ID].rs_left[1]
+	button_rs_right = Globals.INPUTS[player_ID].rs_right[1]
 
 func setup_boxes(ref_rect): # set up detection boxes
 	
@@ -658,9 +666,13 @@ func simulate(new_input_state):
 #			UniqChar.update_uniqueHUD()
 			
 #			Globals.Game.LevelControl.spawn_mob("TestMobBase", Vector2.ZERO)
-#			enchance_card(Globals.Game.LevelControl.effect_ref.SHARK)
-			if !Inventory.shop_open:
-				Globals.Game.card_menu.open_shop()
+#			enhance_card(Globals.Game.LevelControl.effect_ref.SHARK)
+#			if !Inventory.shop_open:
+#				Globals.Game.card_menu.open_shop()
+	
+			
+
+	
 			pass
 
 		
@@ -894,7 +906,7 @@ func simulate2(): # only ran if not in hitstop
 		chain_memory = []
 		
 	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
-		timed_enchance()
+		timed_enhance()
 		
 	if status_effects.size() > 0:
 		timed_status()
@@ -1218,6 +1230,10 @@ func simulate2(): # only ran if not in hitstop
 						
 				Globals.char_state.GROUND_ATK_RECOVERY:
 					if chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
+						afterimage_cancel()
+						animate("BlockStartup")
+					elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.BLOCK_CANCEL):
+						afterimage_cancel()
 						animate("BlockStartup")
 						
 			# air blocking
@@ -1244,7 +1260,11 @@ func simulate2(): # only ran if not in hitstop
 			
 				Globals.char_state.AIR_ATK_RECOVERY:
 					if chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
-						animate("BlockStartup")
+						afterimage_cancel()
+						animate("aBlockStartup")
+					elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.BLOCK_CANCEL):
+						afterimage_cancel()
+						animate("aBlockStartup")
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
 	
@@ -1273,7 +1293,8 @@ func simulate2(): # only ran if not in hitstop
 	else:
 		gravity_temp = FMath.percent(GRAVITY, get_stat("GRAVITY_MOD")) # each character are affected by gravity differently out of hitstun
 	
-	if $VarJumpTimer.is_running() and (button_jump in input_state.pressed or button_up in input_state.pressed):
+	if $VarJumpTimer.is_running() and !grounded and \
+			(button_jump in input_state.pressed or button_up in input_state.pressed):
 		# variable jump system reduces gravity if you hold down the jump button
 		gravity_temp = FMath.percent(GRAVITY, VAR_JUMP_GRAV_MOD)
 		
@@ -1353,7 +1374,7 @@ func simulate2(): # only ran if not in hitstop
 			if velocity.y > terminal:
 				velocity.y = FMath.f_lerp(velocity.y, terminal, 75)
 				
-	if velocity.y < 0 and $VarJumpTimer.is_running() and abs(velocity.y) > PEAK_DAMPER_LIMIT:
+	if velocity.y < 0 and $VarJumpTimer.is_running() and !grounded and abs(velocity.y) > PEAK_DAMPER_LIMIT:
 		if (button_jump in input_state.pressed or button_up in input_state.pressed):
 			if $VarJumpTimer.time <= get_stat("VAR_JUMP_SLOW_POINT"):
 				velocity.y = FMath.f_lerp(velocity.y, PEAK_DAMPER_LIMIT, get_stat("HIGH_JUMP_SLOW"))
@@ -1404,9 +1425,8 @@ func simulate2(): # only ran if not in hitstop
 			if Animator.query_to_play(["FastFallTransit", "FastFall"]) and !button_down in input_state.pressed:
 				animate("Fall")
 	
-		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
+		Globals.char_state.AIR_D_RECOVERY:
 			air_res_this_frame = 0
-			
 			# air dash into wall/ceiling, stop instantly
 			var stopped := false
 			if Animator.query_to_play(["aDash", "aDashD", "aDashU"]) and is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, facing):
@@ -1418,7 +1438,10 @@ func simulate2(): # only ran if not in hitstop
 				if Animator.current_animation == "aDashTransit": # to fix a bug when touching a wall during aDashTransit > aDash
 					UniqChar.consume_one_air_dash() # reduce air_dash count by 1
 					
-#			elif Animator.query_to_play(["Tech", "GuardTech", "FDash"]):
+	
+		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_RECOVERY:
+			air_res_this_frame = 0
+			
 			var sdashing := false
 			if Animator.query_current(["SDash"]):
 				if button_dash in input_state.pressed:
@@ -1551,7 +1574,9 @@ func simulate2(): # only ran if not in hitstop
 				modulate_play("unlaunch_flash")
 				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			elif !$HitStunTimer.is_running():
-				tech()
+				if !tech():
+					if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_TECH):
+						animate("FallTransit")
 #					animate("FallTransit")]
 #					modulate_play("unlaunch_flash")
 #					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
@@ -1665,10 +1690,10 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	if !$RespawnTimer.is_running():
 	
 		process_status_effects_visual()
+		flashes()
 		
 		if !$HitStopTimer.is_running():
 			
-			flashes()
 			process_afterimage_trail() 	# do afterimage trails
 			
 			# render the next frame, this update the time!
@@ -1707,8 +1732,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			
 		$ModulatePlayer.simulate() # modulate animations continue even in hitstop
 		
-		if Globals.survival_level != null and enchance_cooldowns.size() > 0:
-			enchance_cooldown()
+		if Globals.survival_level != null and enhance_cooldowns.size() > 0:
+			enhance_cooldown()
 	
 	test2()
 		
@@ -1850,6 +1875,11 @@ func buffer_actions():
 				if Animator.time <= 5 and Animator.time != 0:
 					rebuffer_actions()
 					UniqChar.rebuffer_EX()
+					
+	if button_rs_up in input_state.just_pressed or button_rs_down in input_state.just_pressed or button_rs_left in input_state.just_pressed or \
+			button_rs_right in input_state.just_pressed:
+		input_buffer.append(["Dodge", Settings.input_buffer_time[player_ID]])
+		
 		
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 		
@@ -2189,6 +2219,9 @@ func process_input_buffer():
 									
 							if keep:
 								animate("JumpTransit") # ground jump
+								if button_dash in input_state.pressed: # for wavedash alternate input
+									input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
+									
 								keep = false
 								
 						Globals.char_state.GROUND_BLOCK:
@@ -2400,6 +2433,12 @@ func process_input_buffer():
 							has_acted[0] = true
 							keep = false
 							
+					Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY:
+						if test_dodge_cancel() and dodge_check():
+							animate("DodgeTransit")
+							has_acted[0] = true
+							keep = false
+							
 #			"FDash":
 #				match new_state:
 #					Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
@@ -2603,7 +2642,7 @@ func get_target():
 #
 #	return to_return
 
-# MODIFERS AND ENCHANCE -----------------------------------------------------------------------------------------------------------------
+# MODIFERS AND ENHANCE -----------------------------------------------------------------------------------------------------------------
 
 func get_stat(stat: String) -> int:
 	
@@ -2755,31 +2794,94 @@ func mod_damage(move_name):
 	return mod
 	
 	
-func enchance_cooldown():
-	for cooldown in enchance_cooldowns.keys():
-		enchance_cooldowns[cooldown] -= 1
-		if enchance_cooldowns[cooldown] <= 0:
+func enhance_cooldown():
+	for cooldown in enhance_cooldowns.keys():
+		enhance_cooldowns[cooldown] -= 1
+		if enhance_cooldowns[cooldown] <= 0:
 # warning-ignore:return_value_discarded
-			enchance_cooldowns.erase(cooldown)
+			enhance_cooldowns.erase(cooldown)
 	
-func enchance_card(effect_ref: int):
+func enhance_card(effect_ref: int):
 	match effect_ref:
-		Globals.Game.LevelControl.effect_ref.SHARK:
-			if !Globals.Game.LevelControl.effect_ref.SHARK in enchance_cooldowns:
+		Cards.effect_ref.SUMMON_SHARK:
+			if !Cards.effect_ref.SUMMON_SHARK in enhance_cooldowns:
 				var spawn_point = position
 				spawn_point = Detection.ground_finder(spawn_point, facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
 #					func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):
 					Globals.Game.spawn_entity(player_ID, "NibblerSpawnE", spawn_point, {}, null, UniqChar.NAME)
-					play_audio("water15", {"surv" : true})
-					enchance_cooldowns[Globals.Game.LevelControl.effect_ref.SHARK] = Cards.SHARK_COOLDOWN
+					play_audio("water15", {})
+					enhance_cooldowns[Cards.effect_ref.SUMMON_SHARK] = Cards.SHARK_COOLDOWN
+		Cards.effect_ref.SUMMON_HORROR:
+			if !Cards.effect_ref.SUMMON_HORROR in enhance_cooldowns:
+				var target = get_target()
+				if target != null and target != self:
+					Globals.Game.spawn_entity(player_ID, "HorrorE", get_target().position, {}, null, UniqChar.NAME)
+					enhance_cooldowns[Cards.effect_ref.SUMMON_HORROR] = Cards.HORROR_COOLDOWN
+		Cards.effect_ref.KERIS_PROJ:
+			if !Cards.effect_ref.KERIS_PROJ in enhance_cooldowns:
+				Globals.Game.spawn_entity(player_ID, "KerisE", position + Vector2(50, -50), {}, null, UniqChar.NAME)
+				Globals.Game.spawn_entity(player_ID, "KerisE", position + Vector2(-50, -50), {}, null, UniqChar.NAME)
+				play_audio("bling5", {"vol" : -10})
+				enhance_cooldowns[Cards.effect_ref.KERIS_PROJ] = Cards.KERIS_COOLDOWN
+		Cards.effect_ref.SCYTHE_PROJ:
+			if !Cards.effect_ref.SCYTHE_PROJ in enhance_cooldowns:
+				Globals.Game.spawn_entity(player_ID, "ScytheE", position, {}, null, UniqChar.NAME)
+				play_audio("whoosh7", {"vol" : -10})
+				enhance_cooldowns[Cards.effect_ref.SCYTHE_PROJ] = Cards.SCYTHE_COOLDOWN
+		Cards.effect_ref.PHOENIX_PROJ:
+			if !Cards.effect_ref.PHOENIX_PROJ in enhance_cooldowns:
+				if grounded:
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 0), {}, null, UniqChar.NAME)
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(23 * facing, -8), {"ground2":true}, null, UniqChar.NAME)
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(21 * facing, -15), {"ground3":true}, null, UniqChar.NAME)
+				else:
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 0), {}, null, UniqChar.NAME)
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 10), {"air2":true}, null, UniqChar.NAME)
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, -10), {"air3":true}, null, UniqChar.NAME)
+				enhance_cooldowns[Cards.effect_ref.PHOENIX_PROJ] = Cards.PHOENIX_COOLDOWN
+		Cards.effect_ref.PEACOCK_PROJ:
+			if !Cards.effect_ref.PEACOCK_PROJ in enhance_cooldowns:
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(40 * facing, 0), {}, null, UniqChar.NAME)
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(-40 * facing, 0), {"alt":true}, null, UniqChar.NAME)
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(25 * facing, -35), {"alt":true}, null, UniqChar.NAME)
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(-25 * facing, -35), {}, null, UniqChar.NAME)
+				play_audio("bling5", {"vol" : -10})
+				enhance_cooldowns[Cards.effect_ref.PEACOCK_PROJ] = Cards.PEACOCK_COOLDOWN
+		Cards.effect_ref.RAIN_PROJ:
+			Globals.Game.spawn_entity(player_ID, "WaterBulletE", get_feet_pos(), {}, null, UniqChar.NAME)
 				
-func timed_enchance():
+func timed_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_SHARK):
-		enchance_card(Globals.Game.LevelControl.effect_ref.SHARK)
+		enhance_card(Cards.effect_ref.SUMMON_SHARK)
 		
+func being_hit_enhance():
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_HORROR):
+		enhance_card(Cards.effect_ref.SUMMON_HORROR)
 		
-func ground_dash_enchance():
+func attack_enhance(atk_type: int):
+	match atk_type:
+		Globals.atk_type.LIGHT:
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.KERIS_PROJ):
+				enhance_card(Cards.effect_ref.KERIS_PROJ)
+		Globals.atk_type.FIERCE:
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.PHOENIX_PROJ):
+				enhance_card(Cards.effect_ref.PHOENIX_PROJ)
+		Globals.atk_type.HEAVY:
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.SCYTHE_PROJ):
+				enhance_card(Cards.effect_ref.SCYTHE_PROJ)
+		Globals.atk_type.SPECIAL, Globals.atk_type.EX:
+			pass
+		
+func air_jump_enhance():
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.RAIN_PROJ):
+		enhance_card(Cards.effect_ref.RAIN_PROJ)
+		
+func block_enhance():
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.PEACOCK_PROJ):
+		enhance_card(Cards.effect_ref.PEACOCK_PROJ)
+		
+func ground_dash_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.CAN_TRIP) and Globals.Game.rng_generate(100) < Cards.TRIP_CHANCE:
 		trip()
 		return false
@@ -3007,7 +3109,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			
 		Globals.char_state.AIR_D_RECOVERY:
 			if !Animator.to_play_animation.ends_with("DD"): # wave landing
-				if Globals.survival_level != null and !ground_dash_enchance():
+				if Globals.survival_level != null and !ground_dash_enhance():
 					pass
 				else:
 					animate("WaveDashBrake")
@@ -3157,14 +3259,10 @@ func check_collidable(): # called by Physics.gd
 				if Animator.query_to_play(["SDash"]):
 					if Inventory.has_quirk(player_ID, Cards.effect_ref.SDASH_IFRAME):
 						return false
-				elif Animator.query_to_play(["aDash", "aDashU", "aDashD", "aDashUU", "aDashDD"]):
-					if Inventory.has_quirk(player_ID, Cards.effect_ref.AIR_DASH_IFRAME):
-						return false
-		Globals.char_state.GROUND_RECOVERY:
+		Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY:
 			if Globals.survival_level != null:
-				if Animator.query_to_play(["Dash"]):
-					if Inventory.has_quirk(player_ID, Cards.effect_ref.GROUND_DASH_IFRAME):
-						return false
+				if Inventory.has_quirk(player_ID, Cards.effect_ref.DASH_IFRAME):
+					return false
 			
 	return UniqChar.check_collidable()
 	
@@ -3203,14 +3301,10 @@ func check_semi_invuln():
 					if Animator.query_to_play(["SDash"]):
 						if Inventory.has_quirk(player_ID, Cards.effect_ref.SDASH_IFRAME):
 							return true
-					elif Animator.query_to_play(["aDash", "aDashU", "aDashD", "aDashUU", "aDashDD"]):
-						if Inventory.has_quirk(player_ID, Cards.effect_ref.AIR_DASH_IFRAME):
-							return true
-			Globals.char_state.GROUND_RECOVERY:
+			Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY:
 				if Globals.survival_level != null:
-					if Animator.query_to_play(["Dash"]):
-						if Inventory.has_quirk(player_ID, Cards.effect_ref.GROUND_DASH_IFRAME):
-							return true
+					if Inventory.has_quirk(player_ID, Cards.effect_ref.DASH_IFRAME):
+						return true
 			Globals.char_state.LAUNCHED_HITSTUN:
 				if Globals.survival_level != null:
 					if !$HitStunTimer.is_running() and Inventory.has_quirk(player_ID, Cards.effect_ref.CAN_TRIP):
@@ -3345,8 +3439,8 @@ func flashes():
 	if is_blocking():
 		modulate_play("block")
 		
-	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR) and current_guard_gauge == 0:
-		modulate_play("passive_armor")
+#	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR) and current_guard_gauge == 0:
+#		modulate_play("passive_armor")
 		
 	UniqChar.unique_flash()
 	
@@ -3904,6 +3998,20 @@ func test_dash_cancel():
 	return true
 	
 	
+func test_dodge_cancel():
+	
+	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.DODGE_CANCEL):
+		pass
+	elif !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
+		return false # can only dodge cancel on Normal/Heavy hit
+		
+	var move_name = get_move_name()
+	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be dash cancelled
+	
+	afterimage_cancel()
+	return true
+	
+	
 func test_sdash_cancel():
 	
 	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL]:
@@ -4133,6 +4241,7 @@ func timed_status():
 func query_polygons(): # requested by main game node when doing hit detection
 	
 	var polygons_queried = {
+		"rect" : null,
 		"hurtbox" : null,
 		"sdhurtbox" : null,
 		"hitbox" : null,
@@ -4156,6 +4265,10 @@ func query_polygons(): # requested by main game node when doing hit detection
 			pass  # no hurtbox during respawn grace
 		else:
 			polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
+			
+		if polygons_queried.hitbox != null or polygons_queried.hurtbox != null:
+			var sprite_rect = sprite.get_rect()
+			polygons_queried.rect = Rect2(sprite_rect.position + position, sprite_rect.size)
 
 	return polygons_queried
 	
@@ -4223,11 +4336,13 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #				else:
 #					return false
 			else:
+#				pass
 				return false
 		Globals.atk_type.EX:
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.SPECIAL_CHAIN):
 				pass
 			else:
+#				pass
 				return false
 		_:
 			return false
@@ -4932,18 +5047,20 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data.block_state = Globals.block_state.WEAK
 					hit_data["superarmored"] = true
 				
-		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR):
-			if current_guard_gauge >= 0:
+				
+		if !is_hitstunned_or_sequenced() and !is_blocking():
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR):
+				if current_guard_gauge >= 0:
+					hit_data.block_state = Globals.block_state.WEAK
+					hit_data["superarmored"] = true
+			
+			if has_trait(Globals.trait.PERMA_SUPERARMOR):
 				hit_data.block_state = Globals.block_state.WEAK
 				hit_data["superarmored"] = true
-		
-		if has_trait(Globals.trait.PERMA_SUPERARMOR):
-			hit_data.block_state = Globals.block_state.WEAK
-			hit_data["superarmored"] = true
-		elif has_trait(Globals.trait.PASSIVE_NORMALARMOR):
-			if current_guard_gauge >= 0 and "normalarmorable" in hit_data:
-				hit_data.block_state = Globals.block_state.WEAK
-				hit_data["superarmored"] = true
+			elif has_trait(Globals.trait.PASSIVE_NORMALARMOR):
+				if current_guard_gauge >= 0 and "normalarmorable" in hit_data:
+					hit_data.block_state = Globals.block_state.WEAK
+					hit_data["superarmored"] = true
 			
 				
 		# BLOCKING --------------------------------------------------------------------------------------------------
@@ -5513,6 +5630,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if hit_data.block_state != Globals.block_state.UNBLOCKED and grounded:
 			velocity.y = 0 # set to horizontal pushback on blocking defender
 			
+			
+	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
+		being_hit_enhance()
+			
 #	if Globals.survival_level != null and $HitStunTimer.is_running():
 #		attacked_this_frame = true
 		
@@ -5770,6 +5891,12 @@ func calculate_knockback_dir(hit_data) -> int:
 							knockback_dir = posmod(180 - knockback_dir, 360)
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
+		Globals.knockback_type.VELOCITY: # in direction of attacker's velocity
+			if hit_data.attacker_or_entity.velocity.x == 0 and hit_data.attacker_or_entity.velocity.y == 0:
+				knockback_dir = -90
+			else:
+				knockback_dir = hit_data.attacker_or_entity.velocity.angle()
+				
 		Globals.knockback_type.RADIAL:
 #			if KBOrigin:
 			knockback_dir = ref_vector.angle(hit_data.attack_facing)
@@ -6003,12 +6130,22 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 					hitspark = "SlashsparkC"
 				5:
 					hitspark = "SlashsparkD"
+			
 		Globals.hitspark_type.CUSTOM:
 			# WIP
 			pass
 					
 	if hitspark != "":
-		var rot_rad : float = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
+		var rot_rad: float
+		if hit_data.move_data.hitspark_type != Globals.hitspark_type.SLASH:
+			rot_rad = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
+		else: # slash hitspark randomize angle a bit
+			var rand_degree := 0
+			if "multihit" in hit_data or "autochain" in hit_data:
+				rand_degree = Globals.Game.rng_generate(91) * Globals.Game.rng_facing()
+			else:
+				rand_degree = Globals.Game.rng_generate(46) * Globals.Game.rng_facing()
+			rot_rad = (hit_data.knockback_dir + rand_degree) / 360.0 * (2 * PI) + PI # visuals only
 		if "pull" in hit_data: rot_rad += PI # flip if pulling
 #		var aux_data = {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}
 #		if hit_data.move_data["hitspark_palette"] != "red":
@@ -6506,6 +6643,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 				elif is_special_move(move_name):
 					aerial_sp_memory.append(move_name)
 					
+			if Globals.survival_level != null and move_name in UniqChar.STARTERS:
+				attack_enhance(query_move_data().atk_type)
+					
 #		else:
 #			perfect_chain = false # change to false if neither startup nor active
 	
@@ -6522,7 +6662,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		
 		"Dash":
-			if Globals.survival_level != null and !ground_dash_enchance():
+			if Globals.survival_level != null and !ground_dash_enhance():
 				return
 			
 		"JumpTransit2":
@@ -6558,6 +6698,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #					velocity.x = int(clamp(velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
 #					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			
 		"aJumpTransit2":
 			aerial_memory = []
 			if !check_wall_jump():
@@ -6579,6 +6720,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
 				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
+				
+				if Globals.survival_level != null:
+					air_jump_enhance()
+					
 			else: # if next to wall when starting an air jump, do wall jump instead
 				if wall_jump_dir != 0:
 					velocity.x = wall_jump_dir * FMath.percent(get_stat("SPEED"), get_stat("WALL_AIR_JUMP_HORIZ_MOD"))
@@ -6619,6 +6764,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"BlockStartup", "aBlockStartup":
 			success_block = false
+			if Globals.survival_level != null:
+				block_enhance()
 			
 		"DodgeTransit":
 			aerial_memory = []
@@ -6630,13 +6777,38 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Dodge":
 			face_opponent()
 			var tech_angle: int
-			if !grounded or soft_grounded:
-				tech_angle = Globals.dir_to_angle(dir, v_dir, facing)
-			else:
-				if v_dir == -1:
-					tech_angle = Globals.dir_to_angle(dir, -1, facing)
+				
+			var rs_dir := Vector2(0, 0)
+			if button_rs_up in input_state.pressed:
+				rs_dir.y -= 1
+			if button_rs_down in input_state.pressed:
+				rs_dir.y += 1
+			if button_rs_left in input_state.pressed:
+				rs_dir.x -= 1
+			if button_rs_right in input_state.pressed:
+				rs_dir.x += 1
+				
+			if rs_dir == Vector2(0, 0): # LS dodge
+				if !grounded or soft_grounded:
+					tech_angle = Globals.dir_to_angle(dir, v_dir, facing)
 				else:
-					tech_angle = Globals.dir_to_angle(dir, 0, facing)
+					if v_dir == -1:
+						tech_angle = Globals.dir_to_angle(dir, -1, facing)
+					else:
+						tech_angle = Globals.dir_to_angle(dir, 0, facing)
+			else: # RS dodge
+				if !grounded or soft_grounded:
+# warning-ignore:narrowing_conversion
+# warning-ignore:narrowing_conversion
+					tech_angle = Globals.dir_to_angle(rs_dir.x, rs_dir.y, facing)
+				else:
+					if rs_dir.y == -1:
+# warning-ignore:narrowing_conversion
+						tech_angle = Globals.dir_to_angle(rs_dir.x, -1, facing)
+					else:
+# warning-ignore:narrowing_conversion
+						tech_angle = Globals.dir_to_angle(rs_dir.x, 0, facing)
+						
 			velocity.set_vector(get_stat("DODGE_SPEED"), 0)
 			velocity.rotate(tech_angle)
 			anim_gravity_mod = 0
@@ -6772,6 +6944,8 @@ func rotate_sprite(angle: int):
 			else:
 				sprite.rotation = deg2rad(posmod(angle + 180, 360))
 		
+func rotate_sprite_x_axis(angle: int): # use to rotate sprite without changing facing
+	$Sprite.rotation += deg2rad(angle * facing)
 		
 func modulate_play(anim: String):
 	if !$ModulatePlayer.playing:
@@ -6922,7 +7096,7 @@ func save_state():
 		state_data["TrainingRegenTimer_time"] = $TrainingRegenTimer.time
 		
 	if Globals.survival_level != null:
-		state_data["enchance_cooldowns"] = enchance_cooldowns
+		state_data["enhance_cooldowns"] = enhance_cooldowns
 
 	return state_data
 	
@@ -6968,7 +7142,7 @@ func load_state(state_data):
 	lethal_flag = state_data.lethal_flag
 	from_move_rec = state_data.from_move_rec
 	if Globals.survival_level != null:
-		enchance_cooldowns = state_data.enchance_cooldowns
+		enhance_cooldowns = state_data.enhance_cooldowns
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	

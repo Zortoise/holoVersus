@@ -340,7 +340,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"armor_time" :{
+	"mob_armor_time" :{
 		"priority" : priority.MOB_ARMOR,
 		"duration": 6,
 		"loop" : true,
@@ -351,11 +351,38 @@ var modulate_animations = {
 			},
 			2 :
 			{
-				"modulate" : Color(1.5, 0.0, 0.0),
+				"modulate" : Color(0.0, 0.0, 1.5),
 			},
 			4 :
 			{
-				"modulate" : Color(1.2, 0.7, 0.7),
+				"modulate" : Color(0.7, 0.7, 1.2),
+			},
+		}
+	},
+	"mob_armor_flash" :{
+		"priority" : priority.FLASH,
+		"duration": 10,
+		"loop" : false,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(0.0, 0.0, 0.0),
+			},
+			2 :
+			{
+				"modulate" : Color(0.3, 0.3, 0.8),
+			},
+			4 :
+			{
+				"modulate" : Color(0.5, 0.5, 0.75),
+			},
+			6 :
+			{
+				"modulate" : Color(0.7, 0.7, 0.9),
+			},
+			8 :
+			{
+				"modulate" : Color(0.9, 0.9, 1.0),
 			},
 		}
 	},

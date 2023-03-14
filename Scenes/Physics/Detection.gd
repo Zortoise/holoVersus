@@ -4,15 +4,7 @@ extends Node
 
 
 func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are nodes like ColorRect
-# warning-ignore:unassigned_variable
-	var detect_box: Rect2
-	detect_box.position = box1.rect_global_position
-	detect_box.size = box1.rect_size
-# warning-ignore:unassigned_variable
-	var target_box: Rect2
-	target_box.position = box2.rect_global_position
-	target_box.size = box2.rect_size
-	if detect_box.intersects(target_box):
+	if Rect2(box1.rect_global_position, box1.rect_size).intersects(Rect2(box2.rect_global_position, box2.rect_size)):
 		return true
 	else: return false
 	
@@ -22,18 +14,11 @@ func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are
 # return true if found intersected stuff
 func detect_bool(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO):
 	for box in box_array:
-# warning-ignore:unassigned_variable
-		var detect_box: Rect2 # need to do this since need global position
-		detect_box.position = box.rect_global_position + offset
-		detect_box.size = box.rect_size
+		var detect_box := Rect2(box.rect_global_position + offset, box.rect_size)
 		for group_name in groups_to_comb:
 			var array = get_tree().get_nodes_in_group(group_name)
 			for x in array:
-# warning-ignore:unassigned_variable
-				var target_box: Rect2 # need to do this since need global position
-				target_box.position = x.rect_global_position
-				target_box.size = x.rect_size
-				if detect_box.intersects(target_box):
+				if detect_box.intersects(Rect2(x.rect_global_position, x.rect_size)):
 					return true
 	return false
 
@@ -42,19 +27,12 @@ func detect_bool(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO)
 func detect_return(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO):
 	var bodies = []
 	for box in box_array:
-# warning-ignore:unassigned_variable
-		var detect_box: Rect2 # need to do this since need global position
-		detect_box.position = box.rect_global_position + offset
-		detect_box.size = box.rect_size
+		var detect_box := Rect2(box.rect_global_position + offset, box.rect_size)
 		for group_name in groups_to_comb:
 			var array = get_tree().get_nodes_in_group(group_name)
 			for x in array:
-# warning-ignore:unassigned_variable
-				var target_box: Rect2 # need to do this since need global position
-				target_box.position = x.rect_global_position
-				target_box.size = x.rect_size
-				if detect_box.intersects(target_box) and x.get_parent() != box.get_parent() \
-						and !x.get_parent() in bodies: # skip box's owner and repeats
+				if  x.get_parent() != box.get_parent() and !x.get_parent() in bodies and \
+						detect_box.intersects(Rect2(x.rect_global_position, x.rect_size)): # skip box's owner and repeats
 					bodies.append(x.get_parent())
 	return bodies
 	
@@ -68,11 +46,7 @@ func wall_finder(global_pos: Vector2, facing, finding_range = 15):
 	
 	for x in finding_range:
 		for wall in wall_array:
-# warning-ignore:unassigned_variable
-			var target_box: Rect2 # need to do this since need global position
-			target_box.position = wall.rect_global_position
-			target_box.size = wall.rect_size
-			if target_box.has_point(point): # wall found
+			if Rect2(wall.rect_global_position, wall.rect_size).has_point(point): # wall found
 				point.x -= facing
 				return point
 		point.x += facing
@@ -90,10 +64,7 @@ func ground_finder(global_pos: Vector2, facing, offset: Vector2, detect_size: Ve
 	
 	# 1st, create a detect box centered at that offset
 	var origin = Vector2(global_pos.x + (facing * offset.x), global_pos.y + offset.y)
-# warning-ignore:unassigned_variable
-	var detect_box: Rect2
-	detect_box.position = Vector2(origin.x - int(detect_size.x/2), origin.y - int(detect_size.y/2))
-	detect_box.size = detect_size
+	var detect_box := Rect2(Vector2(origin.x - int(detect_size.x/2), origin.y - int(detect_size.y/2)), detect_size)
 	Globals.Game.get_node("PolygonDrawer").extra_boxes.append(detect_box) # draw the box out
 	
 	# 2nd, get intersecting platform boxes and get the one closest to the vertical level needed
@@ -106,10 +77,7 @@ func ground_finder(global_pos: Vector2, facing, offset: Vector2, detect_size: Ve
 	
 	var platform_boxes = get_tree().get_nodes_in_group("SolidPlatforms") + get_tree().get_nodes_in_group("SoftPlatforms")
 	for platform_box in platform_boxes:
-# warning-ignore:unassigned_variable
-		var target_box: Rect2 # need to do this since need global position
-		target_box.position = platform_box.rect_global_position
-		target_box.size = platform_box.rect_size
+		var target_box := Rect2(platform_box.rect_global_position, platform_box.rect_size)
 		
 		# conditions, must intersect and top surface must be within detect_box's height
 		if detect_box.intersects(target_box) and target_box.position.y > detect_box.position.y and \

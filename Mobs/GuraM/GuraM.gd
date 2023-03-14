@@ -153,7 +153,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 6,
 		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
+		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.SUPERARMOR_STARTUP],
 		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
 	},
@@ -251,7 +251,7 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 5,
 		"KB_angle" : 45,
-		"atk_attr" : [],
+		"atk_attr" : [Globals.atk_attr.SUPERARMOR_STARTUP],
 		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
 		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
 	},
@@ -380,6 +380,23 @@ const COMMANDS = {
 				TRIGGERS.anti_air_long,
 			]
 		},
+		"option_cross": { # no anti_air_long, done during forward dashes
+			"action": "option",
+			"decision" : "offense",
+			"triggers" : [
+				TRIGGERS.point_blank,
+				TRIGGERS.anti_air_short,
+				TRIGGERS.close_range,
+				TRIGGERS.mid_range,
+				TRIGGERS.anti_air,
+			]
+		},
+		"option_none": { # when retreating, will not attack till out of dash animation/landed on ground
+			"action": "option",
+			"decision" : "offense",
+			"triggers" : [
+			]
+		},
 		"option_air": { # special air stance that last till hit the ground, do air attacks if player is close
 			"action": "option",
 			"next" : "option_close",
@@ -409,13 +426,14 @@ const COMMANDS = {
 			"action": "anim",
 			"no_c_rec" : true, # cannot use from C_RECOVERY
 			"anim" : "DashTransit",	
-			"next" : "option_close"
+			"next" : "option_cross"
 		},
 		"back_dash": {
 			"action": "anim",
 			"no_c_rec" : true,
 			"dir": "retreat",
 			"anim" : "DashTransit",	
+			"next" : "option_none"
 #			"decision" : "retreat",
 		},
 		"dash_dance": {
@@ -424,7 +442,7 @@ const COMMANDS = {
 			"dir": "retreat",
 			"anim" : "DashTransit",	
 			"style" : "dash_dance",
-			"next" : "option_close"
+			"next" : "option_none"
 #			"decision" : "retreat",
 		},
 		
@@ -439,7 +457,7 @@ const COMMANDS = {
 			"action": "anim",
 			"no_c_rec" : true, # cannot use from C_RECOVERY
 			"anim" : "aDashTransit",	
-			"next" : "option_air",
+			"next" : "option_close",
 			"style" : "air_back_dash"
 		},
 		
@@ -530,12 +548,12 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : "HStartup",
 		},
-		"sharkstomp_dash": {
-			"action": "anim",
-			"no_c_rec" : true,
-			"anti_air_dash" : true,
-			"anim" : ["DashTransit", "HStartup"],
-		},
+#		"sharkstomp_dash": {
+#			"action": "anim",
+#			"no_c_rec" : true,
+#			"anti_air_dash" : true,
+#			"anim" : ["DashTransit", "HStartup"],
+#		},
 		
 #		"sharkstomp_combo": {
 #			"action": "anim",
@@ -603,6 +621,14 @@ const COMMANDS = {
 			"action": "anim",
 			"anim" : "aHStartup",
 		},
+		"air_shark_combo": {
+			"action": "anim",
+			"anim" : ["aHStartup", "aSP1Startup"],
+		},
+		"air_shark_combo2": {
+			"action": "anim",
+			"anim" : ["aHStartup", "aSP2Startup"],
+		},
 		"air_upthrust": {
 			"action": "anim",
 			"anim" : "aF3Startup",
@@ -634,19 +660,20 @@ enum rank {LOW, MID, HIGH, SHARK, RUSH, ZONE}
 const ATK_LOOKUP = {
 	atk_range.POINTBLANK : {
 		rank.LOW : ["back_dash", "double_stab", "double_stab"],
-		rank.MID : ["double_stab_combo1", "hammerhead"],
-		rank.HIGH : ["command_grab", "double_stab_combo2", "hammerhead_combo"],
+		rank.MID : ["double_stab_combo1", "hammerhead", "sharkstomp"],
+		rank.HIGH : ["command_grab", "double_stab_combo2", "hammerhead_combo", "sharkstomp", "sharkstomp_combo"],
 		rank.RUSH : ["command_grab", "double_stab_combo2", "hammerhead"],
 		rank.SHARK : ["hammerhead"],
 		rank.ZONE : ["back_dash", "hammerhead"]
 	},
 	atk_range.CLOSE_RANGE : {
 		rank.LOW : ["dash", "double_stab", "backswing", "rush_upthrust"],
-		rank.MID : ["dash", "dash_dance", "shorthop", "double_stab_combo1", "thrust", "backswing", "sharkstomp", "rush_upthrust", "overhead"],
-		rank.HIGH : ["dash", "dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust_combo", "backswing_combo", "sharkstomp_combo", \
-				"hammerhead_combo", "rush_upthrust_combo", "overhead"],
+		rank.MID : ["dash", "dash_dance", "shorthop", "double_stab_combo1", "thrust", "backswing", "sharkstomp", "sharkstomp", \
+				"rush_upthrust", "overhead"],
+		rank.HIGH : ["dash", "dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust_combo", "backswing_combo", \
+				"hammerhead_combo", "rush_upthrust_combo", "overhead", "sharkstomp", "sharkstomp_combo"],
 		rank.RUSH : ["dash", "dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust", "backswing_combo", "sharkstomp", \
-				"rush_upthrust_combo", "hammerhead"],
+				"rush_upthrust_combo", "hammerhead", "sharkstomp"],
 		rank.SHARK : ["dash", "dash_dance", "shorthop", "sharkstomp", "hammerhead", "shorthop"],
 		rank.ZONE : ["back_dash", "back_jump", "hammerhead"]
 	},
@@ -669,8 +696,8 @@ const ATK_LOOKUP = {
 	},
 	atk_range.ANTI_AIR_SHORT: {
 		rank.LOW : ["overhead"],
-		rank.MID : ["overhead", "sharkstomp"],
-		rank.HIGH : ["sharkstomp_combo", "overhead", "hammerhead_combo"],
+		rank.MID : ["dash_dance", "overhead", "sharkstomp"],
+		rank.HIGH : ["dash_dance", "sharkstomp_combo", "overhead", "hammerhead_combo"],
 		rank.RUSH : ["overhead", "sharkstomp", "hammerhead"],
 		rank.SHARK : ["sharkstomp", "hammerhead"],
 		rank.ZONE : ["back_dash", "hammerhead", "hammerhead", "up_throw_trident"]
@@ -693,8 +720,8 @@ const ATK_LOOKUP = {
 	},
 	atk_range.AIR_CLOSE: {
 		rank.LOW : ["air_tail"],
-		rank.MID : ["air_uptail", "air_tail", "air_overhead"],
-		rank.HIGH : ["air_uptail", "air_overhead", "air_shark"],
+		rank.MID : ["air_uptail", "air_tail", "air_overhead", "air_shark"],
+		rank.HIGH : ["air_uptail", "air_overhead", "air_shark_combo", "air_shark_combo2"],
 		rank.SHARK : ["air_shark"],
 		rank.ZONE : ["air_back_dash", "air_trident"]
 	},
@@ -714,8 +741,8 @@ const ATK_LOOKUP = {
 	},
 	atk_range.AIR_LOW_SHORT: {
 		rank.LOW : ["air_tail"],
-		rank.MID : ["air_hitgrab", "air_tail"],
-		rank.HIGH : ["air_hitgrab", "air_tail", "air_down_trident"],
+		rank.MID : ["air_hitgrab", "air_tail", "air_shark"],
+		rank.HIGH : ["air_hitgrab", "air_tail", "air_down_trident", "air_shark"],
 		rank.RUSH : ["air_hitgrab", "air_tail"],
 		rank.SHARK : ["air_shark"],
 		rank.ZONE : ["air_down_trident"]
@@ -739,7 +766,7 @@ const ATK_LOOKUP = {
 	atk_range.AIR_FAR: {
 		rank.LOW : ["air_tail"],
 		rank.MID : ["air_dash","air_shark", "air_uptail", "air_overhead"],
-		rank.HIGH : ["air_dash","air_surf", "air_shark", "air_trident", "air_overhead"],
+		rank.HIGH : ["air_dash","air_surf", "air_shark_combo", "air_shark_combo2", "air_trident", "air_overhead"],
 		rank.SHARK : ["air_dash","air_shark"],
 		rank.RUSH : ["air_dash","air_surf", "air_uptail", "air_overhead"],
 		rank.ZONE : ["air_trident"]
@@ -1210,6 +1237,10 @@ func filter(atk_range: int):
 		Globals.remove_instances(results, "back_dash")
 		Globals.remove_instances(results, "air_back_dash")
 		Globals.remove_instances(results, "back_jump")
+	
+	if Character.new_state == Globals.char_state.GROUND_D_RECOVERY:
+		Globals.remove_instances(results, "dash") # will not decide to dash again during option_cross while dashing
+		Globals.remove_instances(results, "dash_dance")
 				
 # warning-ignore:return_value_discarded
 	if results.size() == 0: decision()
@@ -1476,8 +1507,8 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 		_:
 			pass
 
-	if Globals.mob_attr.ARMOR_MOVES in Character.mob_attr:
-		atk_attr.append(Globals.atk_attr.SUPERARMOR_STARTUP)
+#	if Globals.mob_attr.ARMOR_MOVES in Character.mob_attr:
+#		atk_attr.append(Globals.atk_attr.SUPERARMOR_STARTUP)
 			
 	return atk_attr
 	
@@ -1730,6 +1761,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.face(-Character.facing)
 				Character.animate("DashTransit")
 				Character.command_style = ""
+				Character.start_command("option_cross")
 			else:
 				Character.animate("DashBrake")
 		"DashBrake":

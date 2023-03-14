@@ -1,6 +1,6 @@
 extends Node
 
-enum effect_ref {SHARK}
+#enum effect_ref {SHARK}
 
 var card_entity_data = {
 	"NibblerSpawnE" : {
@@ -12,6 +12,36 @@ var card_entity_data = {
 		"scene" : load("res://Cards/NibblerE.tscn"),
 		"frame_data" : ResourceLoader.load("res://Characters/Gura/Entities/FrameData/Nibbler.tres"),
 		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/NibblerSprite.png"),
+	},
+	"HorrorE" : {
+		"scene" : load("res://Cards/HorrorE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Horror.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/HorrorSprite.png"),
+	},
+	"PhoenixFeatherE" : {
+		"scene" : load("res://Cards/PhoenixFeatherE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/PhoenixFeather.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/PhoenixFeatherSprite.png"),
+	},
+	"PeacockFeatherE" : {
+		"scene" : load("res://Cards/PeacockFeatherE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/PeacockFeather.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/PeacockFeatherSprite.png"),
+	},
+	"WaterBulletE" : {
+		"scene" : load("res://Cards/WaterBulletE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/WaterBullet.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/WaterBulletSprite.png"),
+	},
+	"KerisE" : {
+		"scene" : load("res://Cards/KerisE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Keris.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/KerisSprite.png"),
+	},
+	"ScytheE" : {
+		"scene" : load("res://Cards/ScytheE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Scythe.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/ScytheSprite.png"),
 	},
 }
 
