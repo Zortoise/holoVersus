@@ -214,8 +214,10 @@ func query_move_data(move_name) -> Dictionary:
 				if Entity.v_facing == -1:
 					move_data.KB_angle = -25
 					
-					
-	move_data.damage = FMath.percent(move_data.damage, Entity.MOB_LEVEL_TO_DMG[Entity.mob_level])
+	if Globals.difficulty == 3:
+		move_data.damage = FMath.percent(move_data.damage, Entity.MOB_LEVEL_TO_DMG[8])
+	else:			
+		move_data.damage = FMath.percent(move_data.damage, Entity.MOB_LEVEL_TO_DMG[Entity.mob_level])
 					
 	if Globals.mob_attr.POWER in Entity.mob_attr:
 		move_data.damage = Entity.modify_stat(move_data.damage, Globals.mob_attr.POWER, [50, 75, 125, 150, 175, 200])

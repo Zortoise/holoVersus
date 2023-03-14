@@ -175,7 +175,7 @@ func setup():
 		HUD.get_node("MatchTime").hide()
 		HUD.get_node("TimeFrame").hide()
 	
-	if Globals.survival_level == null:
+	if Globals.survival_level == null or Globals.difficulty >= 2:
 		HUD.get_node("P1_HUDRect/Portrait/Coin").hide()
 		HUD.get_node("P2_HUDRect/Portrait/Coin").hide()
 	
@@ -1377,6 +1377,8 @@ func mob_projectile_miss(entity, defender):
 	
 	if Globals.survival_level == null: return false
 	
+	if Globals.difficulty == 3:
+		return false
 	if entity == null or defender == null:
 		return false
 	if !entity.is_in_group("MobEntityNodes"):

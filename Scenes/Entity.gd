@@ -255,8 +255,7 @@ func interactions():
 		var my_hitbox = Animator.query_polygon("hitbox")
 		if my_hitbox != null:
 			
-			var sprite_rect = $Sprite.get_rect()
-			var my_rect = Rect2(sprite_rect.position + position, sprite_rect.size)
+			var my_rect = get_sprite_rect()
 			
 			to_destroy = false
 			
@@ -301,8 +300,7 @@ func interactions():
 				for destroyer in destroyer_array:
 					var second_hitbox = destroyer.Animator.query_polygon("hitbox")
 					if second_hitbox != null:
-						var their_sprite_rect = destroyer.sprite.get_rect()
-						var their_rect = Rect2(their_sprite_rect.position + destroyer.position, their_sprite_rect.size)
+						var their_rect = destroyer.get_sprite_rect()
 						
 						if my_rect.intersects(their_rect):
 							var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
@@ -317,8 +315,7 @@ func interactions():
 					for entity in clash_array:
 						var second_hitbox = entity.Animator.query_polygon("hitbox")
 						if second_hitbox != null:
-							var their_sprite_rect = entity.get_node("Sprite").get_rect()
-							var their_rect = Rect2(their_sprite_rect.position + entity.position, their_sprite_rect.size)
+							var their_rect = entity.get_sprite_rect()
 							
 							if my_rect.intersects(their_rect):
 								var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
@@ -427,10 +424,14 @@ func query_polygons(): # requested by main game node when doing hit detection
 			polygons_queried.vacpoint = Animator.query_point("vacpoint")
 
 		if polygons_queried.hitbox != null:
-			var sprite_rect = $Sprite.get_rect()
-			polygons_queried.rect = Rect2(sprite_rect.position + position, sprite_rect.size)
+			polygons_queried.rect = get_sprite_rect()
 
 	return polygons_queried
+	
+func get_sprite_rect():
+	if UniqEntity.has_method("get_sprite_rect"): return UniqEntity.get_sprite_rect()
+	var sprite_rect = $Sprite.get_rect()
+	return Rect2(sprite_rect.position + position, sprite_rect.size)
 
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection

@@ -101,12 +101,16 @@ func init():
 	add_child(UniqLevel)
 	move_child(UniqLevel, 0)
 	
-	if Globals.player_count == 1:
-		Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
-		starting_coin = UniqLevel.STARTING_COIN
+	if Globals.difficulty >= 2:
+		Globals.Game.starting_stock_pts = 1
+		starting_coin = 0
 	else:
-		Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
-		starting_coin = FMath.percent(UniqLevel.STARTING_COIN, 50)
+		if Globals.player_count == 1:
+			Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
+			starting_coin = UniqLevel.STARTING_COIN
+		else:
+			Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
+			starting_coin = FMath.percent(UniqLevel.STARTING_COIN, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
 	
 	load_cards()
@@ -292,8 +296,7 @@ func load_items():
 		else: print("No Palettes folder for item: " + item)
 
 #-----------------------------------------------------------------------------------------------------------------------------
-
-
+		
 func simulate():
 	
 	if !Globals.Game.game_set:
@@ -304,11 +307,12 @@ func simulate():
 				break
 		if failure:
 			Globals.Game.game_set = true
+			level_active = false
 			emit_signal("level_failed")
 		
 	if level_active:
 		if wave_standby_timer > 0:
-			if wave_ID > 1 and wave_standby_timer == 90:
+			if wave_ID > 1 and wave_standby_timer == 90 and Globals.difficulty < 2:
 				Globals.Game.card_menu.open_shop()
 			elif wave_standby_timer == 60:
 				emit_signal("wave_start", wave_ID)
@@ -365,11 +369,14 @@ func simulate():
 		
 func next_wave():
 	wave_ID += 1
+	var respawned_players = []
 	
-	for player in get_tree().get_nodes_in_group("PlayerNodes"):
-		if player.stock_points_left == 0:
-			player.stock_points_left = 1
-			player.get_node("RespawnTimer").stop()
+	if Globals.difficulty != 3:
+		for player in get_tree().get_nodes_in_group("PlayerNodes"):
+			if player.stock_points_left == 0:
+				player.stock_points_left = 1
+				player.get_node("RespawnTimer").stop()
+				respawned_players.append(player)
 	
 	if !wave_ID in UniqLevel.WAVES:
 		all_waves_cleared()
@@ -379,8 +386,21 @@ func next_wave():
 		wave_active = true
 		wave_timer = STARTING_TIME
 		time_of_last_spawn = null
-		wave_standby_timer = 210
+		if Globals.difficulty >= 2:
+			wave_standby_timer = 120
+		else:
+			wave_standby_timer = 210
 		emit_signal("wave_cleared")
+		
+		if Globals.difficulty == 1:
+			for player in get_tree().get_nodes_in_group("PlayerNodes"):
+				var quota: int
+				if Globals.player_count == 1:
+					quota = UniqLevel.STARTING_STOCKS
+				else:
+					quota = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
+				if !player in respawned_players and player.stock_points_left < quota:
+					player.change_stock_points(1)
 		
 	
 func all_waves_cleared():
@@ -390,6 +410,12 @@ func all_waves_cleared():
 	emit_signal("level_cleared")
 
 	
+func get_living_player_count():
+	var count := 0
+	for player in get_tree().get_nodes_in_group("PlayerNodes"):
+		if player.state != Globals.char_state.DEAD:
+			count += 1
+	return count
 	
 	
 # SPAWNERS -----------------------------------------------------------------------------------------------------------------------------

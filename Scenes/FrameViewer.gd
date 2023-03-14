@@ -68,7 +68,8 @@ func simulate():
 							Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.4, 0.4, 1.0)
-							Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY:
+							Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
+									Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY:
 								if !player_stopped[player_number]: stoptimes[player_number] = time
 								player_stopped[player_number] = true
 								pips[player_number][pip_number].modulate = Color(0.7, 0.3, 1.0)

@@ -35,6 +35,8 @@ const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Gu
 #const ATK_LEVEL_TO_L_HITSTUN = [[40, 45, 50, 55, 60, 65, 70, 75], [35, 40, 45, 50, 55, 60, 65, 70], [30, 35, 40, 45, 50, 55, 60, 65]]
 const ATK_LEVEL_TO_F_HITSTUN = [33, 36, 39, 42, 45, 48, 51, 54]
 const ATK_LEVEL_TO_L_HITSTUN = [48, 51, 54, 57, 60, 63, 66, 69]
+const ATK_LEVEL_TO_F_HITSTUN_H = [15, 20, 25, 30, 35, 40, 45, 50]
+const ATK_LEVEL_TO_L_HITSTUN_H = [25, 30, 35, 40, 45, 50, 55, 60]
 const COMBO_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
 
 const ATK_LEVEL_TO_GDRAIN = [0, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
@@ -1047,11 +1049,13 @@ func is_ground_anim(anim): # for AI commands
 	return false
 		
 func is_passive():
+	if Globals.difficulty == 3: return false
 #	if !$RageTimer.is_running() and !Globals.mob_attr.RAGE in mob_attr:
 	if !Globals.mob_attr.RAGE in mob_attr:
 		var target = get_target()
 		if target == self or target.get_target() != self:
-			if Globals.player_count > 1 and Globals.Game.get_player_node(0).target_ID == Globals.Game.get_player_node(1).target_ID:
+			if Globals.Game.LevelControl.get_living_player_count() > 1 and \
+					Globals.Game.get_player_node(0).target_ID == Globals.Game.get_player_node(1).target_ID:
 				return false # if both players target the same mob, no passivity
 			return true
 	return false
@@ -1160,12 +1164,18 @@ func get_stat(stat):
 		
 	match stat: # increase stats as level raise
 		"SPEED_MOD":
-			to_return = FMath.percent(to_return, MOB_LEVEL_TO_SPEED[mob_level])
+			if Globals.difficulty == 3:
+				to_return = FMath.percent(to_return, MOB_LEVEL_TO_SPEED[8] + 20)
+			else:
+				to_return = FMath.percent(to_return, MOB_LEVEL_TO_SPEED[mob_level])
 		"DAMAGE_VALUE_LIMIT":
 			to_return = FMath.percent(to_return, MOB_LEVEL_TO_HP[mob_level])
 		"GUARD_GAUGE_SWELL_RATE":
-			var mob_level_values = [100, 125, 150]
-			to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
+			if Globals.difficulty == 3:
+				to_return = FMath.percent(to_return, 175)
+			else:
+				var mob_level_values = [100, 125, 150]
+				to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
 			
 			var hp_left_values = [125, 100, 75, 50] # remaining HP affects Guard Swell
 			to_return = FMath.percent(to_return, hp_left_values[hp_left_to_tier()])
@@ -1173,9 +1183,24 @@ func get_stat(stat):
 			# combo level affects Guard Swell
 			to_return = FMath.percent(to_return, COMBO_LEVEL_TO_GUARD_SWELL_MOD[combo_level])
 		"GUARD_DRAIN_MOD":
-			var mob_level_values = [125, 100, 75]
-			to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
-			
+			if Globals.difficulty == 3:
+				to_return = FMath.percent(to_return, 50)
+			else:		
+				var mob_level_values = [125, 100, 75]
+				to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
+		
+	if Globals.difficulty == 3: # increased stats for hardest mode
+		match stat:
+			"GUARD_DRAIN_MOD":
+				to_return = FMath.percent(to_return, 70)
+#			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
+#				to_return = FMath.percent(to_return, 150)
+			"ARMOR_TIME":
+				to_return = FMath.percent(to_return, 300)
+			"DAMAGE_VALUE_LIMIT":
+				to_return = FMath.percent(to_return, 130)
+			"GG_REGEN_AMOUNT":
+				to_return = FMath.percent(to_return, 125)
 			
 	if Globals.player_count > 1: # increased stats for 2 players
 		match stat:
@@ -1232,6 +1257,8 @@ func has_trait(trait: int) -> bool:
 	
 
 func loot_drop():
+	if Globals.difficulty == 3: return
+	
 	var loot_array = UniqChar.generate_loot()
 	
 	if Globals.mob_attr.COIN in mob_attr:
@@ -1972,12 +1999,13 @@ func query_polygons(): # requested by main game node when doing hit detection
 #			pass  # no hurtbox during respawn grace or after a strongblock/parry
 #		else:
 		polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
-		
-		var sprite_rect = sprite.get_rect()
-		polygons_queried.rect = Rect2(sprite_rect.position + position, sprite_rect.size)
+		polygons_queried.rect = get_sprite_rect()
 
 	return polygons_queried
 	
+func get_sprite_rect():
+	var sprite_rect = sprite.get_rect()
+	return Rect2(sprite_rect.position + position, sprite_rect.size)
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	
@@ -2074,7 +2102,7 @@ func get_guard_gauge_percent_below() -> int:
 		
 func take_damage(damage: int): # called by attacker
 	current_damage_value += damage
-	current_damage_value = int(clamp(current_damage_value, 0, 9999)) # cannot go under zero (take_damage is also used for healing)
+#	current_damage_value = int(clamp(current_damage_value, 0, 9999)) # cannot go under zero (take_damage is also used for healing)
 	damage_update()
 	
 func change_guard_gauge(guard_gauge_change: int): # called by attacker
@@ -2583,10 +2611,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if "entity_nodepath" in hit_data: # for projectiles as well
 #			hit_data.hitstop = hitstop
 
-	if "resisted" in hit_data and !guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit:
-		if "superarmored" in hit_data:
-			hitstop += 15
-		else:
+	if !hit_data.lethal_hit and "resisted" in hit_data and !guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit:
+#		if "superarmored" in hit_data:
+#			hitstop += 15
+#		else:
 			hitstop += 10
 		
 	if guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit and !"autochain" in hit_data:
@@ -3008,10 +3036,14 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 	var scaled_hitstun := 0
 	if has_trait(Globals.trait.NO_LAUNCH) or hit_data.knockback_strength < LAUNCH_THRESHOLD:
 #		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
-		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
+		if Globals.difficulty == 3:
+			scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN_H[hit_data.adjusted_atk_level - 1] * FMath.S
+		else: scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 	else:
 #		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
-		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
+		if Globals.difficulty == 3:
+			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[hit_data.adjusted_atk_level - 1] * FMath.S
+		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
 		
 	if guardbroken: # start scaling down when over 50% guard gauge
 		var weight = get_guard_gauge_percent_below()
@@ -3309,7 +3341,10 @@ func sequence_launch():
 		hitstun = seq_data.fixed_hitstun
 	else:
 #		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][seq_data.atk_level - 1] * FMath.S
-		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[seq_data.atk_level - 1] * FMath.S
+		var scaled_hitstun: int
+		if Globals.difficulty == 3:
+			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[seq_data.atk_level - 1] * FMath.S
+		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[seq_data.atk_level - 1] * FMath.S
 		var weight = get_guard_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)

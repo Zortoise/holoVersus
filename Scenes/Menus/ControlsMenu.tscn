@@ -1091,14 +1091,13 @@ focus_neighbour_right = NodePath("../../ControlsListR/Block")
 margin_top = 235.0
 margin_right = 408.0
 margin_bottom = 278.0
-focus_neighbour_left = NodePath("../Pause")
+focus_neighbour_right = NodePath("../../ControlsListR/RS_Up")
 
 [node name="Unique" parent="ControlsListL" instance=ExtResource( 9 )]
 margin_top = 282.0
 margin_right = 408.0
 margin_bottom = 325.0
-focus_neighbour_left = NodePath("../Pause")
-focus_neighbour_bottom = NodePath("../../ControlsListBottom/TapJump")
+focus_neighbour_right = NodePath("../../ControlsListR/RS_Down")
 
 [node name="Blank2" type="Label" parent="ControlsListL"]
 margin_top = 329.0
@@ -1110,7 +1109,7 @@ custom_fonts/font = SubResource( 50 )
 margin_top = 350.0
 margin_right = 408.0
 margin_bottom = 393.0
-focus_neighbour_right = NodePath("../Special")
+focus_neighbour_right = NodePath("../../ControlsListR/RS_Left")
 focus_neighbour_bottom = NodePath("../../ControlsListBottom/TapJump")
 
 [node name="ControlsListR" type="VBoxContainer" parent="."]
@@ -1162,29 +1161,26 @@ custom_fonts/font = SubResource( 50 )
 margin_top = 256.0
 margin_right = 408.0
 margin_bottom = 299.0
-focus_neighbour_left = NodePath("../../ControlsListExtra/AddButton")
-focus_neighbour_top = NodePath("../../ControlsListBottom/LoadPreset")
-focus_neighbour_right = NodePath("../Light")
+focus_neighbour_left = NodePath("../../ControlsListL/Special")
 
 [node name="RS_Down" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_top = 303.0
 margin_right = 408.0
 margin_bottom = 346.0
-focus_neighbour_left = NodePath("../../ControlsListExtra/ClearButtons")
-focus_neighbour_right = NodePath("../Fierce")
+focus_neighbour_left = NodePath("../../ControlsListL/Unique")
 
 [node name="RS_Left" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_top = 350.0
 margin_right = 408.0
 margin_bottom = 393.0
-focus_neighbour_left = NodePath("../../ControlsListExtra/RemoveButton")
-focus_neighbour_right = NodePath("../Dash")
+focus_neighbour_left = NodePath("../../ControlsListL/Pause")
 
 [node name="RS_Right" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_top = 397.0
 margin_right = 408.0
 margin_bottom = 440.0
-focus_neighbour_right = NodePath("../Aux")
+focus_neighbour_left = NodePath("../../ControlsListL/Pause")
+focus_neighbour_bottom = NodePath("../../ControlsListBottom/TapJump")
 
 [node name="ControlsListExtra" type="VBoxContainer" parent="."]
 margin_left = 1472.0

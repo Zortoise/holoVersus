@@ -430,7 +430,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 									Character.check_snap_up() and \
 									Character.snap_up(Character.get_node("PlayerCollisionBox"), Character.get_node("DashLandDBox")): # for easy wavedashing on soft platforms
 								# cannot snap up if jump is pressed more than 1 frame ago, to allow easier down dash after fallthrough
-
+								
 								Character.animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
 								input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
 										

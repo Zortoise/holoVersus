@@ -578,7 +578,7 @@ func initial_targeting(): # target random players at start, cannot do in init() 
 
 # for testing only
 func test1():
-	if $HitStopTimer.is_running():
+	if $HitStopTimer.is_running() or $RespawnTimer.is_running():
 		test0()
 	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "old state: " + Globals.char_state_to_string(state) + \
 		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + "\n"
@@ -725,7 +725,7 @@ func simulate(new_input_state):
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
 	
-	if stock_points_left > 0 and !Globals.Game.game_set:
+	if stock_points_left > 0:
 		$RespawnTimer.simulate()
 	
 	if !$RespawnTimer.is_running():
@@ -778,7 +778,7 @@ func simulate2(): # only ran if not in hitstop
 	if !new_state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
 		
-	if Globals.survival_level != null:
+	if Globals.survival_level != null and Globals.difficulty != 3:
 		if Globals.Game.LevelControl.wave_standby_timer > 0:
 			if Globals.Game.LevelControl.wave_standby_timer == 1:
 				current_damage_value = 0
@@ -2940,6 +2940,7 @@ func on_kill():
 		hitcount_record = []
 		ignore_list = []
 		remove_all_status_effects()
+		reset_modulate()
 		reset_jumps()
 		
 		if Globals.survival_level == null:
@@ -3331,7 +3332,9 @@ func check_snap_up():
 		return false
 		
 func snap_up_wave_land_check():
-	if velocity.y <= 0 and check_snap_up() and snap_up($PlayerCollisionBox, $DashLandDBox):
+#	if velocity.y <= 0:
+#		print("A")
+	if !button_jump in input_state.pressed and check_snap_up() and snap_up($PlayerCollisionBox, $DashLandDBox):
 		if dir != 0: # if holding direction, dash towards it
 			if facing != dir:
 				face(dir)
@@ -3952,9 +3955,9 @@ func a_reset_check(move_name):
 					Globals.reset_type.STARTUP_RESET: # can only reset during startup
 						if is_atk_startup():
 							filter = true
-					Globals.reset_type.EARLY_RESET: # can only reset during first 3 frames of active frames
-						if is_atk_active() and Animator.time > 0 and Animator.time <= 3:
-							filter = true
+#					Globals.reset_type.EARLY_RESET: # can only reset during first 3 frames of active frames
+#						if is_atk_active() and Animator.time > 0 and Animator.time <= 3:
+#							filter = true
 					Globals.reset_type.ACTIVE_RESET: # can only reset during active frames
 						if "damage" in move_data:
 							if is_atk_active() and Animator.time > 0:
@@ -4267,11 +4270,13 @@ func query_polygons(): # requested by main game node when doing hit detection
 			polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
 			
 		if polygons_queried.hitbox != null or polygons_queried.hurtbox != null:
-			var sprite_rect = sprite.get_rect()
-			polygons_queried.rect = Rect2(sprite_rect.position + position, sprite_rect.size)
+			polygons_queried.rect = get_sprite_rect()
 
 	return polygons_queried
 	
+func get_sprite_rect():
+	var sprite_rect = sprite.get_rect()
+	return Rect2(sprite_rect.position + position, sprite_rect.size)
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	
@@ -6480,7 +6485,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"FallTransit":
 			animate("Fall")
 		"FastFallTransit":
-			animate("FastFall")
+			if !button_jump in input_state.pressed and is_button_tapped_in_last_X_frames(button_jump, 1) and \
+					check_snap_up(): # do this here instead of _on_SpritePlayer_anim_started()
+				snap_up($PlayerCollisionBox, $DashLandDBox)
+				animate("SoftLanding")
+			else:
+				animate("FastFall")
 		"DodgeTransit":
 			animate("Dodge")
 		"Dodge":

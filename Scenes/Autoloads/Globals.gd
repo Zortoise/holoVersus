@@ -69,9 +69,9 @@ enum block_state {UNBLOCKED, STRONG, WEAK}
 enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK, WAVE_DASH_BLOCK, AIR_DASH_BLOCK, PASSIVE_NORMALARMOR, 
 		PERMA_SUPERARMOR, NO_LAUNCH}
 # PASSIVE_NORMALARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
-enum reset_type {STARTUP_RESET, EARLY_RESET, ACTIVE_RESET}
+enum reset_type {STARTUP_RESET, ACTIVE_RESET}
 # STARTUP_RESET = can only a_reset this Special during startup just like Normals
-# EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special
+## EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special
 # ACTIVE_RESET = can a_reset anytime during active frames of this Special
 
 enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE}
@@ -148,6 +148,7 @@ var training_settings := {
 }
 
 var survival_level = null
+var difficulty := 0
 
 #onready var debugger = load("res://Scenes/Debugger.gd").new()
 

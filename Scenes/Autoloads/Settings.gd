@@ -318,7 +318,7 @@ func load_survival_config():
 		survival_config = ResourceLoader.load("user://survival_config.tres").game_config
 		
 		var valid := true # check if game_config has all needed keys, if not, use default game_config
-		for check in ["level_select", "player_count"]:
+		for check in ["level_select", "player_count", "difficulty"]:
 			if !check in survival_config:
 				valid = false
 		if valid:
@@ -328,6 +328,7 @@ func load_survival_config():
 	return {
 			"level_select" : 0,
 			"player_count" : 0,
+			"difficulty" : 0,
 		}	
 
 

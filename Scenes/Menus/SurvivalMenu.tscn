@@ -5,7 +5,6 @@
 [ext_resource path="res://Assets/UI/cursor.png" type="Texture" id=3]
 [ext_resource path="res://Scenes/Menus/ButtonTypeF.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Scenes/Menus/ButtonTypeC.tscn" type="PackedScene" id=5]
-[ext_resource path="res://Scenes/Menus/ButtonTypeC2.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Scenes/Menus/SurvivalMenu.gd" type="Script" id=7]
 [ext_resource path="res://Scenes/Menus/ButtonTypeB.tscn" type="PackedScene" id=8]
 
@@ -245,6 +244,11 @@ Button/styles/hover = null
 Button/styles/normal = null
 Button/styles/pressed = null
 
+[sub_resource type="DynamicFont" id=39]
+size = 17
+use_filter = true
+font_data = ExtResource( 2 )
+
 [node name="SurvivalMenu" type="Node2D"]
 script = ExtResource( 7 )
 
@@ -310,22 +314,44 @@ theme = SubResource( 29 )
 margin_right = 752.0
 focus_neighbour_top = NodePath("../Return")
 
-[node name="PlayerCount" parent="SurvivalList" instance=ExtResource( 6 )]
+[node name="PlayerCount" parent="SurvivalList" instance=ExtResource( 5 )]
 margin_top = 60.0
 margin_right = 752.0
 margin_bottom = 116.0
 
-[node name="Blank4" type="Label" parent="SurvivalList"]
+[node name="Difficulty" parent="SurvivalList" instance=ExtResource( 5 )]
 margin_top = 120.0
 margin_right = 752.0
-margin_bottom = 170.0
+margin_bottom = 176.0
+
+[node name="Blank4" type="Label" parent="SurvivalList"]
+margin_top = 180.0
+margin_right = 752.0
+margin_bottom = 230.0
+
+[node name="Blank5" type="Label" parent="SurvivalList"]
+margin_top = 234.0
+margin_right = 752.0
+margin_bottom = 284.0
 
 [node name="StartGame" parent="SurvivalList" instance=ExtResource( 4 )]
-margin_top = 174.0
-margin_bottom = 237.0
+margin_top = 288.0
+margin_bottom = 351.0
 
 [node name="Return" parent="SurvivalList" instance=ExtResource( 8 )]
-margin_top = 241.0
-margin_bottom = 297.0
+margin_top = 355.0
+margin_bottom = 411.0
 focus_neighbour_bottom = NodePath("../LevelSelect")
 text = "Return to Main Menu"
+
+[node name="DiffExplain" type="Label" parent="."]
+margin_left = 512.0
+margin_top = 448.0
+margin_right = 1000.0
+margin_bottom = 512.0
+custom_colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 39 )
+text = "Regain 1 Stock after every wave if Stock count is below starting amount"
+align = 1
+autowrap = true

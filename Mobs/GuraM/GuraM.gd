@@ -269,7 +269,6 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"KB_angle" : -45,
-		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		"atk_attr" : [],
 		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
@@ -282,7 +281,6 @@ const MOVE_DATABASE = {
 		"knockback_type": Globals.knockback_type.FIXED,
 		"atk_level" : 4,
 		"KB_angle" : -90,
-		"reset_type" : Globals.reset_type.EARLY_RESET,
 		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
 		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
 		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
@@ -1078,7 +1076,7 @@ func decision(decision_ref = null) -> bool:
 					elif Character.is_passive() and Globals.Game.rng_generate(100) < LONG_RANGE_PASSIVE_CHANCE:
 						Character.start_command("idle")
 					else:
-						if Character.get_target().is_hitstunned_or_sequenced():
+						if Globals.difficulty != 3 and Character.get_target().is_hitstunned_or_sequenced():
 							Character.start_command("idle")
 						else:
 							filter(atk_range.LONG_RANGE)
@@ -1181,6 +1179,8 @@ func decision(decision_ref = null) -> bool:
 
 
 func idle_chance():
+	if Globals.difficulty >= 2:
+		return 0
 	var chance = Character.IDLE_CHANCE[Character.mob_level]
 	var mobs_left = get_tree().get_nodes_in_group("MobNodes").size()
 	if mobs_left == 2:
@@ -1482,7 +1482,10 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 	move_data["atk_attr"] = query_atk_attr(orig_move_name)
 	
 	if "damage" in move_data:
-		move_data.damage = FMath.percent(move_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
+		if Globals.difficulty == 3:
+			move_data.damage = FMath.percent(move_data.damage, Character.MOB_LEVEL_TO_DMG[8])
+		else:
+			move_data.damage = FMath.percent(move_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
 	
 	if Globals.mob_attr.POWER in Character.mob_attr:
 		if "damage" in move_data:
