@@ -32,10 +32,10 @@ const GUARD_GAUGE_CEIL = 10000
 const GUARD_GAUGE_SWELL_RATE = 100 # exact GG gain per frame during hitstun
 const GUARD_GAUGE_DEGEN_AMOUNT = 150 # exact GG degened per frame when GG > 100% out of hitstun
 
-const BETARESET_EX_COST = 5000
+const RESET_EX_COST = 5000
 const BURSTCOUNTER_EX_COST = 10000
 const BURSTESCAPE_GG_COST = 5000
-const ALPHARESET_EX_COST = 5000
+#const ALPHARESET_EX_COST = 5000
 const EX_MOVE_COST = 10000 # 10000
 
 const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blocking
@@ -266,6 +266,7 @@ var first_hit_flag := false # will not swell GG during hitstun of 1st attack tak
 var lethal_flag := false # flag the hitstun as a lethal hit, can only kill during lethal hitstun
 var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
 var enhance_cooldowns := {} # each key contain the cooldown
+var slowed := 0
 
 # controls
 var button_up
@@ -670,8 +671,9 @@ func simulate(new_input_state):
 #			if !Inventory.shop_open:
 #				Globals.Game.card_menu.open_shop()
 	
-			
-
+#			get_target().add_status_effect([Globals.status_effect.SLOWED, 60, 3])
+			Globals.Game.spawn_field(player_ID, "SlowBubbleE", position, {}, null, UniqChar.NAME)
+			Globals.Game.spawn_SFX("SlowBubbleTop", "SlowBubbleTop", position, {"field": true})
 	
 			pass
 
@@ -720,6 +722,12 @@ func simulate(new_input_state):
 	
 	
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
+		return
+		
+	var slow_amount = query_status_effect_aux(Globals.status_effect.SLOWED)
+	if slow_amount != null: slowed = slow_amount
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0:
+		buffer_actions()
 		return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
@@ -847,11 +855,11 @@ func simulate2(): # only ran if not in hitstop
 		if !Globals.Game.input_lock and current_ex_gauge < MAX_EX_GAUGE and state != Globals.char_state.DEAD:
 			var ex_change := BASE_EX_REGEN * FMath.S
 			if is_hitstunned():
-				ex_change = FMath.percent(ex_change, HITSTUN_EX_REGEN_MOD)
+				ex_change = FMath.percent(ex_change, get_stat("HITSTUN_EX_REGEN_MOD"))
 			else:
 				match chain_combo:
 					Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL: # landed an attack on opponent
-						ex_change = FMath.percent(ex_change, LANDED_EX_REGEN_MOD)
+						ex_change = FMath.percent(ex_change, get_stat("LANDED_EX_REGEN_MOD"))
 					Globals.chain_combo.WEAKBLOCKED, Globals.chain_combo.STRONGBLOCKED: # landed an attack on blocking opponent
 						ex_change = FMath.percent(ex_change, BLOCKED_EX_REGEN_MOD)
 					_:
@@ -872,7 +880,6 @@ func simulate2(): # only ran if not in hitstop
 						change_ex_gauge(ex_change)
 				else:
 					ex_change = FMath.percent(ex_change, 60) # EX Gain for survival mode
-					ex_change = FMath.percent(ex_change, Inventory.modifier(player_ID, Cards.effect_ref.LANDED_EX_REGEN))
 					change_ex_gauge(FMath.round_and_descale(ex_change))
 			else:
 				change_ex_gauge(FMath.round_and_descale(ex_change))
@@ -1248,8 +1255,6 @@ func simulate2(): # only ran if not in hitstop
 					animate("aBlockStartup")
 					$VarJumpTimer.stop()
 				Globals.char_state.AIR_C_RECOVERY:
-					if Animator.query(["AResetCRec"]): # cannot block out of Alpha Reset
-						continue
 					if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
 						if has_trait(Globals.trait.AIR_DASH_BLOCK): # only heavyweights can block out of air dashes
 							animate("aBlockStartup")
@@ -1684,11 +1689,15 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
 		hitstop = null
 		return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0:
+		$HitStopTimer.stop()
+		return
+	slowed = 0
 	
 	capture_and_process_instant_actions() # can do instant actions during hitstop, but not screenfreeze
 	
 	if !$RespawnTimer.is_running():
-	
+
 		process_status_effects_visual()
 		flashes()
 		
@@ -1888,7 +1897,7 @@ func capture_combinations():
 	# instant air dash, place at back
 	combination(button_jump, button_dash, "InstaAirDash")
 	combination(button_aux, button_dash, "Dodge")
-	combination(button_block, button_dash, "Reset")
+	combination(button_block, button_dash, "SDash")
 	
 	if !button_unique in input_state.pressed: # this allows you to use Unique + Aux command when blocking without doing a Burst
 		combination(button_block, button_aux, "Burst")
@@ -2374,19 +2383,19 @@ func process_input_buffer():
 #									has_acted[0] = true
 #									keep = false
 									
-			"Reset":
+			"SDash":
 				if is_attacking(): # new state must not be standby
 					match state:
-						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP, \
-								Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
-								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
-								var move_name = get_move_name()
-								if a_reset_check(move_name):
-									animate("AReset")
-									has_acted[0] = true
-									keep = false
-								else:
-									continue
+#						Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP, \
+#								Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY, \
+#								Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
+#								var move_name = get_move_name()
+#								if a_reset_check(move_name):
+#									animate("AReset")
+#									has_acted[0] = true
+#									keep = false
+#								else:
+#									continue
 						Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE, \
 								Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY:
 							if test_sdash_cancel():
@@ -2583,10 +2592,8 @@ func state_detect(anim):
 		"BurstCRec":
 			return Globals.char_state.AIR_C_RECOVERY
 			
-		"AReset", "SDash":
+		"SDash":
 			return Globals.char_state.AIR_RECOVERY
-		"AResetCRec":
-			return Globals.char_state.AIR_C_RECOVERY
 		"SDashTransit":
 			return Globals.char_state.AIR_STARTUP
 			
@@ -2741,7 +2748,12 @@ func get_stat(stat: String) -> int:
 #				to_return = int(max(to_return, 0))
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CHIP_DMG):
 					to_return = 0
-
+					
+			"LANDED_EX_REGEN_MOD":
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.LANDED_EX_REGEN))
+			"HITSTUN_EX_REGEN_MOD":
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.HITSTUN_EX_REGEN))
+				
 	return to_return
 	
 				
@@ -3126,7 +3138,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("BlockRec")
 				UniqChar.landing_sound()
 				
-			elif Animator.query_to_play(["DodgeTransit", "Dodge", "DodgeRec", "AReset", "SDash"]) or \
+			elif Animator.query_to_play(["DodgeTransit", "Dodge", "DodgeRec", "SDash"]) or \
 					Animator.to_play_animation.begins_with("Burst"): # no landing
 				pass
 				
@@ -3928,50 +3940,50 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 #	return true
 	
 	
-func a_reset_check(move_name):
-	
-	var move_data = UniqChar.query_move_data(move_name)
-	var cost = ALPHARESET_EX_COST
-	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
-		cost = 0
-		
-	if !chain_combo in [Globals.chain_combo.RESET]: # can only be used on whiff
-		return false
-		
-	if current_ex_gauge < cost:
-		return false # not enough EX Gauge to use it
-		
-	var filter := false
-		
-	match move_data.atk_type:
-		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
-			if is_atk_startup():
-				filter = true
-		Globals.atk_type.SPECIAL:
-			if !"reset_type" in move_data: # cannot reset
-				filter = false
-			else:
-				match move_data.reset_type:
-					Globals.reset_type.STARTUP_RESET: # can only reset during startup
-						if is_atk_startup():
-							filter = true
-#					Globals.reset_type.EARLY_RESET: # can only reset during first 3 frames of active frames
-#						if is_atk_active() and Animator.time > 0 and Animator.time <= 3:
+#func a_reset_check(move_name):
+#
+#	var move_data = UniqChar.query_move_data(move_name)
+#	var cost = ALPHARESET_EX_COST
+#	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
+#		cost = 0
+#
+#	if !chain_combo in [Globals.chain_combo.RESET]: # can only be used on whiff
+#		return false
+#
+#	if current_ex_gauge < cost:
+#		return false # not enough EX Gauge to use it
+#
+#	var filter := false
+#
+#	match move_data.atk_type:
+#		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
+#			if is_atk_startup():
+#				filter = true
+#		Globals.atk_type.SPECIAL:
+#			if !"reset_type" in move_data: # cannot reset
+#				filter = false
+#			else:
+#				match move_data.reset_type:
+#					Globals.reset_type.STARTUP_RESET: # can only reset during startup
+#						if is_atk_startup():
 #							filter = true
-					Globals.reset_type.ACTIVE_RESET: # can only reset during active frames
-						if "damage" in move_data:
-							if is_atk_active() and Animator.time > 0:
-								filter = true
-						else: # for non-attacks, can only reset during active frames if targeted opponent not in hit
-							if is_atk_active() and Animator.time > 1: # not on frame 1
-								if !get_target().get_node("HitStunTimer").is_running():
-									filter = true
-
-	if filter == false: return false
-			
-	change_ex_gauge(-cost)
-	afterimage_cancel()
-	return true
+##					Globals.reset_type.EARLY_RESET: # can only reset during first 3 frames of active frames
+##						if is_atk_active() and Animator.time > 0 and Animator.time <= 3:
+##							filter = true
+#					Globals.reset_type.ACTIVE_RESET: # can only reset during active frames
+#						if "damage" in move_data:
+#							if is_atk_active() and Animator.time > 0:
+#								filter = true
+#						else: # for non-attacks, can only reset during active frames if targeted opponent not in hit
+#							if is_atk_active() and Animator.time > 1: # not on frame 1
+#								if !get_target().get_node("HitStunTimer").is_running():
+#									filter = true
+#
+#	if filter == false: return false
+#
+#	change_ex_gauge(-cost)
+#	afterimage_cancel()
+#	return true
 
 	
 func test_jump_cancel():
@@ -4017,37 +4029,90 @@ func test_dodge_cancel():
 	
 func test_sdash_cancel():
 	
-	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL]:
-		return false # can only s_dash cancel on Normal hit/Special hit
+#	if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY, Globals.chain_combo.SPECIAL]:
+#		return false # can only s_dash cancel on Normal hit/Special hit
 	
 	var move_name = get_move_name()
-	if Globals.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name):
+	var move_data = UniqChar.query_move_data(move_name)
+	
+	if Globals.atk_attr.NO_REC_CANCEL in move_data.atk_attr:
 		return false
 		
-	if is_normal_attack(move_name): # normal attacks can be sdashed on recovery on hit
-		if !grounded and super_dash == 0: return false
-		if is_atk_active(): #  some normals can be sdashed on active frames, but only with active_cancel == true
-			if !active_cancel:
+	match move_data.atk_type:
+		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
+			if !chain_combo in [Globals.chain_combo.NORMAL, Globals.chain_combo.HEAVY]:
+				return false # can only s_dash cancel on Normal/Heavy hit
+				
+			if !grounded and super_dash == 0: return false
+			if is_atk_active():
+				if !active_cancel:
+					return false
+					
+		Globals.atk_type.SPECIAL:
+			if !is_atk_active():
 				return false
 				
-	elif is_atk_active() and is_non_EX_special_move(move_name):
-		var cost = BETARESET_EX_COST
-		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
-			cost = 0
+			var can_reset_on_whiff := false
+			if Globals.atk_attr.WHIFF_SDASH_CANCEL in move_data.atk_attr: # some attacks/projectiles can be sdashed on whiff
+				if Animator.time > 1: # not on frame 1
+					can_reset_on_whiff = true
+			elif !"damage" in move_data:
+				if Animator.time > 1: # for non-attacks, can only sdash cancel if opponent is in hitstun
+					if get_target().get_node("HitStunTimer").is_running():
+						can_reset_on_whiff = true
+#			else:
+#				if Globals.atk_attr.WHIFF_SDASH_CANCEL in move_data.atk_attr:
+#					can_reset_on_whiff = true
 			
-		if current_ex_gauge < cost:
+			if !chain_combo in [Globals.chain_combo.SPECIAL]:
+				if chain_combo in [Globals.chain_combo.RESET] and can_reset_on_whiff:
+					pass # some attacks can s_dash cancel on whiffed hits
+				else:
+					return false # can only s_dash cancel on SPECIAL hit
+				
+			var cost = RESET_EX_COST
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
+				cost = 0
+				
+			if current_ex_gauge < cost:
+				return false
+			change_ex_gauge(-cost)
+			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+			Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+					"v_mirror":Globals.Game.rng_bool(), "sticky_ID":player_ID}, "blue")
+			modulate_play("blue_reset")
+			
+				
+		_:
 			return false
-		change_ex_gauge(-cost)
-		
-		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
-		Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool(), "sticky_ID":player_ID}, "blue")
-		modulate_play("blue_reset")
-	else:
-		return false	
-	
+			
 	afterimage_cancel()
 	return true
+		
+#	if is_normal_attack(move_name): # normal attacks can be sdashed on recovery on hit
+#		if !grounded and super_dash == 0: return false
+#		if is_atk_active(): #  some normals can be sdashed on active frames, but only with active_cancel == true
+#			if !active_cancel:
+#				return false
+#
+#	elif is_atk_active() and is_non_EX_special_move(move_name):
+#		var cost = RESET_EX_COST
+#		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
+#			cost = 0
+#
+#		if current_ex_gauge < cost:
+#			return false
+#		change_ex_gauge(-cost)
+#
+#		play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+#		Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+#				"v_mirror":Globals.Game.rng_bool(), "sticky_ID":player_ID}, "blue")
+#		modulate_play("blue_reset")
+#	else:
+#		return false	
+#
+#	afterimage_cancel()
+#	return true
 
 	
 func test_fastfall_cancel():
@@ -4234,9 +4299,13 @@ func timed_status():
 			
 			Globals.status_effect.POISON:
 				if posmod(status_effect[1], 30) == 1:
-					var damage = status_effect[2] # WIP
-					take_damage(damage)
-					Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+					take_DOT(status_effect[2])
+					
+func take_DOT(amount):
+	var damage = int(min(amount, get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value - 1))
+	if damage > 0:
+		take_damage(damage)
+		Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
 					
 	
 # HIT DETECTION AND PROCESSING ---------------------------------------------------------------------------------------------------
@@ -6565,10 +6634,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 #		"BurstCRec":
 #			animate("FallTransit")
 			
-		"AReset":
-			animate("AResetCRec")
-		"AResetCRec":
-			animate("FallTransit")
 		"SDashTransit":
 			animate("SDash")
 		"SDash":
@@ -6871,16 +6936,16 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"BurstCRec":
 			anim_gravity_mod = 0
 			
-		"AReset":
-			anim_gravity_mod = 0
-			anim_friction_mod = 0
-			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
-			Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool()}, "pink")
-			modulate_play("pink_reset")
-		"AResetCRec":
-			anim_gravity_mod = 0
-			anim_friction_mod = 0
+#		"AReset":
+#			anim_gravity_mod = 0
+#			anim_friction_mod = 0
+#			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+#			Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+#				"v_mirror":Globals.Game.rng_bool()}, "pink")
+#			modulate_play("pink_reset")
+#		"AResetCRec":
+#			anim_gravity_mod = 0
+#			anim_friction_mod = 0
 		"SDashTransit":
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
@@ -7061,6 +7126,7 @@ func save_state():
 		"GG_swell_flag" : GG_swell_flag,
 		"lethal_flag" : lethal_flag,
 		"from_move_rec" : from_move_rec,
+		"slowed" : slowed,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -7151,6 +7217,7 @@ func load_state(state_data):
 	GG_swell_flag = state_data.GG_swell_flag
 	lethal_flag = state_data.lethal_flag
 	from_move_rec = state_data.from_move_rec
+	slowed = state_data.slowed
 	if Globals.survival_level != null:
 		enhance_cooldowns = state_data.enhance_cooldowns
 	

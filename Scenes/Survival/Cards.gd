@@ -3,7 +3,7 @@ extends Node
 enum type {PERCENT, LINEAR, QUIRK}
 
 enum effect_ref {
-		STOCK, HP, COMBO_LEVEL, LANDED_EX_REGEN, PASSIVE_EX_REGEN,
+		STOCK, HP, COMBO_LEVEL, LANDED_EX_REGEN, PASSIVE_EX_REGEN, HITSTUN_EX_REGEN
 		SPEED, FRICTION, JUMP_SPEED, GRAVITY_MOD, MAX_AIR_JUMP, MAX_AIR_DASH, MAX_AIR_DODGE, MAX_SUPER_DASH, 
 		GROUND_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_SPEED,
 		GUARD_DRAIN_MOD,
@@ -41,6 +41,10 @@ const DESCRIBE = {
 	effect_ref.PASSIVE_EX_REGEN : {
 		"type" : type.LINEAR,
 		"suffix" :"Passive EX Gain",
+	},
+	effect_ref.HITSTUN_EX_REGEN : {
+		"type" : type.PERCENT,
+		"suffix" :"EX Gain when Atked",
 	},
 	
 	effect_ref.FRICTION : {
@@ -391,6 +395,7 @@ const DATABASE = {
 		effect_ref.COIN_GAIN : 2,
 		effect_ref.HITSTUN_TAKEN : -30,
 		effect_ref.HEAVY_DMG_MOD : 50,
+		effect_ref.HITSTUN_EX_REGEN: 150,
 	},
 	card_ref.AQUA : {
 		"name" : "Aqua",

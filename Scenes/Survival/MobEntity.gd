@@ -30,6 +30,7 @@ var ignore_list = [] # some moves has ignore_time, after hitting will ignore tha
 var unique_data = {} # data unique for the entity, stored as a dictionary
 var entity_ID := 0
 var birth_time := 0
+var slowed := 0
 
 # not saved
 var hitstop = null
@@ -153,6 +154,7 @@ func simulate():
 	
 	if free: return
 	if Globals.Game.is_stage_paused(): return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -299,6 +301,10 @@ func interactions():
 func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
 	if free: return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0:
+		$HitStopTimer.stop()
+		return
+	slowed = 0
 	
 	if !$HitStopTimer.is_running():
 		$SpritePlayer.simulate()
@@ -609,6 +615,7 @@ func save_state():
 		"unique_data" : unique_data,
 		"entity_ID" : entity_ID,
 		"birth_time" : birth_time,
+		"slowed" : slowed,
 		
 		"HitStopTimer_time" : $HitStopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
@@ -631,6 +638,7 @@ func load_state(state_data):
 	palette_ref = state_data.palette_ref
 	entity_ID = state_data.entity_ID
 	birth_time = state_data.birth_time
+	slowed = state_data.slowed
 	load_entity()
 
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)

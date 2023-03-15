@@ -9,6 +9,8 @@ script = ExtResource( 1 )
 
 [node name="Stage" type="Node2D" parent="."]
 
+[node name="Fields" type="Node2D" parent="."]
+
 [node name="EntitiesBack" type="Node2D" parent="."]
 
 [node name="SFXBack" type="Node2D" parent="."]

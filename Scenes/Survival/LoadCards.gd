@@ -43,6 +43,16 @@ var card_entity_data = {
 		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Scythe.tres"),
 		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/ScytheSprite.png"),
 	},
+	"SlowBubbleE" : {
+		"scene" : load("res://Cards/SlowBubbleE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/SlowBubble.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/SlowBubbleSprite.png"),
+	},
+	"VortexE" : {
+		"scene" : load("res://Cards/VortexE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Vortex.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/VortexSprite.png"),
+	},
 }
 
 var card_sfx = {
@@ -53,7 +63,11 @@ var card_sfx = {
 	"BigSplash" : {
 		"frame_data" : ResourceLoader.load("res://Characters/Gura/SFX/FrameData/BigSplash.tres"),
 		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/BigSplashSprite.png"),
-	}
+	},
+	"SlowBubbleTop" : {
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/SlowBubbleTop.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/SlowBubbleTopSprite.png"),
+	},
 }
 
 var card_audio = {

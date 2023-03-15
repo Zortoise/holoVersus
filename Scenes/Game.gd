@@ -696,6 +696,12 @@ func simulate(rendering = true):
 
 	# activate player's physics
 
+	for field in $Fields.get_children():
+		if field.free:
+			field.free()
+		else:
+			field.simulate()
+
 	for player in $Players.get_children():
 		if "free" in player and player.free:
 			player.free() # remove killed mobs
@@ -838,6 +844,7 @@ func save_state(timestamp):
 		"mob_entities_data" : [],
 		"pickups_data" : [],
 		"damage_numbers_data" : [],
+		"fields_data" : [],
 #		"audio_data" : [],
 		"stage_data" : {},
 		"screenfreeze" : null,
@@ -882,6 +889,9 @@ func save_state(timestamp):
 		
 	for pickup in $PickUps.get_children():
 		game_state.pickups_data.append(pickup.save_state())
+		
+	for field in $Fields.get_children():
+		game_state.fields_data.append(field.save_state())
 		
 	for number in $DamageNumbers.get_children():
 		game_state.damage_numbers_data.append(number.save_state())
@@ -968,6 +978,8 @@ func load_state(game_state, loading_autosave = true):
 		SFX.free()
 	for pickup in $PickUps.get_children():
 		pickup.free()
+	for field in $Fields.get_children():
+		field.free()
 	for number in $DamageNumbers.get_children():
 		number.free()
 #	for AudioManager in $AudioPlayers.get_children():
@@ -1009,6 +1021,11 @@ func load_state(game_state, loading_autosave = true):
 		var new_pickup = LevelControl.loaded_pickup_scene.instance()
 		$PickUps.add_child(new_pickup)
 		new_pickup.load_state(state_data)
+		
+	for state_data in loaded_game_state.fields_data:
+		var new_field = Loader.loaded_field_scene.instance()
+		$Fields.add_child(new_field)
+		new_field.load_state(state_data)
 		
 	for state_data in loaded_game_state.damage_numbers_data:
 		var new_number = Loader.loaded_dmg_num_scene.instance()
@@ -1455,7 +1472,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 		return false # defender's semi-invul failed
 				
 	if defender.check_semi_invuln():
-		if "chain_combo" in attacker_or_entity: # prevent Alpha Reset on iframed attack
+		if "chain_combo" in attacker_or_entity: # prevent chaining on iframed attack
 			attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
 		defender.success_dodge = true
 		return true # defender's semi-invul succeeded
@@ -2031,6 +2048,11 @@ func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Di
 	entity.init(master_ID, entity_ref, out_position, aux_data, palette_ref, master_ref)
 	return entity
 	
+func spawn_field(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):
+	var field = Loader.loaded_field_scene.instance()
+	$Fields.add_child(field)
+	field.init(master_ID, entity_ref, out_position, aux_data, palette_ref, master_ref)
+	return field
 
 # aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
 func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):

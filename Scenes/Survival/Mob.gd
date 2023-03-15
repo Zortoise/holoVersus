@@ -172,6 +172,7 @@ var combo_level := 0 # set when mob_break according to atk_level, determine Guar
 #var proj_only_combo := false # set to true when mob_break via projectile, false if hit with physical attack during combo, increase armor time
 var no_jump_chance := 0 # chance of removing all jumps from decision, increased if hit in air, decreased when hit on ground
 var can_impulse := true # set to false when starting a MOVEMENT RECOVERY, set to true otherwise
+var slowed := 0
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -438,6 +439,10 @@ func simulate(_new_input_state):
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
 	if free: return
+	
+	var slow_amount = query_status_effect_aux(Globals.status_effect.SLOWED)
+	if slow_amount != null: slowed = slow_amount
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -816,6 +821,10 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		hitstop = null
 		return
 	if free: return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0:
+		$HitStopTimer.stop()
+		return
+	slowed = 0
 	
 	
 	process_status_effects_visual()
@@ -1959,17 +1968,17 @@ func timed_status():
 			
 			Globals.status_effect.POISON:
 				if posmod(status_effect[1], 30) == 1:
-					var damage = int(min(status_effect[2], get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value - 1))
-					if damage > 0:
-						take_damage(damage)
-						Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+					take_DOT(status_effect[2])
 						
 			Globals.status_effect.IGNITE:
 				if posmod(status_effect[1], 30) == 15:
-					var damage = int(min(status_effect[2], get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value - 1))
-					if damage > 0:
-						take_damage(damage)
-						Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+					take_DOT(status_effect[2])
+						
+func take_DOT(amount):
+	var damage = int(min(amount, get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value - 1))
+	if damage > 0:
+		take_damage(damage)
+		Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
 	
 # HIT DETECTION AND PROCESSING ---------------------------------------------------------------------------------------------------
 
@@ -3703,6 +3712,7 @@ func save_state():
 #		"proj_only_combo" : proj_only_combo,
 		"no_jump_chance" : no_jump_chance,
 		"can_impulse" : can_impulse,
+		"slowed" : slowed,
 		
 	}
 
@@ -3792,6 +3802,7 @@ func load_state(state_data):
 #	proj_only_combo = state_data.proj_only_combo
 	no_jump_chance = state_data.no_jump_chance
 	can_impulse = state_data.can_impulse
+	slowed = state_data.slowed
 
 	
 #--------------------------------------------------------------------------------------------------

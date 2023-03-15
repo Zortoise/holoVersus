@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 360,
+"hframes": 1,
+"loop": false,
+"spritesheet": "VortexSprite",
+"timestamps": {
+0: {
+"frame": 0
+}
+},
+"vframes": 1
+}
+}

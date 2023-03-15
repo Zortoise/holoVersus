@@ -1,0 +1,53 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 360,
+"hframes": 1,
+"loop": false,
+"spritesheet": "SlowBubbleSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+30: {
+"frame": 0
+},
+60: {
+"frame": 0
+},
+90: {
+"frame": 0
+},
+120: {
+"frame": 0
+},
+150: {
+"frame": 0
+},
+180: {
+"frame": 0
+},
+210: {
+"frame": 0
+},
+240: {
+"frame": 0
+},
+270: {
+"frame": 0
+},
+300: {
+"frame": 0
+},
+330: {
+"frame": 0
+}
+},
+"vframes": 1
+}
+}

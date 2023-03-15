@@ -22,6 +22,7 @@ var lifetime := 0
 var lifespan = null
 var stasis := false # if true, no movement and gravity
 var ground_bounce_limit := 2 # can only bounce once on ground
+var slowed := 0
 
 
 func init(in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan = null, in_palette_ref = null):
@@ -117,6 +118,7 @@ func load_entity():
 func simulate():
 	
 	if Globals.Game.is_stage_paused(): return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
 	
 	UniqEntity.simulate()
 	
@@ -194,6 +196,8 @@ func pickup():
 	
 func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	slowed = 0
 	
 	$SpritePlayer.simulate()
 	
@@ -298,6 +302,7 @@ func save_state():
 		
 		"ground_bounce_limit" : ground_bounce_limit,
 		"stasis" : stasis,
+		"slowed" : slowed,
 	}
 	return state_data
 
@@ -322,6 +327,7 @@ func load_state(state_data):
 	
 	ground_bounce_limit = state_data.ground_bounce_limit
 	stasis = state_data.stasis
+	slowed = state_data.slowed
 
 		
 #--------------------------------------------------------------------------------------------------

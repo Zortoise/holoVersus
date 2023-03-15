@@ -6,6 +6,8 @@ extends Node2D
 # soft_platform_dbox is needed to phase through soft platforms
 func move(collision_box, soft_platform_dbox, ledge_stop = false): # uses the object's velocity
 	
+	if get("velocity").x == 0 and get("velocity").y == 0: return [false, false, false]
+	
 	call("move_true_position", get("velocity")) # first, move the true position
 	var target_position: Vector2 = call("get_rounded_position")  # then get the new target position derived from the true position
 	
@@ -164,6 +166,9 @@ func not_in_sequence(collision_box): # when object is in sequence, will not be k
 	
 	
 func move_no_collision():
+	
+	if get("velocity").x == 0 and get("velocity").y == 0: return
+	
 	call("move_true_position", get("velocity")) # first, move the true position
 	position = call("get_rounded_position")  # then get the new target position derived from the true position
 	

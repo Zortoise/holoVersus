@@ -3,6 +3,8 @@ extends Node2D
 #var master_node = null # not saved, set when loading state
 
 var free := false
+var slowed := 0
+var field := false # if true, not affected by fields
 
 var master_ref = null
 var sfx_ref
@@ -45,6 +47,8 @@ func init(in_anim: String, in_sfx_ref: String, in_position: Vector2, aux_data: D
 #		else:
 		sticky_ID = aux_data.sticky_ID
 		sticky_offset = in_position - Globals.Game.get_player_node(sticky_ID).position
+	if "field" in aux_data:
+		field = true
 		
 	if palette_ref != null:
 		palette()
@@ -108,6 +112,8 @@ func simulate():
 			free = true
 		
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	slowed = 0
 	
 	$SpritePlayer.simulate()
 
@@ -132,6 +138,8 @@ func save_state():
 		"ignore_freeze" : ignore_freeze,
 		"sticky_ID" : sticky_ID,
 		"sticky_offset" : sticky_offset,
+		"slowed" : slowed,
+		"field" : field,
 	}
 	return state_data
 	
@@ -152,6 +160,8 @@ func load_state(state_data):
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	free = state_data.free
 	ignore_freeze = state_data.ignore_freeze
+	slowed = state_data.slowed
+	field = state_data.field
 	
 	sticky_ID = state_data.sticky_ID
 	sticky_offset = state_data.sticky_offset

@@ -21,7 +21,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
 		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
 		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
-		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB, GRAB_INVULN_STARTUP}
+		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB, GRAB_INVULN_STARTUP, WHIFF_SDASH_CANCEL}
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
@@ -61,15 +61,16 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # NO_SS_ATK_LVL_BOOST = no sweetspot boost in atk level, for sweetspot hitgrabs
 # QUICK_GRAB = command grab that fails if target is in movement STARTUP
 # GRAB_INVULN_STARTUP = immune to command grabs during startup, for slower command grabs
+# WHIFF_SDASH_CANCEL = can s_dash cancel on whiff
 
-enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, GRAVITIZE, ENFEEBLE}
+enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, GRAVITIZE, ENFEEBLE, SLOWED}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, STRONG, WEAK}
 enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK, WAVE_DASH_BLOCK, AIR_DASH_BLOCK, PASSIVE_NORMALARMOR, 
 		PERMA_SUPERARMOR, NO_LAUNCH}
 # PASSIVE_NORMALARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
-enum reset_type {STARTUP_RESET, ACTIVE_RESET}
+#enum reset_type {STARTUP_RESET, ACTIVE_RESET}
 # STARTUP_RESET = can only a_reset this Special during startup just like Normals
 ## EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special
 # ACTIVE_RESET = can a_reset anytime during active frames of this Special
@@ -82,6 +83,7 @@ enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, 
 		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, PASSIVE_ARMOR}
 enum peak_flag {GROUNDED, JUMPING, PEAK, PEAK_SPENT} # for mob AI command
 enum strafe_style {NONE, TOWARDS, AWAY, AWAY_ON_DESCEND}
+enum field_target {ALL_BUT_PLAYERS, ALL_MOBS, ALL, ALL_BUT_MASTER, ALL_CHAR, ALL_CHAR_BUT_MASTER, ALL_PROJ, ALL_PROJ_BUT_MASTER}
 
 enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
 		P1_UNIQUE, P1_PAUSE, P1_RS_LEFT, P1_RS_RIGHT, P1_RS_UP, P1_RS_DOWN

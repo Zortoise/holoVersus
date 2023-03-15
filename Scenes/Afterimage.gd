@@ -17,6 +17,7 @@ var spritesheet_ref: String
 var palette_ref = null
 var afterimage_shader = Globals.afterimage_shader.MASTER
 var ignore_freeze := false
+var slowed := 0
 
 
 func init(in_original_ID : int, in_is_entity: bool, in_master_ref: String, in_spritesheet_ref: String, sprite_node_path: NodePath, in_palette_ref, \
@@ -120,6 +121,8 @@ func apply_shader():
 
 func simulate():
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
+	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	slowed = 0
 	
 	if is_entity:
 		var entity_node = Globals.Game.get_entity_node(original_ID)
@@ -160,7 +163,8 @@ func save_state():
 		"starting_modulate_a" : starting_modulate_a,
 		"free" : free,
 		"position" : position,
-		"ignore_freeze" : ignore_freeze
+		"ignore_freeze" : ignore_freeze,
+		"slowed" : slowed,
 	}
 	return state_data
 	
@@ -197,5 +201,6 @@ func load_state(state_data):
 
 	$Sprite.modulate.a = lerp(starting_modulate_a, 0.0, 1.0 - life/lifetime)
 	ignore_freeze = state_data.ignore_freeze
+	slowed = state_data.slowed
 	
 #--------------------------------------------------------------------------------------------------
