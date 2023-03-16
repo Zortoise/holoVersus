@@ -6,45 +6,45 @@
 script = ExtResource( 1 )
 frame_data = {
 "Kill": {
-"duration": 360,
+"duration": 240,
 "hframes": 1,
 "loop": false,
-"spritesheet": "SlowBubbleSprite",
+"spritesheet": "TimeBubbleSprite",
 "timestamps": {
 0: {
 "frame": 0
 },
-30: {
+20: {
+"frame": 0
+},
+40: {
 "frame": 0
 },
 60: {
 "frame": 0
 },
-90: {
+80: {
+"frame": 0
+},
+100: {
 "frame": 0
 },
 120: {
 "frame": 0
 },
-150: {
+140: {
+"frame": 0
+},
+160: {
 "frame": 0
 },
 180: {
 "frame": 0
 },
-210: {
+200: {
 "frame": 0
 },
-240: {
-"frame": 0
-},
-270: {
-"frame": 0
-},
-300: {
-"frame": 0
-},
-330: {
+220: {
 "frame": 0
 }
 },

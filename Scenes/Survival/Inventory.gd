@@ -87,7 +87,7 @@ func sell_card(player_ID: int, index: int):
 
 
 func get_price(card_ref) -> int:
-	var mod: int = 100 + (Globals.Game.LevelControl.wave_ID - 2) * 10
+	var mod: int = 100 + (Globals.Game.LevelControl.wave_ID - 2) * Globals.Game.LevelControl.UniqLevel.PRICE_SCALING
 	return FMath.percent(Cards.DATABASE[card_ref].price, mod)
 	
 

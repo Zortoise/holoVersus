@@ -3,7 +3,7 @@ extends Node2D
 
 const TRAITS = []
 
-const TARGETS = Globals.field_target.ALL_MOBS
+const TARGETS = [Em.field_target.MOBS]
 const RADIUS = 64
 #const RECT_SIZE = Vector2[64, 64]
 

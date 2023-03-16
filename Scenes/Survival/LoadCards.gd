@@ -43,10 +43,10 @@ var card_entity_data = {
 		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Scythe.tres"),
 		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/ScytheSprite.png"),
 	},
-	"SlowBubbleE" : {
-		"scene" : load("res://Cards/SlowBubbleE.tscn"),
-		"frame_data" : ResourceLoader.load("res://Cards/FrameData/SlowBubble.tres"),
-		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/SlowBubbleSprite.png"),
+	"TimeBubbleE" : {
+		"scene" : load("res://Cards/TimeBubbleE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/TimeBubble.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TimeBubbleSprite.png"),
 	},
 	"VortexE" : {
 		"scene" : load("res://Cards/VortexE.tscn"),
@@ -64,9 +64,9 @@ var card_sfx = {
 		"frame_data" : ResourceLoader.load("res://Characters/Gura/SFX/FrameData/BigSplash.tres"),
 		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/BigSplashSprite.png"),
 	},
-	"SlowBubbleTop" : {
-		"frame_data" : ResourceLoader.load("res://Cards/FrameData/SlowBubbleTop.tres"),
-		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/SlowBubbleTopSprite.png"),
+	"TimeBubbleTop" : {
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/TimeBubbleTop.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TimeBubbleTopSprite.png"),
 	},
 }
 

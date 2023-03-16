@@ -12,19 +12,19 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Active" : {
-		"root" : "KerisE",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 1,
-		"damage" : 25,
-		"knockback" : 300 * FMath.S,
-		"knockback_type": Globals.knockback_type.VELOCITY,
-		"atk_level" : 2,
-		"KB_angle" : 0,
-		"hitspark_type" : Globals.hitspark_type.SLASH,
-		"hitspark_palette" : "yellow",
-		"proj_level" : 1,
-		"atk_attr" : [Globals.atk_attr.REPEATABLE],
-		"hit_sound" : { ref = "cut6", aux_data = {"vol" : -10} },
+		Em.move.ROOT : "KerisE",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 25,
+		Em.move.KB : 300 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.VELOCITY,
+		Em.move.ATK_LVL : 2,
+		Em.move.KB_ANGLE : 0,
+		Em.move.HITSPARK_TYPE : Em.hitspark_type.SLASH,
+		Em.move.HITSPARK_PALETTE : "yellow",
+		Em.move.PROJ_LVL : 1,
+		Em.move.ATK_ATTR : [Em.atk_attr.REPEATABLE],
+		Em.move.HIT_SOUND : { ref = "cut6", aux_data = {"vol" : -10} },
 	},
 }
 
@@ -54,8 +54,8 @@ func query_move_data(move_name) -> Dictionary:
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	
-	if Globals.survival_level != null and "damage" in move_data:
-		move_data.damage = FMath.percent(move_data.damage, Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
+	if Globals.survival_level != null and Em.move.DMG in move_data:
+		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
 	
 	return move_data
 		
@@ -64,11 +64,19 @@ func query_atk_attr(move_name):
 	
 	move_name = refine_move_name(move_name)
 
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 		
 #	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
+	
+func get_proj_level(move_name):
+	move_name = refine_move_name(move_name)
+
+	if move_name in MOVE_DATABASE and Em.move.PROJ_LVL in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.PROJ_LVL]
+	
+	return 1
 
 			
 func simulate():

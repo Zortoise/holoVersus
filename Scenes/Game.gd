@@ -488,7 +488,7 @@ func _process(delta):
 		
 		for player in $Players.get_children():
 			var valid := true
-			if player.state == Globals.char_state.DEAD:
+			if player.state == Em.char_state.DEAD:
 				if player.stock_points_left > 0:
 					var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
 					if time_diff > 30 or time_diff < 0:
@@ -502,7 +502,7 @@ func _process(delta):
 		var player_1 = get_player_node(0)
 		
 		var p1_valid := true
-		if player_1.state == Globals.char_state.DEAD:
+		if player_1.state == Em.char_state.DEAD:
 			if player_1.stock_points_left > 0:
 				var time_diff = Globals.RespawnTimer_WAIT_TIME - player_1.get_node("RespawnTimer").time
 				if time_diff > 30 or time_diff < 0:
@@ -522,7 +522,7 @@ func _process(delta):
 			var player_2 = get_player_node(1)
 			
 			var p2_valid := true
-			if player_2.state == Globals.char_state.DEAD:
+			if player_2.state == Em.char_state.DEAD:
 				if player_2.stock_points_left > 0:
 					var time_diff = Globals.RespawnTimer_WAIT_TIME - player_2.get_node("RespawnTimer").time
 					if time_diff > 30 or time_diff < 0:
@@ -1054,24 +1054,25 @@ func load_state(game_state, loading_autosave = true):
 # DETECT RINGOUT --------------------------------------------------------------------------------------------------	
 # called by Physics.gd
 
-func detect_kill(character_box):
-# warning-ignore:unassigned_variable
-	var target_box: Rect2
-	target_box.position = character_box.rect_global_position
-	target_box.size = character_box.rect_size
+func is_offstage(in_box):
+	var target_box
+	if in_box is Rect2:
+		target_box = in_box
+	else:
+		target_box = Rect2(in_box.rect_global_position, in_box.rect_size)
 	if !stage_box.get_rect().intersects(target_box):
-		# if collision box is outside stage_box, kill them
+		return true
+	return false
+	
+
+func detect_kill(character_box):
+	if is_offstage(character_box): # if collision box is outside stage_box, kill them
 		character_box.get_parent().on_kill()
 		return true
 	return false
 	
 func detect_offstage(entity_sprite_box):
-# warning-ignore:unassigned_variable
-	var target_box: Rect2
-	target_box.position = entity_sprite_box.rect_global_position
-	target_box.size = entity_sprite_box.rect_size
-	if !stage_box.get_rect().intersects(target_box):
-		# if collision box is outside stage_box, kill them
+	if is_offstage(entity_sprite_box): # if collision box is outside stage_box, kill them
 		entity_sprite_box.get_parent().on_offstage()
 		return true
 	return false
@@ -1145,38 +1146,38 @@ func detect_hit():
 		var polygons_queried = player.query_polygons()
 		# will not return hitbox if in hitstop
 		
-		if polygons_queried.hitbox != null: # if hitbox is not empty
+		if polygons_queried[Em.hit.HITBOX] != null: # if hitbox is not empty
 			var move_data_and_name = player.query_move_data_and_name()
 			var hitbox = {
-				"rect": polygons_queried.rect,
-				"polygon" : polygons_queried.hitbox,
-				"owner_ID" : player.player_ID,
-				"facing": player.facing,
-				"move_name" : move_data_and_name.move_name,
-				"move_data" : move_data_and_name.move_data, # damage, attack level, etc
+				Em.hit.RECT: polygons_queried[Em.hit.RECT],
+				Em.hit.POLYGON : polygons_queried[Em.hit.HITBOX],
+				Em.hit.OWNER_ID : player.player_ID,
+				Em.hit.FACING: player.facing,
+				Em.hit.MOVE_NAME : move_data_and_name[Em.hit.MOVE_NAME],
+				Em.hit.MOVE_DATA : move_data_and_name[Em.hit.MOVE_DATA], # damage, attack level, etc
 			}
-			if polygons_queried.sweetbox != null: # if sweetbox is not empty
-				hitbox["sweetbox"] = polygons_queried.sweetbox
-			if polygons_queried.kborigin != null: # if kborigin is not null
-				hitbox["kborigin"] = polygons_queried.kborigin
-			if polygons_queried.vacpoint != null: # if kborigin is not null
-				hitbox["vacpoint"] = polygons_queried.vacpoint
+			if polygons_queried[Em.hit.SWEETBOX] != null: # if sweetbox is not empty
+				hitbox[Em.hit.SWEETBOX] = polygons_queried[Em.hit.SWEETBOX]
+			if polygons_queried[Em.hit.KBORIGIN] != null: # if kborigin is not null
+				hitbox[Em.hit.KBORIGIN] = polygons_queried[Em.hit.KBORIGIN]
+			if polygons_queried[Em.hit.VACPOINT] != null: # if kborigin is not null
+				hitbox[Em.hit.VACPOINT] = polygons_queried[Em.hit.VACPOINT]
 				
 			if !"MOB" in player:
 				player_hitboxes.append(hitbox)
 			else:
 				mob_hitboxes.append(hitbox)
 			
-		if polygons_queried.hurtbox != null:
+		if polygons_queried[Em.hit.HURTBOX] != null:
 			var hurtbox = {
-				"rect": polygons_queried.rect,
-				"polygon" : polygons_queried.hurtbox,
-				"owner_ID" : player.player_ID,
-				"facing": player.facing,
+				Em.hit.RECT: polygons_queried[Em.hit.RECT],
+				Em.hit.POLYGON : polygons_queried[Em.hit.HURTBOX],
+				Em.hit.OWNER_ID : player.player_ID,
+				Em.hit.FACING: player.facing,
 #				"defensive_state" : null, # blocking, punishable state, etc
 			}
-			if polygons_queried.sdhurtbox != null:
-				hurtbox["sdhurtbox"] = polygons_queried.sdhurtbox
+			if polygons_queried[Em.hit.SDHURTBOX] != null:
+				hurtbox[Em.hit.SDHURTBOX] = polygons_queried[Em.hit.SDHURTBOX]
 			
 			if !"MOB" in player:
 				player_hurtboxes.append(hurtbox)
@@ -1189,46 +1190,46 @@ func detect_hit():
 	
 	for entity in entities:
 		var polygons_queried = entity.query_polygons()
-		if polygons_queried.hitbox != null: # if hitbox is not empty
+		if polygons_queried[Em.hit.HITBOX] != null: # if hitbox is not empty
 			var move_data_and_name = entity.query_move_data_and_name()
 			var hitbox = {
-				"rect": polygons_queried.rect,
-				"polygon" : polygons_queried.hitbox,
-				"owner_ID" : entity.master_ID,
-				"entity_nodepath" : entity.get_path(),
-				"facing": entity.facing,
-				"move_name" : move_data_and_name.move_name,
-				"move_data" : move_data_and_name.move_data, # damage, attack level, etc
+				Em.hit.RECT: polygons_queried[Em.hit.RECT],
+				Em.hit.POLYGON : polygons_queried[Em.hit.HITBOX],
+				Em.hit.OWNER_ID : entity.master_ID,
+				Em.hit.ENTITY_PATH : entity.get_path(),
+				Em.hit.FACING: entity.facing,
+				Em.hit.MOVE_NAME : move_data_and_name[Em.hit.MOVE_NAME],
+				Em.hit.MOVE_DATA : move_data_and_name[Em.hit.MOVE_DATA], # damage, attack level, etc
 			}
-			if polygons_queried.sweetbox != null: # if sweetbox is not empty
-				hitbox["sweetbox"] = polygons_queried.sweetbox
-			if polygons_queried.kborigin != null: # if kborigin is not null
-				hitbox["kborigin"] = polygons_queried.kborigin
-			if polygons_queried.vacpoint != null: # if kborigin is not null
-				hitbox["vacpoint"] =  polygons_queried.vacpoint
+			if polygons_queried[Em.hit.SWEETBOX] != null: # if sweetbox is not empty
+				hitbox[Em.hit.SWEETBOX] = polygons_queried[Em.hit.SWEETBOX]
+			if polygons_queried[Em.hit.KBORIGIN] != null: # if kborigin is not null
+				hitbox[Em.hit.KBORIGIN] = polygons_queried[Em.hit.KBORIGIN]
+			if polygons_queried[Em.hit.VACPOINT] != null: # if kborigin is not null
+				hitbox[Em.hit.VACPOINT] =  polygons_queried[Em.hit.VACPOINT]
 				
 			player_hitboxes.append(hitbox)
 			
 	for mob_entity in $MobEntities.get_children():
 		var polygons_queried = mob_entity.query_polygons()
-		if polygons_queried.hitbox != null: # if hitbox is not empty
+		if polygons_queried[Em.hit.HITBOX] != null: # if hitbox is not empty
 			var move_data_and_name = mob_entity.query_move_data_and_name()
 			var hitbox = {
-				"mob" : true,
-				"rect": polygons_queried.rect,
-				"polygon" : polygons_queried.hitbox,
-				"owner_ID" : mob_entity.master_ID,
-				"entity_nodepath" : mob_entity.get_path(),
-				"facing": mob_entity.facing,
-				"move_name" : move_data_and_name.move_name,
-				"move_data" : move_data_and_name.move_data, # damage, attack level, etc
+				Em.hit.MOB : true,
+				Em.hit.RECT: polygons_queried[Em.hit.RECT],
+				Em.hit.POLYGON : polygons_queried[Em.hit.HITBOX],
+				Em.hit.OWNER_ID : mob_entity.master_ID,
+				Em.hit.ENTITY_PATH : mob_entity.get_path(),
+				Em.hit.FACING: mob_entity.facing,
+				Em.hit.MOVE_NAME : move_data_and_name[Em.hit.MOVE_NAME],
+				Em.hit.MOVE_DATA : move_data_and_name[Em.hit.MOVE_DATA], # damage, attack level, etc
 			}
-			if polygons_queried.sweetbox != null: # if sweetbox is not empty
-				hitbox["sweetbox"] = polygons_queried.sweetbox
-			if polygons_queried.kborigin != null: # if kborigin is not null
-				hitbox["kborigin"] = polygons_queried.kborigin
-			if polygons_queried.vacpoint != null: # if kborigin is not null
-				hitbox["vacpoint"] =  polygons_queried.vacpoint
+			if polygons_queried[Em.hit.SWEETBOX] != null: # if sweetbox is not empty
+				hitbox[Em.hit.SWEETBOX] = polygons_queried[Em.hit.SWEETBOX]
+			if polygons_queried[Em.hit.KBORIGIN] != null: # if kborigin is not null
+				hitbox[Em.hit.KBORIGIN] = polygons_queried[Em.hit.KBORIGIN]
+			if polygons_queried[Em.hit.VACPOINT] != null: # if kborigin is not null
+				hitbox[Em.hit.VACPOINT] =  polygons_queried[Em.hit.VACPOINT]
 				
 			mob_hitboxes.append(hitbox)
 	
@@ -1249,20 +1250,20 @@ func detect_hit():
 
 	for hit_data in hit_data_array:
 		
-		var attacker = get_player_node(hit_data.attacker_ID)
+		var attacker = get_player_node(hit_data[Em.hit.ATKER_ID])
 		var attacker_or_entity = attacker
-		if "entity_nodepath" in hit_data:
-			attacker_or_entity = get_node(hit_data.entity_nodepath)
+		if Em.hit.ENTITY_PATH in hit_data:
+			attacker_or_entity = get_node(hit_data[Em.hit.ENTITY_PATH])
 			
-		var defender = get_player_node(hit_data.defender_ID)
+		var defender = get_player_node(hit_data[Em.hit.DEFENDER_ID])
 		
-		if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hit_data.move_data):
+		if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hit_data[Em.hit.MOVE_DATA]):
 			continue # attacker/entity must still have hitcount left, some attacks changes hitcount record of other attacks, so put this here
 		
 		defender.being_hit(hit_data) # will add stuff to hit_data, passing by reference
 		
-		if !"sequence" in hit_data.move_data and !"cancelled" in hit_data:
-#			if !"entity_nodepath" in hit_data:
+		if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA] and !Em.hit.CANCELLED in hit_data:
+#			if !Em.hit.ENTITY_PATH in hit_data:
 #				attacker.landed_a_hit(hit_data)
 #	#				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
 #			else:
@@ -1272,20 +1273,20 @@ func detect_hit():
 func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 	for hitbox in hitboxes:
 		for hurtbox in hurtboxes:
-			if hitbox.owner_ID == hurtbox.owner_ID:
+			if hitbox[Em.hit.OWNER_ID] == hurtbox[Em.hit.OWNER_ID]:
 				continue # defender must not be owner of hitbox
 			
-			var attacker = get_player_node(hitbox.owner_ID)
+			var attacker = get_player_node(hitbox[Em.hit.OWNER_ID])
 			var attacker_or_entity = attacker
-			if "entity_nodepath" in hitbox:
-				attacker_or_entity = get_node(hitbox.entity_nodepath)
-			var defender = get_player_node(hurtbox.owner_ID)
+			if Em.hit.ENTITY_PATH in hitbox:
+				attacker_or_entity = get_node(hitbox[Em.hit.ENTITY_PATH])
+			var defender = get_player_node(hurtbox[Em.hit.OWNER_ID])
 
 			if attacker_or_entity == null or defender == null: continue # invalid attack
 			
 #			if defender_command_grab_dodge(hitbox, hurtbox):
 #				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
-			if !"entity_nodepath" in hitbox:
+			if !Em.hit.ENTITY_PATH in hitbox:
 				if !test_priority(hitbox, attacker, hurtbox, defender):
 					continue # attacker must pass the priority test
 				if defender_anti_airing(hitbox, attacker, hurtbox, defender):
@@ -1306,11 +1307,11 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 #			if Globals.survival_level != null and defender_mob_grace(hitbox, attacker, hurtbox, defender):
 #				continue # attacking mob cannot hit hitstunned player if not being targeted
 					
-			if !hitbox.rect.intersects(hurtbox.rect):
+			if !hitbox[Em.hit.RECT].intersects(hurtbox[Em.hit.RECT]):
 				continue # intersect_polygons_2d is expensive?
 						
 			# get an array of PoolVector2Arrays of the intersecting polygons
-			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.polygon)
+			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox[Em.hit.POLYGON], hurtbox[Em.hit.POLYGON])
 			if intersect_polygons.size() > 0: # detected a hit
 				
 				if defender_semi_invul(hitbox, attacker_or_entity, hurtbox, defender):
@@ -1318,8 +1319,8 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 				else:
 					create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox)
 				
-			elif "sdhurtbox" in hurtbox: # detecting a semi-disjoint hit
-				var intersect_polygons_sd = Geometry.intersect_polygons_2d(hitbox.polygon, hurtbox.sdhurtbox)
+			elif Em.hit.SDHURTBOX in hurtbox: # detecting a semi-disjoint hit
+				var intersect_polygons_sd = Geometry.intersect_polygons_2d(hitbox[Em.hit.POLYGON], hurtbox[Em.hit.SDHURTBOX])
 				if intersect_polygons_sd.size() > 0:
 					
 					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, attacker_or_entity, hurtbox, true)
@@ -1345,30 +1346,30 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_ent
 #	hit_center.y = round(hit_center.y) # remove decimals
 
 	var sweetspotted := false
-	if semi_disjoint == false and "sweetbox" in hitbox:
-		if Globals.point_in_polygon(hit_center, hitbox.sweetbox): # Geometry.is_point_in_polygon() wouldn't work on pixels due to left/right
+	if semi_disjoint == false and Em.hit.SWEETBOX in hitbox:
+		if Globals.point_in_polygon(hit_center, hitbox[Em.hit.SWEETBOX]): # Geometry.is_point_in_polygon() wouldn't work on pixels due to left/right
 			sweetspotted = true # cannot sweetspot on SD hits
 	
 	var hit_data = { # send this to both attacker and defender
-		"attacker_ID" : hitbox.owner_ID,
-		"defender_ID" : hurtbox.owner_ID,
-		"hit_center" : hit_center,
-		"semi_disjoint": semi_disjoint,
-		"sweetspotted" : sweetspotted,
-		"attack_facing" : hitbox.facing,
-		"defend_facing" : hurtbox.facing,
-		"move_name" : hitbox.move_name,
-		"move_data" : hitbox.move_data,
+		Em.hit.ATKER_ID : hitbox[Em.hit.OWNER_ID],
+		Em.hit.DEFENDER_ID : hurtbox[Em.hit.OWNER_ID],
+		Em.hit.HIT_CENTER : hit_center,
+		Em.hit.SEMI_DISJOINT: semi_disjoint,
+		Em.hit.SWEETSPOTTED : sweetspotted,
+		Em.hit.ATK_FACING : hitbox[Em.hit.FACING],
+		Em.hit.DEFEND_FACING : hurtbox[Em.hit.FACING],
+		Em.hit.MOVE_NAME : hitbox[Em.hit.MOVE_NAME],
+		Em.hit.MOVE_DATA : hitbox[Em.hit.MOVE_DATA],
 #		"defensive_state": hurtbox.defensive_state,
 	}
 	
-	if "kborigin" in hitbox:
-		hit_data["kborigin"] = hitbox.kborigin
-	if "vacpoint" in hitbox:
-		hit_data["vacpoint"] = hitbox.vacpoint
+	if Em.hit.KBORIGIN in hitbox:
+		hit_data[Em.hit.KBORIGIN] = hitbox[Em.hit.KBORIGIN]
+	if Em.hit.VACPOINT in hitbox:
+		hit_data[Em.hit.VACPOINT] = hitbox[Em.hit.VACPOINT]
 	
-	if "entity_nodepath" in hitbox: # flag hit as a entity
-		hit_data["entity_nodepath"] = hitbox.entity_nodepath
+	if Em.hit.ENTITY_PATH in hitbox: # flag hit as a entity
+		hit_data[Em.hit.ENTITY_PATH] = hitbox[Em.hit.ENTITY_PATH]
 	
 	hit_data_array.append(hit_data)
 	
@@ -1385,7 +1386,7 @@ func test_priority(hitbox, attacker, _hurtbox, defender): # return false if atta
 		# this allow higher priority attack to beat lower priority ones after the frame 1 invincibility of Rule 1
 		# sweetspots should at least be 3 frames long (50ms)
 		elif attacker.Animator.time <= 1:
-			if attacker.query_priority(hitbox.move_name) < defender.query_priority():
+			if attacker.query_priority(hitbox[Em.hit.MOVE_NAME]) < defender.query_priority():
 				return false
 	return true
 	
@@ -1422,12 +1423,12 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 		
 		var defender_move_data = defender.query_move_data()
 		
-		if Globals.atk_attr.ANTI_AIR in defender_move_data.atk_attr:
+		if Em.atk_attr.ANTI_AIR in defender_move_data[Em.move.ATK_ATTR]:
 
 			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
 			# and the attacker must be airborne and above defender
-			var defender_tier = Globals.atk_type_to_tier(defender_move_data.atk_type)
-			var attacker_tier = Globals.atk_type_to_tier(hitbox.move_data.atk_type)
+			var defender_tier = Em.atk_type_to_tier(defender_move_data[Em.move.ATK_TYPE])
+			var attacker_tier = Em.atk_type_to_tier(hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE])
 			
 			if attacker_tier == 0: return true # air normals can be anti-aired by anything
 			elif attacker_tier > defender_tier: return false # cannot anti-air attacks of higher tier
@@ -1447,10 +1448,10 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 #	if !defender.get_node("HitStunTimer").is_running(): return false # defender must be in hitstun
 #
 #	var attacker_ID: int
-#	if !"entity_nodepath" in hitbox: # not entity
+#	if !Em.hit.ENTITY_PATH in hitbox: # not entity
 #		attacker_ID = attacker.player_ID
 #	else:
-#		attacker_ID = get_node(hitbox.entity_nodepath).master_ID
+#		attacker_ID = get_node(hitbox[Em.hit.ENTITY_PATH]).master_ID
 #
 #	if defender.target_ID != attacker_ID: return true # attacking mob is not targeted by player, cannot hit hitstunned player
 #	else:
@@ -1459,22 +1460,22 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 	
 func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 	var attacker_or_entity
-	if !"entity_nodepath" in hitbox: # not entity
+	if !Em.hit.ENTITY_PATH in hitbox: # not entity
 		attacker_or_entity = attacker
 	else:
-		attacker_or_entity = get_node(hitbox.entity_nodepath)
+		attacker_or_entity = get_node(hitbox[Em.hit.ENTITY_PATH])
 		
-#	if Globals.atk_attr.UNBLOCKABLE in hitbox.move_data.atk_attr or \
-#			hitbox.move_data.atk_type in [Globals.atk_type.SUPER]:
+#	if Em.atk_attr.UNBLOCKABLE in hitbox.move_data[Em.move.ATK_ATTR] or \
+#			hitbox.move_data[Em.move.ATK_TYPE] in [Em.atk_type.SUPER]:
 #		return false # defender's semi-invul failed
 		
-	if hitbox.move_data.atk_type in [Globals.atk_type.SUPER]:
+	if hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER]:
 		return false # defender's semi-invul failed
 				
 	if defender.check_semi_invuln():
 		if "chain_combo" in attacker_or_entity: # prevent chaining on iframed attack
-			attacker_or_entity.chain_combo = Globals.chain_combo.NO_CHAIN
-		defender.success_dodge = true
+			attacker_or_entity.chain_combo = Em.chain_combo.NO_CHAIN
+		defender.perfect_dodge()
 		return true # defender's semi-invul succeeded
 
 	return false
@@ -1483,9 +1484,9 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 #func defender_backdash(hitbox, hurtbox):
 #	var attacker = get_node(hitbox.owner_nodepath)
 #	var defender = get_node(hurtbox.owner_nodepath)
-#	var attacker_attr = hitbox.move_data.atk_attr
-#	if Globals.atk_attr.UNBLOCKABLE in attacker_attr or Globals.atk_attr.ANTI_GUARD in attacker_attr:
-#		if defender.new_state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] or \
+#	var attacker_attr = hitbox.move_data[Em.move.ATK_ATTR]
+#	if Em.atk_attr.UNBLOCKABLE in attacker_attr or Em.atk_attr.ANTI_GUARD in attacker_attr:
+#		if defender.new_state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] or \
 #				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
 #			if defender.Animator.query_to_play(["Tech", "GuardTech"]):
 #				return false
@@ -1496,14 +1497,14 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 #
 #func defender_command_grab_dodge(hitbox, hurtbox):
 ##	var attacker_or_entity
-##	if !"entity_nodepath" in hitbox: # not entity
+##	if !Em.hit.ENTITY_PATH in hitbox: # not entity
 ##		attacker_or_entity = get_node(hitbox.owner_nodepath)
 ##	else:
-##		attacker_or_entity = get_node(hitbox.entity_nodepath) # rare entity command grab
+##		attacker_or_entity = get_node(hitbox[Em.hit.ENTITY_PATH]) # rare entity command grab
 #	var defender = get_node(hurtbox.owner_nodepath)
-#	if Globals.atk_attr.COMMAND_GRAB in hitbox.move_data.atk_attr:
-#		if defender.new_state in [Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, Globals.char_state.GROUND_BLOCKSTUN, \
-#				Globals.char_state.AIR_BLOCKSTUN]:
+#	if Em.atk_attr.COMMAND_GRAB in hitbox.move_data[Em.move.ATK_ATTR]:
+#		if defender.new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, Em.char_state.GROUND_BLOCKSTUN, \
+#				Em.char_state.AIR_BLOCKSTUN]:
 #			return true # defender's evaded command grab
 #	return false
 
@@ -1519,7 +1520,7 @@ func handle_zoom(delta):
 		
 		for player in $Players.get_children():
 			var valid := true
-			if player.state == Globals.char_state.DEAD:
+			if player.state == Em.char_state.DEAD:
 				if player.stock_points_left > 0:
 					var time_diff = Globals.RespawnTimer_WAIT_TIME - player.get_node("RespawnTimer").time
 					if time_diff > 30 or time_diff < 0:
@@ -1532,7 +1533,7 @@ func handle_zoom(delta):
 			
 	else: # survival mode
 		var player_1 = get_player_node(0)
-		if player_1.state != Globals.char_state.DEAD:
+		if player_1.state != Em.char_state.DEAD:
 			array_of_horizontal_diff.append(abs(player_1.position.x - $CameraRef.position.x))
 			array_of_vertical_diff.append(abs(player_1.position.y - $CameraRef.position.y))
 			var target = player_1.get_target()
@@ -1541,7 +1542,7 @@ func handle_zoom(delta):
 				array_of_vertical_diff.append(abs(target.position.y - $CameraRef.position.y))
 		if Globals.player_count == 2:
 			var player_2 = get_player_node(1)
-			if player_2.state != Globals.char_state.DEAD:
+			if player_2.state != Em.char_state.DEAD:
 				array_of_horizontal_diff.append(abs(player_2.position.x - $CameraRef.position.x))
 				array_of_vertical_diff.append(abs(player_2.position.y - $CameraRef.position.y))
 				var target = player_2.get_target()
@@ -1875,11 +1876,11 @@ func stock_points_update(character):
 				
 func burst_update(character):
 	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/BurstToken")
-	if character.burst_token == Globals.burst.AVAILABLE:
+	if character.burst_token == Em.burst.AVAILABLE:
 		burst_token.get_node("AnimationPlayer").play("flash")
-	elif character.burst_token == Globals.burst.CONSUMED:
+	elif character.burst_token == Em.burst.CONSUMED:
 		burst_token.get_node("AnimationPlayer").play("empty")
-	elif character.burst_token == Globals.burst.EXHAUSTED:
+	elif character.burst_token == Em.burst.EXHAUSTED:
 		burst_token.get_node("AnimationPlayer").play("gray")
 		
 func coin_update(character):	
@@ -2068,7 +2069,7 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary,
 # master_ID is passed in to freeze afterimages during hitstop
 # master_ref is used to locate spritesheet_ref for character afterimages and locate palettes as well
 func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
-		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 	var afterimage = Loader.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
 	afterimage.init(master_ID, is_entity, master_ref, spritesheet_ref, sprite_node_path, palette_ref, color_modulate, starting_modulate_a, \

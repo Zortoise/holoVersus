@@ -47,7 +47,7 @@ func set_physics_logs(timestamp: int, players):
 		physics_logs[timestamp][player.player_ID]["position"] = player.position
 		physics_logs[timestamp][player.player_ID]["velocity"] = player.velocity
 #		damage_logs[timestamp][player.player_ID] = {}
-#		damage_logs[timestamp][player.player_ID]["damage"] = player.current_damage_value
+#		damage_logs[timestamp][player.player_ID][Em.move.DMG] = player.current_damage_value
 #		gg_logs[timestamp][player.player_ID] = {}
 #		gg_logs[timestamp][player.player_ID]["gg"] = player.current_guard_gauge
 #		mm_logs[timestamp][player.player_ID] = {}

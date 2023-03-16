@@ -5,46 +5,46 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"SlowBubbleTop": {
-"duration": 360,
+"TimeBubbleTop": {
+"duration": 240,
 "hframes": 6,
 "loop": false,
-"spritesheet": "SlowBubbleTopSprite",
+"spritesheet": "TimeBubbleTopSprite",
 "timestamps": {
 0: {
 "frame": 0
 },
-30: {
+20: {
 "frame": 1
 },
-60: {
+40: {
 "frame": 2
 },
-90: {
+60: {
 "frame": 3
 },
-120: {
+80: {
 "frame": 4
 },
-150: {
+100: {
 "frame": 5
 },
-180: {
+120: {
 "frame": 6
 },
-210: {
+140: {
 "frame": 7
 },
-240: {
+160: {
 "frame": 8
 },
-270: {
+180: {
 "frame": 9
 },
-300: {
+200: {
 "frame": 10
 },
-330: {
+220: {
 "frame": 11
 }
 },

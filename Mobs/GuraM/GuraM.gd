@@ -57,7 +57,7 @@ const LONG_FAIL_CHANCE = 20 # chance of ignoring long zones to get closer instea
 
 const TRAITS = []
 
-const DEFAULT_HITSPARK_TYPE = Globals.hitspark_type.HIT
+const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "gray"
 
 const UNIQUE_DATA_REF = {
@@ -70,249 +70,249 @@ const NO_IMPULSE = ["SP1"]
 
 const MOVE_DATABASE = {
 	"L1" : {
-		"atk_type" : Globals.atk_type.LIGHT,
-		"hitcount" : 1,
-		"damage" : 20,
-		"knockback" : 200 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 2,
-		"fixed_hitstop" : 10,
-		"fixed_atker_hitstop" : 1,
-		"KB_angle" : -36,
-		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
-		"move_sound" : { ref = "whoosh2", aux_data = {"vol" : -12} },
-		"hit_sound" : { ref = "cut1", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 20,
+		Em.move.KB : 200 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 2,
+		Em.move.FIXED_HITSTOP : 10,
+		Em.move.FIXED_ATKER_HITSTOP : 1,
+		Em.move.KB_ANGLE : -36,
+		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN],
+		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
+		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
 	"L1b" : {
-		"atk_type" : Globals.atk_type.LIGHT,
-		"hitcount" : 1,
-		"damage" : 20,
-		"knockback" : 200 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 2,
-		"KB_angle" : -36,
-		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
-		"move_sound" : { ref = "whoosh2", aux_data = {"vol" : -12} },
-		"hit_sound" : { ref = "cut1", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 20,
+		Em.move.KB : 200 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 2,
+		Em.move.KB_ANGLE : -36,
+		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP],
+		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
+		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
 	"L3" : {
-		"atk_type" : Globals.atk_type.LIGHT,
-		"hitcount" : 1,
-		"damage" : 55,
-		"knockback" : 445 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"priority_add" : 2,
-		"KB_angle" : -80,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh9", aux_data = {"vol" : -18} },
-		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -10,} },
+		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 55,
+		Em.move.KB : 445 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.PRIORITY_ADD : 2,
+		Em.move.KB_ANGLE : -80,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh9", aux_data = {"vol" : -18} },
+		Em.move.HIT_SOUND : { ref = "cut5", aux_data = {"vol" : -10,} },
 	},
 	"F1" : {
-		"atk_type" : Globals.atk_type.FIERCE,
-		"hitcount" : 1,
-		"damage" : 60,
-		"knockback" : 350 * FMath.S,
-		"knockback_type": Globals.knockback_type.MIRRORED,
-		"atk_level" : 3,
-		"KB_angle" : -36,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh13", aux_data = {"vol" : -12,} },
-		"hit_sound" : { ref = "impact16", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 60,
+		Em.move.KB : 350 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.MIRRORED,
+		Em.move.ATK_LVL : 3,
+		Em.move.KB_ANGLE : -36,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh13", aux_data = {"vol" : -12,} },
+		Em.move.HIT_SOUND : { ref = "impact16", aux_data = {"vol" : -15} },
 	},
 	"F2" : {
-		"atk_type" : Globals.atk_type.FIERCE,
-		"hitcount" : 1,
-		"damage" : 60,
-		"knockback" : 400 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"priority_add" : -1,
-		"KB_angle" : 0,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh1", aux_data = {"vol" : -12,} },
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 60,
+		Em.move.KB : 400 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.PRIORITY_ADD : -1,
+		Em.move.KB_ANGLE : 0,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh1", aux_data = {"vol" : -12,} },
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -15} },
 	},
 	"F3" : {
-		"atk_type" : Globals.atk_type.FIERCE,
-		"hitcount" : 1,
-		"damage" : 70,
-		"knockback" : 400 * FMath.S,
-		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 4,
-		"KB_angle" : 90,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh7", aux_data = {"vol" : -12,} },
-		"hit_sound" : { ref = "impact19", aux_data = {"vol" : -18} },
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
+		Em.move.KB : 400 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : 90,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh7", aux_data = {"vol" : -12,} },
+		Em.move.HIT_SOUND : { ref = "impact19", aux_data = {"vol" : -18} },
 	},
 	"H" : {
-		"atk_type" : Globals.atk_type.HEAVY,
-		"hitcount" : 1,
-		"damage" : 30,
-		"knockback" : 150 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 6,
-		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.AUTOCHAIN, Globals.atk_attr.SUPERARMOR_STARTUP],
-		"move_sound" : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
-		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
+		Em.move.ATK_TYPE : Em.atk_type.HEAVY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 30,
+		Em.move.KB : 150 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 6,
+		Em.move.KB_ANGLE : -75,
+		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN, Em.atk_attr.SUPERARMOR_STARTUP],
+		Em.move.MOVE_SOUND : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
+		Em.move.HIT_SOUND : { ref = "water7", aux_data = {"vol" : -9} },
 	},
 	"Hb" : {
-		"atk_type" : Globals.atk_type.HEAVY,
-		"hitcount" : 1,
-		"damage" : 70,
-		"knockback" : 550 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 6,
-		"KB_angle" : -75,
-		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
-		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
+		Em.move.ATK_TYPE : Em.atk_type.HEAVY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
+		Em.move.KB : 550 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 6,
+		Em.move.KB_ANGLE : -75,
+		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP],
+		Em.move.HIT_SOUND : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	
 	"aL1" : {
-		"atk_type" : Globals.atk_type.LIGHT,
-		"hitcount" : 1,
-		"damage" : 40,
-		"knockback" : 200 * FMath.S,
-		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 2,
-		"KB_angle" : 0,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12} },
-		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 40,
+		Em.move.KB : 200 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 2,
+		Em.move.KB_ANGLE : 0,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh3", aux_data = {"vol" : -12} },
+		Em.move.HIT_SOUND : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
 	"aL3" : {
-		"atk_type" : Globals.atk_type.LIGHT,
-		"hitcount" : 1,
-		"damage" : 40,
-		"knockback" : 400 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 3,
-		"priority_add": 1,
-		"KB_angle" : -80,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh3", aux_data = {"vol" : -12, "bus" : "PitchDown"} },
-		"hit_sound" : { ref = "impact14", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 40,
+		Em.move.KB : 400 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 3,
+		Em.move.PRIORITY_ADD: 1,
+		Em.move.KB_ANGLE : -80,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh3", aux_data = {"vol" : -12, "bus" : "PitchDown"} },
+		Em.move.HIT_SOUND : { ref = "impact14", aux_data = {"vol" : -15} },
 	},
 	"aF1" : {
-		"atk_type" : Globals.atk_type.FIERCE,
-		"hitcount" : 1,
-		"damage" : 60,
-		"knockback" : 350 * FMath.S,
-		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 3,
-		"KB_angle" : 72,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh14", aux_data = {"vol" : -9, "bus": "PitchDown"} },
-		"hit_sound" : { ref = "impact12", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 60,
+		Em.move.KB : 350 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 3,
+		Em.move.KB_ANGLE : 72,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh14", aux_data = {"vol" : -9, "bus": "PitchDown"} },
+		Em.move.HIT_SOUND : { ref = "impact12", aux_data = {"vol" : -15} },
 	},
 	"aF2" : {
-		"atk_type" : Globals.atk_type.FIERCE,
-		"hitcount" : 1,
-		"damage" : 45,
-		"knockback" : 350 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"fixed_ss_hitstop" : 12,
-		"KB_angle" : 70,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh15", aux_data = {"vol" : -5, "bus": "PitchDown"} },
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 45,
+		Em.move.KB : 350 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.FIXED_SS_HITSTOP : 12,
+		Em.move.KB_ANGLE : 70,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh15", aux_data = {"vol" : -5, "bus": "PitchDown"} },
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -15} },
 	},
 	"aF2SeqB": {
-		"starter" : "aF2",
-		"sequence_launch" : {
-			"damage" : 30,
-			"hitstop" : 0,
+		Em.move.STARTER : "aF2",
+		Em.move.SEQ_LAUNCH : {
+			Em.move.DMG : 30,
+			Em.move.SEQ_HITSTOP : 0,
 			"weak" : true,
-			"launch_power" : 500 * FMath.S,
-			"launch_angle" : -100,
-			"atk_level" : 4,
+			Em.move.KB : 500 * FMath.S,
+			Em.move.KB_ANGLE : -100,
+			Em.move.ATK_LVL : 4,
 		}
 	},
 	"aF3" : {
-		"atk_type" : Globals.atk_type.FIERCE,
-		"hitcount" : 1,
-		"damage" : 55,
-		"knockback" : 350 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"priority_add" : 1,
-		"KB_angle" : -72,
-		"atk_attr" : [],
-		"move_sound" : { ref = "whoosh12", aux_data = {"vol" : -2} },
-		"hit_sound" : { ref = "cut5", aux_data = {"vol" : -10} },
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 55,
+		Em.move.KB : 350 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.PRIORITY_ADD : 1,
+		Em.move.KB_ANGLE : -72,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh12", aux_data = {"vol" : -2} },
+		Em.move.HIT_SOUND : { ref = "cut5", aux_data = {"vol" : -10} },
 	},
 	"aH" : {
-		"atk_type" : Globals.atk_type.HEAVY,
-		"hitcount" : 1,
-		"damage" : 90,
-		"knockback" : 450 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 5,
-		"KB_angle" : 45,
-		"atk_attr" : [Globals.atk_attr.SUPERARMOR_STARTUP],
-		"move_sound" : { ref = "water4", aux_data = {"vol" : -12,} },
-		"hit_sound" : { ref = "water5", aux_data = {"vol" : -18} },
+		Em.move.ATK_TYPE : Em.atk_type.HEAVY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 90,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 5,
+		Em.move.KB_ANGLE : 45,
+		Em.move.ATK_ATTR : [Em.atk_attr.SUPERARMOR_STARTUP],
+		Em.move.MOVE_SOUND : { ref = "water4", aux_data = {"vol" : -12,} },
+		Em.move.HIT_SOUND : { ref = "water5", aux_data = {"vol" : -18} },
 	},
 	"SP1": {
-		"atk_type" : Globals.atk_type.SPECIAL, # used for chaining
-		"atk_attr" : [],
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL, # used for chaining
+		Em.move.ATK_ATTR : [],
 	},
 	"aSP2" : {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"hitcount" : 3,
-		"ignore_time" : 6,
-		"damage" : 40,
-		"knockback" : 500 * FMath.S,
-		"fixed_knockback_multi" : 300 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"KB_angle" : -45,
-		"atk_attr" : [],
-		"move_sound" : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
-		"hit_sound" : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 3,
+		Em.move.IGNORE_TIME : 6,
+		Em.move.DMG : 40,
+		Em.move.KB : 500 * FMath.S,
+		Em.move.FIXED_KB_MULTI : 300 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : -45,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
+		Em.move.HIT_SOUND : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},
 	"SP3" : {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"hitcount" : 1,
-		"damage" : 40,
-		"knockback" : 600 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"KB_angle" : -90,
-		"atk_attr" : [Globals.atk_attr.AUTOCHAIN],
-		"move_sound" : { ref = "water8", aux_data = {"vol" : -10,} },
-		"hit_sound" : { ref = "water7", aux_data = {"vol" : -9} },
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 40,
+		Em.move.KB : 600 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : -90,
+		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN],
+		Em.move.MOVE_SOUND : { ref = "water8", aux_data = {"vol" : -10,} },
+		Em.move.HIT_SOUND : { ref = "water7", aux_data = {"vol" : -9} },
 	},
 	"SP3b" : {
-		"atk_type" : Globals.atk_type.SPECIAL,
-		"hitcount" : 1,
-		"damage" : 70,
-		"knockback" : 475 * FMath.S,
-		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 4,
-		"KB_angle" : 0,
-		"atk_attr" : [Globals.atk_attr.FOLLOW_UP],
-		"hit_sound" : { ref = "water7", aux_data = {"vol" : -7} },
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
+		Em.move.KB : 475 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : 0,
+		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP],
+		Em.move.HIT_SOUND : { ref = "water7", aux_data = {"vol" : -7} },
 	},
 	
 	"aSP6[ex]" : {
-		"atk_type" : Globals.atk_type.EX,
-		"sequence": "SP6[ex]SeqA",
-		"hitcount" : 1,
-		"atk_attr" : []
+		Em.move.ATK_TYPE : Em.atk_type.EX,
+		Em.move.SEQ: "SP6[ex]SeqA",
+		Em.move.HITCOUNT : 1,
+		Em.move.ATK_ATTR : []
 	},
 	
 	"SP6[ex]SeqE": {
-		"starter" : "aSP6[ex]",
-		"sequence_hits" : [{"damage":150, "hitstop": 15}], # for hits during sequence, has a key, only contain damage
-		"sequence_launch" : { # for final hit of sequence
-			"damage" : 0,
-			"hitstop" : 0,
-			"launch_power" : 800 * FMath.S,
-			"launch_angle" : -103, # launch backwards
-			"atk_level" : 4,
+		Em.move.STARTER : "aSP6[ex]",
+		Em.move.SEQ_HITS : [{Em.move.DMG:150, Em.move.SEQ_HITSTOP: 15}], # for hits during sequence, has a key, only contain damage
+		Em.move.SEQ_LAUNCH : { # for final hit of sequence
+			Em.move.DMG : 0,
+			Em.move.SEQ_HITSTOP : 0,
+			Em.move.KB : 800 * FMath.S,
+			Em.move.KB_ANGLE : -103, # launch backwards
+			Em.move.ATK_LVL : 4,
 		}
 	},
 
@@ -1238,7 +1238,7 @@ func filter(atk_range: int):
 		Globals.remove_instances(results, "air_back_dash")
 		Globals.remove_instances(results, "back_jump")
 	
-	if Character.new_state == Globals.char_state.GROUND_D_RECOVERY:
+	if Character.new_state == Em.char_state.GROUND_D_RECOVERY:
 		Globals.remove_instances(results, "dash") # will not decide to dash again during option_cross while dashing
 		Globals.remove_instances(results, "dash_dance")
 				
@@ -1258,7 +1258,7 @@ func get_stat(stat: String): # later can have effects that changes stats
 	
 func jump_style_check(): # from main character node
 	Character.velocity.x = FMath.percent(Character.velocity.x, 50)
-	Character.strafe_style = Globals.strafe_style.NONE
+	Character.strafe_style = Em.strafe_style.NONE
 	
 	match Character.command_style:
 		"forward_jump":
@@ -1266,27 +1266,27 @@ func jump_style_check(): # from main character node
 			Character.velocity.x += FMath.percent(Character.facing * 400 * FMath.S, Character.get_stat("SPEED_MOD"))
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			if Globals.Game.rng_bool():
-				Character.strafe_style = Globals.strafe_style.TOWARDS
+				Character.strafe_style = Em.strafe_style.TOWARDS
 		"back_jump":
 			Character.velocity.y = -1000 * FMath.S
 			Character.velocity.x -= FMath.percent(Character.facing * 400 * FMath.S, Character.get_stat("SPEED_MOD"))
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-			Character.strafe_style = Globals.strafe_style.AWAY
+			Character.strafe_style = Em.strafe_style.AWAY
 		"neutral_jump":
 			Character.velocity.y = -1000 * FMath.S
-			Character.strafe_style = Globals.strafe_style.TOWARDS
+			Character.strafe_style = Em.strafe_style.TOWARDS
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"shorthop":
 			Character.velocity.y = -625 * FMath.S
 			Character.velocity.x += FMath.percent(Character.facing * 450 * FMath.S, Character.get_stat("SPEED_MOD"))
 			var sfx_point = Character.get_feet_pos()
 			sfx_point.x -= Character.facing * 5 # spawn the dust behind slightly
-			Character.strafe_style = Globals.strafe_style.TOWARDS
+			Character.strafe_style = Em.strafe_style.TOWARDS
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"cross_jump":
 			Character.velocity.y = -1000 * FMath.S
 			Character.velocity.x += FMath.percent(Character.facing * 800 * FMath.S, Character.get_stat("SPEED_MOD"))
-			Character.strafe_style = Globals.strafe_style.AWAY_ON_DESCEND
+			Character.strafe_style = Em.strafe_style.AWAY_ON_DESCEND
 			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 	Character.command_style = ""
 
@@ -1334,61 +1334,61 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 	match anim:
 			
 		"L1Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "HStartup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1Rec", "L1bActive", "L3Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive":
-			return Globals.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GROUND_ATK_ACTIVE
 		"L1bRec", "L3Rec", "F1Rec", "F2Rec", "F3Rec", "HbRec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 			
 		"aL1Startup", "aL3Startup", "aF1Startup", "aF2Startup", "aF3Startup", "aHStartup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aL1Active", "aL3Active", "aF1Active", "aF2Active", "aF3Active", "aHActive":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aL1Rec", "aL3Rec", "aF1Rec", "aF2Rec", "aF3Rec", "aHRec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 
 		"aF2SeqA", "aF2SeqB":
-			return Globals.char_state.SEQUENCE_USER
+			return Em.char_state.SEQUENCE_USER
 		"aF2GrabRec":
-			return Globals.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_RECOVERY
 
 		"SP1Startup", "SP1[b]Startup", "SP1[c1]bStartup", "SP1[u]Startup", "SP1[u][c1]bStartup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"SP1[c1]Active", "SP1[u][c1]Active":
-			return Globals.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GROUND_ATK_ACTIVE
 		"SP1Rec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 		"aSP1Startup", "aSP1[b]Startup", "aSP1[c1]bStartup", "aSP1[d]Startup", "aSP1[d][c1]bStartup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP1[c1]Active", "aSP1[d][c1]Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP1Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 		
 		"aSP2Startup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP2Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP2Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 		"aSP2CRec":
-			return Globals.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_RECOVERY
 			
 		"SP3Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"SP3Active", "SP3bActive":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP3Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 			
 		"SP6[ex]Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"aSP6[ex]Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"SP6[ex]Rec", "SP6[ex]GrabRec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
-			return Globals.char_state.SEQUENCE_USER
+			return Em.char_state.SEQUENCE_USER
 		
 	print("Error: " + anim + " not found.")
 		
@@ -1406,7 +1406,7 @@ func check_semi_invuln():
 func simulate():
 	
 	# can strafe up/down while doing air surf
-	if Character.state == Globals.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aSP2Active"]):
+	if Character.state == Em.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aSP2Active"]):
 		var v_dir = Character.get_opponent_v_dir()  # if +1, target is under, if -1, target is above
 		if v_dir != 0:
 			Character.velocity.y += v_dir * 100 * FMath.S
@@ -1416,14 +1416,14 @@ func simulate():
 
 func afterimage_trail():# process afterimage trail
 	
-	if Globals.mob_attr.TRAIL in Character.mob_attr:
+	if Em.mob_attr.TRAIL in Character.mob_attr:
 			Character.afterimage_trail()
 			return
-	if Globals.mob_attr.BLACK_TRAIL in Character.mob_attr:
+	if Em.mob_attr.BLACK_TRAIL in Character.mob_attr:
 			Character.afterimage_trail(Color(0,0,0), 0.6, 10)
 			return
-	if Globals.mob_attr.WHITE_TRAIL in Character.mob_attr:
-			Character.afterimage_trail(null, 0.6, 10, Globals.afterimage_shader.WHITE)
+	if Em.mob_attr.WHITE_TRAIL in Character.mob_attr:
+			Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
 			return
 	
 	match Animator.to_play_animation:
@@ -1445,8 +1445,8 @@ func query_traits(): # may have special conditions
 			
 #func get_root(move_name): # for aerial and chain memory, only needed for versions with active frames not in MOVE_DATABASE
 #
-#	if move_name in MOVE_DATABASE and "root" in MOVE_DATABASE[move_name]:
-#		return MOVE_DATABASE[move_name].root
+#	if move_name in MOVE_DATABASE and Em.move.ROOT in MOVE_DATABASE[move_name]:
+#		return MOVE_DATABASE[move_name][Em.move.ROOT]
 #
 #	match move_name:
 #		_:
@@ -1479,17 +1479,17 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-	move_data["atk_attr"] = query_atk_attr(orig_move_name)
+	move_data[Em.move.ATK_ATTR] = query_atk_attr(orig_move_name)
 	
-	if "damage" in move_data:
+	if Em.move.DMG in move_data:
 		if Globals.difficulty == 3:
-			move_data.damage = FMath.percent(move_data.damage, Character.MOB_LEVEL_TO_DMG[8])
+			move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Character.MOB_LEVEL_TO_DMG[8])
 		else:
-			move_data.damage = FMath.percent(move_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
+			move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Character.MOB_LEVEL_TO_DMG[Character.mob_level])
 	
-	if Globals.mob_attr.POWER in Character.mob_attr:
-		if "damage" in move_data:
-			move_data.damage = Character.modify_stat(move_data.damage, Globals.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
+	if Em.mob_attr.POWER in Character.mob_attr:
+		if Em.move.DMG in move_data:
+			move_data[Em.move.DMG] = Character.modify_stat(move_data[Em.move.DMG], Em.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
 
 	return move_data
 	
@@ -1500,8 +1500,8 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	move_name = refine_move_name(move_name)
 
 	var atk_attr := []
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		atk_attr = MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		atk_attr = MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 	else:
 		print("Error: Cannot retrieve atk_attr for " + move_name)
 		return []
@@ -1510,8 +1510,8 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 		_:
 			pass
 
-#	if Globals.mob_attr.ARMOR_MOVES in Character.mob_attr:
-#		atk_attr.append(Globals.atk_attr.SUPERARMOR_STARTUP)
+#	if Em.mob_attr.ARMOR_MOVES in Character.mob_attr:
+#		atk_attr.append(Em.atk_attr.SUPERARMOR_STARTUP)
 			
 	return atk_attr
 	
@@ -1520,15 +1520,15 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 
 func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	
-	match hit_data.move_name:
+	match hit_data[Em.hit.MOVE_NAME]:
 		"aF2":
-			if hit_data.sweetspotted:
-				hit_data.move_data["sequence"] = "aF2SeqA"
+			if hit_data[Em.hit.SWEETSPOTTED]:
+				hit_data[Em.hit.MOVE_DATA][Em.move.SEQ] = "aF2SeqA"
 			
 
 func being_hit(hit_data):
 	
-	match hit_data.move_name:
+	match hit_data[Em.hit.MOVE_NAME]:
 		_:
 			pass
 		
@@ -1707,26 +1707,26 @@ func move_sequence_target(new_position): # move sequence_target to new position
 			
 			
 func get_seq_hit_data(hit_key: int):
-	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key].duplicate(true)
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_HITS][hit_key].duplicate(true)
 	
-	if "damage" in seq_hit_data:
-		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
+	if Em.move.DMG in seq_hit_data:
+		seq_hit_data[Em.move.DMG] = FMath.percent(seq_hit_data[Em.move.DMG], Character.MOB_LEVEL_TO_DMG[Character.mob_level])
 	
-		if Globals.mob_attr.POWER in Character.mob_attr:
-			seq_hit_data.damage = Character.modify_stat(seq_hit_data.damage, Globals.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
+		if Em.mob_attr.POWER in Character.mob_attr:
+			seq_hit_data[Em.move.DMG] = Character.modify_stat(seq_hit_data[Em.move.DMG], Em.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
 	
 	return seq_hit_data
 	
 	
 	
 func get_seq_launch_data():
-	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch.duplicate(true)
+	var seq_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_LAUNCH].duplicate(true)
 
-	if "damage" in seq_data:
-		seq_data.damage = FMath.percent(seq_data.damage, Character.MOB_LEVEL_TO_DMG[Character.mob_level])
+	if Em.move.DMG in seq_data:
+		seq_data[Em.move.DMG] = FMath.percent(seq_data[Em.move.DMG], Character.MOB_LEVEL_TO_DMG[Character.mob_level])
 	
-		if Globals.mob_attr.POWER in Character.mob_attr:
-			seq_data.damage = Character.modify_stat(seq_data.damage, Globals.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
+		if Em.mob_attr.POWER in Character.mob_attr:
+			seq_data[Em.move.DMG] = Character.modify_stat(seq_data[Em.move.DMG], Em.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
 
 	return seq_data
 			
@@ -1772,12 +1772,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aDashTransit":
 			if Character.command_style != "air_back_dash":
 				Character.face_opponent()
-				match Character.get_opponent_angle_seg(Globals.angle_split.FOUR):
-					Globals.compass.E, Globals.compass.W:
+				match Character.get_opponent_angle_seg(Em.angle_split.FOUR):
+					Em.compass.E, Em.compass.W:
 						Character.animate("aDash")
-					Globals.compass.N:
+					Em.compass.N:
 						Character.animate("aDashU")
-					Globals.compass.S:
+					Em.compass.S:
 						Character.animate("aDashD")
 			else:
 				Character.face_away_from_opponent()
@@ -1998,7 +1998,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 			
-	if Globals.mob_attr.CHAIN in Character.mob_attr:
+	if Em.mob_attr.CHAIN in Character.mob_attr:
 		if Character.is_atk_recovery():
 			if Character.chain_memory.size() < Character.rand_max_chain_size and !Character.is_opponent_crossing_mob():
 				Character.chaining = true
@@ -2021,10 +2021,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 func _on_SpritePlayer_anim_started(anim_name):
 				
-	if Globals.mob_attr.CHAIN in Character.mob_attr and \
+	if Em.mob_attr.CHAIN in Character.mob_attr and \
 			Character.is_atk_startup() and Character.get_move_name() in STARTERS:
 		if Character.chain_memory.size() == 0: # 1st attack in chain set the rand_max_chain_size
-			Character.rand_max_chain_size = Globals.Game.rng_generate(Character.mob_attr[Globals.mob_attr.CHAIN] + 1)
+			Character.rand_max_chain_size = Globals.Game.rng_generate(Character.mob_attr[Em.mob_attr.CHAIN] + 1)
 		Character.chain_memory.append(anim_name)
 						
 	if Character.chaining:
@@ -2043,7 +2043,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 				
-	if Character.new_state in [Globals.char_state.GROUND_D_RECOVERY]: # put this after impulse
+	if Character.new_state in [Em.char_state.GROUND_D_RECOVERY]: # put this after impulse
 		Character.can_impulse = false
 	else:
 		Character.can_impulse = true
@@ -2225,11 +2225,11 @@ func start_audio(anim_name):
 		if !move_name in MOVE_DATABASE:
 			move_name = refine_move_name(move_name)
 		if move_name in MOVE_DATABASE:
-			if "move_sound" in MOVE_DATABASE[move_name]:
-				if !MOVE_DATABASE[move_name].move_sound is Array:
-					Character.play_audio(MOVE_DATABASE[move_name].move_sound.ref, MOVE_DATABASE[move_name].move_sound.aux_data)
+			if Em.move.MOVE_SOUND in MOVE_DATABASE[move_name]:
+				if !MOVE_DATABASE[move_name][Em.move.MOVE_SOUND] is Array:
+					Character.play_audio(MOVE_DATABASE[move_name][Em.move.MOVE_SOUND].ref, MOVE_DATABASE[move_name][Em.move.MOVE_SOUND].aux_data)
 				else:
-					for sound in MOVE_DATABASE[move_name].move_sound:
+					for sound in MOVE_DATABASE[move_name][Em.move.MOVE_SOUND]:
 						Character.play_audio(sound.ref, sound.aux_data)
 						
 		match orig_move_name:

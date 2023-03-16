@@ -91,6 +91,9 @@ func load_entity():
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Loader.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", Loader.char_data[master_ref].palettes[palette_ref])
+			
+	if UniqEntity.has_method("load_entity"):
+		UniqEntity.load_entity()
 				
 
 func simulate():
@@ -105,24 +108,81 @@ func simulate():
 		return
 		
 	if "TARGETS" in UniqEntity:
-		match UniqEntity.TARGETS:
-			Globals.field_target.ALL_BUT_PLAYERS:
-				for node in get_tree().get_nodes_in_group("MobNodes"):
+		if Em.field_target.MOBS in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("MobNodes"):
+				inflict(node)
+				
+		if Em.field_target.MOB_ENTITIES in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("MobEntityNodes"):
+				inflict(node)
+				
+		if Em.field_target.PLAYERS in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("PlayerNodes"):
+				inflict(node)
+				
+		if Em.field_target.PLAYER_ENTITIES in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("EntityNodes"):
+				inflict(node)
+				
+		if Em.field_target.MASTER in UniqEntity.TARGETS:
+			inflict(Globals.Game.get_player_node(master_ID))
+				
+		if Em.field_target.MASTER_ENTITIES in UniqEntity.TARGETS:
+			if master_ID >= 0:
+				for node in get_tree().get_nodes_in_group("EntityNodes"):
+					if node.master_ID == master_ID:
+						inflict(node)
+			else:
+				for node in get_tree().get_nodes_in_group("MobEntityNodes"):
+					if node.master_ID == master_ID:
+						inflict(node)
+				
+		if Em.field_target.OPPONENTS in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("PlayerNodes"):
+				if node.player_ID != master_ID:
 					inflict(node)
-				for node in Globals.Game.get_node("MobEntities").get_children():
+				
+		if Em.field_target.OPPONENT_ENTITIES in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("EntityNodes"):
+				if node.master_ID != master_ID:
 					inflict(node)
-				for node in Globals.Game.get_node("SFXFront").get_children(): # sticky_ID != positive
-					if (node.sticky_ID != null and node.sticky_ID >= 0) or node.field: pass
-					else: inflict(node)
-				for node in Globals.Game.get_node("SFXBack").get_children(): # sticky_ID != positive
-					if (node.sticky_ID != null and node.sticky_ID >= 0) or node.field: pass
-					else: inflict(node)
-				for node in Globals.Game.get_node("Afterimages").get_children(): # original_ID is negative
-					if node.original_ID >= 0: pass
-					else: inflict(node)
-			Globals.field_target.ALL_MOBS:
-				for node in get_tree().get_nodes_in_group("MobNodes"):
-					inflict(node)
+
+				
+		if Em.field_target.EFFECTS in UniqEntity.TARGETS:
+			for node in Globals.Game.get_node("SFXFront").get_children(): # sticky_ID != positive
+				if node.field: pass
+				elif node.sticky_ID != null:
+					if Em.field_target.MOBS in UniqEntity.TARGETS:
+						if node.sticky_ID < 0: inflict(node)
+					if Em.field_target.PLAYERS in UniqEntity.TARGETS:
+						if node.sticky_ID >= 0: inflict(node)
+					if Em.field_target.MASTER in UniqEntity.TARGETS:
+						if node.sticky_ID == master_ID: inflict(node)
+					if Em.field_target.OPPONENTS in UniqEntity.TARGETS:
+						if node.sticky_ID != master_ID: inflict(node)
+				else: inflict(node)
+			for node in Globals.Game.get_node("SFXBack").get_children(): # sticky_ID != positive
+				if node.field: pass
+				elif node.sticky_ID != null:
+					if Em.field_target.MOBS in UniqEntity.TARGETS:
+						if node.sticky_ID < 0: inflict(node)
+					if Em.field_target.PLAYERS in UniqEntity.TARGETS:
+						if node.sticky_ID >= 0: inflict(node)
+					if Em.field_target.MASTER in UniqEntity.TARGETS:
+						if node.sticky_ID == master_ID: inflict(node)
+					if Em.field_target.OPPONENTS in UniqEntity.TARGETS:
+						if node.sticky_ID != master_ID: inflict(node)
+				else: inflict(node)
+			for node in Globals.Game.get_node("Afterimages").get_children(): # original_ID is negative
+				if Em.field_target.MOBS in UniqEntity.TARGETS:
+					if node.original_ID < 0: inflict(node)
+				if Em.field_target.PLAYERS in UniqEntity.TARGETS:
+					if node.original_ID >= 0: inflict(node)
+				if Em.field_target.MASTER in UniqEntity.TARGETS:
+					if node.original_ID == master_ID: inflict(node)
+				if Em.field_target.OPPONENTS in UniqEntity.TARGETS:
+					if node.original_ID != master_ID: inflict(node)
+				
 
 
 	if abs(velocity.x) < 5 * FMath.S:

@@ -118,8 +118,8 @@ var mob_attr := {}
 var palette_ref: String
 var player_ID: int
 
-var state = Globals.char_state.GROUND_STANDBY
-var new_state = Globals.char_state.GROUND_STANDBY
+var state = Em.char_state.GROUND_STANDBY
+var new_state = Em.char_state.GROUND_STANDBY
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
 var velocity := FVector.new()
 var facing := 1 # 1 for facing right, -1 for facing left
@@ -165,7 +165,7 @@ var guardbroken := false # when GG is depleted, mob enters a guardbroken state w
 var chaining := false
 var air_dashed := false
 var rand_time = null
-var peak_flag = Globals.peak_flag.GROUNDED
+var peak_flag = Em.peak_flag.GROUNDED
 var chain_memory := []
 var rand_max_chain_size := 0
 var combo_level := 0 # set when mob_break according to atk_level, determine Guard Swell Rate
@@ -312,21 +312,21 @@ func get_seq_partner():
 func get_target():
 	var target_node = Globals.Game.get_player_node(target_ID)
 	
-	if target_node.state == Globals.char_state.DEAD: # player is dead
+	if target_node.state == Em.char_state.DEAD: # player is dead
 		if Globals.player_count == 1:
 			return self # no more players
 		else: # target other player
 			if target_ID == 0:
 				target_ID = 1
 				target_node = Globals.Game.get_player_node(target_ID)
-				if target_node.state == Globals.char_state.DEAD:
+				if target_node.state == Em.char_state.DEAD:
 					return self # no more players
 				else:
 					return target_node
 			else:
 				target_ID = 0
 				target_node = Globals.Game.get_player_node(target_ID)
-				if target_node.state == Globals.char_state.DEAD:
+				if target_node.state == Em.char_state.DEAD:
 					return self # no more players
 				else:
 					return target_node
@@ -385,7 +385,7 @@ func simulate(_new_input_state):
 	
 # INDICATORS --------------------------------------------------------------------------------------------------
 
-	if state == Globals.char_state.DEAD:
+	if state == Em.char_state.DEAD:
 		$MobStats.hide()
 	else:
 		$MobStats.show()
@@ -440,9 +440,10 @@ func simulate(_new_input_state):
 		return
 	if free: return
 	
-	var slow_amount = query_status_effect_aux(Globals.status_effect.SLOWED)
+	var slow_amount = query_status_effect_aux(Em.status_effect.SLOWED)
 	if slow_amount != null: slowed = slow_amount
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -462,14 +463,14 @@ func simulate2(): # only ran if not in hitstop
 		repeat_memory = []
 		combo_level = 0
 		
-	if !new_state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
 		
 	if !is_attacking():
 		chain_memory = []
 		
 	# GG Swell during guardbroken state
-	if !$HitStopTimer.is_running() and !state in [Globals.char_state.SEQUENCE_TARGET] and get_damage_percent() < 100:
+	if !$HitStopTimer.is_running() and !state in [Em.char_state.SEQUENCE_TARGET] and get_damage_percent() < 100:
 		if guardbroken:
 			current_guard_gauge = int(min(0, current_guard_gauge + get_stat("GUARD_GAUGE_SWELL_RATE")))
 			if !$HitStunTimer.is_running(): # guardbroken and out of hitstun, instantly gain back all Guard Gauge
@@ -482,7 +483,7 @@ func simulate2(): # only ran if not in hitstop
 #					proj_only_combo = false
 				play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 				Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-					"v_mirror":Globals.Game.rng_bool()}, "red")
+					"v_mirror":Globals.Game.rng_bool()}, "white")
 			else:
 				if current_guard_gauge == 0: # instantly recover from hitstun if GG swell back to max
 					$HitStunTimer.stop()
@@ -494,7 +495,7 @@ func simulate2(): # only ran if not in hitstop
 #						proj_only_combo = false
 					play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 					Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
-						"v_mirror":Globals.Game.rng_bool()}, "red")
+						"v_mirror":Globals.Game.rng_bool()}, "white")
 				
 			guard_gauge_update()
 		else:
@@ -504,7 +505,7 @@ func simulate2(): # only ran if not in hitstop
 				guard_gauge_update()
 		
 		
-	if state in [Globals.char_state.SEQUENCE_USER, Globals.char_state.SEQUENCE_TARGET]:
+	if state in [Em.char_state.SEQUENCE_USER, Em.char_state.SEQUENCE_TARGET]:
 		simulate_sequence()
 		return
 	
@@ -513,7 +514,7 @@ func simulate2(): # only ran if not in hitstop
 			$ArmorTimer.time += 1
 	
 #	if !$ResistTimer.is_running(): # out of resist timer, recover automatically
-#		if state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
+#		if state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			if grounded:
 #				animate("Idle")
@@ -521,7 +522,7 @@ func simulate2(): # only ran if not in hitstop
 #				animate("FallTransit")
 #			$ArmorTimer.time = get_stat("ARMOR_TIME")
 #	else: # if no longer in Resisted Hitstun, set the timer to zero
-#		if state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
+#		if state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			pass
 #		else:
@@ -539,38 +540,38 @@ func simulate2(): # only ran if not in hitstop
 		$ZoneDrawer.activate()
 	
 	match new_state: # quick turn
-		Globals.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GROUND_ATK_STARTUP:
 			if Animator.time <= 6:
 				face_opponent()
-		Globals.char_state.AIR_ATK_STARTUP:
+		Em.char_state.AIR_ATK_STARTUP:
 			if Animator.time <= 6:
 				face_opponent()
 	
 	# air strafing
-	if !grounded and new_state in [Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE]:
+	if !grounded and new_state in [Em.char_state.AIR_STANDBY, Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE]:
 					
 		var valid := true
 		match new_state:
-			Globals.char_state.AIR_ATK_ACTIVE:
+			Em.char_state.AIR_ATK_ACTIVE:
 				var move_data = query_move_data()
 				if !can_air_strafe(move_data):
 					valid = false # some attacks cannot be air strafed
-			Globals.char_state.AIR_STANDBY:
-				if strafe_style == Globals.strafe_style.NONE:
+			Em.char_state.AIR_STANDBY:
+				if strafe_style == Em.strafe_style.NONE:
 					valid = false
 					
-		if strafe_style == Globals.strafe_style.AWAY_ON_DESCEND and velocity.y < 0:
+		if strafe_style == Em.strafe_style.AWAY_ON_DESCEND and velocity.y < 0:
 			valid = false # some style prevent strafing while going up
 					
 		if valid:
 			var strafe_dir: int = get_opponent_dir()
-			if strafe_style in [Globals.strafe_style.AWAY, Globals.strafe_style.AWAY_ON_DESCEND]:
+			if strafe_style in [Em.strafe_style.AWAY, Em.strafe_style.AWAY_ON_DESCEND]:
 				strafe_dir = -strafe_dir
 				
 			var air_strafe_speed_temp: int = FMath.percent(get_stat("SPEED"), get_stat("AIR_STRAFE_SPEED_MOD"))
 			var air_strafe_limit_temp: int = FMath.percent(air_strafe_speed_temp, get_stat("AIR_STRAFE_LIMIT_MOD"))
 			
-			if state != Globals.char_state.AIR_STANDBY:
+			if state != Em.char_state.AIR_STANDBY:
 				air_strafe_speed_temp = FMath.percent(air_strafe_speed_temp, AERIAL_STRAFE_MOD)
 				air_strafe_limit_temp = FMath.percent(air_strafe_limit_temp, AERIAL_STRAFE_MOD)
 			else:
@@ -586,17 +587,17 @@ func simulate2(): # only ran if not in hitstop
 	
 	if !grounded:
 		match new_state:
-			Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, \
-				Globals.char_state.GROUND_STARTUP, Globals.char_state.GROUND_ACTIVE, Globals.char_state.GROUND_RECOVERY, \
-				Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
-				Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.GROUND_BLOCK:
+			Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY, \
+				Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_ACTIVE, Em.char_state.GROUND_RECOVERY, \
+				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_RECOVERY, \
+				Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.GROUND_BLOCK:
 				check_drop()
 	else: # just in case, normally called when physics.gd runs into a floor
 		match new_state:
-			Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_STARTUP, \
-				Globals.char_state.AIR_ACTIVE, Globals.char_state.AIR_RECOVERY, Globals.char_state.AIR_ATK_STARTUP, \
-				Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_FLINCH_HITSTUN, \
-				Globals.char_state.LAUNCHED_HITSTUN:
+			Em.char_state.AIR_STANDBY, Em.char_state.AIR_STARTUP, \
+				Em.char_state.AIR_ACTIVE, Em.char_state.AIR_RECOVERY, Em.char_state.AIR_ATK_STARTUP, \
+				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_RECOVERY, Em.char_state.AIR_FLINCH_HITSTUN, \
+				Em.char_state.LAUNCHED_HITSTUN:
 				check_landing()
 
 # GRAVITY --------------------------------------------------------------------------------------------------
@@ -616,7 +617,7 @@ func simulate2(): # only ran if not in hitstop
 		var weight: int = FMath.get_fraction_percent(PEAK_DAMPER_LIMIT - abs(velocity.y), PEAK_DAMPER_LIMIT)
 		gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, PEAK_DAMPER_MOD), weight)
 		# transit from jump to fall animation
-		if new_state == Globals.char_state.AIR_STANDBY and Animator.query_to_play(["Jump"]): # don't use query() for this one
+		if new_state == Em.char_state.AIR_STANDBY and Animator.query_to_play(["Jump"]): # don't use query() for this one
 			animate("FallTransit")
 
 	if !grounded: # gravity only pulls you if you are in the air
@@ -634,14 +635,14 @@ func simulate2(): # only ran if not in hitstop
 	
 	var has_terminal := true
 
-	if new_state == Globals.char_state.DEAD:
+	if new_state == Em.char_state.DEAD:
 		has_terminal = false
 
 #	if is_atk_startup():
-#		if Globals.atk_attr.NO_TERMINAL_VEL_STARTUP in query_atk_attr():
+#		if Em.atk_attr.NO_TERMINAL_VEL_STARTUP in query_atk_attr():
 #			 has_terminal = false
 	if is_atk_active():
-		if Globals.atk_attr.NO_TERMINAL_VEL_ACTIVE in query_atk_attr():
+		if Em.atk_attr.NO_TERMINAL_VEL_ACTIVE in query_atk_attr():
 			 has_terminal = false
 
 	if has_terminal:
@@ -675,7 +676,7 @@ func simulate2(): # only ran if not in hitstop
 		air_res_this_frame = HITSTUN_AIR_RES # 3
 	
 	match state:
-		Globals.char_state.GROUND_STANDBY:
+		Em.char_state.GROUND_STANDBY:
 			if dir == 0: # if not moving
 				# if in run animation, do brake animation
 				if Animator.query_to_play(["Run", "RunTransit"]):
@@ -683,24 +684,24 @@ func simulate2(): # only ran if not in hitstop
 			else: # no friction when moving
 				friction_this_frame = 0
 	
-		Globals.char_state.GROUND_STARTUP:
+		Em.char_state.GROUND_STARTUP:
 			friction_this_frame = 0 # no friction when starting a ground jump/dash
 
-		Globals.char_state.AIR_STANDBY:
+		Em.char_state.AIR_STANDBY:
 			# just in case, fall animation if falling downwards without slowing down
 			if velocity.y > 0 and Animator.query_to_play(["Jump"]):
 				animate("FallTransit")
 	
-		Globals.char_state.AIR_STARTUP, Globals.char_state.AIR_D_RECOVERY, Globals.char_state.AIR_RECOVERY:
+		Em.char_state.AIR_STARTUP, Em.char_state.AIR_D_RECOVERY, Em.char_state.AIR_RECOVERY:
 			air_res_this_frame = 0
 
-		Globals.char_state.AIR_ATK_STARTUP:
+		Em.char_state.AIR_ATK_STARTUP:
 			air_res_this_frame = 0
 			
-		Globals.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.AIR_ATK_ACTIVE:
 			air_res_this_frame = 0
 			
-		Globals.char_state.GROUND_FLINCH_HITSTUN:
+		Em.char_state.GROUND_FLINCH_HITSTUN:
 			# when out of hitstun, recover
 			if !$HitStunTimer.is_running():
 				if Animator.query_to_play(["FlinchA"]):
@@ -711,7 +712,7 @@ func simulate2(): # only ran if not in hitstop
 			else:
 				friction_this_frame = FMath.percent(friction_this_frame, 50) # lower friction during flinch hitstun
 					
-		Globals.char_state.AIR_FLINCH_HITSTUN:
+		Em.char_state.AIR_FLINCH_HITSTUN:
 			# when out of hitstun, recover
 #			if velocity.y > HITSTUN_FALL_THRESHOLD and position.y > floor_level:
 #				velocity.y = HITSTUN_FALL_THRESHOLD # limit downward velocity during air flinch
@@ -722,7 +723,7 @@ func simulate2(): # only ran if not in hitstop
 					animate("aFlinchBReturn")
 				modulate_play("unflinch_flash")
 		
-		Globals.char_state.LAUNCHED_HITSTUN:
+		Em.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
 			if !$HitStunTimer.is_running() and Animator.query_to_play(["Launch", "LaunchTransit"]):
 				animate("FallTransit")
@@ -762,7 +763,7 @@ func simulate2(): # only ran if not in hitstop
 	if velocity_limiter.y_slow != null:
 		velocity.y = FMath.f_lerp(velocity.y, 0, velocity_limiter.y_slow)
 	
-	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and state == Globals.char_state.LAUNCHED_HITSTUN:
+	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and state == Em.char_state.LAUNCHED_HITSTUN:
 		launch_trail() # do launch trail before moving
 		
 #	if grounded and abs(velocity.x) < 30 * FMath.S:
@@ -785,7 +786,7 @@ func simulate2(): # only ran if not in hitstop
 		else:
 			if results[0]: check_landing()
 			
-			if new_state == Globals.char_state.LAUNCHED_HITSTUN:
+			if new_state == Em.char_state.LAUNCHED_HITSTUN:
 				bounce(results[0])
 		
 	
@@ -795,18 +796,18 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	test1()
 	
 	match peak_flag:
-		Globals.peak_flag.GROUNDED:
+		Em.peak_flag.GROUNDED:
 			if !grounded:
-				peak_flag = Globals.peak_flag.JUMPING
-		Globals.peak_flag.JUMPING:
+				peak_flag = Em.peak_flag.JUMPING
+		Em.peak_flag.JUMPING:
 			if grounded:
-				peak_flag = Globals.peak_flag.GROUNDED
+				peak_flag = Em.peak_flag.GROUNDED
 			else:
 				if velocity.y > 0:
-					 peak_flag = Globals.peak_flag.PEAK
-		Globals.peak_flag.PEAK, Globals.peak_flag.PEAK_SPENT:
+					 peak_flag = Em.peak_flag.PEAK
+		Em.peak_flag.PEAK, Em.peak_flag.PEAK_SPENT:
 			if grounded:
-				peak_flag = Globals.peak_flag.GROUNDED
+				peak_flag = Em.peak_flag.GROUNDED
 				
 	advance_command()
 	
@@ -821,7 +822,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		hitstop = null
 		return
 	if free: return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0:
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		slowed = 0
 		$HitStopTimer.stop()
 		return
 	slowed = 0
@@ -847,11 +849,11 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 #		if !$HitStunTimer.is_running():
 #			$RageTimer.simulate()
 
-		if state == Globals.char_state.DEAD:
+		if state == Em.char_state.DEAD:
 			death_anim()
 		
 		# spin character during launch, be sure to do this after SpritePlayer since rotation is reset at start of each animation
-		if state == Globals.char_state.LAUNCHED_HITSTUN and Animator.query_current(["LaunchTransit", "Launch"]):
+		if state == Em.char_state.LAUNCHED_HITSTUN and Animator.query_current(["LaunchTransit", "Launch"]):
 			sprite.rotation = launch_starting_rot - facing * launchstun_rotate * LAUNCH_ROT_SPEED * Globals.FRAME
 			launchstun_rotate += 1
 	
@@ -885,8 +887,8 @@ func process_command():
 	if  is_atk_recovery() and command_array_num > 0 and current_command in UniqChar.COMMANDS and \
 			"anim" in UniqChar.COMMANDS[current_command] and UniqChar.COMMANDS[current_command].anim is Array:
 		pass # chain series
-	elif !new_state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.AIR_STANDBY, Globals.char_state.GROUND_C_RECOVERY, \
-			Globals.char_state.AIR_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY]:
+	elif !new_state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.GROUND_C_RECOVERY, \
+			Em.char_state.AIR_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY, Em.char_state.AIR_D_RECOVERY]:
 		return
 	
 	if !current_command in UniqChar.COMMANDS: # standby
@@ -910,9 +912,9 @@ func process_command():
 				var active_trigger = null
 				match trigger.type:
 					"peak":
-						if peak_flag == Globals.peak_flag.PEAK:
+						if peak_flag == Em.peak_flag.PEAK:
 							active_trigger = trigger
-							peak_flag = Globals.peak_flag.PEAK_SPENT
+							peak_flag = Em.peak_flag.PEAK_SPENT
 					"zone":
 						if "long" in trigger:
 							if $LongFailTimer.is_running():
@@ -939,12 +941,12 @@ func process_command():
 			match UniqChar.COMMANDS[current_command].action:
 						
 				"idle":
-					if !new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY]:
+					if !new_state in [Em.char_state.GROUND_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY]:
 						face_opponent()
 							
 				"option": # see if activate triggers for 1 frame, then do "next" or "decision"
-					if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_C_RECOVERY, \
-							Globals.char_state.GROUND_D_RECOVERY, Globals.char_state.AIR_D_RECOVERY]:
+					if new_state in [Em.char_state.GROUND_C_RECOVERY, Em.char_state.AIR_C_RECOVERY, \
+							Em.char_state.GROUND_D_RECOVERY, Em.char_state.AIR_D_RECOVERY]:
 						return # maintain option during recovery states
 					if grounded:
 						if "next" in UniqChar.COMMANDS[current_command]:
@@ -956,7 +958,7 @@ func process_command():
 							UniqChar.decision()
 						
 				"run":
-					if new_state == Globals.char_state.GROUND_STANDBY:
+					if new_state == Em.char_state.GROUND_STANDBY:
 						if "dir" in UniqChar.COMMANDS[current_command]:
 							match UniqChar.COMMANDS[current_command].dir:
 								1, -1:
@@ -993,14 +995,14 @@ func process_command():
 						if !grounded: return # if in air while trying to do a ground animation, wait till grounded then do it
 						
 						match new_state:
-							Globals.char_state.GROUND_ATK_RECOVERY: # chaining
+							Em.char_state.GROUND_ATK_RECOVERY: # chaining
 								if command_array_num == 0: return
 								else: chaining = true
-							Globals.char_state.GROUND_D_RECOVERY:
+							Em.char_state.GROUND_D_RECOVERY:
 								if command_array_num == 0 and \
 										("no_c_rec" in UniqChar.COMMANDS[current_command] or "no_move_rec" in UniqChar.COMMANDS[current_command]):
 									return # some animations cannot be done during MOVE RECOVERY
-							Globals.char_state.GROUND_C_RECOVERY:
+							Em.char_state.GROUND_C_RECOVERY:
 								if command_array_num == 0 and "no_c_rec" in UniqChar.COMMANDS[current_command]:
 									return # some animations cannot be done during C_RECOVERY
 							
@@ -1010,14 +1012,14 @@ func process_command():
 							return
 							
 						match new_state:
-							Globals.char_state.AIR_ATK_RECOVERY: # chaining
+							Em.char_state.AIR_ATK_RECOVERY: # chaining
 								if command_array_num == 0: return
 								else: chaining = true
-							Globals.char_state.AIR_D_RECOVERY:
+							Em.char_state.AIR_D_RECOVERY:
 								if command_array_num == 0 and \
 										("no_c_rec" in UniqChar.COMMANDS[current_command] or "no_move_rec" in UniqChar.COMMANDS[current_command]):
 									return # some animations cannot be done during MOVE RECOVERY
-							Globals.char_state.AIR_C_RECOVERY:
+							Em.char_state.AIR_C_RECOVERY:
 								if command_array_num == 0 and "no_c_rec" in UniqChar.COMMANDS[current_command]:
 									return # some animations cannot be done during C_RECOVERY
 					
@@ -1053,14 +1055,14 @@ func process_command():
 						
 func is_ground_anim(anim): # for AI commands
 	match state_detect(anim):
-		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_STARTUP:
+		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_STARTUP:
 			return true
 	return false
 		
 func is_passive():
 	if Globals.difficulty == 3: return false
-#	if !$RageTimer.is_running() and !Globals.mob_attr.RAGE in mob_attr:
-	if !Globals.mob_attr.RAGE in mob_attr:
+#	if !$RageTimer.is_running() and !Em.mob_attr.RAGE in mob_attr:
+	if !Em.mob_attr.RAGE in mob_attr:
 		var target = get_target()
 		if target == self or target.get_target() != self:
 			if Globals.Game.LevelControl.get_living_player_count() > 1 and \
@@ -1163,11 +1165,11 @@ func get_stat(stat):
 	
 	match stat: # status effects
 		"SPEED_MOD":
-			var mod = query_status_effect_aux(Globals.status_effect.CHILL)
+			var mod = query_status_effect_aux(Em.status_effect.CHILL)
 			if mod != null:
 				to_return = FMath.percent(to_return, mod)
 		"GRAVITY_MOD":
-			var mod = query_status_effect_aux(Globals.status_effect.GRAVITIZE)
+			var mod = query_status_effect_aux(Em.status_effect.GRAVITIZE)
 			if mod != null:
 				to_return = FMath.percent(to_return, mod)
 		
@@ -1222,34 +1224,34 @@ func get_stat(stat):
 			"DAMAGE_VALUE_LIMIT":
 				to_return = FMath.percent(to_return, 175)
 	
-	if Globals.mob_attr.TOUGH in mob_attr:
+	if Em.mob_attr.TOUGH in mob_attr:
 		match stat:
 			"GUARD_GAUGE_SWELL_RATE":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [50, 75, 115, 130, 145, 160])
+				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [50, 75, 115, 130, 145, 160])
 			"ARMOR_TIME":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [50, 75, 125, 150, 175, 200])
+				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [50, 75, 125, 150, 175, 200])
 			"ARMOR_DMG_MOD":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [150, 125, 75, 50, 25, 1])
+				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [150, 125, 75, 50, 25, 1])
 			"GUARD_DRAIN_MOD":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [140, 120, 90, 80, 70, 60])
+				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [140, 120, 90, 80, 70, 60])
 			"GG_REGEN_AMOUNT":
-				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [0, 50, 110, 120, 130, 140])
+				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [0, 50, 110, 120, 130, 140])
 #			"ARMOR_KNOCKBACK_MOD":
-#				to_return = modify_stat(to_return, Globals.mob_attr.TOUGH, [75, 50, 25, 1])
-	if Globals.mob_attr.SPEED in mob_attr:
+#				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [75, 50, 25, 1])
+	if Em.mob_attr.SPEED in mob_attr:
 		match stat:
 			"SPEED_MOD":
-				to_return = modify_stat(to_return, Globals.mob_attr.SPEED, [60, 80, 120, 140, 160, 180, 200])
-	if Globals.mob_attr.HP in mob_attr:
+				to_return = modify_stat(to_return, Em.mob_attr.SPEED, [60, 80, 120, 140, 160, 180, 200])
+	if Em.mob_attr.HP in mob_attr:
 		match stat:
 			"DAMAGE_VALUE_LIMIT":
-				if mob_attr[Globals.mob_attr.HP] == 0:
+				if mob_attr[Em.mob_attr.HP] == 0:
 					return 1
-				to_return = modify_stat(to_return, Globals.mob_attr.HP, [1, 50, 150, 200, 250, 300])
-#	if Globals.mob_attr.GDRAIN in mob_attr:
+				to_return = modify_stat(to_return, Em.mob_attr.HP, [1, 50, 150, 200, 250, 300])
+#	if Em.mob_attr.GDRAIN in mob_attr:
 #		match stat:
 #			"GUARD_DRAIN_MOD":
-#				to_return = modify_stat(to_return, Globals.mob_attr.GDRAIN, [999, 130, 120, 110, 90, 80, 70])
+#				to_return = modify_stat(to_return, Em.mob_attr.GDRAIN, [999, 130, 120, 110, 90, 80, 70])
 #
 #	match stat: # limits
 #		"SPEED_MOD":
@@ -1270,8 +1272,8 @@ func loot_drop():
 	
 	var loot_array = UniqChar.generate_loot()
 	
-	if Globals.mob_attr.COIN in mob_attr:
-		for x in min(mob_attr[Globals.mob_attr.COIN], Globals.Game.LevelControl.ITEM_LIMIT):
+	if Em.mob_attr.COIN in mob_attr:
+		for x in min(mob_attr[Em.mob_attr.COIN], Globals.Game.LevelControl.ITEM_LIMIT):
 			loot_array.append("Coin")
 	
 	if target_ID >= 0:
@@ -1300,23 +1302,23 @@ func bounce(against_ground: bool):
 		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
 		if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			if sign(velocity_previous_frame.x) > 0:
-				bounce_dust(Globals.compass.E)
+				bounce_dust(Em.compass.E)
 			else:
-				bounce_dust(Globals.compass.W)
+				bounce_dust(Em.compass.W)
 			play_audio("rock3", {"vol" : -10,})
 			
 				
 	elif is_against_ceiling($PlayerCollisionBox, $PlayerCollisionBox):
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
-			bounce_dust(Globals.compass.N)
+			bounce_dust(Em.compass.N)
 			play_audio("rock3", {"vol" : -10,})
 			
 				
 	elif against_ground:
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
-			bounce_dust(Globals.compass.S)
+			bounce_dust(Em.compass.S)
 			play_audio("rock3", {"vol" : -10,})
 			
 		
@@ -1360,57 +1362,57 @@ func state_detect(anim):
 	match anim:
 		# universal animations
 		"Idle", "RunTransit", "Run", "Brake", "TurnTransit":
-			return Globals.char_state.GROUND_STANDBY
+			return Em.char_state.GROUND_STANDBY
 		"JumpTransit", "DashTransit":
-			return Globals.char_state.GROUND_STARTUP
+			return Em.char_state.GROUND_STARTUP
 		"Dash":
-			return Globals.char_state.GROUND_D_RECOVERY
+			return Em.char_state.GROUND_D_RECOVERY
 		"SoftLanding":
-			return Globals.char_state.GROUND_RECOVERY
+			return Em.char_state.GROUND_RECOVERY
 		"DashBrake":
-			return Globals.char_state.GROUND_C_RECOVERY
+			return Em.char_state.GROUND_C_RECOVERY
 			
 		"JumpTransit3", "Jump", "FallTransit", "Fall":
-			return Globals.char_state.AIR_STANDBY
+			return Em.char_state.AIR_STANDBY
 		"JumpTransit2", "aDashTransit":
-			return Globals.char_state.AIR_STARTUP
+			return Em.char_state.AIR_STARTUP
 			
 		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU":
-			return Globals.char_state.AIR_D_RECOVERY
+			return Em.char_state.AIR_D_RECOVERY
 		"aDashBrake":
-			return Globals.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_RECOVERY
 			
 		"FlinchAStop", "FlinchA", "FlinchBStop", "FlinchB":
-			return Globals.char_state.GROUND_FLINCH_HITSTUN
+			return Em.char_state.GROUND_FLINCH_HITSTUN
 		"FlinchAReturn", "FlinchBReturn":
-			return Globals.char_state.GROUND_C_RECOVERY
+			return Em.char_state.GROUND_C_RECOVERY
 		"aFlinchAStop", "aFlinchA", "aFlinchBStop", "aFlinchB":
-			return Globals.char_state.AIR_FLINCH_HITSTUN
+			return Em.char_state.AIR_FLINCH_HITSTUN
 		"aFlinchAReturn", "aFlinchBReturn":
-			return Globals.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_RECOVERY
 		"LaunchStop", "LaunchTransit", "Launch":
-			return Globals.char_state.LAUNCHED_HITSTUN
+			return Em.char_state.LAUNCHED_HITSTUN
 			
 		"ResistA", "ResistB":
-			return Globals.char_state.GROUND_RESISTED_HITSTUN
+			return Em.char_state.GROUND_RESISTED_HITSTUN
 		"aResistA", "aResistB":
-			return Globals.char_state.AIR_RESISTED_HITSTUN
+			return Em.char_state.AIR_RESISTED_HITSTUN
 		
 		"SeqFlinchAFreeze", "SeqFlinchBFreeze":
-			return Globals.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQUENCE_TARGET
 		"SeqFlinchAStop", "SeqFlinchA", "SeqFlinchBStop", "SeqFlinchB":
-			return Globals.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQUENCE_TARGET
 		"aSeqFlinchAFreeze", "aSeqFlinchBFreeze":
-			return Globals.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQUENCE_TARGET
 		"aSeqFlinchAStop", "aSeqFlinchA", "aSeqFlinchBStop", "aSeqFlinchB":
-			return Globals.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQUENCE_TARGET
 		"SeqLaunchFreeze":
-			return Globals.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQUENCE_TARGET
 		"SeqLaunchStop", "SeqLaunchTransit", "SeqLaunch":
-			return Globals.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQUENCE_TARGET
 			
 		"Death":
-			return Globals.char_state.DEAD
+			return Em.char_state.DEAD
 			
 			
 		_: # unique animations
@@ -1476,10 +1478,10 @@ func target_closest():
 		var alive_players := []
 		
 		var player_1 = Globals.Game.get_player_node(0)
-		if player_1.state != Globals.char_state.DEAD:
+		if player_1.state != Em.char_state.DEAD:
 			alive_players.append(player_1)
 		var player_2 = Globals.Game.get_player_node(1)
-		if player_2.state != Globals.char_state.DEAD:
+		if player_2.state != Em.char_state.DEAD:
 			alive_players.append(player_2)
 			
 		if alive_players.size() == 0:
@@ -1522,11 +1524,11 @@ func are_players_in_box(origin: Vector2, size:Vector2) -> bool:
 func get_alive_players() -> Array:
 	var players = []
 	var player_1 = Globals.Game.get_player_node(0)
-	if player_1.state != Globals.char_state.DEAD:
+	if player_1.state != Em.char_state.DEAD:
 		players.append(player_1)
 	if Globals.player_count == 2:
 		var player_2 = Globals.Game.get_player_node(1)
-		if player_2.state != Globals.char_state.DEAD:
+		if player_2.state != Em.char_state.DEAD:
 			players.append(player_2)
 	return players
 	
@@ -1534,13 +1536,13 @@ func get_alive_players() -> Array:
 func check_drop():
 	if seq_partner_ID != null: return # no checking during start of sequence
 	match new_state:
-		Globals.char_state.GROUND_FLINCH_HITSTUN:
+		Em.char_state.GROUND_FLINCH_HITSTUN:
 			match Animator.to_play_animation:
 				"FlinchAStop", "FlinchA":
 					animate("aFlinchA")
 				"FlinchBStop", "FlinchB":
 					animate("aFlinchB")
-		Globals.char_state.GROUND_RESISTED_HITSTUN:
+		Em.char_state.GROUND_RESISTED_HITSTUN:
 			match Animator.to_play_animation:
 				"ResistA":
 					animate("aResistA")
@@ -1552,10 +1554,10 @@ func check_drop():
 func check_landing(): # called by physics.gd when character stopped by floor
 	if seq_partner_ID != null: return # no checking during start of sequence
 	match new_state:
-		Globals.char_state.AIR_STANDBY:
+		Em.char_state.AIR_STANDBY:
 			animate("SoftLanding")
 			
-		Globals.char_state.AIR_RESISTED_HITSTUN:
+		Em.char_state.AIR_RESISTED_HITSTUN:
 			match Animator.to_play_animation:
 				"aResistA":
 					animate("ResistA")
@@ -1564,7 +1566,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			if velocity_previous_frame.y > 300 * FMath.S:
 				UniqChar.landing_sound() # only make landing sound if landed fast enough, or very annoying
 
-		Globals.char_state.AIR_FLINCH_HITSTUN: # land during hitstun
+		Em.char_state.AIR_FLINCH_HITSTUN: # land during hitstun
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			match Animator.to_play_animation:
 				"aFlinchAStop", "aFlinchA":
@@ -1574,8 +1576,8 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			if velocity_previous_frame.y > 300 * FMath.S:
 				UniqChar.landing_sound() # only make landing sound if landed fast enough, or very annoying
 			
-		Globals.char_state.LAUNCHED_HITSTUN: # land during launch_hitstun, can bounce or tech land
-			if new_state == Globals.char_state.LAUNCHED_HITSTUN:
+		Em.char_state.LAUNCHED_HITSTUN: # land during launch_hitstun, can bounce or tech land
+			if new_state == Em.char_state.LAUNCHED_HITSTUN:
 				# need to use new_state to prevent an issue with grounded Break state causing HardLanding on flinch
 				# check using either velocity this frame or last frame
 					
@@ -1595,8 +1597,9 @@ func check_landing(): # called by physics.gd when character stopped by floor
 
 
 func check_collidable(): # called by Physics.gd
+	if slowed < 0: return false
 	match new_state:
-		Globals.char_state.DEAD, Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER:
+		Em.char_state.DEAD, Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER:
 			return false
 			
 	return UniqChar.check_collidable()
@@ -1608,9 +1611,9 @@ func check_semi_invuln():
 	return false	
 	
 func check_passthrough():
-	if state == Globals.char_state.SEQUENCE_USER:
+	if state == Em.char_state.SEQUENCE_USER:
 		return UniqChar.sequence_passthrough() # for cinematic supers
-	elif state == Globals.char_state.SEQUENCE_TARGET:
+	elif state == Em.char_state.SEQUENCE_TARGET:
 		return get_target().sequence_partner_passthrough() # get passthrough state from the one grabbing you
 	return false
 		
@@ -1625,14 +1628,14 @@ func get_feet_pos(): # return global position of the point the character is stan
 
 func bounce_dust(orig_dir):
 	match orig_dir:
-		Globals.compass.N:
+		Em.compass.N:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
-		Globals.compass.E:
+		Em.compass.E:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
 				{"facing": 1, "rot":-PI/2})
-		Globals.compass.S:
+		Em.compass.S:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", get_feet_pos(), {"grounded":true})
-		Globals.compass.W:
+		Em.compass.W:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
 				{"facing": -1, "rot":-PI/2})
 
@@ -1662,7 +1665,7 @@ func flashes():
 	if $ArmorTimer.is_running():
 		modulate_play("mob_armor_time")
 
-	if Globals.mob_attr.PASSIVE_ARMOR in mob_attr and get_guard_gauge_percent_below() >= 75:
+	if Em.mob_attr.PASSIVE_ARMOR in mob_attr and get_guard_gauge_percent_below() >= 75:
 		modulate_play("passive_armor")
 
 	UniqChar.unique_flash()
@@ -1687,7 +1690,7 @@ func process_afterimage_trail():# process afterimage trail
 			
 			
 func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime: int = 10, \
-		afterimage_shader = Globals.afterimage_shader.MASTER): # one afterimage every 3 frames
+		afterimage_shader = Em.afterimage_shader.MASTER): # one afterimage every 3 frames
 			
 	if afterimage_timer <= 0:
 		afterimage_timer = 2
@@ -1703,7 +1706,7 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 			main_color_modulate = color_modulate
 		
 #func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, palette_ref, color_modulate = null, \
-#		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+#		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 		
 		if sfx_under.visible:
 			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, \
@@ -1724,14 +1727,14 @@ func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need
 	
 	if sfx_under.visible:
 		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, null, \
-				starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER)
+				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 		
 	Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, null, \
-			starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER)
+			starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 	if sfx_over.visible:
 		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, null, \
-				starting_modulate_a, lifetime, Globals.afterimage_shader.MASTER)
+				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 		
 func launch_trail():
@@ -1772,66 +1775,66 @@ func get_move_name():
 	
 func is_hitstunned():
 	match state: # use non-new state
-		Globals.char_state.AIR_FLINCH_HITSTUN, Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.LAUNCHED_HITSTUN:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
 			return true
 	return false
 	
 func is_hitstunned_or_sequenced():
 	match state: # use non-new state
-		Globals.char_state.AIR_FLINCH_HITSTUN, Globals.char_state.GROUND_FLINCH_HITSTUN, Globals.char_state.LAUNCHED_HITSTUN, \
-				Globals.char_state.SEQUENCE_TARGET:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
+				Em.char_state.SEQUENCE_TARGET:
 			return true
 	return false
 	
 func is_attacking():
 	match new_state:
-		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.GROUND_ATK_RECOVERY, \
-			Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY, \
-			Globals.char_state.SEQUENCE_USER:
+		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_RECOVERY, \
+			Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_RECOVERY, \
+			Em.char_state.SEQUENCE_USER:
 			return true
 	return false
 	
 func is_aerial():
 	match new_state:
-		Globals.char_state.AIR_ATK_STARTUP, Globals.char_state.AIR_ATK_ACTIVE, Globals.char_state.AIR_ATK_RECOVERY:
+		Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_RECOVERY:
 			return true
 	return false
 	
 func is_atk_startup():
 	match new_state:
-		Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP:
+		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 			return true
 	return false
 	
 func is_atk_active():
 	match new_state:
-		Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 			return true
 	return false
 	
 func is_atk_recovery():
 	match new_state:
-		Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.AIR_ATK_RECOVERY:
+		Em.char_state.GROUND_ATK_RECOVERY, Em.char_state.AIR_ATK_RECOVERY:
 			return true
 	return false
 			
 func is_special_move(move_name):
-	match query_move_data(move_name).atk_type:
-		Globals.atk_type.SPECIAL, Globals.atk_type.SUPER, Globals.atk_type.EX:
+	match query_move_data(move_name)[Em.move.ATK_TYPE]:
+		Em.atk_type.SPECIAL, Em.atk_type.SUPER, Em.atk_type.EX:
 			return true
 	return false
 
 func can_air_strafe(move_data):
-	if move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY]: # Normal
-		if Globals.atk_attr.NO_STRAFE_NORMAL in move_data.atk_attr:
+	if move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY]: # Normal
+		if Em.atk_attr.NO_STRAFE_NORMAL in move_data[Em.move.ATK_ATTR]:
 			return false # cannot strafe during some aerial normals
 	else: # non-Normal
-		if !Globals.atk_attr.STRAFE_NON_NORMAL in move_data.atk_attr:
+		if !Em.atk_attr.STRAFE_NON_NORMAL in move_data[Em.move.ATK_ATTR]:
 			return false # can strafe during some aerial non-normals
 	return true
 
 # STATUS EFFECTS ---------------------------------------------------------------------------------------------------
-	# rule: status_effect is array contain [effect, lifetime], effect can be a Globals.status_effect enum or a string
+	# rule: status_effect is array contain [effect, lifetime], effect can be a Em.status_effect enum or a string
 	
 func add_status_effect(status_effect: Array):
 	
@@ -1885,30 +1888,30 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 		
 func new_status_effect(effect): # run on frame the status effect is inflicted/state is loaded, for visual effects
 	match effect:
-		Globals.status_effect.LETHAL:
+		Em.status_effect.LETHAL:
 			Globals.Game.lethalfreeze(get_path())
 		
 func continue_visual_effect_of_status(effect): # run every frame, will not add visual effect if there is already one of higher priority
 	match effect:
-		Globals.status_effect.POISON:
+		Em.status_effect.POISON:
 			modulate_play("poison")
 			particle("Mote", "Particles", "purple", 4, 1, 25)
-		Globals.status_effect.CHILL:
+		Em.status_effect.CHILL:
 			modulate_play("freeze")
 			particle("Mote", "Particles", "blue", 4, 1, 25)
-		Globals.status_effect.IGNITE:
+		Em.status_effect.IGNITE:
 			modulate_play("ignite")
 			particle("Mote", "Particles", "yellow", 4, 1, 25)
-		Globals.status_effect.GRAVITIZE:
+		Em.status_effect.GRAVITIZE:
 			modulate_play("gravitize")
-		Globals.status_effect.ENFEEBLE:
+		Em.status_effect.ENFEEBLE:
 			modulate_play("enfeeble")
-#		Globals.status_effect.LETHAL:
+#		Em.status_effect.LETHAL:
 #			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["lethal", "lethal_flash"]):
 #				modulate_play("lethal")
 #			set_monochrome()
 #			sprite_shake()
-#		Globals.status_effect.CRUSH:
+#		Em.status_effect.CRUSH:
 #			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["crush", "stun_flash"]):
 #				modulate_play("crush")
 #			particle("Sparkle", "Particles", "red", 4, 1, 25)
@@ -1930,10 +1933,10 @@ func remove_all_status_effects():
 	status_effects = []
 	
 func remove_status_effect_on_landing_hit():
-	status_effect_to_remove.append(Globals.status_effect.POISON)
-#	status_effect_to_remove.append(Globals.status_effect.CHILL)
-	status_effect_to_remove.append(Globals.status_effect.IGNITE)
-#	status_effect_to_remove.append(Globals.status_effect.GRAVITIZE)
+	status_effect_to_remove.append(Em.status_effect.POISON)
+#	status_effect_to_remove.append(Em.status_effect.CHILL)
+	status_effect_to_remove.append(Em.status_effect.IGNITE)
+#	status_effect_to_remove.append(Em.status_effect.GRAVITIZE)
 	
 func remove_status_effect_on_taking_hit():
 	pass
@@ -1966,11 +1969,11 @@ func timed_status():
 	for status_effect in status_effects:
 		match status_effect[0]:
 			
-			Globals.status_effect.POISON:
+			Em.status_effect.POISON:
 				if posmod(status_effect[1], 30) == 1:
 					take_DOT(status_effect[2])
 						
-			Globals.status_effect.IGNITE:
+			Em.status_effect.IGNITE:
 				if posmod(status_effect[1], 30) == 15:
 					take_DOT(status_effect[2])
 						
@@ -1978,37 +1981,37 @@ func take_DOT(amount):
 	var damage = int(min(amount, get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value - 1))
 	if damage > 0:
 		take_damage(damage)
-		Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+		Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.GRAY)
 	
 # HIT DETECTION AND PROCESSING ---------------------------------------------------------------------------------------------------
 
 func query_polygons(): # requested by main game node when doing hit detection
 	
 	var polygons_queried = {
-		"rect" : null,
-		"hurtbox" : null,
-		"sdhurtbox" : null,
-		"hitbox" : null,
-		"sweetbox": null,
-		"kborigin": null,
-		"vacpoint" : null,
+		Em.hit.RECT : null,
+		Em.hit.HURTBOX : null,
+		Em.hit.SDHURTBOX : null,
+		Em.hit.HITBOX : null,
+		Em.hit.SWEETBOX: null,
+		Em.hit.KBORIGIN: null,
+		Em.hit.VACPOINT : null,
 	}
 	
-	if state != Globals.char_state.DEAD:
+	if state != Em.char_state.DEAD and slowed >= 0:
 		if is_attacking():
 			if is_atk_active():
 				if !$HitStopTimer.is_running(): # no hitbox during hitstop
-					polygons_queried.hitbox = Animator.query_polygon("hitbox")
-					polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
-					polygons_queried.kborigin = Animator.query_point("kborigin")
-					polygons_queried.vacpoint = Animator.query_point("vacpoint")
-#			polygons_queried.sdhurtbox = Animator.query_polygon("sdhurtbox")
+					polygons_queried[Em.hit.HITBOX] = Animator.query_polygon("hitbox")
+					polygons_queried[Em.hit.SWEETBOX] = Animator.query_polygon("sweetbox")
+					polygons_queried[Em.hit.KBORIGIN] = Animator.query_point("kborigin")
+					polygons_queried[Em.hit.VACPOINT] = Animator.query_point("vacpoint")
+#			polygons_queried[Em.hit.SDHURTBOX] = Animator.query_polygon("sdhurtbox")
 			
-#		if query_status_effect(Globals.status_effect.RESPAWN_GRACE):
+#		if query_status_effect(Em.status_effect.RESPAWN_GRACE):
 #			pass  # no hurtbox during respawn grace or after a strongblock/parry
 #		else:
-		polygons_queried.hurtbox = Animator.query_polygon("hurtbox")
-		polygons_queried.rect = get_sprite_rect()
+		polygons_queried[Em.hit.HURTBOX] = Animator.query_polygon("hurtbox")
+		polygons_queried[Em.hit.RECT] = get_sprite_rect()
 
 	return polygons_queried
 	
@@ -2022,7 +2025,7 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 		var move_name = Animator.to_play_animation.trim_suffix("Active")
 		move_name = UniqChar.refine_move_name(move_name)
 		if UniqChar.MOVE_DATABASE.has(move_name):
-			return {"move_data" : UniqChar.query_move_data(move_name), "move_name" : move_name}
+			return {Em.hit.MOVE_DATA : UniqChar.query_move_data(move_name), Em.hit.MOVE_NAME : move_name}
 		else:
 			print("Error: " + move_name + " not found in MOVE_DATABASE for query_move_data_and_name().")
 	else:
@@ -2051,7 +2054,7 @@ func get_hitcount(in_ID):
 func is_hitcount_maxed(in_ID, move_data): # called by main game node
 	var recorded_hitcount = get_hitcount(in_ID)
 	
-	if recorded_hitcount >= move_data.hitcount:
+	if recorded_hitcount >= move_data[Em.move.HITCOUNT]:
 		return true
 	else: return false
 	
@@ -2059,7 +2062,7 @@ func is_hitcount_maxed(in_ID, move_data): # called by main game node
 func is_hitcount_last_hit(in_ID, move_data):
 	var recorded_hitcount = get_hitcount(in_ID)
 	
-	if recorded_hitcount >= move_data.hitcount - 1:
+	if recorded_hitcount >= move_data[Em.move.HITCOUNT] - 1:
 		return true
 	else: return false
 	
@@ -2071,7 +2074,7 @@ func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Gu
 	
 # IGNORE LIST ------------------------------------------------------------------------------------------------
 	
-func append_ignore_list(in_ID, ignore_time): # added if the move has "ignore_time"
+func append_ignore_list(in_ID, ignore_time): # added if the move has Em.move.IGNORE_TIME
 	for ignored in ignore_list:
 		if ignored[0] == in_ID:
 			print("Error: attempting to ignore an ignored player")
@@ -2155,40 +2158,40 @@ func query_priority(in_move_name = null):
 		move_name = get_move_name()
 	
 	var move_data = UniqChar.query_move_data(move_name)
-	if !"atk_type" in move_data: return 0 # just in case
+	if !Em.move.ATK_TYPE in move_data: return 0 # just in case
 	
 	var priority: int
-	match move_data.atk_type:
-		Globals.atk_type.LIGHT:
+	match move_data[Em.move.ATK_TYPE]:
+		Em.atk_type.LIGHT:
 			if grounded:
-				priority = Globals.priority.gL
+				priority = Em.priority.gL
 			else:
-				priority = Globals.priority.aL
-		Globals.atk_type.FIERCE:
+				priority = Em.priority.aL
+		Em.atk_type.FIERCE:
 			if grounded:
-				priority = Globals.priority.gF
+				priority = Em.priority.gF
 			else:
-				priority = Globals.priority.aF
-		Globals.atk_type.HEAVY:
+				priority = Em.priority.aF
+		Em.atk_type.HEAVY:
 			if grounded:
-				priority = Globals.priority.gH
+				priority = Em.priority.gH
 			else:
-				priority = Globals.priority.aH
-		Globals.atk_type.SPECIAL:
+				priority = Em.priority.aH
+		Em.atk_type.SPECIAL:
 			if grounded:
-				priority = Globals.priority.gSp
+				priority = Em.priority.gSp
 			else:
-				priority = Globals.priority.aSp
-		Globals.atk_type.EX:
+				priority = Em.priority.aSp
+		Em.atk_type.EX:
 			if grounded:
-				priority = Globals.priority.gEX
+				priority = Em.priority.gEX
 			else:
-				priority = Globals.priority.aEX
-		Globals.atk_type.SUPER:
-			priority = Globals.priority.SUPER
+				priority = Em.priority.aEX
+		Em.atk_type.SUPER:
+			priority = Em.priority.SUPER
 				
-	if "priority_add" in move_data:
-		return priority + move_data.priority_add
+	if Em.move.PRIORITY_ADD in move_data:
+		return priority + move_data[Em.move.PRIORITY_ADD]
 	else:
 		return priority
 	
@@ -2209,42 +2212,42 @@ func query_move_data(in_move_name = null):
 	
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
+	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
 	if defender == null:
 		return # defender is deleted
-	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
+	increment_hitcount(hit_data[Em.hit.DEFENDER_ID]) # for measuring hitcount of attacks
 	
-	match hit_data.block_state:
-		Globals.block_state.UNBLOCKED:
+	match hit_data[Em.hit.BLOCK_STATE]:
+		Em.block_state.UNBLOCKED:
 			remove_status_effect_on_landing_hit()
 	
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 	
-	if "fixed_atker_hitstop" in hit_data.move_data:
-		# multi-hit special/super moves are done by having lower atker hitstop then defender hitstop, and high "hitcount" and ignore_time
-		hitstop = hit_data.move_data.fixed_atker_hitstop
+	if Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+		# multi-hit special/super moves are done by having lower atker hitstop then defender hitstop, and high Em.move.HITCOUNT and ignore_time
+		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP]
 		
-	elif hit_data.stun:
-		if hitstop == null or hit_data.hitstop > hitstop:
+	elif hit_data[Em.hit.STUN]:
+		if hitstop == null or hit_data[Em.hit.HITSTOP] > hitstop:
 			hitstop = STUN_HITSTOP_ATTACKER # fixed hitstop for attacking for Break Hits
 			
-	elif hit_data.lethal_hit:
+	elif hit_data[Em.hit.LETHAL_HIT]:
 		hitstop = null # no hitstop for mob attacker for lethal hit, screenfreeze already enough
 		
 	else:
-		if hitstop == null or hit_data.hitstop > hitstop: # need to do this to set consistent hitstop during clashes
-			hitstop = hit_data.hitstop
+		if hitstop == null or hit_data[Em.hit.HITSTOP] > hitstop: # need to do this to set consistent hitstop during clashes
+			hitstop = hit_data[Em.hit.HITSTOP]
 
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 		
-	if "hit_sound" in hit_data.move_data:
+	if Em.move.HIT_SOUND in hit_data[Em.hit.MOVE_DATA]:
 		
-		if !hit_data.move_data.hit_sound is Array:
-			play_audio(hit_data.move_data.hit_sound.ref, hit_data.move_data.hit_sound.aux_data)
+		if !hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND] is Array:
+			play_audio(hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND].ref, hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND].aux_data)
 		else: # multiple sounds at once
-			for sound in hit_data.move_data.hit_sound:
+			for sound in hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND]:
 				play_audio(sound.ref, sound.aux_data)
 	
 
@@ -2252,24 +2255,24 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 func being_hit(hit_data): # called by main game node when taking a hit
 
-	var attacker = Globals.Game.get_player_node(hit_data.attacker_ID)
+	var attacker = Globals.Game.get_player_node(hit_data[Em.hit.ATKER_ID])
 #	var defender = get_node(hit_data.defender_nodepath)
 	
 	var attacker_or_entity = attacker # cleaner code
-	if "entity_nodepath" in hit_data:
-		attacker_or_entity = get_node(hit_data.entity_nodepath)
+	if Em.hit.ENTITY_PATH in hit_data:
+		attacker_or_entity = get_node(hit_data[Em.hit.ENTITY_PATH])
 
 	if attacker_or_entity == null:
-		hit_data["cancelled"] = true
+		hit_data[Em.hit.CANCELLED] = true
 		return # attacked by something that is already deleted, return
 
-	hit_data["attacker"] = attacker # for other functions
-	hit_data["attacker_or_entity"] = attacker_or_entity
+	hit_data[Em.hit.ATKER] = attacker # for other functions
+	hit_data[Em.hit.ATKER_OR_ENTITY] = attacker_or_entity
 
 	attacker.target_ID = player_ID # attacker target defender
 	target_ID = attacker.player_ID # target opponent who last attacked you
 	
-	remove_status_effect(Globals.status_effect.CRUSH)
+	remove_status_effect(Em.status_effect.CRUSH)
 	$HitStopTimer.stop() # cancel pre-existing hitstop
 #	$RageTimer.time = RageTimer_TIME
 	
@@ -2282,69 +2285,69 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var attacker_vec := FVector.new()
 	attacker_vec.set_from_vec(vec_to_attacker)
 	
-	hit_data["angle_to_atker"] = attacker_vec.angle()
-	hit_data["lethal_hit"] = false
-	hit_data["punish_hit"] = false
-	hit_data["stun"] = false
-	hit_data["crush"] = false
-	hit_data["block_state"] = Globals.block_state.UNBLOCKED
-	hit_data["repeat"] = false
-	hit_data["double_repeat"] = false
+	hit_data[Em.hit.ANGLE_TO_ATKER] = attacker_vec.angle()
+	hit_data[Em.hit.LETHAL_HIT] = false
+	hit_data[Em.hit.PUNISH_HIT] = false
+	hit_data[Em.hit.STUN] = false
+	hit_data[Em.hit.CRUSH] = false
+	hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+	hit_data[Em.hit.REPEAT] = false
+	hit_data[Em.hit.DOUBLE_REPEAT] = false
 	
-	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data.move_data):
-		hit_data["multihit"] = true
+	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data[Em.hit.MOVE_DATA]):
+		hit_data[Em.hit.MULTIHIT] = true
 		if attacker_or_entity.is_hitcount_first_hit(player_ID):
-			hit_data["first_hit"] = true
-	if Globals.atk_attr.AUTOCHAIN in hit_data.move_data.atk_attr:
-		hit_data["autochain"] = true
-	if Globals.atk_attr.FOLLOW_UP in hit_data.move_data.atk_attr:
-		hit_data["follow_up"] = true
+			hit_data[Em.hit.FIRST_HIT] = true
+	if Em.atk_attr.AUTOCHAIN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		hit_data[Em.hit.AUTOCHAIN] = true
+	if Em.atk_attr.FOLLOW_UP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		hit_data[Em.hit.FOLLOW_UP] = true
 		
-	if "entity_nodepath" in hit_data and "proj_level" in hit_data.move_data and hit_data.move_data.proj_level != 3:
-		hit_data["non_strong_proj"] = true
+	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] != 3:
+		hit_data[Em.hit.NON_STRONG_PROJ] = true
 		
-	if hit_data.move_data.atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] or "non_strong_proj" in hit_data:
-		hit_data["normalarmorable"] = true
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or Em.hit.NON_STRONG_PROJ in hit_data:
+		hit_data[Em.hit.NORMALARMORABLE] = true
 	
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
-	if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
-		attacker_or_entity.append_ignore_list(player_ID, hit_data.move_data.ignore_time)
+	if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
+		attacker_or_entity.append_ignore_list(player_ID, hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME])
 		
-	if hit_data.move_data.atk_type in [Globals.atk_type.EX, Globals.atk_type.SUPER] or \
-			("proj_level" in hit_data.move_data and hit_data.move_data.proj_level >= 3):
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.SUPER] or \
+			(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
 		hit_data["ignore_resist"] = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
 	var double_repeat := false
 	var root_move_name # for move variations
-	if !"entity_nodepath" in hit_data:
-		root_move_name = attacker.UniqChar.get_root(hit_data.move_name)
-	elif "root" in hit_data.move_data: # is entity, most has a root in move_data
-		root_move_name = hit_data.move_data.root
+	if !Em.hit.ENTITY_PATH in hit_data:
+		root_move_name = attacker.UniqChar.get_root(hit_data[Em.hit.MOVE_NAME])
+	elif Em.move.ROOT in hit_data[Em.hit.MOVE_DATA]: # is entity, most has a root in move_data
+		root_move_name = hit_data[Em.hit.MOVE_DATA][Em.move.ROOT]
 	else:
-		root_move_name = hit_data.move_name
+		root_move_name = hit_data[Em.hit.MOVE_NAME]
 	
-	if !Globals.atk_attr.REPEATABLE in hit_data.move_data.atk_attr:
+	if !Em.atk_attr.REPEATABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		
-		if !Inventory.has_quirk(hit_data.attacker_ID, Cards.effect_ref.CAN_REPEAT):
+		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
 		
 			for array in repeat_memory:
-				if array[0] == hit_data.attacker_ID and array[1] == root_move_name:
-					if !hit_data.repeat:
-						hit_data.repeat = true # found a repeat
-						if hit_data.move_data.atk_type in [Globals.atk_type.SPECIAL, Globals.atk_type.EX, Globals.atk_type.SUPER] or \
-								Globals.atk_attr.NO_REPEAT_MOVE in hit_data.move_data.atk_attr:
+				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
+					if !hit_data[Em.hit.REPEAT]:
+						hit_data[Em.hit.REPEAT] = true # found a repeat
+						if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
+								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
-							hit_data["double_repeat"] = true
+							hit_data[Em.hit.DOUBLE_REPEAT] = true
 							break
 					elif !double_repeat:
 						double_repeat = true
-						hit_data["double_repeat"] = true # found multiple repeats
+						hit_data[Em.hit.DOUBLE_REPEAT] = true # found multiple repeats
 						break
 						
 			# add to repeat memory
-			if !double_repeat and !"multihit" in hit_data: # for multi-hit move, only the last hit add to repeat_memory
+			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
 				repeat_memory.append([attacker.player_ID, root_move_name])
 	
 	
@@ -2359,15 +2362,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# Weak Hits cannot cause Lethal Hit, cannot cause Stun, cannot cause Sweetspotted Hits, cannot cause Punish Hits
 	
 	var weak_hit := false
-	if ("atk_level" in hit_data and hit_data.move_data.atk_level <= 1) or hit_data.double_repeat or \
-		"multihit" in hit_data:
+	if (Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1) or hit_data[Em.hit.DOUBLE_REPEAT] or \
+		Em.hit.MULTIHIT in hit_data:
 		weak_hit = true
-		hit_data.sweetspotted = false
+		hit_data[Em.hit.SWEETSPOTTED] = false
 		
-	hit_data["weak_hit"] = weak_hit
+	hit_data[Em.hit.WEAK_HIT] = weak_hit
 
 
-	if !Globals.atk_attr.UNBLOCKABLE in hit_data.move_data.atk_attr:
+	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		match new_state:
 			
 			# SUPERARMOR --------------------------------------------------------------------------------------------------
@@ -2375,36 +2378,36 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			# WEAK block_state
 			# attacker can chain combo normally after hitting an armored defender
 			
-			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
-				if Globals.atk_attr.SUPERARMOR_STARTUP in query_atk_attr() or \
-						(Globals.atk_attr.NORMALARMOR_STARTUP in query_atk_attr() and "normalarmorable" in hit_data):
-#					hit_data.block_state = Globals.block_state.WEAK
-					hit_data["superarmored"] = true
+			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
+				if Em.atk_attr.SUPERARMOR_STARTUP in query_atk_attr() or \
+						(Em.atk_attr.NORMALARMOR_STARTUP in query_atk_attr() and Em.hit.NORMALARMORABLE in hit_data):
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.SUPERARMORED] = true
 					
-			Globals.char_state.GROUND_ATK_ACTIVE, Globals.char_state.AIR_ATK_ACTIVE:
-				if Globals.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
-						(Globals.atk_attr.NORMALARMOR_ACTIVE in query_atk_attr() and "normalarmorable" in hit_data) or \
-						(Globals.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr() and "entity_nodepath" in hit_data):
-#					hit_data.block_state = Globals.block_state.WEAK
-					hit_data["superarmored"] = true
+			Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+				if Em.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
+						(Em.atk_attr.NORMALARMOR_ACTIVE in query_atk_attr() and Em.hit.NORMALARMORABLE in hit_data) or \
+						(Em.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr() and Em.hit.ENTITY_PATH in hit_data):
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.SUPERARMORED] = true
 						
 						
-			Globals.char_state.AIR_RECOVERY:
+			Em.char_state.AIR_RECOVERY:
 				 # air superdash has projectile superarmor against non-strong projectiles
-				if Animator.query_current(["SDash"]) and "non_strong_proj" in hit_data:
-#					hit_data.block_state = Globals.block_state.WEAK
-					hit_data["superarmored"] = true
+				if Animator.query_current(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.SUPERARMORED] = true
 					
 		if !is_hitstunned_or_sequenced():
-			if Globals.mob_attr.PASSIVE_ARMOR in mob_attr:
+			if Em.mob_attr.PASSIVE_ARMOR in mob_attr:
 				if current_guard_gauge >= 0:
-#					hit_data.block_state = Globals.block_state.WEAK
-					hit_data["superarmored"] = true
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.SUPERARMORED] = true
 					
 	# RESISTED HIT ----------------------------------------------------------------------------------------------
 	
-	if "superarmored" in hit_data:
-		hit_data["resisted"] = true
+	if Em.hit.SUPERARMORED in hit_data:
+		hit_data[Em.hit.RESISTED] = true
 	elif "ignore_resist" in hit_data:
 		pass # true hitstun
 	elif current_guard_gauge == GUARD_GAUGE_FLOOR:
@@ -2413,14 +2416,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		pass # mob_armored or already in hitstun
 	elif is_atk_active() or is_atk_recovery():
 		pass # true hitstun
-	elif Globals.mob_attr.TOUGH in mob_attr and mob_attr[Globals.mob_attr.TOUGH] <= 1:
+	elif Em.mob_attr.TOUGH in mob_attr and mob_attr[Em.mob_attr.TOUGH] <= 1:
 		pass # true hitstun
-	elif "atk_level" in hit_data and hit_data.move_data.atk_level <= 1:
+	elif Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1:
 		pass # no hitstun
 	else:
-		hit_data["resisted"] = true
-#		if !"multihit" in hit_data and !"autochain" in hit_data and \
-#				state in [Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY] and \
+		hit_data[Em.hit.RESISTED] = true
+#		if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data and \
+#				state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			$ArmorTimer.time = ARMOR_TIME # gain armor if hit during Resisted Hitstun
 ##				else:
@@ -2429,7 +2432,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
 	
 	# unique reactions
-	if "entity_nodepath" in hit_data:
+	if Em.hit.ENTITY_PATH in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit0"):
 			attacker_or_entity.UniqEntity.landed_a_hit0(hit_data) # reaction, can change hit_data from there
 	elif attacker.UniqChar.has_method("landed_a_hit0"):
@@ -2443,52 +2446,52 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# attack level
 	var adjusted_atk_level: int = 1
 	
-	if !"sequence" in hit_data.move_data:
+	if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]:
 		adjusted_atk_level = adjusted_atk_level(hit_data)
-		hit_data["adjusted_atk_level"] = adjusted_atk_level
+		hit_data[Em.hit.ADJUSTED_ATK_LVL] = adjusted_atk_level
 		
 		if !guardbroken:
 			change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
 			if get_guard_gauge_percent_below() == 0:
-				hit_data["mob_break"] = true
-				hit_data.erase("superarmored")
+				hit_data[Em.hit.MOB_BREAK] = true
+				hit_data.erase(Em.hit.SUPERARMORED)
 				$ArmorTimer.time = 0
 				guardbroken = true
 #				repeat_memory = [] # reset move memory for getting a Break
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
-				Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
+				Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 						"v_mirror":Globals.Game.rng_bool()})
 		
 		var damage = calculate_damage(hit_data)
 		take_damage(damage) # do damage calculation
-		hit_data["dealt_damage"] = damage
+		hit_data[Em.hit.DEALT_DMG] = damage
 		if damage > 0:
 			if guardbroken:
-				if hit_data.double_repeat or adjusted_atk_level == 1:
-					Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+				if hit_data[Em.hit.DOUBLE_REPEAT] or adjusted_atk_level == 1:
+					Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.GRAY)
 				else:
-					Globals.Game.spawn_damage_number(damage, hit_data.hit_center)
+					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
 			else:
-				Globals.Game.spawn_damage_number(damage, position, Globals.dmg_num_col.GRAY)
+				Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.GRAY)
 		
 		if get_damage_percent() >= 100:
-			hit_data.lethal_hit = true
+			hit_data[Em.hit.LETHAL_HIT] = true
 			
 
 	# FIRST REACTION ---------------------------------------------------------------------------------
 	
-	if has_trait(Globals.trait.NO_LAUNCH) or $ArmorTimer.is_running() or ("resisted" in hit_data and !guardbroken):
+	if has_trait(Em.trait.NO_LAUNCH) or $ArmorTimer.is_running() or (Em.hit.RESISTED in hit_data and !guardbroken):
 		hit_data["tough_mob"] = true
 	
-#	if !(Globals.mob_attr.GDRAIN in mob_attr and mob_attr[Globals.mob_attr.GDRAIN] == 0):
+#	if !(Em.mob_attr.GDRAIN in mob_attr and mob_attr[Em.mob_attr.GDRAIN] == 0):
 #		if !guardbroken: # not guardbroken mobs, hitgrabs can still connect if the hit guardbreaks them
-#			if !"sequence" in hit_data.move_data:
+#			if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]:
 #				hit_data["tough_mob"] = true
 #			elif get_guard_gauge_percent_below() >= 50: # natural command grabs can still grab them if they have below 50% GG
 #				hit_data["tough_mob"] = true
 
 	# unique reactions
-	if "entity_nodepath" in hit_data:
+	if Em.hit.ENTITY_PATH in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit"):
 			attacker_or_entity.UniqEntity.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	elif attacker.UniqChar.has_method("landed_a_hit"):
@@ -2505,32 +2508,32 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if adjusted_atk_level > 1 and guardbroken:
 		remove_status_effect_on_taking_hit()
 	
-#	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-#		if !hit_data.double_repeat and !"tough_mob" in hit_data:
+#	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
+#		if !hit_data[Em.hit.DOUBLE_REPEAT] and !"tough_mob" in hit_data:
 #			attacker_or_entity.landed_a_sequence(hit_data)
 #		return
 		
-	if "sequence" in hit_data.move_data: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-		if "tough_mob" in hit_data or hit_data.double_repeat:
+	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
+		if "tough_mob" in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
 			return
-		if Globals.atk_attr.QUICK_GRAB in hit_data.move_data.atk_attr and new_state in [Globals.char_state.GROUND_STARTUP, \
-				Globals.char_state.AIR_STARTUP]:
+		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
+				Em.char_state.AIR_STARTUP]:
 			return # quick grabs fail if target is in movement startup
-		if is_atk_startup() and Globals.atk_attr.GRAB_INVULN_STARTUP in query_atk_attr():
+		if is_atk_startup() and Em.atk_attr.GRAB_INVULN_STARTUP in query_atk_attr():
 			return # grabs fail if target is in attack startup with an attack with GRAB_INVULN_STARTUP atk attr
 		attacker_or_entity.landed_a_sequence(hit_data)
 		return		
 		
 
-	if !"entity_nodepath" in hit_data:
+	if !Em.hit.ENTITY_PATH in hit_data:
 		Globals.Game.get_node("Players").move_child(attacker, 0) # move attacker to bottom layer to see defender easier
 	
 
 	# knockback
 	var knockback_dir: int = calculate_knockback_dir(hit_data)
-	hit_data["knockback_dir"] = knockback_dir
+	hit_data[Em.hit.KB_ANGLE] = knockback_dir
 	var knockback_strength: int = calculate_knockback_strength(hit_data)
-	hit_data["knockback_strength"] = knockback_strength
+	hit_data[Em.hit.KB] = knockback_strength
 	
 
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------
@@ -2538,39 +2541,39 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
 #	if !is_hitstunned(): # first hit
-#		if "entity_nodepath" in hit_data:
+#		if Em.hit.ENTITY_PATH in hit_data:
 #			proj_only_combo = true
 #		else:
 #			proj_only_combo = false
 #	else: # additional hits turn off proj_only_combo if not a projectile
-#		if proj_only_combo and !"entity_nodepath" in hit_data:
+#		if proj_only_combo and !Em.hit.ENTITY_PATH in hit_data:
 #			proj_only_combo = false
 
 		
-	if hit_data.double_repeat:
+	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
-#		add_status_effect(Globals.status_effect.REPEAT, 10)
+#		add_status_effect(Em.status_effect.REPEAT, 10)
 	
-	elif hit_data.lethal_hit:
+	elif hit_data[Em.hit.LETHAL_HIT]:
 		Globals.Game.set_screenshake()
 		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		modulate_play("stun_flash")
 		if !$HitStunTimer.is_running(): # death from chip damage
 			play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs as well
-			Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data.hit_center, {"facing":Globals.Game.rng_facing(), \
+			Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
 		
-	elif "mob_break" in hit_data:
+	elif Em.hit.MOB_BREAK in hit_data:
 		modulate_play("punish_sweet_flash")
 		combo_level = adjusted_atk_level - 1
 		combo_level += Inventory.modifier(attacker.player_ID, Cards.effect_ref.COMBO_LEVEL)
 		combo_level = int(clamp(combo_level, 0, 7))
 		
-	elif "superarmored" in hit_data:
+	elif Em.hit.SUPERARMORED in hit_data:
 		modulate_play("armor_flash")
 		play_audio("block3", {"vol" : -15})
 		
-	elif "resisted" in hit_data:
+	elif Em.hit.RESISTED in hit_data:
 		modulate_play("weakblock_flash")
 		play_audio("block3", {"vol" : -15})
 		hit_data["no_hit_sound"] = true
@@ -2580,21 +2583,21 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		play_audio("bling2", {"vol" : -5, "bus" : "PitchDown2"})
 		hit_data["no_hit_sound"] = true
 		
-	elif hit_data.sweetspotted:
+	elif hit_data[Em.hit.SWEETSPOTTED]:
 		modulate_play("punish_sweet_flash")
 		play_audio("break2", {"vol" : -15})
 		
 	else:
 		modulate_play("mob_hit_flash")
 		
-	if Globals.atk_attr.SCREEN_SHAKE in hit_data.move_data.atk_attr:
+	if Em.atk_attr.SCREEN_SHAKE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		Globals.Game.set_screenshake()
 			
 	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
 	if guardbroken:
-		if !hit_data.double_repeat and adjusted_atk_level <= 1 and $HitStunTimer.is_running():
+		if !hit_data[Em.hit.DOUBLE_REPEAT] and adjusted_atk_level <= 1 and $HitStunTimer.is_running():
 			# for atk level 1 hits on hitstunned opponent, add their hitstun to existing hitstun
 			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
@@ -2605,39 +2608,42 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# HITSTOP ---------------------------------------------------------------------------------------------------
 	
-	if !hit_data.lethal_hit:
+	if !hit_data[Em.hit.LETHAL_HIT]:
 		hitstop = calculate_hitstop(hit_data, knockback_strength)
 	else:
 		hitstop = LETHAL_HITSTOP # set for defender, attacker has no hitstop during LETHAL_HITSTOP
 								# screenfreeze for everyone but the defender till their hitstop is over
 		
-	if !hit_data.lethal_hit and "mob_break" in hit_data:
+	if !hit_data[Em.hit.LETHAL_HIT] and Em.hit.MOB_BREAK in hit_data:
 		hitstop = FMath.percent(hitstop, MOB_BREAK_HITSTOP_MOD)
 		
-	hit_data["hitstop"] = hitstop # send this to attacker as well
-#	if !guardbroken and !hit_data.lethal_hit and !hit_data.weak_hit and !"autochain" in hit_data:
+	hit_data[Em.hit.HITSTOP] = hitstop # send this to attacker as well
+#	if !guardbroken and !hit_data[Em.hit.LETHAL_HIT] and !hit_data[Em.hit.WEAK_HIT] and !Em.hit.AUTOCHAIN in hit_data:
 #		hitstop += 10 # extra hitstop just for defender on guarded hit
-#		if "entity_nodepath" in hit_data: # for projectiles as well
-#			hit_data.hitstop = hitstop
+#		if Em.hit.ENTITY_PATH in hit_data: # for projectiles as well
+#			hit_data[Em.hit.HITSTOP] = hitstop
 
-	if !hit_data.lethal_hit and "resisted" in hit_data and !guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit:
-#		if "superarmored" in hit_data:
-#			hitstop += 15
-#		else:
+	if !hit_data[Em.hit.LETHAL_HIT] and Em.hit.RESISTED in hit_data and !guardbroken and !Em.hit.ENTITY_PATH in hit_data and !hit_data[Em.hit.WEAK_HIT]:
+		if Globals.difficulty < 3:
+			if Em.hit.SUPERARMORED in hit_data:
+				hitstop += 13
+			else:
+				hitstop += 10
+		else:
 			hitstop += 10
 		
-	if guardbroken and !"entity_nodepath" in hit_data and !hit_data.weak_hit and !"autochain" in hit_data:
-		hitstop += Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.EXTRA_HITSTOP)
+	if guardbroken and !Em.hit.ENTITY_PATH in hit_data and !hit_data[Em.hit.WEAK_HIT] and !Em.hit.AUTOCHAIN in hit_data:
+		hitstop += Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.EXTRA_HITSTOP)
 		
 	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
-		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
-			$NoCollideTimer.time = hit_data.move_data.ignore_time
+		if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
+			$NoCollideTimer.time = hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME]
 		else:
 			$NoCollideTimer.time = 1
 		
 #	# SECOND REACTION (after knockback) ---------------------------------------------------------------------------------
 
-	if "entity_nodepath" in hit_data:
+	if Em.hit.ENTITY_PATH in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit2"):
 			attacker_or_entity.UniqEntity.landed_a_hit2(hit_data) # reaction, can change hit_data from there
 	elif attacker.UniqChar.has_method("landed_a_hit2"):
@@ -2649,12 +2655,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
 	if !guardbroken:
-		if "superarmored" in hit_data:
-			Globals.Game.spawn_SFX("Superarmorspark", "Blocksparks", hit_data.hit_center, {"rot" : deg2rad(hit_data.angle_to_atker)})
-		elif "resisted" in hit_data:
-			Globals.Game.spawn_SFX("WBlockspark2", "Blocksparks", hit_data.hit_center, {"rot" : deg2rad(hit_data.angle_to_atker)})
+		if Em.hit.SUPERARMORED in hit_data:
+			Globals.Game.spawn_SFX("Superarmorspark", "Blocksparks", hit_data[Em.hit.HIT_CENTER], {"rot" : deg2rad(hit_data[Em.hit.ANGLE_TO_ATKER])})
+		elif Em.hit.RESISTED in hit_data:
+			Globals.Game.spawn_SFX("WBlockspark2", "Blocksparks", hit_data[Em.hit.HIT_CENTER], {"rot" : deg2rad(hit_data[Em.hit.ANGLE_TO_ATKER])})
 		else:
-			Globals.Game.spawn_SFX("MobArmorspark", "Blocksparks", hit_data.hit_center, {"rot" : deg2rad(hit_data.angle_to_atker)})
+			Globals.Game.spawn_SFX("MobArmorspark", "Blocksparks", hit_data[Em.hit.HIT_CENTER], {"rot" : deg2rad(hit_data[Em.hit.ANGLE_TO_ATKER])})
 	else:
 		generate_hitspark(hit_data)
 	
@@ -2664,66 +2670,66 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	var no_impact_and_vel_change := false
 	
-	if "superarmored" in hit_data and !hit_data.lethal_hit:
+	if Em.hit.SUPERARMORED in hit_data and !hit_data[Em.hit.LETHAL_HIT]:
 		if grounded:
 			var knock_dir := 0
-			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.FOUR, hit_data.attack_facing)
+			var segment = Globals.split_angle(knockback_dir, Em.angle_split.FOUR, hit_data[Em.hit.ATK_FACING])
 			match segment:
-				Globals.compass.E:
+				Em.compass.E:
 					knock_dir = 1
-				Globals.compass.W:
+				Em.compass.W:
 					knock_dir = -1
 			if knock_dir != 0:
-				move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $PlayerCollisionBox, true)
+				move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $PlayerCollisionBox, create_checklist(), true)
 				set_true_position()
 		return
 
 	if guardbroken:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if has_trait(Globals.trait.NO_LAUNCH) or knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
+		if has_trait(Em.trait.NO_LAUNCH) or knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
 
 			var no_impact := false
 			
 			if adjusted_atk_level <= 1: # for attack level 1 attacks
 				
 				if $HitStunTimer.is_running(): # for hitstunned defender
-					if state == Globals.char_state.LAUNCHED_HITSTUN:
+					if state == Em.char_state.LAUNCHED_HITSTUN:
 						no_impact_and_vel_change = true
 						# if defender is hit by atk level 1 attack while in launched state, no impact/velocity change (just added hitstun)
 						# if they are flinched, will enter new flinch animation with added hitstun and has velocity change
 						
 				# for atk level 1 attack on non-passive state, just push them back, no turn
 				# if is in passive state, will enter impact animation but 0 hitstun
-				elif !state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.GROUND_RECOVERY, \
-					Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_RECOVERY, \
-					Globals.char_state.AIR_C_RECOVERY]:
+				elif !state in [Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_RECOVERY, \
+					Em.char_state.GROUND_C_RECOVERY, Em.char_state.AIR_STANDBY, Em.char_state.AIR_RECOVERY, \
+					Em.char_state.AIR_C_RECOVERY]:
 					no_impact = true
 						
 			if !no_impact and !no_impact_and_vel_change:
-				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
+				var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
 				if !"pull" in hit_data:
 					match segment:
-						Globals.compass.E:
+						Em.compass.E:
 							face(-1) # face other way
-						Globals.compass.W:
+						Em.compass.W:
 							face(1)
 				else: # flip facing direction if pulling attack on flinch
 					match segment:
-						Globals.compass.E:
+						Em.compass.E:
 							face(1)
-						Globals.compass.W:
+						Em.compass.W:
 							face(-1)
 
 				var alternate_flag := false # alternate hitstun for multi-hit flinch during hitstop
-				if state == Globals.char_state.AIR_FLINCH_HITSTUN:
+				if state == Em.char_state.AIR_FLINCH_HITSTUN:
 					if Animator.query_current(["aFlinchAStop"]):
 						animate("aFlinchBStop")
 						alternate_flag = true
 					elif Animator.query_current(["aFlinchBStop"]):
 						animate("aFlinchAStop")
 						alternate_flag = true
-				elif state == Globals.char_state.GROUND_FLINCH_HITSTUN:
+				elif state == Em.char_state.GROUND_FLINCH_HITSTUN:
 					if Animator.query_current(["FlinchAStop"]):
 						animate("FlinchBStop")
 						alternate_flag = true
@@ -2732,7 +2738,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						alternate_flag = true
 				
 				if !alternate_flag:
-					if hit_data.hit_center.y >= position.y: # A/B depending on height hit
+					if hit_data[Em.hit.HIT_CENTER].y >= position.y: # A/B depending on height hit
 						if grounded:
 							animate("FlinchAStop")
 						else:
@@ -2746,58 +2752,58 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		else: # launch
 			
 			knockback_strength += LAUNCH_BOOST
-			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.EIGHT, dir_to_attacker)
+			var segment = Globals.split_angle(knockback_dir, Em.angle_split.EIGHT, dir_to_attacker)
 			match segment:
-				Globals.compass.N:
+				Em.compass.N:
 					face(dir_to_attacker) # turn towards attacker
 					if facing == 1:
 						launch_starting_rot = PI/2
 					else:
 						launch_starting_rot = 3*PI/2
-				Globals.compass.NE:
+				Em.compass.NE:
 					face(-1)
 					launch_starting_rot = 7*PI/4
-				Globals.compass.E:
+				Em.compass.E:
 					face(-1)
 					launch_starting_rot = 0
-				Globals.compass.SE:
+				Em.compass.SE:
 					face(-1)
 					launch_starting_rot = 9*PI/4
-				Globals.compass.S:
+				Em.compass.S:
 					face(dir_to_attacker) # turn towards attacker
 					if facing == -1:
 						launch_starting_rot = PI/2
 					else:
 						launch_starting_rot = 3*PI/2
-				Globals.compass.SW:
+				Em.compass.SW:
 					face(1)
 					launch_starting_rot = 7*PI/4
-				Globals.compass.W:
+				Em.compass.W:
 					face(1)
 					launch_starting_rot = 0.0
-				Globals.compass.NW:
+				Em.compass.NW:
 					face(1)
 					launch_starting_rot = PI/4
 			animate("LaunchStop")
 									
 	else: # not guardbroken
-		if "resisted" in hit_data and hit_data.move_data.atk_level > 1:
+		if Em.hit.RESISTED in hit_data and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
 			
-			var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, -dir_to_attacker)
+			var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
 			if !"pull" in hit_data:
 				match segment:
-					Globals.compass.E:
+					Em.compass.E:
 						face(-1) # face other way
-					Globals.compass.W:
+					Em.compass.W:
 						face(1)
 			else: # flip facing direction if pulling attack on flinch
 				match segment:
-					Globals.compass.E:
+					Em.compass.E:
 						face(1)
-					Globals.compass.W:
+					Em.compass.W:
 						face(-1)
 			
-			if hit_data.hit_center.y >= position.y: # A/B depending on height hit
+			if hit_data[Em.hit.HIT_CENTER].y >= position.y: # A/B depending on height hit
 				if grounded:
 					animate("ResistA")
 				else:
@@ -2818,10 +2824,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		velocity.set_vector(knockback_strength, 0)  # reset momentum
 		velocity.rotate(knockback_dir)
 		
-		if !guardbroken and grounded and !hit_data.lethal_hit:
+		if !guardbroken and grounded and !hit_data[Em.hit.LETHAL_HIT]:
 			velocity.y = 0 # set to horizontal pushback on non-guardbroken grounded defender
 			
-	if hit_data.lethal_hit:				
+	if hit_data[Em.hit.LETHAL_HIT]:				
 		animate("Death")
 		var angle: int
 		if velocity.y > 0 and !grounded:
@@ -2836,16 +2842,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 func calculate_damage(hit_data) -> int:
 	
-	var scaled_damage: int = hit_data.move_data.damage * FMath.S
+	var scaled_damage: int = hit_data[Em.hit.MOVE_DATA][Em.move.DMG] * FMath.S
 	if scaled_damage == 0: return 0
 	
-	if hit_data.double_repeat:
+	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		scaled_damage = FMath.percent(scaled_damage, REPEAT_DMG_MOD)
 	else:
-		if hit_data.sweetspotted:
+		if hit_data[Em.hit.SWEETSPOTTED]:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
 			
-	if !guardbroken and !Inventory.has_quirk(hit_data.attacker_ID, Cards.effect_ref.ARMOR_PIERCE):
+	if !guardbroken and !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.ARMOR_PIERCE):
 		scaled_damage = FMath.percent(scaled_damage, get_stat("ARMOR_DMG_MOD"))
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
@@ -2853,39 +2859,39 @@ func calculate_damage(hit_data) -> int:
 
 func calculate_guard_gauge_change(hit_data) -> int:
 	
-	if (hit_data.move_data.hitcount > 1 and !"first_hit" in hit_data) or "follow_up" in hit_data:  
+	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data) or Em.hit.FOLLOW_UP in hit_data:  
 	# for multi-hit/autochain moves, only first hit affect GG
 		return 0
 
 	if guardbroken: # if guardbroken, no Guard Drain
 		return 0
 		
-#	if "superarmored" in hit_data:
+#	if Em.hit.SUPERARMORED in hit_data:
 #		return 0
 		
-#	if "superarmored" in hit_data or ($ArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
-	if "superarmored" in hit_data or $ArmorTimer.is_running(): # halves GDrain on armored
-		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+#	if Em.hit.SUPERARMORED in hit_data or ($ArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
+	if Em.hit.SUPERARMORED in hit_data or $ArmorTimer.is_running(): # halves GDrain on armored
+		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
-		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.GUARD_DRAIN_MOD))
+		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
 		guard_drain = FMath.percent(guard_drain, 50)
 		return guard_drain
 		
-#	if state in [Globals.char_state.GROUND_STANDBY, Globals.char_state.AIR_STANDBY, 
-#			Globals.char_state.GROUND_STARTUP, Globals.char_state.AIR_STARTUP, 
-#			Globals.char_state.GROUND_RECOVERY, Globals.char_state.AIR_RECOVERY, 
-#			Globals.char_state.GROUND_ATK_STARTUP, Globals.char_state.AIR_ATK_STARTUP]:
+#	if state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, 
+#			Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, 
+#			Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY, 
+#			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP]:
 #		return 0
 
-	if "resisted" in hit_data:
-		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+	if Em.hit.RESISTED in hit_data:
+		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
-		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data.attacker_ID, Cards.effect_ref.GUARD_DRAIN_MOD))
+		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
 		return guard_drain
 		
 	return GUARD_GAUGE_FLOOR
 
-#	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data.adjusted_atk_level - 1]
+#	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 #	guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
 #
 #	return guard_drain # Guard Drain on 1st hit of the combo depends on Attack Level
@@ -2893,26 +2899,26 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	
 func calculate_knockback_strength(hit_data) -> int:
 
-	var knockback_strength: int = hit_data.move_data.knockback # scaled by FMath.S
+	var knockback_strength: int = hit_data[Em.hit.MOVE_DATA][Em.move.KB] # scaled by FMath.S
 	
-	if Globals.atk_attr.FIXED_KNOCKBACK_STR in hit_data.move_data.atk_attr:
+	if Em.atk_attr.FIXED_KNOCKBACK_STR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		return knockback_strength
 	
 	# for certain multi-hit attacks (not autochain), can be fixed KB till the last hit
-	if "multihit" in hit_data:
-		if "fixed_knockback_multi" in hit_data.move_data:
-			knockback_strength = hit_data.move_data.fixed_knockback_multi # scaled by FMath.S
+	if Em.hit.MULTIHIT in hit_data:
+		if Em.move.FIXED_KB_MULTI in hit_data[Em.hit.MOVE_DATA]:
+			knockback_strength = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_MULTI] # scaled by FMath.S
 	
-	if hit_data.sweetspotted:
+	if hit_data[Em.hit.SWEETSPOTTED]:
 		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
 		
 	# for rekkas and combo-type moves/supers, no KB boost for non-finishers
-	if "autochain" in hit_data or "multihit" in hit_data:
+	if Em.hit.AUTOCHAIN in hit_data or Em.hit.MULTIHIT in hit_data:
 		return knockback_strength
 #	elif !guardbroken: # KB for non-guardbreak
 #		knockback_strength = FMath.percent(knockback_strength, get_stat("ARMOR_KNOCKBACK_MOD"))
 			
-#	if "resisted" in hit_data and !guardbroken:
+#	if Em.hit.RESISTED in hit_data and !guardbroken:
 #		knockback_strength = FMath.percent(knockback_strength, get_stat("RESISTED_KB_MOD"))
 ##		if grounded:
 ##			knockback_strength = FMath.percent(knockback_strength, 200)
@@ -2922,7 +2928,7 @@ func calculate_knockback_strength(hit_data) -> int:
 #			knockback_strength = FMath.percent(knockback_strength, 200)
 
 
-	if guardbroken and !hit_data.weak_hit:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
+	if guardbroken and !hit_data[Em.hit.WEAK_HIT]:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
 		var weight = get_guard_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
@@ -2938,76 +2944,76 @@ func calculate_knockback_strength(hit_data) -> int:
 func calculate_knockback_dir(hit_data) -> int:
 	
 	var knockback_dir := 0
-	var knockback_type = hit_data.move_data.knockback_type
+	var knockback_type = hit_data[Em.hit.MOVE_DATA][Em.move.KB_TYPE]
 	
 	# for certain multi-hit attacks and autochain
-	if "multihit" in hit_data or "autochain" in hit_data:
+	if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
 		
-		if Globals.atk_attr.DRAG_KB in hit_data.move_data.atk_attr: # can be drag KB till the last hit
-			return hit_data.attacker_or_entity.velocity.angle()
+		if Em.atk_attr.DRAG_KB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # can be drag KB till the last hit
+			return hit_data[Em.hit.ATKER_OR_ENTITY].velocity.angle()
 			
-		elif "vacpoint" in hit_data: # or vacuum towards VacPoint
+		elif Em.hit.VACPOINT in hit_data: # or vacuum towards VacPoint
 			var vac_vector := FVector.new()
-			vac_vector.set_from_vec(hit_data.vacpoint - hit_data.hit_center)
+			vac_vector.set_from_vec(hit_data[Em.hit.VACPOINT] - hit_data[Em.hit.HIT_CENTER])
 			return vac_vector.angle()
 			
-		elif "fixed_knockback_dir_multi" in hit_data.move_data: # or fixed angle till the last hit
-			knockback_dir = hit_data.move_data.fixed_knockback_dir_multi
-			if hit_data.attack_facing < 0:
+		elif Em.move.FIXED_KB_ANGLE_MULTI in hit_data[Em.hit.MOVE_DATA]: # or fixed angle till the last hit
+			knockback_dir = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_ANGLE_MULTI]
+			if hit_data[Em.hit.ATK_FACING] < 0:
 				knockback_dir = posmod(180 - knockback_dir, 360) # mirror knockback angle horizontally if facing other way
 			return knockback_dir
 			
 				
 	var KBOrigin = null
-	if "kborigin" in hit_data:
-		KBOrigin = hit_data.kborigin # becomes a Vector2
+	if Em.hit.KBORIGIN in hit_data:
+		KBOrigin = hit_data[Em.hit.KBORIGIN] # becomes a Vector2
 		
 	var ref_vector := FVector.new() # vector from KBOrigin to hit_center
 	if KBOrigin:
-		ref_vector.set_from_vec(hit_data.hit_center - KBOrigin)
+		ref_vector.set_from_vec(hit_data[Em.hit.HIT_CENTER] - KBOrigin)
 	else:
-		ref_vector.set_from_vec(hit_data.hit_center - hit_data.attacker_or_entity.position)
+		ref_vector.set_from_vec(hit_data[Em.hit.HIT_CENTER] - hit_data[Em.hit.ATKER_OR_ENTITY].position)
 		
 	if ref_vector.x <= FMath.S and ref_vector.x >= -FMath.S:
 		ref_vector.x = 0 # reduce rounding errors when calculating hit center
 	
 	match knockback_type:
-		Globals.knockback_type.FIXED, Globals.knockback_type.MIRRORED:
+		Em.knockback_type.FIXED, Em.knockback_type.MIRRORED:
 
-			if hit_data.attack_facing > 0:
-				knockback_dir = posmod(hit_data.move_data.KB_angle, 360)
+			if hit_data[Em.hit.ATK_FACING] > 0:
+				knockback_dir = posmod(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360)
 			else:
-				knockback_dir = posmod(180 - hit_data.move_data.KB_angle, 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = posmod(180 - hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360) # mirror knockback angle horizontally if facing other way
 				
-			if knockback_type == Globals.knockback_type.MIRRORED: # mirror it again if wrong way
+			if knockback_type == Em.knockback_type.MIRRORED: # mirror it again if wrong way
 #				if KBOrigin:
-				var segment = Globals.split_angle(knockback_dir, Globals.angle_split.TWO, hit_data.attack_facing)
+				var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, hit_data[Em.hit.ATK_FACING])
 				match segment:
-					Globals.compass.E:
+					Em.compass.E:
 						if ref_vector.x < 0:
 							knockback_dir = posmod(180 - knockback_dir, 360)
-					Globals.compass.W:
+					Em.compass.W:
 						if ref_vector.x > 0:
 							knockback_dir = posmod(180 - knockback_dir, 360)
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
-		Globals.knockback_type.RADIAL:
+		Em.knockback_type.RADIAL:
 #			if KBOrigin:
-			knockback_dir = ref_vector.angle(hit_data.attack_facing)
-			if hit_data.attack_facing > 0:
-				knockback_dir += hit_data.move_data.KB_angle # KB_angle can rotate radial knockback some more
+			knockback_dir = ref_vector.angle(hit_data[Em.hit.ATK_FACING])
+			if hit_data[Em.hit.ATK_FACING] > 0:
+				knockback_dir += hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE] # KB_angle can rotate radial knockback some more
 			else:
-				knockback_dir -= hit_data.move_data.KB_angle
+				knockback_dir -= hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE]
 			knockback_dir = posmod(knockback_dir, 360)
 #			else: print("Error: No KBOrigin found for knockback_type.RADIAL")
 			
 	# for weak hit/non-guardbroken and grounded mob, if the hit is towards left/right instead of up/down, level it
-	if grounded and (!guardbroken or hit_data.weak_hit or hit_data.adjusted_atk_level <= 1):
-		var segment = Globals.split_angle(knockback_dir, Globals.angle_split.FOUR, hit_data.attack_facing)
+	if grounded and (!guardbroken or hit_data[Em.hit.WEAK_HIT] or hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1):
+		var segment = Globals.split_angle(knockback_dir, Em.angle_split.FOUR, hit_data[Em.hit.ATK_FACING])
 		match segment:
-			Globals.compass.E:
+			Em.compass.E:
 				knockback_dir = 0
-			Globals.compass.W:
+			Em.compass.W:
 				knockback_dir = 180
 				
 	return knockback_dir
@@ -3016,14 +3022,14 @@ func calculate_knockback_dir(hit_data) -> int:
 func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	# atk_level = 1 are weak hits and cannot do a lot of stuff, cannot cause hitstun
 
-#	if "superarmored" in hit_data:
+#	if Em.hit.SUPERARMORED in hit_data:
 #		return 1
-	if hit_data.double_repeat:
+	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 1 # double repeat is forced attack level 1
 		
-	var atk_level: int = hit_data.move_data.atk_level
+	var atk_level: int = hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL]
 	
-	if hit_data.sweetspotted and !Globals.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data.move_data.atk_attr: # sweetspotted give more hitstun
+	if hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
 		atk_level += 2
 		
 	atk_level = int(clamp(atk_level, 1, 8))
@@ -3033,26 +3039,26 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	
 func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's Guard Gauge
 	
-	if "fixed_hitstun" in hit_data.move_data and !hit_data.double_repeat:
-		return hit_data.move_data.fixed_hitstun
+	if Em.move.FIXED_HITSTUN in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT]:
+		return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTUN]
 		
-	if hit_data.adjusted_atk_level <= 1 and !is_hitstunned():
+	if hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1 and !is_hitstunned():
 		return 0 # weak hit on opponent not in hitstun
 		
-	if hit_data.double_repeat:
+	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 0
 
 	var scaled_hitstun := 0
-	if has_trait(Globals.trait.NO_LAUNCH) or hit_data.knockback_strength < LAUNCH_THRESHOLD:
-#		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
+	if has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
+#		scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[mob_level_to_tier()][hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
 		if Globals.difficulty == 3:
-			scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN_H[hit_data.adjusted_atk_level - 1] * FMath.S
-		else: scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
+			scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN_H[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
+		else: scaled_hitstun = ATK_LEVEL_TO_F_HITSTUN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
 	else:
-#		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][hit_data.adjusted_atk_level - 1] * FMath.S
+#		scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
 		if Globals.difficulty == 3:
-			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[hit_data.adjusted_atk_level - 1] * FMath.S
-		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data.adjusted_atk_level - 1] * FMath.S
+			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
+		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
 		
 	if guardbroken: # start scaling down when over 50% guard gauge
 		var weight = get_guard_gauge_percent_below()
@@ -3060,7 +3066,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 			weight = FMath.get_fraction_percent((weight - 50), 50)
 			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), weight)
 
-#	if "mob_break" in hit_data and "entity_nodepath" in hit_data: # reduce hitstun of projectile starters
+#	if Em.hit.MOB_BREAK in hit_data and Em.hit.ENTITY_PATH in hit_data: # reduce hitstun of projectile starters
 #		scaled_hitstun = FMath.percent(scaled_hitstun, 70)
 
 	return FMath.round_and_descale(scaled_hitstun)
@@ -3068,28 +3074,28 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
 		
-	if "superarmored" in hit_data:
+	if Em.hit.SUPERARMORED in hit_data:
 		return 7
 		
 	if !guardbroken:
-		if hit_data.sweetspotted:
-			if "fixed_ss_hitstop" in hit_data.move_data:
-				return hit_data.move_data.fixed_ss_hitstop # for Normal hitpulls
+		if hit_data[Em.hit.SWEETSPOTTED]:
+			if Em.move.FIXED_SS_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+				return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_SS_HITSTOP] # for Normal hitpulls
 			else:
 				return 10
 		else:
 			return 5
 
 	# some moves have predetermined hitstop
-	if "fixed_hitstop" in hit_data.move_data:
-		return hit_data.move_data.fixed_hitstop
+	if Em.move.FIXED_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+		return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTOP]
 	
 # warning-ignore:integer_division
 	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 100) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
-	if hit_data.sweetspotted: # sweetspotted hits has 30% more hitstop
-		if "fixed_ss_hitstop" in hit_data.move_data:
-			return hit_data.move_data.fixed_ss_hitstop # for Normal hitpulls
+	if hit_data[Em.hit.SWEETSPOTTED]: # sweetspotted hits has 30% more hitstop
+		if Em.move.FIXED_SS_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+			return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_SS_HITSTOP] # for Normal hitpulls
 		hitstop_temp = FMath.percent(hitstop_temp, SWEETSPOT_HITSTOP_MOD)
 		
 	hitstop_temp = FMath.round_and_descale(hitstop_temp) # descale it
@@ -3103,47 +3109,47 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 
 	var hitspark_level: int
 	
-	if hit_data.adjusted_atk_level <= 1:
+	if hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1:
 		hitspark_level = 0
-	elif "burst" in hit_data.move_data:
+	elif Em.move.BURST in hit_data[Em.hit.MOVE_DATA]:
 		hitspark_level = 5
-	elif hit_data.lethal_hit or "mob_break" in hit_data:
+	elif hit_data[Em.hit.LETHAL_HIT] or Em.hit.MOB_BREAK in hit_data:
 		hitspark_level = 5 # max size for Lethal and Break
 	else:
-		if hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 40):
+		if hit_data[Em.hit.KB] <= FMath.percent(LAUNCH_THRESHOLD, 40):
 			hitspark_level = 1
-		elif hit_data.knockback_strength < LAUNCH_THRESHOLD:
+		elif hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
 			hitspark_level = 2
-		elif hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 170):
+		elif hit_data[Em.hit.KB] <= FMath.percent(LAUNCH_THRESHOLD, 170):
 			hitspark_level = 3
-		elif hit_data.knockback_strength <= FMath.percent(LAUNCH_THRESHOLD, 200):
+		elif hit_data[Em.hit.KB] <= FMath.percent(LAUNCH_THRESHOLD, 200):
 			hitspark_level = 4
 		else:
 			hitspark_level = 5
 		
-		if hit_data.sweetspotted: # if sweetspotted, hitspark level increased by 1
+		if hit_data[Em.hit.SWEETSPOTTED]: # if sweetspotted, hitspark level increased by 1
 			hitspark_level = int(clamp(hitspark_level + 1, 1, 5)) # max is 5
 
 			
-	if !"hitspark_type" in hit_data.move_data:
-#		if hit_data.attacker_or_entity.has_method("get_default_hitspark_type"):
-#			hit_data.move_data["hitspark_type"] = hit_data.attacker_or_entity.get_default_hitspark_type()
-		if hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_type"):
-			hit_data.move_data["hitspark_type"] = hit_data.attacker.get_default_hitspark_type()
+	if !Em.move.HITSPARK_TYPE in hit_data[Em.hit.MOVE_DATA]:
+#		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_type"):
+#			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_type()
+		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_type"):
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER].get_default_hitspark_type()
 		else:
-			hit_data.move_data["hitspark_type"] = Globals.hitspark_type.HIT
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = Em.hitspark_type.HIT
 			
-	if !"hitspark_palette" in hit_data.move_data:
-#		if hit_data.attacker_or_entity.has_method("get_default_hitspark_palette"):
-#			hit_data.move_data["hitspark_palette"] = hit_data.attacker_or_entity.get_default_hitspark_palette()
-		if hit_data.attacker != null and hit_data.attacker.has_method("get_default_hitspark_palette"):
-			hit_data.move_data["hitspark_palette"] = hit_data.attacker.get_default_hitspark_palette()
+	if !Em.move.HITSPARK_PALETTE in hit_data[Em.hit.MOVE_DATA]:
+#		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_palette"):
+#			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_palette()
+		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
 		else:
-			hit_data.move_data["hitspark_palette"] = "red"
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
 		
 	var hitspark = ""
-	match hit_data.move_data.hitspark_type:
-		Globals.hitspark_type.HIT:
+	match hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE]:
+		Em.hitspark_type.HIT:
 			match hitspark_level:
 				0:
 					hitspark = "HitsparkA"
@@ -3153,7 +3159,7 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 					hitspark = "HitsparkC"
 				5:
 					hitspark = "HitsparkD"
-		Globals.hitspark_type.SLASH:
+		Em.hitspark_type.SLASH:
 			match hitspark_level:
 				0:
 					hitspark = "SlashsparkA"
@@ -3163,24 +3169,24 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 					hitspark = "SlashsparkC"
 				5:
 					hitspark = "SlashsparkD"
-		Globals.hitspark_type.CUSTOM:
+		Em.hitspark_type.CUSTOM:
 			# WIP
 			pass
 					
 	if hitspark != "":
 		var rot_rad: float
-		if hit_data.move_data.hitspark_type != Globals.hitspark_type.SLASH:
-			rot_rad = hit_data.knockback_dir / 360.0 * (2 * PI) + PI # visuals only
+		if hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] != Em.hitspark_type.SLASH:
+			rot_rad = hit_data[Em.hit.KB_ANGLE] / 360.0 * (2 * PI) + PI # visuals only
 		else: # slash hitspark randomize angle a bit
 			var rand_degree := 0
-			if "multihit" in hit_data or "autochain" in hit_data:
+			if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
 				rand_degree = Globals.Game.rng_generate(91) * Globals.Game.rng_facing()
 			else:
 				rand_degree = Globals.Game.rng_generate(46) * Globals.Game.rng_facing()
-			rot_rad = (hit_data.knockback_dir + rand_degree) / 360.0 * (2 * PI) + PI # visuals only
+			rot_rad = (hit_data[Em.hit.KB_ANGLE] + rand_degree) / 360.0 * (2 * PI) + PI # visuals only
 		if "pull" in hit_data: rot_rad += PI # flip if pulling
-		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data.hit_center, {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}, \
-				hit_data.move_data["hitspark_palette"])
+		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data[Em.hit.HIT_CENTER], {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}, \
+				hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE])
 		
 func get_default_hitspark_type():
 	return get_stat("DEFAULT_HITSPARK_TYPE")
@@ -3193,15 +3199,15 @@ func get_default_hitspark_palette():
 func simulate_sequence(): # cut into this during simulate2() during sequences
 	
 	var Partner = get_seq_partner()
-	if Partner == null and new_state in [Globals.char_state.SEQUENCE_TARGET, Globals.char_state.SEQUENCE_USER]:
+	if Partner == null and new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		animate("Idle")
 		return
 	
-	if new_state == Globals.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		if Partner.new_state != Globals.char_state.SEQUENCE_USER:
+	if new_state == Em.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
+		if Partner.new_state != Em.char_state.SEQUENCE_USER:
 			animate("Idle") # auto release if not released proberly, just in case
 		
-	elif new_state == Globals.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
+	elif new_state == Em.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
 		UniqChar.simulate_sequence()
 		
 		
@@ -3217,7 +3223,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 #	velocity.x = results[0].x
 #	velocity.y = results[0].y
 	
-	if new_state == Globals.char_state.SEQUENCE_USER:
+	if new_state == Em.char_state.SEQUENCE_USER:
 		UniqChar.simulate_sequence_after() # move grabbed target after grabber has moved
 	
 	if results[0]: UniqChar.end_sequence_step("ground") # hit the ground, no effect if simulate_sequence_after() broke grab and animated "Idle"
@@ -3225,15 +3231,15 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 		
 func landed_a_sequence(hit_data):
 	
-	if new_state in [Globals.char_state.SEQUENCE_USER]:
+	if new_state in [Em.char_state.SEQUENCE_USER]:
 		return # no sequencing if you are already grabbing another player
 
-	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
+	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
 	
-	if defender == null or defender.new_state in [Globals.char_state.SEQUENCE_TARGET]:
+	if defender == null or defender.new_state in [Em.char_state.SEQUENCE_TARGET]:
 		return # no sequencing players that are already being grabbed
 		
-	if defender.new_state in [Globals.char_state.SEQUENCE_USER]: # both players grab each other at the same time, break grabs
+	if defender.new_state in [Em.char_state.SEQUENCE_USER]: # both players grab each other at the same time, break grabs
 		animate("Idle")
 		defender.animate("Idle")
 		return
@@ -3244,12 +3250,12 @@ func landed_a_sequence(hit_data):
 	seq_partner_ID = defender.player_ID
 	defender.seq_partner_ID = player_ID
 		
-	animate(hit_data.move_data.sequence)
+	animate(hit_data[Em.hit.MOVE_DATA][Em.move.SEQ])
 #	UniqChar.start_sequence_step()
 	
 	remove_status_effect_on_landing_hit()
 	
-#	defender.status_effect_to_remove.append(Globals.status_effect.POS_FLOW)	# defender lose positive flow
+#	defender.status_effect_to_remove.append(Em.status_effect.POS_FLOW)	# defender lose positive flow
 
 	
 func take_seq_damage(base_damage: int) -> bool: # return true if lethal
@@ -3275,16 +3281,16 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 		return
 		
 	var seq_hit_data = seq_user.UniqChar.get_seq_hit_data(hit_key)
-	var lethal = take_seq_damage(seq_hit_data.damage)
+	var lethal = take_seq_damage(seq_hit_data[Em.move.DMG])
 	
-	if "hitstop" in seq_hit_data and !"weak" in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
+	if Em.move.SEQ_HITSTOP in seq_hit_data and !Em.move.SEQ_WEAK in    seq_hit_data: # if weak, no lethal effect, place it for non-final hits
 		if lethal:
 			hitstop = LETHAL_HITSTOP
 			seq_user.hitstop = hitstop
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		else:
-			hitstop = seq_hit_data.hitstop
+			hitstop = seq_hit_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop
 
 
@@ -3304,28 +3310,28 @@ func sequence_launch():
 		print("Error: " + Animator.to_play_animation + " auto-sequence not found in database.")
 	var seq_data = seq_user.UniqChar.get_seq_launch_data()
 	
-#		"sequence_launch" : { # for final hit of sequence
-#			"damage" : 0,
-#			"hitstop" : 0,
+#		Em.move.SEQ_LAUNCH : { # for final hit of sequence
+#			Em.move.DMG : 0,
+#			Em.move.SEQ_HITSTOP : 0,
 #			"guard_gain" : 3500,
-#			"launch_power" : 700 * FMath.S,
-#			"launch_angle" : -82,
-#			"atk_level" : 6,
+#			Em.move.KB : 700 * FMath.S,
+#			Em.move.KB_ANGLE : -82,
+#			Em.move.ATK_LVL : 6,
 #		}
 
 	# DAMAGE
-	var damage = seq_data.damage
+	var damage = seq_data[Em.move.DMG]
 	var lethal = take_seq_damage(damage)
-	if damage > 0 and seq_data.hitstop > 0: # launch is a hit (rare)
-		if lethal and !"weak" in seq_data:
+	if damage > 0 and seq_data[Em.move.SEQ_HITSTOP] > 0: # launch is a hit (rare)
+		if lethal and !Em.move.SEQ_WEAK in seq_data:
 			hitstop = LETHAL_HITSTOP
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 		else:
-			hitstop = seq_data.hitstop
+			hitstop = seq_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop
 		
-	if !guardbroken and !"weak" in seq_data:
+	if !guardbroken and !Em.move.SEQ_WEAK in seq_data:
 		
 		change_guard_gauge(GUARD_GAUGE_FLOOR)
 		
@@ -3338,7 +3344,7 @@ func sequence_launch():
 			Globals.Game.spawn_SFX("Crushspark", "Stunspark", position, {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()})
 		
-			combo_level = seq_data.atk_level - 1
+			combo_level = seq_data[Em.move.ATK_LVL] - 1
 			combo_level += Inventory.modifier(seq_user.player_ID, Cards.effect_ref.COMBO_LEVEL)
 			combo_level = int(clamp(combo_level, 0, 7))
 			
@@ -3346,14 +3352,14 @@ func sequence_launch():
 		
 	# HITSTUN
 	var hitstun: int
-	if "fixed_hitstun" in seq_data:
+	if Em.move.FIXED_HITSTUN in seq_data:
 		hitstun = seq_data.fixed_hitstun
 	else:
-#		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][seq_data.atk_level - 1] * FMath.S
+#		var scaled_hitstun: int = ATK_LEVEL_TO_L_HITSTUN[mob_level_to_tier()][seq_data[Em.move.ATK_LVL] - 1] * FMath.S
 		var scaled_hitstun: int
 		if Globals.difficulty == 3:
-			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[seq_data.atk_level - 1] * FMath.S
-		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[seq_data.atk_level - 1] * FMath.S
+			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[seq_data[Em.move.ATK_LVL] - 1] * FMath.S
+		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[seq_data[Em.move.ATK_LVL] - 1] * FMath.S
 		var weight = get_guard_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
@@ -3363,53 +3369,53 @@ func sequence_launch():
 	launchstun_rotate = 0 # used to calculation sprite rotation during launched state
 		
 	# LAUNCH POWER
-	var launch_power = seq_data.launch_power # scaled
+	var launch_power = seq_data[Em.move.KB] # scaled
 	launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, get_stat("KB_BOOST_AT_MAX_GG")), \
 			get_guard_gauge_percent_below())
 		
 	# LAUNCH ANGLE
 	var launch_angle: int
 	if seq_user.facing > 0:
-		launch_angle = posmod(seq_data.launch_angle, 360)
+		launch_angle = posmod(seq_data[Em.move.KB_ANGLE], 360)
 	else:
-		launch_angle = posmod(180 - seq_data.launch_angle, 360) # if mirrored
+		launch_angle = posmod(180 - seq_data[Em.move.KB_ANGLE], 360) # if mirrored
 		
 	# LAUNCHING
 	sprite.rotation = 0
-	var segment = Globals.split_angle(launch_angle, Globals.angle_split.EIGHT, dir_to_attacker)
+	var segment = Globals.split_angle(launch_angle, Em.angle_split.EIGHT, dir_to_attacker)
 	match segment:
-		Globals.compass.N:
+		Em.compass.N:
 			face(-dir_to_attacker) # turn towards attacker
 			if facing == 1:
 				launch_starting_rot = PI/2
 			else:
 				launch_starting_rot = 3*PI/2
-		Globals.compass.NE:
+		Em.compass.NE:
 			face(-1)
 			launch_starting_rot = 7*PI/4
-		Globals.compass.E:
+		Em.compass.E:
 			face(-1)
 			launch_starting_rot = 0
-		Globals.compass.SE:
+		Em.compass.SE:
 			face(-1)
 			launch_starting_rot = 9*PI/4
-		Globals.compass.S:
+		Em.compass.S:
 			face(-dir_to_attacker) # turn towards attacker
 			if facing == -1:
 				launch_starting_rot = PI/2
 			else:
 				launch_starting_rot = 3*PI/2
-		Globals.compass.SW:
+		Em.compass.SW:
 			face(1)
 			launch_starting_rot = 7*PI/4
-		Globals.compass.W:
+		Em.compass.W:
 			face(1)
 			launch_starting_rot = 0.0
-		Globals.compass.NW:
+		Em.compass.NW:
 			face(1)
 			launch_starting_rot = PI/4
 			
-	if !has_trait(Globals.trait.NO_LAUNCH):
+	if !has_trait(Em.trait.NO_LAUNCH):
 		animate("LaunchStop")
 	else:
 		animate("aFlinchAStop") # error, just in case, mobs with NO_LAUNCH are not supposed to be vulnerable to sequence and has no LaunchStop
@@ -3440,10 +3446,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					var killer = Globals.Game.get_player_node(target_ID)
 					var healed = killer.take_damage(-FMath.percent(get_stat("DAMAGE_VALUE_LIMIT"), Cards.KILL_HEAL_PERCENT))
 					if healed != null and healed > 0:
-						Globals.Game.spawn_damage_number(healed, killer.position, Globals.dmg_num_col.GREEN)
+						Globals.Game.spawn_damage_number(healed, killer.position, Em.dmg_num_col.GREEN)
 						
 			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, null, \
-					1.0, 20, Globals.afterimage_shader.WHITE)
+					1.0, 20, Em.afterimage_shader.WHITE)
 			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
 			play_audio("kill2", {})
@@ -3517,7 +3523,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		
 	if is_atk_startup():
 		var atk_attr = query_atk_attr()
-		if Globals.atk_attr.NORMALARMOR_STARTUP in atk_attr or Globals.atk_attr.SUPERARMOR_STARTUP in atk_attr:
+		if Em.atk_attr.NORMALARMOR_STARTUP in atk_attr or Em.atk_attr.SUPERARMOR_STARTUP in atk_attr:
 			modulate_play("armor_flash")
 	
 	match anim_name:

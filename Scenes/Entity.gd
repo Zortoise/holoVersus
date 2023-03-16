@@ -82,6 +82,7 @@ func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_da
 func load_entity():
 
 	add_to_group("EntityNodes")
+	add_to_group("P" + str(master_ID + 1) + "EntityNodes")
 
 	if entity_ref in Loader.entity_data:
 		UniqEntity = Loader.entity_data[entity_ref].scene.instance() # load UniqEntity scene
@@ -120,7 +121,7 @@ func load_entity():
 		$EntityCollisionBox.rect_size = ref_rect.rect_size
 		$EntityCollisionBox.add_to_group("Entities")
 		
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
 			$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
 			$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
@@ -159,13 +160,16 @@ func load_entity():
 			$Sprite.material.shader = Loader.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", Loader.char_data[master_ref].palettes[palette_ref])
 				
+	if UniqEntity.has_method("load_entity"):
+		UniqEntity.load_entity()
 
 func simulate():
 	hitstop = null
 	
 	if Globals.Game.is_stage_paused(): return
 	if free: return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -199,17 +203,17 @@ func simulate2(): # only ran if not in hitstop
 	
 	# movement
 	if has_node("EntityCollisionBox"):
-		
+
 		var orig_pos = position
 		var orig_vel_x = velocity.x
 		var orig_vel_y = velocity.y
-	
+
 		var results #  # [landing_check, collision_check, ledgedrop_check]
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
-			results = move($EntityCollisionBox, $SoftPlatformDBox, Globals.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
+			results = move($EntityCollisionBox, $SoftPlatformDBox, Em.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
 		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
 			results = move($EntityCollisionBox, $EntityCollisionBox)
-		
+
 		if UniqEntity.has_method("collision"): # entity can collide with solid platforms
 			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
 				UniqEntity.kill()
@@ -221,7 +225,7 @@ func simulate2(): # only ran if not in hitstop
 					velocity.y = orig_vel_y
 				else:
 					UniqEntity.collision()
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
 			if !is_on_ground($SoftPlatformDBox): # spawned in the air, kill it
 				UniqEntity.kill()
 			elif results[2]: # reached a ledge
@@ -232,12 +236,13 @@ func simulate2(): # only ran if not in hitstop
 					velocity.y = orig_vel_y
 				else:	
 					UniqEntity.ledge_stop()
-		
+
 	else: # no collision with platforms
 		move_no_collision()
-		
-#	if !Globals.entity_trait.PICKUP in UniqEntity.TRAITS:
-	interactions() # do this after movement!
+#
+##	if !Em.entity_trait.PICKUP in UniqEntity.TRAITS:
+	if Globals.survival_level == null:
+		interactions() # do this after movement!
 		
 #	else:
 #		if UniqEntity.has_method("picked_up"):
@@ -261,12 +266,13 @@ func interactions():
 			
 			to_destroy = false
 			
+			
 			var easy_destructible := false # if true, all physical attacks can destroy this entity
-			if Globals.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 1:
+			if Em.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 1:
 				easy_destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
 				
 			var indestructible := false
-			if Globals.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
+			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
 				indestructible = true
 				
 			var can_clash := false
@@ -275,76 +281,86 @@ func interactions():
 
 			 # get characters that can destroy this entity
 			var character_array = []
-			if Globals.survival_level == null:
-				character_array = get_tree().get_nodes_in_group("PlayerNodes")
-			else:
-				character_array = get_tree().get_nodes_in_group("MobNodes")
+#			if Globals.survival_level == null:
+			character_array = get_tree().get_nodes_in_group("PlayerNodes")
+#			else:
+#				character_array = get_tree().get_nodes_in_group("MobNodes")
 			var destroyer_array = []
 			
 			if !indestructible:
 				for character in character_array:
 					if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
-						(easy_destructible or Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
+						(easy_destructible or Em.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
 						destroyer_array.append(character)
 					
-			if Globals.survival_level == null:
+#			if Globals.survival_level == null:
 				 # get entities that can destroy or clash with this entity
-				var entity_array = get_tree().get_nodes_in_group("EntityNodes")
-				var clash_array := []
-				for entity in entity_array:
-					if entity.master_ID != master_ID and !entity.free:
-						if !indestructible and Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
-							destroyer_array.append(entity)
-						elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
-							clash_array.append(entity)
-				
-				# check for entity destroyers
-				for destroyer in destroyer_array:
-					var second_hitbox = destroyer.Animator.query_polygon("hitbox")
+			var entity_array := []
+			if Globals.player_count > 2:
+				entity_array = get_tree().get_nodes_in_group("EntityNodes")
+			else:
+				match master_ID:
+					0:
+						entity_array = get_tree().get_nodes_in_group("P2EntityNodes")
+					1:
+						entity_array = get_tree().get_nodes_in_group("P1EntityNodes")
+						
+			var clash_array := []
+			for entity in entity_array:
+				if entity.master_ID != master_ID and !entity.free:
+					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
+						destroyer_array.append(entity)
+					elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
+						clash_array.append(entity)
+			
+			# check for entity destroyers
+			for destroyer in destroyer_array:
+				var second_hitbox = destroyer.Animator.query_polygon("hitbox")
+				if second_hitbox != null:
+					var their_rect = destroyer.get_sprite_rect()
+					
+					if my_rect.intersects(their_rect):
+						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+						if intersect_polygons.size() > 0: # detected intersection
+							UniqEntity.kill()
+							to_destroy = true
+							break
+					
+			# check for clashes
+			if !to_destroy and can_clash:
+				var clash_array2 = []
+				for entity in clash_array:
+					var second_hitbox = entity.Animator.query_polygon("hitbox")
 					if second_hitbox != null:
-						var their_rect = destroyer.get_sprite_rect()
+						var their_rect = entity.get_sprite_rect()
 						
 						if my_rect.intersects(their_rect):
 							var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
 							if intersect_polygons.size() > 0: # detected intersection
-								UniqEntity.kill()
-								to_destroy = true
-								break
-						
-				# check for clashes
-				if !to_destroy and can_clash:
-					var clash_array2 = []
-					for entity in clash_array:
-						var second_hitbox = entity.Animator.query_polygon("hitbox")
-						if second_hitbox != null:
-							var their_rect = entity.get_sprite_rect()
+								clash_array2.append(entity) 
+		
+				if clash_array2.size() > 0:
+					var lowest_AV = absorption_value # find lowest absorption_value
+					for x in clash_array2:
+						if x.absorption_value < lowest_AV:
+							lowest_AV = x.absorption_value
 							
-							if my_rect.intersects(their_rect):
-								var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
-								if intersect_polygons.size() > 0: # detected intersection
-									clash_array2.append(entity) 
-			
-					if clash_array2.size() > 0:
-						var lowest_AV = absorption_value # find lowest absorption_value
-						for x in clash_array2:
-							if x.absorption_value < lowest_AV:
-								lowest_AV = x.absorption_value
-								
-						absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
-						if absorption_value <= 0:
-							UniqEntity.kill()
-							to_destroy = true
-						for x in clash_array2:
-							x.absorption_value -= lowest_AV
-							if x.absorption_value <= 0:
-								x.UniqEntity.kill()	
-								x.to_destroy = true
+					absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
+					if absorption_value <= 0:
+						UniqEntity.kill()
+						to_destroy = true
+					for x in clash_array2:
+						x.absorption_value -= lowest_AV
+						if x.absorption_value <= 0:
+							x.UniqEntity.kill()	
+							x.to_destroy = true
 	
 	
 func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
 	if free: return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0:
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		slowed = 0
 		$HitStopTimer.stop()
 		return
 	slowed = 0
@@ -415,22 +431,22 @@ func on_offstage(): # what to do if entity leaves stage
 func query_polygons(): # requested by main game node when doing hit detection
 
 	var polygons_queried = {
-		"rect" : null,
-		"hitbox" : null,
-		"sweetbox": null,
-		"kborigin": null,
-		"vacpoint": null,
+		Em.hit.RECT : null,
+		Em.hit.HITBOX : null,
+		Em.hit.SWEETBOX: null,
+		Em.hit.KBORIGIN: null,
+		Em.hit.VACPOINT: null,
 	}
 
 	if !$HitStopTimer.is_running(): # no hitbox during hitstop
-		if !Globals.atk_attr.HARMLESS_ENTITY in query_atk_attr():
-			polygons_queried.hitbox = Animator.query_polygon("hitbox")
-			polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
-			polygons_queried.kborigin = Animator.query_point("kborigin")
-			polygons_queried.vacpoint = Animator.query_point("vacpoint")
+		if !Em.atk_attr.HARMLESS_ENTITY in query_atk_attr():
+			polygons_queried[Em.hit.HITBOX] = Animator.query_polygon("hitbox")
+			polygons_queried[Em.hit.SWEETBOX] = Animator.query_polygon("sweetbox")
+			polygons_queried[Em.hit.KBORIGIN] = Animator.query_point("kborigin")
+			polygons_queried[Em.hit.VACPOINT] = Animator.query_point("vacpoint")
 
-		if polygons_queried.hitbox != null:
-			polygons_queried.rect = get_sprite_rect()
+		if polygons_queried[Em.hit.HITBOX] != null:
+			polygons_queried[Em.hit.RECT] = get_sprite_rect()
 
 	return polygons_queried
 	
@@ -442,9 +458,9 @@ func get_sprite_rect():
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	if UniqEntity.has_method("query_move_data"):
-		return {"move_data" : UniqEntity.query_move_data(Animator.to_play_animation), "move_name" : Animator.to_play_animation}
+		return {Em.hit.MOVE_DATA : UniqEntity.query_move_data(Animator.to_play_animation), Em.hit.MOVE_NAME : Animator.to_play_animation}
 #	elif Animator.to_play_animation in UniqEntity.MOVE_DATABASE:
-#		return {"move_data" : UniqEntity.MOVE_DATABASE[Animator.to_play_animation], "move_name" : Animator.to_play_animation}
+#		return {Em.hit.MOVE_DATA : UniqEntity.MOVE_DATABASE[Animator.to_play_animation], Em.hit.MOVE_NAME : Animator.to_play_animation}
 	print("Error: " + Animator.to_play_animation + " not found in MOVE_DATABASE for query_move_data_and_name().")
 
 
@@ -465,73 +481,82 @@ func query_move_data(in_move_name = null):
 	var move_data = UniqEntity.query_move_data(in_move_name)
 	return move_data
 	
-func get_proj_level():
-	if UniqEntity.MOVE_DATABASE.size() == 0: return null
-	else:
-		var move_data = query_move_data()
-		if "proj_level" in move_data:
-			return move_data.proj_level
-	return null
+#func get_proj_level():
+#	if UniqEntity.MOVE_DATABASE.size() == 0: return null
+#	else:
+#		var move_data = query_move_data()
+#		if Em.move.PROJ_LVL in move_data:
+#			return move_data[Em.move.PROJ_LVL]
+#	return null
+	
+func get_proj_level(in_move_name = null):
+	
+	if in_move_name == null:
+		in_move_name = Animator.to_play_animation
+	
+	if UniqEntity.has_method("get_proj_level"):
+		return UniqEntity.get_proj_level(in_move_name)
+	return 1
 	
 	
 # LANDING A HIT ---------------------------------------------------------------------------------------------- 
 
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 
-	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
+	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
 	if defender == null:
 		return # defender is deleted
-	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
+	increment_hitcount(hit_data[Em.hit.DEFENDER_ID]) # for measuring hitcount of attacks
 	
-	Globals.Game.get_player_node(master_ID).target_ID = hit_data.defender_ID # target last attacked opponent
+	Globals.Game.get_player_node(master_ID).target_ID = hit_data[Em.hit.DEFENDER_ID] # target last attacked opponent
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 
-	if "fixed_entity_hitstop" in hit_data.move_data:
-		hitstop = hit_data.move_data.fixed_entity_hitstop
+	if Em.move.FIXED_ENTITY_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ENTITY_HITSTOP]
 		
-	elif hit_data.lethal_hit:
+	elif hit_data[Em.hit.LETHAL_HIT]:
 		if Globals.survival_level == null: # no screenfreeze for Survival Mode
 			hitstop = null # no hitstop for projectile for lethal hit, screenfreeze already enough
 		else: # follow hitstop of lethaled mob, which is lower
-			hitstop = hit_data.hitstop
+			hitstop = hit_data[Em.hit.HITSTOP]
 		
-	elif hit_data.stun:
+	elif hit_data[Em.hit.STUN]:
 		hitstop = null # projectiles don't normally stun except on last hits
 		
 	else:
-		if hitstop == null or hit_data.hitstop > hitstop:
-			hitstop = hit_data.hitstop			
+		if hitstop == null or hit_data[Em.hit.HITSTOP] > hitstop:
+			hitstop = hit_data[Em.hit.HITSTOP]			
 			
 	if hitstop != null and hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
-		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
-			$NoCollideTimer.time = hit_data.move_data.ignore_time
+		if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
+			$NoCollideTimer.time = hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME]
 		else:
 			$NoCollideTimer.time = 1
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 
-	if hit_data.block_state == Globals.block_state.UNBLOCKED and "hit_sound" in hit_data.move_data:
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and Em.move.HIT_SOUND in hit_data[Em.hit.MOVE_DATA]:
 
 		var volume_change = 0
-		if hit_data.lethal_hit or hit_data.stun or hit_data.sweetspotted:
+		if hit_data[Em.hit.LETHAL_HIT] or hit_data[Em.hit.STUN] or hit_data[Em.hit.SWEETSPOTTED]:
 			volume_change += STRONG_HIT_AUDIO_BOOST
-#		elif hit_data.adjusted_atk_level <= 1 or hit_data.double_repeat or hit_data.semi_disjoint: # last for VULN_LIMBS
-		elif hit_data.double_repeat:
+#		elif hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1 or hit_data[Em.hit.DOUBLE_REPEAT] or hit_data[Em.hit.SEMI_DISJOINT]: # last for VULN_LIMBS
+		elif hit_data[Em.hit.DOUBLE_REPEAT]:
 			volume_change += WEAK_HIT_AUDIO_NERF # WEAK_HIT_AUDIO_NERF is negative
 			
-		if !hit_data.move_data.hit_sound is Array:
+		if !hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND] is Array:
 
-			var aux_data = hit_data.move_data.hit_sound.aux_data.duplicate(true)
+			var aux_data = hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND].aux_data.duplicate(true)
 			if "vol" in aux_data:
 				aux_data["vol"] = min(aux_data["vol"] + volume_change, 0) # max is 0
 			elif volume_change < 0:
 				aux_data["vol"] = volume_change
-			play_audio(hit_data.move_data.hit_sound.ref, aux_data)
+			play_audio(hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND].ref, aux_data)
 
 		else: # multiple sounds at once
-			for sound in hit_data.move_data.hit_sound:
+			for sound in hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND]:
 				var aux_data = sound.aux_data.duplicate(true)
 				if "vol" in aux_data:
 					aux_data["vol"] = min(aux_data["vol"] + volume_change, 0) # max is 0
@@ -558,7 +583,7 @@ func get_hitcount(in_ID):
 func is_hitcount_maxed(in_ID, in_move_data):  # called by main game node
 	var recorded_hitcount = get_hitcount(in_ID)
 	
-	if recorded_hitcount >= in_move_data.hitcount:
+	if recorded_hitcount >= in_move_data[Em.move.HITCOUNT]:
 		return true
 	else: return false
 	
@@ -566,7 +591,7 @@ func is_hitcount_maxed(in_ID, in_move_data):  # called by main game node
 func is_hitcount_last_hit(in_ID, in_move_data):
 	var recorded_hitcount = get_hitcount(in_ID)
 	
-	if recorded_hitcount >= in_move_data.hitcount - 1:
+	if recorded_hitcount >= in_move_data[Em.move.HITCOUNT] - 1:
 		return true
 	else: return false
 	
@@ -579,7 +604,7 @@ func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Gu
 	
 # IGNORE LIST ------------------------------------------------------------------------------------------------
 	
-func append_ignore_list(in_ID, ignore_time): # added if the move has "ignore_time", called by the defender
+func append_ignore_list(in_ID, ignore_time): # added if the move has Em.move.IGNORE_TIME, called by the defender
 	for ignored in ignore_list:
 		if ignored[0] == in_ID:
 			print("Error: attempting to ignore an ignored player")

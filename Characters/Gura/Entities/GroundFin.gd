@@ -2,8 +2,8 @@ extends Node2D
 
 #const START_SPEED = 500
 
-const TRAITS = [Globals.entity_trait.GROUNDED, Globals.entity_trait.LEDGE_STOP]
-# example: Globals.entity_trait.GROUNDED
+const TRAITS = [Em.entity_trait.GROUNDED, Em.entity_trait.LEDGE_STOP]
+# example: Em.entity_trait.GROUNDED
 
 # cleaner code
 onready var Entity = get_parent()
@@ -65,7 +65,7 @@ func simulate():
 				
 				
 func query_atk_attr(_move_name):
-	return [Globals.atk_attr.HARMLESS_ENTITY, Globals.atk_attr.DESTRUCTIBLE_ENTITY]
+	return [Em.atk_attr.HARMLESS_ENTITY, Em.atk_attr.DESTRUCTIBLE_ENTITY]
 
 	
 func kill(_sound = true):

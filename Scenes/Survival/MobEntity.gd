@@ -105,7 +105,7 @@ func load_entity():
 		$EntityCollisionBox.rect_size = ref_rect.rect_size
 		$EntityCollisionBox.add_to_group("Entities")
 		
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
 
 	else: # no collision, delete EntityCollisionBox
@@ -148,13 +148,18 @@ func load_entity():
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Loader.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", Loader.char_data[creator_mob_ref].palettes[palette_ref])
+			
+	if UniqEntity.has_method("load_entity"):
+		UniqEntity.load_entity()
+		
 
 func simulate():
 	hitstop = null
 	
 	if free: return
 	if Globals.Game.is_stage_paused(): return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		return
 	
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
@@ -187,8 +192,8 @@ func simulate2(): # only ran if not in hitstop
 		var orig_vel_y = velocity.y
 	
 		var results #  # [landing_check, collision_check, ledgedrop_check]
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
-			results = move($EntityCollisionBox, $EntityCollisionBox, Globals.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
+			results = move($EntityCollisionBox, $EntityCollisionBox, Em.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
 		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
 			results = move($EntityCollisionBox, $EntityCollisionBox)
 		
@@ -203,7 +208,7 @@ func simulate2(): # only ran if not in hitstop
 					velocity.y = orig_vel_y
 				else:
 					UniqEntity.collision()
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			if !is_on_solid_ground($EntityCollisionBox): # spawned in the air, kill it
 				UniqEntity.kill()
 		
@@ -224,11 +229,11 @@ func interactions():
 			var to_destroy := false
 			
 			var easy_destructible := false # if true, all physical attacks can destroy this entity
-			if Globals.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 1:
+			if Em.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 1:
 				easy_destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
 				
 			var indestructible := false
-			if Globals.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
+			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
 				indestructible = true
 
 			var can_clash := false
@@ -242,7 +247,7 @@ func interactions():
 			if !indestructible:
 				for character in character_array:
 					if character.is_atk_active() and (!"free" in character or !character.free) and \
-							(easy_destructible or Globals.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
+							(easy_destructible or Em.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
 						destroyer_array.append(character)
 					
 			 # get entities that can destroy or clash with this entity
@@ -250,7 +255,7 @@ func interactions():
 			var clash_array := []
 			for entity in entity_array:
 				if !entity.free:
-					if !indestructible and Globals.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
+					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
 						destroyer_array.append(entity)
 					elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
 						clash_array.append(entity)
@@ -301,7 +306,8 @@ func interactions():
 func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
 	if free: return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0:
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		slowed = 0
 		$HitStopTimer.stop()
 		return
 	slowed = 0
@@ -372,22 +378,22 @@ func on_offstage(): # what to do if entity leaves stage
 func query_polygons(): # requested by main game node when doing hit detection
 
 	var polygons_queried = {
-		"rect" : null,
-		"hitbox" : null,
-		"sweetbox": null,
-		"kborigin": null,
-		"vacpoint": null,
+		Em.hit.RECT : null,
+		Em.hit.HITBOX : null,
+		Em.hit.SWEETBOX: null,
+		Em.hit.KBORIGIN: null,
+		Em.hit.VACPOINT: null,
 	}
 
 	if !$HitStopTimer.is_running(): # no hitbox during hitstop
-		if !Globals.atk_attr.HARMLESS_ENTITY in query_atk_attr():
-			polygons_queried.hitbox = Animator.query_polygon("hitbox")
-			polygons_queried.sweetbox = Animator.query_polygon("sweetbox")
-			polygons_queried.kborigin = Animator.query_point("kborigin")
-			polygons_queried.vacpoint = Animator.query_point("vacpoint")
+		if !Em.atk_attr.HARMLESS_ENTITY in query_atk_attr():
+			polygons_queried[Em.hit.HITBOX] = Animator.query_polygon("hitbox")
+			polygons_queried[Em.hit.SWEETBOX] = Animator.query_polygon("sweetbox")
+			polygons_queried[Em.hit.KBORIGIN] = Animator.query_point("kborigin")
+			polygons_queried[Em.hit.VACPOINT] = Animator.query_point("vacpoint")
 			
-			if polygons_queried.hitbox != null:
-				polygons_queried.rect = get_sprite_rect()
+			if polygons_queried[Em.hit.HITBOX] != null:
+				polygons_queried[Em.hit.RECT] = get_sprite_rect()
 
 	return polygons_queried
 
@@ -398,9 +404,9 @@ func get_sprite_rect():
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	if UniqEntity.has_method("query_move_data"):
-		return {"move_data" : UniqEntity.query_move_data(Animator.to_play_animation), "move_name" : Animator.to_play_animation}
+		return {Em.hit.MOVE_DATA : UniqEntity.query_move_data(Animator.to_play_animation), Em.hit.MOVE_NAME : Animator.to_play_animation}
 #	elif Animator.to_play_animation in UniqEntity.MOVE_DATABASE:
-#		return {"move_data" : UniqEntity.MOVE_DATABASE[Animator.to_play_animation], "move_name" : Animator.to_play_animation}
+#		return {Em.hit.MOVE_DATA : UniqEntity.MOVE_DATABASE[Animator.to_play_animation], Em.hit.MOVE_NAME : Animator.to_play_animation}
 	print("Error: " + Animator.to_play_animation + " not found in MOVE_DATABASE for query_move_data_and_name().")
 
 
@@ -421,13 +427,22 @@ func query_move_data(in_move_name = null):
 	var move_data = UniqEntity.query_move_data(in_move_name)
 	return move_data
 	
-func get_proj_level():
-	if UniqEntity.MOVE_DATABASE.size() == 0: return null
-	else:
-		var move_data = query_move_data()
-		if "proj_level" in move_data:
-			return move_data.proj_level
-	return null
+#func get_proj_level():
+#	if UniqEntity.MOVE_DATABASE.size() == 0: return null
+#	else:
+#		var move_data = query_move_data()
+#		if Em.move.PROJ_LVL in move_data:
+#			return move_data[Em.move.PROJ_LVL]
+#	return null
+	
+func get_proj_level(in_move_name = null):
+	
+	if in_move_name == null:
+		in_move_name = Animator.to_play_animation
+	
+	if UniqEntity.has_method("get_proj_level"):
+		return UniqEntity.get_proj_level(in_move_name)
+	return 1
 	
 func modify_stat(to_return, attr: int, values: Array):
 	return FMath.percent(to_return, values[int(clamp(mob_attr[attr], 0, values.size() - 1))])
@@ -436,42 +451,42 @@ func modify_stat(to_return, attr: int, values: Array):
 
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	var attacker = Globals.Game.get_player_node(hit_data.attacker_ID) # will be this entity's master
+	var attacker = Globals.Game.get_player_node(hit_data[Em.hit.ATKER_ID]) # will be this entity's master
 	if attacker != null:
-		attacker.target_ID = hit_data.defender_ID # target last attacked opponent
+		attacker.target_ID = hit_data[Em.hit.DEFENDER_ID] # target last attacked opponent
 
-#	var defender = Globals.Game.get_player_node(hit_data.defender_ID)
+#	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
 	
-	increment_hitcount(hit_data.defender_ID) # for measuring hitcount of attacks
+	increment_hitcount(hit_data[Em.hit.DEFENDER_ID]) # for measuring hitcount of attacks
 
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 
-	if "fixed_entity_hitstop" in hit_data.move_data:
-		hitstop = hit_data.move_data.fixed_entity_hitstop
+	if Em.move.FIXED_ENTITY_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ENTITY_HITSTOP]
 		
-	elif hit_data.lethal_hit or hit_data.stun:
+	elif hit_data[Em.hit.LETHAL_HIT] or hit_data[Em.hit.STUN]:
 		hitstop = null # no hitstop for entity for lethal hit, screenfreeze already enough
 		
 	else:
-		if hitstop == null or hit_data.hitstop > hitstop:
-			hitstop = hit_data.hitstop			
+		if hitstop == null or hit_data[Em.hit.HITSTOP] > hitstop:
+			hitstop = hit_data[Em.hit.HITSTOP]			
 			
 	if hitstop != null and hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
-		if "multihit" in hit_data and "ignore_time" in hit_data.move_data:
-			$NoCollideTimer.time = hit_data.move_data.ignore_time
+		if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
+			$NoCollideTimer.time = hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME]
 		else:
 			$NoCollideTimer.time = 1
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 
-	if "hit_sound" in hit_data.move_data:
+	if Em.move.HIT_SOUND in hit_data[Em.hit.MOVE_DATA]:
 
-		if !hit_data.move_data.hit_sound is Array:
-			play_audio(hit_data.move_data.hit_sound.ref, hit_data.move_data.hit_sound.aux_data)
+		if !hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND] is Array:
+			play_audio(hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND].ref, hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND].aux_data)
 		else: # multiple sounds at once
-			for sound in hit_data.move_data.hit_sound:
+			for sound in hit_data[Em.hit.MOVE_DATA][Em.move.HIT_SOUND]:
 				play_audio(sound.ref, sound.aux_data)
 	
 	
@@ -493,7 +508,7 @@ func get_hitcount(in_ID):
 func is_hitcount_maxed(in_ID, in_move_data):  # called by main game node
 	var recorded_hitcount = get_hitcount(in_ID)
 	
-	if recorded_hitcount >= in_move_data.hitcount:
+	if recorded_hitcount >= in_move_data[Em.move.HITCOUNT]:
 		return true
 	else: return false
 	
@@ -501,7 +516,7 @@ func is_hitcount_maxed(in_ID, in_move_data):  # called by main game node
 func is_hitcount_last_hit(in_ID, in_move_data):
 	var recorded_hitcount = get_hitcount(in_ID)
 	
-	if recorded_hitcount >= in_move_data.hitcount - 1:
+	if recorded_hitcount >= in_move_data[Em.move.HITCOUNT] - 1:
 		return true
 	else: return false
 	
@@ -514,7 +529,7 @@ func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Gu
 	
 # IGNORE LIST ------------------------------------------------------------------------------------------------
 	
-func append_ignore_list(in_ID, ignore_time): # added if the move has "ignore_time", called by the defender
+func append_ignore_list(in_ID, ignore_time): # added if the move has Em.move.IGNORE_TIME, called by the defender
 	for ignored in ignore_list:
 		if ignored[0] == in_ID:
 			print("Error: attempting to ignore an ignored player")

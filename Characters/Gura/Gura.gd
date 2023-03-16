@@ -45,109 +45,109 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		
 		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "F3[b]Startup", "F3[h]Startup", \
 			"HStartup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "L3Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
 				"F3[h]Active", "HActive", "HbActive":
-			return Globals.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GROUND_ATK_ACTIVE
 		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
 				"aL2LandRec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 			
 		"aL1Startup", "aL2Startup", "aL3Startup", "aF1Startup", "aF1[h]Startup", "aF2Startup", "aF3Startup", "aHStartup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aL1Active", "aL2Active", "aL3Active", "aF1Active", "aF2Active", "aF3Active", "aHActive":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"L2Rec", "aL1Rec", "aL2Rec", "aL3Rec", "aL2bRec", "aF1Rec", "aF2Rec", "aF3Rec", "aHRec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 		"L2cCRec":
-			return Globals.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_RECOVERY
 			
 		"aF2SeqA", "aF2SeqB":
-			return Globals.char_state.SEQUENCE_USER
+			return Em.char_state.SEQUENCE_USER
 		"aF2GrabRec":
-			return Globals.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_RECOVERY
 			
 		"SP1Startup", "SP1[b]Startup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", \
 				"SP1[u]Startup", "SP1[u][c1]Startup", "SP1[u][c2]Startup", "SP1[u][c1]bStartup", "SP1[u][c2]bStartup", "SP1[u][c3]Startup", \
 				"SP1[ex]Startup", "SP1[b][ex]Startup", "SP1[u][ex]Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"SP1[c1]Active", "SP1[c2]Active", "SP1[c3]Active", "SP1[ex]Active", \
 				"SP1[u][c1]Active", "SP1[u][c2]Active", "SP1[u][c3]Active", "SP1[u][ex]Active":
-			return Globals.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GROUND_ATK_ACTIVE
 		"SP1Rec", "SP1[ex]Rec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 		"aSP1Startup", "aSP1[b]Startup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", \
 				"aSP1[d]Startup", "aSP1[d][c1]Startup", "aSP1[d][c2]Startup", "aSP1[d][c1]bStartup", "aSP1[d][c2]bStartup", "aSP1[d][c3]Startup", \
 				"aSP1[ex]Startup", "aSP1[b][ex]Startup", "aSP1[d][ex]Startup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP1[c1]Active", "aSP1[c2]Active", "aSP1[c3]Active", "aSP1[ex]Active", \
 				"aSP1[d][c1]Active", "aSP1[d][c2]Active", "aSP1[d][c3]Active", "aSP1[d][ex]Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP1Rec", "aSP1[ex]Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 			
 		"aSP2Startup", "aSP2[ex]Startup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP2Active", "aSP2[h]Active", "aSP2[ex]Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP2Rec", "aSP2[h]Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 		"aSP2CRec":
-			return Globals.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_RECOVERY
 			
 			
 			
 		"SP3Startup", "SP3[h]Startup", "SP3[ex]Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active", \
 				"SP3Active", "SP3[h]Active", "SP3[ex]Active", "SP3bActive", "SP3b[h]Active", "SP3b[ex]Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP3Rec", "aSP3[ex]Rec", "SP3Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 			
 		"SP4Startup", "SP4[ex]Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"SP4Active", "SP4[h]Active", "SP4[ex]Active":
-			return Globals.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GROUND_ATK_ACTIVE
 		"SP4Rec", "SP4[ex]Rec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 			
 		"SP5Startup", "SP5[ex]Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"aSP5Startup", "aSP5[ex]Startup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP5Active", "aSP5[h]Active", "aSP5[h]bActive", "aSP5[ex]Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP5Rec", "aSP5bRec", "aSP5[h]Rec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 		"SP5bRec", "SP5b[ex]Rec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 			
 		"SP6[ex]Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"aSP6[ex]Startup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP6[ex]Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"SP6[ex]Rec", "SP6[ex]GrabRec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 		"aSP6[ex]Rec", "aSP6[ex]GrabRec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
-			return Globals.char_state.SEQUENCE_USER
+			return Em.char_state.SEQUENCE_USER
 
 		"SP7Startup":
-			return Globals.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GROUND_ATK_STARTUP
 		"aSP7Startup":
-			return Globals.char_state.AIR_ATK_STARTUP
+			return Em.char_state.AIR_ATK_STARTUP
 		"aSP7Active":
-			return Globals.char_state.AIR_ATK_ACTIVE
+			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP7Rec":
-			return Globals.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_RECOVERY
 		"SP7Rec":
-			return Globals.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_RECOVERY
 		
 	print("Error: " + anim + " not found.")
 		
@@ -173,7 +173,7 @@ func simulate():
 	
 	# QUICK CANCEL AIR DASH FROM AIR BLOCK ------------------------------------------------------------------------------------
 	
-#	if Character.state == Globals.char_state.AIR_BLOCK:
+#	if Character.state == Em.char_state.AIR_BLOCK:
 #		if Character.button_dash in Character.input_state.pressed and (Character.dir != 0 or Character.v_dir != 0):
 #			if Animator.query_to_play(["aBlockStartup"]):
 #				if Character.air_dash > 0:
@@ -183,7 +183,7 @@ func simulate():
 
 	match Character.state:
 		
-		Globals.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.AIR_ATK_ACTIVE:
 			if Animator.query_current(["aL2Active"]):
 				if Character.grounded:
 					Character.animate("aL2LandRec")
@@ -200,7 +200,7 @@ func simulate():
 #				if Character.button_aux in Character.input_state.pressed:
 #					Character.animate("aSP1[c1]Active")
 			
-		Globals.char_state.AIR_ATK_RECOVERY:
+		Em.char_state.AIR_ATK_RECOVERY:
 			
 			if Animator.query_current(["aL2bRec"]):
 				if Character.grounded:
@@ -216,7 +216,7 @@ func simulate():
 			
 	# RELEASING HELD INPUTS --------------------------------------------------------------------------------------------------
 			
-		Globals.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GROUND_ATK_STARTUP:
 			match Animator.current_animation:
 				"SP1[c1]Startup":
 					if !Character.button_light in Character.input_state.pressed:
@@ -238,7 +238,7 @@ func simulate():
 						else:
 							Character.animate("SP1[u][c2]bStartup")
 			
-		Globals.char_state.AIR_ATK_STARTUP:
+		Em.char_state.AIR_ATK_STARTUP:
 			match Animator.current_animation:
 				"aF1[h]Startup": # if holding a.F
 					if !Character.button_fierce in Character.input_state.pressed:
@@ -278,7 +278,7 @@ func simulate():
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
-#	if Character.state == Globals.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
+#	if Character.state == Em.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
 #		Animator.query_current(["Dash"]): 	# dash dancing, need to hold dash
 #		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
 #			Character.face(-1)
@@ -399,7 +399,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					
 				# GROUND DASH ---------------------------------------------------------------------------------
 			
-					Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+					Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY:
 						if keep and !Character.button_light in Character.input_state.just_pressed and \
 								!Character.button_fierce in Character.input_state.just_pressed:
 							if !Animator.query(["DashBrake", "WaveDashBrake"]):
@@ -418,9 +418,9 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							
 				# AIR DASH ---------------------------------------------------------------------------------
 					
-					Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY:
+					Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_RECOVERY:
 						
-						if Animator.query(["aDashBrake"]) and !Character.has_trait(Globals.trait.AIR_CHAIN_DASH):
+						if Animator.query(["aDashBrake"]) and !Character.has_trait(Em.trait.AIR_CHAIN_DASH):
 							continue
 						
 						if Character.air_dash > 0:
@@ -440,7 +440,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 									Character.velocity.y = FMath.percent(Character.velocity.y, 50)
 							keep = false
 							
-					Globals.char_state.AIR_STARTUP: # cancel start of air jump into air dash, used for up-dashes
+					Em.char_state.AIR_STARTUP: # cancel start of air jump into air dash, used for up-dashes
 						if Animator.query(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
 							if Character.air_dash > 0:
 								Character.animate("aDashTransit")
@@ -450,18 +450,18 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				# DASH CANCELS ---------------------------------------------------------------------------------
 					# if land a sweetspot hit, can dash cancel on active
 								
-					Globals.char_state.GROUND_ATK_RECOVERY:
+					Em.char_state.GROUND_ATK_RECOVERY:
 						if Character.test_dash_cancel():
 							Character.animate("DashTransit")
 							keep = false
 					
-					Globals.char_state.GROUND_ATK_ACTIVE:
+					Em.char_state.GROUND_ATK_ACTIVE:
 						if Character.active_cancel:
 							Character.afterimage_cancel() # need to do this manually for active cancel
 							Character.animate("DashTransit")
 							keep = false
 							
-					Globals.char_state.AIR_ATK_RECOVERY:
+					Em.char_state.AIR_ATK_RECOVERY:
 						if Character.test_dash_cancel():
 							if !Character.grounded:
 								Character.animate("aDashTransit")
@@ -470,7 +470,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								Character.animate("DashTransit")
 								keep = false
 					
-					Globals.char_state.AIR_ATK_ACTIVE:
+					Em.char_state.AIR_ATK_ACTIVE:
 						if Character.active_cancel:
 							if !Character.grounded:
 								if Character.air_dash > 0:
@@ -582,7 +582,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		
 		"InstaAirDash": # needed to chain wavedashes
 			match new_state:
-				Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY:
+				Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY:
 					Character.animate("JumpTransit")
 					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
 					has_acted[0] = true
@@ -598,7 +598,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 func process_move(new_state, attack_ref: String, has_acted: Array): # return true if button consumed
 	
 	 # no attacking during respawn grace
-	if Character.query_status_effect(Globals.status_effect.RESPAWN_GRACE):
+	if Character.query_status_effect(Em.status_effect.RESPAWN_GRACE):
 		if Globals.survival_level != null and Inventory.has_quirk(Character.player_ID, Cards.effect_ref.RESPAWN_POWER):
 			pass
 		else:
@@ -608,14 +608,14 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		return false # since this will trigger instant aerial
 	
 	match Character.state:
-		Globals.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
+		Em.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
 			if Animator.query_current(["DashTransit"]) and attack_ref in STARTERS:
 				if Character.test_qc_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
 						return true
-		Globals.char_state.AIR_STARTUP: # can attack on 1st frames of air dash
+		Em.char_state.AIR_STARTUP: # can attack on 1st frames of air dash
 			if Animator.query_current(["aDashTransit"]) and ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 				if Character.test_qc_chain_combo("a" + attack_ref):
 					if Character.is_ex_valid("a" + attack_ref):
@@ -625,17 +625,17 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						
 	match new_state:
 			
-		Globals.char_state.GROUND_STANDBY, Globals.char_state.CROUCHING, Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY:
+		Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY:
 			if Character.grounded and attack_ref in STARTERS:
-				if new_state in [Globals.char_state.GROUND_C_RECOVERY, Globals.char_state.GROUND_D_RECOVERY] and \
-						Globals.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
+				if new_state in [Em.char_state.GROUND_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY] and \
+						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 					continue # certain moves cannot be performed during cancellable recovery
 				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					has_acted[0] = true
 					return true
 					
-		Globals.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
+		Em.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
 			if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]) and \
 					Character.test_qc_chain_combo(attack_ref):
 				if Character.is_ex_valid(attack_ref):
@@ -643,18 +643,18 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					has_acted[0] = true
 					return true
 					
-		Globals.char_state.AIR_STANDBY, Globals.char_state.AIR_C_RECOVERY, Globals.char_state.AIR_D_RECOVERY:
+		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_RECOVERY, Em.char_state.AIR_D_RECOVERY:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-					if new_state in [Globals.char_state.AIR_C_RECOVERY, Globals.char_state.AIR_D_RECOVERY] and \
-							Globals.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr("a" + attack_ref):
+					if new_state in [Em.char_state.AIR_C_RECOVERY, Em.char_state.AIR_D_RECOVERY] and \
+							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr("a" + attack_ref):
 						continue # certain moves cannot be performed during cancellable recovery
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						has_acted[0] = true
 						return true
 						
-		Globals.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
+		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
 			if ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
 					!Character.button_jump in Character.input_state.pressed and \
 					Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
@@ -665,7 +665,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					return true
 				
 		# chain cancel
-		Globals.char_state.GROUND_ATK_RECOVERY, Globals.char_state.GROUND_ATK_ACTIVE:
+		Em.char_state.GROUND_ATK_RECOVERY, Em.char_state.GROUND_ATK_ACTIVE:
 			if attack_ref in STARTERS:
 				if Character.test_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
@@ -678,7 +678,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						return true
 			
 		# quick cancel
-		Globals.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GROUND_ATK_STARTUP:
 			if Character.grounded and attack_ref in STARTERS:
 				if Character.check_quick_cancel(attack_ref): # must be within 1st frame, animation name must be in MOVE_DATABASE
 					if Character.test_qc_chain_combo(attack_ref):
@@ -688,7 +688,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 							return true
 					
 		# chain cancel
-		Globals.char_state.AIR_ATK_RECOVERY, Globals.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.AIR_ATK_RECOVERY, Em.char_state.AIR_ATK_ACTIVE:
 			if !Character.grounded:
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 					if Character.test_chain_combo("a" + attack_ref):
@@ -712,7 +712,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 							return true
 							
 		# quick cancel
-		Globals.char_state.AIR_ATK_STARTUP:
+		Em.char_state.AIR_ATK_STARTUP:
 			if !Character.grounded:
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 					if Character.check_quick_cancel("a" + attack_ref):
@@ -765,7 +765,7 @@ func afterimage_trail():# process afterimage trail
 		"Dash", "aDash", "aDashD", "aDashU", "SDashTransit", "SDash", "aSDash":
 			Character.afterimage_trail()
 		"Dodge":
-			Character.afterimage_trail(null, 0.6, 10, Globals.afterimage_shader.WHITE)
+			Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
 		"DodgeRec", "DodgeCRec":
 			Character.afterimage_trail()
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
@@ -791,8 +791,8 @@ func query_traits(): # may have special conditions
 			
 func get_root(move_name): # for aerial, chain and repeat memory, only needed for versions with active frames not in MOVE_DATABASE
 	
-	if move_name in MOVE_DATABASE and "root" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].root
+	if move_name in MOVE_DATABASE and Em.move.ROOT in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ROOT]
 		
 	return refine_move_name(move_name)
 		
@@ -875,15 +875,15 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-	move_data["atk_attr"] = query_atk_attr(orig_move_name)
+	move_data[Em.move.ATK_ATTR] = query_atk_attr(orig_move_name)
 	
 	match orig_move_name:
 		_:
 			pass
 			
-	if Globals.survival_level != null and "damage" in move_data:
-#		move_data.damage = FMath.percent(move_data.damage, Character.SURV_BASE_DMG)
-		move_data.damage = FMath.percent(move_data.damage, Character.mod_damage(move_name))
+	if Globals.survival_level != null and Em.move.DMG in move_data:
+#		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Character.SURV_BASE_DMG)
+		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Character.mod_damage(move_name))
 
 
 	return move_data
@@ -896,27 +896,27 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	move_name = refine_move_name(move_name)
 
 	var atk_attr := []
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		atk_attr = MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		atk_attr = MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 	else:
 		print("Error: Cannot retrieve atk_attr for " + move_name)
 		return []
 	
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
 		"F3[h]":
-			atk_attr.append_array([Globals.atk_attr.NORMALARMOR_STARTUP])
+			atk_attr.append_array([Em.atk_attr.NORMALARMOR_STARTUP])
 
 		"SP3", "SP3b", "SP3[h]", "SP3b[h]": 
-			atk_attr.append_array([Globals.atk_attr.ANTI_AIR])
+			atk_attr.append_array([Em.atk_attr.ANTI_AIR])
 		"SP3[ex]", "SP3b[ex]": 
-			atk_attr.append_array([Globals.atk_attr.ANTI_AIR, Globals.atk_attr.SEMI_INVUL_STARTUP])
+			atk_attr.append_array([Em.atk_attr.ANTI_AIR, Em.atk_attr.SEMI_INVUL_STARTUP])
 		
 #	if Globals.survival_level != null: # no anti-air normals during Survival Mode
-#		if move_name in MOVE_DATABASE and "atk_type" in MOVE_DATABASE[move_name] and \
-#				MOVE_DATABASE[move_name].atk_type in [Globals.atk_type.LIGHT, Globals.atk_type.FIERCE] and \
-#				Globals.atk_attr.ANTI_AIR in atk_attr:
-#			while Globals.atk_attr.ANTI_AIR in atk_attr:	
-#				atk_attr.erase(Globals.atk_attr.ANTI_AIR)
+#		if move_name in MOVE_DATABASE and Em.move.ATK_TYPE in MOVE_DATABASE[move_name] and \
+#				MOVE_DATABASE[move_name][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] and \
+#				Em.atk_attr.ANTI_AIR in atk_attr:
+#			while Em.atk_attr.ANTI_AIR in atk_attr:	
+#				atk_attr.erase(Em.atk_attr.ANTI_AIR)
 		
 	return atk_attr
 	
@@ -925,32 +925,32 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 
 func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	
-	match hit_data.move_name:
+	match hit_data[Em.hit.MOVE_NAME]:
 		"aL2":
 			Character.animate("aL2Rec")
 		"L2":
 			Character.animate("L2Rec")
 			
 		"F2[h]":
-			if !"tough_mob" in hit_data and hit_data.sweetspotted and !hit_data.stun and !hit_data.lethal_hit:
-				hit_data.move_data.KB_angle = 180
-				hit_data.move_data.knockback = 200 * FMath.S
+			if !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED] and !hit_data[Em.hit.STUN] and !hit_data[Em.hit.LETHAL_HIT]:
+				hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE] = 180
+				hit_data[Em.hit.MOVE_DATA][Em.move.KB] = 200 * FMath.S
 				hit_data["pull"] = true
-				hit_data.move_data.atk_attr.append(Globals.atk_attr.DI_MANUAL_SEAL)
+				hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR].append(Em.atk_attr.DI_MANUAL_SEAL)
 				Character.animate("F2[h]PRec")
 			
 		"aF2":
-			if !"tough_mob" in hit_data and hit_data.sweetspotted:
-				hit_data.move_data["sequence"] = "aF2SeqA"
+			if !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED]:
+				hit_data[Em.hit.MOVE_DATA][Em.move.SEQ] = "aF2SeqA"
 			
 		"aSP5", "aSP5[h]b":
-			if hit_data.sweetspotted:
+			if hit_data[Em.hit.SWEETSPOTTED]:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			else:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 1, 3)
 			update_uniqueHUD()
 		"aSP5[ex]":
-			if hit_data.sweetspotted:
+			if hit_data[Em.hit.SWEETSPOTTED]:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 3, 3)
 			else:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
@@ -960,7 +960,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 func being_hit(hit_data):
 #	var defender = get_node(hit_data.defender_nodepath)
 					
-	if hit_data.block_state in [Globals.block_state.UNBLOCKED]:
+	if hit_data[Em.hit.BLOCK_STATE] in [Em.block_state.UNBLOCKED]:
 		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
 		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
 		update_uniqueHUD()
@@ -1109,7 +1109,6 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 		"aF2SeqB":
 			Partner.sequence_launch()
 			return true
-		
 		"SP6[ex]SeqD": # ends when either you or parther hit the ground
 			if trigger == "ground": # you hit the ground
 				Character.animate("SP6[ex]SeqE")
@@ -1158,22 +1157,22 @@ func move_sequence_target(new_position): # move sequence_target to new position
 		
 			
 func get_seq_hit_data(hit_key: int):
-	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation].sequence_hits[hit_key].duplicate(true)
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_HITS][hit_key].duplicate(true)
 
-	if Globals.survival_level != null and "damage" in seq_hit_data:
-#		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.SURV_BASE_DMG)	
-		seq_hit_data.damage = FMath.percent(seq_hit_data.damage, Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
+	if Globals.survival_level != null and Em.move.DMG in seq_hit_data:
+#		seq_hit_data[Em.move.DMG] = FMath.percent(seq_hit_data[Em.move.DMG], Character.SURV_BASE_DMG)	
+		seq_hit_data[Em.move.DMG] = FMath.percent(seq_hit_data[Em.move.DMG], Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation][Em.move.STARTER]))
 
 	return seq_hit_data
 	
 	
 	
 func get_seq_launch_data():
-	var seq_data = MOVE_DATABASE[Animator.to_play_animation].sequence_launch.duplicate(true)
+	var seq_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_LAUNCH].duplicate(true)
 
-	if Globals.survival_level != null and "damage" in seq_data:
-#		seq_data.damage = FMath.percent(seq_data.damage, Character.SURV_BASE_DMG)	
-		seq_data.damage = FMath.percent(seq_data.damage, Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation].starter))
+	if Globals.survival_level != null and Em.move.DMG in seq_data:
+#		seq_data[Em.move.DMG] = FMath.percent(seq_data[Em.move.DMG], Character.SURV_BASE_DMG)	
+		seq_data[Em.move.DMG] = FMath.percent(seq_data[Em.move.DMG], Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation][Em.move.STARTER]))
 
 	return seq_data
 			
@@ -2099,11 +2098,11 @@ func start_audio(anim_name):
 		if !move_name in MOVE_DATABASE:
 			move_name = refine_move_name(move_name)
 		if move_name in MOVE_DATABASE:
-			if "move_sound" in MOVE_DATABASE[move_name]:
-				if !MOVE_DATABASE[move_name].move_sound is Array:
-					Character.play_audio(MOVE_DATABASE[move_name].move_sound.ref, MOVE_DATABASE[move_name].move_sound.aux_data)
+			if Em.move.MOVE_SOUND in MOVE_DATABASE[move_name]:
+				if !MOVE_DATABASE[move_name][Em.move.MOVE_SOUND] is Array:
+					Character.play_audio(MOVE_DATABASE[move_name][Em.move.MOVE_SOUND].ref, MOVE_DATABASE[move_name][Em.move.MOVE_SOUND].aux_data)
 				else:
-					for sound in MOVE_DATABASE[move_name].move_sound:
+					for sound in MOVE_DATABASE[move_name][Em.move.MOVE_SOUND]:
 						Character.play_audio(sound.ref, sound.aux_data)
 						
 		match orig_move_name:

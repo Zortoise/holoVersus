@@ -1,7 +1,7 @@
 extends Node2D
 
 
-const TRAITS = [Globals.entity_trait.GROUNDED]
+const TRAITS = [Em.entity_trait.GROUNDED]
 
 # cleaner code
 onready var Entity = get_parent()
@@ -11,17 +11,17 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
-		"root" : "SharkBreach", # for entities, keep move_name in move_data, for checking repeat
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 1,
-		"damage" : 90,
-		"knockback" : 475 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 5,
-		"fixed_hitstop" : 10,
-		"KB_angle" : -60,
-		"atk_attr" : [Globals.atk_attr.REPEATABLE],
-		"hit_sound" : { ref = "water1", aux_data = {"vol" : -6} },
+		Em.move.ROOT : "SharkBreach", # for entities, keep move_name in move_data, for checking repeat
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 90,
+		Em.move.KB : 475 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 5,
+		Em.move.FIXED_HITSTOP : 10,
+		Em.move.KB_ANGLE : -60,
+		Em.move.ATK_ATTR : [Em.atk_attr.REPEATABLE],
+		Em.move.HIT_SOUND : { ref = "water1", aux_data = {"vol" : -6} },
 	}
 }
 
@@ -40,20 +40,28 @@ func query_move_data(move_name) -> Dictionary:
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 
-	if Globals.survival_level != null and "damage" in move_data:
-#		move_data.damage = FMath.percent(move_data.damage, 60)	
-		move_data.damage = FMath.percent(move_data.damage, Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
+	if Globals.survival_level != null and Em.move.DMG in move_data:
+#		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	
+		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
 
 	return move_data
 	
 	
 func query_atk_attr(move_name):
 	
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 		
 #	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
+	
+	
+func get_proj_level(move_name):
+
+	if move_name in MOVE_DATABASE and Em.move.PROJ_LVL in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.PROJ_LVL]
+	
+	return 1
 	
 	
 func _on_SpritePlayer_anim_finished(anim_name):

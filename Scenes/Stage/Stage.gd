@@ -6,9 +6,12 @@ func init(): # called by unique stage code when init() is called
 #	Globals.Game.blastbarrierL = $StageBox/BlastBarrierL
 #	Globals.Game.blastbarrierR = $StageBox/BlastBarrierR
 #	Globals.Game.blastbarrierU = $StageBox/BlastBarrierU
-	$StageBox/BlastBarrierL.add_to_group("BlastBarriers")
-	$StageBox/BlastBarrierR.add_to_group("BlastBarriers")
-	$StageBox/BlastBarrierU.add_to_group("BlastBarriers")
+#	$StageBox/BlastBarrierL.add_to_group("BlastBarriers")
+#	$StageBox/BlastBarrierR.add_to_group("BlastBarriers")
+#	$StageBox/BlastBarrierU.add_to_group("BlastBarriers")
+	$StageBox/BlastBarrierL.add_to_group("BlastWalls")
+	$StageBox/BlastBarrierR.add_to_group("BlastWalls")
+	$StageBox/BlastBarrierU.add_to_group("BlastCeiling")
 	$StageBox/BlastBarrierL.hide()
 	$StageBox/BlastBarrierR.hide()
 	$StageBox/BlastBarrierU.hide()

@@ -10,7 +10,7 @@ func move_platform():
 	
 	var new_position: Vector2 = call("movement_pattern")
 	
-	if get("TYPE") == Globals.moving_platform.MOVING: # actual moving platform
+	if get("TYPE") == Em.moving_platform.MOVING: # actual moving platform
 		# get all riding entities
 		var rider_boxes = []
 		# get collision boxes of all grounded entities
@@ -29,14 +29,14 @@ func move_platform():
 				 # rider is player character/grounded entity
 				# position_change need to be in integer!'
 				var rider = rider_box.get_parent()
-				rider.move_amount(position_change, rider_box, rider.get_node("SoftPlatformDBox"))
+				rider.move_amount(position_change, rider_box, rider.get_node("SoftPlatformDBox"), rider.create_checklist())
 				if rider.has_method("set_true_position"):
 					rider.call("set_true_position")
 				# no need the velocity, grounded Entities always have SoftPlatformDBox
 			else:
 				rider_box.get_parent().position += position_change # for grounded sfx, don't need to check for collision
 						
-	elif get("TYPE") == Globals.moving_platform.WARPING: # teleporting platform, vanishing platforms just warp offstage
+	elif get("TYPE") == Em.moving_platform.WARPING: # teleporting platform, vanishing platforms just warp offstage
 		$MPlatform.position = new_position # move platform
 
 

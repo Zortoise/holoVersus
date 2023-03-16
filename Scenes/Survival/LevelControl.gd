@@ -413,7 +413,7 @@ func all_waves_cleared():
 func get_living_player_count():
 	var count := 0
 	for player in get_tree().get_nodes_in_group("PlayerNodes"):
-		if player.state != Globals.char_state.DEAD:
+		if player.state != Em.char_state.DEAD:
 			count += 1
 	return count
 	

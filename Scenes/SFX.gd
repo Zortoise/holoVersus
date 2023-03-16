@@ -112,7 +112,9 @@ func simulate():
 			free = true
 		
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		slowed = 0
+		return
 	slowed = 0
 	
 	$SpritePlayer.simulate()

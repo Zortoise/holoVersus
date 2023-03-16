@@ -7,7 +7,7 @@ const ID = "trident" # for master to find it
 #const LIFESPAN = null
 
 const TRAITS = []
-# example: Globals.entity_trait.GROUNDED
+# example: Em.entity_trait.GROUNDED
 
 # cleaner code
 onready var Entity = get_parent()
@@ -17,56 +17,56 @@ var sprite
 
 const MOVE_DATABASE = {
 	"[c1]Active" : {
-		"root" : "TridentProj",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 1,
-		"damage" : 70,
-		"knockback" : 400 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"KB_angle" : -45,
-		"proj_level" : 1,
-		"atk_attr" : [],
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+		Em.move.ROOT : "TridentProj",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
+		Em.move.KB : 400 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : -45,
+		Em.move.PROJ_LVL : 1,
+		Em.move.ATK_ATTR : [],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c2]Active" : {
-		"root" : "TridentProj",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 2,
-		"damage" : 55,
-		"knockback" : 450 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"KB_angle" : -45,
-		"proj_level" : 2,
-		"atk_attr" : [Globals.atk_attr.DRAG_KB],
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+		Em.move.ROOT : "TridentProj",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 2,
+		Em.move.DMG : 55,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : -45,
+		Em.move.PROJ_LVL : 2,
+		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[c3]Active" : {
-		"root" : "TridentProj",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 3,
-		"damage" : 55,
-		"knockback" : 500 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"KB_angle" : -45,
-		"proj_level" : 3,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.DRAG_KB],
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+		Em.move.ROOT : "TridentProj",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 3,
+		Em.move.DMG : 55,
+		Em.move.KB : 500 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : -45,
+		Em.move.PROJ_LVL : 3,
+		Em.move.ATK_ATTR : [Em.atk_attr.UNBLOCKABLE, Em.atk_attr.DRAG_KB],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 	"[ex]Active" : {
-		"root" : "TridentProjEX",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 3,
-		"damage" : 50,
-		"knockback" : 500 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"KB_angle" : -45,
-		"proj_level" : 3,
-		"atk_attr" : [Globals.atk_attr.DRAG_KB, Globals.atk_attr.NO_REPEAT_MOVE],
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+		Em.move.ROOT : "TridentProjEX",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 3,
+		Em.move.DMG : 50,
+		Em.move.KB : 500 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : -45,
+		Em.move.PROJ_LVL : 3,
+		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB, Em.atk_attr.NO_REPEAT_MOVE],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 }
 
@@ -188,7 +188,7 @@ func init(aux_data: Dictionary):
 #			move_name = "a[ex]Active"
 #
 #	if move_ref in MOVE_DATABASE:
-#		return {"move_data" : MOVE_DATABASE[move_ref], "move_name" : move_ref}
+#		return {Em.hit.MOVE_DATA : MOVE_DATABASE[move_ref], Em.hit.MOVE_NAME : move_ref}
 
 func spin():
 	match Animator.to_play_animation:
@@ -209,7 +209,7 @@ func turn_to_enemy():
 	var angle_finder := FVector.new()
 	angle_finder.set_from_vec(enemy_node.position - Entity.position)
 	var angle = angle_finder.angle()
-	var segment = Globals.split_angle(angle, Globals.angle_split.SIXTEEN)
+	var segment = Globals.split_angle(angle, Em.angle_split.SIXTEEN)
 	
 	var new_facing := 1
 	var new_v_facing := 1
@@ -226,53 +226,53 @@ func turn_to_enemy():
 		Entity.velocity.set_vector(500 * FMath.S, 0)
 	
 	match segment:
-		Globals.compass.E:
+		Em.compass.E:
 			Animator.play("[c"+ charge_level + "]TurnE")
-		Globals.compass.ESE:
+		Em.compass.ESE:
 			Animator.play("[c"+ charge_level + "]TurnESE")
-		Globals.compass.SE:
+		Em.compass.SE:
 			Animator.play("[c"+ charge_level + "]TurnSE")
-		Globals.compass.SSE:
+		Em.compass.SSE:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
 			
-		Globals.compass.S:
+		Em.compass.S:
 			Animator.play("[c"+ charge_level + "]TurnS")
-		Globals.compass.SSW:
+		Em.compass.SSW:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
 			new_facing = -1
-		Globals.compass.SW:
+		Em.compass.SW:
 			Animator.play("[c"+ charge_level + "]TurnSE")
 			new_facing = -1
-		Globals.compass.WSW:
+		Em.compass.WSW:
 			Animator.play("[c"+ charge_level + "]TurnESE")
 			new_facing = -1
 			
-		Globals.compass.W:
+		Em.compass.W:
 			Animator.play("[c"+ charge_level + "]TurnE")
 			new_facing = -1
-		Globals.compass.WNW:
+		Em.compass.WNW:
 			Animator.play("[c"+ charge_level + "]TurnESE")
 			new_facing = -1
 			new_v_facing = -1
-		Globals.compass.NW:
+		Em.compass.NW:
 			Animator.play("[c"+ charge_level + "]TurnSE")
 			new_facing = -1
 			new_v_facing = -1
-		Globals.compass.NNW:
+		Em.compass.NNW:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
 			new_facing = -1
 			new_v_facing = -1
 			
-		Globals.compass.N:
+		Em.compass.N:
 			Animator.play("[c"+ charge_level + "]TurnS")
 			new_v_facing = -1
-		Globals.compass.NNE:
+		Em.compass.NNE:
 			Animator.play("[c"+ charge_level + "]TurnSSE")
 			new_v_facing = -1
-		Globals.compass.NE:
+		Em.compass.NE:
 			Animator.play("[c"+ charge_level + "]TurnSE")
 			new_v_facing = -1
-		Globals.compass.ENE:
+		Em.compass.ENE:
 			Animator.play("[c"+ charge_level + "]TurnESE")
 			new_v_facing = -1
 			
@@ -308,50 +308,50 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-#	move_data["atk_attr"] = query_atk_attr(move_name, true)
+#	move_data[Em.move.ATK_ATTR] = query_atk_attr(move_name, true)
 	
 #	if orig_move_name.begins_with("a"):
-#		move_data.KB_angle = -25
+#		move_data[Em.move.KB_ANGLE] = -25
 #	else:
 	match orig_move_name:
 		"[c1]TurnE", "[c2]TurnE":
-			move_data.KB_angle = -31
+			move_data[Em.move.KB_ANGLE] = -31
 		"[c1]TurnS", "[c2]TurnS":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = 90
+				move_data[Em.move.KB_ANGLE] = 90
 			else:
-				move_data.KB_angle = -90
+				move_data[Em.move.KB_ANGLE] = -90
 		"[c1]TurnSE", "[c2]TurnSE":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = 0
+				move_data[Em.move.KB_ANGLE] = 0
 			else:
-				move_data.KB_angle = -76
+				move_data[Em.move.KB_ANGLE] = -76
 		"[c1]TurnSSE", "[c2]TurnSSE":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = 31
+				move_data[Em.move.KB_ANGLE] = 31
 			else:
-				move_data.KB_angle = -83
+				move_data[Em.move.KB_ANGLE] = -83
 		"[c1]TurnESE", "[c2]TurnESE":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = -25
+				move_data[Em.move.KB_ANGLE] = -25
 			else:
-				move_data.KB_angle = -55
+				move_data[Em.move.KB_ANGLE] = -55
 		_:
 			if orig_move_name.begins_with("[u]"):
 				if Entity.v_facing == 1:
-					move_data.KB_angle = -83
+					move_data[Em.move.KB_ANGLE] = -83
 				else:
-					move_data.KB_angle = 31
+					move_data[Em.move.KB_ANGLE] = 31
 			else:
 				if Entity.v_facing == -1:
-					move_data.KB_angle = -25
+					move_data[Em.move.KB_ANGLE] = -25
 	
 	if Globals.survival_level != null:
-		if "damage" in move_data:
-	#		move_data.damage = FMath.percent(move_data.damage, 60)	
-			move_data.damage = FMath.percent(move_data.damage, Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
+		if Em.move.DMG in move_data:
+	#		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	
+			move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
 		if move_name == "[c3]Active":
-			move_data.proj_level = 2
+			move_data[Em.move.PROJ_LVL] = 2
 	
 	return move_data
 	
@@ -360,11 +360,20 @@ func query_atk_attr(move_name):
 	
 	move_name = refine_move_name(move_name)
 
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 		
 #	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
+	
+	
+func get_proj_level(move_name):
+	move_name = refine_move_name(move_name)
+
+	if move_name in MOVE_DATABASE and Em.move.PROJ_LVL in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.PROJ_LVL]
+	
+	return 1
 	
 			
 func simulate():
@@ -386,7 +395,7 @@ func simulate():
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
 			if posmod(Entity.lifetime, 2) == 0:
 #func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
-#		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+#		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
 						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 		

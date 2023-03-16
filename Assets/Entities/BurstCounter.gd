@@ -15,22 +15,22 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
-		"burst" : "BurstCounter",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 1,
-		"damage" : 0,
-		"knockback" : 1000 * FMath.S,
-		"knockback_type": Globals.knockback_type.RADIAL,
-		"atk_level" : 8,
-		"fixed_entity_hitstop" : 0,
-		"fixed_hitstop" : 15,
-		"fixed_hitstun" : 38,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "yellow",
-		"KB_angle" : 0,
-		"proj_level" : 3,
-		"atk_attr" : [Globals.atk_attr.UNBLOCKABLE, Globals.atk_attr.SCREEN_SHAKE, Globals.atk_attr.DESTROY_ENTITIES],
-		"hit_sound" : { ref = "blast2", aux_data = {"vol" : -9} },
+		Em.move.BURST : "BurstCounter",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 0,
+		Em.move.KB : 1000 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 8,
+		Em.move.FIXED_ENTITY_HITSTOP : 0,
+		Em.move.FIXED_HITSTOP : 15,
+		Em.move.FIXED_HITSTUN : 38,
+		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
+		Em.move.HITSPARK_PALETTE : "yellow",
+		Em.move.KB_ANGLE : 0,
+		Em.move.PROJ_LVL : 3,
+		Em.move.ATK_ATTR : [Em.atk_attr.UNBLOCKABLE, Em.atk_attr.SCREEN_SHAKE, Em.atk_attr.DESTROY_ENTITIES],
+		Em.move.HIT_SOUND : { ref = "blast2", aux_data = {"vol" : -9} },
 	}
 }
 
@@ -70,8 +70,8 @@ func query_move_data(move_name) -> Dictionary:
 	
 func query_atk_attr(move_name):
 	
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 	return []
 	
 	

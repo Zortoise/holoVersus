@@ -13,19 +13,19 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Active" : {
-		"root" : "ScytheE",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 3,
-		"damage" : 40,
-		"knockback" : 300 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 2,
-		"KB_angle" : -45,
-		"hitspark_type" : Globals.hitspark_type.SLASH,
-		"hitspark_palette" : "dark_red",
-		"proj_level" : 1,
-		"atk_attr" : [Globals.atk_attr.DRAG_KB],
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -15} },
+		Em.move.ROOT : "ScytheE",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 3,
+		Em.move.DMG : 40,
+		Em.move.KB : 300 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 2,
+		Em.move.KB_ANGLE : -45,
+		Em.move.HITSPARK_TYPE : Em.hitspark_type.SLASH,
+		Em.move.HITSPARK_PALETTE : "dark_red",
+		Em.move.PROJ_LVL : 1,
+		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -15} },
 	},
 }
 
@@ -56,8 +56,8 @@ func query_move_data(move_name) -> Dictionary:
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	
-	if Globals.survival_level != null and "damage" in move_data:
-		move_data.damage = FMath.percent(move_data.damage, Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
+	if Globals.survival_level != null and Em.move.DMG in move_data:
+		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
 	
 	return move_data
 		
@@ -66,12 +66,19 @@ func query_atk_attr(move_name):
 	
 	move_name = refine_move_name(move_name)
 
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 		
 #	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
 
+func get_proj_level(move_name):
+	move_name = refine_move_name(move_name)
+
+	if move_name in MOVE_DATABASE and Em.move.PROJ_LVL in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.PROJ_LVL]
+	
+	return 1
 			
 func simulate():
 	
@@ -80,7 +87,7 @@ func simulate():
 	
 	Entity.get_node("Sprite").rotation += 5*PI * Globals.FRAME * Entity.facing
 	Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
-		Color(0.8, 0.0, 0.3), 0.5, 10, Globals.afterimage_shader.WHITE)
+		Color(0.8, 0.0, 0.3), 0.5, 10, Em.afterimage_shader.WHITE)
 	
 func kill(_sound = true):
 	Entity.free = true

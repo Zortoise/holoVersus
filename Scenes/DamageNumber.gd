@@ -16,11 +16,11 @@ func init(in_number: int, in_position: Vector2, in_color = null):
 	color = in_color
 	$Label.text = str(number)
 	match color:
-		Globals.dmg_num_col.RED:
+		Em.dmg_num_col.RED:
 			$Label.modulate = RED
-		Globals.dmg_num_col.GRAY:
+		Em.dmg_num_col.GRAY:
 			$Label.modulate = GRAY
-		Globals.dmg_num_col.GREEN:
+		Em.dmg_num_col.GREEN:
 			$Label.modulate = GREEN
 
 func simulate():
@@ -50,11 +50,11 @@ func load_state(state_data):
 	$Label.text = str(number)
 	$Label.rect_position.y = state_data.height
 	match color:
-		Globals.dmg_num_col.RED:
+		Em.dmg_num_col.RED:
 			$Label.modulate = RED
-		Globals.dmg_num_col.GRAY:
+		Em.dmg_num_col.GRAY:
 			$Label.modulate = GRAY
-		Globals.dmg_num_col.GREEN:
+		Em.dmg_num_col.GREEN:
 			$Label.modulate = GREEN
 	if $Label.rect_position.y < FADE_HEIGHT:
 			$Label.modulate.a = (MAX_HEIGHT - $Label.rect_position.y) / float(MAX_HEIGHT - FADE_HEIGHT)

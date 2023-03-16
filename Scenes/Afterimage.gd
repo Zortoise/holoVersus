@@ -15,13 +15,13 @@ var is_entity : bool
 var master_ref: String
 var spritesheet_ref: String
 var palette_ref = null
-var afterimage_shader = Globals.afterimage_shader.MASTER
+var afterimage_shader = Em.afterimage_shader.MASTER
 var ignore_freeze := false
 var slowed := 0
 
 
 func init(in_original_ID : int, in_is_entity: bool, in_master_ref: String, in_spritesheet_ref: String, sprite_node_path: NodePath, in_palette_ref, \
-		in_color_modulate = null, in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Globals.afterimage_shader.MASTER):
+		in_color_modulate = null, in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Em.afterimage_shader.MASTER):
 	
 	original_ID = in_original_ID
 	is_entity = in_is_entity
@@ -95,9 +95,9 @@ func set_texture():
 
 func apply_shader():
 	match afterimage_shader:
-		Globals.afterimage_shader.NONE:
+		Em.afterimage_shader.NONE:
 			pass
-		Globals.afterimage_shader.MASTER:
+		Em.afterimage_shader.MASTER:
 			if palette_ref in Loader.char_data[master_ref].palettes:
 				$Sprite.material = ShaderMaterial.new()
 				$Sprite.material.shader = Loader.loaded_palette_shader
@@ -111,17 +111,19 @@ func apply_shader():
 #				$Sprite.material = ShaderMaterial.new()
 #				$Sprite.material.shader = Loader.loaded_palette_shader
 #				$Sprite.material.set_shader_param("swap", master_node.loaded_palette)
-		Globals.afterimage_shader.MONOCHROME:
+		Em.afterimage_shader.MONOCHROME:
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Loader.monochrome_shader
-		Globals.afterimage_shader.WHITE:
+		Em.afterimage_shader.WHITE:
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Loader.white_shader
 			$Sprite.material.set_shader_param("whitening", 1.0)
 
 func simulate():
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		slowed = 0
+		return
 	slowed = 0
 	
 	if is_entity:

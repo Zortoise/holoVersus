@@ -12,19 +12,19 @@ var sprite
 
 const MOVE_DATABASE = {
 	"[c1]Active" : {
-		"root" : "TridentProj",
-		"atk_type" : Globals.atk_type.ENTITY,
-		"hitcount" : 1,
-		"damage" : 70,
-		"knockback" : 400 * FMath.S,
-		"knockback_type": Globals.knockback_type.FIXED,
-		"atk_level" : 4,
-		"hitspark_type" : Globals.hitspark_type.HIT,
-		"hitspark_palette" : "white",
-		"KB_angle" : -45,
-		"proj_level" : 1,
-		"atk_attr" : [],
-		"hit_sound" : { ref = "cut2", aux_data = {"vol" : -16} },
+		Em.move.ROOT : "TridentProj",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
+		Em.move.KB : 400 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
+		Em.move.HITSPARK_PALETTE : "white",
+		Em.move.KB_ANGLE : -45,
+		Em.move.PROJ_LVL : 1,
+		Em.move.ATK_ATTR : [],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 }
 
@@ -56,8 +56,8 @@ func init(aux_data: Dictionary):
 		"[c1]Spawn", "[u][c1]Spawn":
 
 			var vel = 500
-			if Globals.mob_attr.PROJ_SPEED in Entity.mob_attr:
-				vel = Entity.modify_stat(vel, Globals.mob_attr.PROJ_SPEED, [50, 75, 125, 150])
+			if Em.mob_attr.PROJ_SPEED in Entity.mob_attr:
+				vel = Entity.modify_stat(vel, Em.mob_attr.PROJ_SPEED, [50, 75, 125, 150])
 			Entity.velocity.set_vector(vel * FMath.S, 0)
 			
 			Entity.velocity.rotate(rot)
@@ -86,7 +86,7 @@ func turn_to_enemy():
 	var angle_finder := FVector.new()
 	angle_finder.set_from_vec(enemy_node.position - Entity.position)
 	var angle = angle_finder.angle()
-	var segment = Globals.split_angle(angle, Globals.angle_split.SIXTEEN)
+	var segment = Globals.split_angle(angle, Em.angle_split.SIXTEEN)
 	
 	var new_facing := 1
 	var new_v_facing := 1
@@ -95,58 +95,58 @@ func turn_to_enemy():
 	Entity.absorption_value = 1
 
 	var vel = 500
-	if Globals.mob_attr.PROJ_SPEED in Entity.mob_attr:
-		vel = Entity.modify_stat(vel, Globals.mob_attr.PROJ_SPEED, [50, 75, 125, 150])
+	if Em.mob_attr.PROJ_SPEED in Entity.mob_attr:
+		vel = Entity.modify_stat(vel, Em.mob_attr.PROJ_SPEED, [50, 75, 125, 150])
 	Entity.velocity.set_vector(vel * FMath.S, 0)
 	
 	match segment:
-		Globals.compass.E:
+		Em.compass.E:
 			Animator.play("[c1]TurnE")
-		Globals.compass.ESE:
+		Em.compass.ESE:
 			Animator.play("[c1]TurnESE")
-		Globals.compass.SE:
+		Em.compass.SE:
 			Animator.play("[c1]TurnSE")
-		Globals.compass.SSE:
+		Em.compass.SSE:
 			Animator.play("[c1]TurnSSE")
 			
-		Globals.compass.S:
+		Em.compass.S:
 			Animator.play("[c1]TurnS")
-		Globals.compass.SSW:
+		Em.compass.SSW:
 			Animator.play("[c1]TurnSSE")
 			new_facing = -1
-		Globals.compass.SW:
+		Em.compass.SW:
 			Animator.play("[c1]TurnSE")
 			new_facing = -1
-		Globals.compass.WSW:
+		Em.compass.WSW:
 			Animator.play("[c1]TurnESE")
 			new_facing = -1
 			
-		Globals.compass.W:
+		Em.compass.W:
 			Animator.play("[c1]TurnE")
 			new_facing = -1
-		Globals.compass.WNW:
+		Em.compass.WNW:
 			Animator.play("[c1]TurnESE")
 			new_facing = -1
 			new_v_facing = -1
-		Globals.compass.NW:
+		Em.compass.NW:
 			Animator.play("[c1]TurnSE")
 			new_facing = -1
 			new_v_facing = -1
-		Globals.compass.NNW:
+		Em.compass.NNW:
 			Animator.play("[c1]TurnSSE")
 			new_facing = -1
 			new_v_facing = -1
 			
-		Globals.compass.N:
+		Em.compass.N:
 			Animator.play("[c1]TurnS")
 			new_v_facing = -1
-		Globals.compass.NNE:
+		Em.compass.NNE:
 			Animator.play("[c1]TurnSSE")
 			new_v_facing = -1
-		Globals.compass.NE:
+		Em.compass.NE:
 			Animator.play("[c1]TurnSE")
 			new_v_facing = -1
-		Globals.compass.ENE:
+		Em.compass.ENE:
 			Animator.play("[c1]TurnESE")
 			new_v_facing = -1
 			
@@ -176,51 +176,51 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-#	move_data["atk_attr"] = query_atk_attr(move_name, true)
+#	move_data[Em.move.ATK_ATTR] = query_atk_attr(move_name, true)
 	
 #	if orig_move_name.begins_with("a"):
-#		move_data.KB_angle = -25
+#		move_data[Em.move.KB_ANGLE] = -25
 #	else:
 	match orig_move_name:
 		"[c1]TurnE":
-			move_data.KB_angle = -31
+			move_data[Em.move.KB_ANGLE] = -31
 		"[c1]TurnS":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = 90
+				move_data[Em.move.KB_ANGLE] = 90
 			else:
-				move_data.KB_angle = -90
+				move_data[Em.move.KB_ANGLE] = -90
 		"[c1]TurnSE":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = 0
+				move_data[Em.move.KB_ANGLE] = 0
 			else:
-				move_data.KB_angle = -76
+				move_data[Em.move.KB_ANGLE] = -76
 		"[c1]TurnSSE":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = 31
+				move_data[Em.move.KB_ANGLE] = 31
 			else:
-				move_data.KB_angle = -83
+				move_data[Em.move.KB_ANGLE] = -83
 		"[c1]TurnESE":
 			if Entity.v_facing == 1:
-				move_data.KB_angle = -25
+				move_data[Em.move.KB_ANGLE] = -25
 			else:
-				move_data.KB_angle = -55
+				move_data[Em.move.KB_ANGLE] = -55
 		_:
 			if orig_move_name.begins_with("[u]"):
 				if Entity.v_facing == 1:
-					move_data.KB_angle = -83
+					move_data[Em.move.KB_ANGLE] = -83
 				else:
-					move_data.KB_angle = 31
+					move_data[Em.move.KB_ANGLE] = 31
 			else:
 				if Entity.v_facing == -1:
-					move_data.KB_angle = -25
+					move_data[Em.move.KB_ANGLE] = -25
 					
 	if Globals.difficulty == 3:
-		move_data.damage = FMath.percent(move_data.damage, Entity.MOB_LEVEL_TO_DMG[8])
+		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Entity.MOB_LEVEL_TO_DMG[8])
 	else:			
-		move_data.damage = FMath.percent(move_data.damage, Entity.MOB_LEVEL_TO_DMG[Entity.mob_level])
+		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Entity.MOB_LEVEL_TO_DMG[Entity.mob_level])
 					
-	if Globals.mob_attr.POWER in Entity.mob_attr:
-		move_data.damage = Entity.modify_stat(move_data.damage, Globals.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
+	if Em.mob_attr.POWER in Entity.mob_attr:
+		move_data[Em.move.DMG] = Entity.modify_stat(move_data[Em.move.DMG], Em.mob_attr.POWER, [50, 75, 125, 150, 175, 200])
 	
 	return move_data
 	
@@ -229,12 +229,19 @@ func query_atk_attr(move_name):
 	
 	move_name = refine_move_name(move_name)
 
-	if move_name in MOVE_DATABASE and "atk_attr" in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name].atk_attr.duplicate(true)
+	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 		
 #	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
 	
+func get_proj_level(move_name):
+	move_name = refine_move_name(move_name)
+
+	if move_name in MOVE_DATABASE and Em.move.PROJ_LVL in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.PROJ_LVL]
+	
+	return 1
 			
 func simulate():
 	
@@ -255,24 +262,24 @@ func simulate():
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
 
 #func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
-#		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Globals.afterimage_shader.MASTER):
+#		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 
 			if posmod(Entity.lifetime, 2) == 0:
-				if Globals.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
+				if Em.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
 					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
-							null, 0.5, 10.0, Globals.afterimage_shader.WHITE)
+							null, 0.5, 10.0, Em.afterimage_shader.WHITE)
 #					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), null, \
-#							0.5, 10.0, Globals.afterimage_shader.WHITE)
-				if Globals.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
+#							0.5, 10.0, Em.afterimage_shader.WHITE)
+				if Em.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
 					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
-							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
+							Color(0.0, 0.0, 0.0), 0.5, 10.0, Em.afterimage_shader.MASTER)
 #					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
-#							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
+#							Color(0.0, 0.0, 0.0), 0.5, 10.0, Em.afterimage_shader.MASTER)
 				else:
 					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
-							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
+							Color(1.5, 1.5, 1.5), 0.5, 10.0, Em.afterimage_shader.MASTER)
 #					Globals.Game.spawn_mob_afterimage(Entity.creator_mob_ref, Entity.palette_ref, Entity.entity_ref, sprite.get_path(), \
-#							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
+#							Color(1.5, 1.5, 1.5), 0.5, 10.0, Em.afterimage_shader.MASTER)
 		
 		"[c1]Active", "[u][c1]Active":
 			if Entity.lifetime > 25 and Entity.unique_data.spun == false:
@@ -284,15 +291,15 @@ func simulate():
 			
 		_:
 			if posmod(Entity.lifetime, 2) == 0:
-				if Globals.mob_attr.PROJ_TRAIL in Entity.mob_attr:
+				if Em.mob_attr.PROJ_TRAIL in Entity.mob_attr:
 					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
-							Color(1.5, 1.5, 1.5), 0.5, 10.0, Globals.afterimage_shader.MASTER)
-				elif Globals.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
+							Color(1.5, 1.5, 1.5), 0.5, 10.0, Em.afterimage_shader.MASTER)
+				elif Em.mob_attr.WHITE_PROJ_TRAIL in Entity.mob_attr:
 					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
-							null, 0.5, 10.0, Globals.afterimage_shader.WHITE)
-				elif Globals.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
+							null, 0.5, 10.0, Em.afterimage_shader.WHITE)
+				elif Em.mob_attr.BLACK_PROJ_TRAIL in Entity.mob_attr:
 					Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.creator_mob_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
-							Color(0.0, 0.0, 0.0), 0.5, 10.0, Globals.afterimage_shader.MASTER)
+							Color(0.0, 0.0, 0.0), 0.5, 10.0, Em.afterimage_shader.MASTER)
 						
 	
 func kill(sound = true):

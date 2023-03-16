@@ -1,6 +1,6 @@
 extends "res://Scenes/Stage/MovingPlatform.gd"
 
-const TYPE = Globals.moving_platform.WARPING
+const TYPE = Em.moving_platform.WARPING
 const PERIOD = 300
 
 

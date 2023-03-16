@@ -1,7 +1,7 @@
 extends Node2D
 
 
-const TRAITS = [Globals.entity_trait.GROUNDED]
+const TRAITS = [Em.entity_trait.GROUNDED]
 
 # cleaner code
 onready var Entity = get_parent()

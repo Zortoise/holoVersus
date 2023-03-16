@@ -14,7 +14,7 @@ enum effect_ref {
 		CAN_TRIP, REVENGE, DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, GRAVITIZING_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
 		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_ARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, SUMMON_HORROR
-		PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ
+		PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND
 }
 # NO_CROSSUP = can perfect block too
 # ARMOR_PIERCE = full damage on armored mobs
@@ -300,7 +300,7 @@ const DESCRIBE = {
 	},
 	effect_ref.SUMMON_TAKO: {
 		"type" : type.QUIRK,
-		"suffix" :"Summon Tako via Special",
+		"suffix" :"Summon Tako via Specials",
 	},
 	effect_ref.KERIS_PROJ: {
 		"type" : type.QUIRK,
@@ -309,6 +309,18 @@ const DESCRIBE = {
 	effect_ref.SCYTHE_PROJ: {
 		"type" : type.QUIRK,
 		"suffix" :"Summon Scythe via Heavy",
+	},
+	effect_ref.TIME_BUBBLE: {
+		"type" : type.QUIRK,
+		"suffix" :"PDodge creates TimeBubble",
+	},
+	effect_ref.VORTEX: {
+		"type" : type.QUIRK,
+		"suffix" :"Heavy Hit creates Vortex",
+	},
+	effect_ref.REWIND: {
+		"type" : type.QUIRK,
+		"suffix" :"Rewind Self when Atked",
 	},
 	
 }
@@ -332,6 +344,10 @@ const PHOENIX_COOLDOWN = 200
 const PEACOCK_COOLDOWN = 600
 const SCYTHE_COOLDOWN = 600
 #const RAIN_COOLDOWN = 30
+const TIME_BUBBLE_COOLDOWN = 240
+const VORTEX_COOLDOWN = 600
+const REWIND_COOLDOWN = 1000
+const REWIND_RANGE = 120
 
 # CARDS ------------------------------------------------------------------------------------------------------------------------------------
 

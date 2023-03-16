@@ -2,94 +2,6 @@ extends Node
 
 const VERSION = "Test Build 6"
 
-enum char_state {DEAD, GROUND_STANDBY, CROUCHING, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_RECOVERY,
-		GROUND_C_RECOVERY, GROUND_D_RECOVERY, AIR_STARTUP, AIR_ACTIVE, AIR_RECOVERY, AIR_C_RECOVERY, AIR_D_RECOVERY, GROUND_FLINCH_HITSTUN,
-		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_RESISTED_HITSTUN, AIR_RESISTED_HITSTUN, GROUND_ATK_STARTUP, 
-		GROUND_ATK_ACTIVE, GROUND_ATK_RECOVERY, AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_RECOVERY, GROUND_BLOCK, AIR_BLOCK,
-		SEQUENCE_USER, SEQUENCE_TARGET}
-enum burst {AVAILABLE, CONSUMED, EXHAUSTED}
-enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY, SUPER_ENTITY}
-enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
-enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
-enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
-enum knockback_type {FIXED, RADIAL, MIRRORED, VELOCITY}
-enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, SUPER}
-enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, SUPER}
-enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_MOVE_REC
-		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
-		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
-		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
-		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
-		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
-		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB, GRAB_INVULN_STARTUP, WHIFF_SDASH_CANCEL}
-# NO_CHAIN = mostly for autochain moves, some can chain but some cannot
-# ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
-# AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
-# FOLLOW_UP = follow-ups for autochain moves, deal no Guard Drain, does not proc Guard Swell
-# NO_REC_CANCEL = cannot jump/dash/fdash/fastfall cancel recovery frames, but still can chain
-# LEDGE_DROP = if move during attack will fall off ledges
-# NO_TURN = prevent turning during startup
-# NO_QUICK_CANCEL = prevent quick canceling during startup
-# NOT_FROM_MOVE_REC = cannot do from cancellable recovery
-# SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers
-# UNBLOCKABLE = certain attacks that are not physical specials are unblockable
-# SCREEN_SHAKE = cause screen to shake on hit
-# NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
-# SUPERARMOR_STARTUP = weakblock all attacks during startup frames
-# SUPERARMOR_ACTIVE = weakblock all attacks during active frames
-# PROJ_ARMOR_ACTIVE = weakblock all projectiles during active frames
-# NORMALARMOR_STARTUP = weakblock all Normals/non-strong projectiles during startup frames
-# NORMALARMOR_ACTIVE = weakblock all Normals/non-strong projectiles during active frames
-# DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
-# NO_STRAFE_NORMAL = for certain aerial normals, prevent air strafing during active frames
-# STRAFE_NON_NORMAL = for certain aerial non-normals, allow air strafing during active frames
-# REPEATABLE = will not incur repeat penalty, use for multi-entities
-# DI_MANUAL_SEAL = seal DI for certain duration set by "burstlock" in move_data, for Burst Extend
-# ONLY_CHAIN_ON_HIT = cannot chain into other moves on whiff and weakblock
-# CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
-# LATE_CHAIN = can only chain into other moves during recovery and not active frames
-# LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
-# CRUSH = cause Crush on punish hits, score punish hits on hitting opponent during startup
-# VULN_LIMBS = take full damage from SDHits
-# NO_REPEAT_MOVE = a move that can only be repeated once
-# DESTROY_ENTITIES = hitbox destroys entities
-# DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
-# INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
-# HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)
-# NO_TERMINAL_VEL_ACTIVE = no terminal velocity on active frames
-# FIXED_KNOCKBACK_STR = fixed knockback, used for nothing currently but may be useful
-# NO_SS_ATK_LVL_BOOST = no sweetspot boost in atk level, for sweetspot hitgrabs
-# QUICK_GRAB = command grab that fails if target is in movement STARTUP
-# GRAB_INVULN_STARTUP = immune to command grabs during startup, for slower command grabs
-# WHIFF_SDASH_CANCEL = can s_dash cancel on whiff
-
-enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, GRAVITIZE, ENFEEBLE, SLOWED}
-# STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
-
-enum block_state {UNBLOCKED, STRONG, WEAK}
-enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK, WAVE_DASH_BLOCK, AIR_DASH_BLOCK, PASSIVE_NORMALARMOR, 
-		PERMA_SUPERARMOR, NO_LAUNCH}
-# PASSIVE_NORMALARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
-#enum reset_type {STARTUP_RESET, ACTIVE_RESET}
-# STARTUP_RESET = can only a_reset this Special during startup just like Normals
-## EARLY_RESET = can a_reset within 1st 3 frames of the active frames of this Special
-# ACTIVE_RESET = can a_reset anytime during active frames of this Special
-
-enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE}
-enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
-enum moving_platform {MOVING, WARPING}
-enum dmg_num_col {WHITE, RED, GRAY, GREEN}
-enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
-		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, PASSIVE_ARMOR}
-enum peak_flag {GROUNDED, JUMPING, PEAK, PEAK_SPENT} # for mob AI command
-enum strafe_style {NONE, TOWARDS, AWAY, AWAY_ON_DESCEND}
-enum field_target {ALL_BUT_PLAYERS, ALL_MOBS, ALL, ALL_BUT_MASTER, ALL_CHAR, ALL_CHAR_BUT_MASTER, ALL_PROJ, ALL_PROJ_BUT_MASTER}
-
-enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
-		P1_UNIQUE, P1_PAUSE, P1_RS_LEFT, P1_RS_RIGHT, P1_RS_UP, P1_RS_DOWN
-		P2_UP, P2_DOWN, P2_LEFT, P2_RIGHT, P2_JUMP, P2_LIGHT, P2_FIERCE, P2_DASH, P2_BLOCK, P2_AUX, P2_SPECIAL, P2_UNIQUE,
-		P2_PAUSE, P2_RS_LEFT, P2_RS_RIGHT, P2_RS_UP, P2_RS_DOWN}
-
 const FRAME = 1.0/60.0
 const CAMERA_ZOOM_SPEED = 0.000006
 const RespawnTimer_WAIT_TIME = 75
@@ -157,42 +69,42 @@ var difficulty := 0
 
 onready var INPUTS = [
 	{
-		up = ["P1_up", Globals.button.P1_UP],
-		down = ["P1_down", Globals.button.P1_DOWN],
-		left = ["P1_left", Globals.button.P1_LEFT],
-		right = ["P1_right", Globals.button.P1_RIGHT],
-		jump = ["P1_jump", Globals.button.P1_JUMP],
-		light = ["P1_light", Globals.button.P1_LIGHT],
-		fierce = ["P1_fierce", Globals.button.P1_FIERCE],
-		dash = ["P1_dash", Globals.button.P1_DASH],
-		aux = ["P1_aux", Globals.button.P1_AUX],
-		block = ["P1_block", Globals.button.P1_BLOCK],
-		special = ["P1_special", Globals.button.P1_SPECIAL],
-		unique = ["P1_unique", Globals.button.P1_UNIQUE],
-		pause = ["P1_pause", Globals.button.P1_PAUSE],
-		rs_up = ["P1_rs_up", Globals.button.P1_RS_UP],
-		rs_down = ["P1_rs_down", Globals.button.P1_RS_DOWN],
-		rs_left = ["P1_rs_left", Globals.button.P1_RS_LEFT],
-		rs_right = ["P1_rs_right", Globals.button.P1_RS_RIGHT],
+		up = ["P1_up", Em.button.P1_UP],
+		down = ["P1_down", Em.button.P1_DOWN],
+		left = ["P1_left", Em.button.P1_LEFT],
+		right = ["P1_right", Em.button.P1_RIGHT],
+		jump = ["P1_jump", Em.button.P1_JUMP],
+		light = ["P1_light", Em.button.P1_LIGHT],
+		fierce = ["P1_fierce", Em.button.P1_FIERCE],
+		dash = ["P1_dash", Em.button.P1_DASH],
+		aux = ["P1_aux", Em.button.P1_AUX],
+		block = ["P1_block", Em.button.P1_BLOCK],
+		special = ["P1_special", Em.button.P1_SPECIAL],
+		unique = ["P1_unique", Em.button.P1_UNIQUE],
+		pause = ["P1_pause", Em.button.P1_PAUSE],
+		rs_up = ["P1_rs_up", Em.button.P1_RS_UP],
+		rs_down = ["P1_rs_down", Em.button.P1_RS_DOWN],
+		rs_left = ["P1_rs_left", Em.button.P1_RS_LEFT],
+		rs_right = ["P1_rs_right", Em.button.P1_RS_RIGHT],
 	},
 	{
-		up = ["P2_up", Globals.button.P2_UP],
-		down = ["P2_down", Globals.button.P2_DOWN],
-		left = ["P2_left", Globals.button.P2_LEFT],
-		right = ["P2_right", Globals.button.P2_RIGHT],
-		jump = ["P2_jump", Globals.button.P2_JUMP],
-		light = ["P2_light", Globals.button.P2_LIGHT],
-		fierce = ["P2_fierce", Globals.button.P2_FIERCE],
-		dash = ["P2_dash", Globals.button.P2_DASH],
-		aux = ["P2_aux", Globals.button.P2_AUX],
-		block = ["P2_block", Globals.button.P2_BLOCK],
-		special = ["P2_special", Globals.button.P2_SPECIAL],
-		unique = ["P2_unique", Globals.button.P2_UNIQUE],
-		pause = ["P2_pause", Globals.button.P2_PAUSE],
-		rs_up = ["P2_rs_up", Globals.button.P2_RS_UP],
-		rs_down = ["P2_rs_down", Globals.button.P2_RS_DOWN],
-		rs_left = ["P2_rs_left", Globals.button.P2_RS_LEFT],
-		rs_right = ["P2_rs_right", Globals.button.P2_RS_RIGHT],
+		up = ["P2_up", Em.button.P2_UP],
+		down = ["P2_down", Em.button.P2_DOWN],
+		left = ["P2_left", Em.button.P2_LEFT],
+		right = ["P2_right", Em.button.P2_RIGHT],
+		jump = ["P2_jump", Em.button.P2_JUMP],
+		light = ["P2_light", Em.button.P2_LIGHT],
+		fierce = ["P2_fierce", Em.button.P2_FIERCE],
+		dash = ["P2_dash", Em.button.P2_DASH],
+		aux = ["P2_aux", Em.button.P2_AUX],
+		block = ["P2_block", Em.button.P2_BLOCK],
+		special = ["P2_special", Em.button.P2_SPECIAL],
+		unique = ["P2_unique", Em.button.P2_UNIQUE],
+		pause = ["P2_pause", Em.button.P2_PAUSE],
+		rs_up = ["P2_rs_up", Em.button.P2_RS_UP],
+		rs_down = ["P2_rs_down", Em.button.P2_RS_DOWN],
+		rs_left = ["P2_rs_left", Em.button.P2_RS_LEFT],
+		rs_right = ["P2_rs_right", Em.button.P2_RS_RIGHT],
 	},
 ]
 
@@ -287,63 +199,63 @@ func input_string_to_action_string(input_string: String):
 
 func char_state_to_string(state):
 	match state:
-		Globals.char_state.DEAD:
+		Em.char_state.DEAD:
 			return "DEAD"
-		Globals.char_state.GROUND_STANDBY:
+		Em.char_state.GROUND_STANDBY:
 			return "GROUND_STANDBY"
-		Globals.char_state.CROUCHING:
+		Em.char_state.CROUCHING:
 			return "CROUCHING"
-		Globals.char_state.AIR_STANDBY:
+		Em.char_state.AIR_STANDBY:
 			return "AIR_STANDBY"
-		Globals.char_state.GROUND_STARTUP:
+		Em.char_state.GROUND_STARTUP:
 			return "GROUND_STARTUP"
-		Globals.char_state.GROUND_ACTIVE:
+		Em.char_state.GROUND_ACTIVE:
 			return "GROUND_ACTIVE"
-		Globals.char_state.GROUND_RECOVERY:
+		Em.char_state.GROUND_RECOVERY:
 			return "GROUND_RECOVERY"
-		Globals.char_state.GROUND_C_RECOVERY:
+		Em.char_state.GROUND_C_RECOVERY:
 			return "GROUND_C_RECOVERY"
-		Globals.char_state.GROUND_D_RECOVERY:
+		Em.char_state.GROUND_D_RECOVERY:
 			return "GROUND_D_RECOVERY"
-		Globals.char_state.AIR_STARTUP:
+		Em.char_state.AIR_STARTUP:
 			return "AIR_STARTUP"
-		Globals.char_state.AIR_ACTIVE:
+		Em.char_state.AIR_ACTIVE:
 			return "AIR_ACTIVE"
-		Globals.char_state.AIR_RECOVERY:
+		Em.char_state.AIR_RECOVERY:
 			return "AIR_RECOVERY"
-		Globals.char_state.AIR_C_RECOVERY:
+		Em.char_state.AIR_C_RECOVERY:
 			return "AIR_C_RECOVERY"
-		Globals.char_state.AIR_D_RECOVERY:
+		Em.char_state.AIR_D_RECOVERY:
 			return "AIR_D_RECOVERY"
-		Globals.char_state.GROUND_FLINCH_HITSTUN:
+		Em.char_state.GROUND_FLINCH_HITSTUN:
 			return "GROUND_FLINCH_HITSTUN"
-		Globals.char_state.AIR_FLINCH_HITSTUN:
+		Em.char_state.AIR_FLINCH_HITSTUN:
 			return "AIR_FLINCH_HITSTUN"
-		Globals.char_state.LAUNCHED_HITSTUN:
+		Em.char_state.LAUNCHED_HITSTUN:
 			return "LAUNCHED_HITSTUN"
-		Globals.char_state.GROUND_RESISTED_HITSTUN:
+		Em.char_state.GROUND_RESISTED_HITSTUN:
 			return "GROUND_RESISTED_HITSTUN"
-		Globals.char_state.AIR_RESISTED_HITSTUN:
+		Em.char_state.AIR_RESISTED_HITSTUN:
 			return "AIR_RESISTED_HITSTUN"
-		Globals.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GROUND_ATK_STARTUP:
 			return "GROUND_ATK_STARTUP"
-		Globals.char_state.GROUND_ATK_ACTIVE:
+		Em.char_state.GROUND_ATK_ACTIVE:
 			return "GROUND_ATK_ACTIVE"
-		Globals.char_state.GROUND_ATK_RECOVERY:
+		Em.char_state.GROUND_ATK_RECOVERY:
 			return "GROUND_ATK_RECOVERY"
-		Globals.char_state.AIR_ATK_STARTUP:
+		Em.char_state.AIR_ATK_STARTUP:
 			return "AIR_ATK_STARTUP"
-		Globals.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.AIR_ATK_ACTIVE:
 			return "AIR_ATK_ACTIVE"
-		Globals.char_state.AIR_ATK_RECOVERY:
+		Em.char_state.AIR_ATK_RECOVERY:
 			return "AIR_ATK_RECOVERY"
-		Globals.char_state.GROUND_BLOCK:
+		Em.char_state.GROUND_BLOCK:
 			return "GROUND_BLOCK"
-		Globals.char_state.AIR_BLOCK:
+		Em.char_state.AIR_BLOCK:
 			return "AIR_BLOCK"
-		Globals.char_state.SEQUENCE_TARGET:
+		Em.char_state.SEQUENCE_TARGET:
 			return "SEQUENCE_TARGET"
-		Globals.char_state.SEQUENCE_USER:
+		Em.char_state.SEQUENCE_USER:
 			return "SEQUENCE_USER"
 			
 
@@ -364,7 +276,7 @@ func point_in_polygon(point: Vector2, polygon: Array):
 
 # ANGLE SPLITTER ---------------------------------------------------------------------------------------------------
 
-func split_angle(angle: int, split_type = angle_split.FOUR, bias = 1):
+func split_angle(angle: int, split_type = Em.angle_split.FOUR, bias = 1):
 	# for angle, 0 is straight right, positive is turning clockwise
 	# for 4 way split, the ranges would be 315 ~ 45, 45 ~ 135, 135 ~ 225 , 225 ~ 315
 	# for 4 way split cross, the ranges would be 270 ~ 0, 0 ~ 90, 90 ~ 180 , 180 ~ 270
@@ -380,177 +292,177 @@ func split_angle(angle: int, split_type = angle_split.FOUR, bias = 1):
 	angle = posmod(angle, 360)
 
 	match split_type:
-		angle_split.TWO:
+		Em.angle_split.TWO:
 			if angle == 90:
-				if bias == 1: return compass.E
-				else: return compass.W
+				if bias == 1: return Em.compass.E
+				else: return Em.compass.W
 			if angle == 270:
-				if bias == 1: return compass.E
-				else: return compass.W
+				if bias == 1: return Em.compass.E
+				else: return Em.compass.W
 			if angle > 270 or angle < 90:
-				return compass.E
-			return compass.W
+				return Em.compass.E
+			return Em.compass.W
 			
-		angle_split.FOUR:
+		Em.angle_split.FOUR:
 			if angle <= 45 or angle >= 315:
-				return compass.E
+				return Em.compass.E
 			if angle < 135:
-				return compass.S
+				return Em.compass.S
 			if angle <= 225:
-				return compass.W
-			return compass.N
+				return Em.compass.W
+			return Em.compass.N
 
-		angle_split.FOUR_X:
+		Em.angle_split.FOUR_X:
 			if angle == 90:
-				if bias == 1: return compass.SE
-				else: return compass.SW
+				if bias == 1: return Em.compass.SE
+				else: return Em.compass.SW
 			if angle == 270:
-				if bias == 1: return compass.NE
-				else: return compass.NW
+				if bias == 1: return Em.compass.NE
+				else: return Em.compass.NW
 			if angle <= 0 or angle > 270:
-				return compass.NE
+				return Em.compass.NE
 			if angle < 90:
-				return compass.SE
+				return Em.compass.SE
 			if angle < 180:
-				return compass.SW
-			return compass.SE 
+				return Em.compass.SW
+			return Em.compass.SE 
 
-		angle_split.EIGHT:
+		Em.angle_split.EIGHT:
 			if angle <= 22 or angle >= 338:
-				return compass.E
+				return Em.compass.E
 			if angle <= 67:
-				return compass.SE
+				return Em.compass.SE
 			if angle <= 112:
-				return compass.S
+				return Em.compass.S
 			if angle <= 157:
-				return compass.SW	
+				return Em.compass.SW	
 			if angle <= 202:
-				return compass.W	
+				return Em.compass.W	
 			if angle <= 247:
-				return compass.NW	
+				return Em.compass.NW	
 			if angle <= 292:
-				return compass.N
-			return compass.NE
+				return Em.compass.N
+			return Em.compass.NE
 
-		angle_split.EIGHT_X:
+		Em.angle_split.EIGHT_X:
 			if angle == 90:
-				if bias == 1: return compass.SSE
-				else: return compass.SSW
+				if bias == 1: return Em.compass.SSE
+				else: return Em.compass.SSW
 			if angle == 270:
-				if bias == 1: return compass.NNE
-				else: return compass.NNW
+				if bias == 1: return Em.compass.NNE
+				else: return Em.compass.NNW
 			if angle <= 0 and angle >= 315:
-				return compass.ENE
+				return Em.compass.ENE
 			if angle <= 45:
-				return compass.ESE
+				return Em.compass.ESE
 			if angle < 90:
-				return compass.SSE
+				return Em.compass.SSE
 			if angle < 135:
-				return compass.SSW
+				return Em.compass.SSW
 			if angle < 180:
-				return compass.WSW	
+				return Em.compass.WSW	
 			if angle <= 225:
-				return compass.WNW	
+				return Em.compass.WNW	
 			if angle < 270:
-				return compass.NNW	
-			return compass.NNE
+				return Em.compass.NNW	
+			return Em.compass.NNE
 
-		angle_split.SIX: # 12 segments
+		Em.angle_split.SIX: # 12 segments
 			if angle == 90:
-				if bias == 1: return compass.SSE2
-				else: return compass.SSW2
+				if bias == 1: return Em.compass.SSE2
+				else: return Em.compass.SSW2
 			if angle == 270:
-				if bias == 1: return compass.NNE2
-				else: return compass.NNW2
+				if bias == 1: return Em.compass.NNE2
+				else: return Em.compass.NNW2
 			if angle <= 30 or angle >= 330:
-				return compass.E
+				return Em.compass.E
 			if angle < 90:
-				return compass.SSE2
+				return Em.compass.SSE2
 			if angle < 150:
-				return compass.SSW2
+				return Em.compass.SSW2
 			if angle <= 210:
-				return compass.W
+				return Em.compass.W
 			if angle < 270:
-				return compass.NNW2
-			return compass.NNE2
+				return Em.compass.NNW2
+			return Em.compass.NNE2
 			
-		angle_split.SIXTEEN:
+		Em.angle_split.SIXTEEN:
 			if angle <= 11 or angle >= 349:
-				return compass.E
+				return Em.compass.E
 			if angle <= 33:
-				return compass.ESE
+				return Em.compass.ESE
 			if angle <= 56:
-				return compass.SE
+				return Em.compass.SE
 			if angle <= 78:
-				return compass.SSE	
+				return Em.compass.SSE	
 			if angle <= 101:
-				return compass.S	
+				return Em.compass.S	
 			if angle <= 123:
-				return compass.SSW	
+				return Em.compass.SSW	
 			if angle <= 146:
-				return compass.SW
+				return Em.compass.SW
 			if angle <= 168:
-				return compass.WSW
+				return Em.compass.WSW
 			if angle <= 191:
-				return compass.W
+				return Em.compass.W
 			if angle <= 213:
-				return compass.WNW
+				return Em.compass.WNW
 			if angle <= 236:
-				return compass.NW	
+				return Em.compass.NW	
 			if angle <= 258:
-				return compass.NNW	
+				return Em.compass.NNW	
 			if angle <= 281:
-				return compass.N	
+				return Em.compass.N	
 			if angle <= 303:
-				return compass.NNE
+				return Em.compass.NNE
 			if angle <= 326:
-				return compass.NE
-			return compass.ENE	
+				return Em.compass.NE
+			return Em.compass.ENE	
 
 	return null
 			
 
-func compass_to_angle(compass):
-	match compass:
-		Globals.compass.E:
+func compass_to_angle(in_compass):
+	match in_compass:
+		Em.compass.E:
 			return 0
-		Globals.compass.ESE:
+		Em.compass.ESE:
 			return 22
-		Globals.compass.SE:
+		Em.compass.SE:
 			return 45
-		Globals.compass.SSE2:
+		Em.compass.SSE2:
 			return 60
-		Globals.compass.SSE:
+		Em.compass.SSE:
 			return 68
-		Globals.compass.S:
+		Em.compass.S:
 			return 90
-		Globals.compass.SSW:
+		Em.compass.SSW:
 			return 112
-		Globals.compass.SSW2:
+		Em.compass.SSW2:
 			return 120
-		Globals.compass.SW:
+		Em.compass.SW:
 			return 135
-		Globals.compass.WSW:
+		Em.compass.WSW:
 			return 158
-		Globals.compass.W:
+		Em.compass.W:
 			return 180
-		Globals.compass.WNW:
+		Em.compass.WNW:
 			return 202
-		Globals.compass.NW:
+		Em.compass.NW:
 			return 225
-		Globals.compass.NNW2:
+		Em.compass.NNW2:
 			return 240
-		Globals.compass.NNW:
+		Em.compass.NNW:
 			return 248
-		Globals.compass.N:
+		Em.compass.N:
 			return 270
-		Globals.compass.NNE:
+		Em.compass.NNE:
 			return 292
-		Globals.compass.NNE2:
+		Em.compass.NNE2:
 			return 300
-		Globals.compass.NE:
+		Em.compass.NE:
 			return 315
-		Globals.compass.ENE:
+		Em.compass.ENE:
 			return 338
 
 func dir_to_angle(dir: int, v_dir: int, bias: int):
@@ -618,15 +530,15 @@ func get_angle_btw(angle1: int, angle2: int) -> int:
 	
 func atk_type_to_tier(atk_type):
 	match atk_type:
-		Globals.atk_type.LIGHT, Globals.atk_type.FIERCE, Globals.atk_type.HEAVY:
+		Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY:
 			return 0
-		Globals.atk_type.SPECIAL:
+		Em.atk_type.SPECIAL:
 			return 1
-		Globals.atk_type.EX:
+		Em.atk_type.EX:
 			return 2
-		Globals.atk_type.SUPER:
+		Em.atk_type.SUPER:
 			return 3
-		Globals.atk_type.ENTITY, Globals.atk_type.SUPER_ENTITY: # just in case
+		Em.atk_type.ENTITY, Em.atk_type.SUPER_ENTITY: # just in case
 			return -1
 	
 #enum status_priority {
@@ -635,21 +547,21 @@ func atk_type_to_tier(atk_type):
 #
 #func status_effect_priority(effect):
 #	match effect:
-##		Globals.status_effect.REPEAT:
+##		Em.status_effect.REPEAT:
 ##			return 3
-#		Globals.status_effect.STUN, Globals.status_effect.CRUSH:
+#		Em.status_effect.STUN, Em.status_effect.CRUSH:
 #			return status_priority.STUN
-#		Globals.status_effect.LETHAL:
+#		Em.status_effect.LETHAL:
 #			return status_priority.LETHAL
-#		Globals.status_effect.RESPAWN_GRACE:
+#		Em.status_effect.RESPAWN_GRACE:
 #			return status_priority.GRACE
-#		Globals.status_effect.POISON:
+#		Em.status_effect.POISON:
 #			return status_priority.HARMFUL
 #	return 0 # no visual effect
 			
 #func trait_lookup(trait):
 #	match trait:
-#		Globals.trait.VULN_LIMBS: # 50% damage on SD hits
+#		Em.trait.VULN_LIMBS: # 50% damage on SD hits
 #			return 50
 #
 #func atk_attr_lookup(atk_attr):

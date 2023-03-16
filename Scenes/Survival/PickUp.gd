@@ -71,10 +71,10 @@ func load_entity():
 		$EntityCollisionBox.rect_size = ref_rect.rect_size
 		$EntityCollisionBox.add_to_group("Entities") # for moving platforms and offstage detection
 		
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
 			
-#		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+#		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 #			$EntityCollisionBox.add_to_group("Grounded")
 #			$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
 #			$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
@@ -118,7 +118,8 @@ func load_entity():
 func simulate():
 	
 	if Globals.Game.is_stage_paused(): return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		return
 	
 	UniqEntity.simulate()
 	
@@ -138,7 +139,7 @@ func simulate():
 				$Sprite.hide()
 		
 		# gravity and friction
-		if Globals.entity_trait.GROUNDED in UniqEntity.TRAITS:
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			if !is_on_ground($EntityCollisionBox):
 				velocity.y += GRAVITY
 				var terminal = FMath.percent(GRAVITY, TERMINAL_VELOCITY_MOD)
@@ -196,7 +197,9 @@ func pickup():
 	
 func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
-	if slowed != 0 and posmod(Globals.Game.frametime, slowed) != 0: return
+	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
+		slowed = 0
+		return
 	slowed = 0
 	
 	$SpritePlayer.simulate()

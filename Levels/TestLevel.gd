@@ -5,6 +5,7 @@ const LEVEL_NAME = "Test Level"
 const STAGE = "Grid"
 const STARTING_STOCKS = 5
 const STARTING_COIN = 100
+const PRICE_SCALING = 10
 
 const MOB_LIST = [
 	["GuraM", "Gura"],
@@ -43,7 +44,7 @@ const WAVES2 = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "test",
 					"attr" : {
-						Globals.mob_attr.PASSIVE_ARMOR : true
+						Em.mob_attr.PASSIVE_ARMOR : true
 						} },
 				],
 			}
@@ -78,8 +79,8 @@ const WAVES = {
 				1800 : [
 					{"mob" : "GuraM", "level" : 2, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 0
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 0
 						} },
 				],
 			}
@@ -108,20 +109,20 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 0
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 0
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 0
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 0
 						} },
 				],
 				1800 : [
 					{"mob" : "GuraM", "level" : 5, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 1
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 1
 						} },
 				],
 			}
@@ -162,7 +163,7 @@ const WAVES = {
 				4200 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "rush",
 					"attr" : {
-						Globals.mob_attr.PASSIVE_ARMOR: true,
+						Em.mob_attr.PASSIVE_ARMOR: true,
 						} },
 				],
 			}
@@ -173,67 +174,67 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 				],
 				1800 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 				],
 				3600 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 0, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.RAGE : true,
 						} },
 				],
 			}
@@ -244,25 +245,25 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.PROJ_SPEED: 0,
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 0,
+						Em.mob_attr.PROJ_SPEED: 0,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 0,
 						} },
 					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.PROJ_SPEED: 0,
-						Globals.mob_attr.HP : 1,
-						Globals.mob_attr.TOUGH : 0,
+						Em.mob_attr.PROJ_SPEED: 0,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 0,
 						} },
 				],
 				4200 : [
 					{"mob" : "GuraM", "level" : 6, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.RAGE : true,
 						} },
 					{"mob" : "GuraM", "level" : 6, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.RAGE : true,
 						} },
 				],
 			}
@@ -273,35 +274,35 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "rush",
 					"attr" : {
-						Globals.mob_attr.SPEED : 0,
-						Globals.mob_attr.HP : 4,
-						Globals.mob_attr.TOUGH : 5,
-						Globals.mob_attr.TRAIL : true,
-						Globals.mob_attr.RAGE : true,
+						Em.mob_attr.SPEED : 0,
+						Em.mob_attr.HP : 4,
+						Em.mob_attr.TOUGH : 5,
+						Em.mob_attr.TRAIL : true,
+						Em.mob_attr.RAGE : true,
 						} },
 				],
 				600 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
+						Em.mob_attr.HP : 1,
 						} },
 				],
 				1200 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
+						Em.mob_attr.HP : 1,
 						} },
 				],
 				1800 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
+						Em.mob_attr.HP : 1,
 						} },
 				],
 				2400 : [
 					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
 					"attr" : {
-						Globals.mob_attr.HP : 1,
+						Em.mob_attr.HP : 1,
 						} },
 				],
 			}
@@ -312,35 +313,36 @@ const WAVES = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.CHAIN : 7,
-						Globals.mob_attr.PROJ_SPEED : 0,
-						Globals.mob_attr.WHITE_TRAIL : true,
-						Globals.mob_attr.WHITE_PROJ_TRAIL : true,
+						Em.mob_attr.CHAIN : 7,
+						Em.mob_attr.PROJ_SPEED : 0,
+						Em.mob_attr.WHITE_TRAIL : true,
+						Em.mob_attr.WHITE_PROJ_TRAIL : true,
+						Em.mob_attr.HP : 2,
 						} },
 				],
 				6300 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.SPEED : 6,
-						Globals.mob_attr.PROJ_SPEED : 3,
-						Globals.mob_attr.BLACK_TRAIL : true,
-						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+						Em.mob_attr.SPEED : 6,
+						Em.mob_attr.PROJ_SPEED : 3,
+						Em.mob_attr.BLACK_TRAIL : true,
+						Em.mob_attr.BLACK_PROJ_TRAIL : true,
 						} },
 				],
 				12600 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.CHAIN : 7,
-						Globals.mob_attr.PROJ_SPEED : 0,
-						Globals.mob_attr.WHITE_TRAIL : true,
-						Globals.mob_attr.WHITE_PROJ_TRAIL : true,
+						Em.mob_attr.CHAIN : 7,
+						Em.mob_attr.PROJ_SPEED : 0,
+						Em.mob_attr.WHITE_TRAIL : true,
+						Em.mob_attr.WHITE_PROJ_TRAIL : true,
 						} },
 					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 					"attr" : {
-						Globals.mob_attr.SPEED : 6,
-						Globals.mob_attr.PROJ_SPEED : 3,
-						Globals.mob_attr.BLACK_TRAIL : true,
-						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+						Em.mob_attr.SPEED : 6,
+						Em.mob_attr.PROJ_SPEED : 3,
+						Em.mob_attr.BLACK_TRAIL : true,
+						Em.mob_attr.BLACK_PROJ_TRAIL : true,
 						} },
 				],
 			}
@@ -351,21 +353,21 @@ const WAVES = {
 #				0 : [
 #					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 #					"attr" : {
-#						Globals.mob_attr.SPEED : 6,
-#						Globals.mob_attr.CHAIN : 10,
-#						Globals.mob_attr.BLACK_TRAIL : true,
-#						Globals.mob_attr.PROJ_SPEED : 3,
-#						Globals.mob_attr.BLACK_PROJ_TRAIL : true,
+#						Em.mob_attr.SPEED : 6,
+#						Em.mob_attr.CHAIN : 10,
+#						Em.mob_attr.BLACK_TRAIL : true,
+#						Em.mob_attr.PROJ_SPEED : 3,
+#						Em.mob_attr.BLACK_PROJ_TRAIL : true,
 #						} },
 #				],
 
 #				0 : [
 #					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 #					"attr" : {
-#						Globals.mob_attr.BLACK_TRAIL : true,
+#						Em.mob_attr.BLACK_TRAIL : true,
 #						} },
 #					{"mob" : "GuraM", "level" : 8, "variant" : "base",
 #					"attr" : {
-#						Globals.mob_attr.BLACK_TRAIL : true,
+#						Em.mob_attr.BLACK_TRAIL : true,
 #						} },
 #				],

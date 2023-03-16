@@ -3,8 +3,15 @@ extends Node
 # autoload, global functions for detecting objects using detect boxes
 
 
-func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are nodes like ColorRect
-	if Rect2(box1.rect_global_position, box1.rect_size).intersects(Rect2(box2.rect_global_position, box2.rect_size)):
+func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are nodes like ColorRect or Rect2s
+	var refined_box1
+	var refined_box2
+	if box1 is Rect2: refined_box1 = box1
+	else: refined_box1 = Rect2(box1.rect_global_position, box1.rect_size)
+	if box2 is Rect2: refined_box2 = box2
+	else: refined_box2 = Rect2(box2.rect_global_position, box2.rect_size)
+	
+	if refined_box1.intersects(refined_box2):
 		return true
 	else: return false
 	
@@ -14,7 +21,11 @@ func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are
 # return true if found intersected stuff
 func detect_bool(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO):
 	for box in box_array:
-		var detect_box := Rect2(box.rect_global_position + offset, box.rect_size)
+		var detect_box
+		if box is Rect2: # straight rect2 works too
+			detect_box = box
+		else:
+			detect_box = Rect2(box.rect_global_position + offset, box.rect_size)
 		for group_name in groups_to_comb:
 			var array = get_tree().get_nodes_in_group(group_name)
 			for x in array:
@@ -27,7 +38,11 @@ func detect_bool(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO)
 func detect_return(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO):
 	var bodies = []
 	for box in box_array:
-		var detect_box := Rect2(box.rect_global_position + offset, box.rect_size)
+		var detect_box
+		if box is Rect2: # straight rect2 works too
+			detect_box = box
+		else:
+			detect_box = Rect2(box.rect_global_position + offset, box.rect_size)
 		for group_name in groups_to_comb:
 			var array = get_tree().get_nodes_in_group(group_name)
 			for x in array:
@@ -42,7 +57,7 @@ func wall_finder(global_pos: Vector2, facing, finding_range = 15):
 	# create a point
 	var point = Vector2(global_pos)
 	var wall_array = get_tree().get_nodes_in_group("SolidPlatforms")
-	wall_array.append_array(get_tree().get_nodes_in_group("BlastBarriers"))
+	wall_array.append_array(get_tree().get_nodes_in_group("BlastWalls"))
 	
 	for x in finding_range:
 		for wall in wall_array:

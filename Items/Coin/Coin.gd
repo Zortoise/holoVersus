@@ -3,7 +3,7 @@ extends Node2D
 
 const PALETTE = null
 
-const TRAITS = [Globals.entity_trait.GROUNDED, Globals.entity_trait.BLAST_BARRIER_COLLIDE]
+const TRAITS = [Em.entity_trait.GROUNDED, Em.entity_trait.BLAST_BARRIER_COLLIDE]
 
 # cleaner code
 onready var Entity = get_parent()
