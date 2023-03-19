@@ -19,7 +19,7 @@ const MOVE_DATABASE = {
 		Em.move.DMG : 40,
 		Em.move.KB : 300 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
-		Em.move.ATK_LVL : 2,
+		Em.move.ATK_LVL : 4,
 		Em.move.KB_ANGLE : -45,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.SLASH,
 		Em.move.HITSPARK_PALETTE : "dark_red",
@@ -86,7 +86,7 @@ func simulate():
 	Entity.velocity.x = clamp(Entity.velocity.x, -START_SPEED, START_SPEED)
 	
 	Entity.get_node("Sprite").rotation += 5*PI * Globals.FRAME * Entity.facing
-	Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+	Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), null, null, \
 		Color(0.8, 0.0, 0.3), 0.5, 10, Em.afterimage_shader.WHITE)
 	
 func kill(_sound = true):

@@ -226,6 +226,7 @@ onready var current_damage_value: int = 0
 onready var current_guard_gauge: int = 0
 onready var current_ex_gauge: int = 10000
 onready var super_ex_lock = null # starting EXSealTimer time
+onready var install_time = null
 onready var burst_token = Em.burst.AVAILABLE
 var stock_points_left: int
 var coin_count := 0
@@ -580,27 +581,34 @@ func initial_targeting(): # target random players at start, cannot do in init() 
 
 # for testing only
 func test1():
-	if $HitStopTimer.is_running() or $RespawnTimer.is_running():
-		test0()
-	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "old state: " + Globals.char_state_to_string(state) + \
-		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + "\n"
+	if Globals.debug_mode2:
+		if $HitStopTimer.is_running() or $RespawnTimer.is_running():
+			test0()
+		$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "old state: " + Globals.char_state_to_string(state) + \
+			"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + "\n"
+	else:
+		$TestNode2D/TestLabel.text = ""
 			
 func test0():
-	var string_input_buffer = []
-	for buffered_input in input_buffer:
-		var string_buffered_input = [Globals.input_to_string(buffered_input[0], player_ID), buffered_input[1]]
-		string_input_buffer.append(string_buffered_input)
-	$TestNode2D/TestLabel.text = "buffer: " + str(string_input_buffer) + "\n"
-	
+	if Globals.debug_mode2:
+		var string_input_buffer = []
+		for buffered_input in input_buffer:
+			var string_buffered_input = [Globals.input_to_string(buffered_input[0], player_ID), buffered_input[1]]
+			string_input_buffer.append(string_buffered_input)
+		$TestNode2D/TestLabel.text = "buffer: " + str(string_input_buffer) + "\n"
+	else:
+		$TestNode2D/TestLabel.text = ""
 			
 func test2():
-	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
-		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
-		"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
-		"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-		str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-		" " + str(from_move_rec)
-			
+	if Globals.debug_mode2:
+		$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
+			"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
+			"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
+			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
+			str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
+			" " + str(from_move_rec)
+	else:
+		$TestNode2D/TestLabel.text = ""
 			
 func _process(_delta):
 	if Globals.debug_mode:
@@ -673,13 +681,32 @@ func simulate(new_input_state):
 #				Globals.Game.card_menu.open_shop()
 	
 #			get_target().add_status_effect([Em.status_effect.SLOWED, 60, 3])
-#			Globals.Game.spawn_field(player_ID, "TimeBubbleE", position, {}, null, UniqChar.NAME)
-#			Globals.Game.spawn_SFX("TimeBubbleTop", "TimeBubbleTop", position, {"field": true})
+#			var field_id = Globals.Game.spawn_field(player_ID, "TimeBubbleE", position, {}).entity_ID
+#			Globals.Game.spawn_SFX("TimeBubbleTop", "TimeBubbleTop", position, {"field": true, "sticky_ID": field_id, "sticky_entity" : true})
 #			if "rewind" in enhance_data:
 #				var to_loaded_state = enhance_data.rewind.saved_state.duplicate(true)
 #				load_state(to_loaded_state, true)
-			for x in 50:
-				Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, -x * 5), {}, null, UniqChar.NAME)
+#			for x in 50:
+#				Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, -x * 5), {}, null, UniqChar.NAME)
+#			super_cost(60, 30, 180)
+#			var random = Globals.Game.rng_generate(4)
+#			var rand_facing = Globals.Game.rng_facing()
+#			if random == 0:
+#				Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(0, -100), \
+#						{"facing":rand_facing, "alt1":true})
+#			elif random == 1:
+#				Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(70 * -rand_facing, -50), \
+#						{"facing":rand_facing, "alt2":true})
+#			elif random == 2:
+#				Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(100 * -rand_facing, 0), \
+#						{"facing":rand_facing, "alt3":true})
+#			else:
+#				Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(0, 70), \
+#						{"facing":rand_facing, "alt4":true})
+#			Globals.Game.spawn_entity(player_ID, "NousagiE", position, {})
+			enhance_card(Cards.effect_ref.REWIND, true)
+			
+
 	
 			pass
 
@@ -896,10 +923,17 @@ func simulate2(): # only ran if not in hitstop
 			change_ex_gauge(600)
 		if Globals.training_settings.regen == 1 and !$TrainingRegenTimer.is_running() and current_damage_value > 0:
 			take_damage(-30) # regen damage
-	
-	if !$EXSealTimer.is_running():
-		super_ex_lock = null
-	elif super_ex_lock != null:
+		
+	if !$InstallTimer.is_running():
+		if install_time != null:
+			install_time = null
+			if UniqChar.has_method("install_over"): UniqChar.install_over()
+			
+		if !$EXSealTimer.is_running():
+			super_ex_lock = null
+		elif super_ex_lock != null:
+			Globals.Game.ex_gauge_update(self)
+	elif install_time != null:
 		Globals.Game.ex_gauge_update(self)
 	
 	# drain EX Gauge when air blocking
@@ -1722,12 +1756,13 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$HitStunTimer.simulate()
 				$BurstLockTimer.simulate()
 				$NoCollideTimer.simulate()
+				$InstallTimer.simulate()
 				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
 					if !get_target().is_hitstunned_or_sequenced():
 						# no counting down EX Seal if opponent is hitstunned or sequenced
 						$EXSealTimer.simulate()
 				else: # EX Seal from using super, count down during opponent hitstun as well
-					if is_attacking() and is_super(get_move_name()): # no counting down EX Seal during Super animation
+					if $InstallTimer.is_running() or (is_attacking() and is_super(get_move_name())): # no counting down EX Seal during Super animation
 						pass
 					else:
 						$EXSealTimer.simulate()
@@ -2678,6 +2713,7 @@ func get_stat(stat: String) -> int:
 #				to_return = FMath.percent(to_return, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.HP))
+#				to_return = 99999
 				to_return = int(max(to_return, 1))
 		
 			"SPEED":
@@ -2820,7 +2856,7 @@ func enhance_cooldown():
 # warning-ignore:return_value_discarded
 			enhance_cooldowns.erase(cooldown)
 	
-func enhance_card(effect_ref: int):
+func enhance_card(effect_ref: int, skip_cooldown = false):
 	match effect_ref:
 		Cards.effect_ref.SUMMON_SHARK:
 			if !Cards.effect_ref.SUMMON_SHARK in enhance_cooldowns:
@@ -2828,66 +2864,129 @@ func enhance_card(effect_ref: int):
 				spawn_point = Detection.ground_finder(spawn_point, facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
 #					func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):
-					Globals.Game.spawn_entity(player_ID, "NibblerSpawnE", spawn_point, {}, null, UniqChar.NAME)
+					Globals.Game.spawn_entity(player_ID, "NibblerSpawnE", spawn_point, {})
 					play_audio("water15", {})
-					enhance_cooldowns[Cards.effect_ref.SUMMON_SHARK] = Cards.SHARK_COOLDOWN
+					if !skip_cooldown:
+						enhance_cooldowns[Cards.effect_ref.SUMMON_SHARK] = Cards.SHARK_COOLDOWN
 		Cards.effect_ref.SUMMON_HORROR:
 			if !Cards.effect_ref.SUMMON_HORROR in enhance_cooldowns:
 				var target = get_target()
 				if target != null and target != self:
-					Globals.Game.spawn_entity(player_ID, "HorrorE", get_target().position, {}, null, UniqChar.NAME)
-					enhance_cooldowns[Cards.effect_ref.SUMMON_HORROR] = Cards.HORROR_COOLDOWN
+					Globals.Game.spawn_entity(player_ID, "HorrorE", get_target().position, {})
+					if !skip_cooldown:
+						enhance_cooldowns[Cards.effect_ref.SUMMON_HORROR] = Cards.HORROR_COOLDOWN
 		Cards.effect_ref.KERIS_PROJ:
 			if !Cards.effect_ref.KERIS_PROJ in enhance_cooldowns:
-				Globals.Game.spawn_entity(player_ID, "KerisE", position + Vector2(50, -50), {}, null, UniqChar.NAME)
-				Globals.Game.spawn_entity(player_ID, "KerisE", position + Vector2(-50, -50), {}, null, UniqChar.NAME)
+				Globals.Game.spawn_entity(player_ID, "KerisE", position + Vector2(50, -50), {})
+				Globals.Game.spawn_entity(player_ID, "KerisE", position + Vector2(-50, -50), {})
 				play_audio("bling5", {"vol" : -10})
-				enhance_cooldowns[Cards.effect_ref.KERIS_PROJ] = Cards.KERIS_COOLDOWN
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.KERIS_PROJ] = Cards.KERIS_COOLDOWN
 		Cards.effect_ref.SCYTHE_PROJ:
 			if !Cards.effect_ref.SCYTHE_PROJ in enhance_cooldowns:
-				Globals.Game.spawn_entity(player_ID, "ScytheE", position, {}, null, UniqChar.NAME)
+				Globals.Game.spawn_entity(player_ID, "ScytheE", position, {})
 				play_audio("whoosh7", {"vol" : -10})
-				enhance_cooldowns[Cards.effect_ref.SCYTHE_PROJ] = Cards.SCYTHE_COOLDOWN
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.SCYTHE_PROJ] = Cards.SCYTHE_COOLDOWN
 		Cards.effect_ref.PHOENIX_PROJ:
 			if !Cards.effect_ref.PHOENIX_PROJ in enhance_cooldowns:
 				if grounded:
-					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 0), {}, null, UniqChar.NAME)
-					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(23 * facing, -8), {"ground2":true}, null, UniqChar.NAME)
-					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(21 * facing, -15), {"ground3":true}, null, UniqChar.NAME)
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 0), {})
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(23 * facing, -8), {"ground2":true})
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(21 * facing, -15), {"ground3":true})
 				else:
-					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 0), {}, null, UniqChar.NAME)
-					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 10), {"air2":true}, null, UniqChar.NAME)
-					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, -10), {"air3":true}, null, UniqChar.NAME)
-				enhance_cooldowns[Cards.effect_ref.PHOENIX_PROJ] = Cards.PHOENIX_COOLDOWN
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 0), {})
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, 10), {"air2":true})
+					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, -10), {"air3":true})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.PHOENIX_PROJ] = Cards.PHOENIX_COOLDOWN
 		Cards.effect_ref.PEACOCK_PROJ:
 			if !Cards.effect_ref.PEACOCK_PROJ in enhance_cooldowns:
-				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(40 * facing, 0), {}, null, UniqChar.NAME)
-				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(-40 * facing, 0), {"alt":true}, null, UniqChar.NAME)
-				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(25 * facing, -35), {"alt":true}, null, UniqChar.NAME)
-				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(-25 * facing, -35), {}, null, UniqChar.NAME)
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(40 * facing, 0), {})
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(-40 * facing, 0), {"alt":true})
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(25 * facing, -35), {"alt":true})
+				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(-25 * facing, -35), {})
 				play_audio("bling5", {"vol" : -10})
-				enhance_cooldowns[Cards.effect_ref.PEACOCK_PROJ] = Cards.PEACOCK_COOLDOWN
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.PEACOCK_PROJ] = Cards.PEACOCK_COOLDOWN
 		Cards.effect_ref.RAIN_PROJ:
-			Globals.Game.spawn_entity(player_ID, "WaterBulletE", get_feet_pos(), {}, null, UniqChar.NAME)
+			Globals.Game.spawn_entity(player_ID, "WaterBulletE", get_feet_pos(), {})
 		Cards.effect_ref.TIME_BUBBLE:
 			if !Cards.effect_ref.TIME_BUBBLE in enhance_cooldowns:
-				Globals.Game.spawn_field(player_ID, "TimeBubbleE", position, {}, null, UniqChar.NAME)
-				Globals.Game.spawn_SFX("TimeBubbleTop", "TimeBubbleTop", position, {"field": true})
-				enhance_cooldowns[Cards.effect_ref.TIME_BUBBLE] = Cards.TIME_BUBBLE_COOLDOWN
+				var field_id = Globals.Game.spawn_field(player_ID, "TimeBubbleE", position, {}).entity_ID
+				Globals.Game.spawn_SFX("TimeBubbleTop", "TimeBubbleTop", position, {"field": true, "sticky_ID": field_id, "sticky_entity" : true})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.TIME_BUBBLE] = Cards.TIME_BUBBLE_COOLDOWN
 		Cards.effect_ref.VORTEX:
 			if !Cards.effect_ref.VORTEX in enhance_cooldowns:
-				Globals.Game.spawn_field(player_ID, "VortexE", get_target().position, {}, null, UniqChar.NAME)
-				enhance_cooldowns[Cards.effect_ref.VORTEX] = Cards.VORTEX_COOLDOWN
+				Globals.Game.spawn_field(player_ID, "VortexE", get_target().position, {})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.VORTEX] = Cards.VORTEX_COOLDOWN
 		Cards.effect_ref.REWIND:
 			if !Cards.effect_ref.REWIND in enhance_cooldowns:
 				if "rewind" in enhance_data and Globals.Game.frametime - enhance_data.rewind.frametime <= Cards.REWIND_RANGE:
+					Globals.Game.spawn_SFX("RewindEffect", "RewindEffect", position, {})
 					var to_loaded_state = enhance_data.rewind.saved_state.duplicate(true)
 					load_state(to_loaded_state, true)
-					enhance_cooldowns[Cards.effect_ref.REWIND] = Cards.REWIND_COOLDOWN
+# warning-ignore:return_value_discarded
+					enhance_data.erase("rewind")
+					Globals.Game.spawn_SFX("RewindEffect", "RewindEffect", position, {})
+					play_audio("shutter1", {"vol" : -3})
+					if !skip_cooldown:
+						enhance_cooldowns[Cards.effect_ref.REWIND] = Cards.REWIND_COOLDOWN
+		Cards.effect_ref.SUMMON_TAKO:
+			if !Cards.effect_ref.SUMMON_TAKO in enhance_cooldowns:
+				var random = Globals.Game.rng_generate(4)
+				var rand_facing = Globals.Game.rng_facing()
+				if random == 0:
+					Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(0, -100), \
+							{"facing":rand_facing, "alt1":true})
+				elif random == 1:
+					Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(70 * -rand_facing, -50), \
+							{"facing":rand_facing, "alt2":true})
+				elif random == 2:
+					Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(100 * -rand_facing, 0), \
+							{"facing":rand_facing, "alt3":true})
+				else:
+					Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(0, 70), \
+							{"facing":rand_facing, "alt4":true})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.SUMMON_TAKO] = Cards.TAKO_COOLDOWN
+					
+		Cards.effect_ref.TBLOCK_PROJ:
+			if !Cards.effect_ref.TBLOCK_PROJ in enhance_cooldowns:
+				Globals.Game.spawn_entity(player_ID, "TBlockE", get_target().position + Vector2(0, -100), {})
+				play_audio("bling5", {"vol" : -10})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.TBLOCK_PROJ] = Cards.TBLOCK_COOLDOWN
+				
+		Cards.effect_ref.FLASK_PROJ:
+			if !Cards.effect_ref.FLASK_PROJ in enhance_cooldowns:
+				Globals.Game.spawn_entity(player_ID, "FlaskE", position, {})
+				play_audio("bling5", {"vol" : -10})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.FLASK_PROJ] = Cards.FLASK_COOLDOWN
+					
+		Cards.effect_ref.SUMMON_SSRB:
+			if !Cards.effect_ref.SUMMON_SSRB in enhance_cooldowns:
+				Globals.Game.spawn_entity(player_ID, "SsrbE", position, {})
+				play_audio("bling5", {"vol" : -10})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.SUMMON_SSRB] = Cards.SSRB_COOLDOWN
+					
+		Cards.effect_ref.SUMMON_NOUSAGI:
+			if !Cards.effect_ref.SUMMON_NOUSAGI in enhance_cooldowns:
+				Globals.Game.spawn_entity(player_ID, "NousagiE", position, {})
+				play_audio("bling5", {"vol" : -10})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.SUMMON_NOUSAGI] = Cards.NOUSAGI_COOLDOWN
 				
 func timed_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_SHARK):
 		enhance_card(Cards.effect_ref.SUMMON_SHARK)
+		
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_TAKO):
+		enhance_card(Cards.effect_ref.SUMMON_TAKO)
 	
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.REWIND):
 		if !is_hitstunned_or_sequenced2():
@@ -2898,25 +2997,37 @@ func timed_enhance():
 				}
 			else:
 				if Globals.Game.frametime - enhance_data.rewind.frametime >= Cards.REWIND_RANGE:
-					enhance_data.rewind.frametime = Globals.Game.frametime
-					enhance_data.rewind.saved_state = save_state().duplicate(true)
+# warning-ignore:return_value_discarded
+					enhance_data.erase("rewind")
+					enhance_data["rewind"] = {
+						"frametime" : Globals.Game.frametime,
+						"saved_state" : save_state().duplicate(true)
+					}
 	
 		
 func being_hit_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_HORROR):
 		enhance_card(Cards.effect_ref.SUMMON_HORROR)
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.REWIND):
+		enhance_card(Cards.effect_ref.REWIND)
 		
 func attack_enhance(atk_type: int):
 	match atk_type:
 		Em.atk_type.LIGHT:
 			if Inventory.has_quirk(player_ID, Cards.effect_ref.KERIS_PROJ):
 				enhance_card(Cards.effect_ref.KERIS_PROJ)
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_NOUSAGI):
+				enhance_card(Cards.effect_ref.SUMMON_NOUSAGI)
 		Em.atk_type.FIERCE:
 			if Inventory.has_quirk(player_ID, Cards.effect_ref.PHOENIX_PROJ):
 				enhance_card(Cards.effect_ref.PHOENIX_PROJ)
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.TBLOCK_PROJ):
+				enhance_card(Cards.effect_ref.TBLOCK_PROJ)
 		Em.atk_type.HEAVY:
 			if Inventory.has_quirk(player_ID, Cards.effect_ref.SCYTHE_PROJ):
 				enhance_card(Cards.effect_ref.SCYTHE_PROJ)
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_SSRB):
+				enhance_card(Cards.effect_ref.SUMMON_SSRB)
 		Em.atk_type.SPECIAL, Em.atk_type.EX:
 			pass
 			
@@ -2939,6 +3050,8 @@ func air_jump_enhance():
 func block_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.PEACOCK_PROJ):
 		enhance_card(Cards.effect_ref.PEACOCK_PROJ)
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.FLASK_PROJ):
+		enhance_card(Cards.effect_ref.FLASK_PROJ)
 		
 func ground_dash_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.CAN_TRIP) and Globals.Game.rng_generate(100) < Cards.TRIP_CHANCE:
@@ -2947,7 +3060,7 @@ func ground_dash_enhance():
 
 	return true
 	
-func p_dodge_enhance():
+func dodge_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.TIME_BUBBLE):
 		enhance_card(Cards.effect_ref.TIME_BUBBLE)
 	
@@ -2993,6 +3106,9 @@ func on_kill():
 		
 		super_ex_lock = null
 		$EXSealTimer.stop()
+		$InstallTimer.stop()
+		install_time = null
+		if UniqChar.has_method("install_over"): UniqChar.install_over()
 		
 		$Sprites.hide()
 		state = Em.char_state.DEAD
@@ -3177,14 +3293,14 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				else:
 					animate("WaveDashBrake")
 					UniqChar.dash_sound()
-					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"grounded":true})
 					if dir == facing:
 						velocity.x = facing * FMath.percent(get_stat("GROUND_DASH_SPEED"), get_stat("WAVE_DASH_SPEED_MOD"))
 			
 			
 		Em.char_state.AIR_RECOVERY:
 			if Animator.query_to_play(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
-				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 				animate("BlockRec")
 				UniqChar.landing_sound()
 				
@@ -3202,7 +3318,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("HardLanding") # this makes landing and attacking instantly easier
 
 		Em.char_state.AIR_FLINCH_HITSTUN: # land during hitstun
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			match Animator.to_play_animation:
 				"aFlinchAStop", "aFlinchA":
 					animate("FlinchA")
@@ -3231,7 +3347,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 #						play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			
 		Em.char_state.AIR_BLOCK: # air block to ground block
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 			if Animator.query_to_play(["aBlockStartup"]): # if dropping during block startup
 				change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST") * 10)
@@ -3405,7 +3521,7 @@ func snap_up_wave_land_check():
 				face(dir)
 			animate("WaveDashBrake")
 			velocity.x = dir * get_stat("GROUND_DASH_SPEED")
-			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			UniqChar.dash_sound()
 		else:
 			animate("SoftLanding")
@@ -3551,14 +3667,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 #		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_number, \
+			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_under, sfx_under.get_path(), UniqChar.NAME, palette_number, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 			
-		Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sprite, sprite.get_path(), palette_number, \
+		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), UniqChar.NAME, palette_number, \
 				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_number, \
+			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_over, sfx_over.get_path(), UniqChar.NAME, palette_number, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
 	else:
@@ -3568,14 +3684,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_number, null, \
+		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_under, sfx_under.get_path(), UniqChar.NAME, palette_number, null, \
 			starting_modulate_a, lifetime)
 		
-	Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sprite, sprite.get_path(), palette_number, null, \
+	Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), UniqChar.NAME, palette_number, null, \
 		starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(player_ID, false, UniqChar.NAME, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_number, null, \
+		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_over, sfx_over.get_path(), UniqChar.NAME, palette_number, null, \
 			starting_modulate_a, lifetime)
 		
 		
@@ -3888,7 +4004,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 			return false
 
 func super_test():
-	if $EXSealTimer.is_running():
+	if $EXSealTimer.is_running() or $InstallTimer.is_running():
 		return false
 	return true
 #	if current_ex_gauge != MAX_EX_GAUGE:
@@ -3896,12 +4012,17 @@ func super_test():
 #	if cost_burst and burst_token != Em.burst.AVAILABLE:
 #		return false
 #	return true
+	
 		
-func super_cost(lock_time_per_lvl, base_lock_time := 0):
+func super_cost(lock_time_per_lvl, base_lock_time := 0, in_install_time := 0):
 	var total_lock_time: int = lock_time_per_lvl * (3 - get_ex_level()) + base_lock_time
 	
 	$EXSealTimer.time += total_lock_time
 	super_ex_lock = $EXSealTimer.time
+	
+	if in_install_time > 0:
+		install_time = in_install_time
+		$InstallTimer.time = in_install_time
 	
 	change_ex_gauge(-MAX_EX_GAUGE)
 #	if cost_burst:
@@ -3933,13 +4054,16 @@ func dodge_check():
 	else:
 		change_guard_gauge(-get_stat("DODGE_GG_COST"))
 		
+	if Globals.survival_level != null:
+		dodge_enhance()
+		
 	return true
 	
 func perfect_dodge(): # called from Game.gd
 	if new_state == Em.char_state.AIR_RECOVERY and Animator.query_to_play(["DodgeTransit", "Dodge"]):
 		success_dodge = true
-		if Globals.survival_level != null:
-			p_dodge_enhance()
+#		if Globals.survival_level != null:
+#			p_dodge_enhance()
 	
 #func guardtech():
 #	if success_block and button_dash in input_state.pressed:
@@ -4851,8 +4975,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			defender.status_effect_to_add.append([Em.status_effect.CHILL, Cards.CHILL_DURATION, Cards.CHILL_SLOW])
 		if Inventory.has_quirk(player_ID, Cards.effect_ref.IGNITION_ATK):
 			defender.status_effect_to_add.append([Em.status_effect.IGNITE, Cards.IGNITE_DURATION, Cards.IGNITE_DMG])
-		if Inventory.has_quirk(player_ID, Cards.effect_ref.GRAVITIZING_ATK):
-			defender.status_effect_to_add.append([Em.status_effect.GRAVITIZE, Cards.GRAVITIZE_DURATION, Cards.GRAVITIZE_DEGREE])
+#		if Inventory.has_quirk(player_ID, Cards.effect_ref.GRAVITIZING_ATK):
+#			defender.status_effect_to_add.append([Em.status_effect.GRAVITIZE, Cards.GRAVITIZE_DURATION, Cards.GRAVITIZE_DEGREE])
 		if Inventory.has_quirk(player_ID, Cards.effect_ref.ENFEEBLING_ATK):
 			defender.status_effect_to_add.append([Em.status_effect.ENFEEBLE, Cards.ENFEEBLE_DURATION, Cards.ENFEEBLE_DEGREE])
 
@@ -5054,6 +5178,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	hit_data[Em.hit.ATKER] = attacker # for other functions
 	hit_data[Em.hit.ATKER_OR_ENTITY] = attacker_or_entity
+	hit_data[Em.hit.DEFENDER] = self # for hit_reactions
 		
 	if attacker != null:	
 		attacker.target_ID = player_ID # attacker target defender
@@ -5330,6 +5455,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if UniqChar.has_method("being_hit0"):	
 		UniqChar.being_hit0(hit_data) # reaction, can change hit_data from there
+		
+	if Em.hit.CANCELLED in hit_data:
+		return
 	
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
@@ -5337,6 +5465,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var adjusted_atk_level: int = 1
 	
 	if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]:
+		
+		if !Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA]:
+			hit_data[Em.hit.CANCELLED] = true
+			return # just in case
+		
 		adjusted_atk_level = adjusted_atk_level(hit_data)
 		hit_data[Em.hit.ADJUSTED_ATK_LVL] = adjusted_atk_level
 		
@@ -6781,9 +6914,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 			chain_memory.append(move_name) # add move to chain memory
 			
 			if !grounded: # add move to aerial memory
-				if is_normal_attack(move_name) or is_heavy(move_name):
-					aerial_memory.append(move_name)
-				elif is_special_move(move_name):
+#				if is_normal_attack(move_name) or is_heavy(move_name):
+#					aerial_memory.append(move_name)
+#				elif is_special_move(move_name):
+#					aerial_sp_memory.append(move_name)
+				aerial_memory.append(move_name)
+				if is_special_move(move_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(move_name):
 					aerial_sp_memory.append(move_name)
 					
 			if Globals.survival_level != null and move_name in UniqChar.STARTERS:
@@ -6802,7 +6938,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 	
 	match anim_name:
 		"Run":
-			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"grounded":true})
 		
 		"Dash":
 			if Globals.survival_level != null and !ground_dash_enhance():
@@ -6840,7 +6976,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #					velocity.x += dir * get_stat("JUMP_HORIZONTAL_SPEED")
 #					velocity.x = int(clamp(velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
 #					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
-			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 		"aJumpTransit2":
 			aerial_memory = []
@@ -6862,7 +6998,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 					velocity.x = FMath.percent(velocity.x, 70)
 				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
 				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
-				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
+				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 				
 				if Globals.survival_level != null:
 					air_jump_enhance()
@@ -6881,7 +7017,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 				if wall_point != null:
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
 				else:
-					Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
+					Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 				reset_jumps_except_walljumps()
 		"WallJumpTransit2":
 			aerial_memory = []
@@ -6898,12 +7034,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 			if wall_point != null:
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
 			else:
-				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {"facing":facing})
+				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 			reset_jumps_except_walljumps()
 		"HardLanding":
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 		"SoftLanding":
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 		"BlockStartup", "aBlockStartup":
 			success_block = false
@@ -7232,6 +7368,7 @@ func save_state():
 		"RespawnTimer_time" : $RespawnTimer.time,
 		"BurstLockTimer_time" : $BurstLockTimer.time,
 		"EXSealTimer_time" : $EXSealTimer.time,
+		"InstallTimer_time" : $InstallTimer.time,
 		"ShorthopTimer_time" : $ShorthopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
 	}
@@ -7342,6 +7479,7 @@ func load_state(state_data, command_rewind := false):
 	$RespawnTimer.time = state_data.RespawnTimer_time
 	$BurstLockTimer.time = state_data.BurstLockTimer_time
 	$EXSealTimer.time = state_data.EXSealTimer_time
+	$InstallTimer.time = state_data.InstallTimer_time
 	$ShorthopTimer.time = state_data.ShorthopTimer_time
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
 	

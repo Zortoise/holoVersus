@@ -1,0 +1,196 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Fall": {
+"duration": 12,
+"hframes": 6,
+"loop": true,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 9,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 10,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+}
+},
+"vframes": 5
+},
+"FallTransit": {
+"duration": 12,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 7,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 8,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+}
+},
+"vframes": 5
+},
+"Jump": {
+"duration": 12,
+"hframes": 6,
+"loop": true,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 5,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 6,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+}
+},
+"vframes": 5
+},
+"JumpTransit": {
+"duration": 18,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 1,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 2,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+12: {
+"frame": 3,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+}
+},
+"vframes": 5
+},
+"Kill": {
+"duration": 15,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 24,
+"hitbox": [  ]
+},
+3: {
+"frame": 25,
+"hitbox": [  ]
+},
+6: {
+"frame": 26,
+"hitbox": [  ]
+},
+9: {
+"frame": 27,
+"hitbox": [  ]
+},
+12: {
+"frame": 28,
+"hitbox": [  ]
+}
+},
+"vframes": 5
+},
+"Land": {
+"duration": 24,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 3,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 11,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+9: {
+"frame": 12,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+12: {
+"frame": 13,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+},
+15: {
+"frame": 14,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+}
+},
+"vframes": 5
+},
+"Spawn": {
+"duration": 6,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 4,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+}
+},
+"vframes": 5
+},
+"Strike": {
+"duration": 27,
+"hframes": 6,
+"loop": false,
+"spritesheet": "NousagiSprite",
+"timestamps": {
+0: {
+"frame": 15,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ]
+},
+3: {
+"frame": 16,
+"hitbox": [ Vector2( -13, 13 ), Vector2( 13, 13 ), Vector2( 13, -13 ), Vector2( -13, -13 ) ]
+},
+6: {
+"frame": 17,
+"hitbox": [ Vector2( -16, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -16, -16 ) ]
+},
+9: {
+"frame": 18,
+"hitbox": [ Vector2( -16, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -16, -16 ) ]
+},
+12: {
+"frame": 19,
+"hitbox": [ Vector2( -16, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -16, -16 ) ]
+},
+15: {
+"frame": 20,
+"hitbox": [ Vector2( -16, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -16, -16 ) ]
+},
+18: {
+"frame": 21,
+"hitbox": [ Vector2( -16, 16 ), Vector2( 16, 16 ), Vector2( 16, -16 ), Vector2( -16, -16 ) ]
+},
+21: {
+"frame": 22,
+"hitbox": [  ]
+},
+24: {
+"frame": 23,
+"hitbox": [  ]
+}
+},
+"vframes": 5
+}
+}

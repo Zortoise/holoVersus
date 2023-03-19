@@ -16,6 +16,7 @@ var ignore_freeze := false
 
 var sticky_ID = null
 var sticky_offset = null
+var sticky_entity := false
 
 # for common sfx, in_sfx_ref is a string pointing to loaded sfx in NSAnims.gb
 # for master's palette, place "palette_master_ID" : player_ID in aux_data
@@ -46,7 +47,11 @@ func init(in_anim: String, in_sfx_ref: String, in_position: Vector2, aux_data: D
 #			print("Error: Did not pass in master_ID for sticky SFX!")
 #		else:
 		sticky_ID = aux_data.sticky_ID
-		sticky_offset = in_position - Globals.Game.get_player_node(sticky_ID).position
+		if "sticky_entity" in aux_data:
+			sticky_entity = true
+			sticky_offset = in_position - Globals.Game.get_entity_node(sticky_ID).position
+		else:
+			sticky_offset = in_position - Globals.Game.get_player_node(sticky_ID).position
 	if "field" in aux_data:
 		field = true
 		
@@ -105,7 +110,11 @@ func palette():
 
 func simulate():
 	if sticky_ID != null:
-		var master_node = Globals.Game.get_player_node(sticky_ID)
+		var master_node
+		if sticky_entity:
+			master_node = Globals.Game.get_entity_node(sticky_ID)
+		else:
+			master_node = Globals.Game.get_player_node(sticky_ID)
 		if master_node != null:
 			position = master_node.position + sticky_offset
 		else:
@@ -140,6 +149,7 @@ func save_state():
 		"ignore_freeze" : ignore_freeze,
 		"sticky_ID" : sticky_ID,
 		"sticky_offset" : sticky_offset,
+		"sticky_entity" : sticky_entity,
 		"slowed" : slowed,
 		"field" : field,
 	}
@@ -167,8 +177,13 @@ func load_state(state_data):
 	
 	sticky_ID = state_data.sticky_ID
 	sticky_offset = state_data.sticky_offset
+	sticky_entity = state_data.sticky_entity
 	if sticky_ID != null:
-		var master_node = Globals.Game.get_player_node(sticky_ID)
+		var master_node
+		if sticky_entity:
+			master_node = Globals.Game.get_entity_node(sticky_ID)
+		else:
+			master_node = Globals.Game.get_player_node(sticky_ID)
 		if master_node != null:
 			position = master_node.position + sticky_offset
 		else:

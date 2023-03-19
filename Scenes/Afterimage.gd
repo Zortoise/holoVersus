@@ -12,21 +12,21 @@ var starting_modulate_a
 
 var original_ID : int
 var is_entity : bool
-var master_ref: String
 var spritesheet_ref: String
+var master_ref = null
 var palette_ref = null
 var afterimage_shader = Em.afterimage_shader.MASTER
 var ignore_freeze := false
 var slowed := 0
 
 
-func init(in_original_ID : int, in_is_entity: bool, in_master_ref: String, in_spritesheet_ref: String, sprite_node_path: NodePath, in_palette_ref, \
+func init(in_original_ID : int, in_is_entity: bool, in_spritesheet_ref: String, sprite_node_path: NodePath, in_master_ref = null, in_palette_ref = null, \
 		in_color_modulate = null, in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Em.afterimage_shader.MASTER):
 	
 	original_ID = in_original_ID
 	is_entity = in_is_entity
-	master_ref = in_master_ref
 	spritesheet_ref = in_spritesheet_ref
+	master_ref = in_master_ref
 	palette_ref = in_palette_ref
 	
 	set_texture()

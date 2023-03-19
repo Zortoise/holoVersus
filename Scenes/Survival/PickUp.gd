@@ -54,6 +54,8 @@ func load_entity():
 #		"frame_data" : ResourceLoader.load(_),
 #		"spritesheet" : ResourceLoader.load(_),
 #	}
+	add_to_group("PickUpNodes")
+
 	var item_data = Loader.item_data[item_ref]
 	UniqEntity = item_data.scene.instance() # load UniqEntity scene
 	$SpritePlayer.init_with_loaded_frame_data($Sprite, item_data.frame_data) # load frame data
@@ -205,7 +207,8 @@ func simulate_after(): # do this after hit detection
 	$SpritePlayer.simulate()
 	
 	lifetime += 1
-	if !stasis and lifespan != null and lifetime >= lifespan:
+	if lifetime >= Globals.ENTITY_AUTO_DESPAWN: free = true
+	elif !stasis and lifespan != null and lifetime >= lifespan:
 		UniqEntity.kill()
 
 

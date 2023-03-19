@@ -7,6 +7,7 @@ const CAMERA_ZOOM_SPEED = 0.000006
 const RespawnTimer_WAIT_TIME = 75
 const FLAT_STOCK_LOSS = 1000
 const CORNER_SIZE = 64
+const ENTITY_AUTO_DESPAWN = 3600
 
 
 var editor: bool # check if running in editor or not

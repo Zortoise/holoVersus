@@ -7,7 +7,8 @@ const TARGETS = [Em.field_target.MOBS]
 const RADIUS = 64
 #const RECT_SIZE = Vector2[64, 64]
 
-const VACUUM_STR = 200
+const VACUUM_STR = 300
+const LIFESPAN = 240
 
 
 # cleaner code
@@ -21,12 +22,25 @@ func _ready():
 
 func init(_aux_data: Dictionary):
 	
-	Animator.play("Kill") # starting animation
-	Entity.play_audio("blast3", {"vol" : -10})
+	Animator.play("Active") # starting animation
 
 func simulate():
-	pass
+	if posmod(Entity.lifetime, 28) == 0:
+		Entity.play_audio("vortex1", {"vol" : -18})
 	
+	if Entity.lifetime < 3:
+		sprite.modulate.a = 0.33
+	elif Entity.lifetime < 6:
+		sprite.modulate.a = 0.67
+	elif Entity.lifetime < LIFESPAN:
+		sprite.modulate.a = 1
+	elif Entity.lifetime < LIFESPAN + 3:
+		sprite.modulate.a = 0.67
+	elif Entity.lifetime < LIFESPAN + 6:
+		sprite.modulate.a = 0.33
+	else:
+		Entity.free = true
+		
 	
 func inflict(node):
 

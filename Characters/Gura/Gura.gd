@@ -342,7 +342,7 @@ func capture_instant_actions():
 
 func process_instant_actions():
 	Character.unique_data.groundfin_trigger = false
-	Character.unique_data.nibbler_cancel = max(Character.unique_data.nibbler_cancel - 1, 0)
+#	Character.unique_data.nibbler_cancel = max(Character.unique_data.nibbler_cancel - 1, 0)
 	# nibbler_cancel is a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 	
 	if !Character.get_node("RespawnTimer").is_running() and !Character.get_node("HitStunTimer").is_running():
@@ -961,7 +961,7 @@ func being_hit(hit_data):
 #	var defender = get_node(hit_data.defender_nodepath)
 					
 	if hit_data[Em.hit.BLOCK_STATE] in [Em.block_state.UNBLOCKED]:
-		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
+#		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
 		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
 		update_uniqueHUD()
 		

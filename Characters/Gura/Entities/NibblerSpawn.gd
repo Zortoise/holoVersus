@@ -16,7 +16,7 @@ func init(_aux_data: Dictionary):
 	Animator.play("Spawn") # starting animation
 
 func simulate():
-	if Animator.to_play_animation == "Spawn" and Globals.Game.get_player_node(Entity.master_ID).unique_data.nibbler_cancel > 0:
+	if Animator.to_play_animation == "Spawn" and Globals.Game.get_player_node(Entity.master_ID).is_hitstunned_or_sequenced():
 		Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", Entity.position, {"facing":Entity.facing, "grounded":true}, \
 				Entity.palette_ref, Entity.master_ref)
 		Entity.free = true # cancel spawning if master got hit

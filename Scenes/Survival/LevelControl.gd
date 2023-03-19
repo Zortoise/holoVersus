@@ -275,6 +275,37 @@ func load_cards():
 	for key in card_audio:
 		Loader.add_loaded(Loader.audio, key, card_audio[key])
 	
+	var directory = Directory.new()
+	if directory.open("res://Cards/SFX/FrameData/") == OK:
+		directory.list_dir_begin(true)
+		var file_name = directory.get_next()
+		while file_name != "":
+			# load all needed files and add them to the dictionary
+			if file_name.ends_with(".tres"):
+				var file_name2 = file_name.get_file().trim_suffix(".tres")
+				var sfx_data = {
+					"frame_data" : ResourceLoader.load("res://Cards/SFX/FrameData/" + file_name),
+					"spritesheet" : ResourceLoader.load("res://Cards/SFX/Spritesheets/" + file_name2 + "Sprite.png")
+				}
+				Loader.add_loaded(Loader.sfx, file_name2, sfx_data)
+			file_name = directory.get_next()
+			
+#	"RewindEffect" : {
+#		"frame_data" : ResourceLoader.load("res://Cards/FrameData/RewindEffect.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/RewindEffectSprite.png"),
+#	},
+	
+	if directory.change_dir("res://Cards/UniqueAudio/") == OK:
+		directory.list_dir_begin(true)
+		var file_name = directory.get_next()
+		while file_name != "":
+			# load all needed files and add them to the dictionary
+			if file_name.ends_with(".wav.import"):
+				var file_name2 = file_name.get_file().trim_suffix(".wav.import")
+				Loader.add_loaded(Loader.audio, file_name2, ResourceLoader.load("res://Cards/UniqueAudio/" + file_name2 + ".wav"))
+			file_name = directory.get_next()
+			
+	
 func load_items():
 	for item in UniqLevel.ITEMS:
 		Loader.item_data[item] = {}

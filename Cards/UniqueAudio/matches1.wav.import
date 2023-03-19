@@ -1,0 +1,23 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/matches1.wav-0c706786f06261222479b032c66c6a38.sample"
+
+[deps]
+
+source_file="res://Cards/UniqueAudio/matches1.wav"
+dest_files=[ "res://.import/matches1.wav-0c706786f06261222479b032c66c6a38.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

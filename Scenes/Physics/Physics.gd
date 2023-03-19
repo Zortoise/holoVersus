@@ -241,7 +241,7 @@ func create_checklist() -> Array:
 		else:
 			to_check.append("SoftPlatforms")
 			
-	if is_in_group("PlayerNodes") or is_in_group("ModNodes"):
+	if is_in_group("PlayerNodes") or is_in_group("MobNodes"):
 		to_check.append("BlastWalls")
 		to_check.append("BlastCeiling")
 		if has_method("is_killable"):
@@ -252,15 +252,18 @@ func create_checklist() -> Array:
 			
 		if has_method("check_collidable") and call("check_collidable"):
 			to_check.append("Players")
-			if is_in_group("ModNodes"): to_check.append("Mobs")
+			if is_in_group("PlayerNodes"): to_check.append("Mobs")
 			
 		
-	if is_in_group("EntityNodes"):
+	elif is_in_group("EntityNodes"):
 		if Em.entity_trait.BLAST_BARRIER_COLLIDE in get("UniqEntity").TRAITS:
 			to_check.append("BlastWalls")
 			to_check.append("BlastCeiling")
 #		elif get("UniqEntity").has_method("on_offstage"):
 #			to_check.erase("BlastBarriers")
+	elif is_in_group("PickUpNodes"):
+		to_check.append("BlastWalls")
+		to_check.append("BlastCeiling")
 			
 	return to_check
 			

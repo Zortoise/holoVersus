@@ -44,7 +44,7 @@ const WAVES2 = {
 				0 : [
 					{"mob" : "GuraM", "level" : 8, "variant" : "test",
 					"attr" : {
-						Em.mob_attr.PASSIVE_ARMOR : true
+						Em.mob_attr.RAGE:true
 						} },
 				],
 			}

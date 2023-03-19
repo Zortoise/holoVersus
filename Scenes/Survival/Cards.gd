@@ -12,9 +12,10 @@ enum effect_ref {
 		COIN_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
 		LESS_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, ARMOR_PIERCE, AUTO_PBLOCK_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
-		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, GRAVITIZING_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
+		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
 		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_ARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, SUMMON_HORROR
-		PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND
+		PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND, TBLOCK_PROJ
+		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI
 }
 # NO_CROSSUP = can perfect block too
 # ARMOR_PIERCE = full damage on armored mobs
@@ -206,7 +207,7 @@ const DESCRIBE = {
 	},
 	effect_ref.SUMMON_SHARK : {
 		"type" : type.QUIRK,
-		"suffix" :"Summon Shark every 5 sec",	
+		"suffix" :"Summon Sharks",	
 	},
 	effect_ref.HEAL_ON_KILL : {
 		"type" : type.QUIRK,
@@ -228,10 +229,10 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"Igniting Touch",	
 	},
-	effect_ref.GRAVITIZING_ATK : {
-		"type" : type.QUIRK,
-		"suffix" :"Gravitizing Touch",	
-	},
+#	effect_ref.GRAVITIZING_ATK : {
+#		"type" : type.QUIRK,
+#		"suffix" :"Gravitizing Touch",	
+#	},
 	effect_ref.ENFEEBLING_ATK : {
 		"type" : type.QUIRK,
 		"suffix" :"Enfeebling Touch",	
@@ -300,7 +301,7 @@ const DESCRIBE = {
 	},
 	effect_ref.SUMMON_TAKO: {
 		"type" : type.QUIRK,
-		"suffix" :"Summon Tako via Specials",
+		"suffix" :"Summon Takodachi",
 	},
 	effect_ref.KERIS_PROJ: {
 		"type" : type.QUIRK,
@@ -312,7 +313,7 @@ const DESCRIBE = {
 	},
 	effect_ref.TIME_BUBBLE: {
 		"type" : type.QUIRK,
-		"suffix" :"PDodge creates TimeBubble",
+		"suffix" :"Make TimeBubble via Dodge",
 	},
 	effect_ref.VORTEX: {
 		"type" : type.QUIRK,
@@ -322,12 +323,29 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"Rewind Self when Atked",
 	},
+	effect_ref.TBLOCK_PROJ: {
+		"type" : type.QUIRK,
+		"suffix" :"Call Blocks via Fierce",
+	},
+	effect_ref.FLASK_PROJ: {
+		"type" : type.QUIRK,
+		"suffix" :"Throw Flask via Block",
+	},
+	effect_ref.SUMMON_SSRB: {
+		"type" : type.QUIRK,
+		"suffix" :"Throw SSRB via Heavy",
+	},
+	effect_ref.SUMMON_NOUSAGI: {
+		"type" : type.QUIRK,
+		"suffix" :"Call Nousagi via Light",
+	},
 	
 }
 
 const TRIP_CHANCE = 5
 const SHARK_COOLDOWN = 300
 const HORROR_COOLDOWN = 1000
+const TAKO_COOLDOWN = 300
 const KILL_HEAL_PERCENT = 40
 const POISON_DURATION = 180
 const POISON_DMG = 40
@@ -335,19 +353,23 @@ const CHILL_DURATION = 120
 const CHILL_SLOW = 50
 const IGNITE_DURATION = 90
 const IGNITE_DMG = 50
-const GRAVITIZE_DURATION = 240
-const GRAVITIZE_DEGREE = 300
+#const GRAVITIZE_DURATION = 240
+#const GRAVITIZE_DEGREE = 300
 const ENFEEBLE_DURATION = 180
 const ENFEEBLE_DEGREE = 50
 const KERIS_COOLDOWN = 600
 const PHOENIX_COOLDOWN = 200
 const PEACOCK_COOLDOWN = 600
 const SCYTHE_COOLDOWN = 600
+const TBLOCK_COOLDOWN = 600
 #const RAIN_COOLDOWN = 30
-const TIME_BUBBLE_COOLDOWN = 240
-const VORTEX_COOLDOWN = 600
+const TIME_BUBBLE_COOLDOWN = 1000
+const VORTEX_COOLDOWN = 1000
 const REWIND_COOLDOWN = 1000
 const REWIND_RANGE = 120
+const FLASK_COOLDOWN = 600
+const NOUSAGI_COOLDOWN = 600
+const SSRB_COOLDOWN = 600
 
 # CARDS ------------------------------------------------------------------------------------------------------------------------------------
 
@@ -356,7 +378,7 @@ enum card_ref {
 	KORONE, MUMEI, KIARA, MORI, AMELIA, FAUNA, IRYS, IRYS_b, KOBO, FUBUKI, MIO, PEKORA, POLKA, HAATO, HAATO_b,
 	SUISEI, KANATA, LUI, ANYA, COCO, RUSHIA, KRONII, MIKO, OLLIE, AKI, WATAME, 
 	BAELZ, BAELZ_b, BAELZ_c, BAELZ_d, BAELZ_e, BAELZ_f, KAELA,
-	MEL, TOWA, LUNA, CHLOE, KOYORI, KOYORI_b, KOYORI_c, SUBARU, ALOE, AZKI, OKAYU, CHOCO, MOONA, IOFIFTEEN,
+	MEL, TOWA, LUNA, CHLOE, KOYORI, SUBARU, ALOE, AZKI, OKAYU, CHOCO, MOONA, IOFIFTEEN,
 	MATSURI, NENE, ZETA, REINE, RISU, LAPLUS, SANA
 }
 
@@ -392,9 +414,9 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.GRAVITY_MOD : -30,
 		effect_ref.FRICTION : -50,
-		effect_ref.SPECIAL_DMG_MOD : 50,
-		effect_ref.PROJ_DMG_MOD : 50,
+		effect_ref.PROJ_DMG_MOD : 30,
 		effect_ref.PASSIVE_EX_REGEN : 10,
+		"quirks" : [effect_ref.SUMMON_TAKO]
 	},
 	card_ref.SORA : {
 		"name" : "Sora",
@@ -455,8 +477,8 @@ const DATABASE = {
 	card_ref.BOTAN : {
 		"name" : "Botan",
 		"price" : 100,
-		effect_ref.PROJ_DMG_MOD : 80,
-		"quirks" : [effect_ref.ARMOR_PIERCE],
+		effect_ref.PROJ_DMG_MOD : 50,
+		"quirks" : [effect_ref.ARMOR_PIERCE, effect_ref.SUMMON_SSRB],
 	},
 	card_ref.LAMY : {
 		"name" : "Lamy",
@@ -514,8 +536,8 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.JUMP_SPEED : 30,
 		effect_ref.AIR_NORMAL_DMG_MOD : 50,
-		effect_ref.EXTRA_HITSTOP : 5,
-		"quirks" : [effect_ref.CAN_REPEAT],
+		effect_ref.EXTRA_HITSTOP : 7,
+		"quirks" : [effect_ref.REWIND],
 	},
 	card_ref.FAUNA : {
 		"name" : "Fauna",
@@ -574,7 +596,7 @@ const DATABASE = {
 		effect_ref.JUMP_SPEED : 50,
 		effect_ref.MAX_AIR_JUMP : 1,
 		effect_ref.AIR_NORMAL_DMG_MOD : 50,
-		"quirks" : [effect_ref.CAN_REPEAT],
+		"quirks" : [effect_ref.SUMMON_NOUSAGI],
 	},
 	card_ref.POLKA : {
 		"name" : "Polka",
@@ -604,11 +626,10 @@ const DATABASE = {
 	card_ref.SUISEI : {
 		"name" : "Suisei",
 		"price" : 100,
-		effect_ref.AIR_DASH_SPEED : 30,
-		effect_ref.SDASH_SPEED : 30,
-		effect_ref.COMBO_LEVEL : 2,
+		effect_ref.AIR_DASH_SPEED : 20,
+		effect_ref.SDASH_SPEED : 20,
 		effect_ref.FIERCE_DMG_MOD : 50,
-		"quirks" : [effect_ref.AUTO_TECH]
+		"quirks" : [effect_ref.TBLOCK_PROJ]
 	},
 	card_ref.KANATA : {
 		"name" : "Kanata",
@@ -655,7 +676,8 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.LIGHT_DMG_MOD : 50,
 		effect_ref.HEAVY_DMG_MOD : 50,
-		effect_ref.EXTRA_HITSTOP : 10,
+		effect_ref.EXTRA_HITSTOP : 7,
+		"quirks" : [effect_ref.TIME_BUBBLE]
 	},
 	card_ref.MIKO : {
 		"name" : "Miko",
@@ -677,9 +699,10 @@ const DATABASE = {
 		"name" : "Aki",
 		"price" : 100,
 		effect_ref.HP : 30,
-		effect_ref.HITSTUN_TAKEN : -50,
+		effect_ref.SPEED : 10,
+		effect_ref.GROUND_DASH_SPEED : 20,
 		effect_ref.GROUND_NORMAL_DMG_MOD : 50,
-		"quirks" : [effect_ref.BETTER_BLOCK, effect_ref.NO_CHIP_DMG]
+		"quirks" : [effect_ref.NO_BLOCK_COST]
 	},
 	card_ref.WATAME : {
 		"name" : "Watame",
@@ -740,7 +763,7 @@ const DATABASE = {
 		"name" : "Baelz",
 		"price" : 100,
 		"random" : [card_ref.BAELZ, card_ref.BAELZ_b, card_ref.BAELZ_c, card_ref.BAELZ_d, card_ref.BAELZ_e, card_ref.BAELZ_f],
-		"quirks" : [effect_ref.POISON_ATK, effect_ref.CHILLING_ATK, effect_ref.IGNITION_ATK, effect_ref.GRAVITIZING_ATK, \
+		"quirks" : [effect_ref.POISON_ATK, effect_ref.CHILLING_ATK, effect_ref.IGNITION_ATK, \
 				effect_ref.ENFEEBLING_ATK, effect_ref.WILDCARD]
 	},
 	card_ref.KAELA : {
@@ -759,47 +782,30 @@ const DATABASE = {
 		"name" : "Towa",
 		"price" : 100,
 		effect_ref.SPEED : 10,
-		effect_ref.GROUND_DASH_SPEED : 30,
-		effect_ref.COMBO_LEVEL : 2,
+		effect_ref.COMBO_LEVEL : 1,
 		effect_ref.PROJ_DMG_MOD : 50,
+		"quirks" : [effect_ref.CAN_REPEAT]
 	},
 	card_ref.LUNA : {
 		"name" : "Luna",
 		"price" : 100,
-		effect_ref.HP : 25,
+		effect_ref.HP : 35,
 		effect_ref.COIN_GAIN : 1,
-		"quirks" : [effect_ref.EX_RAISE_DMG]
+		"quirks" : [effect_ref.EX_RAISE_DMG, effect_ref.BETTER_BLOCK]
 	},
 	card_ref.CHLOE : {
 		"name" : "Chloe",
 		"price" : 100,
 		effect_ref.LIGHT_DMG_MOD : 50,
 		effect_ref.GUARD_DRAIN_MOD : 30,
-		"quirks" : [effect_ref.SPECIAL_CHAIN, effect_ref.NO_DODGE_COST],
+		"quirks" : [effect_ref.CAN_REPEAT, effect_ref.NO_DODGE_COST],
 	},
 	card_ref.KOYORI : {
 		"name" : "Koyori",
 		"price" : 100,
-		"random" : [card_ref.KOYORI, card_ref.KOYORI_b, card_ref.KOYORI_c],
-		"replace" : "Random Out of 3 Sets",
-		effect_ref.HP: -15,
-		effect_ref.LIFESTEAL_RATE: 50,
-		"quirks" : [effect_ref.POISON_ATK]
-	},
-	card_ref.KOYORI_b : {
-		"name" : "Koyori",
-		"price" : 100,
-		effect_ref.DODGE_SPEED: -50,
-		"quirks" : [effect_ref.NO_BLOCK_COST, effect_ref.PASSIVE_ARMOR, effect_ref.CHILLING_ATK]
-	},
-	card_ref.KOYORI_c : {
-		"name" : "Koyori",
-		"price" : 100,
-		effect_ref.SPEED: -15,
-		effect_ref.FIERCE_DMG_MOD: 60,
-		effect_ref.HEAVY_DMG_MOD : 60,
-		effect_ref.SPECIAL_DMG_MOD : 60,
-		"quirks" : [effect_ref.IGNITION_ATK]
+		effect_ref.LANDED_EX_REGEN : 30,
+		effect_ref.PROJ_DMG_MOD : 50,
+		"quirks" : [effect_ref.FLASK_PROJ]
 	},
 	card_ref.SUBARU : {
 		"name" : "Subaru",
@@ -909,8 +915,8 @@ const DATABASE = {
 		effect_ref.SPEED : -10,
 		effect_ref.GRAVITY_MOD : -30,
 		effect_ref.HP : 50,
-		effect_ref.HEAVY_DMG_MOD : 70,
-		"quirks" : [effect_ref.GRAVITIZING_ATK],
+		effect_ref.HEAVY_DMG_MOD : 50,
+		"quirks" : [effect_ref.VORTEX],
 	},
 
 }

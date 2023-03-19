@@ -1798,6 +1798,14 @@ func ex_gauge_update(character):
 	var ex_gauge_bars = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXGauges")
 #	var ex_lvl_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXLevel")
 
+	if character.install_time != null and character.get_node("InstallTimer").is_running():
+		character.current_ex_gauge = 0
+		ex_gauge_bars.get_node("AnimationPlayer").play("install")
+		ex_gauge_bars.get_node("EXGauge").value = 0
+		ex_gauge_bars.get_node("EXGauge2").value = 0
+		ex_gauge_bars.get_node("EXGauge3").value = 0
+		ex_gauge_bars.get_node("../EXLock").value = character.get_node("InstallTimer").time / float(character.install_time) * 100
+		return
 	if character.super_ex_lock != null and character.get_node("EXSealTimer").is_running():
 		character.current_ex_gauge = 0
 		ex_gauge_bars.get_node("AnimationPlayer").play("lock")
@@ -1907,6 +1915,11 @@ func get_player_node(player_ID):
 	
 func get_entity_node(entity_ID):
 	if entity_ID == null: return null
+	
+	for field in $Fields.get_children():
+		if field.entity_ID == entity_ID:
+			return field
+			
 	if entity_ID >= 0: # positive is player
 		for entity in get_tree().get_nodes_in_group("EntityNodes"):
 			if entity.entity_ID == entity_ID:
@@ -2068,11 +2081,11 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary,
 
 # master_ID is passed in to freeze afterimages during hitstop
 # master_ref is used to locate spritesheet_ref for character afterimages and locate palettes as well
-func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
-		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
+func spawn_afterimage(master_ID: int, is_entity: bool, spritesheet_ref: String, sprite_node_path: NodePath, master_ref = null, \
+		palette_ref = null, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 	var afterimage = Loader.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
-	afterimage.init(master_ID, is_entity, master_ref, spritesheet_ref, sprite_node_path, palette_ref, color_modulate, starting_modulate_a, \
+	afterimage.init(master_ID, is_entity, spritesheet_ref, sprite_node_path, master_ref, palette_ref, color_modulate, starting_modulate_a, \
 			lifetime, afterimage_shader)
 	return afterimage
 	

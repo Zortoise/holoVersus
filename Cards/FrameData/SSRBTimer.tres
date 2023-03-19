@@ -1,0 +1,98 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Time1": {
+"duration": 9,
+"hframes": 6,
+"loop": true,
+"spritesheet": "SSRBTimerSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+3: {
+"frame": 1
+},
+6: {
+"frame": 2
+}
+},
+"vframes": 3
+},
+"Time2": {
+"duration": 9,
+"hframes": 6,
+"loop": true,
+"spritesheet": "SSRBTimerSprite",
+"timestamps": {
+0: {
+"frame": 3
+},
+3: {
+"frame": 4
+},
+6: {
+"frame": 5
+}
+},
+"vframes": 3
+},
+"Time3": {
+"duration": 9,
+"hframes": 6,
+"loop": true,
+"spritesheet": "SSRBTimerSprite",
+"timestamps": {
+0: {
+"frame": 6
+},
+3: {
+"frame": 7
+},
+6: {
+"frame": 8
+}
+},
+"vframes": 3
+},
+"Time4": {
+"duration": 9,
+"hframes": 6,
+"loop": true,
+"spritesheet": "SSRBTimerSprite",
+"timestamps": {
+0: {
+"frame": 9
+},
+3: {
+"frame": 10
+},
+6: {
+"frame": 11
+}
+},
+"vframes": 3
+},
+"Time5": {
+"duration": 9,
+"hframes": 6,
+"loop": true,
+"spritesheet": "SSRBTimerSprite",
+"timestamps": {
+0: {
+"frame": 12
+},
+3: {
+"frame": 13
+},
+6: {
+"frame": 14
+}
+},
+"vframes": 3
+}
+}

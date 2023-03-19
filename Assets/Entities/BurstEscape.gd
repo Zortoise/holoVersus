@@ -22,7 +22,7 @@ const MOVE_DATABASE = {
 		Em.move.KB : 1000 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
 		Em.move.ATK_LVL : 8,
-		Em.move.FIXED_ENTITY_HITSTOP : 0,
+		Em.move.FIXED_ATKER_HITSTOP : 0,
 		Em.move.FIXED_HITSTOP : 15,
 		Em.move.FIXED_HITSTUN : 30,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,

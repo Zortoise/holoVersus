@@ -1,4 +1,4 @@
-[gd_scene load_steps=170 format=2]
+[gd_scene load_steps=172 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -539,6 +539,47 @@ outline_color = Color( 0, 0, 0, 1 )
 use_filter = true
 font_data = ExtResource( 14 )
 
+[sub_resource type="Animation" id=177]
+resource_name = "install"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("../../EXLock:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../../EXLabel:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.6, 0.6, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../../EXLock:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 2.5, 2.5, 5, 1 ), Color( 4, 4, 5, 1 ), Color( 2.5, 2.5, 5, 1 ) ]
+}
+
 [sub_resource type="Animation" id=116]
 resource_name = "level0"
 length = 0.001
@@ -825,6 +866,18 @@ tracks/1/keys = {
 "update": 0,
 "values": [ Color( 1.5, 0.6, 0.6, 1 ) ]
 }
+tracks/2/type = "value"
+tracks/2/path = NodePath("../../EXLock:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
 
 [sub_resource type="ShaderMaterial" id=107]
 shader = ExtResource( 37 )
@@ -967,7 +1020,48 @@ tracks/1/keys = {
 "values": [ Color( 0.8, 0.8, 0.8, 1 ) ]
 }
 
-[sub_resource type="Animation" id=131]
+[sub_resource type="Animation" id=178]
+resource_name = "install"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("../../EXLock:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../../EXLabel:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1.5, 0.6, 0.6, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../../EXLock:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 2.5, 2.5, 5, 1 ), Color( 4, 4, 5, 1 ), Color( 2.5, 2.5, 5, 1 ) ]
+}
+
+[sub_resource type="Animation" id=179]
 resource_name = "level0"
 length = 0.001
 tracks/0/type = "value"
@@ -1031,7 +1125,7 @@ tracks/4/keys = {
 "values": [ false ]
 }
 
-[sub_resource type="Animation" id=132]
+[sub_resource type="Animation" id=180]
 resource_name = "level1"
 length = 0.4
 loop = true
@@ -1096,7 +1190,7 @@ tracks/4/keys = {
 "values": [ false ]
 }
 
-[sub_resource type="Animation" id=133]
+[sub_resource type="Animation" id=181]
 resource_name = "level2"
 length = 0.4
 loop = true
@@ -1161,7 +1255,7 @@ tracks/4/keys = {
 "values": [ false ]
 }
 
-[sub_resource type="Animation" id=134]
+[sub_resource type="Animation" id=182]
 resource_name = "level3"
 length = 0.6
 loop = true
@@ -1226,7 +1320,7 @@ tracks/4/keys = {
 "values": [ false ]
 }
 
-[sub_resource type="Animation" id=135]
+[sub_resource type="Animation" id=183]
 resource_name = "lock"
 length = 0.001
 tracks/0/type = "value"
@@ -1252,6 +1346,18 @@ tracks/1/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 0,
 "values": [ Color( 1.5, 0.6, 0.6, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../../EXLock:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
 }
 
 [sub_resource type="DynamicFont" id=17]
@@ -3564,7 +3670,6 @@ texture = ExtResource( 7 )
 position = Vector2( -66, -31 )
 
 [node name="EXGauge" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder/EXGauges"]
-modulate = Color( 1, 0.9, 0.8, 1 )
 margin_left = -13.0
 margin_top = 1.0
 margin_right = 56.0
@@ -3574,7 +3679,7 @@ value = 100.0
 texture_progress = ExtResource( 9 )
 
 [node name="EXGauge2" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder/EXGauges"]
-modulate = Color( 1, 1, 1, 0 )
+modulate = Color( 1, 0.9, 0.8, 1 )
 margin_left = 58.0
 margin_top = 1.0
 margin_right = 127.0
@@ -3596,6 +3701,7 @@ texture_progress = ExtResource( 9 )
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/GaugesUnder/EXGauges"]
 root_node = NodePath("../EXGauge")
 autoplay = "level1"
+anims/install = SubResource( 177 )
 anims/level0 = SubResource( 116 )
 anims/level1 = SubResource( 117 )
 anims/level2 = SubResource( 118 )
@@ -3624,12 +3730,12 @@ position = Vector2( 1, 1 )
 texture = ExtResource( 12 )
 
 [node name="EXLabel" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
-modulate = Color( 0.784314, 0.784314, 0.784314, 1 )
 position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
 [node name="EXLock" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
 visible = false
+modulate = Color( 2.5, 2.5, 5, 1 )
 margin_left = -79.0
 margin_top = -30.0
 margin_right = 132.0
@@ -3803,7 +3909,6 @@ texture = ExtResource( 7 )
 position = Vector2( -66, -31 )
 
 [node name="EXGauge" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder/EXGauges"]
-modulate = Color( 1, 0.9, 0.8, 1 )
 margin_left = -13.0
 margin_top = 1.0
 margin_right = 56.0
@@ -3813,7 +3918,7 @@ value = 100.0
 texture_progress = ExtResource( 9 )
 
 [node name="EXGauge2" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder/EXGauges"]
-modulate = Color( 1, 1, 1, 0 )
+modulate = Color( 1, 0.9, 0.8, 1 )
 margin_left = 58.0
 margin_top = 1.0
 margin_right = 127.0
@@ -3835,11 +3940,12 @@ texture_progress = ExtResource( 9 )
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/GaugesUnder/EXGauges"]
 root_node = NodePath("../EXGauge")
 autoplay = "level1"
-anims/level0 = SubResource( 131 )
-anims/level1 = SubResource( 132 )
-anims/level2 = SubResource( 133 )
-anims/level3 = SubResource( 134 )
-anims/lock = SubResource( 135 )
+anims/install = SubResource( 178 )
+anims/level0 = SubResource( 179 )
+anims/level1 = SubResource( 180 )
+anims/level2 = SubResource( 181 )
+anims/level3 = SubResource( 182 )
+anims/lock = SubResource( 183 )
 
 [node name="GuardGauge1" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
 margin_left = -54.0
@@ -3863,12 +3969,12 @@ position = Vector2( 1, 1 )
 texture = ExtResource( 12 )
 
 [node name="EXLabel" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
-modulate = Color( 0.784314, 0.784314, 0.784314, 1 )
 position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
 [node name="EXLock" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
 visible = false
+modulate = Color( 3.88154, 3.88154, 5, 1 )
 margin_left = -79.0
 margin_top = -30.0
 margin_right = 132.0

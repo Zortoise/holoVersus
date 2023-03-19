@@ -1,0 +1,44 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"RewindEffect": {
+"duration": 18,
+"hframes": 6,
+"loop": false,
+"spritesheet": "RewindEffectSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+2: {
+"frame": 1
+},
+4: {
+"frame": 2
+},
+6: {
+"frame": 3
+},
+8: {
+"frame": 4
+},
+10: {
+"frame": 5
+},
+12: {
+"frame": 6
+},
+14: {
+"frame": 7
+},
+16: {
+"frame": 8
+}
+},
+"vframes": 2
+}
+}

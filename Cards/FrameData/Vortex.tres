@@ -5,14 +5,23 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
-"Kill": {
-"duration": 360,
-"hframes": 1,
-"loop": false,
+"Active": {
+"duration": 16,
+"hframes": 4,
+"loop": true,
 "spritesheet": "VortexSprite",
 "timestamps": {
 0: {
 "frame": 0
+},
+4: {
+"frame": 1
+},
+8: {
+"frame": 2
+},
+12: {
+"frame": 3
 }
 },
 "vframes": 1

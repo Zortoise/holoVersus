@@ -96,7 +96,7 @@ func simulate():
 	match Animator.to_play_animation: # afterimage trail
 		"Active", "bActive":
 			if posmod(Entity.lifetime, 5) == 0:
-				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), null, null, \
 						null, 1.0, 10.0, Em.afterimage_shader.WHITE)
 	
 func kill(sound = true):

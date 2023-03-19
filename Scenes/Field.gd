@@ -196,7 +196,8 @@ func simulate():
 	
 	$SpritePlayer.simulate()
 	lifetime += 1
-	if lifespan != null and lifetime >= lifespan and UniqEntity.has_method("expire"):
+	if lifetime >= Globals.ENTITY_AUTO_DESPAWN: free = true
+	elif lifespan != null and lifetime >= lifespan and UniqEntity.has_method("expire"):
 		UniqEntity.expire()
 
 

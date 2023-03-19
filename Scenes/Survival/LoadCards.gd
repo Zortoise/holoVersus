@@ -53,6 +53,41 @@ var card_entity_data = {
 		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Vortex.tres"),
 		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/VortexSprite.png"),
 	},
+	"TakoE" : {
+		"scene" : load("res://Cards/TakoE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Tako.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TakoSprite.png"),
+	},
+	"TakoGateE" : {
+		"scene" : load("res://Cards/TakoGateE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/TakoGate.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TakoGateSprite.png"),
+	},
+	"TBlockE" : {
+		"scene" : load("res://Cards/TBlockE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/TBlock.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TBlockSprite.png"),
+	},
+	"FlaskE" : {
+		"scene" : load("res://Cards/FlaskE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Flask.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/FlaskSprite.png"),
+	},
+	"SsrbE" : {
+		"scene" : load("res://Cards/SsrbE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/SSRB.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/SSRBSprite.png"),
+	},
+	"SsrbTimerE" : {
+		"scene" : load("res://Cards/SsrbTimerE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/SSRBTimer.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/SSRBTimerSprite.png"),
+	},
+	"NousagiE" : {
+		"scene" : load("res://Cards/NousagiE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Nousagi.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/NousagiSprite.png"),
+	},
 }
 
 var card_sfx = {
@@ -63,10 +98,6 @@ var card_sfx = {
 	"BigSplash" : {
 		"frame_data" : ResourceLoader.load("res://Characters/Gura/SFX/FrameData/BigSplash.tres"),
 		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/BigSplashSprite.png"),
-	},
-	"TimeBubbleTop" : {
-		"frame_data" : ResourceLoader.load("res://Cards/FrameData/TimeBubbleTop.tres"),
-		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TimeBubbleTopSprite.png"),
 	},
 }
 

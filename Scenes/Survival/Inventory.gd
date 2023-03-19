@@ -23,7 +23,14 @@ func _ready():
 	pass
 
 func stock_pool():
-	inventory = [[],[]]
+	inventory = [[
+#		Cards.card_ref.AMELIA,
+#		Cards.card_ref.SUISEI,
+#		Cards.card_ref.BOTAN,
+#		Cards.card_ref.MUMEI,
+#		Cards.card_ref.ANYA,
+#		Cards.card_ref.PEKORA,
+	],[]]
 	pool = []
 	for card in Cards.LIST:
 		pool.append(card)

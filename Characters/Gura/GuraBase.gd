@@ -80,7 +80,7 @@ const UNIQUE_DATA_REF = {
 	"groundfin_count" : 0,
 	"groundfin_trigger" : false,
 	"nibbler_count" : 0,
-	"nibbler_cancel" : 0, # a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
+#	"nibbler_cancel" : 0, # a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 	"last_trident" : null
 }
 
@@ -359,12 +359,12 @@ const MOVE_DATABASE = {
 	"SP1": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL, # used for chaining
 #		"reset_type" : Globals.reset_type.ACTIVE_RESET,
-		Em.move.ATK_ATTR : [],
+		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT],
 	},
 	"SP1[ex]": {
 		Em.move.ATK_TYPE : Em.atk_type.EX,
 		Em.move.MOVE_SOUND : [{ ref = "water4", aux_data = {"vol" : -20,} }, { ref = "whoosh12", aux_data = {} }],
-		Em.move.ATK_ATTR : [],
+		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT],
 	},
 	
 	"aSP2" : {
@@ -603,7 +603,7 @@ const MOVE_DATABASE = {
 	"SP7": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
 #		"reset_type" : Globals.reset_type.ACTIVE_RESET,
-		Em.move.ATK_ATTR : [Em.atk_attr.WHIFF_SDASH_CANCEL, Em.atk_attr.NO_TURN, Em.atk_attr.NO_QUICK_CANCEL],
+		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT, Em.atk_attr.WHIFF_SDASH_CANCEL, Em.atk_attr.NO_TURN, Em.atk_attr.NO_QUICK_CANCEL],
 	},
 
 }

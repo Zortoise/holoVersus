@@ -366,6 +366,12 @@ const COMMANDS = {
 				TRIGGERS.anti_air_long,
 			]
 		},
+#		"seek_test": {
+#			"action": "run",
+#			"rand_time" :[998, 999],
+#			"triggers" : [
+#			]
+#		},
 		"option_close": { # special ground stance that last 1 frame on ground, attack if player is close
 			"action": "option",
 			"decision" : "offense",
@@ -792,7 +798,7 @@ func decision(decision_ref = null) -> bool:
 #					filter(atk_range.CLOSE_RANGE)
 #					return true
 				"start", "passive", "standby", null:
-					Character.start_command("sharkstomp")
+					Character.start_command("seek")
 					return true
 					
 		"base":

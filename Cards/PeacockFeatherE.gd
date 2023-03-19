@@ -83,10 +83,11 @@ func get_proj_level(move_name):
 	return 1
 			
 func simulate():
-	if "alt" in Entity.unique_data:
-		Entity.velocity.y = -FMath.harmonic_motion_vel(5, 5, Entity.lifetime)
-	else:
-		Entity.velocity.y = FMath.harmonic_motion_vel(5, 5, Entity.lifetime)
+	if Animator.to_play_animation != "Kill":
+		if "alt" in Entity.unique_data:
+			Entity.velocity.y = -FMath.harmonic_motion_vel(5, 5, Entity.lifetime)
+		else:
+			Entity.velocity.y = FMath.harmonic_motion_vel(5, 5, Entity.lifetime)
 	
 	
 func kill(sound = true):
@@ -98,8 +99,8 @@ func expire():
 	if Animator.to_play_animation != "Expire":
 		Animator.play("Expire")
 	
-#func collision(): # collided with a platform
-#	kill()
+func collision(): # collided with a platform
+	kill()
 
 func landed_a_hit(_hit_data):
 	kill(false)

@@ -5,47 +5,44 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"Active": {
+"duration": 234,
+"hframes": 3,
+"loop": false,
+"spritesheet": "TimeBubbleSprite",
+"timestamps": {
+0: {
+"frame": 2
+}
+},
+"vframes": 1
+},
 "Kill": {
-"duration": 240,
-"hframes": 1,
+"duration": 6,
+"hframes": 3,
+"loop": false,
+"spritesheet": "TimeBubbleSprite",
+"timestamps": {
+0: {
+"frame": 1
+},
+3: {
+"frame": 0
+}
+},
+"vframes": 1
+},
+"Spawn": {
+"duration": 6,
+"hframes": 3,
 "loop": false,
 "spritesheet": "TimeBubbleSprite",
 "timestamps": {
 0: {
 "frame": 0
 },
-20: {
-"frame": 0
-},
-40: {
-"frame": 0
-},
-60: {
-"frame": 0
-},
-80: {
-"frame": 0
-},
-100: {
-"frame": 0
-},
-120: {
-"frame": 0
-},
-140: {
-"frame": 0
-},
-160: {
-"frame": 0
-},
-180: {
-"frame": 0
-},
-200: {
-"frame": 0
-},
-220: {
-"frame": 0
+3: {
+"frame": 1
 }
 },
 "vframes": 1

@@ -346,15 +346,21 @@ func damage_update():
 
 # for testing only
 func test1():
-	$TestNode2D/TestLabel.text = "old state: " + Globals.char_state_to_string(state) + \
-		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + "\n"
+	if Globals.debug_mode2:
+		$TestNode2D/TestLabel.text = "old state: " + Globals.char_state_to_string(state) + \
+				"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + "\n"
+	else:
+		$TestNode2D/TestLabel.text = ""
 	
 func test2():
-	$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
-		"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
-		"\n" + str(velocity.y) + " " + str(velocity_previous_frame.y) + " " + str(guardbroken) + " " + str(target_ID) + \
-		"\ngrounded: " + str(grounded) + " command: " + current_command + "\nchain_mem: " + str(chain_memory) + " " + str(seq_partner_ID)
-			
+	if Globals.debug_mode2:
+		$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
+				"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
+				"\n" + str(velocity.y) + " " + str(velocity_previous_frame.y) + " " + str(guardbroken) + " " + str(target_ID) + \
+				"\ngrounded: " + str(grounded) + " command: " + current_command + "\nchain_mem: " + str(chain_memory) + " " + str(seq_partner_ID)
+	else:
+		$TestNode2D/TestLabel.text = ""
+					
 			
 func _process(_delta):
 	if Globals.debug_mode:
@@ -1168,10 +1174,10 @@ func get_stat(stat):
 			var mod = query_status_effect_aux(Em.status_effect.CHILL)
 			if mod != null:
 				to_return = FMath.percent(to_return, mod)
-		"GRAVITY_MOD":
-			var mod = query_status_effect_aux(Em.status_effect.GRAVITIZE)
-			if mod != null:
-				to_return = FMath.percent(to_return, mod)
+#		"GRAVITY_MOD":
+#			var mod = query_status_effect_aux(Em.status_effect.GRAVITIZE)
+#			if mod != null:
+#				to_return = FMath.percent(to_return, mod)
 		
 	match stat: # increase stats as level raise
 		"SPEED_MOD":
@@ -1567,7 +1573,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				UniqChar.landing_sound() # only make landing sound if landed fast enough, or very annoying
 
 		Em.char_state.AIR_FLINCH_HITSTUN: # land during hitstun
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			match Animator.to_play_animation:
 				"aFlinchAStop", "aFlinchA":
 					animate("FlinchA")
@@ -1709,14 +1715,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 #		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, \
+			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 
-		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, \
+		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, \
 				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, \
+			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
 	else:
@@ -1726,14 +1732,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, null, \
+		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, null, \
 				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 		
-	Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, null, \
+	Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
 			starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, null, \
+		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, null, \
 				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 		
@@ -1902,8 +1908,8 @@ func continue_visual_effect_of_status(effect): # run every frame, will not add v
 		Em.status_effect.IGNITE:
 			modulate_play("ignite")
 			particle("Mote", "Particles", "yellow", 4, 1, 25)
-		Em.status_effect.GRAVITIZE:
-			modulate_play("gravitize")
+#		Em.status_effect.GRAVITIZE:
+#			modulate_play("gravitize")
 		Em.status_effect.ENFEEBLE:
 			modulate_play("enfeeble")
 #		Em.status_effect.LETHAL:
@@ -2268,6 +2274,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	hit_data[Em.hit.ATKER] = attacker # for other functions
 	hit_data[Em.hit.ATKER_OR_ENTITY] = attacker_or_entity
+	hit_data[Em.hit.DEFENDER] = self # for hit_reactions
 
 	attacker.target_ID = player_ID # attacker target defender
 	target_ID = attacker.player_ID # target opponent who last attacked you
@@ -2441,12 +2448,20 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if UniqChar.has_method("being_hit0"):	
 		UniqChar.being_hit0(hit_data) # reaction, can change hit_data from there
 			
+	if Em.hit.CANCELLED in hit_data:
+		return
+			
 	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
 	# attack level
 	var adjusted_atk_level: int = 1
 	
 	if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]:
+		
+		if !Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA]:
+			hit_data[Em.hit.CANCELLED] = true
+			return # just in case
+		
 		adjusted_atk_level = adjusted_atk_level(hit_data)
 		hit_data[Em.hit.ADJUSTED_ATK_LVL] = adjusted_atk_level
 		
@@ -2997,6 +3012,12 @@ func calculate_knockback_dir(hit_data) -> int:
 							knockback_dir = posmod(180 - knockback_dir, 360)
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
+		Em.knockback_type.VELOCITY: # in direction of attacker's velocity
+			if hit_data[Em.hit.ATKER_OR_ENTITY].velocity.x == 0 and hit_data[Em.hit.ATKER_OR_ENTITY].velocity.y == 0:
+				knockback_dir = -90
+			else:
+				knockback_dir = hit_data[Em.hit.ATKER_OR_ENTITY].velocity.angle()
+				
 		Em.knockback_type.RADIAL:
 #			if KBOrigin:
 			knockback_dir = ref_vector.angle(hit_data[Em.hit.ATK_FACING])
@@ -3448,7 +3469,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					if healed != null and healed > 0:
 						Globals.Game.spawn_damage_number(healed, killer.position, Em.dmg_num_col.GREEN)
 						
-			Globals.Game.spawn_afterimage(player_ID, false, mob_ref, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, null, \
+			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
 					1.0, 20, Em.afterimage_shader.WHITE)
 			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
@@ -3534,9 +3555,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 			velocity_limiter.x_slow = 10
 			velocity_limiter.y_slow = 10
 		"Run":
-			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"grounded":true})
 		"SoftLanding":
-			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 		"JumpTransit2":
 			UniqChar.jump_style_check()
 

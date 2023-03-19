@@ -396,12 +396,12 @@ func simulate():
 			if posmod(Entity.lifetime, 2) == 0:
 #func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
 #		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
-				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), Entity.master_ref, Entity.palette_ref, \
 						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 		
 		"[c2]Active", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			if posmod(Entity.lifetime, 3) == 0:
-				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), Entity.master_ref, Entity.palette_ref, \
 						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 			if !Animator.to_play_animation in ["[c2]Active", "[u][c2]Active"]:
@@ -411,7 +411,7 @@ func simulate():
 				
 		"[c3]Active", "[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), Entity.master_ref, Entity.palette_ref, \
 						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
@@ -419,7 +419,7 @@ func simulate():
 						
 		"[u][c3]Active", "[u][ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
-				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.master_ref, Entity.entity_ref, sprite.get_path(), Entity.palette_ref, \
+				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), Entity.master_ref, Entity.palette_ref, \
 						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \

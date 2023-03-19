@@ -290,7 +290,7 @@ func interactions():
 			if !indestructible:
 				for character in character_array:
 					if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
-						(easy_destructible or Em.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()):
+						(easy_destructible or Em.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()) and character.slowed >= 0:
 						destroyer_array.append(character)
 					
 #			if Globals.survival_level == null:
@@ -307,7 +307,7 @@ func interactions():
 						
 			var clash_array := []
 			for entity in entity_array:
-				if entity.master_ID != master_ID and !entity.free:
+				if entity.master_ID != master_ID and !entity.free and entity.slowed >= 0:
 					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
 						destroyer_array.append(entity)
 					elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
@@ -369,7 +369,8 @@ func simulate_after(): # do this after hit detection
 		$SpritePlayer.simulate()
 		
 		lifetime += 1
-		if lifespan != null and lifetime >= lifespan and UniqEntity.has_method("expire"):
+		if lifetime >= Globals.ENTITY_AUTO_DESPAWN: free = true
+		elif lifespan != null and lifetime >= lifespan and UniqEntity.has_method("expire"):
 			UniqEntity.expire()
 			
 		if !hitstop:
@@ -427,6 +428,9 @@ func check_passthrough(): # return true if entity ignore walls/floors
 func on_offstage(): # what to do if entity leaves stage
 	if UniqEntity.has_method("on_offstage"):
 		UniqEntity.on_offstage()
+		
+func get_feet_pos(): # return global position of the point the entity is standing on, for SFX emission
+	return position + Vector2(0, $EntityCollisionBox.rect_position.y + $EntityCollisionBox.rect_size.y)
 
 func query_polygons(): # requested by main game node when doing hit detection
 
@@ -438,7 +442,7 @@ func query_polygons(): # requested by main game node when doing hit detection
 		Em.hit.VACPOINT: null,
 	}
 
-	if !$HitStopTimer.is_running(): # no hitbox during hitstop
+	if !$HitStopTimer.is_running() and slowed >= 0: # no hitbox during hitstop
 		if !Em.atk_attr.HARMLESS_ENTITY in query_atk_attr():
 			polygons_queried[Em.hit.HITBOX] = Animator.query_polygon("hitbox")
 			polygons_queried[Em.hit.SWEETBOX] = Animator.query_polygon("sweetbox")
@@ -458,7 +462,10 @@ func get_sprite_rect():
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	if UniqEntity.has_method("query_move_data"):
-		return {Em.hit.MOVE_DATA : UniqEntity.query_move_data(Animator.to_play_animation), Em.hit.MOVE_NAME : Animator.to_play_animation}
+		var move_name = Animator.to_play_animation
+		if UniqEntity.has_method("refine_move_name"):
+			move_name = UniqEntity.refine_move_name(move_name)
+		return {Em.hit.MOVE_DATA : UniqEntity.query_move_data(Animator.to_play_animation), Em.hit.MOVE_NAME : move_name}
 #	elif Animator.to_play_animation in UniqEntity.MOVE_DATABASE:
 #		return {Em.hit.MOVE_DATA : UniqEntity.MOVE_DATABASE[Animator.to_play_animation], Em.hit.MOVE_NAME : Animator.to_play_animation}
 	print("Error: " + Animator.to_play_animation + " not found in MOVE_DATABASE for query_move_data_and_name().")
@@ -513,8 +520,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 
-	if Em.move.FIXED_ENTITY_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
-		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ENTITY_HITSTOP]
+	if Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP]
 		
 	elif hit_data[Em.hit.LETHAL_HIT]:
 		if Globals.survival_level == null: # no screenfreeze for Survival Mode
@@ -681,7 +688,8 @@ func save_state():
 		"facing" : facing,
 		"v_facing" : v_facing,
 		"rotation" : $Sprite.rotation,
-		"visible" : $Sprite.visible,
+#		"visible" : $Sprite.visible,
+		"modulate" : $Sprite.modulate,
 		
 		"entity_ref" : entity_ref,
 		"master_ID" : master_ID,
@@ -718,7 +726,8 @@ func load_state(state_data):
 	v_facing = state_data.v_facing
 	$Sprite.scale.y = v_facing
 	$Sprite.rotation = state_data.rotation
-	$Sprite.visible = state_data.visible
+#	$Sprite.visible = state_data.visible
+	$Sprite.modulate = state_data.modulate
 
 	entity_ref = state_data.entity_ref
 	master_ID = state_data.master_ID
