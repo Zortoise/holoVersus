@@ -244,10 +244,16 @@ func interactions():
 			var character_array = get_tree().get_nodes_in_group("PlayerNodes")
 			var destroyer_array = []
 			
-			if !indestructible:
-				for character in character_array:
-					if character.is_atk_active() and (!"free" in character or !character.free) and \
-							(easy_destructible or Em.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()) and character.slowed >= 0:
+			for character in character_array:
+				if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
+						character.slowed >= 0:
+					var char_atk_attr = character.query_atk_attr()
+					if Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
+						master_ID = character.player_ID
+						velocity.x = -velocity.x
+						return
+						
+					if !indestructible and (easy_destructible or Em.atk_attr.DESTROY_ENTITIES in char_atk_attr):
 						destroyer_array.append(character)
 					
 			 # get entities that can destroy or clash with this entity

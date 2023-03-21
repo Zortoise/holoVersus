@@ -3079,6 +3079,8 @@ func trip():
 		
 		
 func is_killable(vel_value):
+	if new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+		return false
 	if !lethal_flag: # must be in lethal hitstun off a lethal hit
 		return false
 	if abs(vel_value) > KILL_VEL_THRESHOLD: # must be fast enough
@@ -3248,8 +3250,8 @@ func reset_cancels(): # done whenever you use an attack, after startup frames fi
 	active_cancel = false
 	
 func check_wall_jump():
-	var left_wall = Detection.detect_bool([$WallJumpLeftDBox], ["SolidPlatforms", "BlastWalls"])
-	var right_wall = Detection.detect_bool([$WallJumpRightDBox], ["SolidPlatforms", "BlastWalls"])
+	var left_wall = Detection.detect_bool([$WallJumpLeftDBox], ["SolidPlatforms", "CSolidPlatforms", "SemiSolidWalls", "BlastWalls"])
+	var right_wall = Detection.detect_bool([$WallJumpRightDBox], ["SolidPlatforms", "CSolidPlatforms", "SemiSolidWalls", "BlastWalls"])
 	if (left_wall or right_wall) and wall_jump > 0:
 		
 		wall_jump -= 1
@@ -5310,7 +5312,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 			Em.char_state.AIR_RECOVERY:
 				 # air superdash has projectile superarmor against non-strong projectiles
-				if Animator.query_current(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
+				if Animator.query_to_play(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
 				
@@ -5326,8 +5328,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data[Em.hit.SUPERARMORED] = true
 			elif has_trait(Em.trait.PASSIVE_NORMALARMOR):
 				if current_guard_gauge >= 0 and Em.hit.NORMALARMORABLE in hit_data:
-					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
-					hit_data[Em.hit.SUPERARMORED] = true
+					var can_armor := false
+					match new_state:
+						Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+							can_armor = true
+						Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP:
+							if Animator.query_to_play(["aDashTransit", "DashTransit", "SDashTransit"]):
+								can_armor = true
+						Em.char_state.GROUND_D_RECOVERY, Em.char_state.AIR_D_RECOVERY:
+							can_armor = true
+					if can_armor:
+						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+						hit_data[Em.hit.SUPERARMORED] = true
 			
 				
 		# BLOCKING --------------------------------------------------------------------------------------------------
@@ -7016,8 +7028,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 					-wall_jump_dir)
 				if wall_point != null:
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
-				else:
-					Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
+#				else:
+#					Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 				reset_jumps_except_walljumps()
 		"WallJumpTransit2":
 			aerial_memory = []
@@ -7033,8 +7045,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 				-wall_jump_dir)
 			if wall_point != null:
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
-			else:
-				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
+#			else:
+#				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 			reset_jumps_except_walljumps()
 		"HardLanding":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})

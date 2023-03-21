@@ -219,7 +219,7 @@ frame_data = {
 "SfxOver_hframes": 4,
 "SfxOver_spritesheet": "aF2SfxOver",
 "SfxOver_vframes": 1,
-"duration": 11,
+"duration": 7,
 "hframes": 6,
 "loop": false,
 "spritesheet": "aF2Sprite",
@@ -234,7 +234,7 @@ frame_data = {
 "sdhurtbox": [  ],
 "sweetbox": [  ]
 },
-5: {
+3: {
 "SfxOver_frame": 0,
 "frame": 1,
 "grabpoint": null,

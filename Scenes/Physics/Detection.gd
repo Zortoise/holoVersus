@@ -4,6 +4,8 @@ extends Node
 
 
 func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are nodes like ColorRect or Rect2s
+	if box1 is ColorRect and box2 is ColorRect and box1 == box2: return false
+	
 	var refined_box1
 	var refined_box2
 	if box1 is Rect2: refined_box1 = box1
@@ -29,6 +31,8 @@ func detect_bool(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO)
 		for group_name in groups_to_comb:
 			var array = get_tree().get_nodes_in_group(group_name)
 			for x in array:
+				if box is ColorRect:
+					if x.get_parent() == box.get_parent(): continue
 				if detect_box.intersects(Rect2(x.rect_global_position, x.rect_size)):
 					return true
 	return false
@@ -46,10 +50,28 @@ func detect_return(box_array: Array, groups_to_comb: Array, offset = Vector2.ZER
 		for group_name in groups_to_comb:
 			var array = get_tree().get_nodes_in_group(group_name)
 			for x in array:
-				if  x.get_parent() != box.get_parent() and !x.get_parent() in bodies and \
+				if box is ColorRect:
+					if x.get_parent() == box.get_parent(): continue
+				if !x.get_parent() in bodies and \
 						detect_box.intersects(Rect2(x.rect_global_position, x.rect_size)): # skip box's owner and repeats
 					bodies.append(x.get_parent())
 	return bodies
+	
+	
+func is_riding(platform_box, character_box):
+			
+	var my_box := Rect2(platform_box.rect_global_position, platform_box.rect_size)
+	var target_box := Rect2 (character_box.rect_global_position, character_box.rect_size)
+	
+	if my_box.intersects(target_box): # if already overlapping
+		return false
+	
+	target_box.position += Vector2.DOWN # offset target box down 1 pixel
+	
+	if my_box.intersects(target_box): # if overlapping after offsetting while not already overlapping
+		return true
+	else:
+		return false
 	
 	
 # find a wall at a certain height in a certain direction within a certain range
@@ -57,6 +79,8 @@ func wall_finder(global_pos: Vector2, facing, finding_range = 15):
 	# create a point
 	var point = Vector2(global_pos)
 	var wall_array = get_tree().get_nodes_in_group("SolidPlatforms")
+	wall_array.append_array(get_tree().get_nodes_in_group("CSolidPlatforms"))
+	wall_array.append_array(get_tree().get_nodes_in_group("SemiSolidWalls"))
 	wall_array.append_array(get_tree().get_nodes_in_group("BlastWalls"))
 	
 	for x in finding_range:

@@ -358,7 +358,7 @@ const IGNITE_DMG = 50
 const ENFEEBLE_DURATION = 180
 const ENFEEBLE_DEGREE = 50
 const KERIS_COOLDOWN = 600
-const PHOENIX_COOLDOWN = 200
+const PHOENIX_COOLDOWN = 300
 const PEACOCK_COOLDOWN = 600
 const SCYTHE_COOLDOWN = 600
 const TBLOCK_COOLDOWN = 600
@@ -369,7 +369,7 @@ const REWIND_COOLDOWN = 1000
 const REWIND_RANGE = 120
 const FLASK_COOLDOWN = 600
 const NOUSAGI_COOLDOWN = 600
-const SSRB_COOLDOWN = 600
+const SSRB_COOLDOWN = 1000
 
 # CARDS ------------------------------------------------------------------------------------------------------------------------------------
 

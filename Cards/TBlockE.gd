@@ -29,6 +29,10 @@ const MOVE_DATABASE = {
 func _ready():
 	get_node("TestSprite").free() # test sprite is for sizing collision box
 
+func load_entity():
+	if Animator.to_play_animation != "Kill":
+		Entity.get_node("EntityCollisionBox").add_to_group("CSolidPlatforms")
+
 func init(aux_data: Dictionary):
 	Animator.play("Spawn")
 	Entity.absorption_value = 1
@@ -41,10 +45,12 @@ func init(aux_data: Dictionary):
 		else:
 			height = (int(height / 16) + 1) * 16
 		Entity.position.y = Globals.Game.middle_point.y - height - 8
+		Entity.set_true_position()
 		
 		var block_type: int = Globals.Game.rng_generate(7)
 		var coord_array := []
 		
+		block_type = 0
 		match block_type:
 			0: # I block
 				coord_array = [Vector2(-1, 0), Vector2(1, 0), Vector2(2, 0)]
@@ -63,6 +69,7 @@ func init(aux_data: Dictionary):
 				
 		var coord_array2 := []
 		var block_rot: int = Globals.Game.rng_generate(4)
+		block_rot = 0
 		match block_rot:
 			0:
 				coord_array2 = coord_array
@@ -79,7 +86,6 @@ func init(aux_data: Dictionary):
 		for coord in coord_array2:
 			coord *= 16
 			Globals.Game.spawn_entity(Entity.master_ID, "TBlockE", Entity.position + coord, {"branch":true})
-				
 	
 		
 func refine_move_name(move_name):
@@ -156,4 +162,5 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Kill":
 			Entity.velocity.set_vector(0, 0)
 			Entity.play_audio("break2", {"vol" : -20})
+			Entity.get_node("EntityCollisionBox").remove_from_group("CSolidPlatforms")
 

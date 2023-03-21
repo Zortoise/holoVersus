@@ -52,7 +52,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 10
+"vframes": 8
 },
 "BurnActive": {
 "duration": 1,
@@ -65,7 +65,7 @@ frame_data = {
 "hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
-"vframes": 10
+"vframes": 8
 },
 "BurnKill": {
 "duration": 27,
@@ -114,7 +114,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 10
+"vframes": 8
 },
 "Freeze2Kill": {
 "duration": 27,
@@ -123,47 +123,47 @@ frame_data = {
 "spritesheet": "FlaskSprite",
 "timestamps": {
 0: {
-"frame": 14,
-"hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
-},
-2: {
 "frame": 33,
 "hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
 },
-4: {
+2: {
 "frame": 34,
 "hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
 },
-6: {
+4: {
 "frame": 35,
 "hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
 },
-9: {
+6: {
 "frame": 36,
-"hitbox": [  ]
+"hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
 },
-12: {
+9: {
 "frame": 37,
 "hitbox": [  ]
 },
-15: {
+12: {
 "frame": 38,
 "hitbox": [  ]
 },
-18: {
+15: {
 "frame": 39,
 "hitbox": [  ]
 },
-21: {
+18: {
 "frame": 40,
 "hitbox": [  ]
 },
-24: {
+21: {
 "frame": 41,
+"hitbox": [  ]
+},
+24: {
+"frame": 42,
 "hitbox": [  ]
 }
 },
-"vframes": 10
+"vframes": 8
 },
 "FreezeActive": {
 "duration": 1,
@@ -176,7 +176,7 @@ frame_data = {
 "hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
-"vframes": 10
+"vframes": 8
 },
 "FreezeKill": {
 "duration": 27,
@@ -225,56 +225,7 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 10
-},
-"Poison2Kill": {
-"duration": 27,
-"hframes": 6,
-"loop": false,
-"spritesheet": "FlaskSprite",
-"timestamps": {
-0: {
-"frame": 14,
-"hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
-},
-2: {
-"frame": 51,
-"hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
-},
-4: {
-"frame": 52,
-"hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
-},
-6: {
-"frame": 53,
-"hitbox": [ Vector2( -34, -64 ), Vector2( -56, -64 ), Vector2( -56, -47 ), Vector2( -71, -47 ), Vector2( -71, 8 ), Vector2( 71, 8 ), Vector2( 71, -47 ), Vector2( 56, -47 ), Vector2( 56, -64 ), Vector2( 34, -64 ), Vector2( 34, -74 ), Vector2( -34, -74 ) ]
-},
-9: {
-"frame": 54,
-"hitbox": [  ]
-},
-12: {
-"frame": 55,
-"hitbox": [  ]
-},
-15: {
-"frame": 56,
-"hitbox": [  ]
-},
-18: {
-"frame": 57,
-"hitbox": [  ]
-},
-21: {
-"frame": 58,
-"hitbox": [  ]
-},
-24: {
-"frame": 59,
-"hitbox": [  ]
-}
-},
-"vframes": 10
+"vframes": 8
 },
 "PoisonActive": {
 "duration": 1,
@@ -287,56 +238,7 @@ frame_data = {
 "hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
-"vframes": 10
-},
-"PoisonKill": {
-"duration": 27,
-"hframes": 6,
-"loop": false,
-"spritesheet": "FlaskSprite",
-"timestamps": {
-0: {
-"frame": 4,
-"hitbox": [ Vector2( -32, -52 ), Vector2( -52, -52 ), Vector2( -52, -32 ), Vector2( -64, -32 ), Vector2( -64, 32 ), Vector2( -52, 32 ), Vector2( -52, 52 ), Vector2( -32, 52 ), Vector2( -32, 64 ), Vector2( 32, 64 ), Vector2( 32, 52 ), Vector2( 52, 52 ), Vector2( 52, 32 ), Vector2( 64, 32 ), Vector2( 64, -32 ), Vector2( 52, -32 ), Vector2( 52, -52 ), Vector2( 32, -52 ), Vector2( 32, -64 ), Vector2( -32, -64 ) ]
-},
-2: {
-"frame": 42,
-"hitbox": [ Vector2( -32, -52 ), Vector2( -52, -52 ), Vector2( -52, -32 ), Vector2( -64, -32 ), Vector2( -64, 32 ), Vector2( -52, 32 ), Vector2( -52, 52 ), Vector2( -32, 52 ), Vector2( -32, 64 ), Vector2( 32, 64 ), Vector2( 32, 52 ), Vector2( 52, 52 ), Vector2( 52, 32 ), Vector2( 64, 32 ), Vector2( 64, -32 ), Vector2( 52, -32 ), Vector2( 52, -52 ), Vector2( 32, -52 ), Vector2( 32, -64 ), Vector2( -32, -64 ) ]
-},
-4: {
-"frame": 43,
-"hitbox": [ Vector2( -32, -52 ), Vector2( -52, -52 ), Vector2( -52, -32 ), Vector2( -64, -32 ), Vector2( -64, 32 ), Vector2( -52, 32 ), Vector2( -52, 52 ), Vector2( -32, 52 ), Vector2( -32, 64 ), Vector2( 32, 64 ), Vector2( 32, 52 ), Vector2( 52, 52 ), Vector2( 52, 32 ), Vector2( 64, 32 ), Vector2( 64, -32 ), Vector2( 52, -32 ), Vector2( 52, -52 ), Vector2( 32, -52 ), Vector2( 32, -64 ), Vector2( -32, -64 ) ]
-},
-6: {
-"frame": 44,
-"hitbox": [ Vector2( -32, -52 ), Vector2( -52, -52 ), Vector2( -52, -32 ), Vector2( -64, -32 ), Vector2( -64, 32 ), Vector2( -52, 32 ), Vector2( -52, 52 ), Vector2( -32, 52 ), Vector2( -32, 64 ), Vector2( 32, 64 ), Vector2( 32, 52 ), Vector2( 52, 52 ), Vector2( 52, 32 ), Vector2( 64, 32 ), Vector2( 64, -32 ), Vector2( 52, -32 ), Vector2( 52, -52 ), Vector2( 32, -52 ), Vector2( 32, -64 ), Vector2( -32, -64 ) ]
-},
-9: {
-"frame": 45,
-"hitbox": [  ]
-},
-12: {
-"frame": 46,
-"hitbox": [  ]
-},
-15: {
-"frame": 47,
-"hitbox": [  ]
-},
-18: {
-"frame": 48,
-"hitbox": [  ]
-},
-21: {
-"frame": 49,
-"hitbox": [  ]
-},
-24: {
-"frame": 50,
-"hitbox": [  ]
-}
-},
-"vframes": 10
+"vframes": 8
 },
 "Spawn": {
 "duration": 6,
@@ -349,6 +251,6 @@ frame_data = {
 "hitbox": [  ]
 }
 },
-"vframes": 10
+"vframes": 8
 }
 }

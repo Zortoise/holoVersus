@@ -207,12 +207,19 @@ func simulate2(): # only ran if not in hitstop
 		var orig_pos = position
 		var orig_vel_x = velocity.x
 		var orig_vel_y = velocity.y
+		
+		var rider_boxes
+		if $EntityCollisionBox.is_in_group("SoftPlatforms"):
+			rider_boxes = get_riders()
 
 		var results #  # [landing_check, collision_check, ledgedrop_check]
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			results = move($EntityCollisionBox, $SoftPlatformDBox, Em.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
 		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
 			results = move($EntityCollisionBox, $EntityCollisionBox)
+
+		if position != orig_pos and $EntityCollisionBox.is_in_group("SoftPlatforms"):
+			moving_platform(position - orig_pos, rider_boxes)
 
 		if UniqEntity.has_method("collision"): # entity can collide with solid platforms
 			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
@@ -255,6 +262,44 @@ func simulate2(): # only ran if not in hitstop
 #			if UniqEntity.picked_up(character):
 #				break
 			
+			
+func get_riders():
+	# get all riding entities
+	var rider_boxes = []
+	# get collision boxes of all grounded entities
+	var collision_boxes = get_tree().get_nodes_in_group("Grounded")
+	for collision_box in collision_boxes:
+		if Detection.is_riding($EntityCollisionBox, collision_box): # check if riding
+			rider_boxes.append(collision_box)
+			
+	return rider_boxes
+	
+	
+func moving_platform(position_change: Vector2, rider_boxes: Array):
+	
+	# apply position_change vector to all riding entities
+	for rider_box in rider_boxes:
+		if rider_box.is_in_group("Players") or rider_box.is_in_group("Mobs") or rider_box.is_in_group("Entities"):
+			 # rider is player character/grounded entity
+			# position_change need to be in integer!'
+			var rider = rider_box.get_parent()
+			var move_box
+			if rider.has_node("SoftPlatformDBox"):
+				move_box = rider.get_node("SoftPlatformDBox")
+			elif rider.has_node("PlayerCollisionBox"):
+				move_box = rider.get_node("PlayerCollisionBox")
+			elif rider.has_node("EntityCollisionBox"):
+				move_box = rider.get_node("EntityCollisionBox")
+			else:
+				print("check")
+				continue
+			rider.move_amount(position_change, rider_box, move_box, rider.create_checklist())
+			if rider.has_method("set_true_position"):
+				rider.call("set_true_position")
+			# no need the velocity, grounded Entities always have SoftPlatformDBox
+		else:
+			rider_box.get_parent().position += position_change # for grounded sfx, don't need to check for collision
+			
 	
 func interactions():
 	
@@ -278,6 +323,7 @@ func interactions():
 			var can_clash := false
 			if absorption_value != null and absorption_value > 0:
 				can_clash = true
+#			elif Em.atk_attr.REFLECT_ENTITIES in query_atk_attr()
 
 			 # get characters that can destroy this entity
 			var character_array = []
@@ -287,10 +333,19 @@ func interactions():
 #				character_array = get_tree().get_nodes_in_group("MobNodes")
 			var destroyer_array = []
 			
-			if !indestructible:
-				for character in character_array:
-					if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
-						(easy_destructible or Em.atk_attr.DESTROY_ENTITIES in character.query_atk_attr()) and character.slowed >= 0:
+			for character in character_array:
+				if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
+						character.slowed >= 0:
+					var char_atk_attr = character.query_atk_attr()
+					if Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
+						master_ID = character.player_ID
+						velocity.x = -velocity.x
+						face(-facing)
+						if character.UniqChar.has_method("reflected_entity"):
+							character.UniqChar.reflected_entity()
+						return
+						
+					if !indestructible and (easy_destructible or Em.atk_attr.DESTROY_ENTITIES in char_atk_attr):
 						destroyer_array.append(character)
 					
 #			if Globals.survival_level == null:
@@ -308,7 +363,17 @@ func interactions():
 			var clash_array := []
 			for entity in entity_array:
 				if entity.master_ID != master_ID and !entity.free and entity.slowed >= 0:
-					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr():
+					var entity_atk_attr = entity.query_atk_attr()
+					
+					if Em.atk_attr.REFLECT_ENTITIES in entity_atk_attr and velocity.x != 0:
+						master_ID = entity.master_ID
+						velocity.x = -velocity.x
+						face(-facing)
+						if entity.UniqEntity.has_method("reflected_entity"):
+							entity.UniqEntity.reflected_entity()
+						return
+						
+					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity_atk_attr:
 						destroyer_array.append(entity)
 					elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
 						clash_array.append(entity)

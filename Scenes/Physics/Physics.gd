@@ -5,7 +5,10 @@ extends Node2D
 # soft_platform_dbox is needed to phase through soft platforms
 func move(collision_box, soft_platform_dbox, ledge_stop = false): # uses the object's velocity
 	
-	if get("velocity").x == 0 and get("velocity").y == 0: return [false, false, false]
+	if get("velocity").x == 0 and get("velocity").y == 0:
+#		if is_in_wall(soft_platform_dbox):
+#			return [false, true, false]
+		return [false, false, false]
 	
 	var checklist: Array = create_checklist()
 	
@@ -31,6 +34,9 @@ func move(collision_box, soft_platform_dbox, ledge_stop = false): # uses the obj
 	
 	if position != target_position: # unable to reach target_position (collision, pushing, etc), set true position to current position
 		call("set_true_position")
+	
+#	if is_in_wall(soft_platform_dbox):
+#		results[1] = true
 	
 	return results # [landing_check, collision_check, ledgedrop_check]
 	
@@ -236,6 +242,15 @@ func create_checklist() -> Array:
 		pass
 	else:
 		to_check.append("SolidPlatforms")
+		if has_node("EntityCollisionBox"):
+			if ($EntityCollisionBox.is_in_group("CSolidPlatforms") or \
+				$EntityCollisionBox.is_in_group("SemiSolidWalls")):
+				pass # created platforms will not collide with other created platforms
+			else:
+				to_check.append("CSolidPlatforms")
+		else:
+			to_check.append("CSolidPlatforms")
+			to_check.append("SemiSolidWalls") # entities do not collide with SemiSolidWalls
 		if has_method("check_fallthrough") and call("check_fallthrough"):
 			pass
 		else:
@@ -255,7 +270,7 @@ func create_checklist() -> Array:
 			if is_in_group("PlayerNodes"): to_check.append("Mobs")
 			
 		
-	elif is_in_group("EntityNodes"):
+	elif is_in_group("EntityNodes") or is_in_group("MobEntityNodes"):
 		if Em.entity_trait.BLAST_BARRIER_COLLIDE in get("UniqEntity").TRAITS:
 			to_check.append("BlastWalls")
 			to_check.append("BlastCeiling")
@@ -285,20 +300,23 @@ func check_test_rect(test_rect, test_rect2, checklist: Array, ledge_stop: bool):
 	
 # return true if a wall in "direction", 1 is right, -1 is left
 func is_against_wall(collision_box, soft_platform_dbox, direction, checklist = null):
-			
-	var to_check := []
-	if checklist == null:
-		to_check = ["SolidPlatforms", "BlastWalls"]
-	else:
-		if "SolidPlatforms" in checklist: to_check.append("BlastWalls")
-		if "BlastWalls" in checklist: to_check.append("BlastWalls")
-		if to_check.size() == 0: return false
 		
-	if Detection.detect_bool([collision_box], to_check, Vector2(direction, 0)) and \
-			!Detection.detect_bool([soft_platform_dbox], to_check):
-		return true
-	else:
-		return false
+	if checklist == null or "SolidPlatforms" in checklist:
+		if Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2(direction, 0)) and \
+			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+			return true	
+	if checklist == null or "CSolidPlatforms" in checklist:
+		if Detection.detect_bool([collision_box], ["CSolidPlatforms"], Vector2(direction, 0)) and \
+			!Detection.detect_bool([soft_platform_dbox], ["CSolidPlatforms"]):
+			return true	
+	if checklist == null or "SemiSolidWalls" in checklist:
+		if Detection.detect_bool([collision_box], ["SemiSolidWalls"], Vector2(direction, 0)):
+			return true	
+	if checklist == null or "BlastWalls" in checklist:
+		if Detection.detect_bool([collision_box], ["BlastWalls"], Vector2(direction, 0)):
+			return true	
+			
+	return false
 		
 		
 func is_in_wall(soft_platform_dbox):
@@ -315,67 +333,85 @@ func is_in_wall(soft_platform_dbox):
 func is_against_ledge(soft_platform_dbox, direction):
 	if "grounded" in self and !get("grounded"):
 		return false
-	if !Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms", "SoftPlatforms"], Vector2(direction, 1)):
+	if !Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms", "CSolidPlatforms", "SoftPlatforms"], Vector2(direction, 1)):
 		return true
 	else:
 		return false
 		
 		
 func is_against_ceiling(collision_box, soft_platform_dbox, checklist = null): # return true if there is a solid platform above
-	
-	var to_check := []
-	if checklist == null:
-		to_check = ["SolidPlatforms", "BlastCeiling"]
-	else:
-		if "SolidPlatforms" in checklist: to_check.append("SolidPlatforms")
-		if "BlastCeiling" in checklist: to_check.append("BlastCeiling")
-		if to_check.size() == 0: return false
 		
-	if Detection.detect_bool([collision_box], to_check, Vector2.UP) and \
-			!Detection.detect_bool([soft_platform_dbox], to_check):
-#		if collision_box.is_in_group("Players") and get("state") in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
-#			return false # no hitting ceiling in sequences
-		return true
-	else:
-		return false
+	if checklist == null or "SolidPlatforms" in checklist:
+		if Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2.UP) and \
+			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+			return true	
+	if checklist == null or "CSolidPlatforms" in checklist:
+		if Detection.detect_bool([collision_box], ["CSolidPlatforms"], Vector2.UP) and \
+			!Detection.detect_bool([soft_platform_dbox], ["CSolidPlatforms"]):
+			return true	
+	if checklist == null or "BlastCeiling" in checklist:
+		if Detection.detect_bool([collision_box], ["BlastCeiling"], Vector2.UP):
+			return true	
+	
+	return false
 		
 		
 func is_on_ground(soft_platform_dbox, checklist = null): # return true if standing on solid/soft floor
-	
-	var to_check := []
-	if checklist == null:
-		to_check = ["SolidPlatforms", "SoftPlatforms"]
-	else:
-		if "SolidPlatforms" in checklist: to_check.append("SolidPlatforms")
-		if "SoftPlatforms" in checklist: to_check.append("SoftPlatforms")
-		if to_check.size() == 0: return false
-		
-	if Detection.detect_bool([soft_platform_dbox], to_check, Vector2.DOWN) and \
-			!Detection.detect_bool([soft_platform_dbox], to_check) \
-			and get("velocity").y >= 0: # is not considered on ground if moving upwards
-		return true
-	else:
+
+	if get("velocity").y < 0: # is not considered on ground if moving upwards
 		return false
+		
+	if checklist == null or "SolidPlatforms" in checklist:
+		if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"], Vector2.DOWN) and \
+			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+			return true	
+	if checklist == null or "CSolidPlatforms" in checklist:
+		if Detection.detect_bool([soft_platform_dbox], ["CSolidPlatforms"], Vector2.DOWN) and \
+			!Detection.detect_bool([soft_platform_dbox], ["CSolidPlatforms"]):
+			return true
+			
+	if checklist == null or "SoftPlatforms" in checklist:
+		if Detection.detect_bool([soft_platform_dbox], ["SoftPlatforms"], Vector2.DOWN) and \
+			!Detection.detect_bool([soft_platform_dbox], ["SoftPlatforms"]):
+			return true	
+	
+	return false
 			
 
 func is_on_solid_ground(soft_platform_dbox):
-	if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"], Vector2.DOWN) and \
-			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]) \
-			and get("velocity").y >= 0: # is not considered on ground if moving upwards
-		if has_method("check_passthrough") and call("check_passthrough"):
-			return false
-		return true
-	else:
+	
+	if has_method("check_passthrough") and call("check_passthrough"):
 		return false
+	if get("velocity").y < 0: # is not considered on ground if moving upwards
+		return false
+	
+	if Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"], Vector2.DOWN) and \
+		!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms"]):
+		return true	
+
+	if has_node("EntityCollisionBox") and $EntityCollisionBox.is_in_group("CSolidPlatforms"):
+		pass
+	elif Detection.detect_bool([soft_platform_dbox], ["CSolidPlatforms"], Vector2.DOWN) and \
+			!Detection.detect_bool([soft_platform_dbox], ["CSolidPlatforms"]):
+		return true
+		
+	return false
 		
 	
 func is_on_soft_ground(soft_platform_dbox): # return true if standing on soft floor
-	if Detection.detect_bool([soft_platform_dbox], ["SoftPlatforms"], Vector2.DOWN) and \
-			!Detection.detect_bool([soft_platform_dbox], ["SolidPlatforms", "SoftPlatforms"]) \
-			and get("velocity").y >= 0: # is not considered on ground if moving upwards
-		return true
-	else:
+	
+	if has_method("check_passthrough") and call("check_passthrough"):
 		return false
+	if has_method("check_fallthrough") and call("check_fallthrough"):
+		return false
+	if get("velocity").y < 0: # is not considered on ground if moving upwards
+		return false
+	
+	if Detection.detect_bool([soft_platform_dbox], ["SoftPlatforms"], Vector2.DOWN) and \
+		!Detection.detect_bool([soft_platform_dbox], ["SoftPlatforms"]):
+		return true
+		
+	return false
 
 
 func snap_up(collision_box, dashland_dbox): # move character upwards till dashland_dbox stop detecting soft platforms, called by Character.gd
@@ -387,7 +423,7 @@ func snap_up(collision_box, dashland_dbox): # move character upwards till dashla
 			call("set_true_position")
 			return true
 		# else if no solid platform above, move up 1 pixel
-		elif !Detection.detect_bool([collision_box], ["SolidPlatforms"], Vector2.UP):
+		elif !Detection.detect_bool([collision_box], ["SolidPlatforms", "CSolidPlatforms"], Vector2.UP):
 			position.y -= 1
 		else: # hit a solid platform, stop immediately, revert all movement
 			position.y += x

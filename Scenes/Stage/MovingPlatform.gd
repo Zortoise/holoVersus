@@ -16,7 +16,7 @@ func move_platform():
 		# get collision boxes of all grounded entities
 		var collision_boxes = get_tree().get_nodes_in_group("Grounded")
 		for collision_box in collision_boxes:
-			if is_riding(collision_box): # check if riding
+			if Detection.is_riding(box, collision_box): # check if riding
 				rider_boxes.append(collision_box)
 		
 		var old_position = $MPlatform.position # store old position
@@ -41,27 +41,20 @@ func move_platform():
 
 
 					
-func is_riding(character_box):
-			
-# warning-ignore:unassigned_variable
-	var my_box: Rect2
-	my_box.position = box.rect_global_position
-	my_box.size = box.rect_size
-	
-# warning-ignore:unassigned_variable
-	var target_box: Rect2
-	target_box.position = character_box.rect_global_position
-	target_box.size = character_box.rect_size
-	
-	if my_box.intersects(target_box): # if already overlapping
-		return false
-	
-	target_box.position += Vector2.DOWN # offset target box down 1 pixel
-	
-	if my_box.intersects(target_box): # if overlapping after offsetting while not already overlapping
-		return true
-	else:
-		return false
+#func is_riding(platform_box, character_box):
+#
+#	var my_box := Rect2(platform_box.rect_global_position, platform_box.rect_size)
+#	var target_box := Rect2 (character_box.rect_global_position, character_box.rect_size)
+#
+#	if my_box.intersects(target_box): # if already overlapping
+#		return false
+#
+#	target_box.position += Vector2.DOWN # offset target box down 1 pixel
+#
+#	if my_box.intersects(target_box): # if overlapping after offsetting while not already overlapping
+#		return true
+#	else:
+#		return false
 		
 # SAVE/LOAD STATE --------------------------------------------------------------------------------------------------
 

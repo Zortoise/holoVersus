@@ -73,7 +73,7 @@ frame_data = {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "L3SfxOver",
 "SfxOver_vframes": 1,
-"duration": 10,
+"duration": 7,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L3Sprite",
@@ -86,7 +86,7 @@ frame_data = {
 "sdhurtbox": [  ],
 "sweetbox": [  ]
 },
-3: {
+2: {
 "SfxOver_frame": 0,
 "frame": 1,
 "hitbox": [  ],
@@ -94,7 +94,7 @@ frame_data = {
 "sdhurtbox": [  ],
 "sweetbox": [  ]
 },
-6: {
+4: {
 "SfxOver_frame": 1,
 "frame": 2,
 "hitbox": [  ],

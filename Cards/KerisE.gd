@@ -100,7 +100,7 @@ func simulate():
 				
 				Entity.velocity.set_vector(START_SPEED, 0)
 				Entity.velocity.rotate(angle)
-				Entity.get_node("Sprite").rotation = 0
+#				Entity.get_node("Sprite").rotation = 0
 				Entity.rotate_sprite(angle)
 			
 	
