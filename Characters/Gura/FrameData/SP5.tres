@@ -49,7 +49,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,
-"duration": 12,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP5Sprite",
@@ -61,21 +61,21 @@ frame_data = {
 "hurtbox": [ Vector2( -4, 0 ), Vector2( -15, 0 ), Vector2( -15, 21 ), Vector2( 12, 21 ), Vector2( 12, 10 ), Vector2( 20, 10 ), Vector2( 20, -20 ), Vector2( -4, -20 ) ],
 "sweetbox": [  ]
 },
-5: {
+3: {
 "SfxUnder_frame": 1,
 "frame": 1,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -14, 10 ), Vector2( -9, 10 ), Vector2( -9, 19 ), Vector2( 2, 19 ), Vector2( 2, 10 ), Vector2( 17, 10 ), Vector2( 17, -6 ), Vector2( 8, -6 ), Vector2( 8, -19 ), Vector2( -14, -19 ) ],
 "sweetbox": [  ]
 },
-7: {
+5: {
 "SfxUnder_frame": 2,
 "frame": 2,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -14, 10 ), Vector2( -9, 10 ), Vector2( -9, 19 ), Vector2( 2, 19 ), Vector2( 2, 10 ), Vector2( 17, 10 ), Vector2( 17, -6 ), Vector2( 8, -6 ), Vector2( 8, -19 ), Vector2( -14, -19 ) ],
 "sweetbox": [  ]
 },
-9: {
+7: {
 "SfxUnder_frame": 3,
 "frame": 3,
 "hitbox": [  ],
@@ -327,7 +327,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
 "SfxUnder_vframes": 2,
-"duration": 12,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP5Sprite",
@@ -339,21 +339,21 @@ frame_data = {
 "hurtbox": [ Vector2( -4, 0 ), Vector2( -15, 0 ), Vector2( -15, 21 ), Vector2( 12, 21 ), Vector2( 12, 10 ), Vector2( 20, 10 ), Vector2( 20, -20 ), Vector2( -4, -20 ) ],
 "sweetbox": [  ]
 },
-5: {
+3: {
 "SfxUnder_frame": 1,
 "frame": 1,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -14, 10 ), Vector2( -9, 10 ), Vector2( -9, 19 ), Vector2( 2, 19 ), Vector2( 2, 10 ), Vector2( 17, 10 ), Vector2( 17, -6 ), Vector2( 8, -6 ), Vector2( 8, -19 ), Vector2( -14, -19 ) ],
 "sweetbox": [  ]
 },
-7: {
+5: {
 "SfxUnder_frame": 2,
 "frame": 2,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -14, 10 ), Vector2( -9, 10 ), Vector2( -9, 19 ), Vector2( 2, 19 ), Vector2( 2, 10 ), Vector2( 17, 10 ), Vector2( 17, -6 ), Vector2( 8, -6 ), Vector2( 8, -19 ), Vector2( -14, -19 ) ],
 "sweetbox": [  ]
 },
-9: {
+7: {
 "SfxUnder_frame": 3,
 "frame": 3,
 "hitbox": [  ],

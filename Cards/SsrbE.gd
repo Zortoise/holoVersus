@@ -29,7 +29,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "yellow",
 		Em.move.PROJ_LVL : 3,
-		Em.move.ATK_ATTR : [Em.atk_attr.REPEATABLE],
+		Em.move.ATK_ATTR : [],
 		Em.move.HIT_SOUND : { ref = "impact35", aux_data = {"vol" : -6} },
 	},
 }

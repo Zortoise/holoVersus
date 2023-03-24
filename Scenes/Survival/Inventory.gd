@@ -24,7 +24,7 @@ func _ready():
 
 func stock_pool():
 	inventory = [[
-#		Cards.card_ref.AMELIA,
+#		Cards.card_ref.KRONII,
 #		Cards.card_ref.SUISEI,
 #		Cards.card_ref.BOTAN,
 #		Cards.card_ref.MUMEI,

@@ -221,22 +221,43 @@ func simulate():
 				"SP1[c1]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						Character.animate("SP1[c1]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("Idle")
 				"SP1[c2]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						if Animator.time == 1:
 							Character.animate("SP1[c3]Startup")
 						else:
 							Character.animate("SP1[c2]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("Idle")
 							
 				"SP1[u][c1]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						Character.animate("SP1[u][c1]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("Idle")
 				"SP1[u][c2]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						if Animator.time == 1:
 							Character.animate("SP1[u][c3]Startup")
 						else:
 							Character.animate("SP1[u][c2]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("Idle")
+							
 			
 		Em.char_state.AIR_ATK_STARTUP:
 			match Animator.current_animation:
@@ -254,6 +275,11 @@ func simulate():
 				"aSP1[c1]Startup":
 					if !Character.button_light in Character.input_state.pressed or Character.grounded:
 						Character.animate("aSP1[c1]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("FallTransit")
 				"aSP1[c2]Startup":
 					if Character.grounded:
 						Character.animate("aSP1[c2]bStartup")
@@ -262,10 +288,20 @@ func simulate():
 							Character.animate("aSP1[c3]Startup")
 						else:
 							Character.animate("aSP1[c2]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("FallTransit")
 							
 				"aSP1[d][c1]Startup":
 					if !Character.button_light in Character.input_state.pressed or Character.grounded:
 						Character.animate("aSP1[d][c1]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("FallTransit")
 				"aSP1[d][c2]Startup":
 					if Character.grounded:
 						Character.animate("aSP1[d][c2]bStartup")
@@ -274,18 +310,25 @@ func simulate():
 							Character.animate("aSP1[d][c3]Startup")
 						else:
 							Character.animate("aSP1[d][c2]bStartup")
+					elif Character.button_fierce in Character.input_state.just_pressed:
+						Character.input_buffer = []
+						Character.startup_cancel_flag = true
+						Character.afterimage_cancel()
+						Character.animate("FallTransit")
 					
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
-#	if Character.state == Em.char_state.GROUND_RECOVERY and Character.button_dash in Character.input_state.pressed and \
-#		Animator.query_current(["Dash"]): 	# dash dancing, need to hold dash
-#		if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
-#			Character.face(-1)
-#			Character.animate("Dash")
-#		elif Character.button_right in Character.input_state.just_pressed and !Character.button_left in Character.input_state.just_pressed:
-#			Character.face(1)
-#			Character.animate("Dash")
+#	if Character.state == Em.char_state.GROUND_D_RECOVERY: 	# dash dancing
+#		match Character.facing:
+#			1:
+#				if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
+#					Character.face(-1)
+#					Character.animate("Dash")
+#			-1:
+#				if Character.button_right in Character.input_state.just_pressed and !Character.button_left in Character.input_state.just_pressed:
+#					Character.face(1)
+#					Character.animate("Dash")
 
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
@@ -400,7 +443,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				# GROUND DASH ---------------------------------------------------------------------------------
 			
 					Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY:
-						if keep and !Character.button_light in Character.input_state.just_pressed and \
+						if !Character.button_light in Character.input_state.just_pressed and \
 								!Character.button_fierce in Character.input_state.just_pressed:
 							if !Animator.query(["DashBrake", "WaveDashBrake"]):
 								# cannot dash during dash brake
@@ -415,6 +458,9 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 									Character.face(Character.instant_dir)
 									Character.animate("Dash")
 									keep = false
+							
+#					Em.char_state.GROUND_D_RECOVERY:
+						
 							
 				# AIR DASH ---------------------------------------------------------------------------------
 					
@@ -762,7 +808,7 @@ func consume_one_air_dash(): # different characters can have different types of 
 
 func afterimage_trail():# process afterimage trail
 	match Animator.to_play_animation:
-		"Dash", "aDash", "aDashD", "aDashU", "SDashTransit", "SDash", "aSDash":
+		"Dash", "Dash2", "aDash", "aDashD", "aDashU", "SDashTransit", "SDash", "aSDash":
 			Character.afterimage_trail()
 		"Dodge":
 			Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
@@ -1268,6 +1314,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"DashTransit":
 			Character.animate("Dash")
 		"Dash":
+			if Character.held_version(Character.button_dash):
+				Character.animate("Dash2")
+			else:
+				Character.animate("DashBrake")
+		"Dash2":
 			Character.animate("DashBrake")
 		"DashBrake", "WaveDashBrake":
 			Character.animate("Idle")
@@ -1755,6 +1806,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
+		"Dash2":
+			Character.anim_friction_mod = 0
+			Character.afterimage_timer = 1 # sync afterimage trail
 		"aDash":
 			consume_one_air_dash()
 			Character.aerial_memory = []

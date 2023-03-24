@@ -94,7 +94,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-3: {
+2: {
 "SfxUnder_frame": 1,
 "frame": 1,
 "hitbox": [  ],
@@ -102,7 +102,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-6: {
+5: {
 "SfxUnder_frame": 2,
 "frame": 1,
 "hitbox": [  ],
@@ -145,7 +145,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 6,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP3Sprite",
@@ -158,7 +158,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-2: {
+1: {
 "SfxUnder_frame": 1,
 "frame": 1,
 "hitbox": [  ],
@@ -166,7 +166,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-4: {
+2: {
 "SfxUnder_frame": 2,
 "frame": 1,
 "hitbox": [  ],
@@ -430,7 +430,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-3: {
+2: {
 "SfxUnder_frame": 4,
 "frame": 2,
 "hitbox": [  ],
@@ -438,7 +438,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-6: {
+5: {
 "SfxUnder_frame": 5,
 "frame": 2,
 "hitbox": [  ],
@@ -533,7 +533,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP3SfxUnder",
 "SfxUnder_vframes": 3,
-"duration": 6,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP3Sprite",
@@ -546,7 +546,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-2: {
+1: {
 "SfxUnder_frame": 4,
 "frame": 2,
 "hitbox": [  ],
@@ -554,7 +554,7 @@ frame_data = {
 "kborigin": null,
 "sweetbox": [  ]
 },
-4: {
+2: {
 "SfxUnder_frame": 5,
 "frame": 2,
 "hitbox": [  ],

@@ -58,6 +58,13 @@ const GROUND_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking on groun
 const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
 const WEAKBLOCK_CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
 
+const BASE_EX_REGEN = 20
+const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
+const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
+const BLOCKED_EX_REGEN_MOD = 400 # increase EX Regen when doing a blocked attack
+const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
+const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
+
 const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
@@ -603,7 +610,7 @@ const MOVE_DATABASE = {
 	"SP7": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
 #		"reset_type" : Globals.reset_type.ACTIVE_RESET,
-		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT, Em.atk_attr.WHIFF_SDASH_CANCEL, Em.atk_attr.NO_TURN, Em.atk_attr.NO_QUICK_CANCEL],
+		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT, Em.atk_attr.NO_TURN, Em.atk_attr.NO_QUICK_CANCEL],
 	},
 
 }

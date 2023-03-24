@@ -164,6 +164,7 @@ const WAVES = {
 					{"mob" : "GuraM", "level" : 8, "variant" : "rush",
 					"attr" : {
 						Em.mob_attr.PASSIVE_ARMOR: true,
+						Em.mob_attr.SPEED: 1,
 						} },
 				],
 			}

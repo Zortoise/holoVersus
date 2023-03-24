@@ -23,7 +23,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "blue",
 		Em.move.PROJ_LVL : 1,
-		Em.move.ATK_ATTR : [Em.atk_attr.REPEATABLE],
+		Em.move.ATK_ATTR : [],
 		Em.move.HIT_SOUND : { ref = "water1", aux_data = {"vol" : -10} },
 	},
 }

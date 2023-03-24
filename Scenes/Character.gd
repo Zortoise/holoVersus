@@ -20,13 +20,6 @@ const MAX_EX_GAUGE = 30000
 const EX_LEVEL = 10000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
 
-const BASE_EX_REGEN = 20
-const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
-const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
-const BLOCKED_EX_REGEN_MOD = 400 # increase EX Regen when doing a blocked attack
-const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
-const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
-
 const GUARD_GAUGE_FLOOR = -10000
 const GUARD_GAUGE_CEIL = 10000
 const GUARD_GAUGE_SWELL_RATE = 100 # exact GG gain per frame during hitstun
@@ -103,11 +96,12 @@ const WEAKBLOCK_ATKER_PUSHBACK = 350 * FMath.S # how much the attacker is pushed
 const WEAKBLOCK_KNOCKBACK_MOD = 150 # % of knockback defender experience when wrongblocking
 const STRONGBLOCK_HITSTOP = 7
 const STRONGBLOCK_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is pushed away when strongblocked, fixed
-const STRONGBLOCK_KNOCKBACK_MOD = 50 # % of knockback defender experience when strongblocking
+const STRONGBLOCK_KNOCKBACK_MOD = 0 # % of knockback defender experience when strongblocking
 const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 
-const SPECIAL_GDRAIN_MOD = 100 # extra GDrain when blocking heavy/special/ex moves
+const SPECIAL_GDRAIN_MOD = 200 # extra GDrain when blocking heavy/special/ex moves
 const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
+const SDASH_ARMOR_GDRAIN_MOD = 200 # extra GDrain when SDashing through projectiles
 
 #const SUPERARMOR_CHIP_DMG_MOD = 50
 #const SUPERARMOR_GUARD_DRAIN_MOD = 150
@@ -606,7 +600,7 @@ func test2():
 			"\n" + str(velocity.x) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 			str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-			" " + str(from_move_rec)
+			" " + str(soft_grounded)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -886,7 +880,7 @@ func simulate2(): # only ran if not in hitstop
 	if !Globals.training_mode:
 		
 		if !Globals.Game.input_lock and current_ex_gauge < MAX_EX_GAUGE and state != Em.char_state.DEAD:
-			var ex_change := BASE_EX_REGEN * FMath.S
+			var ex_change := get_stat("BASE_EX_REGEN") * FMath.S
 			if is_hitstunned():
 				ex_change = FMath.percent(ex_change, get_stat("HITSTUN_EX_REGEN_MOD"))
 			else:
@@ -894,19 +888,19 @@ func simulate2(): # only ran if not in hitstop
 					Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL: # landed an attack on opponent
 						ex_change = FMath.percent(ex_change, get_stat("LANDED_EX_REGEN_MOD"))
 					Em.chain_combo.WEAKBLOCKED, Em.chain_combo.STRONGBLOCKED: # landed an attack on blocking opponent
-						ex_change = FMath.percent(ex_change, BLOCKED_EX_REGEN_MOD)
+						ex_change = FMath.percent(ex_change, get_stat("BLOCKED_EX_REGEN_MOD"))
 					_:
 						if Globals.survival_level != null:
 							continue # no whiff EX Gain for Survival
 						if is_attacking() and new_state != Em.char_state.SEQUENCE_USER:
 							var move_data = query_move_data()
 							if !Em.move.DMG in move_data:
-								ex_change = FMath.percent(ex_change, NON_ATTACK_EX_REGEN_MOD) # for non-attacks, reduce EX regen
+								ex_change = FMath.percent(ex_change, get_stat("NON_ATTACK_EX_REGEN_MOD")) # for non-attacks, reduce EX regen
 							else:
-								ex_change = FMath.percent(ex_change, ATTACK_EX_REGEN_MOD) # physical attack, raise EX regen
+								ex_change = FMath.percent(ex_change, get_stat("ATTACK_EX_REGEN_MOD")) # physical attack, raise EX regen
 
 			if Globals.survival_level != null:
-				if ex_change == BASE_EX_REGEN * FMath.S:
+				if ex_change == get_stat("BASE_EX_REGEN") * FMath.S:
 					# no passive EX Gain for Survival unless with cards
 					ex_change = Inventory.modifier(player_ID, Cards.effect_ref.PASSIVE_EX_REGEN)
 					if ex_change != 0:
@@ -1583,11 +1577,13 @@ func simulate2(): # only ran if not in hitstop
 #			air_res_this_frame = 5
 
 		Em.char_state.AIR_ATK_STARTUP:
-			air_res_this_frame = 0
+			if anim_gravity_mod == 0:
+				air_res_this_frame = 0
 			friction_this_frame = FMath.percent(friction_this_frame, 75) # lower friction when landing while doing an aerial
 			
 		Em.char_state.AIR_ATK_ACTIVE:
-			air_res_this_frame = 0
+			if anim_gravity_mod == 0:
+				air_res_this_frame = 0
 			
 		Em.char_state.GROUND_FLINCH_HITSTUN:
 			# when out of hitstun, recover
@@ -1640,9 +1636,8 @@ func simulate2(): # only ran if not in hitstop
 	
 # --------------------------------------------------------------------------------------------------
 
-	UniqChar.simulate() # some holdable buttons can have effect unique to the character
-	
 	buffer_actions()
+	UniqChar.simulate() # some holdable buttons can have effect unique to the character
 	
 	test0()
 	
@@ -1671,7 +1666,7 @@ func simulate2(): # only ran if not in hitstop
 	if !$HitStopTimer.is_running() and $HitStunTimer.is_running() and state == Em.char_state.LAUNCHED_HITSTUN:
 		launch_trail() # do launch trail before moving
 		
-	if grounded and dir == 0 and abs(velocity.x) < 30 * FMath.S:
+	if grounded and dir == 0 and abs(velocity.x) < 2 * FMath.S * get_stat("FRICTION"):
 		velocity.x = 0  # this reduces slippiness by canceling grounded horizontal velocity when moving less than 0.5 pixels per frame
 
 	
@@ -1880,6 +1875,7 @@ func buffer_actions():
 		tap_memory.append([button_down, TAP_MEMORY_DURATION])
 	if button_dash in input_state.just_pressed:
 #		if !alt_block and !button_unique in input_state.pressed:
+		tap_memory.append([button_dash, TAP_MEMORY_DURATION])
 		if !button_unique in input_state.pressed:
 			input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
 		
@@ -2438,7 +2434,8 @@ func process_input_buffer():
 #									keep = false
 #								else:
 #									continue
-						Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
+						Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
+								Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
 								Em.char_state.GROUND_ATK_RECOVERY, Em.char_state.AIR_ATK_RECOVERY:
 							if test_sdash_cancel():
 								animate("SDashTransit")
@@ -2573,7 +2570,7 @@ func state_detect(anim):
 			return Em.char_state.CROUCHING
 		"JumpTransit", "DashTransit":
 			return Em.char_state.GROUND_STARTUP
-		"Dash":
+		"Dash", "Dash2":
 			return Em.char_state.GROUND_D_RECOVERY
 		"BlockRec":
 			return Em.char_state.GROUND_RECOVERY
@@ -2705,7 +2702,7 @@ func get_stat(stat: String) -> int:
 	if Globals.survival_level != null:
 		match stat:
 			"SPECIAL_GDRAIN_MOD":
-				to_return = FMath.percent(to_return, 300) # increased GDrain on specials during Survival
+				to_return = FMath.percent(to_return, 150) # increased GDrain on specials during Survival
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
 					to_return = FMath.percent(to_return, 50)
 			"DAMAGE_VALUE_LIMIT":
@@ -3295,7 +3292,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				else:
 					animate("WaveDashBrake")
 					UniqChar.dash_sound()
-					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"grounded":true})
+					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 					if dir == facing:
 						velocity.x = facing * FMath.percent(get_stat("GROUND_DASH_SPEED"), get_stat("WAVE_DASH_SPEED_MOD"))
 			
@@ -3523,7 +3520,7 @@ func snap_up_wave_land_check():
 				face(dir)
 			animate("WaveDashBrake")
 			velocity.x = dir * get_stat("GROUND_DASH_SPEED")
-			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"grounded":true})
+			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			UniqChar.dash_sound()
 		else:
 			animate("SoftLanding")
@@ -3552,8 +3549,9 @@ func can_DI(): # already checked for HitStunTimer
 
 func process_VDI():
 	# to be able to DI, must be entering knockback animation and has a directional key pressed
-#	if Globals.survival_level == null and current_guard_gauge <= 0: return
-	if current_guard_gauge <= 0: return
+
+	if Globals.survival_level == null:
+		if current_guard_gauge <= 0: return
 	
 	if (dir != 0 or v_dir != 0) and !DI_seal and get_damage_percent() < 100 and \
 		((state == Em.char_state.LAUNCHED_HITSTUN and Animator.query_to_play(["LaunchTransit"]) and \
@@ -4227,8 +4225,15 @@ func test_sdash_cancel():
 	var move_name = get_move_name()
 	var move_data = UniqChar.query_move_data(move_name)
 	
-	if Em.atk_attr.NO_REC_CANCEL in move_data[Em.move.ATK_ATTR]:
+	if Em.atk_attr.NO_REC_CANCEL in move_data[Em.move.ATK_ATTR] or Em.atk_attr.NO_SDASH_CANCEL in move_data[Em.move.ATK_ATTR]:
 		return false
+		
+#	if is_atk_startup():
+#		if Em.atk_attr.SDASH_STARTUP_CANCEL in move_data[Em.move.ATK_ATTR]:
+#			afterimage_cancel()
+#			return true
+#		else:
+#			return false
 		
 	match move_data[Em.move.ATK_TYPE]:
 		Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY:
@@ -4245,13 +4250,13 @@ func test_sdash_cancel():
 				return false
 				
 			var can_reset_on_whiff := false
-			if Em.atk_attr.WHIFF_SDASH_CANCEL in move_data[Em.move.ATK_ATTR]: # some attacks/projectiles can be sdashed on whiff
+			if !Em.move.DMG in move_data or Em.atk_attr.WHIFF_SDASH_CANCEL in move_data[Em.move.ATK_ATTR]: # some attacks/projectiles can be sdashed on whiff
 				if Animator.time > 1: # not on frame 1
 					can_reset_on_whiff = true
-			elif !Em.move.DMG in move_data:
-				if Animator.time > 1: # for non-attacks, can only sdash cancel if opponent is in hitstun
-					if get_target().get_node("HitStunTimer").is_running():
-						can_reset_on_whiff = true
+#			elif !Em.move.DMG in move_data:
+#				if Animator.time > 1: # for non-attacks, can only sdash cancel if opponent is in hitstun
+##					if get_target().get_node("HitStunTimer").is_running():
+#					can_reset_on_whiff = true
 #			else:
 #				if Em.atk_attr.WHIFF_SDASH_CANCEL in move_data[Em.move.ATK_ATTR]:
 #					can_reset_on_whiff = true
@@ -4592,6 +4597,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 					query_move_data(attack_ref)[Em.move.ATK_TYPE] == Em.atk_type.LIGHT:
 				return false
 		Em.atk_type.HEAVY: # Heavy Normals can only chain cancel into non-normals
+			if !chain_combo in [Em.chain_combo.HEAVY]:
+				return false
 			if is_normal_attack(attack_ref):
 				return false
 		Em.atk_type.SPECIAL:
@@ -5309,12 +5316,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
 						
-						
+			Em.char_state.AIR_STARTUP:
+				if Animator.query_to_play(["SDashTransit"]) and Em.hit.NON_STRONG_PROJ in hit_data:
+					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.SUPERARMORED] = true
+					hit_data[Em.hit.SDASH_ARMORED] = true
 			Em.char_state.AIR_RECOVERY:
 				 # air superdash has projectile superarmor against non-strong projectiles
 				if Animator.query_to_play(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
+					hit_data[Em.hit.SDASH_ARMORED] = true
 				
 				
 		if !is_hitstunned_or_sequenced() and !is_blocking():
@@ -5489,8 +5501,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if can_stun(hit_data):
 			hit_data[Em.hit.STUN] = true
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+			hit_data.erase(Em.hit.SUPERARMORED)
 		elif get_guard_gauge_percent_below() == 0:
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+			hit_data.erase(Em.hit.SUPERARMORED)
 		
 		var damage = calculate_damage(hit_data)
 		take_damage(damage) # do damage calculation
@@ -6043,6 +6057,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		else:
 			if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
 				return 0
+			elif Em.hit.SDASH_ARMORED in hit_data:
+				guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD)
 	else:
 		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_GUARD_DRAIN):
 			guard_drain = FMath.percent(guard_drain, 10)
@@ -6082,8 +6098,8 @@ func calculate_knockback_strength(hit_data) -> int:
 					# increased KB when blocking heavy/special/ex/super
 			Em.block_state.STRONG:
 				knockback_strength = FMath.percent(knockback_strength, STRONGBLOCK_KNOCKBACK_MOD) # KB for strongblock
-			Em.block_state.PARRY:
-				knockback_strength = 0 # no KB for strongblock and parry
+#			Em.block_state.PARRY:
+#				knockback_strength = 0 # no KB for strongblock and parry
 
 	# for rekkas and combo-type moves/supers, no KB boost for non-finishers
 	if Em.hit.AUTOCHAIN in hit_data:
@@ -6950,7 +6966,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 	
 	match anim_name:
 		"Run":
-			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"grounded":true})
+			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		
 		"Dash":
 			if Globals.survival_level != null and !ground_dash_enhance():
@@ -6988,7 +7004,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #					velocity.x += dir * get_stat("JUMP_HORIZONTAL_SPEED")
 #					velocity.x = int(clamp(velocity.x, -get_stat("SPEED"), get_stat("SPEED")))
 #					velocity.y += abs(velocity.x - old_horizontal_vel) # reduce vertical speed if so
-			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"grounded":true})
+			Globals.Game.spawn_SFX("JumpDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			
 		"aJumpTransit2":
 			aerial_memory = []

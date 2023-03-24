@@ -13,11 +13,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 9,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 6: {
 "frame": 10,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
 "vframes": 5
@@ -30,11 +30,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 7,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 6: {
 "frame": 8,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
 "vframes": 5
@@ -47,11 +47,11 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 5,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 6: {
 "frame": 6,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
 "vframes": 5
@@ -64,15 +64,15 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 1,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 6: {
 "frame": 2,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 12: {
 "frame": 3,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
 "vframes": 5
@@ -114,23 +114,23 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 3,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 6: {
 "frame": 11,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 9: {
 "frame": 12,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 12: {
 "frame": 13,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 },
 15: {
 "frame": 14,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
 "vframes": 5
@@ -143,7 +143,7 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 4,
-"hitbox": [ Vector2( -9, 9 ), Vector2( 9, 9 ), Vector2( 9, -9 ), Vector2( -9, -9 ) ]
+"hitbox": [ Vector2( -8, 8 ), Vector2( 8, 8 ), Vector2( 8, -8 ), Vector2( -8, -8 ) ]
 }
 },
 "vframes": 5

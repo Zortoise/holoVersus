@@ -313,7 +313,8 @@ func is_against_wall(collision_box, soft_platform_dbox, direction, checklist = n
 		if Detection.detect_bool([collision_box], ["SemiSolidWalls"], Vector2(direction, 0)):
 			return true	
 	if checklist == null or "BlastWalls" in checklist:
-		if Detection.detect_bool([collision_box], ["BlastWalls"], Vector2(direction, 0)):
+		if Detection.detect_bool([collision_box], ["BlastWalls"], Vector2(direction, 0)) and \
+			!Detection.detect_bool([soft_platform_dbox], ["BlastWalls"]):
 			return true	
 			
 	return false
@@ -350,7 +351,8 @@ func is_against_ceiling(collision_box, soft_platform_dbox, checklist = null): # 
 			!Detection.detect_bool([soft_platform_dbox], ["CSolidPlatforms"]):
 			return true	
 	if checklist == null or "BlastCeiling" in checklist:
-		if Detection.detect_bool([collision_box], ["BlastCeiling"], Vector2.UP):
+		if Detection.detect_bool([collision_box], ["BlastCeiling"], Vector2.UP) and \
+			!Detection.detect_bool([soft_platform_dbox], ["BlastCeiling"]):
 			return true	
 	
 	return false
@@ -402,8 +404,8 @@ func is_on_soft_ground(soft_platform_dbox): # return true if standing on soft fl
 	
 	if has_method("check_passthrough") and call("check_passthrough"):
 		return false
-	if has_method("check_fallthrough") and call("check_fallthrough"):
-		return false
+#	if has_method("check_fallthrough") and call("check_fallthrough"):
+#		return false
 	if get("velocity").y < 0: # is not considered on ground if moving upwards
 		return false
 	

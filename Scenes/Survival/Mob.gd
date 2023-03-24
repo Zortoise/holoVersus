@@ -702,10 +702,12 @@ func simulate2(): # only ran if not in hitstop
 			air_res_this_frame = 0
 
 		Em.char_state.AIR_ATK_STARTUP:
-			air_res_this_frame = 0
+			if anim_gravity_mod == 0:
+				air_res_this_frame = 0
 			
 		Em.char_state.AIR_ATK_ACTIVE:
-			air_res_this_frame = 0
+			if anim_gravity_mod == 0:
+				air_res_this_frame = 0
 			
 		Em.char_state.GROUND_FLINCH_HITSTUN:
 			# when out of hitstun, recover
@@ -2335,7 +2337,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		root_move_name = hit_data[Em.hit.MOVE_NAME]
 	
-	if !Em.atk_attr.REPEATABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+	if !Em.atk_attr.REPEATABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !Em.hit.ENTITY_PATH in hit_data:
 		
 		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
 		
