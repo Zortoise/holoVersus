@@ -86,6 +86,12 @@ const ARMOR_DMG_MOD = 50 # % of damage taken when attacked during special armor
 #const ARMOR_KNOCKBACK_MOD = 150 # % of knockback mob experience when attacked during special armor
 #const RESISTED_KB_MOD = 200 # % of knockback mob experience
 
+const WEAKBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when wrongblocked, fixed
+const STRONGBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when strongblocked, fixed
+
+const AUTOCHAIN_HITSTOP = 7
+const WEAK_HIT_HITSTOP = 6
+
 # variables used, don't touch these
 var loaded_palette = null
 onready var Animator = $SpritePlayer # clean code
@@ -2248,6 +2254,28 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			hitstop = hit_data[Em.hit.HITSTOP]
 
 
+	# PUSHBACK ----------------------------------------------------------------------------------------------
+		
+	if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data or !can_air_strafe(hit_data[Em.hit.MOVE_DATA]):
+		pass # if an attack does not allow air strafing, it cannot be pushed back
+	else:
+		
+		match hit_data[Em.hit.BLOCK_STATE]:					
+			Em.block_state.WEAK, Em.block_state.STRONG:
+				
+				var pushback_strength: = 0
+				if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.WEAK:
+					pushback_strength = WEAKBLOCK_ATKER_PUSHBACK
+				else:
+					pushback_strength = STRONGBLOCK_ATKER_PUSHBACK
+				
+				var pushback_dir_enum = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.SIX, facing) # this return an enum
+				var pushback_dir = Globals.compass_to_angle(pushback_dir_enum) # pushback for weak/strong blocked hits in 6 directions only
+				
+				velocity.set_vector(pushback_strength, 0)  # reset momentum
+				velocity.rotate(pushback_dir)
+
+
 	# AUDIO ----------------------------------------------------------------------------------------------
 		
 	if Em.move.HIT_SOUND in hit_data[Em.hit.MOVE_DATA]:
@@ -2551,6 +2579,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data[Em.hit.KB_ANGLE] = knockback_dir
 	var knockback_strength: int = calculate_knockback_strength(hit_data)
 	hit_data[Em.hit.KB] = knockback_strength
+	
+	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT] and attacker != null:
+		if hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstCounter":
+			attacker.reset_jumps()
+			attacker.change_ex_gauge(FMath.percent(attacker.get("BURSTCOUNTER_EX_COST"), 50), true)
+			# Burst Counter grants attacker Positive Flow
+			if attacker.current_guard_gauge < 0:
+#				attacker.add_status_effect(Em.status_effect.POS_FLOW, null)
+				attacker.status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
+				
+		elif hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstEscape":
+			attacker.reset_jumps()
 	
 
 	# SPECIAL HIT EFFECTS ---------------------------------------------------------------------------------
@@ -3113,8 +3153,13 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 	if Em.move.FIXED_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
 		return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTOP]
 	
+	if Em.hit.AUTOCHAIN in hit_data:
+		return AUTOCHAIN_HITSTOP
+	if hit_data[Em.hit.WEAK_HIT]:
+		return WEAK_HIT_HITSTOP
+	
 # warning-ignore:integer_division
-	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 100) # scaled, +1 frame of hitstop for each 100 scaled knockback
+	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 90) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
 	if hit_data[Em.hit.SWEETSPOTTED]: # sweetspotted hits has 30% more hitstop
 		if Em.move.FIXED_SS_HITSTOP in hit_data[Em.hit.MOVE_DATA]:

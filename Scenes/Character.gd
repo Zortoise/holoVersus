@@ -92,16 +92,20 @@ const STUN_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Stun
 const CRUSH_TIME = 40 # number of frames stun time last for Crush
 
 const WEAKBLOCK_HITSTOP = 5
-const WEAKBLOCK_ATKER_PUSHBACK = 350 * FMath.S # how much the attacker is pushed away when wrongblocked, fixed
-const WEAKBLOCK_KNOCKBACK_MOD = 150 # % of knockback defender experience when wrongblocking
+const WEAKBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when wrongblocked, fixed
+const WEAKBLOCK_KNOCKBACK_MOD = 200 # % of knockback defender experience when wrongblocking
 const STRONGBLOCK_HITSTOP = 7
-const STRONGBLOCK_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is pushed away when strongblocked, fixed
+const STRONGBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when strongblocked, fixed
 const STRONGBLOCK_KNOCKBACK_MOD = 0 # % of knockback defender experience when strongblocking
-const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
+#const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
+const MOBBLOCK_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
 const SPECIAL_GDRAIN_MOD = 200 # extra GDrain when blocking heavy/special/ex moves
 const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
 const SDASH_ARMOR_GDRAIN_MOD = 200 # extra GDrain when SDashing through projectiles
+
+const AUTOCHAIN_HITSTOP = 7
+const WEAK_HIT_HITSTOP = 6
 
 #const SUPERARMOR_CHIP_DMG_MOD = 50
 #const SUPERARMOR_GUARD_DRAIN_MOD = 150
@@ -4885,9 +4889,9 @@ func get_ex_level():
 	else:
 		return 3
 	
-func change_ex_gauge(ex_gauge_change: int):
+func change_ex_gauge(ex_gauge_change: int, forced := false):
 #	current_ex_gauge += ex_gauge_change * 3 # boosted for testing
-	if $EXSealTimer.is_running() and ex_gauge_change > 0: # no gain in EX Gauge when sealed
+	if !forced and $EXSealTimer.is_running() and ex_gauge_change > 0: # no gain in EX Gauge when sealed
 		return
 	current_ex_gauge += ex_gauge_change
 	current_ex_gauge = int(clamp(current_ex_gauge, 0, MAX_EX_GAUGE))
@@ -5121,7 +5125,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				
 				if Globals.survival_level != null: # mob pushback when resisting or armoring
 					if (Em.hit.RESISTED in hit_data or "mob_armored" in hit_data) and !Em.hit.MOB_BREAK in hit_data:
-						var pushback_strength = WEAKBLOCK_ATKER_PUSHBACK
+						var pushback_strength = MOBBLOCK_ATKER_PUSHBACK
 						
 						var pushback_dir_enum = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.SIX, facing)
 						var pushback_dir = Globals.compass_to_angle(pushback_dir_enum)
@@ -5399,6 +5403,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
 
 			hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
+			
+			if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
+				hit_data[Em.hit.ANTI_AIRED] = true
 
 			match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 				
@@ -5409,15 +5416,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						# to strongblock a physical attack, you need to either perfect block them or
 						# block at close range, but the later is not allowed during Survival Mode
 						
-						var close_enough = !attacker_vec.is_longer_than(STRONGBLOCK_RANGE)
-						if Globals.survival_level != null and close_enough:
-#							if !Inventory.has_quirk(player_ID, Cards.effect_ref.PROXIMITY_PARRY):
-							close_enough = false
+#						var close_enough = !attacker_vec.is_longer_than(STRONGBLOCK_RANGE)
+#						if Globals.survival_level != null and close_enough:
+##							if !Inventory.has_quirk(player_ID, Cards.effect_ref.PROXIMITY_PARRY):
+#							close_enough = false
 
-						if Animator.query_current(["BlockStartup", "aBlockStartup"]) or close_enough:
+						if Animator.query_current(["BlockStartup", "aBlockStartup"]):
 #							if Globals.survival_level != null:
 #								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # no proximity parry for Survival Mode
-							if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
+							if Em.hit.ANTI_AIRED in hit_data:
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # anti-air normals force weakblock on airblockers
 							else:
 								# if perfect blocked or blocking attacker close enough, a Strongblock occurs
@@ -5608,8 +5615,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		lethal_flag = true
 		
 	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT] and attacker != null:
-		if hit_data[Em.hit.MOVE_DATA][Em.move.BURST] in ["BurstCounter"]:
+		if hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstCounter":
 			attacker.reset_jumps()
+			attacker.change_ex_gauge(FMath.percent(attacker.get("BURSTCOUNTER_EX_COST"), 50), true)
 			# Burst Counter grants attacker Positive Flow
 			if attacker.current_guard_gauge < 0:
 #				attacker.add_status_effect(Em.status_effect.POS_FLOW, null)
@@ -6090,17 +6098,22 @@ func calculate_guard_gauge_change(hit_data) -> int:
 
 	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 	
-	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED: # no Guard Drain on blocking normals
-		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX]:
-			guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # double guard drain when blocking heavy/special/ex
-		else:
-			if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
-				return 0
-			elif Em.hit.SDASH_ARMORED in hit_data:
-				guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD)
-	else:
-		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_GUARD_DRAIN):
-			guard_drain = FMath.percent(guard_drain, 10)
+	match hit_data[Em.hit.BLOCK_STATE]:
+		Em.block_state.STRONG:
+			return 0
+		
+		Em.block_state.WEAK: # no Guard Drain on blocking normals
+			if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX]:
+				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # double guard drain when blocking heavy/special/ex
+			else:
+				if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
+					return 0
+				elif Em.hit.SDASH_ARMORED in hit_data:
+					guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD)
+					
+		Em.block_state.UNBLOCKED:
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_GUARD_DRAIN):
+				guard_drain = FMath.percent(guard_drain, 10)
 
 	return guard_drain # Guard Drain on 1st hit of the combo depends on Attack Level
 
@@ -6351,7 +6364,6 @@ func check_if_crossed_up(attacker, angle_to_atker: int):
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
 		
-		
 	if Em.hit.SUPERARMORED in hit_data:
 		return STRONGBLOCK_HITSTOP
 		
@@ -6374,9 +6386,14 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 		
 	if Globals.survival_level != null and !hit_data[Em.hit.WEAK_HIT] and !Em.hit.AUTOCHAIN in hit_data:
 		return SURVIVAL_HITSTOP
-	
+		
+	if Em.hit.AUTOCHAIN in hit_data:
+		return AUTOCHAIN_HITSTOP
+	if hit_data[Em.hit.WEAK_HIT]:
+		return WEAK_HIT_HITSTOP
+		
 # warning-ignore:integer_division
-	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 100) # scaled, +1 frame of hitstop for each 100 scaled knockback
+	var hitstop_temp: int = 3 * FMath.S + int(knockback_strength / 90) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
 	if hit_data[Em.hit.SEMI_DISJOINT]: # on semi-disjoint hits, lowest hitstop
 		return MIN_HITSTOP

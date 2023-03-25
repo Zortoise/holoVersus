@@ -331,7 +331,7 @@ const MOVE_DATABASE = {
 		Em.move.SEQ_LAUNCH : {
 			Em.move.DMG : 30,
 			Em.move.SEQ_HITSTOP : 0,
-			"weak" : true,
+			Em.move.SEQ_WEAK : true,
 			Em.move.KB : 500 * FMath.S,
 			Em.move.KB_ANGLE : -100,
 			Em.move.ATK_LVL : 4,
