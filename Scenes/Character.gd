@@ -1099,28 +1099,29 @@ func simulate2(): # only ran if not in hitstop
 					quick_turn_used = true
 				face(dir)
 				
-		# quick impulse
-		match state:
-			Em.char_state.GROUND_ATK_STARTUP:
-				if !impulse_used and Animator.time <= 1:
-					var move_name = Animator.to_play_animation.trim_suffix("Startup")
-					if move_name in UniqChar.STARTERS:
-						if !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
-							impulse_used = true
-							var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))
-							# some moves have their own impulse mod
-		#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
-		#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
-		#						impulse = FMath.percent(impulse, impulse_mod)
-							velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
-							Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
-			
-		# quick strafe-lock
-			Em.char_state.AIR_ATK_STARTUP:
-				if strafe_lock_dir == 0 and Animator.time <= 1:
-					var move_name = Animator.to_play_animation.trim_suffix("Startup")
-					if move_name in UniqChar.STARTERS:
-						strafe_lock_dir = dir
+		if Settings.input_assist[player_ID]:
+			# quick impulse
+			match state:
+				Em.char_state.GROUND_ATK_STARTUP:
+					if !impulse_used and Animator.time <= 1:
+						var move_name = Animator.to_play_animation.trim_suffix("Startup")
+						if move_name in UniqChar.STARTERS:
+							if !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
+								impulse_used = true
+								var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))
+								# some moves have their own impulse mod
+			#					if move_name in UniqChar.MOVE_DATABASE and "impulse_mod" in UniqChar.MOVE_DATABASE[move_name]:
+			#						var impulse_mod: int = UniqChar.query_move_data(move_name).impulse_mod
+			#						impulse = FMath.percent(impulse, impulse_mod)
+								velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
+								Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+				
+			# quick strafe-lock
+				Em.char_state.AIR_ATK_STARTUP:
+					if strafe_lock_dir == 0 and Animator.time <= 1:
+						var move_name = Animator.to_play_animation.trim_suffix("Startup")
+						if move_name in UniqChar.STARTERS:
+							strafe_lock_dir = dir
 
 
 #	if instant_dir != 0 and facing != instant_dir: # this allow for quick turns when you tap a direction while holding another direction
@@ -1241,7 +1242,7 @@ func simulate2(): # only ran if not in hitstop
 #		if button_dash in input_state.pressed:
 #			alt_block = true
 #		if button_dash in input_state.just_pressed and button_aux in input_state.pressed:
-#			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
+#			input_buffer.append(["Burst", buffer_time()])
 			
 	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
@@ -1857,6 +1858,16 @@ func move_true_position(in_velocity: FVector):
 		
 # BUFFERING BUTTONs --------------------------------------------------------------------------------------------------	
 	
+func buffer_time():
+#	if Settings.hard_mode[player_ID]:
+#		return 0
+	return Settings.input_buffer_time[player_ID]
+	
+#func tap_memory_duration():
+#	if Settings.hard_mode[player_ID]:
+#		return 0
+#	return TAP_MEMORY_DURATION
+	
 func buffer_actions():
 
 	if Globals.survival_level != null and Inventory.shop_open:
@@ -1869,7 +1880,7 @@ func buffer_actions():
 		
 	if button_up in input_state.just_pressed:
 		if !button_unique in input_state.pressed and Settings.tap_jump[player_ID] == 1:
-			input_buffer.append([button_up, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([button_up, buffer_time()])
 		tap_memory.append([button_up, TAP_MEMORY_DURATION])
 	if button_down in input_state.just_pressed:
 		tap_memory.append([button_down, TAP_MEMORY_DURATION])
@@ -1877,7 +1888,7 @@ func buffer_actions():
 #		if !alt_block and !button_unique in input_state.pressed:
 		tap_memory.append([button_dash, TAP_MEMORY_DURATION])
 		if !button_unique in input_state.pressed:
-			input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([button_dash, buffer_time()])
 		
 	if button_special in input_state.just_pressed:
 		tap_memory.append([button_special, TAP_MEMORY_DURATION])
@@ -1891,28 +1902,28 @@ func buffer_actions():
 		
 	if button_light in input_state.just_pressed:
 		if !button_unique in input_state.pressed:
-			input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([button_light, buffer_time()])
 		tap_memory.append([button_light, TAP_MEMORY_DURATION])
 	if button_fierce in input_state.just_pressed:
 		if !button_unique in input_state.pressed:
-			input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([button_fierce, buffer_time()])
 		tap_memory.append([button_fierce, TAP_MEMORY_DURATION])
 	if button_aux in input_state.just_pressed:
 		if !button_unique in input_state.pressed:
-			input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([button_aux, buffer_time()])
 		tap_memory.append([button_aux, TAP_MEMORY_DURATION])
 	
 	if input_state.just_pressed.size() > 0 or release_memory.size() > 0:
 		capture_combinations() # look for combinations
 
 	if button_jump in input_state.just_pressed:
-		input_buffer.push_front([button_jump, Settings.input_buffer_time[player_ID]])
+		input_buffer.push_front([button_jump, buffer_time()])
 		tap_memory.append([button_jump, TAP_MEMORY_DURATION])
 #	if button_jump in input_state.just_released:
 #		release_memory.append([button_jump, TAP_MEMORY_DURATION])
 		
 	# quick cancel from button release
-	if (button_up in input_state.just_released or button_down in input_state.just_released):
+	if Settings.input_assist[player_ID] and (button_up in input_state.just_released or button_down in input_state.just_released):
 		match new_state:
 			Em.char_state.GROUND_ATK_STARTUP:
 				if Animator.time <= 1 and Animator.time != 0:
@@ -1925,7 +1936,7 @@ func buffer_actions():
 					
 	if button_rs_up in input_state.just_pressed or button_rs_down in input_state.just_pressed or button_rs_left in input_state.just_pressed or \
 			button_rs_right in input_state.just_pressed:
-		input_buffer.append(["Dodge", Settings.input_buffer_time[player_ID]])
+		input_buffer.append(["Dodge", buffer_time()])
 		
 		
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
@@ -1933,14 +1944,15 @@ func buffer_actions():
 func capture_combinations():
 	
 	# instant air dash, place at back
-	combination(button_jump, button_dash, "InstaAirDash")
+	if Settings.input_assist[player_ID]:
+		combination(button_jump, button_dash, "InstaAirDash")
 	combination(button_aux, button_dash, "Dodge")
 	combination(button_block, button_dash, "SDash")
 	
 	if !button_unique in input_state.pressed: # this allows you to use Unique + Aux command when blocking without doing a Burst
 		combination(button_block, button_aux, "Burst")
 #		if button_aux in input_state.just_pressed and alt_block == true:
-#			input_buffer.append(["Burst", Settings.input_buffer_time[player_ID]])
+#			input_buffer.append(["Burst", buffer_time()])
 			
 #		combination(button_dash, button_aux, "Tech")
 		
@@ -1953,40 +1965,40 @@ func capture_combinations():
 #func combination_single(button1, action, back = false): # useful for Special/EX/Super Moves
 #	if button1 in input_state.just_pressed:
 #		if !back:
-#			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+#			input_buffer.push_front([action, buffer_time()])
 #		else:
-#			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+#			input_buffer.append([action, buffer_time()])
 
 # used for rebuffer_actions()
 func rebuffer(button1, button2, action, back = false):
 	if button1 in input_state.pressed and button2 in input_state.pressed:
 		if !back:
-			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+			input_buffer.push_front([action, buffer_time()])
 		else:
-			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([action, buffer_time()])
 
 				
 func rebuffer_trio(button1, button2, button3, action, back = false):
 	if button1 in input_state.pressed and button2 in input_state.pressed and button3 in input_state.pressed:
 		if !back:
-			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+			input_buffer.push_front([action, buffer_time()])
 		else:
-			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([action, buffer_time()])
 			
 			
 func ex_rebuffer(button_ex, button1, action, back = false):
 	if button1 in input_state.pressed and is_button_released_in_last_X_frames(button_ex, 7):
 		if !back:
-			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+			input_buffer.push_front([action, buffer_time()])
 		else:
-			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+			input_buffer.append([action, buffer_time()])
 #
 #func ex_rebuffer_trio(button_ex, button1, button2, action, back = false):
 #	if button1 in input_state.pressed and button2 in input_state.pressed and is_button_released(button_ex):
 #		if !back:
-#			input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+#			input_buffer.push_front([action, buffer_time()])
 #		else:
-#			input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+#			input_buffer.append([action, buffer_time()])
 			
 
 func combination(button1, button2, action, back = false, instant = false):
@@ -1994,10 +2006,10 @@ func combination(button1, button2, action, back = false, instant = false):
 		(button2 in input_state.just_pressed and is_button_pressed(button1)):
 		if !instant:
 			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.push_front([action, buffer_time()])
 				return true
 			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.append([action, buffer_time()])
 				return true
 		else:
 			instant_actions_temp.append(action)
@@ -2010,10 +2022,10 @@ func combination_trio(button1, button2, button3, action, back = false, instant =
 		(button3 in input_state.just_pressed and is_button_pressed(button1) and is_button_pressed(button2)):
 		if !instant:
 			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.push_front([action, buffer_time()])
 				return true
 			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.append([action, buffer_time()])
 				return true
 		else:
 			instant_actions_temp.append(action)
@@ -2050,9 +2062,9 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 		(button_ex in input_state.just_released and is_button_pressed(button1)):
 		if !instant:
 			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.push_front([action, buffer_time()])
 			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.append([action, buffer_time()])
 		else:
 			instant_actions_temp.append(action)
 
@@ -2067,13 +2079,19 @@ func ex_combination_trio(button_ex, button1, button2, action, back = false, inst
 		(button_ex in input_state.just_released and is_button_pressed(button1) and is_button_pressed(button2)):
 		if !instant:
 			if !back:
-				input_buffer.push_front([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.push_front([action, buffer_time()])
 			else:
-				input_buffer.append([action, Settings.input_buffer_time[player_ID]])
+				input_buffer.append([action, buffer_time()])
 		else:
 			instant_actions_temp.append(action)
 			
 func is_button_pressed(button):
+#	if Settings.hard_mode[player_ID]:
+#		if button in input_state.just_pressed:
+#			return true
+#		else:
+#			return false
+			
 	if button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
 		if is_button_tapped_in_last_X_frames(button, 7):
@@ -2106,6 +2124,12 @@ func is_button_pressed(button):
 #	return false
 	
 func is_button_released_in_last_X_frames(button, x_time):
+	if !Settings.input_assist[player_ID]:
+		if button in input_state.just_released:
+			return true
+		else:
+			return false
+	
 	for x in release_memory.size():
 		var release = release_memory[-x-1]
 		if release[1] < TAP_MEMORY_DURATION - x_time:
@@ -2212,15 +2236,17 @@ func instant_action_tilt_combination(attack_button, neutral_action, down_tilt_ac
 	if !down_tilted and !up_tilted:
 		combination(button_unique, attack_button, neutral_action, false, true)
 	else:
-		instant_actions.erase(neutral_action) # a down_tilt or up_tilt has been captured, erase neutral action captured last frame
+		if Settings.input_assist[player_ID]:
+			instant_actions.erase(neutral_action) # a down_tilt or up_tilt has been captured, erase neutral action captured last frame
 	
-	# releasing up/down will erase up-tilt/down-tilt instant actions instant_actions array and capture a neutral one
-	if down_tilt_action != null and button_down in input_state.just_released and down_tilt_action in instant_actions:
-		instant_actions.erase(down_tilt_action)
-		instant_actions_temp.append(neutral_action)
-	elif up_tilt_action != null and button_up in input_state.just_released and up_tilt_action in instant_actions:
-		instant_actions.erase(up_tilt_action)
-		instant_actions_temp.append(neutral_action)
+	if Settings.input_assist[player_ID]:
+		# releasing up/down will erase up-tilt/down-tilt instant actions instant_actions array and capture a neutral one
+		if down_tilt_action != null and button_down in input_state.just_released and down_tilt_action in instant_actions:
+			instant_actions.erase(down_tilt_action)
+			instant_actions_temp.append(neutral_action)
+		elif up_tilt_action != null and button_up in input_state.just_released and up_tilt_action in instant_actions:
+			instant_actions.erase(up_tilt_action)
+			instant_actions_temp.append(neutral_action)
 		
 	
 # INPUT BUFFER ---------------------------------------------------------------------------------------------------
@@ -2267,21 +2293,21 @@ func process_input_buffer():
 							if keep:
 								animate("JumpTransit") # ground jump
 								if button_dash in input_state.pressed: # for wavedash alternate input
-									input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
+									input_buffer.append([button_dash, buffer_time()])
 									
 								keep = false
 								
 						Em.char_state.GROUND_BLOCK:
-							if Animator.time <= 1:
+							if Settings.input_assist[player_ID] and Animator.time <= 1:
 								animate("JumpTransit") 
 								keep = false
 							
 						# BUFFERING AN INSTANT AIRDASH ---------------------------------------------------------------------------------
 							
 						Em.char_state.GROUND_D_RECOVERY:
-							if Animator.time == 0:
+							if Settings.input_assist[player_ID] and Animator.time == 0:
 								animate("JumpTransit")
-								input_to_add.append([button_dash, Settings.input_buffer_time[player_ID]])
+								input_to_add.append([button_dash, buffer_time()])
 								has_acted[0] = true
 								keep = false
 								
@@ -2308,7 +2334,7 @@ func process_input_buffer():
 #								 # moving downward and within 1st frame of falling, for easy wavedashing on soft platforms
 #								snap_up($PlayerCollisionBox, $DashLandDBox)
 #								animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
-#								input_to_add.append([button_dash, Settings.input_buffer_time[player_ID]])
+#								input_to_add.append([button_dash, buffer_time()])
 #								keep = false
 								
 						# AIR JUMPS  --------------------------------------------------------------------------------------------------
@@ -2360,6 +2386,8 @@ func process_input_buffer():
 								keep = false
 								
 						Em.char_state.GROUND_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
+							if !Settings.input_assist[player_ID]:
+								continue
 							if chain_memory.size() != 0:
 								continue # cannot quick jump cancel attacks in chains
 							var move_name = get_move_name()
@@ -2450,12 +2478,14 @@ func process_input_buffer():
 								Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY, \
 								Em.char_state.GROUND_D_RECOVERY, Em.char_state.AIR_D_RECOVERY, \
 								Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
-							if new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP] and \
-									!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
-								continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
-							if new_state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] and \
-									!Animator.query_to_play(["BlockRec", "aBlockRec"]):
-								continue # can only cancel from certain non-attack recovery frames
+							if new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP]:
+								if !Settings.input_assist[player_ID]:
+									continue
+								if !Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
+									continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
+							if new_state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY]:
+								if !Animator.query_to_play(["BlockRec", "aBlockRec"]):
+									continue # can only cancel from certain non-attack recovery frames
 							if grounded or super_dash > 0:
 								animate("SDashTransit")
 								has_acted[0] = true
@@ -2468,14 +2498,21 @@ func process_input_buffer():
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_RECOVERY, \
 							Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, \
 							Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK, Em.char_state.GROUND_D_RECOVERY:
-						if new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP] and \
-								!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
-							continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP	
-						if new_state == Em.char_state.GROUND_D_RECOVERY and Animator.time > 0:
-							continue # can cancel from 1st frame of ground dash
-						if new_state in [Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK] and \
-								!Animator.query_to_play(["BlockStartup", "aBlockStartup"]):
-							continue # can only cancel from block startup for GROUND_BLOCK/AIR_BLOCK	
+						if new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP]:
+							if !Settings.input_assist[player_ID]:
+								continue
+							if !Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
+								continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
+						if new_state == Em.char_state.GROUND_D_RECOVERY:
+							if !Settings.input_assist[player_ID]:
+								continue
+							if Animator.time > 0:
+								continue # can cancel from 1st frame of ground dash
+						if new_state in [Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK]:
+							if !Settings.input_assist[player_ID]:
+								continue
+							if !Animator.query_to_play(["BlockStartup", "aBlockStartup"]):
+								continue # can only cancel from block startup for GROUND_BLOCK/AIR_BLOCK	
 						if dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
@@ -2537,7 +2574,7 @@ func animate(anim):
 		atk_startup_resets() # need to do this here to work! resets hitcount and ignore list
 
 	# when changing to a non-attacking state from attack startup, auto-buffer pressed attack buttons
-	if !startup_cancel_flag and !is_attacking():
+	if Settings.input_assist[player_ID] and !startup_cancel_flag and !is_attacking():
 		match old_new_state:
 			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 				rebuffer_actions()
@@ -2546,11 +2583,11 @@ func animate(anim):
 func rebuffer_actions():
 	
 	if button_light in input_state.pressed:
-		input_buffer.append([button_light, Settings.input_buffer_time[player_ID]])
+		input_buffer.append([button_light, buffer_time()])
 	if button_fierce in input_state.pressed:
-		input_buffer.append([button_fierce, Settings.input_buffer_time[player_ID]])
+		input_buffer.append([button_fierce, buffer_time()])
 	if button_aux in input_state.pressed:
-		input_buffer.append([button_aux, Settings.input_buffer_time[player_ID]])
+		input_buffer.append([button_aux, buffer_time()])
 	
 	UniqChar.rebuffer_actions()
 	
@@ -3277,10 +3314,12 @@ func check_landing(): # called by physics.gd when character stopped by floor
 		Em.char_state.AIR_STARTUP:
 			if Animator.query_to_play(["aJumpTransit"]):
 				animate("SoftLanding")
-				input_buffer.append([button_jump, Settings.input_buffer_time[player_ID]])
+				if Settings.input_assist[player_ID]:
+					input_buffer.append([button_jump, buffer_time()])
 			elif Animator.query_to_play(["aDashTransit"]):
 				animate("SoftLanding")
-				input_buffer.append([button_dash, Settings.input_buffer_time[player_ID]])
+				if Settings.input_assist[player_ID]:
+					input_buffer.append([button_dash, buffer_time()])
 				
 		Em.char_state.AIR_ACTIVE:
 			pass # AIR_ACTIVE not used for now

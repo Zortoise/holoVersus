@@ -47,6 +47,7 @@ var orig_rng_seed
 var temp_input_buffer_time := [5, 5] # for saving replays
 var temp_tap_jump := [true, true] # for saving replays
 var temp_dj_fastfall := [false, false] # for saving replays
+var temp_input_assist := [true, true] # for saving replays
 
 var watching_replay := false # flag
 var replay_input_log: Dictionary = {} # not a resource

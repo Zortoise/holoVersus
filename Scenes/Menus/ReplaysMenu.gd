@@ -253,6 +253,7 @@ func watch_replay():
 	Settings.input_buffer_time = replay.input_buffer_time
 	Settings.tap_jump = replay.tap_jump
 	Settings.dj_fastfall = replay.dj_fastfall
+	Settings.input_assist = replay.input_assist
 	
 	if replay.netgame == true:
 		Globals.replay_is_netgame = true

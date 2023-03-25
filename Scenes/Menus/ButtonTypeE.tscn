@@ -5,10 +5,10 @@
 [ext_resource path="res://Scenes/Menus/ButtonTypeE.gd" type="Script" id=3]
 
 [sub_resource type="DynamicFont" id=56]
-size = 25
+size = 22
 use_filter = true
-extra_spacing_top = 8
-extra_spacing_bottom = 4
+extra_spacing_top = 4
+extra_spacing_bottom = 2
 font_data = ExtResource( 2 )
 
 [sub_resource type="StyleBoxEmpty" id=48]
@@ -36,8 +36,8 @@ Button/styles/normal = null
 Button/styles/pressed = null
 
 [sub_resource type="DynamicFont" id=52]
-size = 27
-outline_size = 6
+size = 23
+outline_size = 5
 outline_color = Color( 0.588235, 0.588235, 0.588235, 1 )
 use_filter = true
 font_data = ExtResource( 1 )
@@ -70,7 +70,7 @@ Button/styles/pressed = null
 
 [node name="ButtonTypeE" type="HBoxContainer"]
 margin_right = 640.0
-margin_bottom = 40.0
+margin_bottom = 35.0
 rect_pivot_offset = Vector2( -336, -200 )
 focus_mode = 2
 theme = SubResource( 57 )
@@ -78,7 +78,7 @@ script = ExtResource( 3 )
 
 [node name="Button" type="Button" parent="."]
 margin_right = 282.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 focus_mode = 0
 mouse_filter = 1
 size_flags_horizontal = 3
@@ -91,7 +91,7 @@ align = 0
 [node name="Button2" type="Button" parent="."]
 margin_left = 286.0
 margin_right = 640.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 mouse_filter = 1
 size_flags_horizontal = 3
 theme = SubResource( 55 )

@@ -157,6 +157,7 @@ func change_scene(new_scene: String): # called by animation
 	Globals.temp_input_buffer_time = Settings.input_buffer_time.duplicate(true)
 	Globals.temp_tap_jump = Settings.tap_jump.duplicate(true)
 	Globals.temp_dj_fastfall = Settings.dj_fastfall.duplicate(true)
+	Globals.temp_input_assist = Settings.input_assist.duplicate(true)
 	
 	# change controls back to normal, don't do "if Netplay.is_netplay()" in case of disconnection
 # warning-ignore:return_value_discarded

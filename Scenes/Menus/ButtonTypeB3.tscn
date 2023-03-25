@@ -4,10 +4,10 @@
 [ext_resource path="res://Scenes/Menus/ButtonTypeA.gd" type="Script" id=2]
 
 [sub_resource type="DynamicFont" id=52]
-size = 25
+size = 22
 use_filter = true
-extra_spacing_top = 8
-extra_spacing_bottom = 4
+extra_spacing_top = 4
+extra_spacing_bottom = 2
 font_data = ExtResource( 1 )
 
 [sub_resource type="StyleBoxEmpty" id=48]
@@ -36,7 +36,7 @@ Button/styles/pressed = null
 
 [node name="ButtonTypeB3" type="Button"]
 margin_right = 752.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 theme = SubResource( 51 )
 custom_constants/hseparation = 10
 action_mode = 0

@@ -4,6 +4,7 @@ extends Node2D
 const TAP_JUMP_OPTIONS = ["off", "on"]
 const INPUT_BUFFER_OPTIONS = ["none", "1 frame", "2 frames", "3 frames", "4 frames", "5 frames", "6 frames"
 		, "7 frames", "8 frames", "9 frames", "10 frames"]
+const INPUT_ASSIST_OPTIONS = ["off", "on"]
 const DEADZONE_OPTIONS = ["0.05", "0.10", "0.15", "0.20", "0.25", "0.30", "0.35", "0.40", "0.45", "0.50", "0.55", 
 		"0.60", "0.65", "0.70", "0.75", "0.80", "0.85", "0.90", "0.95", "1.00"]
 const DJ_FASTFALL_OPTIONS = ["off", "on"]
@@ -26,7 +27,7 @@ var fixed_deadzone := 0.2 # for joystick
 
 var action_for_extra_button
 var loaded_extra_button = load("res://Scenes/Menus/ButtonTypeE3.tscn")
-const MAX_EXTRA_BUTTON_NUMBER = 20
+const MAX_EXTRA_BUTTON_NUMBER = 18
 
 
 func _ready():
@@ -109,6 +110,7 @@ func _ready():
 	$ControlsListBottom/TapJump.load_button("Up to Jump", TAP_JUMP_OPTIONS, input_map.P1_tapjump)
 	$ControlsListBottom/DJFastfall.load_button("Down+Jump Fastfall", DJ_FASTFALL_OPTIONS, input_map.P1_dj_fastfall)
 	$ControlsListBottom/InputBuffer.load_button("Input Buffer", INPUT_BUFFER_OPTIONS, input_map.P1_buffer)
+	$ControlsListBottom/InputAssist.load_button("Input Assist", INPUT_ASSIST_OPTIONS, input_map.P1_input_assist)
 	$ControlsListBottom/Deadzone.load_button("Deadzone", DEADZONE_OPTIONS, input_map.P1_deadzone)
 	
 	$PopUpSave/SaveList/PresetName.load_button("Preset Name", "", $AltInputs, 50, $PopUpSave/SaveList/InvalidFilename/Label)
@@ -316,6 +318,7 @@ func update_player_input():
 	input_map["P" + player_index + "_tapjump"] = $ControlsListBottom/TapJump.option_pointer
 	input_map["P" + player_index + "_dj_fastfall"] = $ControlsListBottom/DJFastfall.option_pointer
 	input_map["P" + player_index + "_buffer"] = $ControlsListBottom/InputBuffer.option_pointer
+	input_map["P" + player_index + "_input_assist"] = $ControlsListBottom/InputAssist.option_pointer
 	input_map["P" + player_index + "_deadzone"] = $ControlsListBottom/Deadzone.option_pointer
 			
 func load_player_input():
@@ -343,6 +346,7 @@ func load_player_input():
 	$ControlsListBottom/TapJump.change_pointer(input_map["P" + player_index + "_tapjump"])
 	$ControlsListBottom/DJFastfall.change_pointer(input_map["P" + player_index + "_dj_fastfall"])
 	$ControlsListBottom/InputBuffer.change_pointer(input_map["P" + player_index + "_buffer"])
+	$ControlsListBottom/InputAssist.change_pointer(input_map["P" + player_index + "_input_assist"])
 	$ControlsListBottom/Deadzone.change_pointer(input_map["P" + player_index + "_deadzone"])
 	
 	load_extra_buttons()

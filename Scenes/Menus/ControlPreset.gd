@@ -19,6 +19,7 @@ export var preset := {
 		"tapjump" : null,
 		"dj_fastfall" : null,
 		"buffer" : null,
+		"input_assist" : null,
 		"deadzone" : null,
 		"extra_buttons" : [],
 	}

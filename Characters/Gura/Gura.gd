@@ -653,21 +653,22 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
 		return false # since this will trigger instant aerial
 	
-	match Character.state:
-		Em.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
-			if Animator.query_current(["DashTransit"]) and attack_ref in STARTERS:
-				if Character.test_qc_chain_combo(attack_ref):
-					if Character.is_ex_valid(attack_ref):
-						Character.animate(attack_ref + "Startup")
-						has_acted[0] = true
-						return true
-		Em.char_state.AIR_STARTUP: # can attack on 1st frames of air dash
-			if Animator.query_current(["aDashTransit"]) and ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-				if Character.test_qc_chain_combo("a" + attack_ref):
-					if Character.is_ex_valid("a" + attack_ref):
-						Character.animate("a" + attack_ref + "Startup")
-						has_acted[0] = true
-						return true
+#	if Settings.input_assist[Character.player_ID]:
+#		match Character.state:
+#			Em.char_state.GROUND_STARTUP: # can attack on 1st frame of ground dash
+#				if Animator.query_current(["DashTransit"]) and attack_ref in STARTERS:
+#					if Character.test_qc_chain_combo(attack_ref):
+#						if Character.is_ex_valid(attack_ref):
+#							Character.animate(attack_ref + "Startup")
+#							has_acted[0] = true
+#							return true
+#			Em.char_state.AIR_STARTUP: # can attack on 1st frames of air dash
+#				if Animator.query_current(["aDashTransit"]) and ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
+#					if Character.test_qc_chain_combo("a" + attack_ref):
+#						if Character.is_ex_valid("a" + attack_ref):
+#							Character.animate("a" + attack_ref + "Startup")
+#							has_acted[0] = true
+#							return true
 						
 	match new_state:
 			
@@ -682,12 +683,13 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					return true
 					
 		Em.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
-			if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]) and \
-					Character.test_qc_chain_combo(attack_ref):
-				if Character.is_ex_valid(attack_ref):
-					Character.animate(attack_ref + "Startup")
-					has_acted[0] = true
-					return true
+			if Settings.input_assist[Character.player_ID]:
+				if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]) and \
+						Character.test_qc_chain_combo(attack_ref):
+					if Character.is_ex_valid(attack_ref):
+						Character.animate(attack_ref + "Startup")
+						has_acted[0] = true
+						return true
 					
 		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_RECOVERY, Em.char_state.AIR_D_RECOVERY:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
@@ -701,14 +703,15 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						return true
 						
 		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
-			if ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
-					!Character.button_jump in Character.input_state.pressed and \
-					Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
-					Character.test_qc_chain_combo("a" + attack_ref):
-				if Character.is_ex_valid("a" + attack_ref):
-					Character.animate("a" + attack_ref + "Startup")
-					has_acted[0] = true
-					return true
+			if Settings.input_assist[Character.player_ID]:
+				if ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
+						!Character.button_jump in Character.input_state.pressed and \
+						Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
+						Character.test_qc_chain_combo("a" + attack_ref):
+					if Character.is_ex_valid("a" + attack_ref):
+						Character.animate("a" + attack_ref + "Startup")
+						has_acted[0] = true
+						return true
 				
 		# chain cancel
 		Em.char_state.GROUND_ATK_RECOVERY, Em.char_state.GROUND_ATK_ACTIVE:
@@ -725,13 +728,14 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 			
 		# quick cancel
 		Em.char_state.GROUND_ATK_STARTUP:
-			if Character.grounded and attack_ref in STARTERS:
-				if Character.check_quick_cancel(attack_ref): # must be within 1st frame, animation name must be in MOVE_DATABASE
-					if Character.test_qc_chain_combo(attack_ref):
-						if Character.is_ex_valid(attack_ref, true):
-							Character.animate(attack_ref + "Startup")
-							has_acted[0] = true
-							return true
+			if Settings.input_assist[Character.player_ID]:
+				if Character.grounded and attack_ref in STARTERS:
+					if Character.check_quick_cancel(attack_ref): # must be within 1st frame, animation name must be in MOVE_DATABASE
+						if Character.test_qc_chain_combo(attack_ref):
+							if Character.is_ex_valid(attack_ref, true):
+								Character.animate(attack_ref + "Startup")
+								has_acted[0] = true
+								return true
 					
 		# chain cancel
 		Em.char_state.AIR_ATK_RECOVERY, Em.char_state.AIR_ATK_ACTIVE:
@@ -759,22 +763,23 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 							
 		# quick cancel
 		Em.char_state.AIR_ATK_STARTUP:
-			if !Character.grounded:
-				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-					if Character.check_quick_cancel("a" + attack_ref):
-						if Character.test_qc_chain_combo("a" + attack_ref):
-							if Character.is_ex_valid("a" + attack_ref, true):
-								Character.animate("a" + attack_ref + "Startup")
-								has_acted[0] = true
-								return true
-			else:
-				if attack_ref in STARTERS:
-					if Character.check_quick_cancel(attack_ref):
-						if Character.test_qc_chain_combo(attack_ref):
-							if Character.is_ex_valid(attack_ref, true):
-								Character.animate(attack_ref + "Startup")
-								has_acted[0] = true
-								return true
+			if Settings.input_assist[Character.player_ID]:
+				if !Character.grounded:
+					if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
+						if Character.check_quick_cancel("a" + attack_ref):
+							if Character.test_qc_chain_combo("a" + attack_ref):
+								if Character.is_ex_valid("a" + attack_ref, true):
+									Character.animate("a" + attack_ref + "Startup")
+									has_acted[0] = true
+									return true
+				else:
+					if attack_ref in STARTERS:
+						if Character.check_quick_cancel(attack_ref):
+							if Character.test_qc_chain_combo(attack_ref):
+								if Character.is_ex_valid(attack_ref, true):
+									Character.animate(attack_ref + "Startup")
+									has_acted[0] = true
+									return true
 					
 	return false
 						

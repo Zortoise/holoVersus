@@ -205,6 +205,7 @@ func load_buttoncheck():
 	var TAP_JUMP_OPTIONS = ["off", "on"]
 	var INPUT_BUFFER_OPTIONS = ["none", "1 frame", "2 frames", "3 frames", "4 frames", "5 frames", "6 frames"
 			, "7 frames", "8 frames", "9 frames", "10 frames"]
+	var INPUT_ASSIST_OPTIONS = ["off", "on"]
 	var DJ_FASTFALL_OPTIONS = ["off", "on"]
 	
 	for player_ID in [0, 1]:
@@ -228,6 +229,7 @@ func load_buttoncheck():
 		grid.get_node("TapJump2").text = TAP_JUMP_OPTIONS[input_map["P" + player_index + "_tapjump"]]
 		grid.get_node("DJFastfall2").text = DJ_FASTFALL_OPTIONS[input_map["P" + player_index + "_dj_fastfall"]]
 		grid.get_node("InputBuffer2").text = INPUT_BUFFER_OPTIONS[input_map["P" + player_index + "_buffer"]]
+		grid.get_node("InputAssist2").text = INPUT_ASSIST_OPTIONS[input_map["P" + player_index + "_input_assist"]]
 
 
 func _physics_process(_delta):

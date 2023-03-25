@@ -341,7 +341,7 @@ Button/styles/normal = null
 Button/styles/pressed = null
 
 [sub_resource type="DynamicFont" id=44]
-size = 10
+size = 22
 outline_size = 5
 outline_color = Color( 0.121569, 0.121569, 0.121569, 0 )
 use_filter = true
@@ -1056,59 +1056,58 @@ theme = ExtResource( 7 )
 
 [node name="Up" parent="ControlsListL" instance=ExtResource( 9 )]
 margin_right = 408.0
-margin_bottom = 43.0
 focus_neighbour_left = NodePath("../../ControlsListExtra/AddButton")
 focus_neighbour_top = NodePath("../../ControlsListBottom/LoadPreset")
 focus_neighbour_right = NodePath("../../ControlsListR/Light")
 
 [node name="Down" parent="ControlsListL" instance=ExtResource( 9 )]
-margin_top = 47.0
+margin_top = 39.0
 margin_right = 408.0
-margin_bottom = 90.0
+margin_bottom = 74.0
 focus_neighbour_left = NodePath("../../ControlsListExtra/ClearButtons")
 focus_neighbour_right = NodePath("../../ControlsListR/Fierce")
 
 [node name="Left" parent="ControlsListL" instance=ExtResource( 9 )]
-margin_top = 94.0
+margin_top = 78.0
 margin_right = 408.0
-margin_bottom = 137.0
+margin_bottom = 113.0
 focus_neighbour_left = NodePath("../../ControlsListExtra/RemoveButton")
 focus_neighbour_right = NodePath("../../ControlsListR/Dash")
 
 [node name="Right" parent="ControlsListL" instance=ExtResource( 9 )]
-margin_top = 141.0
+margin_top = 117.0
 margin_right = 408.0
-margin_bottom = 184.0
+margin_bottom = 152.0
 focus_neighbour_right = NodePath("../../ControlsListR/Aux")
 
 [node name="Jump" parent="ControlsListL" instance=ExtResource( 9 )]
-margin_top = 188.0
+margin_top = 156.0
 margin_right = 408.0
-margin_bottom = 231.0
+margin_bottom = 191.0
 focus_neighbour_right = NodePath("../../ControlsListR/Block")
 
 [node name="Special" parent="ControlsListL" instance=ExtResource( 9 )]
-margin_top = 235.0
+margin_top = 195.0
 margin_right = 408.0
-margin_bottom = 278.0
+margin_bottom = 230.0
 focus_neighbour_right = NodePath("../../ControlsListR/RS_Up")
 
 [node name="Unique" parent="ControlsListL" instance=ExtResource( 9 )]
-margin_top = 282.0
+margin_top = 234.0
 margin_right = 408.0
-margin_bottom = 325.0
+margin_bottom = 269.0
 focus_neighbour_right = NodePath("../../ControlsListR/RS_Down")
 
 [node name="Blank2" type="Label" parent="ControlsListL"]
-margin_top = 329.0
+margin_top = 273.0
 margin_right = 408.0
-margin_bottom = 346.0
+margin_bottom = 290.0
 custom_fonts/font = SubResource( 50 )
 
 [node name="Pause" parent="ControlsListL" instance=ExtResource( 9 )]
-margin_top = 350.0
+margin_top = 294.0
 margin_right = 408.0
-margin_bottom = 393.0
+margin_bottom = 329.0
 focus_neighbour_right = NodePath("../../ControlsListR/RS_Left")
 focus_neighbour_bottom = NodePath("../../ControlsListBottom/TapJump")
 
@@ -1121,72 +1120,71 @@ theme = ExtResource( 7 )
 
 [node name="Light" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_right = 408.0
-margin_bottom = 43.0
 focus_neighbour_left = NodePath("../../ControlsListL/Up")
 focus_neighbour_right = NodePath("../../ControlsListExtra/AddButton")
 
 [node name="Fierce" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 47.0
+margin_top = 39.0
 margin_right = 408.0
-margin_bottom = 90.0
+margin_bottom = 74.0
 focus_neighbour_left = NodePath("../../ControlsListL/Down")
 focus_neighbour_right = NodePath("../../ControlsListExtra/ClearButtons")
 
 [node name="Dash" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 94.0
+margin_top = 78.0
 margin_right = 408.0
-margin_bottom = 137.0
+margin_bottom = 113.0
 focus_neighbour_left = NodePath("../../ControlsListL/Left")
 focus_neighbour_right = NodePath("../../ControlsListExtra/RemoveButton")
 
 [node name="Aux" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 141.0
+margin_top = 117.0
 margin_right = 408.0
-margin_bottom = 184.0
+margin_bottom = 152.0
 focus_neighbour_left = NodePath("../../ControlsListL/Right")
 
 [node name="Block" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 188.0
+margin_top = 156.0
 margin_right = 408.0
-margin_bottom = 231.0
+margin_bottom = 191.0
 focus_neighbour_left = NodePath("../../ControlsListL/Jump")
 
 [node name="Blank2" type="Label" parent="ControlsListR"]
-margin_top = 235.0
+margin_top = 195.0
 margin_right = 408.0
-margin_bottom = 252.0
+margin_bottom = 212.0
 custom_fonts/font = SubResource( 50 )
 
 [node name="RS_Up" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 256.0
+margin_top = 216.0
 margin_right = 408.0
-margin_bottom = 299.0
+margin_bottom = 251.0
 focus_neighbour_left = NodePath("../../ControlsListL/Special")
 
 [node name="RS_Down" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 303.0
+margin_top = 255.0
 margin_right = 408.0
-margin_bottom = 346.0
+margin_bottom = 290.0
 focus_neighbour_left = NodePath("../../ControlsListL/Unique")
 
 [node name="RS_Left" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 350.0
+margin_top = 294.0
 margin_right = 408.0
-margin_bottom = 393.0
+margin_bottom = 329.0
 focus_neighbour_left = NodePath("../../ControlsListL/Pause")
 
 [node name="RS_Right" parent="ControlsListR" instance=ExtResource( 9 )]
-margin_top = 397.0
+margin_top = 333.0
 margin_right = 408.0
-margin_bottom = 440.0
+margin_bottom = 368.0
 focus_neighbour_left = NodePath("../../ControlsListL/Pause")
 focus_neighbour_bottom = NodePath("../../ControlsListBottom/TapJump")
 
 [node name="ControlsListExtra" type="VBoxContainer" parent="."]
 margin_left = 1472.0
-margin_top = 256.0
+margin_top = 248.0
 margin_right = 1856.0
-margin_bottom = 312.0
+margin_bottom = 361.0
 theme = ExtResource( 7 )
 
 [node name="AddButton" parent="ControlsListExtra" instance=ExtResource( 11 )]
@@ -1197,16 +1195,17 @@ focus_neighbour_right = NodePath("../../ControlsListL/Up")
 text = "Add Extra Button"
 
 [node name="ClearButtons" parent="ControlsListExtra" instance=ExtResource( 11 )]
-margin_top = 47.0
+margin_top = 39.0
 margin_right = 384.0
-margin_bottom = 90.0
+margin_bottom = 74.0
+focus_neighbour_left = NodePath("../../ControlsListR/Fierce")
 focus_neighbour_right = NodePath("../../ControlsListL/Down")
 text = "Clear Extra Buttons"
 
 [node name="RemoveButton" parent="ControlsListExtra" instance=ExtResource( 11 )]
-margin_top = 94.0
+margin_top = 78.0
 margin_right = 384.0
-margin_bottom = 137.0
+margin_bottom = 113.0
 focus_neighbour_left = NodePath("../../ControlsListR/Dash")
 focus_neighbour_right = NodePath("../../ControlsListL/Left")
 focus_neighbour_bottom = NodePath("../AddButton")
@@ -1214,16 +1213,16 @@ text = "Remove Extra Button"
 
 [node name="ControlsListExtra2" type="VBoxContainer" parent="."]
 margin_left = 1480.0
-margin_top = 424.0
+margin_top = 384.0
 margin_right = 1864.0
-margin_bottom = 984.0
+margin_bottom = 944.0
 theme = ExtResource( 7 )
 
 [node name="ControlsListBottom" type="VBoxContainer" parent="."]
 margin_left = 576.0
-margin_top = 728.0
+margin_top = 672.0
 margin_right = 1280.0
-margin_bottom = 1023.0
+margin_bottom = 967.0
 theme = SubResource( 21 )
 
 [node name="TapJump" parent="ControlsListBottom" instance=ExtResource( 5 )]
@@ -1231,37 +1230,42 @@ margin_right = 704.0
 focus_neighbour_top = NodePath("../../ControlsListL/Pause")
 
 [node name="DJFastfall" parent="ControlsListBottom" instance=ExtResource( 5 )]
-margin_top = 47.0
+margin_top = 39.0
 margin_right = 704.0
-margin_bottom = 90.0
+margin_bottom = 74.0
 focus_neighbour_top = NodePath("../../ControlsListL/Pause")
 
 [node name="InputBuffer" parent="ControlsListBottom" instance=ExtResource( 5 )]
-margin_top = 94.0
+margin_top = 78.0
 margin_right = 704.0
-margin_bottom = 137.0
+margin_bottom = 113.0
+
+[node name="InputAssist" parent="ControlsListBottom" instance=ExtResource( 5 )]
+margin_top = 117.0
+margin_right = 704.0
+margin_bottom = 152.0
 
 [node name="Deadzone" parent="ControlsListBottom" instance=ExtResource( 5 )]
-margin_top = 141.0
+margin_top = 156.0
 margin_right = 704.0
-margin_bottom = 184.0
+margin_bottom = 191.0
 
 [node name="Blank2" type="Label" parent="ControlsListBottom"]
-margin_top = 188.0
+margin_top = 195.0
 margin_right = 704.0
-margin_bottom = 201.0
+margin_bottom = 222.0
 custom_fonts/font = SubResource( 44 )
 
 [node name="SavePreset" parent="ControlsListBottom" instance=ExtResource( 11 )]
-margin_top = 205.0
+margin_top = 226.0
 margin_right = 704.0
-margin_bottom = 248.0
+margin_bottom = 261.0
 text = "Save Preset"
 
 [node name="LoadPreset" parent="ControlsListBottom" instance=ExtResource( 11 )]
-margin_top = 252.0
+margin_top = 265.0
 margin_right = 704.0
-margin_bottom = 295.0
+margin_bottom = 300.0
 focus_neighbour_bottom = NodePath("../../ControlsListL/Up")
 text = "Load Preset"
 

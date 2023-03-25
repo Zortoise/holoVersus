@@ -20,6 +20,7 @@ export var music := "" # WIP
 export var input_buffer_time := [5, 5]
 export var tap_jump := [true, true]
 export var dj_fastfall := [false, false]
+export var input_assist := [true, true]
 
 export var orig_rng_seed := 0
 
@@ -48,6 +49,7 @@ func generate_replay(): # called at start of VictoryScreen
 	input_buffer_time = Globals.temp_input_buffer_time
 	tap_jump = Globals.temp_tap_jump
 	dj_fastfall = Globals.temp_dj_fastfall
+	input_assist = Globals.temp_input_assist
 
 	orig_rng_seed = Globals.orig_rng_seed
 	

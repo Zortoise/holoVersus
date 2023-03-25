@@ -906,7 +906,7 @@ position = Vector2( 640, 576 )
 scale = Vector2( 3, 3 )
 
 [node name="SelectSprite" parent="P1_Sprite" instance=ExtResource( 17 )]
-frame = 4
+frame = 10
 
 [node name="P2_Sprite" type="Node2D" parent="."]
 position = Vector2( 1280, 576 )
@@ -914,7 +914,6 @@ scale = Vector2( -3, 3 )
 
 [node name="SelectSprite" parent="P2_Sprite" instance=ExtResource( 17 )]
 material = SubResource( 28 )
-frame = 3
 
 [node name="Grid" type="GridContainer" parent="."]
 margin_left = 244.0
@@ -1563,7 +1562,6 @@ anims/RESET = SubResource( 40 )
 anims/flashing = SubResource( 41 )
 
 [node name="P1_ButtonCheck" type="Control" parent="."]
-visible = false
 margin_left = 64.0
 margin_top = 64.0
 margin_right = 64.0
@@ -1572,7 +1570,7 @@ margin_bottom = 64.0
 [node name="ButtonCheckFrame" type="ColorRect" parent="P1_ButtonCheck"]
 modulate = Color( 1, 1, 1, 0.7 )
 margin_right = 576.0
-margin_bottom = 448.0
+margin_bottom = 472.0
 color = Color( 0, 0, 0, 1 )
 
 [node name="ButtonCheckGrid" type="GridContainer" parent="P1_ButtonCheck"]
@@ -1747,8 +1745,24 @@ theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "5 frames"
 
+[node name="InputAssist" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
+margin_top = 400.0
+margin_right = 264.0
+margin_bottom = 424.0
+theme = ExtResource( 15 )
+custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
+text = "Input Assist:"
+
+[node name="InputAssist2" type="Label" parent="P1_ButtonCheck/ButtonCheckGrid"]
+margin_left = 264.0
+margin_top = 400.0
+margin_right = 528.0
+margin_bottom = 424.0
+theme = ExtResource( 15 )
+custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
+text = "On"
+
 [node name="P2_ButtonCheck" type="Control" parent="."]
-visible = false
 margin_left = 1280.0
 margin_top = 64.0
 margin_right = 1280.0
@@ -1757,7 +1771,7 @@ margin_bottom = 64.0
 [node name="ButtonCheckFrame" type="ColorRect" parent="P2_ButtonCheck"]
 modulate = Color( 1, 1, 1, 0.7 )
 margin_right = 576.0
-margin_bottom = 448.0
+margin_bottom = 472.0
 color = Color( 0, 0, 0, 1 )
 
 [node name="ButtonCheckGrid" type="GridContainer" parent="P2_ButtonCheck"]
@@ -1931,6 +1945,23 @@ margin_bottom = 391.0
 theme = ExtResource( 15 )
 custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "5 frames"
+
+[node name="InputAssist" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
+margin_top = 400.0
+margin_right = 264.0
+margin_bottom = 424.0
+theme = ExtResource( 15 )
+custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
+text = "Input Assist:"
+
+[node name="InputAssist2" type="Label" parent="P2_ButtonCheck/ButtonCheckGrid"]
+margin_left = 264.0
+margin_top = 400.0
+margin_right = 528.0
+margin_bottom = 424.0
+theme = ExtResource( 15 )
+custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
+text = "On"
 
 [node name="P1_Waiting" type="Label" parent="."]
 visible = false

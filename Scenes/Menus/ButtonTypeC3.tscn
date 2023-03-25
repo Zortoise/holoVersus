@@ -5,10 +5,10 @@
 [ext_resource path="res://Scenes/Menus/ButtonTypeC.gd" type="Script" id=3]
 
 [sub_resource type="DynamicFont" id=49]
-size = 25
+size = 22
 use_filter = true
-extra_spacing_top = 8
-extra_spacing_bottom = 4
+extra_spacing_top = 4
+extra_spacing_bottom = 2
 font_data = ExtResource( 2 )
 
 [sub_resource type="StyleBoxEmpty" id=48]
@@ -37,14 +37,14 @@ Button/styles/pressed = null
 
 [node name="ButtonTypeC3" type="HBoxContainer"]
 margin_right = 472.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 focus_mode = 2
 theme = SubResource( 51 )
 script = ExtResource( 3 )
 
 [node name="Button" type="Button" parent="."]
 margin_right = 230.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 focus_mode = 0
 mouse_filter = 1
 size_flags_horizontal = 3
@@ -56,7 +56,7 @@ align = 0
 [node name="PickerArrowL" type="TextureButton" parent="."]
 margin_left = 234.0
 margin_right = 257.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 focus_mode = 0
 mouse_filter = 1
 size_flags_horizontal = 3
@@ -70,7 +70,7 @@ flip_h = true
 [node name="Selection" type="Button" parent="."]
 margin_left = 261.0
 margin_right = 445.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 focus_mode = 0
 mouse_filter = 1
 size_flags_horizontal = 3
@@ -83,7 +83,7 @@ flat = true
 [node name="PickerArrowR" type="TextureButton" parent="."]
 margin_left = 449.0
 margin_right = 472.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 focus_mode = 0
 mouse_filter = 1
 size_flags_horizontal = 3
