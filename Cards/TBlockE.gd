@@ -30,7 +30,7 @@ func _ready():
 	get_node("TestSprite").free() # test sprite is for sizing collision box
 
 func load_entity():
-	if Animator.to_play_animation != "Kill":
+	if Animator.to_play_anim != "Kill":
 		Entity.get_node("EntityCollisionBox").add_to_group("CSolidPlatforms")
 
 func init(aux_data: Dictionary):
@@ -131,7 +131,7 @@ func get_proj_level(move_name):
 	return 1
 			
 func simulate():
-	if posmod(Entity.lifetime, 10) == 0 and Animator.to_play_animation != "Kill":
+	if posmod(Entity.lifetime, 10) == 0 and Animator.to_play_anim != "Kill":
 		if !Detection.detect_bool([Entity.get_node("EntityCollisionBox")], ["SolidPlatforms"], Vector2(0, 16)):
 			Entity.position.y += 16
 			Entity.set_true_position()
@@ -139,7 +139,7 @@ func simulate():
 			kill()
 	
 func kill():
-	if Animator.to_play_animation != "Kill":
+	if Animator.to_play_anim != "Kill":
 		Animator.play("Kill")
 		
 	

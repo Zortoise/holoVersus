@@ -16,7 +16,7 @@ func init(_aux_data: Dictionary):
 	Animator.play("Spawn") # starting animation
 
 func simulate():
-	if Animator.current_animation == "Kill" and Animator.time == 5:
+	if Animator.current_anim == "Kill" and Animator.time == 5:
 		var spawn_point = Animator.query_point("entityspawn")
 		Globals.Game.spawn_entity(Entity.master_ID, "NibblerE", spawn_point, {"facing" : Entity.facing})
 		

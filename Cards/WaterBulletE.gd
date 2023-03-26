@@ -84,12 +84,12 @@ func simulate():
 	pass
 	
 func kill(sound = true):
-	if Animator.to_play_animation != "Kill":
+	if Animator.to_play_anim != "Kill":
 		Animator.play("Kill")
 		if sound: Entity.play_audio("water1", {"vol" : -10})
 	
 #func expire():
-#	if Animator.to_play_animation != "Expire":
+#	if Animator.to_play_anim != "Expire":
 #		Animator.play("Expire")
 	
 func collision(): # collided with a platform

@@ -99,7 +99,7 @@ func get_proj_level(move_name):
 			
 			
 func simulate():
-	if Animator.to_play_animation != "Kill":
+	if Animator.to_play_anim != "Kill":
 		if "alt2" in Entity.unique_data:
 			Entity.velocity.y -= 6 * FMath.S
 		elif "alt1" in Entity.unique_data:
@@ -107,7 +107,7 @@ func simulate():
 		
 	
 func kill(sound = true):
-	if Animator.to_play_animation != "Kill":
+	if Animator.to_play_anim != "Kill":
 		Animator.play("Kill")
 		if sound: Entity.play_audio("impact25", {"vol" : -12})
 	

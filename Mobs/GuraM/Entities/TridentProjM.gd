@@ -52,7 +52,7 @@ func init(aux_data: Dictionary):
 		rot = -rot
 		Entity.v_face(-1)
 				
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"[c1]Spawn", "[u][c1]Spawn":
 
 			var vel = 500
@@ -73,7 +73,7 @@ func init(aux_data: Dictionary):
 			# set "palette" to Entity.palette_ref under Entity.creater_mob_ref in LevelControl instead of "master"
 
 #func spin():
-#	match Animator.to_play_animation:
+#	match Animator.to_play_anim:
 #		"[c1]Active", "[u][c1]Active":
 #			Animator.play("[c1]Spin")
 
@@ -255,7 +255,7 @@ func simulate():
 		Entity.get_node("Sprite").rotation = 0
 		Entity.unique_data.reset_rot = null
 	
-	match Animator.to_play_animation: # afterimage trail
+	match Animator.to_play_anim: # afterimage trail
 		
 		"[c1]Spin":
 			Entity.velocity.percent(80)
@@ -303,7 +303,7 @@ func simulate():
 						
 	
 func kill(sound = true):
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"[c1]Spawn", "[c1]Active":
 			Animator.play("Kill")
 			if sound: Entity.play_audio("break2", {"vol" : -15}) # don't put this outside, Spin animation has no kill()

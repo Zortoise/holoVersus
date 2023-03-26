@@ -84,7 +84,7 @@ func query_move_data(move_name) -> Dictionary:
 		
 func query_atk_attr(move_name):
 	
-	if Animator.to_play_animation in ["Spawn", "Jump", "Run"]:
+	if Animator.to_play_anim in ["Spawn", "Jump", "Run"]:
 		return [Em.atk_attr.HARMLESS_ENTITY]
 	
 	move_name = refine_move_name(move_name)
@@ -106,11 +106,11 @@ func get_proj_level(move_name):
 			
 			
 func simulate():
-	if Animator.to_play_animation in ["Spawn", "Jump"]: # throw arc
+	if Animator.to_play_anim in ["Spawn", "Jump"]: # throw arc
 		Entity.velocity.y = int(min(Entity.velocity.y + GRAVITY, TERMINAL_DOWN_VELOCITY))
 		Entity.velocity.x = FMath.f_lerp(Entity.velocity.x, 0, AIR_RESISTANCE)
 		
-	elif Animator.to_play_animation == "Run":
+	elif Animator.to_play_anim == "Run":
 		if Entity.is_on_ground(Entity.get_node("EntityCollisionBox")):
 			var target = Globals.Game.get_player_node(Entity.master_ID).get_target()
 			if target != null:
@@ -126,7 +126,7 @@ func simulate():
 		else: # ran off ledges
 			Animator.play("Jump")
 			
-	if !Animator.to_play_animation.ends_with("Kill"):
+	if !Animator.to_play_anim.ends_with("Kill"):
 		var timer = Globals.Game.get_entity_node(Entity.unique_data.timer_ID)
 		if timer != null:
 			if Entity.lifetime <= 60:
@@ -145,7 +145,7 @@ func simulate():
 					
 	
 func kill(sound = true):
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"Spawn", "Jump":
 			Animator.play("Kill")
 		"Run":
@@ -154,7 +154,7 @@ func kill(sound = true):
 	
 	
 func collision(): # collided with a platform
-	if Animator.to_play_animation in ["Spawn", "Jump"]:
+	if Animator.to_play_anim in ["Spawn", "Jump"]:
 		if Entity.is_on_ground(Entity.get_node("EntityCollisionBox")):
 			Animator.play("Run")
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", Entity.get_feet_pos(), {"grounded":true})
@@ -175,7 +175,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 func _on_SpritePlayer_anim_started(anim_name):
 	
-	if Animator.to_play_animation.ends_with("Kill"):
+	if Animator.to_play_anim.ends_with("Kill"):
 		Entity.velocity.set_vector(0, 0)
 		Entity.get_node("Sprite").rotation = 0
 		Entity.absorption_value = null

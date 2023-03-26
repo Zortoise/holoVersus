@@ -86,6 +86,7 @@ const PALETTE_TO_HITSPARK_PALETTE = {
 const UNIQUE_DATA_REF = {
 	"groundfin_count" : 0,
 	"groundfin_trigger" : false,
+	"groundfin_target" : null,
 	"nibbler_count" : 0,
 #	"nibbler_cancel" : 0, # a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 	"last_trident" : null
@@ -93,7 +94,7 @@ const UNIQUE_DATA_REF = {
 
 const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
 	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]", \
-	"SP7", "aSP7"]
+	"SP7", "aSP7", "SP8"]
 #const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
 #const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 #const SUPERS = []
@@ -611,6 +612,11 @@ const MOVE_DATABASE = {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
 #		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT, Em.atk_attr.NO_TURN, Em.atk_attr.NO_QUICK_CANCEL],
+	},
+	
+	"SP8": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_TURN, Em.atk_attr.NO_SDASH_CANCEL],
 	},
 
 }

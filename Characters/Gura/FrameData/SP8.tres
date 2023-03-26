@@ -1,0 +1,100 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"SP8Active": {
+"duration": 5,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP8Sprite",
+"timestamps": {
+0: {
+"frame": 2,
+"hurtbox": [  ]
+},
+1: {
+"frame": 3,
+"hurtbox": [  ]
+},
+2: {
+"frame": 4,
+"hurtbox": [  ]
+},
+3: {
+"frame": 5,
+"hurtbox": [  ]
+},
+4: {
+"frame": 6,
+"hurtbox": [  ]
+}
+},
+"vframes": 3
+},
+"SP8Rec": {
+"duration": 20,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP8Sprite",
+"timestamps": {
+0: {
+"frame": 9,
+"hurtbox": [ Vector2( -11, 22 ), Vector2( 8, 22 ), Vector2( 8, -25 ), Vector2( -11, -25 ) ]
+},
+4: {
+"frame": 10,
+"hurtbox": [ Vector2( -9, 22 ), Vector2( 10, 22 ), Vector2( 10, -25 ), Vector2( -9, -25 ) ]
+},
+8: {
+"frame": 11,
+"hurtbox": [ Vector2( -8, 22 ), Vector2( 11, 22 ), Vector2( 11, -25 ), Vector2( -8, -25 ) ]
+},
+12: {
+"frame": 12,
+"hurtbox": [ Vector2( -9, 22 ), Vector2( 10, 22 ), Vector2( 10, -26 ), Vector2( -9, -26 ) ]
+},
+16: {
+"frame": 13,
+"hurtbox": [ Vector2( -11, 15 ), Vector2( 9, 15 ), Vector2( 9, -19 ), Vector2( -11, -19 ) ]
+}
+},
+"vframes": 3
+},
+"SP8Startup": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP8Sprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hurtbox": [ Vector2( -7, 18 ), Vector2( 13, 18 ), Vector2( 13, -22 ), Vector2( -7, -22 ) ]
+},
+2: {
+"frame": 1,
+"hurtbox": [ Vector2( -8, 16 ), Vector2( 10, 16 ), Vector2( 10, -15 ), Vector2( -8, -15 ) ]
+}
+},
+"vframes": 3
+},
+"SP8bActive": {
+"duration": 4,
+"hframes": 6,
+"loop": false,
+"spritesheet": "SP8Sprite",
+"timestamps": {
+0: {
+"frame": 7,
+"hurtbox": [ Vector2( -11, 22 ), Vector2( 9, 22 ), Vector2( 9, -1 ), Vector2( -11, -1 ) ]
+},
+2: {
+"frame": 8,
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 9, 22 ), Vector2( 9, -15 ), Vector2( -12, -15 ) ]
+}
+},
+"vframes": 3
+}
+}

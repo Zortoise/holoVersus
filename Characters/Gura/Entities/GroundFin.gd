@@ -1,5 +1,6 @@
 extends Node2D
 
+const ID = "ground_fin" # for master to find it
 #const START_SPEED = 500
 
 const TRAITS = [Em.entity_trait.GROUNDED, Em.entity_trait.LEDGE_STOP]
@@ -30,7 +31,7 @@ func init(aux_data: Dictionary):
 	else:
 		Entity.lifespan = 300	
 		
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"Spawn":
 			Entity.velocity.set_vector(250 * FMath.S, 0)
 			Entity.velocity.x *= Entity.facing
@@ -40,7 +41,7 @@ func init(aux_data: Dictionary):
 			
 func simulate():
 	
-	match Animator.to_play_animation: # triggering shark breach
+	match Animator.to_play_anim: # triggering shark breach
 		"Active", "[h]Active", "Turn", "[h]Turn":
 			var master_node = Globals.Game.get_player_node(Entity.master_ID)
 			if master_node.unique_data.groundfin_trigger:
@@ -69,7 +70,7 @@ func query_atk_attr(_move_name):
 
 	
 func kill(_sound = true):
-	if !Animator.to_play_animation.ends_with("Kill"):
+	if !Animator.to_play_anim.ends_with("Kill"):
 		Animator.play("Kill")
 		# reduce ground fin count
 		var master_node = Globals.Game.get_player_node(Entity.master_ID)
@@ -82,7 +83,7 @@ func collision(): # collided with a wall, turns
 	ledge_stop()
 	
 func ledge_stop(): # about to go off the ledge, turns
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"Spawn", "Active":
 			Animator.play("Turn")
 		"[h]Spawn", "[h]Active":

@@ -107,7 +107,7 @@ func init(aux_data: Dictionary):
 		rot = -rot
 		Entity.v_face(-1)
 				
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"[c1]Spawn", "[u][c1]Spawn":
 			Entity.velocity.set_vector(500 * FMath.S, 0)
 			Entity.velocity.rotate(rot)
@@ -167,7 +167,7 @@ func init(aux_data: Dictionary):
 
 #func query_move_data_and_name():
 #
-#	var move_ref = Animator.to_play_animation
+#	var move_ref = Animator.to_play_anim
 #
 #	match move_name:
 #		"[c1]Spawn":
@@ -191,7 +191,7 @@ func init(aux_data: Dictionary):
 #		return {Em.hit.MOVE_DATA : MOVE_DATABASE[move_ref], Em.hit.MOVE_NAME : move_ref}
 
 func spin():
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"[c2]Active", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			Animator.play("[c1]Spin")
 		"[c3]Active", "[u][c3]Active", "[ex]Active", "[u][ex]Active":
@@ -215,7 +215,7 @@ func turn_to_enemy():
 	var new_v_facing := 1
 	
 	var charge_level: String = "1"
-	if Animator.current_animation == "[c2]Spin":
+	if Animator.current_anim == "[c2]Spin":
 		charge_level = "2"
 		Entity.life_point = 2
 		Entity.absorption_value = 2
@@ -388,7 +388,7 @@ func simulate():
 		Entity.get_node("Sprite").rotation = 0
 		Entity.unique_data.reset_rot = null
 	
-	match Animator.to_play_animation: # afterimage trail
+	match Animator.to_play_anim: # afterimage trail
 		
 		"[c1]Spin", "[c2]Spin":
 			Entity.velocity.percent(80)
@@ -404,7 +404,7 @@ func simulate():
 				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), Entity.master_ref, Entity.palette_ref, \
 						Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
-			if !Animator.to_play_animation in ["[c2]Active", "[u][c2]Active"]:
+			if !Animator.to_play_anim in ["[c2]Active", "[u][c2]Active"]:
 				if Entity.lifetime > 25 and Entity.hitcount_record.size() == 0:
 					Animator.play("[c1]Spin")
 		
@@ -427,7 +427,7 @@ func simulate():
 	
 	
 func kill(sound = true):
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"[c1]Spawn", "[c2]Spawn", "[c3]Spawn", "[ex]Spawn", "[c1]Active", "[c2]Active", "[c3]Active", "[ex]Active":
 			Animator.play("Kill")
 			if sound: Entity.play_audio("break2", {"vol" : -15}) # don't put this outside, Spin animation has no kill()
@@ -453,7 +453,7 @@ func kill(sound = true):
 	
 func collision(): # collided with a platform
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			if Entity.hitcount_record.size() == 0:
 				Animator.play("[c1]Spin")

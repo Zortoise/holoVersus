@@ -27,7 +27,7 @@ func _ready():
 func is_idle(player):
 	match player.state:
 		Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.CROUCHING, \
-				Em.char_state.DEAD, Em.char_state.GROUND_C_RECOVERY, Em.char_state.AIR_C_RECOVERY:
+				Em.char_state.DEAD, Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC:
 			return true
 		Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK: # for block, block return is not considered idle
 			return true
@@ -65,11 +65,11 @@ func simulate():
 							Em.char_state.GROUND_ACTIVE, Em.char_state.AIR_ACTIVE:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.3, 0.3, 0.7)
-							Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY:
+							Em.char_state.GROUND_REC, Em.char_state.AIR_REC:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.4, 0.4, 1.0)
-							Em.char_state.GROUND_C_RECOVERY, Em.char_state.AIR_C_RECOVERY, \
-									Em.char_state.GROUND_D_RECOVERY, Em.char_state.AIR_D_RECOVERY:
+							Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
+									Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
 								if !player_stopped[player_number]: stoptimes[player_number] = time
 								player_stopped[player_number] = true
 								pips[player_number][pip_number].modulate = Color(0.7, 0.3, 1.0)
@@ -86,7 +86,7 @@ func simulate():
 									pips[player_number][pip_number].modulate = Color(0.7, 0.3, 0.3)
 								else:
 									pips[player_number][pip_number].modulate = Color(1.0, 0.5, 0.5)				
-							Em.char_state.GROUND_ATK_RECOVERY, Em.char_state.AIR_ATK_RECOVERY:
+							Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.4, 0.4, 1.0)				
 								

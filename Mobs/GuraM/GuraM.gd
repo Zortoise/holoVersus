@@ -428,7 +428,7 @@ const COMMANDS = {
 		
 		"dash": {
 			"action": "anim",
-			"no_c_rec" : true, # cannot use from C_RECOVERY
+			"no_c_rec" : true, # cannot use from C_REC
 			"anim" : "DashTransit",	
 			"next" : "option_cross"
 		},
@@ -453,13 +453,13 @@ const COMMANDS = {
 		
 		"air_dash": {
 			"action": "anim",
-			"no_c_rec" : true, # cannot use from C_RECOVERY
+			"no_c_rec" : true, # cannot use from C_REC
 			"anim" : "aDashTransit",	
 			"next" : "option_air",
 		},
 		"air_back_dash": {
 			"action": "anim",
-			"no_c_rec" : true, # cannot use from C_RECOVERY
+			"no_c_rec" : true, # cannot use from C_REC
 			"anim" : "aDashTransit",	
 			"next" : "option_close",
 			"style" : "air_back_dash"
@@ -1244,7 +1244,7 @@ func filter(atk_range: int):
 		Globals.remove_instances(results, "air_back_dash")
 		Globals.remove_instances(results, "back_jump")
 	
-	if Character.new_state == Em.char_state.GROUND_D_RECOVERY:
+	if Character.new_state == Em.char_state.GROUND_D_REC:
 		Globals.remove_instances(results, "dash") # will not decide to dash again during option_cross while dashing
 		Globals.remove_instances(results, "dash_dance")
 				
@@ -1344,64 +1344,61 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1Active", "L1Rec", "L1bActive", "L3Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive":
 			return Em.char_state.GROUND_ATK_ACTIVE
 		"L1bRec", "L3Rec", "F1Rec", "F2Rec", "F3Rec", "HbRec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 			
 		"aL1Startup", "aL3Startup", "aF1Startup", "aF2Startup", "aF3Startup", "aHStartup":
 			return Em.char_state.AIR_ATK_STARTUP
 		"aL1Active", "aL3Active", "aF1Active", "aF2Active", "aF3Active", "aHActive":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aL1Rec", "aL3Rec", "aF1Rec", "aF2Rec", "aF3Rec", "aHRec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 
 		"aF2SeqA", "aF2SeqB":
 			return Em.char_state.SEQUENCE_USER
 		"aF2GrabRec":
-			return Em.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_REC
 
 		"SP1Startup", "SP1[b]Startup", "SP1[c1]bStartup", "SP1[u]Startup", "SP1[u][c1]bStartup":
 			return Em.char_state.GROUND_ATK_STARTUP
 		"SP1[c1]Active", "SP1[u][c1]Active":
 			return Em.char_state.GROUND_ATK_ACTIVE
 		"SP1Rec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 		"aSP1Startup", "aSP1[b]Startup", "aSP1[c1]bStartup", "aSP1[d]Startup", "aSP1[d][c1]bStartup":
 			return Em.char_state.AIR_ATK_STARTUP
 		"aSP1[c1]Active", "aSP1[d][c1]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP1Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 		
 		"aSP2Startup":
 			return Em.char_state.AIR_ATK_STARTUP
 		"aSP2Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP2Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 		"aSP2CRec":
-			return Em.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_REC
 			
 		"SP3Startup":
 			return Em.char_state.GROUND_ATK_STARTUP
 		"SP3Active", "SP3bActive":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP3Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 			
 		"SP6[ex]Startup":
 			return Em.char_state.GROUND_ATK_STARTUP
 		"aSP6[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"SP6[ex]Rec", "SP6[ex]GrabRec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
 			return Em.char_state.SEQUENCE_USER
 		
 	print("Error: " + anim + " not found.")
 		
 func check_collidable():  # some Characters have move that can pass through other Characters
-	match Animator.to_play_animation:
-		_:
-			pass
 	return true
 	
 func check_semi_invuln():
@@ -1432,13 +1429,13 @@ func afterimage_trail():# process afterimage trail
 			Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
 			return
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"Dash", "aDash", "aDashD", "aDashU":
 			Character.afterimage_trail()
 
 			
 func unique_flash():
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		_:
 			pass
 			
@@ -1547,7 +1544,7 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 		Character.animate("Idle")
 		return
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"SP6[ex]SeqA":
 			if Animator.time == 10:
 				Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", Animator.query_point("grabpoint"), {"facing":-Character.facing}, \
@@ -1579,7 +1576,7 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 		
 	var grab_point = Animator.query_point("grabpoint")
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"aF2SeqA", "aF2SeqB":
 			move_sequence_target(grab_point)
 			rotate_partner(Partner)
@@ -1598,7 +1595,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 		Character.animate("Idle")
 		return
 
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"aF2SeqA":
 			Globals.Game.get_node("Players").move_child(Character, 0)
 			Character.velocity.set_vector(0, 0)
@@ -1664,7 +1661,7 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 		Partner.animate("Idle")
 		return true
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"aF2SeqB":
 			Partner.sequence_launch()
 			return true
@@ -1713,7 +1710,7 @@ func move_sequence_target(new_position): # move sequence_target to new position
 			
 			
 func get_seq_hit_data(hit_key: int):
-	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_HITS][hit_key].duplicate(true)
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_anim][Em.move.SEQ_HITS][hit_key].duplicate(true)
 	
 	if Em.move.DMG in seq_hit_data:
 		seq_hit_data[Em.move.DMG] = FMath.percent(seq_hit_data[Em.move.DMG], Character.MOB_LEVEL_TO_DMG[Character.mob_level])
@@ -1726,7 +1723,7 @@ func get_seq_hit_data(hit_key: int):
 	
 	
 func get_seq_launch_data():
-	var seq_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_LAUNCH].duplicate(true)
+	var seq_data = MOVE_DATABASE[Animator.to_play_anim][Em.move.SEQ_LAUNCH].duplicate(true)
 
 	if Em.move.DMG in seq_data:
 		seq_data[Em.move.DMG] = FMath.percent(seq_data[Em.move.DMG], Character.MOB_LEVEL_TO_DMG[Character.mob_level])
@@ -2049,7 +2046,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 				
-	if Character.new_state in [Em.char_state.GROUND_D_RECOVERY]: # put this after impulse
+	if Character.new_state in [Em.char_state.GROUND_D_REC]: # put this after impulse
 		Character.can_impulse = false
 	else:
 		Character.can_impulse = true
@@ -2262,7 +2259,7 @@ func landing_sound(): # can be called by main node
 	Character.play_audio("land1", {"vol" : -3})
 
 func stagger_anim():
-	match Animator.current_animation:
+	match Animator.current_anim:
 		"Run":
 			match sprite.frame:
 				38, 41:

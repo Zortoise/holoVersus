@@ -1064,7 +1064,12 @@ func is_offstage(in_box):
 		return true
 	return false
 	
-
+func is_point_offstage(point: Vector2):
+	var point_rect = Rect2(point.x - 1, point.y - 1, 2, 2)
+	if !stage_box.get_rect().intersects(point_rect):
+		return true
+	return false
+		
 func detect_kill(character_box):
 	if is_offstage(character_box): # if collision box is outside stage_box, kill them
 		character_box.get_parent().on_kill()
@@ -1486,7 +1491,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 #	var defender = get_node(hurtbox.owner_nodepath)
 #	var attacker_attr = hitbox.move_data[Em.move.ATK_ATTR]
 #	if Em.atk_attr.UNBLOCKABLE in attacker_attr or Em.atk_attr.ANTI_GUARD in attacker_attr:
-#		if defender.new_state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] or \
+#		if defender.new_state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] or \
 #				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
 #			if defender.Animator.query_to_play(["Tech", "GuardTech"]):
 #				return false

@@ -33,7 +33,7 @@ func simulate():
 					
 	
 func time(anim_name: String):
-	if Animator.to_play_animation != anim_name:
+	if Animator.to_play_anim != anim_name:
 		Animator.play(anim_name)
 	
 	

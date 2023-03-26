@@ -28,7 +28,7 @@ func query_atk_attr(_move_name):
 	return [Em.atk_attr.HARMLESS_ENTITY, Em.atk_attr.DESTRUCTIBLE_ENTITY]
 	
 func kill():
-	if !Animator.to_play_animation.ends_with("Kill"):
+	if !Animator.to_play_anim.ends_with("Kill"):
 		Animator.play("Kill")
 	
 func _on_SpritePlayer_anim_finished(anim_name):

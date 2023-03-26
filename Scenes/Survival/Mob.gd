@@ -354,14 +354,14 @@ func damage_update():
 func test1():
 	if Globals.debug_mode2:
 		$TestNode2D/TestLabel.text = "old state: " + Globals.char_state_to_string(state) + \
-				"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + "\n"
+				"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + "\n"
 	else:
 		$TestNode2D/TestLabel.text = ""
 	
 func test2():
 	if Globals.debug_mode2:
 		$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
-				"\n" + Animator.current_animation + " > " + Animator.to_play_animation + "  time: " + str(Animator.time) + \
+				"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 				"\n" + str(velocity.y) + " " + str(velocity_previous_frame.y) + " " + str(guardbroken) + " " + str(target_ID) + \
 				"\ngrounded: " + str(grounded) + " command: " + current_command + "\nchain_mem: " + str(chain_memory) + " " + str(seq_partner_ID)
 	else:
@@ -526,7 +526,7 @@ func simulate2(): # only ran if not in hitstop
 			$ArmorTimer.time += 1
 	
 #	if !$ResistTimer.is_running(): # out of resist timer, recover automatically
-#		if state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] and \
+#		if state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			if grounded:
 #				animate("Idle")
@@ -534,7 +534,7 @@ func simulate2(): # only ran if not in hitstop
 #				animate("FallTransit")
 #			$ArmorTimer.time = get_stat("ARMOR_TIME")
 #	else: # if no longer in Resisted Hitstun, set the timer to zero
-#		if state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] and \
+#		if state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			pass
 #		else:
@@ -599,16 +599,16 @@ func simulate2(): # only ran if not in hitstop
 	
 	if !grounded:
 		match new_state:
-			Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY, \
-				Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_ACTIVE, Em.char_state.GROUND_RECOVERY, \
-				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_RECOVERY, \
+			Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+				Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_ACTIVE, Em.char_state.GROUND_REC, \
+				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
 				Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.GROUND_BLOCK:
 				check_drop()
 	else: # just in case, normally called when physics.gd runs into a floor
 		match new_state:
 			Em.char_state.AIR_STANDBY, Em.char_state.AIR_STARTUP, \
-				Em.char_state.AIR_ACTIVE, Em.char_state.AIR_RECOVERY, Em.char_state.AIR_ATK_STARTUP, \
-				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_RECOVERY, Em.char_state.AIR_FLINCH_HITSTUN, \
+				Em.char_state.AIR_ACTIVE, Em.char_state.AIR_REC, Em.char_state.AIR_ATK_STARTUP, \
+				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC, Em.char_state.AIR_FLINCH_HITSTUN, \
 				Em.char_state.LAUNCHED_HITSTUN:
 				check_landing()
 
@@ -704,7 +704,7 @@ func simulate2(): # only ran if not in hitstop
 			if velocity.y > 0 and Animator.query_to_play(["Jump"]):
 				animate("FallTransit")
 	
-		Em.char_state.AIR_STARTUP, Em.char_state.AIR_D_RECOVERY, Em.char_state.AIR_RECOVERY:
+		Em.char_state.AIR_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.AIR_REC:
 			air_res_this_frame = 0
 
 		Em.char_state.AIR_ATK_STARTUP:
@@ -901,8 +901,8 @@ func process_command():
 	if  is_atk_recovery() and command_array_num > 0 and current_command in UniqChar.COMMANDS and \
 			"anim" in UniqChar.COMMANDS[current_command] and UniqChar.COMMANDS[current_command].anim is Array:
 		pass # chain series
-	elif !new_state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.GROUND_C_RECOVERY, \
-			Em.char_state.AIR_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY, Em.char_state.AIR_D_RECOVERY]:
+	elif !new_state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.GROUND_C_REC, \
+			Em.char_state.AIR_C_REC, Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC]:
 		return
 	
 	if !current_command in UniqChar.COMMANDS: # standby
@@ -955,12 +955,12 @@ func process_command():
 			match UniqChar.COMMANDS[current_command].action:
 						
 				"idle":
-					if !new_state in [Em.char_state.GROUND_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY]:
+					if !new_state in [Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC]:
 						face_opponent()
 							
 				"option": # see if activate triggers for 1 frame, then do "next" or "decision"
-					if new_state in [Em.char_state.GROUND_C_RECOVERY, Em.char_state.AIR_C_RECOVERY, \
-							Em.char_state.GROUND_D_RECOVERY, Em.char_state.AIR_D_RECOVERY]:
+					if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
+							Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC]:
 						return # maintain option during recovery states
 					if grounded:
 						if "next" in UniqChar.COMMANDS[current_command]:
@@ -1009,16 +1009,16 @@ func process_command():
 						if !grounded: return # if in air while trying to do a ground animation, wait till grounded then do it
 						
 						match new_state:
-							Em.char_state.GROUND_ATK_RECOVERY: # chaining
+							Em.char_state.GROUND_ATK_REC: # chaining
 								if command_array_num == 0: return
 								else: chaining = true
-							Em.char_state.GROUND_D_RECOVERY:
+							Em.char_state.GROUND_D_REC:
 								if command_array_num == 0 and \
 										("no_c_rec" in UniqChar.COMMANDS[current_command] or "no_move_rec" in UniqChar.COMMANDS[current_command]):
 									return # some animations cannot be done during MOVE RECOVERY
-							Em.char_state.GROUND_C_RECOVERY:
+							Em.char_state.GROUND_C_REC:
 								if command_array_num == 0 and "no_c_rec" in UniqChar.COMMANDS[current_command]:
-									return # some animations cannot be done during C_RECOVERY
+									return # some animations cannot be done during C_REC
 							
 					else: # animation is in the air
 						if grounded: # attempted to do air animation on ground, default decision
@@ -1026,16 +1026,16 @@ func process_command():
 							return
 							
 						match new_state:
-							Em.char_state.AIR_ATK_RECOVERY: # chaining
+							Em.char_state.AIR_ATK_REC: # chaining
 								if command_array_num == 0: return
 								else: chaining = true
-							Em.char_state.AIR_D_RECOVERY:
+							Em.char_state.AIR_D_REC:
 								if command_array_num == 0 and \
 										("no_c_rec" in UniqChar.COMMANDS[current_command] or "no_move_rec" in UniqChar.COMMANDS[current_command]):
 									return # some animations cannot be done during MOVE RECOVERY
-							Em.char_state.AIR_C_RECOVERY:
+							Em.char_state.AIR_C_REC:
 								if command_array_num == 0 and "no_c_rec" in UniqChar.COMMANDS[current_command]:
-									return # some animations cannot be done during C_RECOVERY
+									return # some animations cannot be done during C_REC
 					
 					if !chaining:
 						if "dir" in UniqChar.COMMANDS[current_command]:
@@ -1380,11 +1380,11 @@ func state_detect(anim):
 		"JumpTransit", "DashTransit":
 			return Em.char_state.GROUND_STARTUP
 		"Dash":
-			return Em.char_state.GROUND_D_RECOVERY
+			return Em.char_state.GROUND_D_REC
 		"SoftLanding":
-			return Em.char_state.GROUND_RECOVERY
+			return Em.char_state.GROUND_REC
 		"DashBrake":
-			return Em.char_state.GROUND_C_RECOVERY
+			return Em.char_state.GROUND_C_REC
 			
 		"JumpTransit3", "Jump", "FallTransit", "Fall":
 			return Em.char_state.AIR_STANDBY
@@ -1392,18 +1392,18 @@ func state_detect(anim):
 			return Em.char_state.AIR_STARTUP
 			
 		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU":
-			return Em.char_state.AIR_D_RECOVERY
+			return Em.char_state.AIR_D_REC
 		"aDashBrake":
-			return Em.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_REC
 			
 		"FlinchAStop", "FlinchA", "FlinchBStop", "FlinchB":
 			return Em.char_state.GROUND_FLINCH_HITSTUN
 		"FlinchAReturn", "FlinchBReturn":
-			return Em.char_state.GROUND_C_RECOVERY
+			return Em.char_state.GROUND_C_REC
 		"aFlinchAStop", "aFlinchA", "aFlinchBStop", "aFlinchB":
 			return Em.char_state.AIR_FLINCH_HITSTUN
 		"aFlinchAReturn", "aFlinchBReturn":
-			return Em.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_REC
 		"LaunchStop", "LaunchTransit", "Launch":
 			return Em.char_state.LAUNCHED_HITSTUN
 			
@@ -1551,13 +1551,13 @@ func check_drop():
 	if seq_partner_ID != null: return # no checking during start of sequence
 	match new_state:
 		Em.char_state.GROUND_FLINCH_HITSTUN:
-			match Animator.to_play_animation:
+			match Animator.to_play_anim:
 				"FlinchAStop", "FlinchA":
 					animate("aFlinchA")
 				"FlinchBStop", "FlinchB":
 					animate("aFlinchB")
 		Em.char_state.GROUND_RESISTED_HITSTUN:
-			match Animator.to_play_animation:
+			match Animator.to_play_anim:
 				"ResistA":
 					animate("aResistA")
 				"ResistB":
@@ -1572,7 +1572,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			animate("SoftLanding")
 			
 		Em.char_state.AIR_RESISTED_HITSTUN:
-			match Animator.to_play_animation:
+			match Animator.to_play_anim:
 				"aResistA":
 					animate("ResistA")
 				"aResistB":
@@ -1582,7 +1582,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 
 		Em.char_state.AIR_FLINCH_HITSTUN: # land during hitstun
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
-			match Animator.to_play_animation:
+			match Animator.to_play_anim:
 				"aFlinchAStop", "aFlinchA":
 					animate("FlinchA")
 				"aFlinchBStop", "aFlinchB":
@@ -1692,11 +1692,11 @@ func process_afterimage_trail():# process afterimage trail
 	# Character.afterimage_trail() can accept 2 parameters, 1st is the starting modulate, 2nd is the lifetime
 	
 	# afterimage trail for certain modulate animations with the key "afterimage_trail"
-	if NSAnims.modulate_animations.has($ModulatePlayer.current_animation) and \
-		NSAnims.modulate_animations[$ModulatePlayer.current_animation].has("afterimage_trail") and \
+	if NSAnims.modulate_animations.has($ModulatePlayer.current_anim) and \
+		NSAnims.modulate_animations[$ModulatePlayer.current_anim].has("afterimage_trail") and \
 		$ModulatePlayer.is_playing():
 		# basic afterimage trail for "afterimage_trail" = 0
-		if NSAnims.modulate_animations[$ModulatePlayer.current_animation]["afterimage_trail"] == 0:
+		if NSAnims.modulate_animations[$ModulatePlayer.current_anim]["afterimage_trail"] == 0:
 			afterimage_trail()
 			return
 			
@@ -1782,7 +1782,7 @@ func death_anim():
 # QUICK STATE CHECK ---------------------------------------------------------------------------------------------------
 	
 func get_move_name():
-	var move_name = Animator.to_play_animation.trim_suffix("Startup")
+	var move_name = Animator.to_play_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
 	return move_name
@@ -1802,15 +1802,15 @@ func is_hitstunned_or_sequenced():
 	
 func is_attacking():
 	match new_state:
-		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_RECOVERY, \
-			Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_RECOVERY, \
+		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
+			Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC, \
 			Em.char_state.SEQUENCE_USER:
 			return true
 	return false
 	
 func is_aerial():
 	match new_state:
-		Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_RECOVERY:
+		Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC:
 			return true
 	return false
 	
@@ -1828,7 +1828,7 @@ func is_atk_active():
 	
 func is_atk_recovery():
 	match new_state:
-		Em.char_state.GROUND_ATK_RECOVERY, Em.char_state.AIR_ATK_RECOVERY:
+		Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
 			return true
 	return false
 			
@@ -2035,8 +2035,8 @@ func get_sprite_rect():
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	
-	if Animator.to_play_animation.ends_with("Active"):
-		var move_name = Animator.to_play_animation.trim_suffix("Active")
+	if Animator.to_play_anim.ends_with("Active"):
+		var move_name = Animator.to_play_anim.trim_suffix("Active")
 		move_name = UniqChar.refine_move_name(move_name)
 		if UniqChar.MOVE_DATABASE.has(move_name):
 			return {Em.hit.MOVE_DATA : UniqChar.query_move_data(move_name), Em.hit.MOVE_NAME : move_name}
@@ -2160,7 +2160,7 @@ func query_atk_attr(in_move_name = null):
 	
 func query_atk_attr_current(): # used for the FrameViewer only
 	if !is_attacking(): return []
-	var move_name = Animator.current_animation.trim_suffix("Startup")
+	var move_name = Animator.current_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
 	return UniqChar.query_atk_attr(move_name)
@@ -2429,7 +2429,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data[Em.hit.SUPERARMORED] = true
 						
 						
-			Em.char_state.AIR_RECOVERY:
+			Em.char_state.AIR_REC:
 				 # air superdash has projectile superarmor against non-strong projectiles
 				if Animator.query_current(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
@@ -2460,7 +2460,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		hit_data[Em.hit.RESISTED] = true
 #		if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data and \
-#				state in [Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY] and \
+#				state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			$ArmorTimer.time = ARMOR_TIME # gain armor if hit during Resisted Hitstun
 ##				else:
@@ -2758,9 +2758,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 				# for atk level 1 attack on non-passive state, just push them back, no turn
 				# if is in passive state, will enter impact animation but 0 hitstun
-				elif !state in [Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_RECOVERY, \
-					Em.char_state.GROUND_C_RECOVERY, Em.char_state.AIR_STANDBY, Em.char_state.AIR_RECOVERY, \
-					Em.char_state.AIR_C_RECOVERY]:
+				elif !state in [Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_REC, \
+					Em.char_state.GROUND_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
+					Em.char_state.AIR_C_REC]:
 					no_impact = true
 						
 			if !no_impact and !no_impact_and_vel_change:
@@ -2936,7 +2936,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		
 #	if state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, 
 #			Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, 
-#			Em.char_state.GROUND_RECOVERY, Em.char_state.AIR_RECOVERY, 
+#			Em.char_state.GROUND_REC, Em.char_state.AIR_REC, 
 #			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP]:
 #		return 0
 
@@ -3093,7 +3093,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	var atk_level: int = hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL]
 	
 	if hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
-		atk_level += 2
+		atk_level += 3
 		
 	atk_level = int(clamp(atk_level, 1, 8))
 		
@@ -3374,8 +3374,8 @@ func sequence_launch():
 	var dir_to_attacker = sign(position.x - seq_user.position.x)
 	if dir_to_attacker == 0: dir_to_attacker = facing
 	
-	if !seq_user.Animator.to_play_animation in seq_user.UniqChar.MOVE_DATABASE:
-		print("Error: " + Animator.to_play_animation + " auto-sequence not found in database.")
+	if !seq_user.Animator.to_play_anim in seq_user.UniqChar.MOVE_DATABASE:
+		print("Error: " + Animator.to_play_anim + " auto-sequence not found in database.")
 	var seq_data = seq_user.UniqChar.get_seq_launch_data()
 	
 #		Em.move.SEQ_LAUNCH : { # for final hit of sequence
@@ -3579,7 +3579,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 func _on_SpritePlayer_anim_started(anim_name):
 	
-	state = state_detect(Animator.current_animation) # update state
+	state = state_detect(Animator.current_anim) # update state
 	
 	anim_friction_mod = 100
 	anim_gravity_mod = 100
@@ -3653,11 +3653,11 @@ func rotate_sprite(angle: int):
 func modulate_play(anim: String):
 	if !$ModulatePlayer.playing:
 		pass # always play if no animation playing
-	elif anim == $ModulatePlayer.current_animation:
+	elif anim == $ModulatePlayer.current_anim:
 		$ModulatePlayer.sustain = true
 		return # no playing if animation is already being played
-	elif "priority" in $ModulatePlayer.animations[anim] and "priority" in $ModulatePlayer.animations[$ModulatePlayer.current_animation]:
-		if $ModulatePlayer.animations[anim].priority <= $ModulatePlayer.animations[$ModulatePlayer.current_animation].priority:
+	elif "priority" in $ModulatePlayer.animations[anim] and "priority" in $ModulatePlayer.animations[$ModulatePlayer.current_anim]:
+		if $ModulatePlayer.animations[anim].priority <= $ModulatePlayer.animations[$ModulatePlayer.current_anim].priority:
 			pass # only play effect if effect has higher priority than currently played animation, lower priority number = higher
 		else:
 			return
@@ -3666,14 +3666,14 @@ func modulate_play(anim: String):
 func reset_modulate():
 	palette()
 	$ModulatePlayer.stop()
-	$ModulatePlayer.current_animation = ""
+	$ModulatePlayer.current_anim = ""
 	sprite.modulate.r = 1.0
 	sprite.modulate.g = 1.0
 	sprite.modulate.b = 1.0
 	
 func reset_fade():
 	$FadePlayer.stop()
-	$FadePlayer.current_animation = ""
+	$FadePlayer.current_anim = ""
 	sprite.modulate.a = 1.0
 	
 	
@@ -3847,8 +3847,8 @@ func load_state(state_data):
 	$SpritePlayer.load_state(state_data.SpritePlayer_data)
 	reset_modulate()
 	$ModulatePlayer.load_state(state_data.ModulatePlayer_data)
-	if $ModulatePlayer.current_animation in NSAnims.modulate_animations and \
-			NSAnims.modulate_animations[$ModulatePlayer.current_animation].has("monochrome"): set_monochrome()
+	if $ModulatePlayer.current_anim in NSAnims.modulate_animations and \
+			NSAnims.modulate_animations[$ModulatePlayer.current_anim].has("monochrome"): set_monochrome()
 	reset_fade()
 	$FadePlayer.load_state(state_data.FadePlayer_data)
 	

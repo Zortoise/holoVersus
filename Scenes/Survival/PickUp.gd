@@ -185,7 +185,7 @@ func simulate():
 			position = true_position.convert_to_vec()
 		
 		
-		if UniqEntity.has_method("picked_up") and Animator.current_animation == "Active": # no pickup during spawn
+		if UniqEntity.has_method("picked_up") and Animator.current_anim == "Active": # no pickup during spawn
 			pickup()
 	
 	

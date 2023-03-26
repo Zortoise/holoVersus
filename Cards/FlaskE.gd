@@ -142,12 +142,12 @@ func get_proj_level(move_name):
 			
 			
 func simulate():
-	if !Animator.to_play_animation.ends_with("Kill"):
+	if !Animator.to_play_anim.ends_with("Kill"):
 		Entity.get_node("Sprite").rotation += 5*PI * Globals.FRAME * Entity.facing
 		Entity.velocity.y = int(min(Entity.velocity.y + GRAVITY, TERMINAL_DOWN_VELOCITY))
 		Entity.velocity.x = FMath.f_lerp(Entity.velocity.x, 0, AIR_RESISTANCE)
 		
-func landed_a_hit0(hit_data): # don't check with to_play_animation since can hit multiple enemies at the same time
+func landed_a_hit0(hit_data): # don't check with to_play_anim since can hit multiple enemies at the same time
 	if hit_data[Em.hit.MOVE_NAME] == "BurnActive":
 		kill()
 		hit_data[Em.hit.CANCELLED] = true
@@ -160,7 +160,7 @@ func landed_a_hit0(hit_data): # don't check with to_play_animation since can hit
 				
 	
 func kill():
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"BurnActive":
 			Animator.play("BurnKill")
 		"FreezeActive":
@@ -170,7 +170,7 @@ func kill():
 #	if sound: Entity.play_audio("impact25", {"vol" : -12})
 	
 func collision(): # collided with a platform
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"BurnActive":
 			if Entity.is_on_solid_ground(Entity.get_node("EntityCollisionBox")):
 				Animator.play("Burn2Kill")
@@ -207,7 +207,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 func _on_SpritePlayer_anim_started(anim_name):
 	
-	if Animator.to_play_animation.ends_with("Kill"):
+	if Animator.to_play_anim.ends_with("Kill"):
 		Entity.velocity.set_vector(0, 0)
 		Entity.get_node("Sprite").rotation = 0
 		Entity.absorption_value = null

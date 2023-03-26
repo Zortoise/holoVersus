@@ -213,22 +213,22 @@ func char_state_to_string(state):
 			return "GROUND_STARTUP"
 		Em.char_state.GROUND_ACTIVE:
 			return "GROUND_ACTIVE"
-		Em.char_state.GROUND_RECOVERY:
-			return "GROUND_RECOVERY"
-		Em.char_state.GROUND_C_RECOVERY:
-			return "GROUND_C_RECOVERY"
-		Em.char_state.GROUND_D_RECOVERY:
-			return "GROUND_D_RECOVERY"
+		Em.char_state.GROUND_REC:
+			return "GROUND_REC"
+		Em.char_state.GROUND_C_REC:
+			return "GROUND_C_REC"
+		Em.char_state.GROUND_D_REC:
+			return "GROUND_D_REC"
 		Em.char_state.AIR_STARTUP:
 			return "AIR_STARTUP"
 		Em.char_state.AIR_ACTIVE:
 			return "AIR_ACTIVE"
-		Em.char_state.AIR_RECOVERY:
-			return "AIR_RECOVERY"
-		Em.char_state.AIR_C_RECOVERY:
-			return "AIR_C_RECOVERY"
-		Em.char_state.AIR_D_RECOVERY:
-			return "AIR_D_RECOVERY"
+		Em.char_state.AIR_REC:
+			return "AIR_REC"
+		Em.char_state.AIR_C_REC:
+			return "AIR_C_REC"
+		Em.char_state.AIR_D_REC:
+			return "AIR_D_REC"
 		Em.char_state.GROUND_FLINCH_HITSTUN:
 			return "GROUND_FLINCH_HITSTUN"
 		Em.char_state.AIR_FLINCH_HITSTUN:
@@ -243,14 +243,14 @@ func char_state_to_string(state):
 			return "GROUND_ATK_STARTUP"
 		Em.char_state.GROUND_ATK_ACTIVE:
 			return "GROUND_ATK_ACTIVE"
-		Em.char_state.GROUND_ATK_RECOVERY:
-			return "GROUND_ATK_RECOVERY"
+		Em.char_state.GROUND_ATK_REC:
+			return "GROUND_ATK_REC"
 		Em.char_state.AIR_ATK_STARTUP:
 			return "AIR_ATK_STARTUP"
 		Em.char_state.AIR_ATK_ACTIVE:
 			return "AIR_ATK_ACTIVE"
-		Em.char_state.AIR_ATK_RECOVERY:
-			return "AIR_ATK_RECOVERY"
+		Em.char_state.AIR_ATK_REC:
+			return "AIR_ATK_REC"
 		Em.char_state.GROUND_BLOCK:
 			return "GROUND_BLOCK"
 		Em.char_state.AIR_BLOCK:

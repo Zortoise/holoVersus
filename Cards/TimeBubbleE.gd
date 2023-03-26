@@ -36,11 +36,11 @@ func simulate():
 	
 	
 func inflict(node):
-	if "slowed" in node and Animator.to_play_animation != "Kill":
+	if "slowed" in node and Animator.to_play_anim != "Kill":
 		node.slowed = SLOW_AMOUNT
 
 func kill():
-	if Animator.to_play_animation != "Kill":
+	if Animator.to_play_anim != "Kill":
 		Animator.play("Kill")
 	
 func _on_SpritePlayer_anim_finished(anim_name):

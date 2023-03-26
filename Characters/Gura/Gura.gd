@@ -51,21 +51,21 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.GROUND_ATK_ACTIVE
 		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
 				"aL2LandRec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 			
 		"aL1Startup", "aL2Startup", "aL3Startup", "aF1Startup", "aF1[h]Startup", "aF2Startup", "aF3Startup", "aHStartup":
 			return Em.char_state.AIR_ATK_STARTUP
 		"aL1Active", "aL2Active", "aL3Active", "aF1Active", "aF2Active", "aF3Active", "aHActive":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"L2Rec", "aL1Rec", "aL2Rec", "aL3Rec", "aL2bRec", "aF1Rec", "aF2Rec", "aF3Rec", "aHRec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 		"L2cCRec":
-			return Em.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_REC
 			
 		"aF2SeqA", "aF2SeqB":
 			return Em.char_state.SEQUENCE_USER
 		"aF2GrabRec":
-			return Em.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_REC
 			
 		"SP1Startup", "SP1[b]Startup", "SP1[c1]Startup", "SP1[c2]Startup", "SP1[c1]bStartup", "SP1[c2]bStartup", "SP1[c3]Startup", \
 				"SP1[u]Startup", "SP1[u][c1]Startup", "SP1[u][c2]Startup", "SP1[u][c1]bStartup", "SP1[u][c2]bStartup", "SP1[u][c3]Startup", \
@@ -75,7 +75,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 				"SP1[u][c1]Active", "SP1[u][c2]Active", "SP1[u][c3]Active", "SP1[u][ex]Active":
 			return Em.char_state.GROUND_ATK_ACTIVE
 		"SP1Rec", "SP1[ex]Rec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 		"aSP1Startup", "aSP1[b]Startup", "aSP1[c1]Startup", "aSP1[c2]Startup", "aSP1[c1]bStartup", "aSP1[c2]bStartup", "aSP1[c3]Startup", \
 				"aSP1[d]Startup", "aSP1[d][c1]Startup", "aSP1[d][c2]Startup", "aSP1[d][c1]bStartup", "aSP1[d][c2]bStartup", "aSP1[d][c3]Startup", \
 				"aSP1[ex]Startup", "aSP1[b][ex]Startup", "aSP1[d][ex]Startup":
@@ -84,16 +84,16 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 				"aSP1[d][c1]Active", "aSP1[d][c2]Active", "aSP1[d][c3]Active", "aSP1[d][ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP1Rec", "aSP1[ex]Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 			
 		"aSP2Startup", "aSP2[ex]Startup":
 			return Em.char_state.AIR_ATK_STARTUP
 		"aSP2Active", "aSP2[h]Active", "aSP2[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP2Rec", "aSP2[h]Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 		"aSP2CRec":
-			return Em.char_state.AIR_C_RECOVERY
+			return Em.char_state.AIR_C_REC
 			
 			
 			
@@ -105,14 +105,14 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 				"SP3Active", "SP3[h]Active", "SP3[ex]Active", "SP3bActive", "SP3b[h]Active", "SP3b[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP3Rec", "aSP3[ex]Rec", "SP3Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 			
 		"SP4Startup", "SP4[ex]Startup":
 			return Em.char_state.GROUND_ATK_STARTUP
 		"SP4Active", "SP4[h]Active", "SP4[ex]Active":
 			return Em.char_state.GROUND_ATK_ACTIVE
 		"SP4Rec", "SP4[ex]Rec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 			
 		"SP5Startup", "SP5[ex]Startup":
 			return Em.char_state.GROUND_ATK_STARTUP
@@ -121,9 +121,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aSP5Active", "aSP5[h]Active", "aSP5[h]bActive", "aSP5[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP5Rec", "aSP5bRec", "aSP5[h]Rec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 		"SP5bRec", "SP5b[ex]Rec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 			
 		"SP6[ex]Startup":
 			return Em.char_state.GROUND_ATK_STARTUP
@@ -132,9 +132,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aSP6[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"SP6[ex]Rec", "SP6[ex]GrabRec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
 		"aSP6[ex]Rec", "aSP6[ex]GrabRec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE":
 			return Em.char_state.SEQUENCE_USER
 
@@ -145,21 +145,33 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aSP7Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP7Rec":
-			return Em.char_state.AIR_ATK_RECOVERY
+			return Em.char_state.AIR_ATK_REC
 		"SP7Rec":
-			return Em.char_state.GROUND_ATK_RECOVERY
+			return Em.char_state.GROUND_ATK_REC
+			
+		"SP8Startup":
+			return Em.char_state.GROUND_ATK_STARTUP
+		"SP8Active":
+			return Em.char_state.GROUND_ATK_ACTIVE
+		"SP8bActive":
+			return Em.char_state.GROUND_ATK_ACTIVE
+		"SP8Rec":
+			return Em.char_state.AIR_C_REC
 		
 	print("Error: " + anim + " not found.")
 		
 func check_collidable():  # some characters have move that can pass through other characters
-	match Animator.to_play_animation:
-#		"Dash":
-#			return false
-		"aSP2[h]Active":
-			return false
+	match Character.new_state:
+		Em.char_state.AIR_ATK_ACTIVE:
+			if Animator.to_play_anim == "aSP2[h]Active":
+				return false
 	return true
 	
 func check_semi_invuln():
+	match Character.new_state:
+		Em.char_state.GROUND_ATK_STARTUP:
+			if Animator.to_play_anim == "SP8Startup":
+				return true
 	return false
 
 # UNIQUE INPUT CAPTURE --------------------------------------------------------------------------------------------------
@@ -200,7 +212,7 @@ func simulate():
 #				if Character.button_aux in Character.input_state.pressed:
 #					Character.animate("aSP1[c1]Active")
 			
-		Em.char_state.AIR_ATK_RECOVERY:
+		Em.char_state.AIR_ATK_REC:
 			
 			if Animator.query_current(["aL2bRec"]):
 				if Character.grounded:
@@ -217,7 +229,7 @@ func simulate():
 	# RELEASING HELD INPUTS --------------------------------------------------------------------------------------------------
 			
 		Em.char_state.GROUND_ATK_STARTUP:
-			match Animator.current_animation:
+			match Animator.current_anim:
 				"SP1[c1]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						Character.animate("SP1[c1]bStartup")
@@ -260,7 +272,7 @@ func simulate():
 							
 			
 		Em.char_state.AIR_ATK_STARTUP:
-			match Animator.current_animation:
+			match Animator.current_anim:
 				"aF1[h]Startup": # if holding a.F
 					if !Character.button_fierce in Character.input_state.pressed:
 						Character.animate("aF1Active")
@@ -319,16 +331,16 @@ func simulate():
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
-#	if Character.state == Em.char_state.GROUND_D_RECOVERY: 	# dash dancing
-#		match Character.facing:
-#			1:
-#				if Character.button_left in Character.input_state.just_pressed and !Character.button_right in Character.input_state.just_pressed:
-#					Character.face(-1)
-#					Character.animate("Dash")
-#			-1:
-#				if Character.button_right in Character.input_state.just_pressed and !Character.button_left in Character.input_state.just_pressed:
-#					Character.face(1)
-#					Character.animate("Dash")
+	if Character.state == Em.char_state.GROUND_C_REC and Animator.to_play_anim == "DashBrake": 	# dash dancing
+		match Character.facing:
+			1:
+				if Character.dir == -1:
+					Character.face(-1)
+					Character.animate("Dash")
+			-1:
+				if  Character.dir == 1:
+					Character.face(1)
+					Character.animate("Dash")
 
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
@@ -360,8 +372,10 @@ func capture_combinations():
 	
 #	Character.doubletap_combination(Character.button_special, Character.button_fierce, "SpSp.F")
 
+func capture_unique_combinations():
+	Character.combination_trio(Character.button_unique, Character.button_down, Character.button_fierce, "U.dF")
 
-func rebuffer_actions():
+func rebuffer_actions(): # for when there are air and ground versions
 	Character.rebuffer(Character.button_up, Character.button_light, "uL")
 	Character.rebuffer(Character.button_down, Character.button_light, "dL")
 	Character.rebuffer(Character.button_up, Character.button_fierce, "uF")
@@ -380,7 +394,8 @@ func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 #	Character.ex_rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
 	
 func capture_instant_actions():
-	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
+	if !Character.button_down in Character.input_state.pressed or !Character.grounded:
+		Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
 	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
 
 func process_instant_actions():
@@ -442,7 +457,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					
 				# GROUND DASH ---------------------------------------------------------------------------------
 			
-					Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY:
+					Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC:
 						if !Character.button_light in Character.input_state.just_pressed and \
 								!Character.button_fierce in Character.input_state.just_pressed:
 							if !Animator.query(["DashBrake", "WaveDashBrake"]):
@@ -459,12 +474,12 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 									Character.animate("Dash")
 									keep = false
 							
-#					Em.char_state.GROUND_D_RECOVERY:
+#					Em.char_state.GROUND_D_REC:
 						
 							
 				# AIR DASH ---------------------------------------------------------------------------------
 					
-					Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_RECOVERY:
+					Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC:
 						
 						if Animator.query(["aDashBrake"]) and !Character.has_trait(Em.trait.AIR_CHAIN_DASH):
 							continue
@@ -496,7 +511,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				# DASH CANCELS ---------------------------------------------------------------------------------
 					# if land a sweetspot hit, can dash cancel on active
 								
-					Em.char_state.GROUND_ATK_RECOVERY:
+					Em.char_state.GROUND_ATK_REC:
 						if Character.test_dash_cancel():
 							Character.animate("DashTransit")
 							keep = false
@@ -507,7 +522,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							Character.animate("DashTransit")
 							keep = false
 							
-					Em.char_state.AIR_ATK_RECOVERY:
+					Em.char_state.AIR_ATK_REC:
 						if Character.test_dash_cancel():
 							if !Character.grounded:
 								Character.animate("aDashTransit")
@@ -589,6 +604,13 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP5", has_acted)
 				
+		"U.dF":
+			if !has_acted[0]:
+				var closest_fin = get_closest_ground_fin()
+				if closest_fin != null:
+					Character.unique_data.groundfin_target = closest_fin
+					keep = !process_move(new_state, "SP8", has_acted)
+				
 		"ExSp.L":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP1[ex]", has_acted)
@@ -628,7 +650,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		
 		"InstaAirDash": # needed to chain wavedashes
 			match new_state:
-				Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY:
+				Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC:
 					Character.animate("JumpTransit")
 					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
 					has_acted[0] = true
@@ -672,9 +694,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						
 	match new_state:
 			
-		Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY:
+		Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC:
 			if Character.grounded and attack_ref in STARTERS:
-				if new_state in [Em.char_state.GROUND_C_RECOVERY, Em.char_state.GROUND_D_RECOVERY] and \
+				if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC] and \
 						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 					continue # certain moves cannot be performed during cancellable recovery
 				if Character.is_ex_valid(attack_ref):
@@ -691,10 +713,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						has_acted[0] = true
 						return true
 					
-		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_RECOVERY, Em.char_state.AIR_D_RECOVERY:
+		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-					if new_state in [Em.char_state.AIR_C_RECOVERY, Em.char_state.AIR_D_RECOVERY] and \
+					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
 							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr("a" + attack_ref):
 						continue # certain moves cannot be performed during cancellable recovery
 					if Character.is_ex_valid("a" + attack_ref):
@@ -714,7 +736,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						return true
 				
 		# chain cancel
-		Em.char_state.GROUND_ATK_RECOVERY, Em.char_state.GROUND_ATK_ACTIVE:
+		Em.char_state.GROUND_ATK_REC, Em.char_state.GROUND_ATK_ACTIVE:
 			if attack_ref in STARTERS:
 				if Character.test_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
@@ -738,7 +760,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 								return true
 					
 		# chain cancel
-		Em.char_state.AIR_ATK_RECOVERY, Em.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.AIR_ATK_REC, Em.char_state.AIR_ATK_ACTIVE:
 			if !Character.grounded:
 				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
 					if Character.test_chain_combo("a" + attack_ref):
@@ -812,7 +834,7 @@ func consume_one_air_dash(): # different characters can have different types of 
 #		Character.air_dash += 1
 
 func afterimage_trail():# process afterimage trail
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"Dash", "Dash2", "aDash", "aDashD", "aDashU", "SDashTransit", "SDash", "aSDash":
 			Character.afterimage_trail()
 		"Dodge":
@@ -823,7 +845,7 @@ func afterimage_trail():# process afterimage trail
 			Character.afterimage_trail()
 			
 func unique_flash():
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"SP1[c2]Startup", "SP1[u][c2]Startup", "aSP1[c2]Startup", "aSP1[d][c2]Startup":
 			Character.get_node("ModulatePlayer").play("darken")
 			
@@ -913,6 +935,8 @@ func refine_move_name(move_name):
 			return "aSP6[ex]"
 		"aSP7":
 			return "SP7"
+		"SP8b":
+			return "SP8"
 	return move_name
 			
 			
@@ -1026,7 +1050,7 @@ func simulate_sequence(): # this is ran on every frame during a sequence
 		Character.animate("Idle")
 		return
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"SP6[ex]SeqA":
 			if Animator.time == 10:
 				Globals.Game.spawn_SFX("HitsparkB", "HitsparkB", Animator.query_point("grabpoint"), {"facing":-Character.facing}, \
@@ -1058,7 +1082,7 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 		
 	var grab_point = Animator.query_point("grabpoint")
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"aF2SeqA", "aF2SeqB":
 			move_sequence_target(grab_point)
 			rotate_partner(Partner)
@@ -1079,7 +1103,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 		Character.animate("Idle")
 		return
 
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"aF2SeqA":
 			Globals.Game.get_node("Players").move_child(Character, 0)
 			Character.velocity.set_vector(0, 0)
@@ -1156,7 +1180,7 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 		Partner.animate("Idle")
 		return true
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"aF2SeqB":
 			Partner.sequence_launch()
 			return true
@@ -1208,29 +1232,29 @@ func move_sequence_target(new_position): # move sequence_target to new position
 		
 			
 func get_seq_hit_data(hit_key: int):
-	var seq_hit_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_HITS][hit_key].duplicate(true)
+	var seq_hit_data = MOVE_DATABASE[Animator.to_play_anim][Em.move.SEQ_HITS][hit_key].duplicate(true)
 
 	if Globals.survival_level != null and Em.move.DMG in seq_hit_data:
 #		seq_hit_data[Em.move.DMG] = FMath.percent(seq_hit_data[Em.move.DMG], Character.SURV_BASE_DMG)	
-		seq_hit_data[Em.move.DMG] = FMath.percent(seq_hit_data[Em.move.DMG], Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation][Em.move.STARTER]))
+		seq_hit_data[Em.move.DMG] = FMath.percent(seq_hit_data[Em.move.DMG], Character.mod_damage(MOVE_DATABASE[Animator.to_play_anim][Em.move.STARTER]))
 
 	return seq_hit_data
 	
 	
 	
 func get_seq_launch_data():
-	var seq_data = MOVE_DATABASE[Animator.to_play_animation][Em.move.SEQ_LAUNCH].duplicate(true)
+	var seq_data = MOVE_DATABASE[Animator.to_play_anim][Em.move.SEQ_LAUNCH].duplicate(true)
 
 	if Globals.survival_level != null and Em.move.DMG in seq_data:
 #		seq_data[Em.move.DMG] = FMath.percent(seq_data[Em.move.DMG], Character.SURV_BASE_DMG)	
-		seq_data[Em.move.DMG] = FMath.percent(seq_data[Em.move.DMG], Character.mod_damage(MOVE_DATABASE[Animator.to_play_animation][Em.move.STARTER]))
+		seq_data[Em.move.DMG] = FMath.percent(seq_data[Em.move.DMG], Character.mod_damage(MOVE_DATABASE[Animator.to_play_anim][Em.move.STARTER]))
 
 	return seq_data
 			
 			
 			
 func sequence_fallthrough(): # which step in sequence ignore soft platforms
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
 			return true
 	return false
@@ -1245,7 +1269,7 @@ func sequence_partner_passthrough(): # which step in sequence has partner ignore
 	return false
 	
 #func sequence_passfloor(): # which step in sequence ignore hard floor
-#	match Animator.to_play_animation:
+#	match Animator.to_play_anim:
 #		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC":
 #			return true
 #	return false
@@ -1267,10 +1291,22 @@ func unique_chaining_rules(move_name, attack_ref):
 #	var trident_array := []
 #	for entity in Globals.Game.get_node("EntitiesFront").get_children():
 #		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "trident":
-#			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
+#			if entity.hitcount_record.size() == 0 and entity.Animator.to_play_anim in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
 #					"[u][ex]Active", "[c3]Active", "[u][c3]Active"]:
 #				trident_array.append(entity)
 #	return trident_array
+
+func get_closest_ground_fin():
+	var ground_fin_array := []
+	for entity in Globals.Game.get_node("EntitiesFront").get_children():
+		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "ground_fin":
+			ground_fin_array.append(entity)
+
+	if ground_fin_array.size() > 0:
+		return FMath.get_closest(ground_fin_array, Character.position).entity_ID
+	else:
+		return null
+		
 			
 func test_instinct(): # to determine if move is usable
 	if Character.unique_data.last_trident == null: return false
@@ -1278,7 +1314,7 @@ func test_instinct(): # to determine if move is usable
 	var last_trident = Globals.Game.get_entity_node(Character.unique_data.last_trident)
 	if last_trident == null: return false
 	
-	if last_trident.hitcount_record.size() == 0 and last_trident.Animator.to_play_animation in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
+	if last_trident.hitcount_record.size() == 0 and last_trident.Animator.to_play_anim in ["[c2]Active", "[u][c2]Active", "[ex]Active", \
 			"[u][ex]Active", "[c3]Active", "[u][c3]Active"]:
 		return true	
 	return false
@@ -1797,6 +1833,16 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 		"aSP7Rec":
 			Character.animate("FallTransit")
+			
+		"SP8Startup":
+			Character.animate("SP8Active")
+		"SP8Active":
+			Character.animate("SP8bActive")
+		"SP8bActive":
+			Character.animate("SP8Rec")
+			Character.velocity.y = -1000 * FMath.S # have to do this here
+		"SP8Rec":
+			Character.animate("FallTransit")
 
 func _on_SpritePlayer_anim_started(anim_name):
 
@@ -2147,6 +2193,24 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.down = 10
 			
+		"SP8Startup":
+			Character.velocity_limiter.y_slow = 20
+		"SP8Active":
+			Character.velocity.set_vector(0, 0)
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
+		"SP8bActive":
+			Character.velocity.set_vector(0, 0)
+			var target = Globals.Game.get_entity_node(Character.unique_data.groundfin_target)
+			if target != null and !Globals.Game.is_point_offstage(target.position):
+				Character.position = Character.get_pos_from_feet(target.position)
+				Character.set_true_position()
+				target.UniqEntity.kill()
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
+			Character.play_audio("water6", {"vol" : -18})
+			Character.play_audio("water4", {"vol" : -15})
+			
 	start_audio(anim_name)
 
 
@@ -2207,7 +2271,7 @@ func dash_sound(): # can be called by snap-up wavelanding
 
 func stagger_anim():
 	
-	match Animator.current_animation:
+	match Animator.current_anim:
 		"Run":
 			match sprite.frame:
 				38, 41:

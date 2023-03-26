@@ -69,7 +69,7 @@ func query_move_data(move_name) -> Dictionary:
 		
 func query_atk_attr(move_name):
 	
-	if !Animator.to_play_animation in ["Kill", "Strike"]:
+	if !Animator.to_play_anim in ["Kill", "Strike"]:
 		return [Em.atk_attr.HARMLESS_ENTITY]
 	
 	move_name = refine_move_name(move_name)
@@ -91,23 +91,23 @@ func get_proj_level(move_name):
 			
 			
 func simulate():
-	if Animator.to_play_animation in ["Jump", "FallTransit", "Fall"]: # jump arc
+	if Animator.to_play_anim in ["Jump", "FallTransit", "Fall"]: # jump arc
 		Entity.velocity.y = int(min(Entity.velocity.y + GRAVITY, TERMINAL_DOWN_VELOCITY))
 		Entity.velocity.x = FMath.f_lerp(Entity.velocity.x, 0, AIR_RESISTANCE)
 		
-		match Animator.to_play_animation:
+		match Animator.to_play_anim:
 			"Jump":
 				if Entity.velocity.y > FALL_LIMIT:
 					Animator.play("FallTransit")
 					
 	
 func kill(sound = true):
-	if Animator.to_play_animation != "Kill": Animator.play("Kill")
+	if Animator.to_play_anim != "Kill": Animator.play("Kill")
 	if sound: Entity.play_audio("impact25", {"vol" : -12})
 	
 	
 func collision(): # collided with a platform
-	if Animator.to_play_animation in ["Jump", "FallTransit", "Fall"]:
+	if Animator.to_play_anim in ["Jump", "FallTransit", "Fall"]:
 		if Entity.is_on_ground(Entity.get_node("EntityCollisionBox")):
 			Animator.play("Land")
 		
@@ -132,7 +132,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 func _on_SpritePlayer_anim_started(anim_name):
 	
-	if Animator.to_play_animation.ends_with("Kill"):
+	if Animator.to_play_anim.ends_with("Kill"):
 		Entity.velocity.set_vector(0, 0)
 		Entity.get_node("Sprite").rotation = 0
 

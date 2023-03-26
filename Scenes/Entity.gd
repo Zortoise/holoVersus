@@ -303,7 +303,7 @@ func moving_platform(position_change: Vector2, rider_boxes: Array):
 	
 func interactions():
 	
-	if !to_destroy and UniqEntity.has_method("kill") and !Animator.to_play_animation.ends_with("Kill"):
+	if !to_destroy and UniqEntity.has_method("kill") and !Animator.to_play_anim.ends_with("Kill"):
 		var my_hitbox = Animator.query_polygon("hitbox")
 		if my_hitbox != null:
 			
@@ -527,19 +527,19 @@ func get_sprite_rect():
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	if UniqEntity.has_method("query_move_data"):
-		var move_name = Animator.to_play_animation
+		var move_name = Animator.to_play_anim
 		if UniqEntity.has_method("refine_move_name"):
 			move_name = UniqEntity.refine_move_name(move_name)
-		return {Em.hit.MOVE_DATA : UniqEntity.query_move_data(Animator.to_play_animation), Em.hit.MOVE_NAME : move_name}
-#	elif Animator.to_play_animation in UniqEntity.MOVE_DATABASE:
-#		return {Em.hit.MOVE_DATA : UniqEntity.MOVE_DATABASE[Animator.to_play_animation], Em.hit.MOVE_NAME : Animator.to_play_animation}
-	print("Error: " + Animator.to_play_animation + " not found in MOVE_DATABASE for query_move_data_and_name().")
+		return {Em.hit.MOVE_DATA : UniqEntity.query_move_data(Animator.to_play_anim), Em.hit.MOVE_NAME : move_name}
+#	elif Animator.to_play_anim in UniqEntity.MOVE_DATABASE:
+#		return {Em.hit.MOVE_DATA : UniqEntity.MOVE_DATABASE[Animator.to_play_anim], Em.hit.MOVE_NAME : Animator.to_play_anim}
+	print("Error: " + Animator.to_play_anim + " not found in MOVE_DATABASE for query_move_data_and_name().")
 
 
 func query_atk_attr(in_move_name = null): # may have certain conditions, if no move name passed in, check current attack
 	
 	if in_move_name == null:
-		in_move_name = Animator.to_play_animation
+		in_move_name = Animator.to_play_anim
 	
 	if UniqEntity.has_method("query_atk_attr"):
 		return UniqEntity.query_atk_attr(in_move_name)
@@ -548,7 +548,7 @@ func query_atk_attr(in_move_name = null): # may have certain conditions, if no m
 func query_move_data(in_move_name = null):
 	
 	if in_move_name == null:
-		in_move_name = Animator.to_play_animation
+		in_move_name = Animator.to_play_anim
 		
 	var move_data = UniqEntity.query_move_data(in_move_name)
 	return move_data
@@ -564,7 +564,7 @@ func query_move_data(in_move_name = null):
 func get_proj_level(in_move_name = null):
 	
 	if in_move_name == null:
-		in_move_name = Animator.to_play_animation
+		in_move_name = Animator.to_play_anim
 	
 	if UniqEntity.has_method("get_proj_level"):
 		return UniqEntity.get_proj_level(in_move_name)

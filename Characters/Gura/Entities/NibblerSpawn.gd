@@ -16,12 +16,12 @@ func init(_aux_data: Dictionary):
 	Animator.play("Spawn") # starting animation
 
 func simulate():
-	if Animator.to_play_animation == "Spawn" and Globals.Game.get_player_node(Entity.master_ID).is_hitstunned_or_sequenced():
+	if Animator.to_play_anim == "Spawn" and Globals.Game.get_player_node(Entity.master_ID).is_hitstunned_or_sequenced():
 		Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", Entity.position, {"facing":Entity.facing, "grounded":true}, \
 				Entity.palette_ref, Entity.master_ref)
 		Entity.free = true # cancel spawning if master got hit
 		
-	elif Animator.current_animation == "Kill" and Animator.time == 5:
+	elif Animator.current_anim == "Kill" and Animator.time == 5:
 		var spawn_point = Animator.query_point("entityspawn")
 		Globals.Game.spawn_entity(Entity.master_ID, "Nibbler", spawn_point, {"facing" : Entity.facing}, Entity.palette_ref, Entity.master_ref)
 		

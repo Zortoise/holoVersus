@@ -41,7 +41,7 @@ func init(_aux_data: Dictionary):
 	 # starting animation
 	Animator.play("Active")
 	
-	match Animator.to_play_animation:
+	match Animator.to_play_anim:
 		"Active":
 			Entity.velocity.set_vector(START_SPEED, 0)
 			Entity.velocity.rotate(START_ROTATION)
@@ -95,7 +95,7 @@ func simulate():
 	Entity.velocity.y = int(min(Entity.velocity.y + GRAVITY, TERMINAL_DOWN_VELOCITY))
 	Entity.velocity.x = FMath.f_lerp(Entity.velocity.x, 0, AIR_RESISTANCE)
 
-	match Animator.to_play_animation: # afterimage trail
+	match Animator.to_play_anim: # afterimage trail
 		"Active", "bActive":
 			if posmod(Entity.lifetime, 5) == 0:
 				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), Entity.master_ref, Entity.palette_ref, \
@@ -105,7 +105,7 @@ func simulate():
 #		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 	
 func kill(sound = true):
-	if Animator.to_play_animation != "Kill":
+	if Animator.to_play_anim != "Kill":
 		Animator.play("Kill")
 		# splash sound
 		if sound:
@@ -123,7 +123,7 @@ func collision(): # collided with a platform
 #func ledge_drop():
 
 func check_passthrough(): # during death bounce, will pass through walls
-	if Animator.to_play_animation == "Kill":
+	if Animator.to_play_anim == "Kill":
 		return true
 	return false
 
