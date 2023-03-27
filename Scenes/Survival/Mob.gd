@@ -1660,7 +1660,7 @@ func set_monochrome():
 		sprite.material.shader = Loader.monochrome_shader
 
 # particle emitter, visuals only, no need fixed-point
-func particle(anim: String, sfx_ref: String, palette: String, interval, number, radius, v_mirror_rand = false):
+func particle(anim: String, sfx_ref: String, palette, interval, number, radius, v_mirror_rand = false, master_palette := false):
 	if Globals.Game.frametime % interval == 0:  # only shake every X frames
 		for x in number:
 			var angle = Globals.Game.rng_generate(10) * PI/5.0
@@ -1672,7 +1672,10 @@ func particle(anim: String, sfx_ref: String, palette: String, interval, number, 
 			var aux_data = {"facing" : Globals.Game.rng_facing()}
 			if v_mirror_rand:
 				aux_data["v_mirror"] = Globals.Game.rng_bool()
-			Globals.Game.spawn_SFX(anim, sfx_ref, particle_pos, aux_data, palette)
+			if master_palette:
+				Globals.Game.spawn_SFX(anim, sfx_ref, particle_pos, aux_data, palette, mob_ref)
+			else:
+				Globals.Game.spawn_SFX(anim, sfx_ref, particle_pos, aux_data, palette)
 		
 		
 func flashes():
@@ -2765,18 +2768,19 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 			if !no_impact and !no_impact_and_vel_change:
 				var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
-				if !"pull" in hit_data:
+				if !Em.hit.PULL in hit_data:
 					match segment:
 						Em.compass.E:
 							face(-1) # face other way
 						Em.compass.W:
 							face(1)
-				else: # flip facing direction if pulling attack on flinch
-					match segment:
-						Em.compass.E:
-							face(1)
-						Em.compass.W:
-							face(-1)
+				else:
+					face(dir_to_attacker)
+#					match segment:
+#						Em.compass.E:
+#							face(1)
+#						Em.compass.W:
+#							face(-1)
 
 				var alternate_flag := false # alternate hitstun for multi-hit flinch during hitstop
 				if state == Em.char_state.AIR_FLINCH_HITSTUN:
@@ -2847,18 +2851,19 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if Em.hit.RESISTED in hit_data and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
 			
 			var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
-			if !"pull" in hit_data:
+			if !Em.hit.PULL in hit_data:
 				match segment:
 					Em.compass.E:
 						face(-1) # face other way
 					Em.compass.W:
 						face(1)
-			else: # flip facing direction if pulling attack on flinch
-				match segment:
-					Em.compass.E:
-						face(1)
-					Em.compass.W:
-						face(-1)
+			else:
+				face(dir_to_attacker)
+#					match segment:
+#						Em.compass.E:
+#							face(1)
+#						Em.compass.W:
+#							face(-1)
 			
 			if hit_data[Em.hit.HIT_CENTER].y >= position.y: # A/B depending on height hit
 				if grounded:
@@ -3252,7 +3257,7 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 			else:
 				rand_degree = Globals.Game.rng_generate(46) * Globals.Game.rng_facing()
 			rot_rad = (hit_data[Em.hit.KB_ANGLE] + rand_degree) / 360.0 * (2 * PI) + PI # visuals only
-		if "pull" in hit_data: rot_rad += PI # flip if pulling
+		if Em.hit.PULL in hit_data: rot_rad += PI # flip if pulling
 		Globals.Game.spawn_SFX(hitspark, hitspark, hit_data[Em.hit.HIT_CENTER], {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}, \
 				hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE])
 		

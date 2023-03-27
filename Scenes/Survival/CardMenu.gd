@@ -102,9 +102,9 @@ func _physics_process(_delta):
 		move_pickers(P1_dir, P2_dir)
 	
 		$P1/Box/ProgressBar.value = P1_held_timer
-		if P1_held_timer > 0 and $P1/Box/Action/AnimationPlayer.current_anim != "flash":
+		if P1_held_timer > 0 and $P1/Box/Action/AnimationPlayer.current_animation != "flash":
 			$P1/Box/Action/AnimationPlayer.play("flash")
-		elif P1_held_timer == 0 and $P1/Box/Action/AnimationPlayer.current_anim != "RESET":
+		elif P1_held_timer == 0 and $P1/Box/Action/AnimationPlayer.current_animation != "RESET":
 			$P1/Box/Action/AnimationPlayer.play("RESET")
 
 		if P1_picker_pos[0] == 0:
@@ -145,9 +145,9 @@ func _physics_process(_delta):
 				
 		if Globals.player_count > 1:
 			$P2/Box/ProgressBar.value = P2_held_timer
-			if P2_held_timer > 0 and $P2/Box/Action/AnimationPlayer.current_anim != "flash":
+			if P2_held_timer > 0 and $P2/Box/Action/AnimationPlayer.current_animation != "flash":
 				$P2/Box/Action/AnimationPlayer.play("flash")
-			elif P1_held_timer == 0 and $P1/Box/Action/AnimationPlayer.current_anim != "RESET":
+			elif P1_held_timer == 0 and $P1/Box/Action/AnimationPlayer.current_animation != "RESET":
 				$P2/Box/Action/AnimationPlayer.play("RESET")
 			
 			if P2_picker_pos[0] == 0:

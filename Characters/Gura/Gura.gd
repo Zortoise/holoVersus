@@ -234,10 +234,7 @@ func simulate():
 					if !Character.button_light in Character.input_state.pressed:
 						Character.animate("SP1[c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("Idle")
+						Character.cancel_action(Character.button_special)
 				"SP1[c2]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						if Animator.time == 1:
@@ -245,19 +242,13 @@ func simulate():
 						else:
 							Character.animate("SP1[c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("Idle")
+						Character.cancel_action(Character.button_special)
 							
 				"SP1[u][c1]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						Character.animate("SP1[u][c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("Idle")
+						Character.cancel_action(Character.button_special)
 				"SP1[u][c2]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						if Animator.time == 1:
@@ -265,10 +256,7 @@ func simulate():
 						else:
 							Character.animate("SP1[u][c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("Idle")
+						Character.cancel_action(Character.button_special)
 							
 			
 		Em.char_state.AIR_ATK_STARTUP:
@@ -288,10 +276,7 @@ func simulate():
 					if !Character.button_light in Character.input_state.pressed or Character.grounded:
 						Character.animate("aSP1[c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("FallTransit")
+						Character.cancel_action(Character.button_special)
 				"aSP1[c2]Startup":
 					if Character.grounded:
 						Character.animate("aSP1[c2]bStartup")
@@ -301,19 +286,13 @@ func simulate():
 						else:
 							Character.animate("aSP1[c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("FallTransit")
+						Character.cancel_action(Character.button_special)
 							
 				"aSP1[d][c1]Startup":
 					if !Character.button_light in Character.input_state.pressed or Character.grounded:
 						Character.animate("aSP1[d][c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("FallTransit")
+						Character.cancel_action(Character.button_special)
 				"aSP1[d][c2]Startup":
 					if Character.grounded:
 						Character.animate("aSP1[d][c2]bStartup")
@@ -323,10 +302,7 @@ func simulate():
 						else:
 							Character.animate("aSP1[d][c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.input_buffer = []
-						Character.startup_cancel_flag = true
-						Character.afterimage_cancel()
-						Character.animate("FallTransit")
+						Character.cancel_action(Character.button_special)
 					
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
@@ -848,6 +824,9 @@ func unique_flash():
 	match Animator.to_play_anim:
 		"SP1[c2]Startup", "SP1[u][c2]Startup", "aSP1[c2]Startup", "aSP1[d][c2]Startup":
 			Character.get_node("ModulatePlayer").play("darken")
+		"SP8Rec":
+			if Animator.time <= 10:
+				Character.particle("WaterSparkle", "WaterSparkle", Character.palette_number, 4, 2, 25, false, true)
 			
 # GET DATA --------------------------------------------------------------------------------------------------
 
@@ -1010,7 +989,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			if !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED] and !hit_data[Em.hit.STUN] and !hit_data[Em.hit.LETHAL_HIT]:
 				hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE] = 180
 				hit_data[Em.hit.MOVE_DATA][Em.move.KB] = 200 * FMath.S
-				hit_data["pull"] = true
+				hit_data[Em.hit.PULL] = true
 				hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR].append(Em.atk_attr.DI_MANUAL_SEAL)
 				Character.animate("F2[h]PRec")
 			

@@ -267,6 +267,8 @@ var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
 var enhance_cooldowns := {} # each key contain the cooldown
 var enhance_data := {} # like unique_data
 var slowed := 0
+var spent_special := false # used a move that requires Special to be held, releasing Special will not trigger EX moves
+var spent_unique := false # used a move that requires Unique to be held, releasing Special will not trigger EX moves
 
 # controls
 var button_up
@@ -604,7 +606,7 @@ func test2():
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
 			str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-			" " + str(soft_grounded)
+			" " + str(spent_special)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -1942,6 +1944,15 @@ func buffer_actions():
 			button_rs_right in input_state.just_pressed:
 		input_buffer.append(["Dodge", buffer_time()])
 		
+	if spent_special:
+		if button_special in input_state.just_pressed or (!button_special in input_state.pressed and \
+				!is_button_released_in_last_X_frames(button_special, 7)):
+			spent_special = false
+	if spent_unique:
+		if button_unique in input_state.just_pressed or (!button_unique in input_state.pressed and \
+				!is_button_released_in_last_X_frames(button_unique, 7)):
+			spent_unique = false
+		
 		
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 		
@@ -1978,6 +1989,7 @@ func capture_combinations():
 # used for rebuffer_actions()
 func rebuffer(button1, button2, action, back = false):
 	if button1 in input_state.pressed and button2 in input_state.pressed:
+#		spend_button(button1)
 		if !back:
 			input_buffer.push_front([action, buffer_time()])
 		else:
@@ -1986,6 +1998,7 @@ func rebuffer(button1, button2, action, back = false):
 				
 func rebuffer_trio(button1, button2, button3, action, back = false):
 	if button1 in input_state.pressed and button2 in input_state.pressed and button3 in input_state.pressed:
+#		spend_button(button1)
 		if !back:
 			input_buffer.push_front([action, buffer_time()])
 		else:
@@ -1994,6 +2007,7 @@ func rebuffer_trio(button1, button2, button3, action, back = false):
 			
 func ex_rebuffer(button_ex, button1, action, back = false):
 	if button1 in input_state.pressed and is_button_released_in_last_X_frames(button_ex, 7):
+#		spend_button(button_ex)
 		if !back:
 			input_buffer.push_front([action, buffer_time()])
 		else:
@@ -2006,36 +2020,40 @@ func ex_rebuffer(button_ex, button1, action, back = false):
 #		else:
 #			input_buffer.append([action, buffer_time()])
 			
+#func spend_button(button):
+#	match button:
+#		button_special:
+#			spent_special = true
+#		button_unique:
+#			spent_unique = true
 
 func combination(button1, button2, action, back = false, instant = false):
 	if (button1 in input_state.just_pressed and is_button_pressed(button2)) or \
 		(button2 in input_state.just_pressed and is_button_pressed(button1)):
+#		spend_button(button1)
 		if !instant:
 			if !back:
 				input_buffer.push_front([action, buffer_time()])
-				return true
 			else:
 				input_buffer.append([action, buffer_time()])
-				return true
 		else:
 			instant_actions_temp.append(action)
-			return true
+		return true
 	return false
 				
 func combination_trio(button1, button2, button3, action, back = false, instant = false):
 	if (button1 in input_state.just_pressed and is_button_pressed(button2) and is_button_pressed(button3)) or \
 		(button2 in input_state.just_pressed and is_button_pressed(button1) and is_button_pressed(button3)) or \
 		(button3 in input_state.just_pressed and is_button_pressed(button1) and is_button_pressed(button2)):
+#		spend_button(button1)
 		if !instant:
 			if !back:
 				input_buffer.push_front([action, buffer_time()])
-				return true
 			else:
 				input_buffer.append([action, buffer_time()])
-				return true
 		else:
 			instant_actions_temp.append(action)
-			return true
+		return true
 	return false
 	
 	
@@ -2049,6 +2067,12 @@ func doubletap_combination_trio(button_ex, button1, button2, action, back = fals
 			
 			
 func ex_combination(button_ex, button1, action, back = false, instant = false):
+
+	match button_ex:
+		button_special:
+			if spent_special: return
+		button_unique:
+			if spent_unique: return
 
 	# for neutral ex move, cannot do it if pressed up/down a few frames before, helps prevent accidental "option selects"
 	# like doing ex up-special but it is in aerial_sp_memory, so you end up doing ex neutral-special
@@ -2076,6 +2100,12 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 
 				
 func ex_combination_trio(button_ex, button1, button2, action, back = false, instant = false):
+	
+	match button_ex:
+		button_special:
+			if spent_special: return
+		button_unique:
+			if spent_unique: return
 	
 	if are_inputs_too_close(): # if last pressed button_ex is too close to last pressed attack button, cannot perform EX
 		return
@@ -2254,6 +2284,20 @@ func instant_action_tilt_combination(attack_button, neutral_action, down_tilt_ac
 			instant_actions.erase(up_tilt_action)
 			instant_actions_temp.append(neutral_action)
 		
+func cancel_action(button_ex = null): # called from UniqChar for character-unique action cancelling
+	if button_ex != null:
+		match button_ex: # prevent special/unique from triggering EX moves
+			button_special:
+				spent_special = true
+			button_unique:
+				spent_unique = true
+	input_buffer = []
+	startup_cancel_flag = true
+	afterimage_cancel()
+	if grounded:
+		animate("Idle")
+	else:
+		animate("FallTransit")
 	
 # INPUT BUFFER ---------------------------------------------------------------------------------------------------
 	
@@ -3647,7 +3691,7 @@ func set_monochrome():
 		sprite.material.shader = Loader.monochrome_shader
 
 # particle emitter, visuals only, no need fixed-point
-func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, number, radius, v_mirror_rand = false):
+func particle(anim: String, loaded_sfx_ref: String, palette, interval, number, radius, v_mirror_rand := false, master_palette := false):
 	if Globals.Game.frametime % interval == 0:  # only shake every X frames
 		for x in number:
 			var angle = Globals.Game.rng_generate(10) * PI/5.0
@@ -3659,7 +3703,10 @@ func particle(anim: String, loaded_sfx_ref: String, palette: String, interval, n
 			var aux_data = {"facing" : Globals.Game.rng_facing()}
 			if v_mirror_rand:
 				aux_data["v_mirror"] = Globals.Game.rng_bool()
-			Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data, palette)
+			if master_palette:
+				Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data, palette, UniqChar.NAME)
+			else:
+				Globals.Game.spawn_SFX(anim, loaded_sfx_ref, particle_pos, aux_data, palette)
 			
 			
 func flashes():
@@ -5878,19 +5925,20 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					no_impact = true
 						
 			if !no_impact and !no_impact_and_vel_change:
-				var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
-				if !"pull" in hit_data:
+				if !Em.hit.PULL in hit_data:
+					var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
 					match segment:
 						Em.compass.E:
 							face(-1) # face other way
 						Em.compass.W:
 							face(1)
-				else: # flip facing direction if pulling attack on flinch
-					match segment:
-						Em.compass.E:
-							face(1)
-						Em.compass.W:
-							face(-1)
+				else:
+					face(dir_to_attacker)
+#					match segment:
+#						Em.compass.E:
+#							face(1)
+#						Em.compass.W:
+#							face(-1)
 				
 #				if knockback_dir == 90 or knockback_dir == 270:
 #					face(dir_to_attacker) # turn towards attacker/entity if hit straight up/down
@@ -6519,7 +6567,7 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 			else:
 				rand_degree = Globals.Game.rng_generate(46) * Globals.Game.rng_facing()
 			rot_rad = (hit_data[Em.hit.KB_ANGLE] + rand_degree) / 360.0 * (2 * PI) + PI # visuals only
-		if "pull" in hit_data: rot_rad += PI # flip if pulling
+		if Em.hit.PULL in hit_data: rot_rad += PI # flip if pulling
 #		var aux_data = {"rot": rot_rad, "v_mirror":Globals.Game.rng_bool()}
 #		if hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] != "red":
 #			aux_data["palette"] = hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE]
@@ -7429,6 +7477,8 @@ func save_state():
 		"lethal_flag" : lethal_flag,
 		"from_move_rec" : from_move_rec,
 		"slowed" : slowed,
+		"spent_special" : spent_special,
+		"spent_unique" : spent_unique,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -7522,6 +7572,8 @@ func load_state(state_data, command_rewind := false):
 	lethal_flag = state_data.lethal_flag
 	from_move_rec = state_data.from_move_rec
 	slowed = state_data.slowed
+	spent_special = state_data.spent_special
+	spent_unique = state_data.spent_unique
 	if Globals.survival_level != null and !command_rewind:
 		enhance_cooldowns = state_data.enhance_cooldowns
 		enhance_data = state_data.enhance_data

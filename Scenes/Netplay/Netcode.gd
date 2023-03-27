@@ -92,6 +92,26 @@ func lag_freezer():
 		# request for special retrieve_inputs() from opponent in reliable rpc call that starts from latest_correct_time
 		rpc("desync_retrieve_inputs", Globals.Game.match_input_log.latest_correct_time)
 		
+		
+func array_to_bitfield(button_array: Array) -> int:
+	var bitfield := 0
+	for button in button_array:
+		bitfield = bitfield | (1 << button)
+	return bitfield
+	
+func bitfield_to_array(bitfield: int) -> Array: # converted received bitfield into opponent's button inputs
+	var button_array := []
+	var id_to_check: int
+	match Netplay.my_player_id():
+		0:
+			id_to_check = 1
+		1:
+			id_to_check = 0
+	for input in INPUTS_PACKET_CHECKER[id_to_check]:
+		if bool(bitfield & (1 << input)):
+			button_array.append(input)
+	return button_array
+	
 
 func retrieve_inputs(): # every frame, send the last [Netcode.max_rollback] frames of your inputs, along with the time range
 	var payload = [ # no strings, minimize size of payload
@@ -105,12 +125,16 @@ func retrieve_inputs(): # every frame, send the last [Netcode.max_rollback] fram
 
 	for frame in range(starting_time, payload[0] + 1): # for each frame in the last [Netcode.max_rollback] frames
 		if frame in Globals.Game.match_input_log.input_log: # check if this frametime is recorded in input log as a timestamp
+			var button_array = []
 			for key in Globals.Game.match_input_log.input_log[frame]: # for each key within this timestamp
 				if key in INPUTS_PACKET_CHECKER[Netplay.my_player_id()]: # if this key belongs to you
-					if !frame in payload[1]: # add it to the payload
-						payload[1][frame] = [key]
-					else:
-						payload[1][frame].append(key)
+					button_array.append(key)
+#					if !frame in payload[1]: # add it to the payload
+#						payload[1][frame] = [key]
+#					else:
+#						payload[1][frame].append(key)
+			if button_array.size() > 0:
+				payload[1][frame] = array_to_bitfield(button_array)
 						
 #	print(payload)
 
@@ -126,12 +150,16 @@ remote func desync_retrieve_inputs(starting_time):
 	
 	for frame in range(payload[0][0], payload[0][1] + 1):
 		if frame in Globals.Game.match_input_log.input_log: # check if this frametime is recorded in input log as a timestamp
+			var button_array = []
 			for key in Globals.Game.match_input_log.input_log[frame]: # for each key within this timestamp
 				if key in INPUTS_PACKET_CHECKER[Netplay.my_player_id()]: # if this key belongs to you
-					if !frame in payload[1]: # add it to the payload
-						payload[1][frame] = [key]
-					else:
-						payload[1][frame].append(key)
+					button_array.append(key)
+#					if !frame in payload[1]: # add it to the payload
+#						payload[1][frame] = [key]
+#					else:
+#						payload[1][frame].append(key)
+			if button_array.size() > 0:
+				payload[1][frame] = array_to_bitfield(button_array)
 	
 	rpc("desync_receive_payload", payload)
 	
@@ -169,7 +197,7 @@ func merge_payloads(payload_A, payload_B):
 	merged_payload[1] = payload_A[1].duplicate(true) # merge timestamps
 	for timestamp in payload_B[1].keys():
 		if !timestamp in merged_payload[1]:
-			merged_payload[1][timestamp] = payload_B[1][timestamp].duplicate(true)
+			merged_payload[1][timestamp] = payload_B[1][timestamp]
 			
 	return merged_payload
 			
@@ -210,10 +238,11 @@ func process_payload():
 		if frame in opponent_payload[1]: # new toggle input for opponent discovered
 			if rollback_starttime == null:
 				rollback_starttime = frame # start rollback from here
+			var opponent_button_array = bitfield_to_array(opponent_payload[1][frame])
 			if frame in Globals.Game.match_input_log.input_log: # if you have inputs that frame, merge yours and opponent's inputs
-				Globals.Game.match_input_log.input_log[frame].append_array(opponent_payload[1][frame])
+				Globals.Game.match_input_log.input_log[frame].append_array(opponent_button_array)
 			else: # if not, add their inputs to your input log in a new timestamp
-				Globals.Game.match_input_log.input_log[frame] = opponent_payload[1][frame].duplicate(true)
+				Globals.Game.match_input_log.input_log[frame] = opponent_button_array.duplicate()
 			
 	Globals.Game.match_input_log.latest_correct_time = opponent_payload[0][1] # update latest_correct_time
 	desync_check()

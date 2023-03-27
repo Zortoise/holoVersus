@@ -4,7 +4,15 @@ extends Node
 
 func _ready():
 
-	print(FMath.get_fraction_percent(5000, 10000))
+
+	var flag : int
+	
+	flag = 1 << 34
+	var flag2 = 1 << 4
+	
+	print(flag | flag2)
+
+#	print(FMath.get_fraction_percent(5000, 10000))
 
 #	var vector = FVector.new()
 #	vector.set_vector(45000, 1000)
@@ -39,3 +47,4 @@ func _ready():
 #	print(str(FMath.ease_in_lerp(68418, 5464, 90)) + " " + str(FMath.ease_out_lerp(68418, 5464, 90)))
 #	print(str(FMath.ease_in_lerp(68418, 5464, 100)) + " " + str(FMath.ease_out_lerp(68418, 5464, 100)))
 	
+	pass
