@@ -13,6 +13,7 @@ const JUMP_SPEED = 900 * FMath.S
 const VAR_JUMP_TIME = 10 # frames after jumping where holding jump will reduce gravity
 const VAR_JUMP_SLOW_POINT = 5 # frames where JUMP_SLOW starts
 #const JUMP_HORIZONTAL_SPEED = 110 * FMath.S
+const DIR_JUMP_HEIGHT_MOD = 85 # % of JUMP_SPEED when jumping while holding left/right
 const HORIZ_JUMP_BOOST_MOD = 20 # % of SPEED to gain when jumping with left/right held
 const HORIZ_JUMP_SPEED_MOD = 150 # % of velocity.x to gain when jumping with left/right held
 const AIR_HORIZ_JUMP_SPEED_MOD = 125

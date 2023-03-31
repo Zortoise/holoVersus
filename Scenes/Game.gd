@@ -1302,8 +1302,11 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 #					continue # attacker must still have hitcount left
 #				if attacker.is_player_in_ignore_list(defender.player_ID):
 #					continue # defender must not be in attacker's ignore list
-			elif mob_projectile_miss(attacker_or_entity, defender):
-				continue # mob projectiles cannot hit hitstunned players
+			else:
+				if first_active_frame_miss(defender):
+					continue
+				if mob_projectile_miss(attacker_or_entity, defender):
+					continue # mob projectiles cannot hit hitstunned players
 #			else: # for entities
 #				if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
 #					continue # entity must still have hitcount left
@@ -1352,7 +1355,7 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_ent
 
 	var sweetspotted := false
 	if semi_disjoint == false and Em.hit.SWEETBOX in hitbox:
-		if Globals.point_in_polygon(hit_center, hitbox[Em.hit.SWEETBOX]): # Geometry.is_point_in_polygon() wouldn't work on pixels due to left/right
+		if Detection.point_in_polygon(hit_center, hitbox[Em.hit.SWEETBOX]): # Geometry.is_point_in_polygon() wouldn't work on pixels due to left/right
 			sweetspotted = true # cannot sweetspot on SD hits
 	
 	var hit_data = { # send this to both attacker and defender
@@ -1394,6 +1397,13 @@ func test_priority(hitbox, attacker, _hurtbox, defender): # return false if atta
 			if attacker.query_priority(hitbox[Em.hit.MOVE_NAME]) < defender.query_priority():
 				return false
 	return true
+	
+	
+func first_active_frame_miss(defender): # projectiles cannot hit targets on 1st frame of active frame
+	if defender.is_atk_active():
+		if defender.Animator.time == 0:
+			return true
+	return false
 	
 	
 func mob_projectile_miss(entity, defender):

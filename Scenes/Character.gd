@@ -120,9 +120,9 @@ const STRONG_HIT_AUDIO_BOOST = 3
 const WEAK_HIT_AUDIO_NERF = -9
 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
-const WALL_SLAM_VEL_LIMIT_MOD = 500
-const WALL_SLAM_MIN_DAMAGE = 1
-const WALL_SLAM_MAX_DAMAGE = 100
+const WALL_SLAM_VEL_LIMIT_MOD = 1000
+const WALL_SLAM_MIN_DAMAGE = 50
+const WALL_SLAM_MAX_DAMAGE = 200
 const HORIZ_WALL_SLAM_UP_BOOST = 500 * FMath.S # if bounce horizontally on ground, boost up a little
 
 const KILL_VEL_THRESHOLD = 900 * FMath.S
@@ -269,6 +269,7 @@ var enhance_data := {} # like unique_data
 var slowed := 0
 var spent_special := false # used a move that requires Special to be held, releasing Special will not trigger EX moves
 var spent_unique := false # used a move that requires Unique to be held, releasing Special will not trigger EX moves
+var wall_slammed = Em.wall_slam.CANNOT_SLAM
 
 # controls
 var button_up
@@ -815,6 +816,7 @@ func simulate2(): # only ran if not in hitstop
 		$BurstLockTimer.stop()
 		DI_seal = false
 		lethal_flag = false
+		wall_slammed = Em.wall_slam.CANNOT_SLAM
 		
 	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
@@ -1178,9 +1180,9 @@ func simulate2(): # only ran if not in hitstop
 				# crouch to cancel ground dash recovery
 		
 				Em.char_state.GROUND_C_REC:
-					if Animator.query(["SoftLanding", "HardLanding"]):
+					if Animator.query_to_play(["SoftLanding", "HardLanding"]):
 						animate("Crouch")
-					elif Animator.query(["DashBrake", "WaveDashBrake"]):
+					elif Animator.query_to_play(["DashBrake", "WaveDashBrake"]):
 						pass
 	#					if Em.trait.CHAIN_DASH in query_traits():
 	#						animate("CrouchTransit")
@@ -1199,7 +1201,7 @@ func simulate2(): # only ran if not in hitstop
 	#		else:
 				
 				Em.char_state.AIR_STANDBY:
-					if !Animator.query(["JumpTransit2", "JumpTransit3", "FastFallTransit", "FastFall"]):
+					if !Animator.query_to_play(["JumpTransit2", "JumpTransit3", "FastFallTransit", "FastFall"]):
 
 
 						if Settings.dj_fastfall[player_ID] == 0 or \
@@ -1214,7 +1216,7 @@ func simulate2(): # only ran if not in hitstop
 	#						if Animator.query(["FallTransit"]): # go straight to fall animation
 	#							animate("Fall")
 					
-					elif Animator.query(["FastFall"]): # hold down while in fastfall animation to fast fall
+					elif Animator.query_to_play(["FastFall"]): # hold down while in fastfall animation to fast fall
 	#					velocity.y = FMath.f_lerp(velocity.y, FMath.percent(FMath.percent(GRAVITY, get_stat("TERMINAL_VELOCITY_MOD")), \
 	#						get_stat("FASTFALL_MOD")), 30)
 						velocity.y = FMath.percent(FMath.percent(GRAVITY, get_stat("TERMINAL_VELOCITY_MOD")), get_stat("FASTFALL_MOD"))
@@ -1229,7 +1231,7 @@ func simulate2(): # only ran if not in hitstop
 					if Settings.dj_fastfall[player_ID] == 0 or \
 						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
 							
-						if Animator.query(["aJumpTransit"]):
+						if Animator.query_to_play(["aJumpTransit"]):
 							animate("FastFallTransit")
 						
 							
@@ -1264,19 +1266,19 @@ func simulate2(): # only ran if not in hitstop
 	#					animate("BlockStartup")
 				Em.char_state.GROUND_STANDBY:
 					animate("BlockStartup")
-				Em.char_state.GROUND_C_REC:
-#					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
-#						continue
-					if Animator.query(["WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
-						if has_trait(Em.trait.WAVE_DASH_BLOCK):
-							animate("BlockStartup")
-					elif Animator.query(["HardLanding"]):
-						pass # cannot block on hardlanding
-					else:
-	#					continue
-						animate("BlockStartup")
+#				Em.char_state.GROUND_C_REC:
+##					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
+##						continue
+#					if Animator.query_to_play(["WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
+#						if has_trait(Em.trait.WAVE_DASH_BLOCK):
+#							animate("BlockStartup")
+#					elif Animator.query_to_play(["HardLanding"]):
+#						pass # cannot block on hardlanding
+#					else:
+#	#					continue
+#						animate("BlockStartup")
 						
-				Em.char_state.GROUND_ATK_REC:
+				Em.char_state.GROUND_ATK_REC: # block cancelling
 					if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
 						afterimage_cancel()
 						animate("BlockStartup")
@@ -1295,16 +1297,17 @@ func simulate2(): # only ran if not in hitstop
 	#				if current_ex_gauge >= UniqChar.AIR_BLOCK_DRAIN_RATE * 0.5:
 					animate("aBlockStartup")
 					$VarJumpTimer.stop()
-				Em.char_state.AIR_C_REC:
-					if Animator.query(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
-						if has_trait(Em.trait.AIR_DASH_BLOCK): # only heavyweights can block out of air dashes
-							animate("aBlockStartup")
-							$VarJumpTimer.stop()
-					else:
-						animate("aBlockStartup")
-						$VarJumpTimer.stop()
+					
+#				Em.char_state.AIR_C_REC:
+#					if Animator.query_to_play(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
+#						if has_trait(Em.trait.AIR_DASH_BLOCK): # only heavyweights can block out of air dashes
+#							animate("aBlockStartup")
+#							$VarJumpTimer.stop()
+#					else:
+#						animate("aBlockStartup")
+#						$VarJumpTimer.stop()
 			
-				Em.char_state.AIR_ATK_REC:
+				Em.char_state.AIR_ATK_REC: # block cancelling
 					if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
 						afterimage_cancel()
 						animate("aBlockStartup")
@@ -1799,39 +1802,87 @@ func bounce(against_ground: bool):
 			velocity.y = -HORIZ_WALL_SLAM_UP_BOOST
 		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
 		if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
+			
+			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
+					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
+				var scaled_damage = wall_slam(velocity.x)
+				
+				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+					wall_slammed = Em.wall_slam.HAS_SLAMMED
+					take_damage(scaled_damage)
+					if Globals.survival_level == null:
+						Globals.Game.spawn_damage_number(scaled_damage, position)
+					else: Globals.Game.spawn_damage_number(scaled_damage, position, Em.dmg_num_col.RED)
+					
+					var slam_level := 0
+					if scaled_damage >= 100:
+						if scaled_damage < 150:
+							hitstop = 12
+							slam_level = 1
+							play_audio("break3", {"vol" : -14,})
+							Globals.Game.set_screenshake()
+						else:
+							hitstop = 15
+							slam_level = 2
+							play_audio("break3", {"vol" : -10,})
+							Globals.Game.set_screenshake()
+					else:
+						hitstop = 9
+						play_audio("break3", {"vol" : -18,})
+						
+					if sign(velocity_previous_frame.x) > 0:
+						bounce_dust(Em.compass.E, slam_level)
+					else:
+						bounce_dust(Em.compass.W, slam_level)
+					return
+				
+			
 			if sign(velocity_previous_frame.x) > 0:
 				bounce_dust(Em.compass.E)
 			else:
 				bounce_dust(Em.compass.W)
 			play_audio("rock3", {"vol" : -10,})
-			
-			# if bounce off hard enough, take damage scaled to velocity and guard gauge
-			if !(DI_seal and $BurstLockTimer.is_running()) and \
-					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
-				var weight: int = FMath.get_fraction_percent(int(abs(velocity.x)) - WALL_SLAM_THRESHOLD, \
-						FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-				var scaled_damage = FMath.f_lerp(WALL_SLAM_MIN_DAMAGE, WALL_SLAM_MAX_DAMAGE, weight)
-				if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
-					scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), \
-							get_guard_gauge_percent_above())
-				take_damage(scaled_damage)
+				
 				
 	elif is_against_ceiling($PlayerCollisionBox, $SoftPlatformDBox):
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
-			bounce_dust(Em.compass.N)
-			play_audio("rock3", {"vol" : -10,})
 			
 			# if bounce off hard enough, take damage scaled to velocity and guard gauge
-			if !(DI_seal and $BurstLockTimer.is_running()) and \
+			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
-				var weight: int = FMath.get_fraction_percent(int(abs(velocity.y)) - WALL_SLAM_THRESHOLD, \
-						FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-				var scaled_damage = FMath.f_lerp(WALL_SLAM_MIN_DAMAGE, WALL_SLAM_MAX_DAMAGE, weight)
-				if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
-					scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), \
-							get_guard_gauge_percent_above())
-				take_damage(scaled_damage)
+				var scaled_damage = wall_slam(velocity.y)
+				
+				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+					wall_slammed = Em.wall_slam.HAS_SLAMMED
+					take_damage(scaled_damage)
+					if Globals.survival_level == null:
+						Globals.Game.spawn_damage_number(scaled_damage, position)
+					else: Globals.Game.spawn_damage_number(scaled_damage, position, Em.dmg_num_col.RED)
+					
+					var slam_level := 0
+					if scaled_damage >= 100:
+						if scaled_damage < 150:
+							hitstop = 12
+							slam_level = 1
+							play_audio("break3", {"vol" : -14,})
+							Globals.Game.set_screenshake()
+						else:
+							hitstop = 15
+							slam_level = 2
+							play_audio("break3", {"vol" : -10,})
+							Globals.Game.set_screenshake()
+					else:
+						hitstop = 9
+						play_audio("break3", {"vol" : -18,})
+
+					bounce_dust(Em.compass.N, slam_level)
+					return
+				
+			bounce_dust(Em.compass.N)
+			play_audio("rock3", {"vol" : -10,})
+				
 				
 	elif against_ground:
 		if $HitStunTimer.is_running():
@@ -1842,6 +1893,12 @@ func bounce(against_ground: bool):
 			bounce_dust(Em.compass.S)
 			play_audio("rock3", {"vol" : -10,})
 			
+			
+func wall_slam(vel) -> int:
+	var weight: int = FMath.get_fraction_percent(int(abs(vel)) - WALL_SLAM_THRESHOLD, \
+			FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
+	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MAX_DAMAGE, weight)
+	return scaled_damage
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
 	# to move an object, first do move_true_position(), then get_rounded_position()
@@ -3671,18 +3728,56 @@ func process_VDI():
 
 # SPECIAL EFFECTS --------------------------------------------------------------------------------------------------
 
-func bounce_dust(orig_dir):
+func bounce_dust(orig_dir, slam = null):
 	match orig_dir:
 		Em.compass.N:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
 		Em.compass.E:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
-				{"facing": 1, "rot":-PI/2})
+					{"facing": 1, "rot":-PI/2})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": 1, "rot":-PI/2})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": 1, "rot":-PI/2})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": 1, "rot":-PI/2})
 		Em.compass.S:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", get_feet_pos(), {"grounded":true})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", get_feet_pos(), {"grounded":true})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", get_feet_pos(), {"grounded":true})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", get_feet_pos(), {"grounded":true})
 		Em.compass.W:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
-				{"facing": -1, "rot":-PI/2})
+					{"facing": -1, "rot":-PI/2})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": -1, "rot":-PI/2})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": -1, "rot":-PI/2})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": -1, "rot":-PI/2})
 
 func set_monochrome():
 	if !monochrome:
@@ -4136,6 +4231,14 @@ func tech():
 				if current_guard_gauge > 0:
 					reset_guard_gauge()
 				return true
+				
+	if button_rs_up in input_state.pressed or button_rs_down in input_state.pressed or button_rs_left in input_state.pressed or \
+		button_rs_right in input_state.pressed:
+		animate("DodgeTransit")
+		if current_guard_gauge > 0:
+			reset_guard_gauge()
+		return true
+		
 	return false
 	
 func dodge_check():
@@ -5184,7 +5287,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			Em.block_state.UNBLOCKED:
 				
 				if Globals.survival_level != null: # mob pushback when resisting or armoring
-					if (Em.hit.RESISTED in hit_data or "mob_armored" in hit_data) and !Em.hit.MOB_BREAK in hit_data:
+					if (Em.hit.RESISTED in hit_data or Em.hit.MOB_ARMORED in hit_data) and !Em.hit.MOB_BREAK in hit_data:
 						var pushback_strength = MOBBLOCK_ATKER_PUSHBACK
 						
 						var pushback_dir_enum = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.SIX, facing)
@@ -5208,6 +5311,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 								velocity.x -= pushback_strength
 								
 			Em.block_state.WEAK, Em.block_state.STRONG:
+				
+				if Em.hit.SUPERARMORED in hit_data:
+					continue
 				
 				var pushback_strength: = 0
 				if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.WEAK:
@@ -5533,7 +5639,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			!Em.hit.SUPERARMORED in hit_data:
 		# cannot Punish Hit for weak hits, non-strong projectiles and non-damaging moves like Burst
 		# remember that multi-hit moves cannot do punish hits
-		match state:
+		match new_state:
 			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 				if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 					hit_data[Em.hit.PUNISH_HIT] = true
@@ -5541,22 +5647,25 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC:
 				hit_data[Em.hit.PUNISH_HIT] = true
 			# check for Punish Hits for dashes
-			Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_REC:
+			Em.char_state.GROUND_STARTUP:
 				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
-					if Animator.query_current(["DashTransit", "Dash"]):
+					if Animator.query_to_play(["DashTransit"]):
 						hit_data[Em.hit.PUNISH_HIT] = true
+			Em.char_state.GROUND_D_REC:
+				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
+					hit_data[Em.hit.PUNISH_HIT] = true
 			Em.char_state.AIR_STARTUP:
 				if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
-					if Animator.query_current(["aDashTransit"]):
+					if Animator.query_to_play(["aDashTransit", "SDashTransit"]):
 						hit_data[Em.hit.PUNISH_HIT] = true
 			Em.char_state.AIR_REC:
-				if Animator.query_current(["DodgeRec"]):
+				if Animator.query_to_play(["DodgeRec", "SDash"]):
 					hit_data[Em.hit.PUNISH_HIT] = true
-				elif has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
-					if Animator.query_current(["aDash", "aDashU", "aDashD", "aDashUU", "aDashDD"]):
-						hit_data[Em.hit.PUNISH_HIT] = true
+			Em.char_state.AIR_D_REC:
+				if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
+					hit_data[Em.hit.PUNISH_HIT] = true
 			Em.char_state.AIR_C_REC:
-				if Animator.query_current(["DodgeCRec"]):
+				if Animator.query_to_play(["DodgeCRec"]):
 					hit_data[Em.hit.PUNISH_HIT] = true
 						
 	if hit_data[Em.hit.PUNISH_HIT] and Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
@@ -5974,6 +6083,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 							animate("aFlinchBStop")
 					
 		else: # launch
+			
+			if wall_slammed != Em.wall_slam.HAS_SLAMMED:
+				if !Em.hit.AUTOCHAIN in hit_data and !Em.hit.MULTIHIT in hit_data:
+					wall_slammed = Em.wall_slam.CAN_SLAM
+				else:
+					wall_slammed = Em.wall_slam.CANNOT_SLAM
 			
 			knockback_strength += LAUNCH_BOOST
 			var segment = Globals.split_angle(knockback_dir, Em.angle_split.EIGHT, dir_to_attacker)
@@ -6868,6 +6983,9 @@ func sequence_launch():
 	velocity.set_vector(launch_power, 0)  # reset momentum
 	velocity.rotate(launch_angle)
 	
+	if wall_slammed != Em.wall_slam.HAS_SLAMMED:
+		wall_slammed = Em.wall_slam.CAN_SLAM
+	
 	
 		
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
@@ -7108,14 +7226,17 @@ func _on_SpritePlayer_anim_started(anim_name):
 #				velocity.y = -FMath.percent(UniqChar.JUMP_SPEED, UniqChar.SUPER_JUMP_MOD)
 #				velocity.x = 0
 #			else:
-			velocity.y = -get_stat("JUMP_SPEED")
+#			velocity.y = -get_stat("JUMP_SPEED")
 			if dir != 0:
+				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("DIR_JUMP_HEIGHT_MOD"))
 				velocity.x += dir * FMath.percent(get_stat("SPEED"), get_stat("HORIZ_JUMP_BOOST_MOD"))
 				if velocity.x > get_stat("SPEED"):
 					velocity.x = FMath.f_lerp(velocity.x, get_stat("SPEED"), 50)
 				elif velocity.x < -get_stat("SPEED"):
 					velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 50)
 				velocity.x = FMath.percent(velocity.x, get_stat("HORIZ_JUMP_SPEED_MOD"))
+			else:
+				velocity.y = -get_stat("JUMP_SPEED")
 			$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 #			if dir != 0: # when jumping can press left/right for a long jump
 #				if abs(velocity.x) < get_stat("SPEED"): # cannot surpass SPEED
@@ -7140,9 +7261,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 						velocity.x = FMath.percent(velocity.x, get_stat("AIR_HORIZ_JUMP_SPEED_MOD"))
 						
 #						velocity.x = FMath.percent(velocity.x, 90) # air jump is slower horizontally since no friction
+					velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
+					velocity.y = FMath.percent(velocity.y, get_stat("DIR_JUMP_HEIGHT_MOD"))
 				else: # neutral air jump
 					velocity.x = FMath.percent(velocity.x, 70)
-				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
+					velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
 				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 				
@@ -7479,6 +7602,7 @@ func save_state():
 		"slowed" : slowed,
 		"spent_special" : spent_special,
 		"spent_unique" : spent_unique,
+		"wall_slammed" : wall_slammed,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -7574,6 +7698,7 @@ func load_state(state_data, command_rewind := false):
 	slowed = state_data.slowed
 	spent_special = state_data.spent_special
 	spent_unique = state_data.spent_unique
+	wall_slammed = state_data.wall_slammed
 	if Globals.survival_level != null and !command_rewind:
 		enhance_cooldowns = state_data.enhance_cooldowns
 		enhance_data = state_data.enhance_data

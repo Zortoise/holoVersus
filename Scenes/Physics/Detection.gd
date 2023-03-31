@@ -3,6 +3,37 @@ extends Node
 # autoload, global functions for detecting objects using detect boxes
 
 
+#func hit_detect(atker_sprite_rect: Rect2, defender_sprite_rect: Rect2, hitbox_bits: Array, hurtbox_bits: Array, sweetbox_bits = null, sdhurtbox_bits = null, \
+#		sourbox_bits = null) -> Array:
+#
+#	var intersection: Rect2 = atker_sprite_rect.clip(defender_sprite_rect)
+#	if intersection.size == Vector2.ZERO:
+#		return [Em.hit_detect.WHIFF]
+#
+#	var hit_detect = Em.hit_detect.WHIFF
+#	var atker_shift = atker_sprite_rect.position - intersection.position
+#	var defender_shift = defender_sprite_rect.position - intersection.position
+#
+#	for y in intersection.size.y:
+#		for x in intersection.size.x:
+#			pass
+#
+#	var hit_center = intersection.get_center()
+#	hit_center.x = int(hit_center.x)
+#	hit_center.y = int(hit_center.y)
+#
+#	return [hit_detect, hit_center]
+	
+	
+func point_in_polygon(point: Vector2, polygon: Array):
+	var point_poly = [Vector2(point.x - 1, point.y + 1), Vector2(point.x + 1, point.y + 1), \
+			Vector2(point.x - 1, point.y - 1), Vector2(point.x + 1, point.y - 1)]
+	if Geometry.intersect_polygons_2d(point_poly, polygon):
+		return true
+	else:
+		return false
+		
+
 func detect_duo(box1, box2): # basic testing whether 2 boxes intersect, both are nodes like ColorRect or Rect2s
 	if box1 is ColorRect and box2 is ColorRect and box1 == box2: return false
 	

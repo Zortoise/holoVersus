@@ -1,0 +1,98 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"WallSlam": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WallSlamSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+3: {
+"frame": 1
+},
+6: {
+"frame": 2
+},
+9: {
+"frame": 3
+},
+12: {
+"frame": 4
+},
+15: {
+"frame": 5
+},
+18: {
+"frame": 6
+}
+},
+"vframes": 4
+},
+"WallSlam2": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WallSlamSprite",
+"timestamps": {
+0: {
+"frame": 7
+},
+3: {
+"frame": 8
+},
+6: {
+"frame": 9
+},
+9: {
+"frame": 10
+},
+12: {
+"frame": 11
+},
+15: {
+"frame": 12
+},
+18: {
+"frame": 13
+}
+},
+"vframes": 4
+},
+"WallSlam3": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WallSlamSprite",
+"timestamps": {
+0: {
+"frame": 14
+},
+3: {
+"frame": 15
+},
+6: {
+"frame": 16
+},
+9: {
+"frame": 17
+},
+12: {
+"frame": 18
+},
+15: {
+"frame": 19
+},
+18: {
+"frame": 20
+}
+},
+"vframes": 4
+}
+}

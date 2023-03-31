@@ -64,9 +64,9 @@ const LAUNCH_ROT_SPEED = 5*PI # speed of sprite rotation when launched, don't ne
 const TECHLAND_THRESHOLD = 300 * FMath.S # max velocity when hitting the ground to tech land
 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
-const WALL_SLAM_VEL_LIMIT_MOD = 500
-const WALL_SLAM_MIN_DAMAGE = 1
-const WALL_SLAM_MAX_DAMAGE = 100
+const WALL_SLAM_VEL_LIMIT_MOD = 1000
+const WALL_SLAM_MIN_DAMAGE = 50
+const WALL_SLAM_MAX_DAMAGE = 200
 const HORIZ_WALL_SLAM_UP_BOOST = 500 * FMath.S # if bounce horizontally on ground, boost up a little
 
 const LAUNCH_DUST_THRESHOLD = 1400 * FMath.S # velocity where launch dust increase in frequency
@@ -179,6 +179,7 @@ var combo_level := 0 # set when mob_break according to atk_level, determine Guar
 var no_jump_chance := 0 # chance of removing all jumps from decision, increased if hit in air, decreased when hit on ground
 var can_impulse := true # set to false when starting a MOVEMENT RECOVERY, set to true otherwise
 var slowed := 0
+var wall_slammed = Em.wall_slam.CANNOT_SLAM
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -474,6 +475,7 @@ func simulate2(): # only ran if not in hitstop
 	if !is_hitstunned_or_sequenced():
 		repeat_memory = []
 		combo_level = 0
+		wall_slammed = Em.wall_slam.CANNOT_SLAM
 		
 	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
@@ -1315,16 +1317,74 @@ func bounce(against_ground: bool):
 			velocity.y = -HORIZ_WALL_SLAM_UP_BOOST
 		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
 		if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
+			
+			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			if wall_slammed == Em.wall_slam.CAN_SLAM and \
+					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
+				var scaled_damage = wall_slam(velocity.x)
+				
+				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+					wall_slammed = Em.wall_slam.HAS_SLAMMED
+					take_damage(scaled_damage)
+					Globals.Game.spawn_damage_number(scaled_damage, position)
+					
+					var slam_level := 0
+					if scaled_damage >= 100:
+						if scaled_damage < 150:
+							hitstop = 12
+							slam_level = 1
+							play_audio("break3", {"vol" : -14,})
+						else:
+							hitstop = 15
+							slam_level = 2
+							play_audio("break3", {"vol" : -10,})
+					else:
+						hitstop = 9
+						play_audio("break3", {"vol" : -18,})
+						
+					if sign(velocity_previous_frame.x) > 0:
+						bounce_dust(Em.compass.E, slam_level)
+					else:
+						bounce_dust(Em.compass.W, slam_level)
+					return
+			
 			if sign(velocity_previous_frame.x) > 0:
 				bounce_dust(Em.compass.E)
 			else:
 				bounce_dust(Em.compass.W)
 			play_audio("rock3", {"vol" : -10,})
-			
 				
 	elif is_against_ceiling($PlayerCollisionBox, $PlayerCollisionBox):
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
+			
+			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			if wall_slammed == Em.wall_slam.CAN_SLAM and \
+					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
+				var scaled_damage = wall_slam(velocity.y)
+				
+				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+					wall_slammed = Em.wall_slam.HAS_SLAMMED
+					take_damage(scaled_damage)
+					Globals.Game.spawn_damage_number(scaled_damage, position)
+						
+					var slam_level := 0
+					if scaled_damage >= 100:
+						if scaled_damage < 150:
+							hitstop = 12
+							slam_level = 1
+							play_audio("break3", {"vol" : -14,})
+						else:
+							hitstop = 15
+							slam_level = 2
+							play_audio("break3", {"vol" : -10,})
+					else:
+						hitstop = 9
+						play_audio("break3", {"vol" : -18,})
+
+					bounce_dust(Em.compass.N, slam_level)
+					return
+			
 			bounce_dust(Em.compass.N)
 			play_audio("rock3", {"vol" : -10,})
 			
@@ -1335,6 +1395,12 @@ func bounce(against_ground: bool):
 			bounce_dust(Em.compass.S)
 			play_audio("rock3", {"vol" : -10,})
 			
+			
+func wall_slam(vel) -> int:
+	var weight: int = FMath.get_fraction_percent(int(abs(vel)) - WALL_SLAM_THRESHOLD, \
+			FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
+	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MAX_DAMAGE, weight)
+	return scaled_damage
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
 	# to move an object, first do move_true_position(), then get_rounded_position()
@@ -1640,18 +1706,56 @@ func get_feet_pos(): # return global position of the point the character is stan
 
 # SPECIAL EFFECTS --------------------------------------------------------------------------------------------------
 
-func bounce_dust(orig_dir):
+func bounce_dust(orig_dir, slam = null):
 	match orig_dir:
 		Em.compass.N:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", position + Vector2(0, $PlayerCollisionBox.rect_position.y), {"rot":PI})
 		Em.compass.E:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
-				{"facing": 1, "rot":-PI/2})
+					{"facing": 1, "rot":-PI/2})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": 1, "rot":-PI/2})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": 1, "rot":-PI/2})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", position + Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": 1, "rot":-PI/2})
 		Em.compass.S:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", get_feet_pos(), {"grounded":true})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", get_feet_pos(), {"grounded":true})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", get_feet_pos(), {"grounded":true})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", get_feet_pos(), {"grounded":true})
 		Em.compass.W:
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
-				{"facing": -1, "rot":-PI/2})
+					{"facing": -1, "rot":-PI/2})
+			if slam != null:
+				match slam:
+					0:
+						Globals.Game.spawn_SFX("WallSlam", "WallSlam", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": -1, "rot":-PI/2})
+					1:
+						Globals.Game.spawn_SFX("WallSlam2", "WallSlam", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": -1, "rot":-PI/2})
+					2:
+						Globals.Game.spawn_SFX("WallSlam3", "WallSlam", position - Vector2($PlayerCollisionBox.rect_size.x / 2, 0), \
+							{"facing": -1, "rot":-PI/2})
 
 func set_monochrome():
 	if !monochrome:
@@ -2266,6 +2370,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		match hit_data[Em.hit.BLOCK_STATE]:					
 			Em.block_state.WEAK, Em.block_state.STRONG:
 				
+				if Em.hit.SUPERARMORED in hit_data:
+					continue
+				
 				var pushback_strength: = 0
 				if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.WEAK:
 					pushback_strength = WEAKBLOCK_ATKER_PUSHBACK
@@ -2812,6 +2919,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 		else: # launch
 			
+			if wall_slammed != Em.wall_slam.HAS_SLAMMED:
+				if !Em.hit.AUTOCHAIN in hit_data and !Em.hit.MULTIHIT in hit_data:
+					wall_slammed = Em.wall_slam.CAN_SLAM
+				else:
+					wall_slammed = Em.wall_slam.CANNOT_SLAM
+			
 			knockback_strength += LAUNCH_BOOST
 			var segment = Globals.split_angle(knockback_dir, Em.angle_split.EIGHT, dir_to_attacker)
 			match segment:
@@ -2877,7 +2990,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					animate("aResistB")
 					
 		else:
-			hit_data["mob_armored"] = true # for attacker knockback
+			hit_data[Em.hit.MOB_ARMORED] = true # for attacker knockback
 			if (is_atk_startup() or is_atk_active()) and is_special_move(get_move_name()):
 				no_impact_and_vel_change = true # no KB if mob is doing a special move
 					
@@ -3496,6 +3609,9 @@ func sequence_launch():
 	velocity.set_vector(launch_power, 0)  # reset momentum
 	velocity.rotate(launch_angle)
 	
+	if wall_slammed != Em.wall_slam.HAS_SLAMMED:
+		wall_slammed = Em.wall_slam.CAN_SLAM
+	
 	if get_damage_percent() >= 100:				
 		animate("Death")
 		if launch_power == 0:
@@ -3792,6 +3908,7 @@ func save_state():
 		"no_jump_chance" : no_jump_chance,
 		"can_impulse" : can_impulse,
 		"slowed" : slowed,
+		"wall_slammed" : wall_slammed,
 		
 	}
 
@@ -3882,6 +3999,7 @@ func load_state(state_data):
 	no_jump_chance = state_data.no_jump_chance
 	can_impulse = state_data.can_impulse
 	slowed = state_data.slowed
+	wall_slammed = state_data.wall_slammed
 
 	
 #--------------------------------------------------------------------------------------------------

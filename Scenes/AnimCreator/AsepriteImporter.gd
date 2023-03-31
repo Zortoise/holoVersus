@@ -11,10 +11,10 @@ extends EditorScript
 
 # TARGETS ---------------------------------------------------------------------------------------------------
 
-export var entity_folder = "res://Characters/Gura/SFX/"
+export var entity_folder = "res://Assets/Effects/WallSlam/"
 # be sure to end with a "/", or not if you wish, I guess
 
-export var target_aseprite_filename = "WaterSparkle"
+export var target_aseprite_filename = ""
 # only need filename, not path, no need extension
 # if left empty, will process all .aseprite files in the AsepriteFiles folder in entity_folder
 
@@ -103,6 +103,11 @@ func process_aseprite_file(in_aseprite_filename: String): # output a single .tre
 	
 	var export_data = load("res://Scenes/AnimCreator/FrameData.gd").new()
 	export_data.frame_data = frame_data
+	
+	var dir = Directory.new()
+	if !dir.dir_exists(entity_folder + "FrameData/"):
+		dir.make_dir(entity_folder + "FrameData/")
+	
 	var output_file_name = entity_folder + "FrameData/" + in_aseprite_filename + ".tres"
 	ResourceSaver.save(output_file_name, export_data)
 
@@ -288,8 +293,10 @@ func process_polygon_layer(polygon_layer_name, frame_data, in_aseprite_filename)
 	
 	# prepare the polygon_array, each entry of polygon_array contain the polygon coordinates for a certain frame index in polygon_ref
 	var polygon_array = []
+#	var bitmask_array = []
 	for x in ref_hframes * ref_vframes:
 		polygon_array.append([]) # prepare one empty array for each frame index in polygon_ref, only accept one polygon per frame index
+#		bitmask_array = []
 	
 	# create bitmap from polygon_ref
 	var image = Image.new()

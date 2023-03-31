@@ -1276,13 +1276,16 @@ func unique_chaining_rules(move_name, attack_ref):
 #	return trident_array
 
 func get_closest_ground_fin():
+	var target = Character.get_target()
+	if target == null: return null
+	
 	var ground_fin_array := []
 	for entity in Globals.Game.get_node("EntitiesFront").get_children():
 		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "ground_fin":
 			ground_fin_array.append(entity)
 
 	if ground_fin_array.size() > 0:
-		return FMath.get_closest(ground_fin_array, Character.position).entity_ID
+		return FMath.get_closest(ground_fin_array, target.position).entity_ID
 	else:
 		return null
 		
@@ -2181,9 +2184,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP8bActive":
 			Character.velocity.set_vector(0, 0)
 			var target = Globals.Game.get_entity_node(Character.unique_data.groundfin_target)
-			if target != null and !Globals.Game.is_point_offstage(target.position):
-				Character.position = Character.get_pos_from_feet(target.position)
-				Character.set_true_position()
+			if target != null:
+				var target_position =  Character.get_pos_from_feet(target.position)
+				if Character.is_tele_valid(Character.get_node("PlayerCollisionBox"), target_position):
+					Character.position = target_position
+					Character.set_true_position()
 				target.UniqEntity.kill()
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
 					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)

@@ -331,6 +331,16 @@ func is_in_wall(soft_platform_dbox):
 		return false
 		
 		
+func is_tele_valid(collision_box, target_position: Vector2): # to check if teleportation will go into walls
+	var move_vec = target_position - position
+	var new_rect = Rect2(collision_box.rect_global_position + move_vec, collision_box.rect_size)
+	
+	if Detection.detect_bool([new_rect], ["SolidPlatforms", "BlastWalls", "BlastCeiling", "CSolidPlatforms"]):
+		return false
+	else:
+		return true
+	
+		
 func is_against_ledge(soft_platform_dbox, direction):
 	if "grounded" in self and !get("grounded"):
 		return false
