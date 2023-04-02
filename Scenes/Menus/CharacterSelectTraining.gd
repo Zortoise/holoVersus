@@ -305,45 +305,45 @@ func move_pickers(dir):
 	if phase == 0:
 		if dir.x == 1:
 			P1_picker_pos += 1
-			if P1_picker_pos == 12: P1_picker_pos = 0
-			elif P1_picker_pos == 24: P1_picker_pos = 12
-			elif P1_picker_pos == 36: P1_picker_pos = 24
+			if P1_picker_pos == $Grid.columns: P1_picker_pos = 0
+			elif P1_picker_pos == $Grid.columns * 2: P1_picker_pos = $Grid.columns
+			elif P1_picker_pos == $Grid.columns * 3: P1_picker_pos = $Grid.columns * 2
 			P1_changed_character()
 		elif dir.x == -1:
 			P1_picker_pos -= 1
-			if P1_picker_pos == -1: P1_picker_pos = 11
-			elif P1_picker_pos == 11: P1_picker_pos = 23
-			elif P1_picker_pos == 23: P1_picker_pos = 35
+			if P1_picker_pos == -1: P1_picker_pos = $Grid.columns - 1
+			elif P1_picker_pos == $Grid.columns - 1: P1_picker_pos = ($Grid.columns * 2) - 1
+			elif P1_picker_pos == ($Grid.columns * 2) - 1: P1_picker_pos = ($Grid.columns * 3) - 1
 			P1_changed_character()
 		if dir.y == 1:
-			P1_picker_pos += 12
-			if P1_picker_pos >= 36: P1_picker_pos -= 36
+			P1_picker_pos += $Grid.columns
+			if P1_picker_pos >= $Grid.columns * 3: P1_picker_pos -= $Grid.columns * 3
 			P1_changed_character()
 		elif dir.y == -1:
-			P1_picker_pos -= 12
-			if P1_picker_pos < 0: P1_picker_pos += 36
+			P1_picker_pos -= $Grid.columns
+			if P1_picker_pos < 0: P1_picker_pos += $Grid.columns * 3
 			P1_changed_character()
 		
 	if phase == 1:
 		if dir.x == 1:
 			P2_picker_pos += 1
-			if P2_picker_pos == 12: P2_picker_pos = 0
-			elif P2_picker_pos == 24: P2_picker_pos = 12
-			elif P2_picker_pos == 36: P2_picker_pos = 24
+			if P2_picker_pos == $Grid.columns: P2_picker_pos = 0
+			elif P2_picker_pos == $Grid.columns * 2: P2_picker_pos = $Grid.columns
+			elif P2_picker_pos == $Grid.columns * 3: P2_picker_pos = $Grid.columns * 2
 			P2_changed_character()
 		elif dir.x == -1:
 			P2_picker_pos -= 1
-			if P2_picker_pos == -1: P2_picker_pos = 11
-			elif P2_picker_pos == 11: P2_picker_pos = 23
-			elif P2_picker_pos == 23: P2_picker_pos = 35
+			if P2_picker_pos == -1: P2_picker_pos = $Grid.columns - 1
+			elif P2_picker_pos == $Grid.columns - 1: P2_picker_pos = ($Grid.columns * 2) - 1
+			elif P2_picker_pos == ($Grid.columns * 2) - 1: P2_picker_pos = ($Grid.columns * 3) - 1
 			P2_changed_character()
 		if dir.y == 1:
-			P2_picker_pos += 12
-			if P2_picker_pos >= 36: P2_picker_pos -= 36
+			P2_picker_pos += $Grid.columns
+			if P2_picker_pos >= $Grid.columns * 3: P2_picker_pos -= $Grid.columns * 3
 			P2_changed_character()
 		elif dir.y == -1:
-			P2_picker_pos -= 12
-			if P2_picker_pos < 0: P2_picker_pos += 36
+			P2_picker_pos -= $Grid.columns
+			if P2_picker_pos < 0: P2_picker_pos += $Grid.columns * 3
 			P2_changed_character()		
 	
 func P1_changed_character():

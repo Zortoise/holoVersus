@@ -448,8 +448,8 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.SPEED : 10,
 		effect_ref.AIR_DASH_SPEED : 25,
-		effect_ref.PROJ_DMG_MOD : 40,
-		"quirks" : [effect_ref.SPECIAL_CHAIN]
+		effect_ref.SPECIAL_DMG_MOD: 50,
+		"quirks" : [effect_ref.IGNITION_ATK],
 	},
 	card_ref.NOEL : {
 		"name" : "Noel",
@@ -523,7 +523,8 @@ const DATABASE = {
 		"name" : "Kiara",
 		"price" : 100,
 		effect_ref.STOCK : 1,
-		"quirks" : [effect_ref.RESPAWN_POWER, effect_ref.IGNITION_ATK, effect_ref.PHOENIX_PROJ],
+		effect_ref.FIERCE_DMG_MOD : 50,
+		"quirks" : [effect_ref.RESPAWN_POWER, effect_ref.PHOENIX_PROJ],
 	},
 	card_ref.MORI : {
 		"name" : "Mori",
@@ -661,7 +662,7 @@ const DATABASE = {
 		effect_ref.HP : 20,
 		effect_ref.HEAVY_DMG_MOD : 50,
 		effect_ref.SPECIAL_DMG_MOD : 50,
-		"quirks" : [effect_ref.IGNITION_ATK],
+		"quirks" : [effect_ref.ARMOR_PIERCE]
 	},
 	card_ref.RUSHIA : {
 		"name" : "Rushia",

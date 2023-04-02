@@ -1320,6 +1320,7 @@ func bounce(against_ground: bool):
 			
 			# if bounce off hard enough, take damage scaled to velocity and guard gauge
 			if wall_slammed == Em.wall_slam.CAN_SLAM and \
+					abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
 				var scaled_damage = wall_slam(velocity.x)
 				
@@ -1334,13 +1335,18 @@ func bounce(against_ground: bool):
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -14,})
+							modulate_play("punish_sweet_flash")
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
 						else:
 							hitstop = 15
 							slam_level = 2
 							play_audio("break3", {"vol" : -10,})
+							modulate_play("punish_sweet_flash")
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
+						modulate_play("punish_flash")
 						
 					if sign(velocity_previous_frame.x) > 0:
 						bounce_dust(Em.compass.E, slam_level)
@@ -1360,6 +1366,7 @@ func bounce(against_ground: bool):
 			
 			# if bounce off hard enough, take damage scaled to velocity and guard gauge
 			if wall_slammed == Em.wall_slam.CAN_SLAM and \
+					abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
 				var scaled_damage = wall_slam(velocity.y)
 				
@@ -1374,13 +1381,18 @@ func bounce(against_ground: bool):
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -14,})
+							modulate_play("punish_sweet_flash")
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
 						else:
 							hitstop = 15
 							slam_level = 2
 							play_audio("break3", {"vol" : -10,})
+							modulate_play("punish_sweet_flash")
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
+						modulate_play("punish_flash")
 
 					bounce_dust(Em.compass.N, slam_level)
 					return

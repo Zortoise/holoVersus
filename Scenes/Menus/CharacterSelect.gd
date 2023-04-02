@@ -391,51 +391,50 @@ func _physics_process(_delta):
 	if P1_phase == 2 and P2_phase == 2: # both players have picked characters and stages
 		start_battle()
 	
-	
 func move_pickers(P1_dir, P2_dir):
 	
 	if P1_phase == 0:
 		if P1_dir.x == 1:
 			P1_picker_pos += 1
-			if P1_picker_pos == 12: P1_picker_pos = 0
-			elif P1_picker_pos == 24: P1_picker_pos = 12
-			elif P1_picker_pos == 36: P1_picker_pos = 24
+			if P1_picker_pos == $Grid.columns: P1_picker_pos = 0
+			elif P1_picker_pos == $Grid.columns * 2: P1_picker_pos = $Grid.columns
+			elif P1_picker_pos == $Grid.columns * 3: P1_picker_pos = $Grid.columns * 2
 			P1_changed_character()
 		elif P1_dir.x == -1:
 			P1_picker_pos -= 1
-			if P1_picker_pos == -1: P1_picker_pos = 11
-			elif P1_picker_pos == 11: P1_picker_pos = 23
-			elif P1_picker_pos == 23: P1_picker_pos = 35
+			if P1_picker_pos == -1: P1_picker_pos = $Grid.columns - 1
+			elif P1_picker_pos == $Grid.columns - 1: P1_picker_pos = ($Grid.columns * 2) - 1
+			elif P1_picker_pos == ($Grid.columns * 2) - 1: P1_picker_pos = ($Grid.columns * 3) - 1
 			P1_changed_character()
 		if P1_dir.y == 1:
-			P1_picker_pos += 12
-			if P1_picker_pos >= 36: P1_picker_pos -= 36
+			P1_picker_pos += $Grid.columns
+			if P1_picker_pos >= $Grid.columns * 3: P1_picker_pos -= $Grid.columns * 3
 			P1_changed_character()
 		elif P1_dir.y == -1:
-			P1_picker_pos -= 12
-			if P1_picker_pos < 0: P1_picker_pos += 36
+			P1_picker_pos -= $Grid.columns
+			if P1_picker_pos < 0: P1_picker_pos += $Grid.columns * 3
 			P1_changed_character()
 		
 	if P2_phase == 0:
 		if P2_dir.x == 1:
 			P2_picker_pos += 1
-			if P2_picker_pos == 12: P2_picker_pos = 0
-			elif P2_picker_pos == 24: P2_picker_pos = 12
-			elif P2_picker_pos == 36: P2_picker_pos = 24
+			if P2_picker_pos == $Grid.columns: P2_picker_pos = 0
+			elif P2_picker_pos == $Grid.columns * 2: P2_picker_pos = $Grid.columns
+			elif P2_picker_pos == $Grid.columns * 3: P2_picker_pos = $Grid.columns * 2
 			P2_changed_character()
 		elif P2_dir.x == -1:
 			P2_picker_pos -= 1
-			if P2_picker_pos == -1: P2_picker_pos = 11
-			elif P2_picker_pos == 11: P2_picker_pos = 23
-			elif P2_picker_pos == 23: P2_picker_pos = 35
+			if P2_picker_pos == -1: P2_picker_pos = $Grid.columns - 1
+			elif P2_picker_pos == $Grid.columns - 1: P2_picker_pos = ($Grid.columns * 2) - 1
+			elif P2_picker_pos == ($Grid.columns * 2) - 1: P2_picker_pos = ($Grid.columns * 3) - 1
 			P2_changed_character()
 		if P2_dir.y == 1:
-			P2_picker_pos += 12
-			if P2_picker_pos >= 36: P2_picker_pos -= 36
+			P2_picker_pos += $Grid.columns
+			if P2_picker_pos >= $Grid.columns * 3: P2_picker_pos -= $Grid.columns * 3
 			P2_changed_character()
 		elif P2_dir.y == -1:
-			P2_picker_pos -= 12
-			if P2_picker_pos < 0: P2_picker_pos += 36
+			P2_picker_pos -= $Grid.columns
+			if P2_picker_pos < 0: P2_picker_pos += $Grid.columns * 3
 			P2_changed_character()		
 	
 func P1_changed_character():
