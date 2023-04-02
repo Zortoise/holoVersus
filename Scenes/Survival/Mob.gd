@@ -180,6 +180,7 @@ var no_jump_chance := 0 # chance of removing all jumps from decision, increased 
 var can_impulse := true # set to false when starting a MOVEMENT RECOVERY, set to true otherwise
 var slowed := 0
 var wall_slammed = Em.wall_slam.CANNOT_SLAM
+var delayed_hit_effect := [] # store things like Em.hit.SWEETSPOTTED and Em.hit.PUNISH_HIT for autochain and multi-hit moves
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -476,6 +477,7 @@ func simulate2(): # only ran if not in hitstop
 		repeat_memory = []
 		combo_level = 0
 		wall_slammed = Em.wall_slam.CANNOT_SLAM
+		delayed_hit_effect = []
 		
 	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
@@ -2453,14 +2455,23 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data[Em.hit.REPEAT] = false
 	hit_data[Em.hit.DOUBLE_REPEAT] = false
 	
-	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data[Em.hit.MOVE_DATA]):
-		hit_data[Em.hit.MULTIHIT] = true
-		if attacker_or_entity.is_hitcount_first_hit(player_ID):
-			hit_data[Em.hit.FIRST_HIT] = true
+	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1:
+		if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data[Em.hit.MOVE_DATA]):
+			hit_data[Em.hit.MULTIHIT] = true
+			if attacker_or_entity.is_hitcount_first_hit(player_ID):
+				hit_data[Em.hit.FIRST_HIT] = true
+		else:
+			hit_data[Em.hit.LAST_HIT] = true
+		if !Em.hit.FIRST_HIT in hit_data:
+			hit_data[Em.hit.SECONDARY_HIT] = true
 	if Em.atk_attr.AUTOCHAIN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.AUTOCHAIN] = true
 	if Em.atk_attr.FOLLOW_UP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.FOLLOW_UP] = true
+		hit_data[Em.hit.SECONDARY_HIT] = true
+		if !Em.hit.AUTOCHAIN in hit_data:
+			hit_data[Em.hit.LAST_HIT] = true
+			
 		
 	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] != 3:
 		hit_data[Em.hit.NON_STRONG_PROJ] = true
@@ -2475,6 +2486,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.SUPER] or \
 			(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
 		hit_data["ignore_resist"] = true
+		
+	if !Em.hit.SECONDARY_HIT in hit_data:
+		delayed_hit_effect = []
+		
+	if hit_data[Em.hit.SWEETSPOTTED]:
+		if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
+			hit_data[Em.hit.SWEETSPOTTED] = false
+			if !Em.hit.SWEETSPOTTED in delayed_hit_effect:
+				delayed_hit_effect.append(Em.hit.SWEETSPOTTED)
+				
+	elif Em.hit.LAST_HIT in hit_data and Em.hit.SWEETSPOTTED in delayed_hit_effect:
+		hit_data[Em.hit.SWEETSPOTTED] = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -2564,6 +2587,25 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 	# RESISTED HIT ----------------------------------------------------------------------------------------------
+	
+	var punish_hit := false
+	if is_atk_active() or is_atk_recovery():
+		if (!hit_data[Em.hit.WEAK_HIT] or Em.hit.MULTIHIT in hit_data) and (!Em.hit.NON_STRONG_PROJ in hit_data or \
+				Em.atk_attr.PUNISH_ENTITY in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
+				(Em.move.DMG in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.DMG] > 0) and \
+				!Em.hit.SUPERARMORED in hit_data:
+			punish_hit = true
+			
+	if punish_hit:
+		if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
+			if !Em.hit.PUNISH_HIT in delayed_hit_effect:
+				delayed_hit_effect.append(Em.hit.PUNISH_HIT)
+		else:
+			hit_data[Em.hit.PUNISH_HIT] = true
+			
+	elif Em.hit.LAST_HIT in hit_data and Em.hit.PUNISH_HIT in delayed_hit_effect:
+		hit_data[Em.hit.PUNISH_HIT] = true
+		
 	
 	if Em.hit.SUPERARMORED in hit_data:
 		hit_data[Em.hit.RESISTED] = true
@@ -3921,6 +3963,7 @@ func save_state():
 		"can_impulse" : can_impulse,
 		"slowed" : slowed,
 		"wall_slammed" : wall_slammed,
+		"delayed_hit_effect" : delayed_hit_effect,
 		
 	}
 
@@ -4012,6 +4055,7 @@ func load_state(state_data):
 	can_impulse = state_data.can_impulse
 	slowed = state_data.slowed
 	wall_slammed = state_data.wall_slammed
+	delayed_hit_effect = state_data.delayed_hit_effect
 
 	
 #--------------------------------------------------------------------------------------------------

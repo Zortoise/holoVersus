@@ -246,7 +246,7 @@ var aerial_memory = [] # appended whenever an air normal attack is made, cannot 
 					   # reset on landing or air jump
 var aerial_sp_memory = [] # appended whenever an air normal attack is made, cannot do the same air normal twice before landing
 						  # reset on landing
-var success_block := false # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
+var success_block = Em.success_block.NONE # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
 var success_dodge := false # set to true after iframing through an attack, turn later part of dodge cancellable, reset outside dodge
 var target_ID = null # ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var seq_partner_ID = null # not always target_ID during Mimic Raid
@@ -270,6 +270,7 @@ var slowed := 0
 var spent_special := false # used a move that requires Special to be held, releasing Special will not trigger EX moves
 var spent_unique := false # used a move that requires Unique to be held, releasing Special will not trigger EX moves
 var wall_slammed = Em.wall_slam.CANNOT_SLAM
+var delayed_hit_effect := [] # store things like Em.hit.SWEETSPOTTED and Em.hit.PUNISH_HIT for autochain and multi-hit moves
 
 # controls
 var button_up
@@ -606,8 +607,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + \
-			" " + str(spent_special)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -705,8 +705,7 @@ func simulate(new_input_state):
 #				Globals.Game.spawn_entity(player_ID, "TakoGateE", get_target().position + Vector2(0, 70), \
 #						{"facing":rand_facing, "alt4":true})
 #			Globals.Game.spawn_entity(player_ID, "NousagiE", position, {})
-			enhance_card(Cards.effect_ref.REWIND, true)
-			
+#			enhance_card(Cards.effect_ref.REWIND, true)
 
 	
 			pass
@@ -817,6 +816,7 @@ func simulate2(): # only ran if not in hitstop
 		DI_seal = false
 		lethal_flag = false
 		wall_slammed = Em.wall_slam.CANNOT_SLAM
+		delayed_hit_effect = []
 		
 	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
@@ -1545,10 +1545,10 @@ func simulate2(): # only ran if not in hitstop
 					
 		Em.char_state.GROUND_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
-				if !success_block:
-					animate("BlockRec")
-				else:
+				if success_block == Em.success_block.SBLOCKED:
 					animate("BlockCRec")
+				else:
+					animate("BlockRec")
 #			elif !success_block:
 			change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
@@ -1560,10 +1560,10 @@ func simulate2(): # only ran if not in hitstop
 			
 		Em.char_state.AIR_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["aBlock"]): # don't use to_play
-				if !success_block:
-					animate("aBlockRec")
-				else:
+				if success_block == Em.success_block.SBLOCKED:
 					animate("aBlockCRec")
+				else:
+					animate("aBlockRec")
 #			elif !success_block:
 			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
@@ -3272,6 +3272,7 @@ func on_kill():
 		input_buffer = []
 		hitcount_record = []
 		ignore_list = []
+		delayed_hit_effect = []
 		remove_all_status_effects()
 		reset_modulate()
 		reset_jumps()
@@ -5437,15 +5438,24 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data[Em.hit.REPEAT] = false
 	hit_data[Em.hit.DOUBLE_REPEAT] = false
 	
-	if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data[Em.hit.MOVE_DATA]):
-		hit_data[Em.hit.MULTIHIT] = true
-		if attacker_or_entity.is_hitcount_first_hit(player_ID):
-			hit_data[Em.hit.FIRST_HIT] = true
+	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1:
+		if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data[Em.hit.MOVE_DATA]):
+			hit_data[Em.hit.MULTIHIT] = true
+			if attacker_or_entity.is_hitcount_first_hit(player_ID):
+				hit_data[Em.hit.FIRST_HIT] = true
+		else:
+			hit_data[Em.hit.LAST_HIT] = true
+		if !Em.hit.FIRST_HIT in hit_data:
+			hit_data[Em.hit.SECONDARY_HIT] = true
 	if Em.atk_attr.AUTOCHAIN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.AUTOCHAIN] = true
 	if Em.atk_attr.FOLLOW_UP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.FOLLOW_UP] = true
-		
+		hit_data[Em.hit.SECONDARY_HIT] = true
+		if !Em.hit.AUTOCHAIN in hit_data:
+			hit_data[Em.hit.LAST_HIT] = true
+	
+	
 	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] < 3:
 		hit_data[Em.hit.NON_STRONG_PROJ] = true
 		
@@ -5463,6 +5473,19 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
 		attacker_or_entity.append_ignore_list(player_ID, hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME])
+		
+	if !Em.hit.SECONDARY_HIT in hit_data:
+		delayed_hit_effect = []
+		
+	if hit_data[Em.hit.SWEETSPOTTED]:
+		if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
+			hit_data[Em.hit.SWEETSPOTTED] = false
+			if !Em.hit.SWEETSPOTTED in delayed_hit_effect:
+				delayed_hit_effect.append(Em.hit.SWEETSPOTTED)
+				
+	elif Em.hit.LAST_HIT in hit_data and Em.hit.SWEETSPOTTED in delayed_hit_effect:
+		hit_data[Em.hit.SWEETSPOTTED] = true
+			
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -5608,12 +5631,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								# if perfect blocked or blocking attacker close enough, a Strongblock occurs
 								# attacker is pushed back, and cannot chain into anything except Burst Counter
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
-						elif success_block:
+						elif success_block == Em.success_block.SBLOCKED:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
 						else:
-							# if blocking attacker too far away, a Weakblock occurs
-							# this cause defender to be pushed back and take Chip Damage
-							# attacker can continue their chain combo or jump/dash as usual
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 
 				Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX: # can weakblock heavy/special/EX at high GG cost
@@ -5635,7 +5655,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
 						if !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
-							if (success_block or Animator.query_current(["BlockStartup", "aBlockStartup"])): # can perfect block projectiles
+							if success_block == Em.success_block.SBLOCKED or Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
 							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PBLOCK_PROJ):
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
@@ -5647,38 +5667,51 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
 	
-	if !hit_data[Em.hit.WEAK_HIT] and !Em.hit.NON_STRONG_PROJ in hit_data and (Em.move.DMG in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.DMG] > 0) and \
+	var punish_hit := false
+	if (!hit_data[Em.hit.WEAK_HIT] or Em.hit.MULTIHIT in hit_data) and (!Em.hit.NON_STRONG_PROJ in hit_data or \
+			Em.atk_attr.PUNISH_ENTITY in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
+			(Em.move.DMG in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.DMG] > 0) and \
 			!Em.hit.SUPERARMORED in hit_data:
 		# cannot Punish Hit for weak hits, non-strong projectiles and non-damaging moves like Burst
 		# remember that multi-hit moves cannot do punish hits
 		match new_state:
 			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 				if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-					hit_data[Em.hit.PUNISH_HIT] = true
+					punish_hit = true
 			Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
 				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC:
-				hit_data[Em.hit.PUNISH_HIT] = true
+				punish_hit = true
 			# check for Punish Hits for dashes
 			Em.char_state.GROUND_STARTUP:
 				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
 					if Animator.query_to_play(["DashTransit"]):
-						hit_data[Em.hit.PUNISH_HIT] = true
+						punish_hit = true
 			Em.char_state.GROUND_D_REC:
 				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
-					hit_data[Em.hit.PUNISH_HIT] = true
+					punish_hit = true
 			Em.char_state.AIR_STARTUP:
 				if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
 					if Animator.query_to_play(["aDashTransit", "SDashTransit"]):
-						hit_data[Em.hit.PUNISH_HIT] = true
+						punish_hit = true
 			Em.char_state.AIR_REC:
 				if Animator.query_to_play(["DodgeRec", "SDash"]):
-					hit_data[Em.hit.PUNISH_HIT] = true
+					punish_hit = true
 			Em.char_state.AIR_D_REC:
 				if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
-					hit_data[Em.hit.PUNISH_HIT] = true
+					punish_hit = true
 			Em.char_state.AIR_C_REC:
 				if Animator.query_to_play(["DodgeCRec"]):
-					hit_data[Em.hit.PUNISH_HIT] = true
+					punish_hit = true
+			
+	if punish_hit:
+		if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
+			if !Em.hit.PUNISH_HIT in delayed_hit_effect:
+				delayed_hit_effect.append(Em.hit.PUNISH_HIT)
+		else:
+			hit_data[Em.hit.PUNISH_HIT] = true
+			
+	elif Em.hit.LAST_HIT in hit_data and Em.hit.PUNISH_HIT in delayed_hit_effect:
+		hit_data[Em.hit.PUNISH_HIT] = true
 						
 	if hit_data[Em.hit.PUNISH_HIT] and Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.CRUSH] = true
@@ -6154,9 +6187,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		match hit_data[Em.hit.BLOCK_STATE]:
 			Em.block_state.STRONG:
-				success_block = true # can cancel block recovery
+				success_block = Em.success_block.SBLOCKED # can cancel block recovery
 			Em.block_state.WEAK:
-				success_block = false # cannot cancel block recovery
+				success_block = Em.success_block.WBLOCKED # cannot cancel block recovery
+			_:
+				success_block = Em.success_block.NONE
 					
 					
 	if !no_impact_and_vel_change:
@@ -6530,6 +6565,9 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 	
 	
 func check_if_crossed_up(attacker, angle_to_atker: int):
+	
+	if success_block != Em.success_block.NONE:
+		return false
 	
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CROSSUP):
 		return false
@@ -7323,7 +7361,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 		"BlockStartup", "aBlockStartup":
-			success_block = false
+			success_block = Em.success_block.NONE
 			if Globals.survival_level != null:
 				block_enhance()
 			
@@ -7615,6 +7653,7 @@ func save_state():
 		"spent_special" : spent_special,
 		"spent_unique" : spent_unique,
 		"wall_slammed" : wall_slammed,
+		"delayed_hit_effect" : delayed_hit_effect,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -7711,6 +7750,7 @@ func load_state(state_data, command_rewind := false):
 	spent_special = state_data.spent_special
 	spent_unique = state_data.spent_unique
 	wall_slammed = state_data.wall_slammed
+	delayed_hit_effect = state_data.delayed_hit_effect
 	if Globals.survival_level != null and !command_rewind:
 		enhance_cooldowns = state_data.enhance_cooldowns
 		enhance_data = state_data.enhance_data

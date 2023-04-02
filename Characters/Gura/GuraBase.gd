@@ -238,7 +238,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
 		Em.move.ATK_LVL : 4,
 		Em.move.KB_ANGLE : 90,
-		Em.move.ATK_ATTR : [Em.atk_attr.ANTI_AIR, Em.atk_attr.DESTROY_ENTITIES, Em.atk_attr.ONLY_CHAIN_ON_HIT],
+		Em.move.ATK_ATTR : [Em.atk_attr.ANTI_AIR, Em.atk_attr.DESTROY_ENTITIES, Em.atk_attr.ONLY_CHAIN_ON_HIT, Em.atk_attr.LATE_CHAIN],
 		Em.move.MOVE_SOUND : { ref = "whoosh7", aux_data = {"vol" : -12,} },
 		Em.move.HIT_SOUND : { ref = "impact19", aux_data = {"vol" : -18} },
 	},
