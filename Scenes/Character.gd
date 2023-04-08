@@ -906,6 +906,8 @@ func simulate2(): # only ran if not in hitstop
 								ex_change = FMath.percent(ex_change, get_stat("NON_ATTACK_EX_REGEN_MOD")) # for non-attacks, reduce EX regen
 							else:
 								ex_change = FMath.percent(ex_change, get_stat("ATTACK_EX_REGEN_MOD")) # physical attack, raise EX regen
+						if !grounded: # reduce EX Gain if whiffing aerials
+							ex_change = FMath.percent(ex_change, 50)
 
 			if Globals.survival_level != null:
 				if ex_change == get_stat("BASE_EX_REGEN") * FMath.S:
@@ -917,6 +919,9 @@ func simulate2(): # only ran if not in hitstop
 					ex_change = FMath.percent(ex_change, 60) # EX Gain for survival mode
 					change_ex_gauge(FMath.round_and_descale(ex_change))
 			else:
+				if ex_change == get_stat("BASE_EX_REGEN") * FMath.S:
+					if !grounded: # reduce passive EX Gain in air
+						ex_change = FMath.percent(ex_change, 50)
 				change_ex_gauge(FMath.round_and_descale(ex_change))
 			
 			
@@ -1821,17 +1826,17 @@ func bounce(against_ground: bool):
 						if scaled_damage < 150:
 							hitstop = 12
 							slam_level = 1
-							play_audio("break3", {"vol" : -14,})
-							modulate_play("punish_sweet_flash")
-							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
-						else:
-							hitstop = 15
-							slam_level = 2
-							play_audio("break3", {"vol" : -10,})
+							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+						else:
+							hitstop = 15
+							slam_level = 2
+							play_audio("break3", {"vol" : -12,})
+							modulate_play("punish_sweet_flash")
+							Globals.Game.set_screenshake()
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
@@ -1873,17 +1878,17 @@ func bounce(against_ground: bool):
 						if scaled_damage < 150:
 							hitstop = 12
 							slam_level = 1
-							play_audio("break3", {"vol" : -14,})
-							modulate_play("punish_sweet_flash")
-							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
-						else:
-							hitstop = 15
-							slam_level = 2
-							play_audio("break3", {"vol" : -10,})
+							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+						else:
+							hitstop = 15
+							slam_level = 2
+							play_audio("break3", {"vol" : -12,})
+							modulate_play("punish_sweet_flash")
+							Globals.Game.set_screenshake()
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
@@ -2473,7 +2478,7 @@ func process_input_buffer():
 								keep = false
 								
 						Em.char_state.AIR_ATK_ACTIVE: # some attacks can jump cancel on active frames
-							if active_cancel:
+							if active_cancel or test_jump_cancel_active():
 								if !grounded:
 									if air_jump > 0:
 										afterimage_cancel()
@@ -2499,7 +2504,7 @@ func process_input_buffer():
 									keep = false
 						
 						Em.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
-							if active_cancel:
+							if active_cancel or test_jump_cancel_active():
 								afterimage_cancel()
 								animate("JumpTransit")
 								keep = false
@@ -2584,7 +2589,7 @@ func process_input_buffer():
 						Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
 								Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
 								Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
-							if test_sdash_cancel():
+							if test_sdash_cancel() or test_sdash_revoke():
 								animate("SDashTransit")
 								has_acted[0] = true
 								keep = false
@@ -2637,7 +2642,7 @@ func process_input_buffer():
 							has_acted[0] = true
 							keep = false
 							
-					Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+					Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
 						if test_dodge_cancel() and dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
@@ -4389,17 +4394,35 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 	
 func test_jump_cancel():
 	
-	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
-		return false # can only dash cancel on Normal/Heavy hit
-	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
-		
+	
 	var move_name = get_move_name()
-	if Em.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be jump cancelled
+	var atk_attr = query_atk_attr(move_name)
+	if Em.atk_attr.NO_REC_CANCEL in atk_attr : return false # Normals with NO_REC_CANCEL cannot be jump cancelled
+	
+	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN]:
+		if !Em.atk_attr.JUMP_CANCEL_ON_WHIFF in atk_attr:
+			return false # some rare attacks can jump cancel on whiff
+	if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
+		pass # can only dash cancel on Normal/Heavy hit
+	else:
+		if !Em.atk_attr.JUMP_CANCEL_ON_HIT in atk_attr:
+			return false # some rare Specials can jump cancel on hit
 	
 	afterimage_cancel()
 	return true
 	
+	
+func test_jump_cancel_active():
+	
+	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
+	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN]:
+		return false # cannot cancel on whiff
+	
+	var move_name = get_move_name()
+	if Em.atk_attr.JUMP_CANCEL_ACTIVE in query_atk_attr(move_name):
+		return true
+		
 	
 func test_dash_cancel():
 	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
@@ -4423,6 +4446,46 @@ func test_dodge_cancel():
 		
 	var move_name = get_move_name()
 	if Em.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be dash cancelled
+	
+	afterimage_cancel()
+	return true
+	
+	
+func test_sdash_revoke():
+	
+	if !is_atk_recovery():
+		return false
+	
+	var move_name = get_move_name()
+	var move_data = UniqChar.query_move_data(move_name)
+	
+	if Em.atk_attr.NO_REC_CANCEL in move_data[Em.move.ATK_ATTR]:
+		return false
+		
+	if Em.atk_attr.NO_SDASH_CANCEL in move_data[Em.move.ATK_ATTR]:
+		return false
+		
+#	if move_data[Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.SUPER]:
+#		return false
+		
+	match move_data[Em.move.ATK_TYPE]:
+		Em.atk_type.LIGHT, Em.atk_type.FIERCE:
+			return false
+		Em.atk_type.EX, Em.atk_type.SUPER:
+			return false
+		
+	var cost = RESET_EX_COST * 2
+	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
+		cost = FMath.percent(cost, 50)
+		
+	if current_ex_gauge < cost:
+		return false
+		
+	change_ex_gauge(-cost)
+	play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+	Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
+			"v_mirror":Globals.Game.rng_bool(), "sticky_ID":player_ID}, "pink")
+	modulate_play("pink_reset")
 	
 	afterimage_cancel()
 	return true
@@ -5504,8 +5567,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
 					if !hit_data[Em.hit.REPEAT]:
 						hit_data[Em.hit.REPEAT] = true # found a repeat
-						if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
-								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
+								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
+								!Em.atk_attr.CAN_REPEAT_TWICE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
 							hit_data[Em.hit.DOUBLE_REPEAT] = true
 							break

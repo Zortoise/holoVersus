@@ -19,8 +19,8 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, DI_MANUAL_SEAL
-		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
-		VULN_LIMBS, NO_REPEAT_MOVE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
+		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH, JUMP_CANCEL_ACTIVE, JUMP_CANCEL_ON_WHIFF, JUMP_CANCEL_ON_HIT
+		VULN_LIMBS, NO_REPEAT_MOVE, CAN_REPEAT_TWICE, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
 		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB, GRAB_INVULN_STARTUP, WHIFF_SDASH_CANCEL
 		AIR_REPEAT, REFLECT_ENTITIES, NO_SDASH_CANCEL, NO_SDC_DURING_ACTIVE, CAN_SDC_DURING_REC, PUNISH_ENTITY}
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
@@ -51,8 +51,12 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # LATE_CHAIN = can only chain into other moves during recovery and not active frames
 # LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
 # CRUSH = cause Crush on punish hits, score punish hits on hitting opponent during startup
+# JUMP_CANCEL_ACTIVE = can jump cancel during active frames on hit
+# JUMP_CANCEL_ON_WHIFF = can jump cancel during recovery on whiff
+# JUMP_CANCEL_ON_HIT = can jump cancel during recovery on hit, for Specials since can already do it for Normals
 # VULN_LIMBS = take full damage from SDHits
-# NO_REPEAT_MOVE = a move that can only be repeated once
+# NO_REPEAT_MOVE = a move that can only be repeated once, for certain Normals/Heavies
+# CAN_REPEAT_TWICE = a move that can repeat twice without incurring repeat penalty, for certain Specials
 # DESTROY_ENTITIES = hitbox destroys entities
 # DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
 # INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
@@ -95,7 +99,7 @@ enum hit {RECT, POLYGON, OWNER_ID, FACING, MOVE_NAME, MOVE_DATA, MOB, HURTBOX, S
 		MULTIHIT, FIRST_HIT, AUTOCHAIN, FOLLOW_UP, NON_STRONG_PROJ, NORMALARMORABLE, CORNERED, WEAK_HIT, SUPERARMORED, HITSTOP, DEALT_DMG
 		ADJUSTED_ATK_LVL, KB, KB_ANGLE, SEMI_DISJOINT, SWEETSPOTTED, PULL, MOB_BREAK, RESISTED, SDASH_ARMORED, MOB_ARMORED}
 
-enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE}
+enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE, PERMANENT}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 enum moving_platform {MOVING, WARPING}
 enum dmg_num_col {WHITE, RED, GRAY, GREEN}

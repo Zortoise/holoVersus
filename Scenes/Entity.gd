@@ -434,7 +434,7 @@ func simulate_after(): # do this after hit detection
 		$SpritePlayer.simulate()
 		
 		lifetime += 1
-		if lifetime >= Globals.ENTITY_AUTO_DESPAWN: free = true
+		if !Em.entity_trait.PERMANENT in UniqEntity.TRAITS and lifetime >= Globals.ENTITY_AUTO_DESPAWN: free = true
 		elif lifespan != null and lifetime >= lifespan and UniqEntity.has_method("expire"):
 			UniqEntity.expire()
 			

@@ -186,7 +186,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 4,
 		Em.move.PRIORITY_ADD: 2,
 		Em.move.KB_ANGLE : -80,
-		Em.move.ATK_ATTR : [Em.atk_attr.ANTI_AIR],
+		Em.move.ATK_ATTR : [Em.atk_attr.ANTI_AIR, Em.atk_attr.JUMP_CANCEL_ACTIVE, Em.atk_attr.ONLY_CHAIN_ON_HIT],
 		Em.move.MOVE_SOUND : { ref = "whoosh9", aux_data = {"vol" : -18} },
 		Em.move.HIT_SOUND : { ref = "cut5", aux_data = {"vol" : -10,} },
 	},

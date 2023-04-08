@@ -1336,13 +1336,13 @@ func bounce(against_ground: bool):
 						if scaled_damage < 150:
 							hitstop = 12
 							slam_level = 1
-							play_audio("break3", {"vol" : -14,})
+							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
 						else:
 							hitstop = 15
 							slam_level = 2
-							play_audio("break3", {"vol" : -10,})
+							play_audio("break3", {"vol" : -12,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
 					else:
@@ -1382,13 +1382,13 @@ func bounce(against_ground: bool):
 						if scaled_damage < 150:
 							hitstop = 12
 							slam_level = 1
-							play_audio("break3", {"vol" : -14,})
+							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
 						else:
 							hitstop = 15
 							slam_level = 2
-							play_audio("break3", {"vol" : -10,})
+							play_audio("break3", {"vol" : -12,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
 					else:
@@ -2518,8 +2518,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
 					if !hit_data[Em.hit.REPEAT]:
 						hit_data[Em.hit.REPEAT] = true # found a repeat
-						if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
-								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
+								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
+								!Em.atk_attr.CAN_REPEAT_TWICE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
 							hit_data[Em.hit.DOUBLE_REPEAT] = true
 							break
