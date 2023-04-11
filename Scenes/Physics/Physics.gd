@@ -94,7 +94,7 @@ func move_amount(move_amount:Vector2, ledge_stop := false):
 #			offstage_check = true
 			get("velocity").x = 0
 		if results[4]: # hit another player
-			get("velocity").x = 0
+			get("velocity").x = FMath.percent(get("velocity").x, get("PLAYER_PUSH_SLOWDOWN")) # slow you down a little more
 			
 			
 	if move_amount.y != 0:

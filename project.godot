@@ -8,6 +8,16 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Node",
+"class": "FVector",
+"language": "GDScript",
+"path": "res://Scenes/Autoloads/FVector.gd"
+} ]
+_global_script_class_icons={
+"FVector": ""
+}
+
 [application]
 
 config/name="holoVersus"
@@ -18,14 +28,19 @@ config/windows_native_icon="res://Assets/UI/icon.ico"
 
 [autoload]
 
-Globals="*res://Scenes/Globals.gd"
+Em="*res://Scenes/Autoloads/Em.gd"
+FMath="*res://Scenes/Autoloads/FMath.gd"
+Globals="*res://Scenes/Autoloads/Globals.gd"
 Detection="*res://Scenes/Physics/Detection.gd"
-LoadedSFX="*res://Scenes/LoadedSFX.gd"
-Settings="*res://Scenes/Settings.gd"
-Fps="*res://Scenes/FPS.tscn"
-BGM="*res://Scenes/BGM.gd"
-Netplay="*res://Scenes/Netplay.gd"
-Netcode="*res://Scenes/Netcode.gd"
+NSAnims="*res://Scenes/Autoloads/NSAnims.gd"
+Settings="*res://Scenes/Autoloads/Settings.gd"
+Fps="*res://Scenes/Autoloads/FPS.tscn"
+BGM="*res://Scenes/Audio/BGM.gd"
+Netplay="*res://Scenes/Netplay/Netplay.gd"
+Netcode="*res://Scenes/Netplay/Netcode.gd"
+Cards="*res://Scenes/Survival/Cards.gd"
+Inventory="*res://Scenes/Survival/Inventory.gd"
+Loader="*res://Scenes/Autoloads/Loader.gd"
 
 [display]
 
@@ -65,6 +80,10 @@ texture={
 "size_limit": 0,
 "stream": false,
 "svg/scale": 1.0
+}
+ogg_vorbis={
+"loop": false,
+"loop_offset": 0
 }
 
 [input]
@@ -159,6 +178,11 @@ frame_advance={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777255,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
+frame_reverse={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777220,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
+}
 save_state1={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777245,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
@@ -167,6 +191,16 @@ save_state1={
 load_state1={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777246,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
+}
+save_state2={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":49,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
+}
+load_state2={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":50,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
 zoom_in={
@@ -229,7 +263,7 @@ P1_dash={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777236,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-P1_unique={
+P1_aux={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777223,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
@@ -239,17 +273,12 @@ P1_block={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777229,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-P1_assist={
-"deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777235,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
- ]
-}
 P1_special={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777238,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-P1_EX={
+P1_unique={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777237,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
@@ -299,7 +328,7 @@ P2_dash={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777356,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-P2_unique={
+P2_aux={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777357,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
@@ -309,17 +338,12 @@ P2_block={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777358,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-P2_assist={
-"deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777359,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
- ]
-}
 P2_special={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777350,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-P2_EX={
+P2_unique={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777349,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
@@ -333,6 +357,38 @@ P2_pause={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777347,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
+}
+P1_rs_left={
+"deadzone": 0.5,
+"events": [  ]
+}
+P1_rs_right={
+"deadzone": 0.5,
+"events": [  ]
+}
+P1_rs_up={
+"deadzone": 0.5,
+"events": [  ]
+}
+P1_rs_down={
+"deadzone": 0.5,
+"events": [  ]
+}
+P2_rs_left={
+"deadzone": 0.5,
+"events": [  ]
+}
+P2_rs_right={
+"deadzone": 0.5,
+"events": [  ]
+}
+P2_rs_up={
+"deadzone": 0.5,
+"events": [  ]
+}
+P2_rs_down={
+"deadzone": 0.5,
+"events": [  ]
 }
 
 [layer_names]
