@@ -29,7 +29,7 @@ func move_platform():
 				 # rider is player character/grounded entity
 				# position_change need to be in integer!'
 				var rider = rider_box.get_parent()
-				rider.move_amount(position_change, rider_box, rider.get_node("SoftPlatformDBox"), rider.create_checklist())
+				rider.move_amount(position_change)
 				if rider.has_method("set_true_position"):
 					rider.call("set_true_position")
 				# no need the velocity, grounded Entities always have SoftPlatformDBox

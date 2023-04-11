@@ -1,16 +1,14 @@
 extends Node
 
 
-
+func test(rect):
+	rect.position.x += 1
+	return rect
+	
 func _ready():
-
-
-	var flag : int
-	
-	flag = 1 << 34
-	var flag2 = 1 << 4
-	
-	print(flag | flag2)
+	var rect := Rect2(Vector2(0, 0), Vector2(1, 1))
+	rect = test(rect)
+	print(rect.position)
 
 #	print(FMath.get_fraction_percent(5000, 10000))
 

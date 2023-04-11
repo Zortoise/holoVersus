@@ -1403,7 +1403,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L2Startup":
 			Character.animate("L2Active")
 		"L2Active":
-			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
+			if Character.is_on_ground():
 				Character.animate("L2bRec")
 			else:
 				Character.animate("L2cCRec")
@@ -1761,12 +1761,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP5[ex]Active":
 			Character.animate("aSP5[ex]Rec")
 		"aSP5Rec":
-			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
+			if Character.is_on_ground():
 				Character.animate("SP5bRec")
 			else:
 				Character.animate("aSP5bRec")
 		"aSP5[ex]Rec":
-			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
+			if Character.is_on_ground():
 				Character.animate("SP5b[ex]Rec")
 			else:
 				Character.animate("aSP5b[ex]Rec")
@@ -1778,7 +1778,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP6[ex]Startup", "aSP6[ex]Startup":
 			Character.animate("aSP6[ex]Active")
 		"aSP6[ex]Active":
-			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
+			if Character.is_on_ground():
 				Character.animate("SP6[ex]Rec")
 			else:
 				Character.animate("aSP6[ex]Rec")
@@ -1807,7 +1807,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP7Startup", "aSP7Startup":
 			Character.animate("aSP7Active")
 		"aSP7Active":
-			if Character.is_on_ground(Character.get_node("SoftPlatformDBox")):
+			if Character.is_on_ground():
 				Character.animate("SP7Rec")
 			else:
 				Character.animate("aSP7Rec")
@@ -2012,10 +2012,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 1}, Character.palette_number, NAME)
 #			var point = Animator.query_point("entityspawn")
-#			for x in 30:
+#			for x in 40:
 #				point.y -= 5
-#				Globals.Game.spawn_entity(Character.player_ID, "TridentProj", point, \
-#						{"aerial" : true, "charge_lvl" : 1})
+#				Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
+#						point, {"aerial" : true, "charge_lvl" : 1}, Character.palette_number, NAME)
 		"aSP1[c2]Active":
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"aerial" : true, "charge_lvl" : 2}, Character.palette_number, NAME).entity_ID
@@ -2186,7 +2186,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			var target = Globals.Game.get_entity_node(Character.unique_data.groundfin_target)
 			if target != null:
 				var target_position =  Character.get_pos_from_feet(target.position)
-				if Character.is_tele_valid(Character.get_node("PlayerCollisionBox"), target_position):
+				if Character.is_tele_valid(target_position):
 					Character.position = target_position
 					Character.set_true_position()
 				target.UniqEntity.kill()

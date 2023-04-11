@@ -2,7 +2,6 @@ extends Node
 
 # autoload, global functions for detecting objects using detect boxes
 
-
 #func hit_detect(atker_sprite_rect: Rect2, defender_sprite_rect: Rect2, hitbox_bits: Array, hurtbox_bits: Array, sweetbox_bits = null, sdhurtbox_bits = null, \
 #		sourbox_bits = null) -> Array:
 #
@@ -57,6 +56,7 @@ func detect_bool(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO)
 		var detect_box
 		if box is Rect2: # straight rect2 works too
 			detect_box = box
+			detect_box.position += offset
 		else:
 			detect_box = Rect2(box.rect_global_position + offset, box.rect_size)
 		for group_name in groups_to_comb:
@@ -76,6 +76,7 @@ func detect_return(box_array: Array, groups_to_comb: Array, offset = Vector2.ZER
 		var detect_box
 		if box is Rect2: # straight rect2 works too
 			detect_box = box
+			detect_box.position += offset
 		else:
 			detect_box = Rect2(box.rect_global_position + offset, box.rect_size)
 		for group_name in groups_to_comb:
@@ -87,7 +88,27 @@ func detect_return(box_array: Array, groups_to_comb: Array, offset = Vector2.ZER
 						detect_box.intersects(Rect2(x.rect_global_position, x.rect_size)): # skip box's owner and repeats
 					bodies.append(x.get_parent())
 	return bodies
-	
+				
+# return an Array of ColorRect Nodes
+func detect_return_boxes(box_array: Array, groups_to_comb: Array, offset = Vector2.ZERO):
+	var bodies = []
+	for box in box_array:
+		var detect_box
+		if box is Rect2: # straight rect2 works too
+			detect_box = box
+			detect_box.position += offset
+		else:
+			detect_box = Rect2(box.rect_global_position + offset, box.rect_size)
+		for group_name in groups_to_comb:
+			var array = get_tree().get_nodes_in_group(group_name)
+			for x in array:
+				if box is ColorRect:
+					if x.get_parent() == box.get_parent(): continue
+				if !x.get_parent() in bodies and \
+						detect_box.intersects(Rect2(x.rect_global_position, x.rect_size)): # skip box's owner and repeats
+					bodies.append(x)
+	return bodies
+				
 	
 func is_riding(platform_box, character_box):
 			
@@ -145,7 +166,8 @@ func ground_finder(global_pos: Vector2, facing, offset: Vector2, detect_size: Ve
 		1: best_value = detect_box.position.y + detect_box.size.y # for highest, compare highest
 		-1: best_value = detect_box.position.y
 	
-	var platform_boxes = get_tree().get_nodes_in_group("SolidPlatforms") + get_tree().get_nodes_in_group("SoftPlatforms")
+	var platform_boxes = get_tree().get_nodes_in_group("SolidPlatforms") + get_tree().get_nodes_in_group("SoftPlatforms") + \
+			get_tree().get_nodes_in_group("CSolidPlatforms")
 	for platform_box in platform_boxes:
 		var target_box := Rect2(platform_box.rect_global_position, platform_box.rect_size)
 		

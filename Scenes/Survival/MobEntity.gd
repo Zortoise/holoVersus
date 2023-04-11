@@ -193,12 +193,12 @@ func simulate2(): # only ran if not in hitstop
 	
 		var results #  # [landing_check, collision_check, ledgedrop_check]
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
-			results = move($EntityCollisionBox, $EntityCollisionBox, Em.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
-		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
-			results = move($EntityCollisionBox, $EntityCollisionBox)
+			results = move(Em.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
+		else: # for non-grounded entities
+			results = move()
 		
 		if UniqEntity.has_method("collision"): # entity can collide with solid platforms
-			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
+			if is_in_wall(): # if spawned inside solid platform, kill it
 				UniqEntity.kill()
 			elif results[1]: # if colliding with a solid platform, runs collision() which can kill it or bounce it
 				if $NoCollideTimer.is_running(): # if collide during 1st frame of hitstop, will return to position before moving
@@ -209,7 +209,7 @@ func simulate2(): # only ran if not in hitstop
 				else:
 					UniqEntity.collision()
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
-			if !is_on_solid_ground($EntityCollisionBox): # spawned in the air, kill it
+			if !is_on_solid_ground(): # spawned in the air, kill it
 				UniqEntity.kill()
 		
 	else: # no collision with platforms

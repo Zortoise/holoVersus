@@ -166,9 +166,9 @@ func simulate():
 			var orig_vel_y = velocity.y
 		
 			var results #  # [landing_check, collision_check, ledgedrop_check]
-			results = move($EntityCollisionBox, $EntityCollisionBox)
+			results = move()
 			
-			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
+			if is_in_wall(): # if spawned inside solid platform, kill it
 				free = true
 			else:
 				if results[1]:
@@ -235,10 +235,14 @@ func move_true_position(in_velocity: FVector):
 # --------------------------------------------------------------------------------------------------
 			
 func bounce(orig_vel_x, orig_vel_y, against_ground: bool):
-	if is_against_wall($EntityCollisionBox, $EntityCollisionBox, sign(orig_vel_x)):
+	
+	var soft_dbox = get_soft_dbox(get_collision_box())
+	
+# warning-ignore:narrowing_conversion
+	if is_against_wall(sign(orig_vel_x), soft_dbox):
 		velocity.x = -FMath.percent(orig_vel_x, 75)
 				
-	elif is_against_ceiling($EntityCollisionBox, $EntityCollisionBox):
+	elif is_against_ceiling(soft_dbox):
 		velocity.y = -FMath.percent(orig_vel_y, 50)
 				
 	elif against_ground:

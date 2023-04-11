@@ -123,16 +123,16 @@ func load_entity():
 		
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
-			$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
-			$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
-			$SoftPlatformDBox.rect_size.x = ref_rect.rect_size.x
-			$SoftPlatformDBox.rect_size.y = 1
-		else:
-			$SoftPlatformDBox.free()
+#			$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
+#			$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
+#			$SoftPlatformDBox.rect_size.x = ref_rect.rect_size.x
+#			$SoftPlatformDBox.rect_size.y = 1
+#		else:
+#			$SoftPlatformDBox.free()
 			
 	else: # no collision, delete EntityCollisionBox
 		$EntityCollisionBox.free()
-		$SoftPlatformDBox.free()
+#		$SoftPlatformDBox.free()
 		
 	if UniqEntity.has_node("DefaultSpriteBox"): # for an entity to go offstage, the entire sprite must be offstage
 		var ref_rect = UniqEntity.get_node("DefaultSpriteBox")
@@ -214,15 +214,15 @@ func simulate2(): # only ran if not in hitstop
 
 		var results #  # [landing_check, collision_check, ledgedrop_check]
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
-			results = move($EntityCollisionBox, $SoftPlatformDBox, Em.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
-		else: # for non-grounded entities, their SoftPlatformDBox is their EntityCollisionBox
-			results = move($EntityCollisionBox, $EntityCollisionBox)
+			results = move(Em.entity_trait.LEDGE_STOP in UniqEntity.TRAITS)
+		else: # for non-grounded entities
+			results = move()
 
 		if position != orig_pos and $EntityCollisionBox.is_in_group("SoftPlatforms"):
 			moving_platform(position - orig_pos, rider_boxes)
 
 		if UniqEntity.has_method("collision"): # entity can collide with solid platforms
-			if is_in_wall($EntityCollisionBox): # if spawned inside solid platform, kill it
+			if is_in_wall(): # if spawned inside solid platform, kill it
 				UniqEntity.kill()
 			elif results[1]: # if colliding with a solid platform, runs collision() which can kill it or bounce it
 				if $NoCollideTimer.is_running(): # if collide during 1st frame of hitstop, will return to position before moving
@@ -233,7 +233,7 @@ func simulate2(): # only ran if not in hitstop
 				else:
 					UniqEntity.collision()
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
-			if !is_on_ground($SoftPlatformDBox): # spawned in the air, kill it
+			if !is_on_ground(): # spawned in the air, kill it
 				UniqEntity.kill()
 			elif results[2]: # reached a ledge
 				if $NoCollideTimer.is_running(): # if go off ledge during 1st frame of hitstop, will return to position before moving
@@ -283,17 +283,17 @@ func moving_platform(position_change: Vector2, rider_boxes: Array):
 			 # rider is player character/grounded entity
 			# position_change need to be in integer!'
 			var rider = rider_box.get_parent()
-			var move_box
-			if rider.has_node("SoftPlatformDBox"):
-				move_box = rider.get_node("SoftPlatformDBox")
-			elif rider.has_node("PlayerCollisionBox"):
-				move_box = rider.get_node("PlayerCollisionBox")
-			elif rider.has_node("EntityCollisionBox"):
-				move_box = rider.get_node("EntityCollisionBox")
-			else:
-				print("check")
-				continue
-			rider.move_amount(position_change, rider_box, move_box, rider.create_checklist())
+#			var move_box
+#			if rider.has_node("SoftPlatformDBox"):
+#				move_box = rider.get_node("SoftPlatformDBox")
+#			elif rider.has_node("PlayerCollisionBox"):
+#				move_box = rider.get_node("PlayerCollisionBox")
+#			elif rider.has_node("EntityCollisionBox"):
+#				move_box = rider.get_node("EntityCollisionBox")
+#			else:
+#				print("check")
+#				continue
+			rider.move_amount(position_change, rider_box, rider.create_checklist_enum())
 			if rider.has_method("set_true_position"):
 				rider.call("set_true_position")
 			# no need the velocity, grounded Entities always have SoftPlatformDBox

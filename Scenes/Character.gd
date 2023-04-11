@@ -423,10 +423,10 @@ func setup_boxes(ref_rect): # set up detection boxes
 
 	# if SoftPlatformDBox detects a soft platform, that means that character is currently phasing through
 	# no collision with soft platforms if so
-	$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
-	$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
-	$SoftPlatformDBox.rect_size.x = ref_rect.rect_size.x
-	$SoftPlatformDBox.rect_size.y = 1
+#	$SoftPlatformDBox.rect_position.x = ref_rect.rect_position.x
+#	$SoftPlatformDBox.rect_position.y = ref_rect.rect_position.y + ref_rect.rect_size.y - 1
+#	$SoftPlatformDBox.rect_size.x = ref_rect.rect_size.x
+#	$SoftPlatformDBox.rect_size.y = 1
 	
 	# if DashLandDBox detects a soft platform while DashLandDBox2 doesn't, that means that the conditions
 	# are right for a dash landing, air dashes here will snap you to the soft platform
@@ -739,12 +739,13 @@ func simulate(new_input_state):
 #	attacked_this_frame = false
 	startup_cancel_flag = false # to cancel startup without incurring auto-buffer
 
-	if is_on_ground($SoftPlatformDBox):
+	var soft_dbox = get_soft_dbox(get_collision_box())
+	if is_on_ground(soft_dbox):
 		grounded = true
 	else:
 		grounded = false
 		
-	if is_on_soft_ground($SoftPlatformDBox):
+	if is_on_soft_ground(soft_dbox):
 		soft_grounded = true
 	else:
 		soft_grounded = false
@@ -1232,9 +1233,8 @@ func simulate2(): # only ran if not in hitstop
 						elif velocity.x > ff_speed_limit:
 							velocity.x = FMath.f_lerp(velocity.x, ff_speed_limit, 50)
 								
-				Em.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall
-					if Settings.dj_fastfall[player_ID] == 0 or \
-						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
+				Em.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall if dj_fastfall is on
+					if Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed:
 							
 						if Animator.query_to_play(["aJumpTransit"]):
 							animate("FastFallTransit")
@@ -1483,9 +1483,10 @@ func simulate2(): # only ran if not in hitstop
 			air_res_this_frame = 0
 			# air dash into wall/ceiling, stop instantly
 			var stopped := false
-			if Animator.query_to_play(["aDash", "aDashD", "aDashU"]) and is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, facing):
+			var soft_dbox = get_soft_dbox(get_collision_box())
+			if Animator.query_to_play(["aDash", "aDashD", "aDashU"]) and is_against_wall(facing, soft_dbox):
 				stopped = true
-			elif Animator.query_to_play(["aDashU"]) and is_against_ceiling($PlayerCollisionBox, $SoftPlatformDBox):
+			elif Animator.query_to_play(["aDashU"]) and is_against_ceiling(soft_dbox):
 				stopped = true
 			if stopped:
 				animate("aDashBrake")
@@ -1689,7 +1690,7 @@ func simulate2(): # only ran if not in hitstop
 	velocity_previous_frame.y = velocity.y
 	
 	var orig_pos = position
-	var results = move($PlayerCollisionBox, $SoftPlatformDBox, check_ledge_stop()) # [landing_check, collision_check, ledgedrop_check]
+	var results = move(check_ledge_stop()) # [landing_check, collision_check, ledgedrop_check]
 	
 #	if results[0]: check_landing()
 
@@ -1700,7 +1701,8 @@ func simulate2(): # only ran if not in hitstop
 			velocity.x = velocity_previous_frame.x
 			velocity.y = velocity_previous_frame.y
 		else:
-			if results[0]: check_landing()
+			if results[0]:
+				check_landing()
 			
 			if new_state == Em.char_state.AIR_REC and Animator.query_to_play(["SDash"]):
 				check_sdash_crash()
@@ -1802,7 +1804,9 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 # BOUNCE --------------------------------------------------------------------------------------------------	
 
 func bounce(against_ground: bool):
-	if is_against_wall($PlayerCollisionBox, $SoftPlatformDBox, sign(velocity_previous_frame.x)):
+	var soft_dbox = get_soft_dbox(get_collision_box())
+# warning-ignore:narrowing_conversion
+	if is_against_wall(sign(velocity_previous_frame.x), soft_dbox):
 		if grounded:
 			velocity.y = -HORIZ_WALL_SLAM_UP_BOOST
 		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
@@ -1856,7 +1860,7 @@ func bounce(against_ground: bool):
 			play_audio("rock3", {"vol" : -10,})
 				
 				
-	elif is_against_ceiling($PlayerCollisionBox, $SoftPlatformDBox):
+	elif is_against_ceiling(soft_dbox):
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
@@ -3573,7 +3577,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 
 
 func check_sdash_crash():
-	if !is_on_ground($SoftPlatformDBox):
+	if !is_on_ground():
 		animate("aDashBrake")
 	else:
 		if !velocity.is_longer_than(FMath.percent(get_stat("SDASH_SPEED"), 50)):
@@ -3678,7 +3682,7 @@ func check_snap_up():
 func snap_up_wave_land_check():
 #	if velocity.y <= 0:
 #		print("A")
-	if !button_jump in input_state.pressed and check_snap_up() and snap_up($PlayerCollisionBox, $DashLandDBox):
+	if !button_jump in input_state.pressed and check_snap_up() and snap_up():
 		if dir != 0: # if holding direction, dash towards it
 			if facing != dir:
 				face(dir)
@@ -4471,7 +4475,7 @@ func test_sdash_revoke():
 	match move_data[Em.move.ATK_TYPE]:
 		Em.atk_type.LIGHT, Em.atk_type.FIERCE:
 			return false
-		Em.atk_type.EX, Em.atk_type.SUPER:
+		Em.atk_type.SUPER:
 			return false
 		
 	var cost = RESET_EX_COST * 2
@@ -6106,7 +6110,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				Em.compass.W:
 					knock_dir = -1
 			if knock_dir != 0:
-				move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $SoftPlatformDBox, create_checklist(), true)
+				move_amount(Vector2(knock_dir * 7, 0), true)
 				set_true_position()
 		return
 
@@ -6858,7 +6862,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	velocity_previous_frame.x = velocity.x
 	velocity_previous_frame.y = velocity.y
 	
-	var results = move($PlayerCollisionBox, $SoftPlatformDBox, UniqChar.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
+	var results = move(UniqChar.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
 #	velocity.x = results[0].x
 #	velocity.y = results[0].y
 	
@@ -6948,7 +6952,7 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 	var seq_hit_data = seq_user.UniqChar.get_seq_hit_data(hit_key)
 	var lethal = take_seq_damage(seq_hit_data[Em.move.DMG])
 	
-	if Em.move.SEQ_HITSTOP in seq_hit_data and !Em.move.SEQ_WEAK in    seq_hit_data: # if weak, no lethal effect, place it for non-final hits
+	if Em.move.SEQ_HITSTOP in seq_hit_data and !Em.move.SEQ_WEAK in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
 		if lethal:
 			hitstop = LETHAL_HITSTOP
 #			add_status_effect(Em.status_effect.LETHAL, 0) # this applies lethal freeze to all others, remove when hitstop ends
@@ -7135,7 +7139,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"FastFallTransit":
 			if !button_jump in input_state.pressed and is_button_tapped_in_last_X_frames(button_jump, 1) and \
 					check_snap_up(): # do this here instead of _on_SpritePlayer_anim_started()
-				snap_up($PlayerCollisionBox, $DashLandDBox)
+				snap_up()
 				animate("SoftLanding")
 			else:
 				animate("FastFall")

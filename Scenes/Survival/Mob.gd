@@ -791,7 +791,7 @@ func simulate2(): # only ran if not in hitstop
 	velocity_previous_frame.y = velocity.y
 	
 	var orig_pos = position
-	var results = move($PlayerCollisionBox, $PlayerCollisionBox, true) # [landing_check, collision_check, ledgedrop_check]
+	var results = move(true) # [landing_check, collision_check, ledgedrop_check]
 	
 #	if results[0]: check_landing()
 
@@ -1314,7 +1314,9 @@ func loot_drop():
 # BOUNCE --------------------------------------------------------------------------------------------------	
 
 func bounce(against_ground: bool):
-	if is_against_wall($PlayerCollisionBox, $PlayerCollisionBox, sign(velocity_previous_frame.x)):
+	var soft_dbox = get_soft_dbox(get_collision_box())
+# warning-ignore:narrowing_conversion
+	if is_against_wall(sign(velocity_previous_frame.x), soft_dbox):
 		if grounded:
 			velocity.y = -HORIZ_WALL_SLAM_UP_BOOST
 		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
@@ -1362,7 +1364,7 @@ func bounce(against_ground: bool):
 				bounce_dust(Em.compass.W)
 			play_audio("rock3", {"vol" : -10,})
 				
-	elif is_against_ceiling($PlayerCollisionBox, $PlayerCollisionBox):
+	elif is_against_ceiling(soft_dbox):
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
@@ -2902,7 +2904,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				Em.compass.W:
 					knock_dir = -1
 			if knock_dir != 0:
-				move_amount(Vector2(knock_dir * 7, 0), $PlayerCollisionBox, $PlayerCollisionBox, create_checklist(), true)
+				move_amount(Vector2(knock_dir * 7, 0), true)
 				set_true_position()
 		return
 
@@ -3460,7 +3462,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	velocity_previous_frame.x = velocity.x
 	velocity_previous_frame.y = velocity.y
 	
-	var results = move($PlayerCollisionBox, $PlayerCollisionBox, UniqChar.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
+	var results = move(UniqChar.sequence_ledgestop()) # [landing_check, collision_check, ledgedrop_check]
 #	velocity.x = results[0].x
 #	velocity.y = results[0].y
 	
@@ -3524,7 +3526,7 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 	var seq_hit_data = seq_user.UniqChar.get_seq_hit_data(hit_key)
 	var lethal = take_seq_damage(seq_hit_data[Em.move.DMG])
 	
-	if Em.move.SEQ_HITSTOP in seq_hit_data and !Em.move.SEQ_WEAK in    seq_hit_data: # if weak, no lethal effect, place it for non-final hits
+	if Em.move.SEQ_HITSTOP in seq_hit_data and !Em.move.SEQ_WEAK in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
 		if lethal:
 			hitstop = LETHAL_HITSTOP
 			seq_user.hitstop = hitstop

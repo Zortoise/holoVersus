@@ -473,12 +473,14 @@ func _physics_process(_delta):
 						winner_ID = player.player_ID
 						damage_value_of_winner = player.current_damage_value		
 			Globals.winner = [winner_ID, get_player_node(winner_ID).UniqChar.NAME]
-					
+			
+	camera()
+	
 
-func _process(delta):
+func camera():
 
 # MOVE CAMERA --------------------------------------------------------------------------------------------------
-	# camera management outside of stimulation, no need to simulate camera
+	# camera management outside of simulation, no need to simulate camera
 	
 	var players_position := Vector2.ZERO
 	
@@ -547,7 +549,7 @@ func _process(delta):
 	$CameraRef.position = point_btw_char
 	
 	
-	handle_zoom(delta) # complex stuff to determine zoom level
+	handle_zoom() # complex stuff to determine zoom level
 	HUD_fade() # fade out UI elements if a player goes behind them
 	
 
@@ -1525,7 +1527,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 
 # HANDLING ZOOM --------------------------------------------------------------------------------------------------
 
-func handle_zoom(delta):
+func handle_zoom():
 	# first, find the distance between the furthest player and the average positions of the players
 	# find for both vertical and horizontal
 	var array_of_horizontal_diff = [0]
@@ -1587,13 +1589,13 @@ func handle_zoom(delta):
 		# only zoom out if camera size not over camera limit
 		if get_viewport_rect().size.x < $CameraRef/Camera2D.limit_right - $CameraRef/Camera2D.limit_left and \
 				get_viewport_rect().size.y < $CameraRef/Camera2D.limit_bottom - $CameraRef/Camera2D.limit_top:
-			change_in_zoom -= Globals.CAMERA_ZOOM_SPEED * delta * abs(area_diff - 2000)
+			change_in_zoom -= Globals.CAMERA_ZOOM_SPEED * Globals.FRAME * abs(area_diff - 2000)
 			# slow down zoom speed when reaching camera limits
 			if get_viewport_rect().size.x + 200 > $CameraRef/Camera2D.limit_right - $CameraRef/Camera2D.limit_left or \
 					get_viewport_rect().size.y + 200  > $CameraRef/Camera2D.limit_bottom - $CameraRef/Camera2D.limit_top:
 				change_in_zoom *= 0.5
 	elif area_diff < -2000: # players too near (smallest rectangle smaller than target area), zoom in
-		change_in_zoom += Globals.CAMERA_ZOOM_SPEED * delta * abs(area_diff + 2000) * 0.5
+		change_in_zoom += Globals.CAMERA_ZOOM_SPEED * Globals.FRAME * abs(area_diff + 2000) * 0.5
 		
 	# when zoomed out, reduce zoom speed, when zoomed in, increase zoom speed
 	if Globals.zoom_level < 1.0:
