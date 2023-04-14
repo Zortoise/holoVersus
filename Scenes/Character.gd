@@ -104,6 +104,8 @@ const SPECIAL_GDRAIN_MOD = 200 # extra GDrain when blocking heavy/special/ex mov
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
 const SDASH_ARMOR_GDRAIN_MOD = 200 # extra GDrain when SDashing through projectiles
 
+const SBlockTimer_TIME = 30 # time after blocking an attack when you are immune to cross-ups and blocking will not cost GG
+
 const AUTOCHAIN_HITSTOP = 7
 const WEAK_HIT_HITSTOP = 6
 
@@ -1551,12 +1553,13 @@ func simulate2(): # only ran if not in hitstop
 					
 		Em.char_state.GROUND_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
-				if success_block == Em.success_block.SBLOCKED:
+				if success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
 					animate("BlockCRec")
 				else:
 					animate("BlockRec")
 #			elif !success_block:
-			change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST"))
+			if !$SBlockTimer.is_running():
+				change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 				animate("BlockRec")
 			
@@ -1566,12 +1569,13 @@ func simulate2(): # only ran if not in hitstop
 			
 		Em.char_state.AIR_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["aBlock"]): # don't use to_play
-				if success_block == Em.success_block.SBLOCKED:
+				if success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
 					animate("aBlockCRec")
 				else:
 					animate("aBlockRec")
 #			elif !success_block:
-			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST"))
+			if !$SBlockTimer.is_running():
+				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 				animate("aBlockRec")
 					
@@ -1769,6 +1773,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$BurstLockTimer.simulate()
 				$NoCollideTimer.simulate()
 				$InstallTimer.simulate()
+				$SBlockTimer.simulate()
 				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
 					if !get_target().is_hitstunned_or_sequenced():
 						# no counting down EX Seal if opponent is hitstunned or sequenced
@@ -5699,7 +5704,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								# if perfect blocked or blocking attacker close enough, a Strongblock occurs
 								# attacker is pushed back, and cannot chain into anything except Burst Counter
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
-						elif success_block == Em.success_block.SBLOCKED:
+						elif success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
@@ -5723,7 +5728,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
 						if !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
-							if success_block == Em.success_block.SBLOCKED or Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
+							if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
+									Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
 							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PBLOCK_PROJ):
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
@@ -6256,10 +6262,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		match hit_data[Em.hit.BLOCK_STATE]:
 			Em.block_state.STRONG:
 				success_block = Em.success_block.SBLOCKED # can cancel block recovery
+				$SBlockTimer.time = SBlockTimer_TIME
 			Em.block_state.WEAK:
 				success_block = Em.success_block.WBLOCKED # cannot cancel block recovery
+				$SBlockTimer.time = SBlockTimer_TIME
 			_:
 				success_block = Em.success_block.NONE
+				$SBlockTimer.stop()
 					
 					
 	if !no_impact_and_vel_change:
@@ -6634,7 +6643,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 	
 func check_if_crossed_up(attacker, angle_to_atker: int):
 	
-	if success_block != Em.success_block.NONE:
+	if $SBlockTimer.is_running():
 		return false
 	
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CROSSUP):
@@ -7430,6 +7439,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"BlockStartup", "aBlockStartup":
 			success_block = Em.success_block.NONE
+			$SBlockTimer.stop()
 			if Globals.survival_level != null:
 				block_enhance()
 			
@@ -7762,6 +7772,7 @@ func save_state():
 		"InstallTimer_time" : $InstallTimer.time,
 		"ShorthopTimer_time" : $ShorthopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
+		"SBlockTimer_time": $SBlockTimer.time,
 	}
 	
 	if Globals.training_mode:
@@ -7877,6 +7888,7 @@ func load_state(state_data, command_rewind := false):
 	$InstallTimer.time = state_data.InstallTimer_time
 	$ShorthopTimer.time = state_data.ShorthopTimer_time
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
+	$SBlockTimer.time = state_data.SBlockTimer_time
 	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = state_data.TrainingRegenTimer_time
