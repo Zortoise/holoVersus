@@ -341,13 +341,13 @@ func create_checklist_enum() -> Array:
 		
 	elif is_in_group("EntityNodes") or is_in_group("MobEntityNodes"):
 		if Em.entity_trait.BLAST_BARRIER_COLLIDE in get("UniqEntity").TRAITS:
-			to_check.erase(Em.detect.BLASTWALLS)
-			to_check.erase(Em.detect.BLASTCEILING)
+			to_check.append(Em.detect.BLASTWALLS)
+			to_check.append(Em.detect.BLASTCEILING)
 #		elif get("UniqEntity").has_method("on_offstage"):
 #			to_check.erase("BlastBarriers")
 	elif is_in_group("PickUpNodes"):
-		to_check.erase(Em.detect.BLASTWALLS)
-		to_check.erase(Em.detect.BLASTCEILING)
+		to_check.append(Em.detect.BLASTWALLS)
+		to_check.append(Em.detect.BLASTCEILING)
 			
 	return to_check
 			

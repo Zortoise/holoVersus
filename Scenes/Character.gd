@@ -3348,6 +3348,7 @@ func respawn():
 		else:
 			position = Globals.Game.respawn_points[4]
 			
+	velocity.set_vector(0, 0)
 	set_true_position()
 			
 	current_damage_value = 0
@@ -5938,7 +5939,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in query_atk_attr(): # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
 		
-	elif hit_data[Em.hit.STUN]:
+	elif hit_data[Em.hit.STUN] and !query_status_effect(Em.status_effect.LETHAL):
 #		add_status_effect(Em.status_effect.STUN, 0)
 		status_effect_to_add.append([Em.status_effect.STUN, 0])
 		status_effect_to_add.append([Em.status_effect.STUN_RECOVER, null])
@@ -5983,8 +5984,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if Em.hit.SUPERARMORED in hit_data:
 					modulate_play("armor_flash")
 					play_audio("block3", {"vol" : -15})
-				elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, \
-						Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
+				elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY,Em.atk_type.SPECIAL, Em.atk_type.EX, \
+						Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY] and !$SBlockTimer.is_running():
 					modulate_play("weakblock_flash")
 					play_audio("block3", {"vol" : -15})
 				else:
@@ -6395,6 +6396,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		return 0
 	
 #	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+	if $SBlockTimer.is_running():
+		return 0
 
 	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 	
@@ -6832,7 +6835,7 @@ func generate_blockspark(hit_data):
 			if Em.hit.SUPERARMORED in hit_data:
 				blockspark = "Superarmorspark"
 			elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX, \
-					Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
+					Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY] and !$SBlockTimer.is_running():
 				blockspark = "WBlockspark2"
 			else:
 				blockspark = "WBlockspark"

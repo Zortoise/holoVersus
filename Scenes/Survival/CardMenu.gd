@@ -8,7 +8,7 @@ var P1_held_timer := 0
 var P1_hold_lock := false
 
 var P2_phase := 0
-var P2_picker_pos := [0, 3]
+var P2_picker_pos := [0, 1]
 var P2_held_timer := 0
 var P2_hold_lock := false
 
@@ -26,8 +26,12 @@ func open_shop():
 	$AnimationPlayer.play("open")
 	Inventory.shop_open = true
 	$P1/Picker/AnimationPlayer.play("flashing")
+	$P1/Box/ProgressBar.value = 0
+	$P1/Box/Action/AnimationPlayer.play("RESET")
 	if Globals.player_count > 1:
 		$P2/Picker/AnimationPlayer.play("flashing")
+		$P2/Box/ProgressBar.value = 0
+		$P2/Box/Action/AnimationPlayer.play("RESET")
 		blank_description(1)
 	else:
 		$P2/Picker.hide()
@@ -37,7 +41,7 @@ func set_active(set: bool): # called by animationplayer
 	active = set
 
 func load_cards(): # load all cards in shop and hands of both players
-	for x in 5:
+	for x in 3:
 		if x < Inventory.shop.size():
 			var new_card = Globals.Game.LevelControl.loaded_card_scene.instance()
 #			var new_card = loaded_card_scene.instance()
@@ -63,11 +67,11 @@ func reset(): # reset pickers at the start
 	P1_phase = 0
 	
 	if Globals.player_count == 1:
-		P1_picker_pos = [0, 2]
+		P1_picker_pos = [0, 1]
 	else:
 		P2_phase = 0
 		P1_picker_pos = [0, 1]
-		P2_picker_pos = [0, 3]
+		P2_picker_pos = [0, 1]
 		
 		
 func update_pickers(): # called by AnimationPlayer when pickers are to appear
@@ -147,7 +151,7 @@ func _physics_process(_delta):
 			$P2/Box/ProgressBar.value = P2_held_timer
 			if P2_held_timer > 0 and $P2/Box/Action/AnimationPlayer.current_animation != "flash":
 				$P2/Box/Action/AnimationPlayer.play("flash")
-			elif P1_held_timer == 0 and $P1/Box/Action/AnimationPlayer.current_animation != "RESET":
+			elif P2_held_timer == 0 and $P2/Box/Action/AnimationPlayer.current_animation != "RESET":
 				$P2/Box/Action/AnimationPlayer.play("RESET")
 			
 			if P2_picker_pos[0] == 0:
@@ -251,7 +255,7 @@ func move_pickers(P1_dir, P2_dir):
 			if P2_picker_pos != orig:
 				match int(P2_picker_pos[0]): # clamp x-coord
 					0:
-						P2_picker_pos[1] = 4
+						P2_picker_pos[1] = 2
 					1:
 						P2_picker_pos[1] = Inventory.inventory[1].size() - 1
 					2:
@@ -339,7 +343,7 @@ func blank_description(player: int): # for when LEAVE SHOP is hovered over
 func get_x_limit(player: int, level: int): # to limit horizontal picker movement
 	match level:
 		0:
-			return 4
+			return 2
 		1:
 			return Inventory.inventory[player].size() - 1
 		2:

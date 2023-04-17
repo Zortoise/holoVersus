@@ -26,7 +26,7 @@ func stock_pool():
 	inventory = [[
 #		Cards.card_ref.KRONII,
 #		Cards.card_ref.SUISEI,
-#		Cards.card_ref.BOTAN,
+#		Cards.card_ref.KIARA,
 #		Cards.card_ref.MUMEI,
 #		Cards.card_ref.ANYA,
 #		Cards.card_ref.PEKORA,
@@ -35,12 +35,12 @@ func stock_pool():
 	for card in Cards.LIST:
 		pool.append(card)
 		
-func open_shop(): # draw 5 random cards from pool
+func open_shop(): # draw 3 random cards from pool
 	shop = []
 	bought_index = []
 	wildcards()
 	
-	for x in 5:
+	for x in 3:
 		if pool.size() > 0:
 			var select = pool[Globals.Game.rng_generate(pool.size())]
 			shop.append(select)

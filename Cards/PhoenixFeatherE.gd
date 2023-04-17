@@ -113,7 +113,8 @@ func expire():
 func collision(): # collided with a platform
 	kill()
 
-func landed_a_hit(_hit_data):
+func landed_a_hit(hit_data):
+	hit_data[Em.hit.DEFENDER].status_effect_to_add.append([Em.status_effect.IGNITE, Cards.IGNITE_DURATION, Cards.IGNITE_DMG])
 	kill(false)
 		
 func on_offstage():

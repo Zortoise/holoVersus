@@ -12,43 +12,43 @@ frame_data = {
 "spritesheet": "SSRBSprite",
 "timestamps": {
 0: {
-"frame": 19,
-"hitbox": [ Vector2( -42, -65 ), Vector2( -64, -65 ), Vector2( -64, -45 ), Vector2( -81, -45 ), Vector2( -81, 10 ), Vector2( 81, 10 ), Vector2( 81, -45 ), Vector2( 64, -45 ), Vector2( 64, -65 ), Vector2( 42, -65 ), Vector2( 42, -83 ), Vector2( -42, -83 ) ]
-},
-2: {
 "frame": 20,
 "hitbox": [ Vector2( -42, -65 ), Vector2( -64, -65 ), Vector2( -64, -45 ), Vector2( -81, -45 ), Vector2( -81, 10 ), Vector2( 81, 10 ), Vector2( 81, -45 ), Vector2( 64, -45 ), Vector2( 64, -65 ), Vector2( 42, -65 ), Vector2( 42, -83 ), Vector2( -42, -83 ) ]
 },
-4: {
+2: {
 "frame": 21,
 "hitbox": [ Vector2( -42, -65 ), Vector2( -64, -65 ), Vector2( -64, -45 ), Vector2( -81, -45 ), Vector2( -81, 10 ), Vector2( 81, 10 ), Vector2( 81, -45 ), Vector2( 64, -45 ), Vector2( 64, -65 ), Vector2( 42, -65 ), Vector2( 42, -83 ), Vector2( -42, -83 ) ]
 },
-6: {
+4: {
 "frame": 22,
 "hitbox": [ Vector2( -42, -65 ), Vector2( -64, -65 ), Vector2( -64, -45 ), Vector2( -81, -45 ), Vector2( -81, 10 ), Vector2( 81, 10 ), Vector2( 81, -45 ), Vector2( 64, -45 ), Vector2( 64, -65 ), Vector2( 42, -65 ), Vector2( 42, -83 ), Vector2( -42, -83 ) ]
 },
-9: {
+6: {
 "frame": 23,
-"hitbox": [  ]
+"hitbox": [ Vector2( -42, -65 ), Vector2( -64, -65 ), Vector2( -64, -45 ), Vector2( -81, -45 ), Vector2( -81, 10 ), Vector2( 81, 10 ), Vector2( 81, -45 ), Vector2( 64, -45 ), Vector2( 64, -65 ), Vector2( 42, -65 ), Vector2( 42, -83 ), Vector2( -42, -83 ) ]
 },
-12: {
+9: {
 "frame": 24,
 "hitbox": [  ]
 },
-15: {
+12: {
 "frame": 25,
 "hitbox": [  ]
 },
-18: {
+15: {
 "frame": 26,
 "hitbox": [  ]
 },
-21: {
+18: {
 "frame": 27,
 "hitbox": [  ]
 },
-24: {
+21: {
 "frame": 28,
+"hitbox": [  ]
+},
+24: {
+"frame": 29,
 "hitbox": [  ]
 }
 },

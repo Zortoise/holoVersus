@@ -7,6 +7,14 @@ extends Node2D
 
 func init(card_ref: int, half_price = false):
 	$Name.text = Cards.DATABASE[card_ref].name
+	var card_ref2 := card_ref
+	match card_ref2:
+		Cards.card_ref.IRYS_b:
+			card_ref2 = Cards.card_ref.IRYS
+		Cards.card_ref.BAELZ_b, Cards.card_ref.BAELZ_c, Cards.card_ref.BAELZ_d, Cards.card_ref.BAELZ_e, Cards.card_ref.BAELZ_f:
+			card_ref2 = Cards.card_ref.BAELZ
+	$Sprite.texture = Globals.Game.LevelControl.card_art[card_ref2]
+	
 	if !half_price:
 		$Price/Cost.text = str(Inventory.get_price(card_ref))
 	else:

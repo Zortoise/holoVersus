@@ -374,6 +374,7 @@ func capture_instant_actions():
 		Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
 	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
 
+
 func process_instant_actions():
 	Character.unique_data.groundfin_trigger = false
 #	Character.unique_data.nibbler_cancel = max(Character.unique_data.nibbler_cancel - 1, 0)
@@ -586,6 +587,9 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				if closest_fin != null:
 					Character.unique_data.groundfin_target = closest_fin
 					keep = !process_move(new_state, "SP8", has_acted)
+					if !keep:
+						Character.instant_actions.erase("GroundFinTrigger")
+						Character.unique_data.groundfin_trigger = false
 				
 		"ExSp.L":
 			if !has_acted[0]:

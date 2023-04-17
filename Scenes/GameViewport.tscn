@@ -2734,7 +2734,7 @@ tracks/0/keys = {
 "values": [ Color( 1, 1, 1, 0 ) ]
 }
 tracks/1/type = "value"
-tracks/1/path = NodePath("Shop/Card1:position")
+tracks/1/path = NodePath("../HUD/P1_HUDRect/GaugesUnder:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/imported = false
@@ -2743,10 +2743,10 @@ tracks/1/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Vector2( 576, 376 ) ]
+"values": [ Color( 1, 1, 1, 1 ) ]
 }
 tracks/2/type = "value"
-tracks/2/path = NodePath("Shop/Card2:position")
+tracks/2/path = NodePath("../HUD/P2_HUDRect/GaugesUnder:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/imported = false
@@ -2755,10 +2755,10 @@ tracks/2/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Vector2( 768, 376 ) ]
+"values": [ Color( 1, 1, 1, 1 ) ]
 }
-tracks/3/type = "value"
-tracks/3/path = NodePath("Shop/Card4:position")
+tracks/3/type = "method"
+tracks/3/path = NodePath(".")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/imported = false
@@ -2766,11 +2766,13 @@ tracks/3/enabled = true
 tracks/3/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Vector2( 1152, 376 ) ]
+"values": [ {
+"args": [  ],
+"method": "hide"
+} ]
 }
 tracks/4/type = "value"
-tracks/4/path = NodePath("Shop/Card5:position")
+tracks/4/path = NodePath("P2/Picker:self_modulate")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/imported = false
@@ -2779,10 +2781,10 @@ tracks/4/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Vector2( 1344, 376 ) ]
+"values": [ Color( 1, 1, 1, 0 ) ]
 }
 tracks/5/type = "value"
-tracks/5/path = NodePath("../HUD/P1_HUDRect/GaugesUnder:modulate")
+tracks/5/path = NodePath("P1/Picker:self_modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/imported = false
@@ -2791,10 +2793,10 @@ tracks/5/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ) ]
+"values": [ Color( 1, 1, 1, 0 ) ]
 }
 tracks/6/type = "value"
-tracks/6/path = NodePath("../HUD/P2_HUDRect/GaugesUnder:modulate")
+tracks/6/path = NodePath("../ViewportContainer:modulate")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/imported = false
@@ -2805,8 +2807,8 @@ tracks/6/keys = {
 "update": 0,
 "values": [ Color( 1, 1, 1, 1 ) ]
 }
-tracks/7/type = "method"
-tracks/7/path = NodePath(".")
+tracks/7/type = "value"
+tracks/7/path = NodePath("Shop/Card1:position")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/imported = false
@@ -2814,13 +2816,11 @@ tracks/7/enabled = true
 tracks/7/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
-"values": [ {
-"args": [  ],
-"method": "hide"
-} ]
+"update": 0,
+"values": [ Vector2( 704, 400 ) ]
 }
 tracks/8/type = "value"
-tracks/8/path = NodePath("P2/Picker:self_modulate")
+tracks/8/path = NodePath("Shop/Card3:position")
 tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/imported = false
@@ -2829,31 +2829,7 @@ tracks/8/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 0 ) ]
-}
-tracks/9/type = "value"
-tracks/9/path = NodePath("P1/Picker:self_modulate")
-tracks/9/interp = 1
-tracks/9/loop_wrap = true
-tracks/9/imported = false
-tracks/9/enabled = true
-tracks/9/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 0 ) ]
-}
-tracks/10/type = "value"
-tracks/10/path = NodePath("../ViewportContainer:modulate")
-tracks/10/interp = 1
-tracks/10/loop_wrap = true
-tracks/10/imported = false
-tracks/10/enabled = true
-tracks/10/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 1 ) ]
+"values": [ Vector2( 1216, 400 ) ]
 }
 
 [sub_resource type="Animation" id=173]
@@ -2945,84 +2921,36 @@ tracks/0/keys = {
 "values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
 }
 tracks/1/type = "value"
-tracks/1/path = NodePath("Shop/Card1:position")
+tracks/1/path = NodePath("../HUD/P1_HUDRect/GaugesUnder:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 0.25 ),
-"transitions": PoolRealArray( 0.287175, 1 ),
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Vector2( 960, 376 ), Vector2( 576, 376 ) ]
+"values": [ Color( 1, 1, 1, 1 ), Color( 0.5, 0.5, 0.5, 1 ) ]
 }
 tracks/2/type = "value"
-tracks/2/path = NodePath("Shop/Card2:position")
+tracks/2/path = NodePath("../HUD/P2_HUDRect/GaugesUnder:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/keys = {
-"times": PoolRealArray( 0, 0.25 ),
-"transitions": PoolRealArray( 0.287175, 1 ),
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Vector2( 960, 376 ), Vector2( 768, 376 ) ]
+"values": [ Color( 1, 1, 1, 1 ), Color( 0.5, 0.5, 0.5, 1 ) ]
 }
-tracks/3/type = "value"
-tracks/3/path = NodePath("Shop/Card4:position")
+tracks/3/type = "method"
+tracks/3/path = NodePath(".")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/imported = false
 tracks/3/enabled = true
 tracks/3/keys = {
-"times": PoolRealArray( 0, 0.25 ),
-"transitions": PoolRealArray( 0.287175, 1 ),
-"update": 0,
-"values": [ Vector2( 960, 376 ), Vector2( 1152, 376 ) ]
-}
-tracks/4/type = "value"
-tracks/4/path = NodePath("Shop/Card5:position")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/keys = {
-"times": PoolRealArray( 0, 0.25 ),
-"transitions": PoolRealArray( 0.287175, 1 ),
-"update": 0,
-"values": [ Vector2( 960, 376 ), Vector2( 1344, 376 ) ]
-}
-tracks/5/type = "value"
-tracks/5/path = NodePath("../HUD/P1_HUDRect/GaugesUnder:modulate")
-tracks/5/interp = 1
-tracks/5/loop_wrap = true
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/keys = {
-"times": PoolRealArray( 0, 0.2 ),
-"transitions": PoolRealArray( 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 0.5, 0.5, 0.5, 1 ) ]
-}
-tracks/6/type = "value"
-tracks/6/path = NodePath("../HUD/P2_HUDRect/GaugesUnder:modulate")
-tracks/6/interp = 1
-tracks/6/loop_wrap = true
-tracks/6/imported = false
-tracks/6/enabled = true
-tracks/6/keys = {
-"times": PoolRealArray( 0, 0.2 ),
-"transitions": PoolRealArray( 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 0.5, 0.5, 0.5, 1 ) ]
-}
-tracks/7/type = "method"
-tracks/7/path = NodePath(".")
-tracks/7/interp = 1
-tracks/7/loop_wrap = true
-tracks/7/imported = false
-tracks/7/enabled = true
-tracks/7/keys = {
 "times": PoolRealArray( 0, 0.25, 0.3 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "values": [ {
@@ -3036,41 +2964,65 @@ tracks/7/keys = {
 "method": "set_active"
 } ]
 }
+tracks/4/type = "value"
+tracks/4/path = NodePath("P2/Picker:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.25, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("P1/Picker:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0, 0.25, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("../ViewportContainer:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0.501961, 0.501961, 0.501961, 1 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Shop/Card3:position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0, 0.25, 0.251 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 960, 400 ), Vector2( 1216, 400 ), Vector2( 1216, 400 ) ]
+}
 tracks/8/type = "value"
-tracks/8/path = NodePath("P2/Picker:self_modulate")
+tracks/8/path = NodePath("Shop/Card1:position")
 tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/imported = false
 tracks/8/enabled = true
 tracks/8/keys = {
-"times": PoolRealArray( 0, 0.25, 0.3 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
-}
-tracks/9/type = "value"
-tracks/9/path = NodePath("P1/Picker:self_modulate")
-tracks/9/interp = 1
-tracks/9/loop_wrap = true
-tracks/9/imported = false
-tracks/9/enabled = true
-tracks/9/keys = {
-"times": PoolRealArray( 0, 0.25, 0.3 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
-}
-tracks/10/type = "value"
-tracks/10/path = NodePath("../ViewportContainer:modulate")
-tracks/10/interp = 1
-tracks/10/loop_wrap = true
-tracks/10/imported = false
-tracks/10/enabled = true
-tracks/10/keys = {
-"times": PoolRealArray( 0, 0.2 ),
+"times": PoolRealArray( 0, 0.25 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 0.501961, 0.501961, 0.501961, 1 ) ]
+"values": [ Vector2( 960, 400 ), Vector2( 704, 400 ) ]
 }
 
 [sub_resource type="DynamicFont" id=159]
@@ -4373,19 +4325,13 @@ valign = 1
 [node name="Shop" type="Node2D" parent="CardMenu"]
 
 [node name="Card1" type="Node2D" parent="CardMenu/Shop"]
-position = Vector2( 576, 376 )
+position = Vector2( 704, 400 )
 
 [node name="Card2" type="Node2D" parent="CardMenu/Shop"]
-position = Vector2( 768, 376 )
+position = Vector2( 960, 400 )
 
 [node name="Card3" type="Node2D" parent="CardMenu/Shop"]
-position = Vector2( 960, 376 )
-
-[node name="Card4" type="Node2D" parent="CardMenu/Shop"]
-position = Vector2( 1152, 376 )
-
-[node name="Card5" type="Node2D" parent="CardMenu/Shop"]
-position = Vector2( 1344, 376 )
+position = Vector2( 1216, 400 )
 
 [node name="P1" type="Node2D" parent="CardMenu"]
 
@@ -4395,7 +4341,7 @@ position = Vector2( 56, 224 )
 [node name="Back" type="ColorRect" parent="CardMenu/P1/Box"]
 modulate = Color( 1, 1, 1, 0.5 )
 margin_right = 400.0
-margin_bottom = 390.0
+margin_bottom = 336.0
 color = Color( 0, 0, 0, 1 )
 
 [node name="Name" type="Label" parent="CardMenu/P1/Box"]
@@ -4420,12 +4366,13 @@ align = 2
 
 [node name="Description" type="Label" parent="CardMenu/P1/Box"]
 margin_left = 32.0
-margin_top = 96.0
+margin_top = 91.0
 margin_right = 368.0
-margin_bottom = 327.0
+margin_bottom = 322.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 152 )
 text = "No GG Loss When Atked
+Test
 Test
 Test
 Test
@@ -4435,9 +4382,9 @@ clip_text = true
 [node name="Action" type="Label" parent="CardMenu/P1/Box"]
 self_modulate = Color( 0.933333, 0.290196, 0.290196, 1 )
 margin_left = 24.0
-margin_top = 341.0
+margin_top = 296.0
 margin_right = 376.0
-margin_bottom = 361.0
+margin_bottom = 316.0
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 custom_fonts/font = SubResource( 154 )
 text = "Hold Light to purchase"
@@ -4453,9 +4400,9 @@ anims/flash = SubResource( 156 )
 [node name="ProgressBar" type="TextureProgress" parent="CardMenu/P1/Box"]
 self_modulate = Color( 0.828125, 0.175939, 0.175939, 1 )
 margin_left = 128.0
-margin_top = 368.0
+margin_top = 323.0
 margin_right = 273.0
-margin_bottom = 375.0
+margin_bottom = 330.0
 max_value = 45.0
 value = 45.0
 texture_under = ExtResource( 46 )
@@ -4465,48 +4412,48 @@ texture_progress = ExtResource( 45 )
 
 [node name="Card1" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 144, 768 )
+position = Vector2( 144, 744 )
 
 [node name="Card2" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 184, 768 )
+position = Vector2( 184, 744 )
 
 [node name="Card3" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 224, 768 )
+position = Vector2( 224, 744 )
 
 [node name="Card4" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 264, 768 )
+position = Vector2( 264, 744 )
 
 [node name="Card5" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 304, 768 )
+position = Vector2( 304, 744 )
 
 [node name="Card6" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 344, 768 )
+position = Vector2( 344, 744 )
 
 [node name="Card7" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 384, 768 )
+position = Vector2( 384, 744 )
 
 [node name="Card8" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 424, 768 )
+position = Vector2( 424, 744 )
 
 [node name="Card9" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 464, 768 )
+position = Vector2( 464, 744 )
 
 [node name="Card10" type="Node2D" parent="CardMenu/P1/Hand"]
 show_behind_parent = true
-position = Vector2( 504, 768 )
+position = Vector2( 504, 744 )
 
 [node name="Picker" type="Sprite" parent="CardMenu/P1"]
 modulate = Color( 0.584314, 0, 0, 1 )
 self_modulate = Color( 1, 1, 1, 0 )
-position = Vector2( 768, 376 )
+position = Vector2( 672, 376 )
 texture = ExtResource( 47 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="CardMenu/P1/Picker"]
@@ -4515,7 +4462,7 @@ anims/RESET = SubResource( 168 )
 anims/flashing = SubResource( 169 )
 
 [node name="LeaveSpot" type="Node2D" parent="CardMenu/P1"]
-position = Vector2( 792, 1008 )
+position = Vector2( 815, 1029 )
 
 [node name="Picker" type="Sprite" parent="CardMenu/P1/LeaveSpot"]
 visible = false
@@ -4530,7 +4477,7 @@ position = Vector2( 1464, 224 )
 [node name="Back" type="ColorRect" parent="CardMenu/P2/Box"]
 modulate = Color( 1, 1, 1, 0.5 )
 margin_right = 400.0
-margin_bottom = 390.0
+margin_bottom = 336.0
 color = Color( 0, 0, 0, 1 )
 
 [node name="Name" type="Label" parent="CardMenu/P2/Box"]
@@ -4555,9 +4502,9 @@ align = 2
 
 [node name="Description" type="Label" parent="CardMenu/P2/Box"]
 margin_left = 32.0
-margin_top = 96.0
+margin_top = 91.0
 margin_right = 368.0
-margin_bottom = 327.0
+margin_bottom = 322.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 152 )
 text = "No GG Loss When Atked
@@ -4569,9 +4516,9 @@ clip_text = true
 
 [node name="Action" type="Label" parent="CardMenu/P2/Box"]
 margin_left = 24.0
-margin_top = 341.0
+margin_top = 296.0
 margin_right = 376.0
-margin_bottom = 361.0
+margin_bottom = 316.0
 custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
 custom_fonts/font = SubResource( 154 )
 text = "Hold Light to purchase"
@@ -4586,9 +4533,9 @@ anims/flash = SubResource( 176 )
 
 [node name="ProgressBar" type="TextureProgress" parent="CardMenu/P2/Box"]
 margin_left = 128.0
-margin_top = 368.0
+margin_top = 323.0
 margin_right = 273.0
-margin_bottom = 375.0
+margin_bottom = 330.0
 max_value = 45.0
 value = 45.0
 texture_under = ExtResource( 46 )
@@ -4598,43 +4545,43 @@ texture_progress = ExtResource( 45 )
 
 [node name="Card1" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1776, 768 )
+position = Vector2( 1776, 744 )
 
 [node name="Card2" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1736, 768 )
+position = Vector2( 1736, 744 )
 
 [node name="Card3" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1696, 768 )
+position = Vector2( 1696, 744 )
 
 [node name="Card4" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1656, 768 )
+position = Vector2( 1656, 744 )
 
 [node name="Card5" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1616, 768 )
+position = Vector2( 1616, 744 )
 
 [node name="Card6" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1576, 768 )
+position = Vector2( 1576, 744 )
 
 [node name="Card7" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1536, 768 )
+position = Vector2( 1536, 744 )
 
 [node name="Card8" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1496, 768 )
+position = Vector2( 1496, 744 )
 
 [node name="Card9" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1456, 768 )
+position = Vector2( 1456, 744 )
 
 [node name="Card10" type="Node2D" parent="CardMenu/P2/Hand"]
 show_behind_parent = true
-position = Vector2( 1416, 768 )
+position = Vector2( 1416, 744 )
 
 [node name="Picker" type="Sprite" parent="CardMenu/P2"]
 modulate = Color( 0, 0.211765, 0.65098, 1 )
@@ -4648,7 +4595,7 @@ anims/RESET = SubResource( 170 )
 anims/flashing = SubResource( 171 )
 
 [node name="LeaveSpot" type="Node2D" parent="CardMenu/P2"]
-position = Vector2( 1128, 1008 )
+position = Vector2( 1105, 983 )
 
 [node name="Picker" type="Sprite" parent="CardMenu/P2/LeaveSpot"]
 visible = false
