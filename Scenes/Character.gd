@@ -1638,6 +1638,8 @@ func simulate2(): # only ran if not in hitstop
 				if !tech():
 					if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_TECH):
 						animate("FallTransit")
+					elif grounded:
+						animate("HardLanding")
 #					animate("FallTransit")]
 #					modulate_play("unlaunch_flash")
 #					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
@@ -3504,7 +3506,6 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			if new_state == Em.char_state.LAUNCHED_HITSTUN:
 				# need to use new_state to prevent an issue with grounded Break state causing HardLanding on flinch
 				# check using either velocity this frame or last frame
-					
 				var vector_to_check
 				if velocity.is_longer_than_another(velocity_previous_frame):
 					vector_to_check = velocity

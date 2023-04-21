@@ -108,7 +108,7 @@ func move_amount(move_amount:Vector2, ledge_stop := false):
 			get("velocity").y = 0
 		if results[3]:
 #			offstage_check = true
-			get("velocity").x = 0
+			get("velocity").y = 0
 			
 #	if offstage_check:
 	check_offstage(collision_box)
@@ -754,9 +754,9 @@ func linear_move(collision_box, horizontal: bool, move_amount: int, checklist_en
 				target_box.position.x = collision_box.rect_global_position.x + move_amount
 			else:
 				var point = get_leftmost_in_array(collided_boxes)
-	#			if point > collision_box.position.x + collision_box.rect_size.x:
-				target_box.position.x = point - collision_box.rect_size.x
-				results[1] = true
+				if point >= collision_box.rect_global_position.x + collision_box.rect_size.x:
+					target_box.position.x = point - collision_box.rect_size.x
+					results[1] = true
 	#			results = [false, false, false]
 			if ledgestop:
 				target_box = right_ledgestop(collision_box, target_box, results)
@@ -768,9 +768,9 @@ func linear_move(collision_box, horizontal: bool, move_amount: int, checklist_en
 				target_box.position.x = collision_box.rect_global_position.x + move_amount
 			else:
 				var point = get_rightmost_in_array(collided_boxes)
-	#			if point < collision_box.position.x:
-				target_box.position.x = point
-				results[1] = true
+				if point <= collision_box.rect_global_position.x:
+					target_box.position.x = point
+					results[1] = true
 	#			results = [false, false, false]
 			if ledgestop:
 				target_box = left_ledgestop(collision_box, target_box, results)
@@ -781,9 +781,9 @@ func linear_move(collision_box, horizontal: bool, move_amount: int, checklist_en
 				target_box.position.y = collision_box.rect_global_position.y + move_amount
 			else:
 				var point = get_lowest_in_array(collided_boxes)
-	#			if point < collision_box.position.y:
-				target_box.position.y = point
-				results[1] = true
+				if point <= collision_box.rect_global_position.y:
+					target_box.position.y = point
+					results[1] = true
 	#			results = [false, false, false]
 			if offstage_stop:
 				target_box = test_offstage_up(target_box, results)
@@ -792,10 +792,10 @@ func linear_move(collision_box, horizontal: bool, move_amount: int, checklist_en
 				target_box.position.y = collision_box.rect_global_position.y + move_amount
 			else:
 				var point = get_highest_in_array(collided_boxes)
-	#			if point > collision_box.position.y + collision_box.rect_size.y:
-				target_box.position.y = point - collision_box.rect_size.y
-				results[0] = true
-				results[1] = true
+				if point >= collision_box.rect_global_position.y + collision_box.rect_size.y:
+					target_box.position.y = point - collision_box.rect_size.y
+					results[0] = true
+					results[1] = true
 	#			results = [false, false, false]
 			if offstage_stop:
 				target_box = test_offstage_down(target_box, results)

@@ -902,7 +902,7 @@ func process_command():
 			current_command = "option_air"
 		return
 	
-	if  is_atk_recovery() and command_array_num > 0 and current_command in UniqChar.COMMANDS and \
+	if is_atk_recovery() and command_array_num > 0 and current_command in UniqChar.COMMANDS and \
 			"anim" in UniqChar.COMMANDS[current_command] and UniqChar.COMMANDS[current_command].anim is Array:
 		pass # chain series
 	elif !new_state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.GROUND_C_REC, \

@@ -50,7 +50,7 @@ func init(aux_data: Dictionary):
 		var block_type: int = Globals.Game.rng_generate(7)
 		var coord_array := []
 		
-		block_type = 0
+#		block_type = 0
 		match block_type:
 			0: # I block
 				coord_array = [Vector2(-1, 0), Vector2(1, 0), Vector2(2, 0)]
@@ -69,7 +69,7 @@ func init(aux_data: Dictionary):
 				
 		var coord_array2 := []
 		var block_rot: int = Globals.Game.rng_generate(4)
-		block_rot = 0
+#		block_rot = 0
 		match block_rot:
 			0:
 				coord_array2 = coord_array
