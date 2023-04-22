@@ -312,9 +312,16 @@ func initial_targeting(): # target closest player at start
 		return target_node
 	
 func get_seq_partner():
+	if seq_partner_ID == null: return null
 	var Partner = Globals.Game.get_player_node(seq_partner_ID)
-	if Partner == null or Partner == self: return null
-	if Partner.seq_partner_ID != player_ID: return null
+	if Partner == null:
+		return null
+	if Partner == self:
+		return null
+#	if Partner.seq_partner_ID == null:
+#		return null
+#	if Partner.seq_partner_ID != player_ID:
+#		return null
 	return Partner
 	
 func get_target():
@@ -521,7 +528,7 @@ func simulate2(): # only ran if not in hitstop
 				guard_gauge_update()
 		
 		
-	if state in [Em.char_state.SEQUENCE_USER, Em.char_state.SEQUENCE_TARGET]:
+	if new_state in [Em.char_state.SEQUENCE_USER, Em.char_state.SEQUENCE_TARGET]:
 		simulate_sequence()
 		return
 	
@@ -884,6 +891,9 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	$LongFailTimer.simulate()
 	
 	test2()
+	
+#	if new_state != state:
+#		state = state_detect(Animator.current_anim)
 		
 		
 # AI COMMANDS --------------------------------------------------------------------------------------------------	
@@ -1454,7 +1464,7 @@ func query_state(query_states: Array):
 			return true
 	return false
 
-func state_detect(anim):
+func state_detect(anim) -> int:
 	match anim:
 		# universal animations
 		"Idle", "RunTransit", "Run", "Brake", "TurnTransit":
@@ -2520,12 +2530,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
 					if !hit_data[Em.hit.REPEAT]:
 						hit_data[Em.hit.REPEAT] = true # found a repeat
-						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
-								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
-								!Em.atk_attr.CAN_REPEAT_TWICE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
-							hit_data[Em.hit.DOUBLE_REPEAT] = true
-							break
+#						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
+#								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
+#								!Em.atk_attr.CAN_REPEAT_TWICE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+#							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
+#							hit_data[Em.hit.DOUBLE_REPEAT] = true
+#							break
 					elif !double_repeat:
 						double_repeat = true
 						hit_data[Em.hit.DOUBLE_REPEAT] = true # found multiple repeats
@@ -2679,7 +2689,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEALT_DMG] = damage
 		if damage > 0:
 			if guardbroken:
-				if hit_data[Em.hit.DOUBLE_REPEAT] or adjusted_atk_level == 1:
+				if hit_data[Em.hit.DOUBLE_REPEAT] or hit_data[Em.hit.REPEAT] or adjusted_atk_level == 1:
 					Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.GRAY)
 				else:
 					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
@@ -2726,7 +2736,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		return
 		
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-		if "tough_mob" in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
+		if "tough_mob" in hit_data or hit_data[Em.hit.REPEAT]:
 			return
 		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
@@ -2774,7 +2784,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			proj_only_combo = false
 
 		
-	if hit_data[Em.hit.DOUBLE_REPEAT]:
+	if hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
 #		add_status_effect(Em.status_effect.REPEAT, 10)
 	
@@ -2821,9 +2831,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
 	if guardbroken:
-		if !hit_data[Em.hit.DOUBLE_REPEAT] and adjusted_atk_level <= 1 and $HitStunTimer.is_running():
-			# for atk level 1 hits on hitstunned opponent, add their hitstun to existing hitstun
-			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
+		if adjusted_atk_level <= 1 and $HitStunTimer.is_running():
+			# for atk level 1 hits on hitstunned opponent, no change to hitstun
+			pass
+#			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			$HitStunTimer.time = calculate_hitstun(hit_data)
 			launchstun_rotate = 0 # used to calculation sprite rotation during launched state
@@ -3077,7 +3088,7 @@ func calculate_damage(hit_data) -> int:
 	var scaled_damage: int = hit_data[Em.hit.MOVE_DATA][Em.move.DMG] * FMath.S
 	if scaled_damage == 0: return 0
 	
-	if hit_data[Em.hit.DOUBLE_REPEAT]:
+	if hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
 		scaled_damage = FMath.percent(scaled_damage, REPEAT_DMG_MOD)
 	else:
 		if hit_data[Em.hit.SWEETSPOTTED]:
@@ -3266,8 +3277,9 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 		return 1 # double repeat is forced attack level 1
 		
 	var atk_level: int = hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL]
-	
-	if hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
+	if hit_data[Em.hit.REPEAT]:
+		atk_level -= 1
+	elif hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
 		atk_level += 3
 		
 	atk_level = int(clamp(atk_level, 1, 8))
@@ -3449,6 +3461,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	if new_state == Em.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
 		if Partner.new_state != Em.char_state.SEQUENCE_USER:
 			animate("Idle") # auto release if not released proberly, just in case
+			return
 		
 	elif new_state == Em.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
 		UniqChar.simulate_sequence()
@@ -3482,6 +3495,8 @@ func landed_a_sequence(hit_data):
 	if defender == null or defender.new_state in [Em.char_state.SEQUENCE_TARGET]:
 		return # no sequencing players that are already being grabbed
 		
+	if hit_data[Em.hit.REPEAT] == true: return # repeat penalty, cannot grab if repeated
+		
 	if defender.new_state in [Em.char_state.SEQUENCE_USER]: # both players grab each other at the same time, break grabs
 		animate("Idle")
 		defender.animate("Idle")
@@ -3490,10 +3505,12 @@ func landed_a_sequence(hit_data):
 	if "attacked_this_frame" in defender:
 		defender.attacked_this_frame = true
 		
+		
 	seq_partner_ID = defender.player_ID
 	defender.seq_partner_ID = player_ID
 		
 	animate(hit_data[Em.hit.MOVE_DATA][Em.move.SEQ])
+	defender.animate("aSeqFlinchAFreeze") # first pose to set defender's state
 #	UniqChar.start_sequence_step()
 	
 	remove_status_effect_on_landing_hit()
@@ -3757,7 +3774,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 func _on_SpritePlayer_anim_started(anim_name):
 	
-	state = state_detect(Animator.current_anim) # update state
+	state = state_detect(anim_name) # update state
 	
 	anim_friction_mod = 100
 	anim_gravity_mod = 100

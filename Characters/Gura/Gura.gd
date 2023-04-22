@@ -990,7 +990,8 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			Character.animate("L2Rec")
 			
 		"F2[h]":
-			if !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED] and !hit_data[Em.hit.STUN] and !hit_data[Em.hit.LETHAL_HIT]:
+			if !hit_data[Em.hit.REPEAT] and !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED] and !hit_data[Em.hit.STUN] and \
+					!hit_data[Em.hit.LETHAL_HIT]:
 				hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE] = 180
 				hit_data[Em.hit.MOVE_DATA][Em.move.KB] = 200 * FMath.S
 				hit_data[Em.hit.PULL] = true
@@ -1082,8 +1083,7 @@ func simulate_sequence_after(): # called after moving and animating every frame,
 						
 func start_sequence_step(): # this is ran at the start of every sequence_step
 	var Partner = Character.get_seq_partner()
-	if Partner == null:
-		Character.animate("Idle")
+	if Partner == null: # DO NOT START ANIMATIONS HERE!
 		return
 
 	match Animator.to_play_anim:
@@ -1156,7 +1156,7 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 	var Partner = Character.get_seq_partner()
 	if Partner == null:
 		Character.animate("Idle")
-		return
+		return true
 	
 	if trigger == "break": # grab break
 		Character.animate("Idle")

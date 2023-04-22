@@ -1592,7 +1592,6 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 	
 	var Partner = Character.get_seq_partner()
 	if Partner == null:
-		Character.animate("Idle")
 		return
 
 	match Animator.to_play_anim:
@@ -1654,7 +1653,7 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 	var Partner = Character.get_seq_partner()
 	if Partner == null:
 		Character.animate("Idle")
-		return
+		return true
 	
 	if trigger == "break": # grab break
 		Character.animate("Idle")

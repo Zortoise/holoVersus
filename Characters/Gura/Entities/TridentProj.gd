@@ -65,7 +65,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 4,
 		Em.move.KB_ANGLE : -45,
 		Em.move.PROJ_LVL : 3,
-		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB, Em.atk_attr.NO_REPEAT_MOVE],
+		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
 }
