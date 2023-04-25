@@ -50,6 +50,9 @@ const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 15  # friction during hitstun
 const HITSTUN_AIR_RES = 3 # air resistance during hitstun
 
+const SD_KNOCKBACK_LIMIT = 300 * FMath.S # knockback strength limit of a semi-disjoint hit
+#const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
+
 const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
 const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
@@ -481,7 +484,8 @@ func simulate2(): # only ran if not in hitstop
 	
 	# clearing repeat memory
 	if !is_hitstunned_or_sequenced():
-		repeat_memory = []
+		if !is_atk_startup():
+			repeat_memory = []
 		combo_level = 0
 		wall_slammed = Em.wall_slam.CANNOT_SLAM
 		delayed_hit_effect = []
@@ -1922,14 +1926,15 @@ func get_move_name():
 	
 func is_hitstunned():
 	match state: # use non-new state
-		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
+				Em.char_state.AIR_RESISTED_HITSTUN, Em.char_state.GROUND_RESISTED_HITSTUN:
 			return true
 	return false
 	
 func is_hitstunned_or_sequenced():
 	match state: # use non-new state
 		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
-				Em.char_state.SEQUENCE_TARGET:
+				Em.char_state.SEQUENCE_TARGET, Em.char_state.AIR_RESISTED_HITSTUN, Em.char_state.GROUND_RESISTED_HITSTUN:
 			return true
 	return false
 	
@@ -2152,7 +2157,7 @@ func query_polygons(): # requested by main game node when doing hit detection
 					polygons_queried[Em.hit.SWEETBOX] = Animator.query_polygon("sweetbox")
 					polygons_queried[Em.hit.KBORIGIN] = Animator.query_point("kborigin")
 					polygons_queried[Em.hit.VACPOINT] = Animator.query_point("vacpoint")
-#			polygons_queried[Em.hit.SDHURTBOX] = Animator.query_polygon("sdhurtbox")
+			polygons_queried[Em.hit.SDHURTBOX] = Animator.query_polygon("sdhurtbox")
 			
 #		if query_status_effect(Em.status_effect.RESPAWN_GRACE):
 #			pass  # no hurtbox during respawn grace or after a strongblock/parry
@@ -2497,7 +2502,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.SUPER] or \
 			(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
-		hit_data["ignore_resist"] = true
+		hit_data[Em.hit.IGNORE_RESIST] = true
 		
 	if !Em.hit.SECONDARY_HIT in hit_data:
 		delayed_hit_effect = []
@@ -2558,7 +2563,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	var weak_hit := false
 	if (Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1) or hit_data[Em.hit.DOUBLE_REPEAT] or \
-		Em.hit.MULTIHIT in hit_data:
+		hit_data[Em.hit.SEMI_DISJOINT] or Em.hit.MULTIHIT in hit_data:
 		weak_hit = true
 		hit_data[Em.hit.SWEETSPOTTED] = false
 		
@@ -2622,7 +2627,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if Em.hit.SUPERARMORED in hit_data:
 		hit_data[Em.hit.RESISTED] = true
-	elif "ignore_resist" in hit_data:
+	elif Em.hit.IGNORE_RESIST in hit_data:
 		pass # true hitstun
 	elif current_guard_gauge == GUARD_GAUGE_FLOOR:
 		pass # true hitstun
@@ -2736,7 +2741,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		return
 		
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-		if "tough_mob" in hit_data or hit_data[Em.hit.REPEAT]:
+		if "tough_mob" in hit_data or hit_data[Em.hit.REPEAT] or hit_data[Em.hit.SEMI_DISJOINT]:
 			return
 		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
@@ -2787,6 +2792,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
 #		add_status_effect(Em.status_effect.REPEAT, 10)
+
+	elif hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in query_atk_attr(): # SD Hit sound
+		play_audio("bling3", {"bus" : "LowPass"})
 	
 	elif hit_data[Em.hit.LETHAL_HIT]:
 		Globals.Game.set_screenshake()
@@ -2858,7 +2866,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if Em.hit.ENTITY_PATH in hit_data: # for projectiles as well
 #			hit_data[Em.hit.HITSTOP] = hitstop
 
-	if !hit_data[Em.hit.LETHAL_HIT] and Em.hit.RESISTED in hit_data and !guardbroken and !Em.hit.ENTITY_PATH in hit_data and !hit_data[Em.hit.WEAK_HIT]:
+	if !hit_data[Em.hit.LETHAL_HIT] and Em.hit.RESISTED in hit_data and !guardbroken and !Em.hit.ENTITY_PATH in hit_data and \
+			!hit_data[Em.hit.WEAK_HIT] and !hit_data[Em.hit.REPEAT]:
 		if Globals.difficulty < 3:
 			if Em.hit.SUPERARMORED in hit_data:
 				hitstop += 13
@@ -3029,7 +3038,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			animate("LaunchStop")
 									
 	else: # not guardbroken
-		if Em.hit.RESISTED in hit_data and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
+		if Em.hit.RESISTED in hit_data and !hit_data[Em.hit.REPEAT] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
 			
 			var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
 			if !Em.hit.PULL in hit_data:
@@ -3087,8 +3096,14 @@ func calculate_damage(hit_data) -> int:
 	
 	var scaled_damage: int = hit_data[Em.hit.MOVE_DATA][Em.move.DMG] * FMath.S
 	if scaled_damage == 0: return 0
-	
-	if hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
+
+	if hit_data[Em.hit.SEMI_DISJOINT]:
+		if Em.atk_attr.VULN_LIMBS in query_atk_attr():
+			pass # VULN_LIMBS trait cause SD hits to do damage
+#			scaled_damage = FMath.percent(scaled_damage, 100)
+		else:
+			return 0
+	elif hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
 		scaled_damage = FMath.percent(scaled_damage, REPEAT_DMG_MOD)
 	else:
 		if hit_data[Em.hit.SWEETSPOTTED]:
@@ -3109,8 +3124,11 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if guardbroken: # if guardbroken, no Guard Drain
 		return 0
 		
-#	if Em.hit.SUPERARMORED in hit_data:
-#		return 0
+	if hit_data[Em.hit.REPEAT]:
+		return 0
+		
+	if Em.hit.SUPERARMORED in hit_data:
+		return 0
 		
 #	if Em.hit.SUPERARMORED in hit_data or ($ArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
 	if Em.hit.SUPERARMORED in hit_data or $ArmorTimer.is_running(): # halves GDrain on armored
@@ -3150,14 +3168,19 @@ func calculate_knockback_strength(hit_data) -> int:
 	# for certain multi-hit attacks (not autochain), can be fixed KB till the last hit
 	if Em.hit.MULTIHIT in hit_data:
 		if Em.move.FIXED_KB_MULTI in hit_data[Em.hit.MOVE_DATA]:
-			knockback_strength = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_MULTI] # scaled by FMath.S
+			return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_MULTI] # scaled by FMath.S
+		else:
+			return knockback_strength
+			
+	if  Em.hit.AUTOCHAIN in hit_data:
+		return knockback_strength
 	
+	if hit_data[Em.hit.SEMI_DISJOINT]:
+		return int(clamp(knockback_strength, 0, SD_KNOCKBACK_LIMIT))
+		
 	if hit_data[Em.hit.SWEETSPOTTED]:
 		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
 		
-	# for rekkas and combo-type moves/supers, no KB boost for non-finishers
-	if Em.hit.AUTOCHAIN in hit_data or Em.hit.MULTIHIT in hit_data:
-		return knockback_strength
 #	elif !guardbroken: # KB for non-guardbreak
 #		knockback_strength = FMath.percent(knockback_strength, get_stat("ARMOR_KNOCKBACK_MOD"))
 			
@@ -3277,12 +3300,16 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 		return 1 # double repeat is forced attack level 1
 		
 	var atk_level: int = hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL]
-	if hit_data[Em.hit.REPEAT]:
+	
+	if hit_data[Em.hit.SEMI_DISJOINT]: # semi-disjoint hits limit hitstun
+		atk_level -= 1 # atk lvl 2 become weak hit
+		atk_level = int(clamp(atk_level, 1, 2))
+	elif hit_data[Em.hit.REPEAT]:
 		atk_level -= 1
+		atk_level = int(clamp(atk_level, 1, 8))
 	elif hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
 		atk_level += 3
-		
-	atk_level = int(clamp(atk_level, 1, 8))
+		atk_level = int(clamp(atk_level, 1, 8))
 		
 	return atk_level
 	
@@ -3348,6 +3375,8 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 # warning-ignore:integer_division
 	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 90) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
+	if hit_data[Em.hit.SEMI_DISJOINT]: # on semi-disjoint hits, lowest hitstop
+		return MIN_HITSTOP
 	if hit_data[Em.hit.SWEETSPOTTED]: # sweetspotted hits has 30% more hitstop
 		if Em.move.FIXED_SS_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
 			return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_SS_HITSTOP] # for Normal hitpulls
@@ -3361,6 +3390,11 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 	
 
 func generate_hitspark(hit_data): # hitspark size determined by knockback power
+
+	if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in query_atk_attr():
+		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
+				"v_mirror":Globals.Game.rng_bool()}, UniqChar.SDHitspark_COLOR)
+		return
 
 	var hitspark_level: int
 	

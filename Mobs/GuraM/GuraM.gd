@@ -59,6 +59,7 @@ const TRAITS = []
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "gray"
+const SDHitspark_COLOR = "blue"
 
 const UNIQUE_DATA_REF = {
 }

@@ -77,7 +77,7 @@ const LETHAL_HITSTOP = 25
 const LETHAL_HITSTUN_MOD = 150 # multiply hitstun when defender is at Damage Value Limit
 
 const SD_KNOCKBACK_LIMIT = 300 * FMath.S # knockback strength limit of a semi-disjoint hit
-const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
+#const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
 
 const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
@@ -4830,8 +4830,8 @@ func query_polygons(): # requested by main game node when doing hit detection
 					polygons_queried[Em.hit.SWEETBOX] = Animator.query_polygon("sweetbox")
 					polygons_queried[Em.hit.KBORIGIN] = Animator.query_point("kborigin")
 					polygons_queried[Em.hit.VACPOINT] = Animator.query_point("vacpoint")
-			if Globals.survival_level == null: # no semi-disjoint mechanic in Survival
-				polygons_queried[Em.hit.SDHURTBOX] = Animator.query_polygon("sdhurtbox")
+#			if Globals.survival_level == null: # no semi-disjoint mechanic in Survival
+			polygons_queried[Em.hit.SDHURTBOX] = Animator.query_polygon("sdhurtbox")
 			
 		if query_status_effect(Em.status_effect.RESPAWN_GRACE):
 			pass  # no hurtbox during respawn grace
@@ -5614,8 +5614,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# Weak Hits cannot cause Lethal Hit, cannot cause Stun, cannot cause Sweetspotted Hits, cannot cause Punish Hits
 	
 	var weak_hit := false
-	if (Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1) or hit_data[Em.hit.DOUBLE_REPEAT] or hit_data[Em.hit.SEMI_DISJOINT] or \
-		Em.hit.MULTIHIT in hit_data:
+	if (Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1) or hit_data[Em.hit.DOUBLE_REPEAT] or \
+		hit_data[Em.hit.SEMI_DISJOINT] or Em.hit.MULTIHIT in hit_data:
 		weak_hit = true
 		hit_data[Em.hit.SWEETSPOTTED] = false
 		
