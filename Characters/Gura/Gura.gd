@@ -997,6 +997,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 				hit_data[Em.hit.PULL] = true
 				hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR].append(Em.atk_attr.DI_MANUAL_SEAL)
 				Character.animate("F2[h]PRec")
+				Character.chain_memory.append(get_root(hit_data[Em.hit.MOVE_NAME])) # add move to chain memory, have to do it here for sequences
 			
 		"aF2":
 			if !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED]:

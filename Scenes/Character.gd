@@ -609,7 +609,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(seq_partner_ID)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(chain_memory)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -5726,6 +5726,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+						hit_data[Em.hit.GUARD_DRAIN] = true
 					
 				Em.atk_type.SUPER: # can weakblock super
 					if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
@@ -5739,7 +5740,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					if Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
-						if !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
+						if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+							hit_data[Em.hit.GUARD_DRAIN] = true
+						elif !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
 							if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
 									Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
@@ -5996,8 +6000,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if Em.hit.SUPERARMORED in hit_data:
 					modulate_play("armor_flash")
 					play_audio("block3", {"vol" : -15})
-				elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY,Em.atk_type.SPECIAL, Em.atk_type.EX, \
-						Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY] and !$SBlockTimer.is_running():
+				elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running():
 					modulate_play("weakblock_flash")
 					play_audio("block3", {"vol" : -15})
 				else:
@@ -6419,7 +6422,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 			return 0
 		
 		Em.block_state.WEAK: # no Guard Drain on blocking normals
-			if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX]:
+			if Em.hit.GUARD_DRAIN in hit_data:
 				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # double guard drain when blocking heavy/special/ex
 			else:
 				if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
@@ -6851,8 +6854,7 @@ func generate_blockspark(hit_data):
 		Em.block_state.WEAK:
 			if Em.hit.SUPERARMORED in hit_data:
 				blockspark = "Superarmorspark"
-			elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX, \
-					Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY] and !$SBlockTimer.is_running():
+			elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running():
 				blockspark = "WBlockspark2"
 			else:
 				blockspark = "WBlockspark"
@@ -6937,6 +6939,7 @@ func landed_a_sequence(hit_data):
 	chain_combo = Em.chain_combo.NO_CHAIN
 #	defender.status_effect_to_remove.append(Em.status_effect.POS_FLOW)	# defender lose positive flow
 				
+	chain_memory.append(UniqChar.get_root(hit_data[Em.hit.MOVE_NAME])) # add move to chain memory, have to do it here for sequences
 				
 #func being_sequenced(hit_data):
 #	targeted_opponent_path = hit_data.attacker_nodepath # target opponent who last attacked you
