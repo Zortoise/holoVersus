@@ -55,7 +55,7 @@ const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard
 const DAMAGE_VALUE_LIMIT = 1100
 
 const GG_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
-const GROUND_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking on ground
+const GROUND_BLOCK_GG_COST = 35 # exact GG loss per frame when blocking on ground
 const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
 const WEAKBLOCK_CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
 
@@ -287,7 +287,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,
 		Em.move.KB_ANGLE : 90,
-		Em.move.ATK_ATTR : [ Em.atk_attr.NO_REC_CANCEL],
+		Em.move.ATK_ATTR : [ Em.atk_attr.NO_REC_CANCEL, Em.atk_attr.CAN_REPEAT_ONCE],
 		Em.move.MOVE_SOUND : { ref = "whoosh15", aux_data = {"vol" : -9} },
 		Em.move.HIT_SOUND : { ref = "cut8", aux_data = {"vol" : -10} },
 	},

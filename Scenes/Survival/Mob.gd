@@ -20,6 +20,7 @@ const PLAYER_PUSH_SLOWDOWN = 95 # how much characters are slowed when they push 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
+const PARTIAL_REPEAT_DMG_MOD = 75
 const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Guard Gauge is at 100%
 
 # old hitstun
@@ -2529,28 +2530,30 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if !Em.atk_attr.REPEATABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !Em.hit.ENTITY_PATH in hit_data:
 		
-		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
+#		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
 		
-			for array in repeat_memory:
-				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
-					if !hit_data[Em.hit.REPEAT]:
-						hit_data[Em.hit.REPEAT] = true # found a repeat
+		for array in repeat_memory:
+			if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
+				if !hit_data[Em.hit.REPEAT]:
+					hit_data[Em.hit.REPEAT] = true # found a repeat
 #						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
 #								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
 #								!Em.atk_attr.CAN_REPEAT_TWICE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 #							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
 #							hit_data[Em.hit.DOUBLE_REPEAT] = true
 #							break
-					elif !double_repeat:
-						double_repeat = true
-						hit_data[Em.hit.DOUBLE_REPEAT] = true # found multiple repeats
-						break
-						
-			# add to repeat memory
-			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-				repeat_memory.append([attacker.player_ID, root_move_name])
+				elif !double_repeat:
+					double_repeat = true
+					hit_data[Em.hit.DOUBLE_REPEAT] = true # found multiple repeats
+					break
+					
+		# add to repeat memory
+		if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
+			repeat_memory.append([attacker.player_ID, root_move_name])
 	
-	
+	if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and \
+			!Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
+		hit_data[Em.hit.SINGLE_REPEAT] = true
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
 	
@@ -2694,12 +2697,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEALT_DMG] = damage
 		if damage > 0:
 			if guardbroken:
-				if hit_data[Em.hit.DOUBLE_REPEAT] or hit_data[Em.hit.REPEAT] or adjusted_atk_level == 1:
-					Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.GRAY)
+				if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or adjusted_atk_level == 1:
+					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
 				else:
 					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
 			else:
-				Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.GRAY)
+				Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
 		
 		if get_damage_percent() >= 100:
 			hit_data[Em.hit.LETHAL_HIT] = true
@@ -2708,14 +2711,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# FIRST REACTION ---------------------------------------------------------------------------------
 	
 	if has_trait(Em.trait.NO_LAUNCH) or $ArmorTimer.is_running() or (Em.hit.RESISTED in hit_data and !guardbroken):
-		hit_data["tough_mob"] = true
+		hit_data[Em.hit.TOUGH_MOB] = true
 	
 #	if !(Em.mob_attr.GDRAIN in mob_attr and mob_attr[Em.mob_attr.GDRAIN] == 0):
 #		if !guardbroken: # not guardbroken mobs, hitgrabs can still connect if the hit guardbreaks them
 #			if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]:
-#				hit_data["tough_mob"] = true
+#				hit_data[Em.hit.TOUGH_MOB] = true
 #			elif get_guard_gauge_percent_below() >= 50: # natural command grabs can still grab them if they have below 50% GG
-#				hit_data["tough_mob"] = true
+#				hit_data[Em.hit.TOUGH_MOB] = true
 
 	# unique reactions
 	if Em.hit.ENTITY_PATH in hit_data:
@@ -2736,12 +2739,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		remove_status_effect_on_taking_hit()
 	
 #	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-#		if !hit_data[Em.hit.DOUBLE_REPEAT] and !"tough_mob" in hit_data:
+#		if !hit_data[Em.hit.DOUBLE_REPEAT] and !Em.hit.TOUGH_MOB in hit_data:
 #			attacker_or_entity.landed_a_sequence(hit_data)
 #		return
 		
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-		if "tough_mob" in hit_data or hit_data[Em.hit.REPEAT] or hit_data[Em.hit.SEMI_DISJOINT]:
+		if Em.hit.TOUGH_MOB in hit_data or hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.SEMI_DISJOINT]:
 			return
 		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
@@ -2789,8 +2792,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			proj_only_combo = false
 
 		
-	if hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
+	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
+		if Em.hit.RESISTED in hit_data:
+			play_audio("block3", {"vol" : -15})
+			hit_data[Em.hit.NO_HIT_SOUND_MOB] = true
 #		add_status_effect(Em.status_effect.REPEAT, 10)
 
 	elif hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in query_atk_attr(): # SD Hit sound
@@ -2818,12 +2824,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif Em.hit.RESISTED in hit_data:
 		modulate_play("weakblock_flash")
 		play_audio("block3", {"vol" : -15})
-		hit_data["no_hit_sound"] = true
+		hit_data[Em.hit.NO_HIT_SOUND_MOB] = true
 		
 	elif !guardbroken:
 		modulate_play("mob_armor_flash")
 		play_audio("bling2", {"vol" : -5, "bus" : "PitchDown2"})
-		hit_data["no_hit_sound"] = true
+		hit_data[Em.hit.NO_HIT_SOUND_MOB] = true
 		
 	elif hit_data[Em.hit.SWEETSPOTTED]:
 		modulate_play("punish_sweet_flash")
@@ -2867,7 +2873,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			hit_data[Em.hit.HITSTOP] = hitstop
 
 	if !hit_data[Em.hit.LETHAL_HIT] and Em.hit.RESISTED in hit_data and !guardbroken and !Em.hit.ENTITY_PATH in hit_data and \
-			!hit_data[Em.hit.WEAK_HIT] and !hit_data[Em.hit.REPEAT]:
+			!hit_data[Em.hit.WEAK_HIT] and !hit_data[Em.hit.DOUBLE_REPEAT] and !Em.hit.SINGLE_REPEAT in hit_data:
 		if Globals.difficulty < 3:
 			if Em.hit.SUPERARMORED in hit_data:
 				hitstop += 13
@@ -3038,7 +3044,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			animate("LaunchStop")
 									
 	else: # not guardbroken
-		if Em.hit.RESISTED in hit_data and !hit_data[Em.hit.REPEAT] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
+		if Em.hit.RESISTED in hit_data and !hit_data[Em.hit.DOUBLE_REPEAT] and \
+				!Em.hit.SINGLE_REPEAT in hit_data and \
+				hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
 			
 			var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
 			if !Em.hit.PULL in hit_data:
@@ -3103,8 +3111,10 @@ func calculate_damage(hit_data) -> int:
 #			scaled_damage = FMath.percent(scaled_damage, 100)
 		else:
 			return 0
-	elif hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
+	elif hit_data[Em.hit.DOUBLE_REPEAT]:
 		scaled_damage = FMath.percent(scaled_damage, REPEAT_DMG_MOD)
+	elif Em.hit.SINGLE_REPEAT in hit_data:
+		scaled_damage = FMath.percent(scaled_damage, PARTIAL_REPEAT_DMG_MOD)
 	else:
 		if hit_data[Em.hit.SWEETSPOTTED]:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
@@ -3124,11 +3134,11 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if guardbroken: # if guardbroken, no Guard Drain
 		return 0
 		
-	if hit_data[Em.hit.REPEAT]:
+	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 0
 		
-	if Em.hit.SUPERARMORED in hit_data:
-		return 0
+#	if Em.hit.SUPERARMORED in hit_data:
+#		return 0
 		
 #	if Em.hit.SUPERARMORED in hit_data or ($ArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
 	if Em.hit.SUPERARMORED in hit_data or $ArmorTimer.is_running(): # halves GDrain on armored
@@ -3304,7 +3314,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	if hit_data[Em.hit.SEMI_DISJOINT]: # semi-disjoint hits limit hitstun
 		atk_level -= 1 # atk lvl 2 become weak hit
 		atk_level = int(clamp(atk_level, 1, 2))
-	elif hit_data[Em.hit.REPEAT]:
+	elif Em.hit.SINGLE_REPEAT in hit_data:
 		atk_level -= 1
 		atk_level = int(clamp(atk_level, 1, 8))
 	elif hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
@@ -3529,7 +3539,7 @@ func landed_a_sequence(hit_data):
 	if defender == null or defender.new_state in [Em.char_state.SEQUENCE_TARGET]:
 		return # no sequencing players that are already being grabbed
 		
-	if hit_data[Em.hit.REPEAT] == true: return # repeat penalty, cannot grab if repeated
+	if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data: return
 		
 	if defender.new_state in [Em.char_state.SEQUENCE_USER]: # both players grab each other at the same time, break grabs
 		animate("Idle")

@@ -166,7 +166,7 @@ const DESCRIBE = {
 	},
 	effect_ref.CAN_REPEAT : {
 		"type" : type.QUIRK,
-		"suffix" :"No Repeat Penalty",
+		"suffix" :"Can Repeat Moves Once",
 	},
 	effect_ref.ARMOR_PIERCE : {
 		"type" : type.QUIRK,

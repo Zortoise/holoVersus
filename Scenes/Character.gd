@@ -56,6 +56,7 @@ const CORNER_PUSHBACK = 200 * FMath.S # attacker is pushed back when attacking a
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
+const PARTIAL_REPEAT_DMG_MOD = 75
 const DMG_VAL_KB_LIMIT = 300 # max damage percent before knockback stop increasing
 const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
 const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
@@ -957,10 +958,10 @@ func simulate2(): # only ran if not in hitstop
 #	elif $ModulatePlayer.is_playing() and $ModulatePlayer.query_current(["EX_block_flash", "EX_block_flash2"]):
 #		reset_modulate()
 		
-	if !is_attacking() and !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GROUND_STARTUP, \
-			Em.char_state.AIR_REC, Em.char_state.GROUND_REC]:
+	if !is_attacking():
 		reset_cancels()
-		chain_memory = []
+		if !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GROUND_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.GROUND_D_REC]:
+			chain_memory = []
 		
 	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
 		timed_enhance()
@@ -4870,6 +4871,19 @@ func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aeri
 	return true
 	
 	
+func test_dash_attack(attack_ref):
+	
+	match new_state: # need to be in attack active/recovery
+		Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
+			pass
+		_:
+			return true
+			
+	var root_attack_ref = UniqChar.get_root(attack_ref)
+	if root_attack_ref in chain_memory: return false # cannot chain into moves already done
+	return true
+	
+	
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
 	
 	match state: # need to be in attack active/recovery
@@ -5428,7 +5442,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 	# AUDIO ----------------------------------------------------------------------------------------------
 		
-	if (Globals.survival_level != null and !"no_hit_sound" in hit_data) or \
+	if (Globals.survival_level != null and !Em.hit.NO_HIT_SOUND_MOB in hit_data) or \
 			(Globals.survival_level == null and hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and Em.move.HIT_SOUND in hit_data[Em.hit.MOVE_DATA]):
 		
 		var volume_change = 0
@@ -5603,6 +5617,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
 				repeat_memory.append([attacker.player_ID, root_move_name])
 		
+	if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		hit_data[Em.hit.SINGLE_REPEAT] = true
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
 	
@@ -5861,13 +5877,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEALT_DMG] = damage
 		if damage > 0:
 			if Globals.survival_level == null:
-				if hit_data[Em.hit.DOUBLE_REPEAT] or hit_data[Em.hit.REPEAT] or adjusted_atk_level == 1 or \
+				if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or adjusted_atk_level == 1 or \
 						hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
-					Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.GRAY)
+					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
 				else:
 					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
 			else:
-				Globals.Game.spawn_damage_number(damage, position, Em.dmg_num_col.RED)
+				Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.RED)
 
 			
 	# FIRST REACTION (after damage) ---------------------------------------------------------------------------------
@@ -5888,7 +5904,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		remove_status_effect_on_taking_hit()
 	
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
-		if hit_data[Em.hit.SEMI_DISJOINT] or hit_data[Em.hit.REPEAT]:
+		if hit_data[Em.hit.SEMI_DISJOINT] or hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data:
 			return
 		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
@@ -5948,7 +5964,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.STRONG and current_guard_gauge < 0:
 		add_status_effect([Em.status_effect.POS_FLOW, null])
 
-	if hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
+	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
 #		add_status_effect(Em.status_effect.REPEAT, 10)
 
@@ -6368,8 +6384,10 @@ func calculate_damage(hit_data) -> int:
 #			scaled_damage = FMath.percent(scaled_damage, 100)
 		else:
 			return 0
-	elif hit_data[Em.hit.REPEAT] or hit_data[Em.hit.DOUBLE_REPEAT]:
+	elif hit_data[Em.hit.DOUBLE_REPEAT]:
 		scaled_damage = FMath.percent(scaled_damage, REPEAT_DMG_MOD)
+	elif Em.hit.SINGLE_REPEAT in hit_data:
+		scaled_damage = FMath.percent(scaled_damage, PARTIAL_REPEAT_DMG_MOD)
 	else:
 		if hit_data[Em.hit.STUN]:
 			scaled_damage = FMath.percent(scaled_damage, STUN_DMG_MOD)
@@ -6608,7 +6626,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	if hit_data[Em.hit.SEMI_DISJOINT]: # semi-disjoint hits limit hitstun
 		atk_level -= 1 # atk lvl 2 become weak hit
 		atk_level = int(clamp(atk_level, 1, 2))
-	elif hit_data[Em.hit.REPEAT]:
+	elif Em.hit.SINGLE_REPEAT in hit_data:
 		atk_level -= 1
 		atk_level = int(clamp(atk_level, 1, 8))
 	else: # sweetspotted and Punish Hits give more hitstun
@@ -6676,14 +6694,14 @@ func check_if_crossed_up(attacker, angle_to_atker: int):
 	var x_dist: int = abs(attacker.position.x - position.x)
 	if x_dist <= CROSS_UP_MIN_DIST: return false
 	
-	var segment = Globals.split_angle(angle_to_atker, Em.angle_split.FOUR)
+	var segment = Globals.split_angle(angle_to_atker, Em.angle_split.EIGHT)
 	if segment == Em.compass.N or segment == Em.compass.S:
 		return false
 	match segment:
-		Em.compass.E:
+		Em.compass.E, Em.compass.NE, Em.compass.SE:
 			if facing == 1:
 				return false
-		Em.compass.W:
+		Em.compass.W, Em.compass.NW, Em.compass.SW:
 			if facing == -1:
 				return false
 	return true
@@ -6916,7 +6934,7 @@ func landed_a_sequence(hit_data):
 	if defender == null or defender.new_state in [Em.char_state.SEQUENCE_TARGET]:
 		return # no sequencing players that are already being grabbed
 		
-	if hit_data[Em.hit.REPEAT] == true: return # repeat penalty, cannot grab if repeated
+	if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data: return
 		
 	if defender.new_state in [Em.char_state.SEQUENCE_USER]: # both players grab each other at the same time, break grabs
 		animate("Idle")

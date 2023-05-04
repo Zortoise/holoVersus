@@ -679,6 +679,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 				if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC] and \
 						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 					continue # certain moves cannot be performed during cancellable recovery
+				if !Character.test_dash_attack(attack_ref):
+					continue # if dash attacking, cannot use attacks already used in the chain
 				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					has_acted[0] = true
@@ -699,6 +701,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
 							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr("a" + attack_ref):
 						continue # certain moves cannot be performed during cancellable recovery
+					if !Character.test_dash_attack(attack_ref):
+						continue # if dash attacking, cannot use attacks already used in the chain
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")
 						has_acted[0] = true
@@ -990,7 +994,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			Character.animate("L2Rec")
 			
 		"F2[h]":
-			if !hit_data[Em.hit.REPEAT] and !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED] and !hit_data[Em.hit.STUN] and \
+			if !hit_data[Em.hit.REPEAT] and !Em.hit.TOUGH_MOB in hit_data and hit_data[Em.hit.SWEETSPOTTED] and !hit_data[Em.hit.STUN] and \
 					!hit_data[Em.hit.LETHAL_HIT]:
 				hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE] = 180
 				hit_data[Em.hit.MOVE_DATA][Em.move.KB] = 200 * FMath.S
@@ -1000,7 +1004,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 				Character.chain_memory.append(get_root(hit_data[Em.hit.MOVE_NAME])) # add move to chain memory, have to do it here for sequences
 			
 		"aF2":
-			if !"tough_mob" in hit_data and hit_data[Em.hit.SWEETSPOTTED]:
+			if !Em.hit.TOUGH_MOB in hit_data and hit_data[Em.hit.SWEETSPOTTED]:
 				hit_data[Em.hit.MOVE_DATA][Em.move.SEQ] = "aF2SeqA"
 			
 		"aSP5", "aSP5[h]b":
