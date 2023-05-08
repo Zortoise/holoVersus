@@ -86,11 +86,7 @@ margin_bottom = 22.0
 
 [node name="EXSealTimer" parent="." instance=ExtResource( 4 )]
 
-[node name="InstallTimer" parent="." instance=ExtResource( 4 )]
-
 [node name="TrainingRegenTimer" parent="." instance=ExtResource( 4 )]
-
-[node name="ShorthopTimer" parent="." instance=ExtResource( 4 )]
 
 [node name="NoCollideTimer" parent="." instance=ExtResource( 4 )]
 

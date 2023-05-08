@@ -166,7 +166,7 @@ const DESCRIBE = {
 	},
 	effect_ref.CAN_REPEAT : {
 		"type" : type.QUIRK,
-		"suffix" :"Can Repeat Moves Once",
+		"suffix" :"No Repeat Penalty",
 	},
 	effect_ref.ARMOR_PIERCE : {
 		"type" : type.QUIRK,
@@ -478,7 +478,7 @@ const DATABASE = {
 		"name" : "Botan",
 		"price" : 100,
 		effect_ref.PROJ_DMG_MOD : 50,
-		"quirks" : [effect_ref.ARMOR_PIERCE, effect_ref.SUMMON_SSRB],
+		"quirks" : [effect_ref.SUMMON_SSRB],
 	},
 	card_ref.LAMY : {
 		"name" : "Lamy",

@@ -14,7 +14,7 @@ dest_files=[ "res://.import/gauges_frame.png-eeb3a8dfc02995550d271afeb878abec.st
 
 [params]
 
-compress/mode=1
+compress/mode=0
 compress/lossy_quality=0.7
 compress/hdr_mode=0
 compress/bptc_ldr=0

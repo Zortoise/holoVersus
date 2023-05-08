@@ -14,11 +14,12 @@ const DashLandDBox_HEIGHT = 15 # allow snapping up to dash land easier on soft p
 const WallJumpDBox_WIDTH = 10 # for detecting walls for walljumping
 const TAP_MEMORY_DURATION = 20
 #const HitStunGraceTimer_TIME = 10 # number of frames that repeat_memory will be cleared after hitstun/blockstun ends
-const ShorthopTimer_TIME = 15 # frames after shorthopping where you cannot block
+#const ShorthopTimer_TIME = 15 # frames after shorthopping where you cannot block
 
 const MAX_EX_GAUGE = 30000
 const EX_LEVEL = 10000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
+const EX_LOCK_DEGEN = 15 # amount of EX Lock lost per frame
 
 const GUARD_GAUGE_FLOOR = -10000
 const GUARD_GAUGE_CEIL = 10000
@@ -56,7 +57,7 @@ const CORNER_PUSHBACK = 200 * FMath.S # attacker is pushed back when attacking a
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
-const PARTIAL_REPEAT_DMG_MOD = 75
+const PARTIAL_REPEAT_DMG_MOD = 70
 const DMG_VAL_KB_LIMIT = 300 # max damage percent before knockback stop increasing
 const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
 const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
@@ -226,8 +227,9 @@ var sprite_texture_ref = { # used for afterimages, each contain spritesheet_file
 onready var current_damage_value: int = 0
 onready var current_guard_gauge: int = 0
 onready var current_ex_gauge: int = 10000
-onready var super_ex_lock = null # starting EXSealTimer time
-onready var install_time = null
+onready var current_ex_lock: int = 0
+#onready var super_ex_lock = null # starting EXSealTimer time
+#onready var install_time = null
 onready var burst_token = Em.burst.AVAILABLE
 var stock_points_left: int
 var coin_count := 0
@@ -710,7 +712,8 @@ func simulate(new_input_state):
 #			Globals.Game.spawn_entity(player_ID, "NousagiE", position, {})
 #			enhance_card(Cards.effect_ref.REWIND, true)
 
-	
+			# warning-ignore:return_value_discarded
+			super_cost(20000)
 			pass
 
 		
@@ -902,18 +905,20 @@ func simulate2(): # only ran if not in hitstop
 					Em.chain_combo.WEAKBLOCKED, Em.chain_combo.STRONGBLOCKED: # landed an attack on blocking opponent
 						ex_change = FMath.percent(ex_change, get_stat("BLOCKED_EX_REGEN_MOD"))
 					_:
-						if Globals.survival_level != null:
-							continue # no whiff EX Gain for Survival
-						if is_attacking() and new_state != Em.char_state.SEQUENCE_USER:
-							var move_data = query_move_data()
-							if !Em.move.DMG in move_data:
-								ex_change = FMath.percent(ex_change, get_stat("NON_ATTACK_EX_REGEN_MOD")) # for non-attacks, reduce EX regen
-							else:
-								ex_change = FMath.percent(ex_change, get_stat("ATTACK_EX_REGEN_MOD")) # physical attack, raise EX regen
-						if !grounded: # reduce EX Gain if whiffing aerials
-							ex_change = FMath.percent(ex_change, 50)
+						continue # no whiff EX gain
+#						if Globals.survival_level != null:
+#							continue # no whiff EX Gain for Survival
+#						if is_attacking() and new_state != Em.char_state.SEQUENCE_USER:
+#							var move_data = query_move_data()
+#							if !Em.move.DMG in move_data:
+#								ex_change = FMath.percent(ex_change, get_stat("NON_ATTACK_EX_REGEN_MOD")) # for non-attacks, reduce EX regen
+#							else:
+#								ex_change = FMath.percent(ex_change, get_stat("ATTACK_EX_REGEN_MOD")) # physical attack, raise EX regen
+#						if !grounded: # reduce EX Gain if whiffing aerials
+#							ex_change = FMath.percent(ex_change, 50)
 
 			if Globals.survival_level != null:
+				
 				if ex_change == get_stat("BASE_EX_REGEN") * FMath.S:
 					# no passive EX Gain for Survival unless with cards
 					ex_change = Inventory.modifier(player_ID, Cards.effect_ref.PASSIVE_EX_REGEN)
@@ -922,11 +927,21 @@ func simulate2(): # only ran if not in hitstop
 				else:
 					ex_change = FMath.percent(ex_change, 60) # EX Gain for survival mode
 					change_ex_gauge(FMath.round_and_descale(ex_change))
+					
 			else:
+				
 				if ex_change == get_stat("BASE_EX_REGEN") * FMath.S:
 					if !grounded: # reduce passive EX Gain in air
 						ex_change = FMath.percent(ex_change, 50)
+							
+				# reduce EX Gain when far from center
+				var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
+				var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
+				var weight = FMath.get_fraction_percent(char_dist, max_dist)
+				ex_change = FMath.f_lerp(ex_change, FMath.percent(ex_change, 50), weight)
+				
 				change_ex_gauge(FMath.round_and_descale(ex_change))
+
 			
 			
 	else: # training mode regen EX Gauge
@@ -934,18 +949,27 @@ func simulate2(): # only ran if not in hitstop
 			change_ex_gauge(600)
 		if Globals.training_settings.regen == 1 and !$TrainingRegenTimer.is_running() and current_damage_value > 0:
 			take_damage(-30) # regen damage
-		
-	if !$InstallTimer.is_running():
-		if install_time != null:
-			install_time = null
-			if UniqChar.has_method("install_over"): UniqChar.install_over()
-			
-		if !$EXSealTimer.is_running():
-			super_ex_lock = null
-		elif super_ex_lock != null:
+
+	# EX lock degen	
+	if current_ex_lock > 0 and !$EXSealTimer.is_running():
+		if Globals.training_mode:
+			current_ex_lock -= 600
 			Globals.Game.ex_gauge_update(self)
-	elif install_time != null:
-		Globals.Game.ex_gauge_update(self)
+		elif !Globals.Game.input_lock and state != Em.char_state.DEAD:
+			current_ex_lock -= EX_LOCK_DEGEN
+			Globals.Game.ex_gauge_update(self)
+		
+#	if !$InstallTimer.is_running():
+#		if install_time != null:
+#			install_time = null
+#			if UniqChar.has_method("install_over"): UniqChar.install_over()
+#
+#		if !$EXSealTimer.is_running():
+#			super_ex_lock = null
+#		elif super_ex_lock != null:
+#			Globals.Game.ex_gauge_update(self)
+#	elif install_time != null:
+#		Globals.Game.ex_gauge_update(self)
 	
 	# drain EX Gauge when air blocking
 #	if !grounded and is_blocking():
@@ -1263,10 +1287,10 @@ func simulate2(): # only ran if not in hitstop
 	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
-		elif $ShorthopTimer.is_running():
-			pass # no blocking after shorthopping for a while
+#		elif $ShorthopTimer.is_running():
+#			pass # no blocking after shorthopping for a while
 		elif current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
-			match state:
+			match state: # don't use new_state or will be able to block Supers after screenfreeze
 				
 			# ground blocking
 	#			Em.char_state.GROUND_STARTUP: # can block on 1st frame of ground dash
@@ -1293,6 +1317,11 @@ func simulate2(): # only ran if not in hitstop
 					elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.BLOCK_CANCEL):
 						afterimage_cancel()
 						animate("BlockStartup")
+						
+				Em.char_state.GROUND_REC: # quick turn block, cannot parry
+					if dir == -facing and Animator.query_current(["BlockRec"]):
+						face(dir)
+						animate("TBlockStartup")
 						
 			# air blocking
 	#		if current_guard_gauge + GUARD_GAUGE_CEIL >= -get_stat("AIR_BLOCK_GG_COST"):
@@ -1322,6 +1351,11 @@ func simulate2(): # only ran if not in hitstop
 					elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.BLOCK_CANCEL):
 						afterimage_cancel()
 						animate("aBlockStartup")
+						
+				Em.char_state.AIR_REC: # quick turn block, cannot parry
+					if dir == -facing and Animator.query_current(["aBlockRec"]):
+						face(dir)
+						animate("aTBlockStartup")
 
 # CHECK DROPS AND LANDING ---------------------------------------------------------------------------------------------------
 	
@@ -1771,21 +1805,21 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 			
 			if !hitstop: # timers do not run on exact frame hitstop starts
 				$VarJumpTimer.simulate()
-				$ShorthopTimer.simulate()
+#				$ShorthopTimer.simulate()
 				$HitStunTimer.simulate()
 				$BurstLockTimer.simulate()
 				$NoCollideTimer.simulate()
-				$InstallTimer.simulate()
+#				$InstallTimer.simulate()
 				$SBlockTimer.simulate()
-				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
-					if !get_target().is_hitstunned_or_sequenced():
-						# no counting down EX Seal if opponent is hitstunned or sequenced
-						$EXSealTimer.simulate()
-				else: # EX Seal from using super, count down during opponent hitstun as well
-					if $InstallTimer.is_running() or (is_attacking() and is_super(get_move_name())): # no counting down EX Seal during Super animation
-						pass
-					else:
-						$EXSealTimer.simulate()
+#				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
+				if !get_target().is_hitstunned_or_sequenced():
+					# no counting down EX Seal if opponent is hitstunned or sequenced
+					$EXSealTimer.simulate()
+#				else: # EX Seal from using super, count down during opponent hitstun as well
+#					if $InstallTimer.is_running() or (is_attacking() and is_super(get_move_name())): # no counting down EX Seal during Super animation
+#						pass
+#					else:
+#						$EXSealTimer.simulate()
 				if !is_hitstunned_or_sequenced():
 #					$HitStunGraceTimer.simulate()
 					if Globals.training_mode:
@@ -2650,7 +2684,7 @@ func process_input_buffer():
 						if new_state in [Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK]:
 							if !Settings.input_assist[player_ID]:
 								continue
-							if !Animator.query_to_play(["BlockStartup", "aBlockStartup"]):
+							if !Animator.query_to_play(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
 								continue # can only cancel from block startup for GROUND_BLOCK/AIR_BLOCK	
 						if dodge_check():
 							animate("DodgeTransit")
@@ -2789,9 +2823,9 @@ func state_detect(anim) -> int:
 		"SeqLaunchStop", "SeqLaunchTransit", "SeqLaunch":
 			return Em.char_state.SEQUENCE_TARGET
 			
-		"BlockStartup":
+		"BlockStartup", "TBlockStartup":
 			return Em.char_state.GROUND_BLOCK
-		"aBlockStartup":
+		"aBlockStartup", "aTBlockStartup":
 			return Em.char_state.AIR_BLOCK
 		"Block", "BlockLanding":
 			return Em.char_state.GROUND_BLOCK
@@ -3286,11 +3320,11 @@ func on_kill():
 		$HitStunTimer.stop()
 		$HitStopTimer.stop()
 		
-		super_ex_lock = null
+#		super_ex_lock = null
 		$EXSealTimer.stop()
-		$InstallTimer.stop()
-		install_time = null
-		if UniqChar.has_method("install_over"): UniqChar.install_over()
+#		$InstallTimer.stop()
+#		install_time = null
+#		if UniqChar.has_method("install_over"): UniqChar.install_over()
 		
 		$Sprites.hide()
 		state = Em.char_state.DEAD
@@ -3534,7 +3568,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 		Em.char_state.AIR_BLOCK: # air block to ground block
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
-			if Animator.query_to_play(["aBlockStartup"]): # if dropping during block startup
+			if Animator.query_to_play(["aBlockStartup", "aTBlockStartup"]): # if dropping during block startup
 				change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST") * 10)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
@@ -3586,7 +3620,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 					animate("aFlinchB")
 			
 		Em.char_state.GROUND_BLOCK:
-			if Animator.query_to_play(["BlockStartup"]):
+			if Animator.query_to_play(["BlockStartup", "TBlockStartup"]):
 				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * 10)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
@@ -4233,10 +4267,11 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		else:
 			return false
 
-func super_test():
-	if $EXSealTimer.is_running() or $InstallTimer.is_running():
-		return false
-	return true
+#func super_test():
+#	pass
+#	if $EXSealTimer.is_running() or $InstallTimer.is_running():
+#		return false
+#	return true
 #	if current_ex_gauge != MAX_EX_GAUGE:
 #		return false
 #	if cost_burst and burst_token != Em.burst.AVAILABLE:
@@ -4244,17 +4279,28 @@ func super_test():
 #	return true
 	
 		
-func super_cost(lock_time_per_lvl, base_lock_time := 0, in_install_time := 0):
-	var total_lock_time: int = lock_time_per_lvl * (3 - get_ex_level()) + base_lock_time
+func super_cost(ex_cost: int, ex_lock = null, forced = false) -> bool:
 	
-	$EXSealTimer.time += total_lock_time
-	super_ex_lock = $EXSealTimer.time
+	if current_ex_gauge < ex_cost: return false # not enough meter
+	if !forced and current_ex_lock > 0: return false # cannot use super if has EX Lock unless forced
 	
-	if in_install_time > 0:
-		install_time = in_install_time
-		$InstallTimer.time = in_install_time
+	if ex_lock == null:
+		current_ex_lock = ex_cost
+	else: # some supers have different ex_cost and ex_lock
+		current_ex_lock = ex_lock
+	change_ex_gauge(-ex_cost)
 	
-	change_ex_gauge(-MAX_EX_GAUGE)
+	return true
+	
+#	var total_lock_time: int = lock_time_per_lvl * (3 - get_ex_level()) + base_lock_time
+#
+#	$EXSealTimer.time += total_lock_time
+#	super_ex_lock = $EXSealTimer.time
+#
+#	if in_install_time > 0:
+#		install_time = in_install_time
+#		$InstallTimer.time = in_install_time
+	
 #	if cost_burst:
 #		change_burst_token(Em.burst.CONSUMED)
 	
@@ -5168,7 +5214,14 @@ func change_ex_gauge(ex_gauge_change: int, forced := false):
 	if !forced and $EXSealTimer.is_running() and ex_gauge_change > 0: # no gain in EX Gauge when sealed
 		return
 	current_ex_gauge += ex_gauge_change
-	current_ex_gauge = int(clamp(current_ex_gauge, 0, MAX_EX_GAUGE))
+	
+	var ex_lock_bar_count: int = 0
+	if current_ex_lock > 0:
+# warning-ignore:integer_division
+		ex_lock_bar_count = int(current_ex_lock / 10000)
+		if current_ex_lock > ex_lock_bar_count * 10000: ex_lock_bar_count += 1
+	
+	current_ex_gauge = int(clamp(current_ex_gauge, 0, MAX_EX_GAUGE - (ex_lock_bar_count * 10000)))
 	Globals.Game.ex_gauge_update(self)
 	if ex_gauge_change < 0: # any usage of EX gauge seals it
 		if $EXSealTimer.time < BASE_EX_SEAL_TIME:
@@ -5723,7 +5776,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 ##							if !Inventory.has_quirk(player_ID, Cards.effect_ref.PROXIMITY_PARRY):
 #							close_enough = false
 
-						if Animator.query_current(["BlockStartup", "aBlockStartup"]):
+						if Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
 #							if Globals.survival_level != null:
 #								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # no proximity parry for Survival Mode
 							if Em.hit.ANTI_AIRED in hit_data:
@@ -5761,7 +5814,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 							hit_data[Em.hit.GUARD_DRAIN] = true
 						elif !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
 							if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
-									Animator.query_current(["BlockStartup", "aBlockStartup"]): # can perfect block projectiles
+									Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
 							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PBLOCK_PROJ):
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
@@ -5964,7 +6017,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.STRONG and current_guard_gauge < 0:
 		add_status_effect([Em.status_effect.POS_FLOW, null])
 
-	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
+	if (Em.hit.SINGLE_REPEAT in hit_data and !hit_data[Em.hit.LETHAL_HIT]) or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
 #		add_status_effect(Em.status_effect.REPEAT, 10)
 
@@ -7227,7 +7280,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"LaunchTransit":
 			animate("Launch")
 			
-		"BlockStartup":
+		"BlockStartup", "TBlockStartup":
 			change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST") * 10)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
@@ -7237,7 +7290,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Idle")
 		"BlockCRec":
 			animate("Idle")
-		"aBlockStartup":
+		"aBlockStartup", "aTBlockStartup":
 			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * 10)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
@@ -7484,7 +7537,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		"SoftLanding":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
-		"BlockStartup", "aBlockStartup":
+		"BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup":
 			success_block = Em.success_block.NONE
 			$SBlockTimer.stop()
 			if Globals.survival_level != null:
@@ -7785,7 +7838,8 @@ func save_state():
 		"current_damage_value" : current_damage_value,
 		"current_guard_gauge" : current_guard_gauge,
 		"current_ex_gauge" : current_ex_gauge,
-		"super_ex_lock" : super_ex_lock,
+		"current_ex_lock" : current_ex_lock,
+#		"super_ex_lock" : super_ex_lock,
 		"stock_points_left" : stock_points_left,
 		"coin_count" : coin_count,
 		
@@ -7816,8 +7870,8 @@ func save_state():
 		"RespawnTimer_time" : $RespawnTimer.time,
 		"BurstLockTimer_time" : $BurstLockTimer.time,
 		"EXSealTimer_time" : $EXSealTimer.time,
-		"InstallTimer_time" : $InstallTimer.time,
-		"ShorthopTimer_time" : $ShorthopTimer.time,
+#		"InstallTimer_time" : $InstallTimer.time,
+#		"ShorthopTimer_time" : $ShorthopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
 		"SBlockTimer_time": $SBlockTimer.time,
 	}
@@ -7886,7 +7940,8 @@ func load_state(state_data, command_rewind := false):
 	current_damage_value = state_data.current_damage_value
 	current_guard_gauge = state_data.current_guard_gauge
 	current_ex_gauge = state_data.current_ex_gauge
-	super_ex_lock = state_data.super_ex_lock
+	current_ex_lock = state_data.current_ex_lock
+#	super_ex_lock = state_data.super_ex_lock
 	stock_points_left = state_data.stock_points_left
 	coin_count = state_data.coin_count
 	Globals.Game.damage_update(self)
@@ -7932,8 +7987,8 @@ func load_state(state_data, command_rewind := false):
 	$RespawnTimer.time = state_data.RespawnTimer_time
 	$BurstLockTimer.time = state_data.BurstLockTimer_time
 	$EXSealTimer.time = state_data.EXSealTimer_time
-	$InstallTimer.time = state_data.InstallTimer_time
-	$ShorthopTimer.time = state_data.ShorthopTimer_time
+#	$InstallTimer.time = state_data.InstallTimer_time
+#	$ShorthopTimer.time = state_data.ShorthopTimer_time
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
 	$SBlockTimer.time = state_data.SBlockTimer_time
 	

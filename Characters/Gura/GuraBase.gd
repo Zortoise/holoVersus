@@ -62,9 +62,9 @@ const WEAKBLOCK_CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocki
 const BASE_EX_REGEN = 20
 const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
 const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
-const BLOCKED_EX_REGEN_MOD = 400 # increase EX Regen when doing a blocked attack
-const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
-const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
+const BLOCKED_EX_REGEN_MOD = 200 # increase EX Regen when doing a blocked attack
+#const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
+#const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 
 const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
 

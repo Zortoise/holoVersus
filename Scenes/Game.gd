@@ -1815,22 +1815,22 @@ func ex_gauge_update(character):
 	var ex_gauge_bars = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXGauges")
 #	var ex_lvl_indicator = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/EXLevel")
 
-	if character.install_time != null and character.get_node("InstallTimer").is_running():
-		character.current_ex_gauge = 0
-		ex_gauge_bars.get_node("AnimationPlayer").play("install")
-		ex_gauge_bars.get_node("EXGauge").value = 0
-		ex_gauge_bars.get_node("EXGauge2").value = 0
-		ex_gauge_bars.get_node("EXGauge3").value = 0
-		ex_gauge_bars.get_node("../EXLock").value = character.get_node("InstallTimer").time / float(character.install_time) * 100
-		return
-	if character.super_ex_lock != null and character.get_node("EXSealTimer").is_running():
-		character.current_ex_gauge = 0
-		ex_gauge_bars.get_node("AnimationPlayer").play("lock")
-		ex_gauge_bars.get_node("EXGauge").value = 0
-		ex_gauge_bars.get_node("EXGauge2").value = 0
-		ex_gauge_bars.get_node("EXGauge3").value = 0
-		ex_gauge_bars.get_node("../EXLock").value = character.get_node("EXSealTimer").time / float(character.super_ex_lock) * 100
-		return
+#	if character.install_time != null and character.get_node("InstallTimer").is_running():
+#		character.current_ex_gauge = 0
+#		ex_gauge_bars.get_node("AnimationPlayer").play("install")
+#		ex_gauge_bars.get_node("EXGauge").value = 0
+#		ex_gauge_bars.get_node("EXGauge2").value = 0
+#		ex_gauge_bars.get_node("EXGauge3").value = 0
+#		ex_gauge_bars.get_node("../EXLock").value = character.get_node("InstallTimer").time / float(character.install_time) * 100
+#		return
+#	if character.super_ex_lock != null and character.get_node("EXSealTimer").is_running():
+#		character.current_ex_gauge = 0
+#		ex_gauge_bars.get_node("AnimationPlayer").play("lock")
+#		ex_gauge_bars.get_node("EXGauge").value = 0
+#		ex_gauge_bars.get_node("EXGauge2").value = 0
+#		ex_gauge_bars.get_node("EXGauge3").value = 0
+#		ex_gauge_bars.get_node("../EXLock").value = character.get_node("EXSealTimer").time / float(character.super_ex_lock) * 100
+#		return
 
 	var current_ex_level: int = int(character.current_ex_gauge / 10000)
 	var leftover_ex_gauge: int
@@ -1864,6 +1864,51 @@ func ex_gauge_update(character):
 			ex_gauge_bars.get_node("EXGauge2").value = 100
 			ex_gauge_bars.get_node("EXGauge3").value = 100
 	
+	if character.current_ex_lock > 0:
+		var current_ex_lock_lvl: int = int(character.current_ex_lock / 10000)
+		var leftover_ex_lock: int = FMath.get_fraction_percent(character.current_ex_lock - (current_ex_lock_lvl * 10000), 10000)
+		
+		match current_ex_lock_lvl:
+			0:
+				ex_gauge_bars.get_node("EXLock").hide()
+				ex_gauge_bars.get_node("EXLock2").hide()
+				if leftover_ex_lock > 0:
+					ex_gauge_bars.get_node("EXLock3").show()
+					ex_gauge_bars.get_node("EXLock3").value = leftover_ex_lock
+				else:
+					ex_gauge_bars.get_node("EXLock3").hide()
+			1:
+				ex_gauge_bars.get_node("EXLock").hide()
+				if leftover_ex_lock > 0:
+					ex_gauge_bars.get_node("EXLock2").show()
+					ex_gauge_bars.get_node("EXLock2").value = leftover_ex_lock
+				else:
+					ex_gauge_bars.get_node("EXLock2").hide()
+				ex_gauge_bars.get_node("EXLock3").show()
+				ex_gauge_bars.get_node("EXLock3").value = 100
+			2:
+				if leftover_ex_lock > 0:
+					ex_gauge_bars.get_node("EXLock").show()
+					ex_gauge_bars.get_node("EXLock").value = leftover_ex_lock
+				else:
+					ex_gauge_bars.get_node("EXLock").hide()
+				ex_gauge_bars.get_node("EXLock2").show()
+				ex_gauge_bars.get_node("EXLock3").show()
+				ex_gauge_bars.get_node("EXLock2").value = 100
+				ex_gauge_bars.get_node("EXLock3").value = 100
+			3:
+				ex_gauge_bars.get_node("EXLock").show()
+				ex_gauge_bars.get_node("EXLock2").show()
+				ex_gauge_bars.get_node("EXLock3").show()
+				ex_gauge_bars.get_node("EXLock").value = 100
+				ex_gauge_bars.get_node("EXLock2").value = 100
+				ex_gauge_bars.get_node("EXLock3").value = 100
+			
+	else:
+		ex_gauge_bars.get_node("EXLock").hide()
+		ex_gauge_bars.get_node("EXLock2").hide()
+		ex_gauge_bars.get_node("EXLock3").hide()
+		
 	
 func stock_points_update(character):
 	

@@ -20,7 +20,7 @@ const PLAYER_PUSH_SLOWDOWN = 95 # how much characters are slowed when they push 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
-const PARTIAL_REPEAT_DMG_MOD = 75
+const PARTIAL_REPEAT_DMG_MOD = 70
 const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Guard Gauge is at 100%
 
 # old hitstun
@@ -2530,30 +2530,29 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	if !Em.atk_attr.REPEATABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !Em.hit.ENTITY_PATH in hit_data:
 		
-#		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
+		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
 		
-		for array in repeat_memory:
-			if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
-				if !hit_data[Em.hit.REPEAT]:
-					hit_data[Em.hit.REPEAT] = true # found a repeat
-#						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
-#								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
-#								!Em.atk_attr.CAN_REPEAT_TWICE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-#							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
-#							hit_data[Em.hit.DOUBLE_REPEAT] = true
-#							break
-				elif !double_repeat:
-					double_repeat = true
-					hit_data[Em.hit.DOUBLE_REPEAT] = true # found multiple repeats
-					break
-					
-		# add to repeat memory
-		if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-			repeat_memory.append([attacker.player_ID, root_move_name])
+			for array in repeat_memory:
+				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
+					if !hit_data[Em.hit.REPEAT]:
+						hit_data[Em.hit.REPEAT] = true # found a repeat
+	#						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
+	#								Em.atk_attr.NO_REPEAT_MOVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
+	#								!Em.atk_attr.CAN_REPEAT_TWICE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+	#							double_repeat = true # if attack is non-projectile non-normal or a no repeat move, can only repeat once
+	#							hit_data[Em.hit.DOUBLE_REPEAT] = true
+	#							break
+					elif !double_repeat:
+						double_repeat = true
+						hit_data[Em.hit.DOUBLE_REPEAT] = true # found multiple repeats
+						break
+						
+			# add to repeat memory
+			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
+				repeat_memory.append([attacker.player_ID, root_move_name])
 	
-	if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and \
-			!Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
-		hit_data[Em.hit.SINGLE_REPEAT] = true
+			if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+				hit_data[Em.hit.SINGLE_REPEAT] = true
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
 	
@@ -2791,8 +2790,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if proj_only_combo and !Em.hit.ENTITY_PATH in hit_data:
 #			proj_only_combo = false
 
+	if hit_data[Em.hit.LETHAL_HIT]:
+			Globals.Game.set_screenshake()
+			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+			modulate_play("stun_flash")
+			if !$HitStunTimer.is_running(): # death from chip damage
+				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs as well
+				Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
+						"v_mirror":Globals.Game.rng_bool()})
 		
-	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
+	elif Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
 		if Em.hit.RESISTED in hit_data:
 			play_audio("block3", {"vol" : -15})
@@ -2801,15 +2808,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	elif hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in query_atk_attr(): # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
-	
-	elif hit_data[Em.hit.LETHAL_HIT]:
-		Globals.Game.set_screenshake()
-		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
-		modulate_play("stun_flash")
-		if !$HitStunTimer.is_running(): # death from chip damage
-			play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs as well
-			Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
-					"v_mirror":Globals.Game.rng_bool()})
 		
 	elif Em.hit.MOB_BREAK in hit_data:
 		modulate_play("punish_sweet_flash")

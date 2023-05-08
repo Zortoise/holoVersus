@@ -1231,6 +1231,19 @@ frame_data = {
 },
 "vframes": 17
 },
+"TBlockStartup": {
+"duration": 5,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 55,
+"hurtbox": [ Vector2( -10, 22 ), Vector2( 14, 22 ), Vector2( 14, -22 ), Vector2( -10, -22 ) ]
+}
+},
+"vframes": 17
+},
 "Transformed": {
 "duration": 1,
 "hframes": 6,
@@ -1713,6 +1726,19 @@ frame_data = {
 0: {
 "frame": 79,
 "hurtbox": [  ]
+}
+},
+"vframes": 17
+},
+"aTBlockStartup": {
+"duration": 5,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 59,
+"hurtbox": [ Vector2( -8, 19 ), Vector2( 14, 19 ), Vector2( 14, -22 ), Vector2( -8, -22 ) ]
 }
 },
 "vframes": 17
