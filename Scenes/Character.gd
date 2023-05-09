@@ -60,15 +60,14 @@ const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
 const PARTIAL_REPEAT_DMG_MOD = 70
 const DMG_VAL_KB_LIMIT = 300 # max damage percent before knockback stop increasing
 const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
-const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
 #const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
 #const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
-const DMG_REDUCTION_AT_MAX_GG = 50 # max reduction in damage when defender's Guard Gauge is at 200%
+const DMG_REDUCTION_AT_MAX_GG = 30 # max reduction in damage when defender's Guard Gauge is at 200%
 #const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
 const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
 const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
-const ATK_LEVEL_TO_GDRAIN = [0, 1500, 1750, 2000, 2250, 2500, 2750, 3000]
+const ATK_LEVEL_TO_GDRAIN = [0, 1500, 2250, 3000, 3750, 4500, 5250, 6000]
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 15  # friction during hitstun
@@ -102,9 +101,9 @@ const STRONGBLOCK_KNOCKBACK_MOD = 0 # % of knockback defender experience when st
 #const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 const MOBBLOCK_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
-const SPECIAL_GDRAIN_MOD = 200 # extra GDrain when blocking heavy/special/ex moves
+const SPECIAL_GDRAIN_MOD = 125 # extra GDrain when blocking heavy/special/ex moves
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
-const SDASH_ARMOR_GDRAIN_MOD = 200 # extra GDrain when SDashing through projectiles
+const SDASH_ARMOR_GDRAIN_MOD = 125 # extra GDrain when SDashing through projectiles
 
 const SBlockTimer_TIME = 30 # time after blocking an attack when you are immune to cross-ups and blocking will not cost GG
 
@@ -612,7 +611,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(chain_memory)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(chain_combo)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -4468,7 +4467,7 @@ func test_jump_cancel():
 	var atk_attr = query_atk_attr(move_name)
 	if Em.atk_attr.NO_REC_CANCEL in atk_attr : return false # Normals with NO_REC_CANCEL cannot be jump cancelled
 	
-	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN]:
+	if chain_combo in [Em.chain_combo.RESET]:
 		if !Em.atk_attr.JUMP_CANCEL_ON_WHIFF in atk_attr:
 			return false # some rare attacks can jump cancel on whiff
 	if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
@@ -4484,7 +4483,7 @@ func test_jump_cancel():
 func test_jump_cancel_active():
 	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
-	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN]:
+	if chain_combo in [Em.chain_combo.RESET]:
 		return false # cannot cancel on whiff
 	
 	var move_name = get_move_name()
@@ -4898,9 +4897,9 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 	
 	if Animator.to_play_anim.ends_with("Active"):
 		var move_name = Animator.to_play_anim.trim_suffix("Active")
-		move_name = UniqChar.refine_move_name(move_name)
-		if UniqChar.MOVE_DATABASE.has(move_name):
-			return {Em.hit.MOVE_DATA : UniqChar.query_move_data(move_name), Em.hit.MOVE_NAME : move_name}
+		var refined_move_name = UniqChar.refine_move_name(move_name)
+		if UniqChar.MOVE_DATABASE.has(refined_move_name):
+			return {Em.hit.MOVE_DATA : UniqChar.query_move_data(move_name), Em.hit.MOVE_NAME : refined_move_name}
 		else:
 			print("Error: " + move_name + " not found in MOVE_DATABASE for query_move_data_and_name().")
 	else:
@@ -6416,8 +6415,8 @@ func can_stun(hit_data):
 		return false
 	if "MOB" in hit_data[Em.hit.ATKER_OR_ENTITY] or "MOB_ENTITY" in hit_data[Em.hit.ATKER_OR_ENTITY]:
 		return true
-	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT]:# Lights cannot Stun, but Fierce can
-		return false
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.SUPER]:# Lights cannot Stun, but Fierce can
+		return false # supers cannot stun
 	return true
 		
 func calculate_damage(hit_data) -> int:
@@ -6472,12 +6471,18 @@ func calculate_damage(hit_data) -> int:
 
 func calculate_guard_gauge_change(hit_data) -> int:
 	
-	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER]: # no Guard Drain for Supers
-		return 0
+#	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER]: # no Guard Drain for Supers
+#		return 0
 	
-	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data) or Em.hit.FOLLOW_UP in hit_data:  
-	# for multi-hit/autochain moves, only first hit affect GG
+	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data): # for multi-hit, only first hit affect GG
 		return 0
+		
+	if Em.hit.FOLLOW_UP in hit_data:
+		if Globals.survival_level != null: return 0
+		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.RESET:
+			# for autochain, followups only affect GG if first hit whiffs
+			pass
+		else: return 0
 	
 	if is_hitstunned() and GG_swell_flag and !first_hit_flag: # if Guard Swell is active, no Guard Drain
 		return 0
@@ -6494,7 +6499,9 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		
 		Em.block_state.WEAK: # no Guard Drain on blocking normals
 			if Em.hit.GUARD_DRAIN in hit_data:
-				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # double guard drain when blocking heavy/special/ex
+				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # increase guard drain when blocking heavy/special/ex
+				if !grounded and Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+					guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airblocking opponent with an anti-air special
 			else:
 				if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
 					return 0
@@ -6725,7 +6732,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 	else:
 		if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
 #				if hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
-			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
 				get_guard_gauge_percent_above())
 #			else:
 #				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
@@ -7134,7 +7141,7 @@ func sequence_launch():
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 		else:
 			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), \
+				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
 					get_guard_gauge_percent_above())
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun

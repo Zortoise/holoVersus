@@ -968,7 +968,7 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 		"F3[h]":
 			atk_attr.append_array([Em.atk_attr.NORMALARMOR_STARTUP])
 
-		"SP3", "SP3b", "SP3[h]", "SP3b[h]": 
+		"SP3", "SP3b", "SP3[h]", "SP3b[h]":
 			atk_attr.append_array([Em.atk_attr.ANTI_AIR])
 		"SP3[ex]", "SP3b[ex]": 
 			atk_attr.append_array([Em.atk_attr.ANTI_AIR, Em.atk_attr.SEMI_INVUL_STARTUP])

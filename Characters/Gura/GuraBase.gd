@@ -49,7 +49,7 @@ const LONG_HOP_JUMP_MOD = 125 # multiply by SPEED to get horizontal velocity gai
 #const SUPER_JUMP_MOD = 150
 const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
 
-#const F_HITSTUN_REDUCTION_AT_MAX_GG = 50 # max reduction in flinch hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
+const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
 const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 1100

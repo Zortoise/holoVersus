@@ -1444,8 +1444,8 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 
 			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
 			# and the attacker must be airborne and above defender
-			var defender_tier = Em.atk_type_to_tier(defender_move_data[Em.move.ATK_TYPE])
-			var attacker_tier = Em.atk_type_to_tier(hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE])
+			var defender_tier = Globals.atk_type_to_tier(defender_move_data[Em.move.ATK_TYPE])
+			var attacker_tier = Globals.atk_type_to_tier(hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE])
 			
 			if attacker_tier == 0: return true # air normals can be anti-aired by anything
 			elif attacker_tier > defender_tier: return false # cannot anti-air attacks of higher tier
