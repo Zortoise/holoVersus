@@ -70,7 +70,6 @@ const TECHLAND_THRESHOLD = 300 * FMath.S # max velocity when hitting the ground 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
 const WALL_SLAM_VEL_LIMIT_MOD = 1000
 const WALL_SLAM_MIN_DAMAGE = 50
-const WALL_SLAM_MAX_DAMAGE = 200
 const HORIZ_WALL_SLAM_UP_BOOST = 500 * FMath.S # if bounce horizontally on ground, boost up a little
 
 const LAUNCH_DUST_THRESHOLD = 1400 * FMath.S # velocity where launch dust increase in frequency
@@ -1395,20 +1394,20 @@ func bounce(against_ground: bool):
 					Globals.Game.spawn_damage_number(scaled_damage, position)
 						
 					var slam_level := 0
-					if scaled_damage >= 100:
-						if scaled_damage < 150:
+					if scaled_damage >= WALL_SLAM_MIN_DAMAGE * 2:
+						if scaled_damage < WALL_SLAM_MIN_DAMAGE * 3: # lvl 2 slam
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
-						else:
+						else: # lvl 3 slam
 							hitstop = 15
 							slam_level = 2
 							play_audio("break3", {"vol" : -12,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
-					else:
+					else: # lvl 1 slam
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
@@ -1430,7 +1429,7 @@ func bounce(against_ground: bool):
 func wall_slam(vel) -> int:
 	var weight: int = FMath.get_fraction_percent(int(abs(vel)) - WALL_SLAM_THRESHOLD, \
 			FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MAX_DAMAGE, weight)
+	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MIN_DAMAGE * 4, weight)
 	return scaled_damage
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	

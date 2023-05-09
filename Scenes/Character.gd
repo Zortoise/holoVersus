@@ -88,7 +88,7 @@ const PUNISH_DMG_MOD = 150 # damage modifier on punish_hit
 const PUNISH_HITSTOP_MOD = 130 # punish hits has 30% more hitstop
 
 const STUN_DMG_MOD = 150 # damage modifier on stun
-const STUN_TIME = 100 # number of frames stun time last for Stun
+const STUN_TIME = 60 # number of frames stun time last for Stun
 const STUN_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Stun
 const CRUSH_TIME = 40 # number of frames stun time last for Crush
 
@@ -124,8 +124,7 @@ const WEAK_HIT_AUDIO_NERF = -9
 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
 const WALL_SLAM_VEL_LIMIT_MOD = 1000
-const WALL_SLAM_MIN_DAMAGE = 50
-const WALL_SLAM_MAX_DAMAGE = 200
+const WALL_SLAM_MIN_DAMAGE = 30
 const HORIZ_WALL_SLAM_UP_BOOST = 500 * FMath.S # if bounce horizontally on ground, boost up a little
 
 const KILL_VEL_THRESHOLD = 900 * FMath.S
@@ -1870,22 +1869,22 @@ func bounce(against_ground: bool):
 					else: Globals.Game.spawn_damage_number(scaled_damage, position, Em.dmg_num_col.RED)
 					
 					var slam_level := 0
-					if scaled_damage >= 100:
-						if scaled_damage < 150:
+					if scaled_damage >= WALL_SLAM_MIN_DAMAGE * 2:
+						if scaled_damage < WALL_SLAM_MIN_DAMAGE * 3: # lvl 2 slam
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
-						else:
+						else: # lvl 3 slam
 							hitstop = 15
 							slam_level = 2
 							play_audio("break3", {"vol" : -12,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))
-					else:
+					else: # lvl 1 slam
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
@@ -1962,7 +1961,7 @@ func bounce(against_ground: bool):
 func wall_slam(vel) -> int:
 	var weight: int = FMath.get_fraction_percent(int(abs(vel)) - WALL_SLAM_THRESHOLD, \
 			FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MAX_DAMAGE, weight)
+	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MIN_DAMAGE * 4, weight)
 	return scaled_damage
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
@@ -2558,6 +2557,8 @@ func process_input_buffer():
 								keep = false
 								
 						Em.char_state.GROUND_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
+							if buffered_input[0] != button_jump:
+								continue # cannot quick jump cancel with up button
 							if !Settings.input_assist[player_ID]:
 								continue
 							if chain_memory.size() != 0:
@@ -4048,14 +4049,19 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 		if is_ex_move(attack_ref): # cancelling into another ex move
 			if Animator.time <= 2 and Animator.time != 0:
 				return true # EX and Supers have a wider window to quick cancel into
-	else: # cancelling from a normal move
-		if is_ex_move(attack_ref): # cancelling into an ex move from normal move has wider window
+	else: # cancelling from a non-ex move
+		if is_ex_move(attack_ref): # cancelling into an ex move from non-ex move has wider window
 			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
 			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed):
 				if !are_inputs_too_close():
 					if Animator.time <= 5 and Animator.time != 0:
 						return true
 		else:
+			
+			if Globals.atk_type_to_tier(query_move_data(move_name)[Em.move.ATK_TYPE]) > \
+					Globals.atk_type_to_tier(query_move_data(attack_ref)[Em.move.ATK_TYPE]):
+				return false # for none-EX moves cannot quick cancel into moves of lower tiers
+			
 			if !grounded and (button_up in input_state.just_released or button_down in input_state.just_released):
 				if Animator.time <= 5 and Animator.time != 0: # release up/down rebuffer has wider window if in the air
 					return true
@@ -6411,6 +6417,8 @@ func can_stun(hit_data):
 		return false
 	if hit_data[Em.hit.WEAK_HIT] or Em.hit.AUTOCHAIN in hit_data or hit_data[Em.hit.MOVE_DATA][Em.move.DMG] <= 0:
 		return false # autochain moves will not stun, only the autochain finisher can
+	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
+		return false
 	if Em.hit.NON_STRONG_PROJ in hit_data:
 		return false
 	if "MOB" in hit_data[Em.hit.ATKER_OR_ENTITY] or "MOB_ENTITY" in hit_data[Em.hit.ATKER_OR_ENTITY]:
