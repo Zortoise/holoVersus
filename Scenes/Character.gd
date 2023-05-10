@@ -1591,8 +1591,8 @@ func simulate2(): # only ran if not in hitstop
 				else:
 					animate("BlockRec")
 #			elif !success_block:
-			if !$SBlockTimer.is_running():
-				change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST"))
+#			if !$SBlockTimer.is_running():
+			change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 				animate("BlockRec")
 			
@@ -1607,8 +1607,8 @@ func simulate2(): # only ran if not in hitstop
 				else:
 					animate("aBlockRec")
 #			elif !success_block:
-			if !$SBlockTimer.is_running():
-				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST"))
+#			if !$SBlockTimer.is_running():
+			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 				animate("aBlockRec")
 					
@@ -2696,6 +2696,19 @@ func process_input_buffer():
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
+							
+					# guard cancel dodge, can only be done when releasing block after blocking an attack
+					Em.char_state.GROUND_REC:
+						if $SBlockTimer.is_running() and Animator.query_to_play(["BlockRec"]) and dodge_check():
+							animate("DodgeTransit")
+							has_acted[0] = true
+							keep = false
+					Em.char_state.AIR_REC:
+						if $SBlockTimer.is_running() and Animator.query_to_play(["aBlockRec"]) and dodge_check():
+							animate("DodgeTransit")
+							has_acted[0] = true
+							keep = false
+							
 							
 #			"FDash":
 #				match new_state:
