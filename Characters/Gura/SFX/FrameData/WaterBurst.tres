@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "WaterBurst": {
-"duration": 19,
+"duration": 20,
 "hframes": 5,
 "loop": false,
 "spritesheet": "WaterBurstSprite",
@@ -14,13 +14,13 @@ frame_data = {
 0: {
 "frame": 0
 },
-5: {
+4: {
 "frame": 1
 },
-10: {
+8: {
 "frame": 2
 },
-13: {
+12: {
 "frame": 3
 },
 16: {

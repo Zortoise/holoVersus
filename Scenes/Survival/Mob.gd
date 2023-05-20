@@ -1795,7 +1795,7 @@ func set_monochrome():
 
 # particle emitter, visuals only, no need fixed-point
 func particle(anim: String, sfx_ref: String, palette, interval, number, radius, v_mirror_rand = false, master_palette := false):
-	if Globals.Game.frametime % interval == 0:  # only shake every X frames
+	if posmod(Globals.Game.frametime, interval) == 0:  # only shake every X frames
 		for x in number:
 			var angle = Globals.Game.rng_generate(10) * PI/5.0
 			var distance = Globals.Game.rng_generate(5) * radius/5.0

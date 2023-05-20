@@ -118,11 +118,11 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.GROUND_ATK_STARTUP
 		"aSP5Startup", "aSP5[ex]Startup":
 			return Em.char_state.AIR_ATK_STARTUP
-		"aSP5Active", "aSP5[h]Active", "aSP5[h]bActive", "aSP5[ex]Active":
+		"aSP5Active", "aSP5[h]Active", "aSP5[ex]Active", "aSP5b[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
-		"aSP5Rec", "aSP5bRec", "aSP5[h]Rec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
+		"aSP5Rec", "aSP5bRec", "aSP5[ex]Rec", "aSP5b[ex]Rec", "aSP5c[ex]Rec":
 			return Em.char_state.AIR_ATK_REC
-		"SP5bRec", "SP5b[ex]Rec":
+		"SP5bRec", "SP5c[ex]Rec":
 			return Em.char_state.GROUND_ATK_REC
 			
 		"SP6[ex]Startup":
@@ -157,6 +157,22 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.GROUND_ATK_ACTIVE
 		"SP8Rec":
 			return Em.char_state.AIR_C_REC
+			
+		"SP9Startup", "SP9aStartup", "SP9bStartup", "SP9cStartup", "SP9dStartup":
+			return Em.char_state.GROUND_ATK_STARTUP
+		"aSP9c[r]Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"SP9Active", "SP9bActive", "SP9dActive", "SP9d[u]Active":
+			return Em.char_state.GROUND_ATK_ACTIVE
+		"aSP9aActive", "aSP9cActive", "aSP9c[r]Active", "aSP9c[r]bActive":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"SP9Rec", "SP9aRec", "SP9bRec", "SP9c[r]Rec", "SP9dRec":
+			return Em.char_state.GROUND_ATK_REC
+		"aSP9Rec", "aSP9aRec", "aSP9cRec":
+			return Em.char_state.AIR_ATK_REC
+		"SP9bCRec":
+			return Em.char_state.GROUND_C_REC
+			
 		
 	print("Error: " + anim + " not found.")
 		
@@ -208,6 +224,10 @@ func simulate():
 				if Character.v_dir != 0:
 					Character.velocity.y += Character.v_dir * 100 * FMath.S
 					
+			if Animator.query_current(["aSP9c[r]Active", "aSP9c[r]bActive"]):
+				if Character.grounded:
+					Character.animate("SP9c[r]Rec")
+					
 #			elif Animator.query_current(["aSP1[c1]Active"]):
 #				if Character.button_aux in Character.input_state.pressed:
 #					Character.animate("aSP1[c1]Active")
@@ -225,6 +245,11 @@ func simulate():
 					landing_sound()
 					Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
 								{"facing":Character.facing, "grounded":true})
+								
+		Em.char_state.GROUND_ATK_ACTIVE:
+			if Animator.query_current(["SP9Active"]):
+				if !Character.grounded:
+					Character.animate("aSP9Rec")
 			
 	# RELEASING HELD INPUTS --------------------------------------------------------------------------------------------------
 			
@@ -323,6 +348,8 @@ func simulate():
 
 
 func capture_combinations():
+	
+	Character.combination(Character.button_special, Character.button_dash, "Sp.Dash")
 	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
@@ -524,11 +551,20 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		
 		Character.button_light:
 			if !has_acted[0]:
-				keep = !process_move(new_state, "L1", has_acted)
+				if Character.test_rekka("SP9Active"):
+					keep = !process_move(new_state, "SP9d", has_acted)
+				else:
+					keep = !process_move(new_state, "L1", has_acted)
 		
 		Character.button_fierce:
 			if !has_acted[0]:
-				keep = !process_move(new_state, "F1", has_acted)
+				if Character.test_rekka("SP9Active"):
+					keep = !process_move(new_state, "SP9a", has_acted)
+				elif Character.test_rekka("aSP9cRec"):
+					keep = !process_move(new_state, "SP9c[r]", has_acted)
+				else:
+					keep = !process_move(new_state, "F1", has_acted)
+					
 
 		# SPECIAL ACTIONS ---------------------------------------------------------------------------------
 		# buffered_input_action can be a string instead of int, for heavy attacks and special moves
@@ -543,15 +579,26 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 
 		"uF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "F3", has_acted)
+				if Character.test_rekka("SP9Active"):
+					keep = !process_move(new_state, "SP9c", has_acted)
+				else:
+					keep = !process_move(new_state, "F3", has_acted)
 				
 		"dF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "F2", has_acted)
+				if Character.test_rekka("SP9Active"):
+					keep = !process_move(new_state, "SP9b", has_acted)
+				else:
+					keep = !process_move(new_state, "F2", has_acted)
 				
 		"H":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "H", has_acted)
+				
+		"Sp.Dash":
+			if !has_acted[0]:
+				if Character.grounded:
+					keep = !process_move(new_state, "SP9", has_acted)
 				
 		"Sp.L":
 			if !has_acted[0]:
@@ -671,7 +718,6 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 #							Character.animate("a" + attack_ref + "Startup")
 #							has_acted[0] = true
 #							return true
-						
 	match new_state:
 			
 		Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC:
@@ -786,7 +832,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 									Character.animate(attack_ref + "Startup")
 									has_acted[0] = true
 									return true
-					
+									
 	return false
 						
 
@@ -835,6 +881,10 @@ func unique_flash():
 		"SP8Rec":
 			if Animator.time <= 10:
 				Character.particle("WaterSparkle", "WaterSparkle", Character.palette_number, 4, 2, 25, false, true)
+		"SP9Active":
+			if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S:
+				Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
+						{"facing":-Character.facing, "grounded":true}, Character.palette_number, NAME)
 			
 # GET DATA --------------------------------------------------------------------------------------------------
 
@@ -854,7 +904,12 @@ func get_root(move_name): # for aerial, chain and repeat memory, only needed for
 	if move_name in MOVE_DATABASE and Em.move.ROOT in MOVE_DATABASE[move_name]:
 		return MOVE_DATABASE[move_name][Em.move.ROOT]
 		
-	return refine_move_name(move_name)
+	move_name = refine_move_name(move_name)
+	
+	if move_name in MOVE_DATABASE and Em.move.ROOT in MOVE_DATABASE[move_name]:
+		return MOVE_DATABASE[move_name][Em.move.ROOT] # refined move_name can have root
+		
+	return move_name
 		
 #	match move_name:
 #		"F3[h]":
@@ -916,7 +971,9 @@ func refine_move_name(move_name):
 			return "aSP3b[ex]"
 		"SP5", "SP5b", "aSP5b":
 			return "aSP5"
-		"SP5[ex]", "SP5b[ex]", "aSP5b[ex]":
+		"SP5[h]":
+			return "aSP5[h]"
+		"SP5[ex]", "SP5c[ex]", "aSP5c[ex]":
 			return "aSP5[ex]"
 		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
 			return "aSP6[ex]"
@@ -924,6 +981,16 @@ func refine_move_name(move_name):
 			return "SP7"
 		"SP8b":
 			return "SP8"
+		"aSP9":
+			return "SP9"
+		"SP9a":
+			return "aSP9a"
+		"SP9c":
+			return "aSP9c"
+		"SP9c[r]":
+			return "aSP9c[r]b"
+		"SP9d[u]":
+			return "SP9d"
 	return move_name
 			
 			
@@ -1007,13 +1074,13 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			if !Em.hit.TOUGH_MOB in hit_data and hit_data[Em.hit.SWEETSPOTTED]:
 				hit_data[Em.hit.MOVE_DATA][Em.move.SEQ] = "aF2SeqA"
 			
-		"aSP5", "aSP5[h]b":
+		"aSP5", "aSP5[h]":
 			if hit_data[Em.hit.SWEETSPOTTED]:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
 			else:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 1, 3)
 			update_uniqueHUD()
-		"aSP5[ex]":
+		"aSP5b[ex]":
 			if hit_data[Em.hit.SWEETSPOTTED]:
 				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 3, 3)
 			else:
@@ -1269,10 +1336,25 @@ func sequence_partner_passthrough(): # which step in sequence has partner ignore
 #	if Character.is_atk_recovery() and attack_ref == "SP7" and move_name in ["SP1", "aSP1", "SP1[ex]", "aSP1[ex]"]:
 #		return true # can chain Akontio: Instinct from recovery of Akontio
 #	return false
+
 	
 func unique_chaining_rules(move_name, attack_ref):
-	if Character.is_atk_recovery() and refine_move_name(move_name) in ["SP1", "SP1[ex]"] and refine_move_name(attack_ref) == "SP7":
-		return true
+	move_name = refine_move_name(move_name)
+	var attack_name = refine_move_name(attack_ref)
+	
+	match Character.new_state:
+		Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+			if move_name in ["SP1", "SP1[ex]"] and attack_name == "SP7":
+				return true
+			if move_name == "aSP9c" and attack_name == "aSP9c[r]":
+				return true
+				
+		Em.char_state.GROUND_ATK_ACTIVE:
+			if move_name == "SP9":
+				match attack_name:
+					"aSP9a", "SP9b", "aSP9c", "SP9d", "SP8":
+						return true
+				
 	return false
 	
 #func get_trident_array(): # return array of all spinnable tridents
@@ -1757,31 +1839,29 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.animate("aSP5[h]Active")
 			else:
 				Character.animate("aSP5Active")
-		"SP5[ex]Startup", "aSP5[ex]Startup":
-			Character.animate("aSP5[ex]Active")
 		"aSP5Active":
 			Character.animate("aSP5Rec")
-		"aSP5[h]Active":
-			Character.animate("aSP5[h]Rec")
-		"aSP5[h]Rec":
-			Character.animate("aSP5[h]bActive")
-		"aSP5[h]bActive":
-			Character.animate("aSP5Rec")
-		"aSP5[ex]Active":
-			Character.animate("aSP5[ex]Rec")
 		"aSP5Rec":
 			if Character.is_on_ground():
 				Character.animate("SP5bRec")
 			else:
 				Character.animate("aSP5bRec")
+		"aSP5[h]Active":
+			Character.animate("aSP5Rec")
+		"SP5[ex]Startup", "aSP5[ex]Startup":
+			Character.animate("aSP5[ex]Active")
+		"aSP5[ex]Active":
+			Character.animate("aSP5[ex]Rec")
 		"aSP5[ex]Rec":
+			Character.animate("aSP5b[ex]Active")
+		"aSP5b[ex]Active":
 			if Character.is_on_ground():
-				Character.animate("SP5b[ex]Rec")
+				Character.animate("SP5c[ex]Rec")
 			else:
-				Character.animate("aSP5b[ex]Rec")
-		"SP5bRec", "SP5b[ex]Rec":
+				Character.animate("aSP5c[ex]Rec")
+		"SP5bRec", "SP5c[ex]Rec":
 			Character.animate("Idle")
-		"aSP5bRec", "aSP5b[ex]Rec":
+		"aSP5bRec", "aSP5c[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"SP6[ex]Startup", "aSP6[ex]Startup":
@@ -1834,6 +1914,49 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.velocity.y = -1000 * FMath.S # have to do this here
 		"SP8Rec":
 			Character.animate("FallTransit")
+			
+		"SP9Startup":
+			Character.animate("SP9Active")
+		"SP9Active":
+			if Character.is_on_ground():
+				Character.animate("SP9Rec")
+			else:
+				Character.animate("aSP9Rec")	
+		"SP9Rec", "SP9aRec", "SP9bCRec", "SP9bRec", "SP9c[r]Rec", "SP9dRec":
+			Character.animate("Idle")
+		"aSP9Rec", "aSP9aRec", "aSP9cRec":
+			Character.animate("FallTransit")
+			
+		"SP9aStartup":
+			Character.animate("aSP9aActive")
+		"aSP9aActive":
+			if Character.is_on_ground():
+				Character.animate("SP9aRec")
+			else:
+				Character.animate("aSP9aRec")
+		"SP9bStartup":
+			Character.animate("SP9bActive")
+		"SP9bActive":
+			if Character.chain_combo == Em.chain_combo.SPECIAL:
+				Character.animate("SP9bCRec")
+			else:
+				Character.animate("SP9bRec")
+		"SP9cStartup":
+			Character.animate("aSP9cActive")
+		"aSP9cActive":
+			Character.animate("aSP9cRec")
+		"aSP9c[r]Startup":
+			Character.animate("aSP9c[r]Active")
+		"aSP9c[r]Active":
+			Character.animate("aSP9c[r]bActive")
+		"SP9dStartup":
+			if Character.button_up in Character.input_state.pressed:
+				Character.animate("SP9d[u]Active")
+			else:
+				Character.animate("SP9dActive")
+		"SP9dActive", "SP9d[u]Active":
+			Character.animate("SP9dRec")
+			
 
 func _on_SpritePlayer_anim_started(anim_name):
 
@@ -2118,7 +2241,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"held" : true, "ex" : true}, Character.palette_number, NAME)
 			Character.unique_data.groundfin_count += 2
 			
-		"SP5Startup", "aSP5Startup", "aSP5[ex]Startup":
+		"SP5Startup", "aSP5Startup", "SP5[ex]Startup", "aSP5[ex]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
@@ -2129,11 +2252,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_friction_mod = 0
 			if Character.grounded:
 				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
-		"aSP5[h]Rec", "aSP5[h]bActive":
-			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+		"aSP5[ex]Rec", "aSP5b[ex]Active":
+#			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-		"aSP5Rec", "aSP5[ex]Rec":
+		"aSP5Rec", "aSP5c[ex]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25
@@ -2203,6 +2326,48 @@ func _on_SpritePlayer_anim_started(anim_name):
 					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
 			Character.play_audio("water6", {"vol" : -18})
 			Character.play_audio("water4", {"vol" : -15})
+			
+		"SP9Startup":
+			Character.face_opponent()
+		"SP9Active":
+			Character.velocity.x = 800 * FMath.S * Character.facing
+			Character.anim_friction_mod = 0
+			Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
+					{"facing":-Character.facing, "grounded":true}, Character.palette_number, NAME)
+		"SP9Rec":
+			Character.anim_friction_mod = 150
+		"SP9aStartup":
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
+		"aSP9aActive":
+			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, \
+					Character.palette_number, NAME)
+		"SP9bActive":
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"aSP9cActive":
+			Character.velocity.y = -1000 * FMath.S
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"aSP9c[r]Active":
+			Character.anim_gravity_mod = 50
+		"aSP9c[r]bActive":
+			Character.anim_gravity_mod = 150
+		"SP9c[r]Rec":
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"grounded":true})
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Animator.query_point("sfxspawn"), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
+			Character.play_audio("water7", {"vol" : -12})
+		"SP9dActive":
+			Globals.Game.spawn_entity(Character.player_ID, "WaterDrive", Animator.query_point("entityspawn"), {}, \
+					Character.palette_number, NAME)
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing, "grounded":true})
+		"SP9d[u]Active":
+			Globals.Game.spawn_entity(Character.player_ID, "WaterDrive", Animator.query_point("entityspawn"), {"alt_aim": true}, \
+					Character.palette_number, NAME)
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing, "grounded":true})
 			
 	start_audio(anim_name)
 

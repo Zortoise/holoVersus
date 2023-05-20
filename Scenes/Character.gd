@@ -46,7 +46,7 @@ const RESPAWN_GRACE_DURATION = 60 # how long invincibility last when respawning
 #const CROUCH_REDUCTION_MOD = 50 # reduce knockback and hitstun if opponent is crouching
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
-const AC_BurstLockTimer_TIME = 10 # number of frames you cannot use Burst Escape after being hit with an autochain move
+const AC_BurstLockTimer_TIME = 15 # number of frames you cannot use Burst Escape after being hit with an autochain move
 #const PosFlowSealTimer_TIME = 30 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
 const TrainingRegenTimer_TIME = 50 # number of frames before GG/Damage Value start regening
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
@@ -610,7 +610,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(chain_combo)
+			str(input_buffer) + "\n" + str(input_state) + " " + str($BurstLockTimer.time)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -1296,7 +1296,11 @@ func simulate2(): # only ran if not in hitstop
 	#					animate("BlockStartup")
 				Em.char_state.GROUND_STANDBY:
 					animate("BlockStartup")
-#				Em.char_state.GROUND_C_REC:
+				Em.char_state.GROUND_C_REC:
+					if has_trait(Em.trait.DASH_BLOCK):
+						animate("BlockStartup")
+					elif !Animator.query_to_play(["DashBrake", "WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
+						animate("BlockStartup")
 ##					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
 ##						continue
 #					if Animator.query_to_play(["WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
@@ -1316,7 +1320,7 @@ func simulate2(): # only ran if not in hitstop
 						afterimage_cancel()
 						animate("BlockStartup")
 						
-				Em.char_state.GROUND_REC: # quick turn block, cannot parry
+				Em.char_state.GROUND_REC: # quick turn block
 					if dir == -facing and Animator.query_current(["BlockRec"]):
 						face(dir)
 						animate("TBlockStartup")
@@ -1333,11 +1337,11 @@ func simulate2(): # only ran if not in hitstop
 					animate("aBlockStartup")
 					$VarJumpTimer.stop()
 					
-#				Em.char_state.AIR_C_REC:
-#					if Animator.query_to_play(["aDashBrake"]): # cannot air block out of air dash unless you have the AIR_DASH_BLOCK trait
-#						if has_trait(Em.trait.AIR_DASH_BLOCK): # only heavyweights can block out of air dashes
-#							animate("aBlockStartup")
-#							$VarJumpTimer.stop()
+				Em.char_state.AIR_C_REC:
+					if !Animator.query_to_play(["aDashBrake"]):
+						animate("aBlockStartup")
+						$VarJumpTimer.stop()
+							
 #					else:
 #						animate("aBlockStartup")
 #						$VarJumpTimer.stop()
@@ -1350,7 +1354,7 @@ func simulate2(): # only ran if not in hitstop
 						afterimage_cancel()
 						animate("aBlockStartup")
 						
-				Em.char_state.AIR_REC: # quick turn block, cannot parry
+				Em.char_state.AIR_REC: # quick turn block
 					if dir == -facing and Animator.query_current(["aBlockRec"]):
 						face(dir)
 						animate("aTBlockStartup")
@@ -2248,8 +2252,10 @@ func is_button_pressed(button):
 #			return true
 #		else:
 #			return false
-			
-	if button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
+	if button in [button_dash]: # dash command needs to be at most 2 frames apart
+		if is_button_tapped_in_last_X_frames(button, 2):
+			return true
+	elif button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
 		if is_button_tapped_in_last_X_frames(button, 7):
 			return true
@@ -2756,7 +2762,7 @@ func animate(anim):
 	Animator.play(anim)
 	new_state = state_detect(anim)
 	
-	if anim.ends_with("Active"):
+	if anim.ends_with("Active") and !Em.atk_attr.NO_HITCOUNT_RESET in UniqChar.query_atk_attr(get_move_name()):
 		atk_startup_resets() # need to do this here to work! resets hitcount and ignore list
 
 	# when changing to a non-attacking state from attack startup, auto-buffer pressed attack buttons
@@ -3874,7 +3880,7 @@ func set_monochrome():
 
 # particle emitter, visuals only, no need fixed-point
 func particle(anim: String, loaded_sfx_ref: String, palette, interval, number, radius, v_mirror_rand := false, master_palette := false):
-	if Globals.Game.frametime % interval == 0:  # only shake every X frames
+	if posmod(Globals.Game.frametime, interval) == 0:  # only spawn every X frames
 		for x in number:
 			var angle = Globals.Game.rng_generate(10) * PI/5.0
 			var distance = Globals.Game.rng_generate(5) * radius/5.0
@@ -4004,7 +4010,6 @@ func check_quick_turn():
 	if quick_turn_used: return false
 	
 	var can_turn := false
-	
 	match state:
 		Em.char_state.GROUND_STARTUP:
 			can_turn = true
@@ -4050,20 +4055,29 @@ func check_quick_turn():
 func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	var move_name = get_move_name()
 	if move_name == null: return false
+	
 	if !move_name in UniqChar.STARTERS or is_super(move_name): return false
 	
-	if Em.atk_attr.NO_QUICK_CANCEL in query_atk_attr(move_name):
+	var from_move_data = query_move_data(move_name)
+	if Em.atk_attr.NO_QUICK_CANCEL in from_move_data[Em.move.ATK_ATTR]:
 		return false
 		
-	if from_move_rec and Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
+	var to_move_data = query_move_data(attack_ref)
+	if from_move_rec and Em.atk_attr.NOT_FROM_MOVE_REC in to_move_data[Em.move.ATK_ATTR]:
 		return false
+		
+	if Em.move.REKKA in from_move_data:
+		if Em.move.REKKA in to_move_data and from_move_data[Em.move.REKKA] == to_move_data[Em.move.REKKA]:
+			pass
+		else:
+			return false # rekka move can only QC into another rekka move from the same parent
 	
-	if is_ex_move(move_name): # cancelling from ex move, only other ex moves are possible
-		if is_ex_move(attack_ref): # cancelling into another ex move
+	if from_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling from ex move, only other ex moves are possible
+		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling into another ex move
 			if Animator.time <= 2 and Animator.time != 0:
 				return true # EX and Supers have a wider window to quick cancel into
 	else: # cancelling from a non-ex move
-		if is_ex_move(attack_ref): # cancelling into an ex move from non-ex move has wider window
+		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling into an ex move from non-ex move has wider window
 			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
 			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed):
 				if !are_inputs_too_close():
@@ -4071,9 +4085,9 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 						return true
 		else:
 			
-			if Globals.atk_type_to_tier(query_move_data(move_name)[Em.move.ATK_TYPE]) > \
-					Globals.atk_type_to_tier(query_move_data(attack_ref)[Em.move.ATK_TYPE]):
-				return false # for none-EX moves cannot quick cancel into moves of lower tiers
+			if Globals.atk_type_to_tier(from_move_data[Em.move.ATK_TYPE]) > \
+					Globals.atk_type_to_tier(to_move_data[Em.move.ATK_TYPE]):
+				return false # for none-EX moves, cannot quick cancel into moves of lower tiers
 			
 			if !grounded and (button_up in input_state.just_released or button_down in input_state.just_released):
 				if Animator.time <= 5 and Animator.time != 0: # release up/down rebuffer has wider window if in the air
@@ -4949,7 +4963,6 @@ func test_dash_attack(attack_ref):
 	
 	
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
-	
 	match state: # need to be in attack active/recovery
 		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
 				Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
@@ -4970,17 +4983,20 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		
 	if chain_combo == Em.chain_combo.STRONGBLOCKED: return false # cannot cancel into anything but Burst Counter if strongblocked
 	
-	match query_move_data(move_name)[Em.move.ATK_TYPE]:
+	var from_move_data = query_move_data(move_name)
+	var to_move_data = query_move_data(attack_ref)
+	
+	match from_move_data[Em.move.ATK_TYPE]:
 		Em.atk_type.LIGHT: # Light Normals can chain cancel on whiff
 			pass
 		Em.atk_type.FIERCE: # Fierce Normals cannot chain into Lights on whiff
 			if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.WEAKBLOCKED] and \
-					query_move_data(attack_ref)[Em.move.ATK_TYPE] == Em.atk_type.LIGHT:
+					to_move_data[Em.move.ATK_TYPE] == Em.atk_type.LIGHT:
 				return false
 		Em.atk_type.HEAVY: # Heavy Normals can only chain cancel into non-normals
 			if !chain_combo in [Em.chain_combo.HEAVY]:
 				return false
-			if is_normal_attack(attack_ref):
+			if to_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE]:
 				return false
 		Em.atk_type.SPECIAL:
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.SPECIAL_CHAIN):
@@ -5010,17 +5026,18 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	var root_attack_ref = UniqChar.get_root(attack_ref)
 	if root_attack_ref in chain_memory: return false # cannot chain into moves already done
 
-	if Em.atk_attr.NO_CHAIN in query_atk_attr(move_name) or Em.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
+	if Em.atk_attr.NO_CHAIN in from_move_data[Em.move.ATK_ATTR] or Em.atk_attr.CANNOT_CHAIN_INTO in to_move_data[Em.move.ATK_ATTR]:
 		return false # some moves cannnot be chained from, some moves cannot be chained into
-		
-	if Em.atk_attr.ONLY_CHAIN_ON_HIT in query_atk_attr(move_name): # some attacks can only chain from on hit
-		if !chain_combo in [Em.chain_combo.NORMAL]:
+
+	if Em.atk_attr.ONLY_CHAIN_ON_HIT in from_move_data[Em.move.ATK_ATTR] or Em.atk_attr.ONLY_CHAIN_INTO_ON_HIT in to_move_data[Em.move.ATK_ATTR]:
+		# some attacks can only chain from on hit, some attacks can only be chained into on hit
+		if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
 			return false
 		
 	if is_atk_active():
-		if Em.atk_attr.LATE_CHAIN in query_atk_attr(move_name):
+		if Em.atk_attr.LATE_CHAIN in from_move_data[Em.move.ATK_ATTR]:
 			return false  # some moves cannot be chained from during active frames
-		if Em.atk_attr.LATE_CHAIN_INTO in query_atk_attr(attack_ref):
+		if Em.atk_attr.LATE_CHAIN_INTO in to_move_data[Em.move.ATK_ATTR]:
 			return false # some moves cannot be chained into from other moves during their active frames
 		
 	afterimage_cancel()
@@ -5044,8 +5061,12 @@ func test_qc_chain_combo(attack_ref): # called during attack startup
 			return false
 	
 	# if chaining, cannot QC into moves with CANNOT_CHAIN_INTO
-	if Em.atk_attr.CANNOT_CHAIN_INTO in query_atk_attr(attack_ref):
+	var atk_attr = query_atk_attr(attack_ref)
+	if Em.atk_attr.CANNOT_CHAIN_INTO in atk_attr:
 		return false
+	if Em.atk_attr.ONLY_CHAIN_INTO_ON_HIT in atk_attr:
+		if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
+			return false
 	
 	# if chaining, cannot QC into moves that go against chain_memory/aerial_memory/aerial_sp_memory rules
 	attack_ref = UniqChar.get_root(attack_ref)
@@ -5055,6 +5076,21 @@ func test_qc_chain_combo(attack_ref): # called during attack startup
 		return false # cannot quick cancel into aerials already done during that jump
 				
 	return true
+	
+	
+func test_rekka(anim_name):
+	match state: # use current
+		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+			if Animator.query_current([anim_name]):
+				return true	
+		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_STARTUP:
+			var parent_name = anim_name.trim_suffix("Active")
+			parent_name = parent_name.trim_suffix("Rec")
+			var move_name = Animator.current_anim.trim_suffix("Startup")
+			var move_data = query_move_data(move_name)
+			if Em.move.REKKA in move_data and move_data[Em.move.REKKA] == parent_name:
+				return true # this allow QCing between rekka moves
+	return false
 	
 	
 func get_atk_strength(move):
@@ -6163,7 +6199,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !hit_data[Em.hit.DOUBLE_REPEAT]: # lock Burst Escape for a few frames afterwards, some moves like Autochain moves lock for more
 		if Em.move.BURSTLOCK in hit_data[Em.hit.MOVE_DATA]:
 			$BurstLockTimer.time = hit_data[Em.hit.MOVE_DATA][Em.move.BURSTLOCK]
-		elif Em.hit.AUTOCHAIN in hit_data: # autochain moves will lock Burst/DI for 10 frames minimum
+		elif Em.hit.AUTOCHAIN in hit_data: # autochain moves will lock Burst/DI for 15 frames minimum
 			$BurstLockTimer.time = AC_BurstLockTimer_TIME
 		elif Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME] > BurstLockTimer_TIME:
 			$BurstLockTimer.time = hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME]

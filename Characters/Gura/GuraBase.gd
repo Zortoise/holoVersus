@@ -95,12 +95,12 @@ const UNIQUE_DATA_REF = {
 
 const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
 	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]", \
-	"SP7", "aSP7", "SP8"]
+	"SP7", "aSP7", "SP8", "SP9", "SP9a", "SP9b", "SP9c", "aSP9c[r]", "SP9d"]
 #const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
 #const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
 #const SUPERS = []
 
-const UP_TILTS = ["L3", "F3", "SP3", "SP3[ex]", "aL3", "aF3", "aSP3", "aSP3[ex]"] # to know which moves can be cancelled from jumpsquat
+const UP_TILTS = ["L3", "F3", "SP3", "SP3[ex]", "aL3", "aF3", "aSP3", "aSP3[ex]", "SP9c"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
 const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1b[ex]", "aSP1b[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
@@ -400,7 +400,6 @@ const MOVE_DATABASE = {
 		Em.move.KB : 500 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
-		Em.move.PRIORITY_ADD: 1,
 		Em.move.KB_ANGLE : -90,
 #		"reset_type" : Globals.reset_type.ACTIVE_RESET,
 		Em.move.ATK_ATTR : [Em.atk_attr.WHIFF_SDASH_CANCEL],
@@ -525,6 +524,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 5,
 		Em.move.HITSPARK_PALETTE : "red",
 		Em.move.KB_ANGLE : -45,
+		Em.move.KB_ANGLE : -45,
 #		"reset_type" : Globals.reset_type.STARTUP_RESET,
 		Em.move.ATK_ATTR : [Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.MOVE_SOUND : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
@@ -532,32 +532,17 @@ const MOVE_DATABASE = {
 	},
 	"aSP5[h]" : {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.ROOT: "aSP5",
 #		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 50,
-		Em.move.KB : 200 * FMath.S,
-		Em.move.KB_TYPE: Em.knockback_type.FIXED,
-		Em.move.ATK_LVL : 5,
-		Em.move.FIXED_HITSTOP : 10,
-		Em.move.FIXED_ATKER_HITSTOP : 1,
-		Em.move.HITSPARK_PALETTE : "red",
-		Em.move.KB_ANGLE : -20,
-#		"reset_type" : Globals.reset_type.STARTUP_RESET,
-		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN, Em.atk_attr.DESTROY_ENTITIES],
-		Em.move.MOVE_SOUND : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
-		Em.move.HIT_SOUND : { ref = "cut5", aux_data = {"vol" : -7} },
-	},
-	"aSP5[h]b" : {
-		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
-#		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
-		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 50,
+		Em.move.DMG : 100,
 		Em.move.KB : 450 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 5,
 		Em.move.HITSPARK_PALETTE : "red",
 		Em.move.KB_ANGLE : -45,
-		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.DESTROY_ENTITIES, Em.atk_attr.NO_IMPULSE],
+#		"reset_type" : Globals.reset_type.STARTUP_RESET,
+		Em.move.ATK_ATTR : [Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.MOVE_SOUND : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		Em.move.HIT_SOUND : { ref = "cut5", aux_data = {"vol" : -7} },
 	},
@@ -565,13 +550,30 @@ const MOVE_DATABASE = {
 		Em.move.ATK_TYPE : Em.atk_type.EX,
 #		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 100,
+		Em.move.DMG : 70,
+		Em.move.KB : 250 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 6,
+		Em.move.FIXED_HITSTOP : 10,
+		Em.move.FIXED_ATKER_HITSTOP : 1,
+		Em.move.HITSPARK_PALETTE : "red",
+		Em.move.KB_ANGLE : -45,
+#		Em.move.BURSTLOCK : 15,
+		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN, Em.atk_attr.DESTROY_ENTITIES],
+		Em.move.MOVE_SOUND : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
+		Em.move.HIT_SOUND : { ref = "cut5", aux_data = {"vol" : -7} },
+	},
+	"aSP5b[ex]" : {
+		Em.move.ATK_TYPE : Em.atk_type.EX,
+#		"quick_turn_limit" : 4, # if on ground, can only quick turn on the first X frames
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
 		Em.move.KB : 550 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 6,
 		Em.move.HITSPARK_PALETTE : "red",
 		Em.move.KB_ANGLE : -45,
-		Em.move.ATK_ATTR : [Em.atk_attr.DESTROY_ENTITIES],
+		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.DESTROY_ENTITIES, Em.atk_attr.NO_IMPULSE],
 		Em.move.MOVE_SOUND : [{ ref = "launch2", aux_data = {"vol" : -5,} }, { ref = "impact33", aux_data = {"vol" : -23,} }],
 		Em.move.HIT_SOUND : { ref = "cut5", aux_data = {"vol" : -7} },
 	},
@@ -621,6 +623,91 @@ const MOVE_DATABASE = {
 		Em.move.ATK_ATTR : [Em.atk_attr.NO_TURN, Em.atk_attr.NO_SDASH_CANCEL],
 	},
 
+	"SP9": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.ATK_ATTR : [Em.atk_attr.LEDGE_DROP, Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN],
+		Em.move.MOVE_SOUND : [{ ref = "water4", aux_data = {"vol" : -16, "bus" : "LowPass"} }, { ref = "launch1", aux_data = {"vol" : -10} }],
+	},
+	
+	"aSP9a": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.REKKA: "SP9", # allow Quick Cancel between Rekkas
+		Em.move.HITCOUNT : 2,
+		Em.move.IGNORE_TIME : 4,
+		Em.move.DMG : 60,
+		Em.move.FIXED_KB_MULTI : 200 * FMath.S,
+		Em.move.KB : 500 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 5,
+		Em.move.FIXED_KB_ANGLE_MULTI : 0,
+		Em.move.KB_ANGLE : -25,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN],
+		Em.move.MOVE_SOUND : [{ ref = "water4", aux_data = {"vol" : -15} }, { ref = "whoosh7", aux_data = {"vol" : -15,} }],
+		Em.move.HIT_SOUND : [{ ref = "cut2", aux_data = {"vol" : -18} }, { ref = "water1", aux_data = {"vol" : -9} }],
+	},
+	
+	"SP9b": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.REKKA: "SP9",
+		Em.move.HITCOUNT : 4,
+		Em.move.IGNORE_TIME : 4,
+		Em.move.DMG : 20,
+		Em.move.FIXED_KB_MULTI : 100 * FMath.S,
+		Em.move.KB : 449 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 3,
+		Em.move.KB_ANGLE : -75,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN],
+		Em.move.MOVE_SOUND : { ref = "whoosh3", aux_data = {"vol" : -8, "bus" : "PitchDown"} },
+		Em.move.HIT_SOUND : [{ ref = "cut8", aux_data = {"vol" : -13} }, { ref = "cut1", aux_data = {"vol" : -12, "bus" : "LowPass"} }],
+	},
+	
+	"aSP9c": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.REKKA: "SP9",
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : -75,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN, Em.atk_attr.ANTI_AIR],
+		Em.move.MOVE_SOUND : [{ ref = "whoosh13", aux_data = {"vol" : -13,} }, { ref = "whoosh9", aux_data = {"vol" : -13,"bus" : "LowPass"} }],
+		Em.move.HIT_SOUND : [{ ref = "impact16", aux_data = {"vol" : -15} },{ ref = "impact19", aux_data = {"vol" : -20,"bus" : "LowPass"} }]
+	},
+	
+	"aSP9c[r]": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 80,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : 70,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh7", aux_data = {"vol" : -12,} },
+		Em.move.HIT_SOUND : [{ ref = "impact12", aux_data = {"vol" : -15} }, { ref = "impact19", aux_data = {"vol" : -20,"bus" : "LowPass"} }],
+	},
+	
+	"aSP9c[r]b": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 80,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : 70,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_TURN, Em.atk_attr.NO_HITCOUNT_RESET],
+		Em.move.HIT_SOUND : [{ ref = "impact12", aux_data = {"vol" : -15} }, { ref = "impact19", aux_data = {"vol" : -20,"bus" : "LowPass"} }],
+	},
+
+	"SP9d": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.REKKA: "SP9",
+		Em.move.MOVE_SOUND : { ref = "water11", aux_data = {"vol" : -8,} },
+		Em.move.ATK_ATTR : [],
+	},
+	
 }
 
 

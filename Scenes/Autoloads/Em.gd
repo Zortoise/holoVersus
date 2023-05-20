@@ -20,10 +20,11 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, CAN_REPEAT_ONCE, DI_MANUAL_SEAL
-		ONLY_CHAIN_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH, JUMP_CANCEL_ACTIVE, JUMP_CANCEL_ON_WHIFF, JUMP_CANCEL_ON_HIT
+		ONLY_CHAIN_ON_HIT, ONLY_CHAIN_INTO_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
+		JUMP_CANCEL_ACTIVE, JUMP_CANCEL_ON_WHIFF, JUMP_CANCEL_ON_HIT
 		VULN_LIMBS, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY
 		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB, GRAB_INVULN_STARTUP, WHIFF_SDASH_CANCEL
-		AIR_REPEAT, REFLECT_ENTITIES, NO_SDASH_CANCEL, NO_SDC_DURING_ACTIVE, CAN_SDC_DURING_REC, PUNISH_ENTITY}
+		AIR_REPEAT, REFLECT_ENTITIES, NO_SDASH_CANCEL, NO_SDC_DURING_ACTIVE, CAN_SDC_DURING_REC, PUNISH_ENTITY, NO_HITCOUNT_RESET}
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
@@ -49,6 +50,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # CAN_REPEAT_ONCE = no penalty on partial penalty
 # DI_MANUAL_SEAL = seal DI till next hit
 # ONLY_CHAIN_ON_HIT = cannot chain into other moves on whiff and weakblock
+# ONLY_CHAIN_INTO_ON_HIT = cannot chain into from other moves on whiff and weakblock, for command dashes
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
 # LATE_CHAIN = can only chain into other moves during recovery and not active frames
 # LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
@@ -73,12 +75,13 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # NO_SDC_DURING_ACTIVE = cannot SDash Cancel during active, for non-damaging moves
 # CAN_SDC_DURING_REC = can SDash Cancel during recovery
 # PUNISH_ENTITY = entity can land punish hit without being Proj Level 3, used for projectiles with special effects on landing punish hits
+# NO_HITCOUNT_RESET = attack does not reset hitcount on being active frames being animated, used for multi-part attacks sharing hitcount
 
 enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, STRONG, WEAK}
-enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK, WAVE_DASH_BLOCK, AIR_DASH_BLOCK, PASSIVE_NORMALARMOR, 
+enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_NORMALARMOR, DASH_BLOCK
 		PERMA_SUPERARMOR, NO_LAUNCH}
 # PASSIVE_NORMALARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
 
@@ -90,7 +93,7 @@ enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, AIR_PERFECT_BLOCK, WAV
 enum move {ROOT, ATK_TYPE, HITCOUNT, DMG, KB, KB_TYPE, KB_ANGLE, ATK_LVL, ATK_ATTR, MOVE_SOUND, HIT_SOUND, BURST
 		FIXED_HITSTOP, FIXED_ATKER_HITSTOP, FIXED_SS_HITSTOP, FIXED_HITSTUN, FIXED_KB_MULTI, FIXED_KB_ANGLE_MULTI
 		PRIORITY_ADD, IGNORE_TIME, HITSPARK_TYPE, HITSPARK_PALETTE, SEQ, STARTER, SEQ_HITS, SEQ_LAUNCH
-		SEQ_HITSTOP, SEQ_WEAK, PROJ_LVL, BURSTLOCK}
+		SEQ_HITSTOP, SEQ_WEAK, PROJ_LVL, BURSTLOCK, REKKA}
 
 enum hit {RECT, POLYGON, OWNER_ID, FACING, MOVE_NAME, MOVE_DATA, MOB, HURTBOX, SDHURTBOX, HITBOX, SWEETBOX, KBORIGIN, VACPOINT
 		ATKER_ID, DEFENDER_ID, HIT_CENTER, ATK_FACING, DEFEND_FACING, TOUGH_MOB, NO_HIT_SOUND_MOB

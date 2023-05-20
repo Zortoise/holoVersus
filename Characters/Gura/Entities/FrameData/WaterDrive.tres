@@ -1,0 +1,134 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "WaterDriveSprite",
+"timestamps": {
+0: {
+"frame": 3,
+"hitbox": [ Vector2( -12, 23 ), Vector2( 11, 23 ), Vector2( 11, -23 ), Vector2( -12, -23 ) ]
+},
+5: {
+"frame": 4,
+"hitbox": [ Vector2( -12, 23 ), Vector2( 11, 23 ), Vector2( 11, -23 ), Vector2( -12, -23 ) ]
+},
+10: {
+"frame": 5,
+"hitbox": [ Vector2( -12, 23 ), Vector2( 11, 23 ), Vector2( 11, -23 ), Vector2( -12, -23 ) ]
+}
+},
+"vframes": 2
+},
+"Kill": {
+"duration": 6,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WaterDriveSprite",
+"timestamps": {
+0: {
+"frame": 2,
+"hitbox": [  ]
+},
+2: {
+"frame": 1,
+"hitbox": [  ]
+},
+4: {
+"frame": 0,
+"hitbox": [  ]
+}
+},
+"vframes": 2
+},
+"Spawn": {
+"duration": 6,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WaterDriveSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -12, 23 ), Vector2( 11, 23 ), Vector2( 11, -23 ), Vector2( -12, -23 ) ]
+},
+2: {
+"frame": 1,
+"hitbox": [ Vector2( -12, 23 ), Vector2( 11, 23 ), Vector2( 11, -23 ), Vector2( -12, -23 ) ]
+},
+4: {
+"frame": 2,
+"hitbox": [ Vector2( -12, 23 ), Vector2( 11, 23 ), Vector2( 11, -23 ), Vector2( -12, -23 ) ]
+}
+},
+"vframes": 2
+},
+"[u]Active": {
+"duration": 15,
+"hframes": 6,
+"loop": true,
+"spritesheet": "WaterDriveSprite",
+"timestamps": {
+0: {
+"frame": 9,
+"hitbox": [ Vector2( -19, 0 ), Vector2( -11, 0 ), Vector2( -11, 11 ), Vector2( 0, 11 ), Vector2( 0, 19 ), Vector2( 16, 19 ), Vector2( 16, 0 ), Vector2( 11, 0 ), Vector2( 11, -11 ), Vector2( 0, -11 ), Vector2( 0, -16 ), Vector2( -19, -16 ) ]
+},
+5: {
+"frame": 10,
+"hitbox": [ Vector2( -19, 0 ), Vector2( -11, 0 ), Vector2( -11, 11 ), Vector2( 0, 11 ), Vector2( 0, 19 ), Vector2( 16, 19 ), Vector2( 16, 0 ), Vector2( 11, 0 ), Vector2( 11, -11 ), Vector2( 0, -11 ), Vector2( 0, -16 ), Vector2( -19, -16 ) ]
+},
+10: {
+"frame": 11,
+"hitbox": [ Vector2( -19, 0 ), Vector2( -11, 0 ), Vector2( -11, 11 ), Vector2( 0, 11 ), Vector2( 0, 19 ), Vector2( 16, 19 ), Vector2( 16, 0 ), Vector2( 11, 0 ), Vector2( 11, -11 ), Vector2( 0, -11 ), Vector2( 0, -16 ), Vector2( -19, -16 ) ]
+}
+},
+"vframes": 2
+},
+"[u]Kill": {
+"duration": 6,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WaterDriveSprite",
+"timestamps": {
+0: {
+"frame": 8,
+"hitbox": [  ]
+},
+2: {
+"frame": 7,
+"hitbox": [  ]
+},
+4: {
+"frame": 6,
+"hitbox": [  ]
+}
+},
+"vframes": 2
+},
+"[u]Spawn": {
+"duration": 6,
+"hframes": 6,
+"loop": false,
+"spritesheet": "WaterDriveSprite",
+"timestamps": {
+0: {
+"frame": 6,
+"hitbox": [ Vector2( -19, 0 ), Vector2( -11, 0 ), Vector2( -11, 11 ), Vector2( 0, 11 ), Vector2( 0, 19 ), Vector2( 16, 19 ), Vector2( 16, 0 ), Vector2( 11, 0 ), Vector2( 11, -11 ), Vector2( 0, -11 ), Vector2( 0, -16 ), Vector2( -19, -16 ) ]
+},
+2: {
+"frame": 7,
+"hitbox": [ Vector2( -19, 0 ), Vector2( -11, 0 ), Vector2( -11, 11 ), Vector2( 0, 11 ), Vector2( 0, 19 ), Vector2( 16, 19 ), Vector2( 16, 0 ), Vector2( 11, 0 ), Vector2( 11, -11 ), Vector2( 0, -11 ), Vector2( 0, -16 ), Vector2( -19, -16 ) ]
+},
+4: {
+"frame": 8,
+"hitbox": [ Vector2( -19, 0 ), Vector2( -11, 0 ), Vector2( -11, 11 ), Vector2( 0, 11 ), Vector2( 0, 19 ), Vector2( 16, 19 ), Vector2( 16, 0 ), Vector2( 11, 0 ), Vector2( 11, -11 ), Vector2( 0, -11 ), Vector2( 0, -16 ), Vector2( -19, -16 ) ]
+}
+},
+"vframes": 2
+}
+}
