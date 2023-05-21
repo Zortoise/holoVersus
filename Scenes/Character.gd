@@ -817,7 +817,7 @@ func simulate2(): # only ran if not in hitstop
 		repeat_memory = []
 		first_hit_flag = false
 		GG_swell_flag = false
-		$BurstLockTimer.stop()
+#		$BurstLockTimer.stop()
 		DI_seal = false
 		lethal_flag = false
 		wall_slammed = Em.wall_slam.CANNOT_SLAM
@@ -2705,12 +2705,12 @@ func process_input_buffer():
 							
 					# guard cancel dodge, can only be done when releasing block after blocking an attack
 					Em.char_state.GROUND_REC:
-						if $SBlockTimer.is_running() and Animator.query_to_play(["BlockRec"]) and dodge_check():
+						if $SBlockTimer.is_running() and !$BurstLockTimer.is_running() and Animator.query_to_play(["BlockRec"]) and dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
 					Em.char_state.AIR_REC:
-						if $SBlockTimer.is_running() and Animator.query_to_play(["aBlockRec"]) and dodge_check():
+						if $SBlockTimer.is_running() and !$BurstLockTimer.is_running() and Animator.query_to_play(["aBlockRec"]) and dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
@@ -4281,7 +4281,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 	if !quick_cancel: # not quick cancelling, must afford it
 		if current_ex_gauge >= EX_MOVE_COST:
 			change_ex_gauge(-EX_MOVE_COST)
-			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
+			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
 			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {}, "pink")
 			modulate_play("EX_flash")
 			return true
@@ -4292,7 +4292,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 			return true
 		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
 			change_ex_gauge(-EX_MOVE_COST)
-			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"}) # EX chime
+			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
 			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {}, "pink")
 			modulate_play("EX_flash")
 			return true
@@ -4394,7 +4394,9 @@ func perfect_dodge(): # called from Game.gd
 #	return false
 	
 func burst_counter_check(): # check if have resources to do it, then take away those resources and return a bool
-	
+	if $BurstLockTimer.is_running():
+		return false
+		
 	var cost = BURSTCOUNTER_EX_COST
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
 		cost = FMath.percent(cost, 50)

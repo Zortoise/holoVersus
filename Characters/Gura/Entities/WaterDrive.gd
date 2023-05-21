@@ -106,10 +106,13 @@ func kill(sound = true):
 	match Animator.to_play_anim:
 		"Spawn", "Active":
 			Animator.play("Kill")
-			if sound: Entity.play_audio("water11", {"bus": "LowPass", "vol" : -5})
+			if sound: killsound()
 		"[u]Spawn", "[u]Active":
 			Animator.play("[u]Kill")
-			if sound: Entity.play_audio("water11", {"bus": "LowPass", "vol" : -5})
+			if sound: killsound()
+
+func killsound():
+	Entity.play_audio("water11", {"bus": "LowPass", "vol" : -5})
 
 func collision(): # collided with a platform
 	kill()

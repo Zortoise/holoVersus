@@ -44,7 +44,7 @@ func simulate():
 	match Animator.to_play_anim: # triggering shark breach
 		"Active", "[h]Active", "Turn", "[h]Turn":
 			var master_node = Globals.Game.get_player_node(Entity.master_ID)
-			if master_node.unique_data.groundfin_trigger:
+			if "groundfin_trigger" in master_node.unique_data and master_node.unique_data.groundfin_trigger:
 #				var breach_facing = get_node(Entity.master_path).get_last_tapped_dir()
 #				var turned := false
 #				if breach_facing == 0:

@@ -10,7 +10,7 @@ const MOB_LEVEL_TO_DMG = [100, 110, 120, 130, 140, 150, 160, 170, 180]
 var free := false
 var facing := 1
 var v_facing := 1
-var reflected := false
+#var reflected := false
 
 var master_ID: int # for special cases where an entity has a special effect that affects its master
 var entity_ref: String
@@ -248,10 +248,10 @@ func interactions():
 				if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
 						character.slowed >= 0:
 					var char_atk_attr = character.query_atk_attr()
-					if Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
-						master_ID = character.player_ID
-						velocity.x = -velocity.x
-						return
+#					if Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
+#						master_ID = character.player_ID
+#						velocity.x = -velocity.x
+#						return
 						
 					if !indestructible and (easy_destructible or Em.atk_attr.DESTROY_ENTITIES in char_atk_attr):
 						destroyer_array.append(character)

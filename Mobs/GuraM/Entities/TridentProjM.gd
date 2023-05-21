@@ -306,26 +306,28 @@ func kill(sound = true):
 	match Animator.to_play_anim:
 		"[c1]Spawn", "[c1]Active":
 			Animator.play("Kill")
-			if sound: Entity.play_audio("break2", {"vol" : -15}) # don't put this outside, Spin animation has no kill()
+			if sound: killsound()
 		"[u][c1]Spawn", "[u][c1]Active":
 			Animator.play("[u]Kill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnE":
 			Animator.play("EKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnS":
 			Animator.play("SKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnSE":
 			Animator.play("SEKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnSSE":
 			Animator.play("SSEKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnESE":
 			Animator.play("ESEKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 
+func killsound():
+	Entity.play_audio("break2", {"vol" : -15})
 	
 func collision(): # collided with a platform
 	kill()

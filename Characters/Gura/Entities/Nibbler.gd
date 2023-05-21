@@ -109,8 +109,11 @@ func kill(sound = true):
 		Animator.play("Kill")
 		# splash sound
 		if sound:
-			Entity.play_audio("water11", {"vol" : -12})
-			Entity.play_audio("water1", {"vol" : -12})
+			killsound()
+			
+func killsound():
+	Entity.play_audio("water11", {"vol" : -12})
+	Entity.play_audio("water1", {"vol" : -12})
 	
 	
 func collision(): # collided with a platform

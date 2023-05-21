@@ -681,7 +681,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP9SfxUnder",
 "SfxUnder_vframes": 7,
-"duration": 4,
+"duration": 5,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP9Sprite",
@@ -747,7 +747,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP9SfxUnder",
 "SfxUnder_vframes": 7,
-"duration": 12,
+"duration": 15,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP9Sprite",
@@ -764,7 +764,7 @@ frame_data = {
 "sfxspawn": null,
 "sweetbox": [  ]
 },
-4: {
+5: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 32,
 "entityspawn": null,
@@ -776,7 +776,7 @@ frame_data = {
 "sfxspawn": null,
 "sweetbox": [  ]
 },
-8: {
+10: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 33,
 "entityspawn": null,
@@ -798,7 +798,7 @@ frame_data = {
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP9SfxUnder",
 "SfxUnder_vframes": 7,
-"duration": 4,
+"duration": 5,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP9Sprite",

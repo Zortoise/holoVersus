@@ -430,26 +430,28 @@ func kill(sound = true):
 	match Animator.to_play_anim:
 		"[c1]Spawn", "[c2]Spawn", "[c3]Spawn", "[ex]Spawn", "[c1]Active", "[c2]Active", "[c3]Active", "[ex]Active":
 			Animator.play("Kill")
-			if sound: Entity.play_audio("break2", {"vol" : -15}) # don't put this outside, Spin animation has no kill()
+			if sound: killsound() # don't put this outside, Spin animation has no kill()
 		"[u][c1]Spawn", "[u][c2]Spawn", "[u][c3]Spawn", "[u][ex]Spawn", "[u][c1]Active", "[u][c2]Active", "[u][c3]Active", "[u][ex]Active":
 			Animator.play("[u]Kill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnE", "[c2]TurnE":
 			Animator.play("EKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnS", "[c2]TurnS":
 			Animator.play("SKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnSE", "[c2]TurnSE":
 			Animator.play("SEKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnSSE", "[c2]TurnSSE":
 			Animator.play("SSEKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 		"[c1]TurnESE", "[c2]TurnESE":
 			Animator.play("ESEKill")
-			if sound: Entity.play_audio("break2", {"vol" : -15})
+			if sound: killsound()
 
+func killsound():
+	Entity.play_audio("break2", {"vol" : -15})
 	
 func collision(): # collided with a platform
 	

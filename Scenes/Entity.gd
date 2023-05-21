@@ -311,14 +311,18 @@ func interactions():
 			
 			to_destroy = false
 			
+			var atk_attr = query_atk_attr()
+			var proj_level = get_proj_level()
 			
 			var easy_destructible := false # if true, all physical attacks can destroy this entity
-			if Em.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 1:
+			if Em.atk_attr.DESTRUCTIBLE_ENTITY in atk_attr or proj_level == 1:
 				easy_destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
 				
 			var indestructible := false
-			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
+			var reflectable := true
+			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in atk_attr or proj_level == 3:
 				indestructible = true
+				reflectable = false
 				
 			var can_clash := false
 			if absorption_value != null and absorption_value > 0:
@@ -333,17 +337,15 @@ func interactions():
 #				character_array = get_tree().get_nodes_in_group("MobNodes")
 			var destroyer_array = []
 			
+			var reflector_array_entity = []
+			var reflector_array_char = []
+			
 			for character in character_array:
 				if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
 						character.slowed >= 0:
 					var char_atk_attr = character.query_atk_attr()
-					if Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
-						master_ID = character.player_ID
-						velocity.x = -velocity.x
-						face(-facing)
-						if character.UniqChar.has_method("reflected_entity"):
-							character.UniqChar.reflected_entity()
-						return
+					if reflectable and Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
+						reflector_array_char.append(character)
 						
 					if !indestructible and (easy_destructible or Em.atk_attr.DESTROY_ENTITIES in char_atk_attr):
 						destroyer_array.append(character)
@@ -365,18 +367,40 @@ func interactions():
 				if entity.master_ID != master_ID and !entity.free and entity.slowed >= 0:
 					var entity_atk_attr = entity.query_atk_attr()
 					
-					if Em.atk_attr.REFLECT_ENTITIES in entity_atk_attr and velocity.x != 0:
-						master_ID = entity.master_ID
-						velocity.x = -velocity.x
-						face(-facing)
-						if entity.UniqEntity.has_method("reflected_entity"):
-							entity.UniqEntity.reflected_entity()
-						return
+					if reflectable and Em.atk_attr.REFLECT_ENTITIES in entity_atk_attr and velocity.x != 0:
+						reflector_array_entity.append(entity)
 						
 					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity_atk_attr:
 						destroyer_array.append(entity)
 					elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
 						clash_array.append(entity)
+				
+			# check for reflector		
+			for reflector in reflector_array_char:
+				var second_hitbox = reflector.Animator.query_polygon("hitbox")
+				if second_hitbox != null:
+					var their_rect = reflector.get_sprite_rect()
+					
+					if my_rect.intersects(their_rect):
+						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+						if intersect_polygons.size() > 0: # detected intersection	
+							reflect(reflector.player_ID)
+							if reflector.UniqChar.has_method("reflected_entity"):
+								reflector.UniqChar.reflected_entity()
+							return
+							
+			for reflector in reflector_array_entity:
+				var second_hitbox = reflector.Animator.query_polygon("hitbox")
+				if second_hitbox != null:
+					var their_rect = reflector.get_sprite_rect()
+					
+					if my_rect.intersects(their_rect):
+						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
+						if intersect_polygons.size() > 0: # detected intersection	
+							reflect(reflector.master_ID)
+							if reflector.UniqEntity.has_method("reflected_entity"):
+								reflector.UniqEntity.reflected_entity()
+							return
 			
 			# check for entity destroyers
 			for destroyer in destroyer_array:
@@ -466,6 +490,22 @@ func move_true_position(in_velocity: FVector):
 	true_position.y += int(in_velocity.y / 60)
 	
 # --------------------------------------------------------------------------------------------------
+		
+func reflect(reflector_id):
+	if Globals.survival_level != null: # no reflection during survival mode
+		if UniqEntity.has_method("kill"):
+			UniqEntity.kill()
+	else:
+		face(-facing)
+		velocity.x = -velocity.x
+		if Globals.player_count > 2:
+			remove_from_group("P" + str(master_ID + 1) + "EntityNodes")
+			add_to_group("P" + str(reflector_id + 1) + "EntityNodes")
+		master_ID = reflector_id
+		if UniqEntity.has_method("reflect"): # unique code for reflection
+			UniqEntity.reflect()
+		if UniqEntity.has_method("killsound"):
+			UniqEntity.killsound()
 		
 func face(in_dir):
 	if in_dir != 0:

@@ -657,7 +657,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,
 		Em.move.KB_ANGLE : -75,
-		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN],
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN, Em.atk_attr.REFLECT_ENTITIES],
 		Em.move.MOVE_SOUND : { ref = "whoosh3", aux_data = {"vol" : -8, "bus" : "PitchDown"} },
 		Em.move.HIT_SOUND : [{ ref = "cut8", aux_data = {"vol" : -13} }, { ref = "cut1", aux_data = {"vol" : -12, "bus" : "LowPass"} }],
 	},
@@ -678,6 +678,7 @@ const MOVE_DATABASE = {
 	
 	"aSP9c[r]": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.REKKA: "aSP9c",
 		Em.move.HITCOUNT : 1,
 		Em.move.DMG : 80,
 		Em.move.KB : 450 * FMath.S,
