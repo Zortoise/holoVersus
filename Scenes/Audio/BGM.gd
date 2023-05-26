@@ -8,7 +8,7 @@ var common_music = {
 		"name" : "title_theme", # to not play the same music as the one currently being played
 		"audio" : ResourceLoader.load("res://Assets/Music/TitleTheme.ogg"),
 		"loop_end": 224.0,
-		"vol" : 2,
+		"vol" : 3,
 		},
 	"victory" : {
 		"name" : "victory",

@@ -178,15 +178,15 @@ func load_state(state_data):
 	sticky_ID = state_data.sticky_ID
 	sticky_offset = state_data.sticky_offset
 	sticky_entity = state_data.sticky_entity
-	if sticky_ID != null:
-		var master_node
-		if sticky_entity:
-			master_node = Globals.Game.get_entity_node(sticky_ID)
-		else:
-			master_node = Globals.Game.get_player_node(sticky_ID)
-		if master_node != null:
-			position = master_node.position + sticky_offset
-		else:
-			free = true
+#	if sticky_ID != null:
+#		var master_node
+#		if sticky_entity:
+#			master_node = Globals.Game.get_entity_node(sticky_ID)
+#		else:
+#			master_node = Globals.Game.get_player_node(sticky_ID)
+#		if master_node != null:
+#			position = master_node.position + sticky_offset
+#		else:
+#			free = true
 	
 #--------------------------------------------------------------------------------------------------

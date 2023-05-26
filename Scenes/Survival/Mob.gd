@@ -36,9 +36,10 @@ const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Gu
 #const ATK_LEVEL_TO_L_HITSTUN = [[40, 45, 50, 55, 60, 65, 70, 75], [35, 40, 45, 50, 55, 60, 65, 70], [30, 35, 40, 45, 50, 55, 60, 65]]
 const ATK_LEVEL_TO_F_HITSTUN = [33, 36, 39, 42, 45, 48, 51, 54]
 const ATK_LEVEL_TO_L_HITSTUN = [48, 51, 54, 57, 60, 63, 66, 69]
-const ATK_LEVEL_TO_F_HITSTUN_H = [15, 20, 25, 30, 35, 40, 45, 50]
+const ATK_LEVEL_TO_F_HITSTUN_H = [15, 20, 25, 30, 35, 40, 45, 50] # for hard difficulty
 const ATK_LEVEL_TO_L_HITSTUN_H = [25, 30, 35, 40, 45, 50, 55, 60]
 const COMBO_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
+const MULTIHIT_HITSTUN = 15
 
 const ATK_LEVEL_TO_GDRAIN = [0, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
 
@@ -1701,6 +1702,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 					animate("SoftLanding")
 					$HitStunTimer.stop()
 					velocity.y = 0 # stop bouncing
+#					UniqChar.landing_sound()
 #					modulate_play("unflinch_flash")
 #					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			
@@ -3331,6 +3333,9 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 		
 	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 0
+		
+	if Em.hit.MULTIHIT in hit_data:
+		return MULTIHIT_HITSTUN
 
 	var scaled_hitstun := 0
 	if has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:

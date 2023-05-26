@@ -873,6 +873,12 @@ func afterimage_trail():# process afterimage trail
 			Character.afterimage_trail()
 		"SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD":
 			Character.afterimage_trail()
+		"aSP9cActive":
+			Character.afterimage_trail()
+		"SP9bActive":
+			if posmod(Animator.time, 2) == 0:
+				Globals.Game.spawn_afterimage(Character.player_ID, false, Character.sprite_texture_ref.sfx_under, Character.sfx_under.get_path(), 
+						NAME, Character.palette_number, null, 0.5, 12)
 			
 func unique_flash():
 	match Animator.to_play_anim:

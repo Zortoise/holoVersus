@@ -101,8 +101,9 @@ func _physics_process(_delta):
 		
 		# directional keys
 		var P1_dir = $P1DirInputs.P1_dir
-		var P2_dir = $P2DirInputs.P2_dir
-		
+		var P2_dir = Vector2.ZERO
+		if Globals.player_count > 1:
+			P2_dir = $P2DirInputs.P2_dir
 		move_pickers(P1_dir, P2_dir)
 	
 		$P1/Box/ProgressBar.value = P1_held_timer

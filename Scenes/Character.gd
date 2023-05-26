@@ -68,6 +68,7 @@ const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
 const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
 const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
 const ATK_LEVEL_TO_GDRAIN = [0, 1500, 2250, 3000, 3750, 4500, 5250, 6000]
+const MULTIHIT_HITSTUN = 15 # if you failed to connect all hits
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
 const HITSTUN_FRICTION = 15  # friction during hitstun
@@ -3444,8 +3445,8 @@ func respawn():
 	
 	Globals.Game.spawn_SFX("Respawn", "Respawn", position, {"back":true, "facing":Globals.Game.rng_facing(), \
 			"v_mirror":Globals.Game.rng_bool()}, palette)
-	play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
-	play_audio("bling7", {"vol" : -7, "bus" : "PitchUp2"})
+	play_audio("bling7", {"vol" : -27, "bus" : "HighPass"})
+	play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"})
 
 		
 func face(in_dir):
@@ -3543,7 +3544,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("BlockRec")
 				UniqChar.landing_sound()
 				
-			elif Animator.query_to_play(["DodgeTransit", "Dodge", "DodgeRec", "SDash"]) or \
+			elif Animator.query_to_play(["Dodge", "DodgeRec", "SDash"]) or \
 					Animator.to_play_anim.begins_with("Burst"): # no landing
 				pass
 				
@@ -3582,6 +3583,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 						$HitStunTimer.stop()
 						velocity.y = 0 # stop bouncing
 						modulate_play("unflinch_flash")
+#						UniqChar.landing_sound()
 #						play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 			
 		Em.char_state.AIR_BLOCK: # air block to ground block
@@ -3711,10 +3713,10 @@ func check_semi_invuln():
 				elif Em.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
 					return true
 			Em.char_state.AIR_STARTUP:
-				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup"]):
+				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup", "DodgeTransit"]):
 					return true
 			Em.char_state.AIR_REC:
-				if Animator.query_to_play(["DodgeTransit", "Dodge"]):
+				if Animator.query_to_play(["Dodge"]):
 #					and Animator.time <= DODGE_SEMI_IFRAMES:
 					return true
 				if Globals.survival_level != null:
@@ -4782,11 +4784,11 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 				status_effect_to_remove.append(status_effect[0])
 				
 		match status_effect[0]:
-			Em.status_effect.STUN_RECOVER: # when recovering from a combo where a Stun occur, restore Guard Gauge to 50%
+			Em.status_effect.STUN_RECOVER: # when recovering from a combo where a Stun occur, restore Guard Gauge to 0%
 				if !is_hitstunned_or_sequenced():
 					status_effect_to_remove.append(status_effect[0])
-					if current_guard_gauge < -5000:
-						current_guard_gauge = -5000
+					if current_guard_gauge < 0:
+						current_guard_gauge = 0
 						Globals.Game.guard_gauge_update(self)
 			Em.status_effect.POS_FLOW: # positive flow ends if guard gauge returns to 0
 				if current_guard_gauge >= 0:
@@ -6769,6 +6771,9 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 		
 	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 0
+
+	if Em.hit.MULTIHIT in hit_data:
+		return MULTIHIT_HITSTUN
 
 	var scaled_hitstun := 0
 	if hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
