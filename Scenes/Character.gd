@@ -105,6 +105,7 @@ const MOBBLOCK_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed 
 const SPECIAL_GDRAIN_MOD = 125 # extra GDrain when blocking heavy/special/ex moves
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
 const SDASH_ARMOR_GDRAIN_MOD = 125 # extra GDrain when SDashing through projectiles
+const SDASH_ARMOR_GDRAIN_MOD2 = 160 # extra GDrain when SDashing through level 2 projectiles
 
 const SBlockTimer_TIME = 30 # time after blocking an attack when you are immune to cross-ups and blocking will not cost GG
 
@@ -5751,7 +5752,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
-	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or $SBlockTimer.is_running():
 		match new_state:
 			
 			# SUPERARMOR --------------------------------------------------------------------------------------------------
@@ -5784,7 +5785,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data[Em.hit.SUPERARMORED] = true
 					hit_data[Em.hit.SDASH_ARMORED] = true
 				
-				
+		# passive armor
 		if !is_hitstunned_or_sequenced() and !is_blocking():
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR):
 				if current_guard_gauge >= 0:
@@ -5812,74 +5813,74 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 		# BLOCKING --------------------------------------------------------------------------------------------------
 		
-	match state:
-		Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
+		match state:
+			Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
 
-			hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
-			
-			if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
-				hit_data[Em.hit.ANTI_AIRED] = true
-
-			match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
+				hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
 				
-				Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-					if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
-						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-					else:
-						# to strongblock a physical attack, you need to either perfect block them or
-						# block at close range, but the later is not allowed during Survival Mode
-						
-#						var close_enough = !attacker_vec.is_longer_than(STRONGBLOCK_RANGE)
-#						if Globals.survival_level != null and close_enough:
-##							if !Inventory.has_quirk(player_ID, Cards.effect_ref.PROXIMITY_PARRY):
-#							close_enough = false
+				if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
+					hit_data[Em.hit.ANTI_AIRED] = true
 
-						if Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
-#							if Globals.survival_level != null:
-#								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # no proximity parry for Survival Mode
-							if Em.hit.ANTI_AIRED in hit_data:
-								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # anti-air normals force weakblock on airblockers
-							else:
-								# if perfect blocked or blocking attacker close enough, a Strongblock occurs
-								# attacker is pushed back, and cannot chain into anything except Burst Counter
-								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
-						elif success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
-							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
+				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
+					
+					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
+						if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
-							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+							# to strongblock a physical attack, you need to either perfect block them or
+							# block at close range, but the later is not allowed during Survival Mode
+							
+	#						var close_enough = !attacker_vec.is_longer_than(STRONGBLOCK_RANGE)
+	#						if Globals.survival_level != null and close_enough:
+	##							if !Inventory.has_quirk(player_ID, Cards.effect_ref.PROXIMITY_PARRY):
+	#							close_enough = false
 
-				Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX: # can weakblock heavy/special/EX at high GG cost
-					if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
-						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-					else:
-						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
-						hit_data[Em.hit.GUARD_DRAIN] = true
-					
-				Em.atk_type.SUPER: # can weakblock super
-					if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
-						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-					else:
-						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
-					
-				Em.atk_type.ENTITY, Em.atk_type.SUPER_ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE
-#					if check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
-#						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-					if Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-					else:
-						if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
-							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
-							hit_data[Em.hit.GUARD_DRAIN] = true
-						elif !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
-							if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
-									Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
-								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
-							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PBLOCK_PROJ):
+							if Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
+	#							if Globals.survival_level != null:
+	#								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # no proximity parry for Survival Mode
+								if Em.hit.ANTI_AIRED in hit_data:
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # anti-air normals force weakblock on airblockers
+								else:
+									# if perfect blocked or blocking attacker close enough, a Strongblock occurs
+									# attacker is pushed back, and cannot chain into anything except Burst Counter
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
+							elif success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
 							else:
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+
+					Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX: # can weakblock heavy/special/EX at high GG cost
+						if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+							hit_data[Em.hit.GUARD_DRAIN] = true
+						
+					Em.atk_type.SUPER: # can weakblock super
+						if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+						else:
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+						
+					Em.atk_type.ENTITY, Em.atk_type.SUPER_ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE
+	#					if check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
+	#						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+						if Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+						else:
+							if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+								hit_data[Em.hit.GUARD_DRAIN] = true
+							elif !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
+								if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
+										Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
+								elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PBLOCK_PROJ):
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
+								else:
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+							else:
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 				
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
@@ -6015,8 +6016,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		remove_status_effect_on_taking_hit()
 	
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
+		if $SBlockTimer.is_running():
+			return # cannot grab someone who just blocked an attack
 		if hit_data[Em.hit.SEMI_DISJOINT] or hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data:
-			return
+			return # cannot grab if has repeat penalty
 		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
 			return # quick grabs fail if target is in movement startup
@@ -6566,8 +6569,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 			else:
 				if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
 					return 0
-				elif Em.hit.SDASH_ARMORED in hit_data:
+				elif Em.hit.SDASH_ARMORED in hit_data: # super dashing through projectiles drain GG
 					guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD)
+					if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
+						guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD2) # super dashing through level 2 projectiles drain more
 					
 		Em.block_state.UNBLOCKED:
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_GUARD_DRAIN):
