@@ -593,9 +593,9 @@ const MOVE_DATABASE = {
 			Em.move.SEQ_HITSTOP : 0,
 #			"guard_gain" : 3500,
 #			"EX_gain": 0,
-			Em.move.KB : 800 * FMath.S,
+			Em.move.KB : 900 * FMath.S,
 			Em.move.KB_ANGLE : -103, # launch backwards
-			Em.move.ATK_LVL : 6,
+			Em.move.ATK_LVL : 2,
 		}
 	},
 	"aSP6[ex]SeqE": { # if Grabbed hit a ledge while Grabber doesn't
@@ -606,9 +606,9 @@ const MOVE_DATABASE = {
 			Em.move.SEQ_HITSTOP : 0,
 #			"guard_gain" : 3500,
 #			"EX_gain": 0,
-			Em.move.KB : 800 * FMath.S,
+			Em.move.KB : 900 * FMath.S,
 			Em.move.KB_ANGLE : -103,
-			Em.move.ATK_LVL : 6,
+			Em.move.ATK_LVL : 2,
 		}
 	},
 	

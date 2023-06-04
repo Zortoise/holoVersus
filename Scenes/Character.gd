@@ -893,11 +893,21 @@ func simulate2(): # only ran if not in hitstop
 		
 	# regen EX Gauge
 	if !Globals.training_mode:
+#		var target = get_target()
+#		var no_regen := false
+#
+#		# no regen when moving away from opponent
+#		if Globals.survival_level == null and !is_hitstunned_or_sequenced() and !target.is_hitstunned_or_sequenced():
+#			var distance = target.position.x - position.x
+#			if velocity.x != 0 and distance != 0 and sign(velocity.x) != sign(distance):
+#				no_regen = true
 		
 		if !Globals.Game.input_lock and current_ex_gauge < MAX_EX_GAUGE and state != Em.char_state.DEAD:
 			var ex_change := get_stat("BASE_EX_REGEN") * FMath.S
 			if is_hitstunned():
 				ex_change = FMath.percent(ex_change, get_stat("HITSTUN_EX_REGEN_MOD"))
+			elif state == Em.char_state.SEQUENCE_TARGET:
+				ex_change = 0
 			else:
 				match chain_combo:
 					Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL: # landed an attack on opponent

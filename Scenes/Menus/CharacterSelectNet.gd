@@ -69,7 +69,7 @@ var my_payload = {
 
 func _ready():
 	
-#	BGM.bgm(BGM.common_music["char_select"])
+	BGM.bgm(BGM.common_music["char_select"])
 	
 # warning-ignore:return_value_discarded
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")

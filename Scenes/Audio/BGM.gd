@@ -7,8 +7,16 @@ var common_music = {
 	"title_theme" : {
 		"name" : "title_theme", # to not play the same music as the one currently being played
 		"audio" : ResourceLoader.load("res://Assets/Music/TitleTheme.ogg"),
+#		"loop_start": 0.0,
 		"loop_end": 224.0,
 		"vol" : 3,
+		},
+	"char_select" : {
+		"name" : "char_select",
+		"audio" : ResourceLoader.load("res://Assets/Music/CharSelect.ogg"),
+#		"loop_end": 111.42,
+		"loop_end": 125.14,
+		"vol" : 0,
 		},
 	"victory" : {
 		"name" : "victory",
