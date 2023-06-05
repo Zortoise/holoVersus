@@ -1,7 +1,7 @@
 [gd_scene load_steps=45 format=2]
 
 [ext_resource path="res://Characters/Gura/UI/full_art.png" type="Texture" id=1]
-[ext_resource path="res://Assets/UI/victory.png" type="Texture" id=2]
+[ext_resource path="res://Assets/UI/result.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Menus/VictoryScreen.gd" type="Script" id=3]
 [ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://Assets/UI/cursor.png" type="Texture" id=5]

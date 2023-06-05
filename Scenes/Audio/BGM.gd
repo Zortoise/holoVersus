@@ -21,8 +21,9 @@ var common_music = {
 	"victory" : {
 		"name" : "victory",
 		"audio" : ResourceLoader.load("res://Assets/Music/VictoryScreen.ogg"),
-		"loop_end": 90.66,
-		"vol" : -4,
+		"loop_start": 0.63,
+		"loop_end": 94.1,
+		"vol" : 1,
 		}
 }
 

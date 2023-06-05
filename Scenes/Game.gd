@@ -174,6 +174,9 @@ func setup():
 	if Globals.time_limit == 0: # no time limit
 		HUD.get_node("MatchTime").hide()
 		HUD.get_node("TimeFrame").hide()
+	else:
+		HUD.get_node("MatchTime").show()
+		HUD.get_node("TimeFrame").show()
 	
 	if Globals.survival_level == null or Globals.difficulty >= 2:
 		HUD.get_node("P1_HUDRect/Portrait/Coin").hide()

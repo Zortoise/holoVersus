@@ -111,7 +111,7 @@ func triggered(triggered_node):
 				
 			"Save":
 				if $ReplayMenu/ReplayList/Rename.is_valid():
-					play_audio("ui_accept2", {"vol":-5})
+					play_audio("ui_accept2", {})
 					replay.save_replay($ReplayMenu/ReplayList/Rename/Entry.text)
 					$ReplayMenu.hide()
 					$VictoryMenu/VictoryList/SaveReplay.initial_focus()

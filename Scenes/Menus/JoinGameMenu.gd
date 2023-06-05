@@ -124,7 +124,7 @@ func triggered(triggered_node):
 puppet func guest_ready_acknowledged(ready_state: bool):
 	if ready_state:
 		if !guest_readied:
-			play_audio("ui_accept2", {"vol":-5})
+			play_audio("ui_accept2", {})
 			$PlayerList/PlayersList/Player2/Ready/AnimationPlayer.play("flashing")
 			guest_readied = true
 	else:

@@ -944,11 +944,11 @@ func simulate2(): # only ran if not in hitstop
 					if !grounded: # reduce passive EX Gain in air
 						ex_change = FMath.percent(ex_change, 50)
 							
-				# reduce EX Gain when far from center
-				var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
-				var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
-				var weight = FMath.get_fraction_percent(char_dist, max_dist)
-				ex_change = FMath.f_lerp(ex_change, FMath.percent(ex_change, 50), weight)
+					# reduce passive EX Gain when far from center
+					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
+					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
+					var weight = FMath.get_fraction_percent(char_dist, max_dist)
+					ex_change = FMath.f_lerp(ex_change, FMath.percent(ex_change, 0), weight)
 				
 				change_ex_gauge(FMath.round_and_descale(ex_change))
 

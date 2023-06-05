@@ -439,7 +439,7 @@ func move_pickers(P1_dir, P2_dir):
 	
 func P1_changed_character():
 	if sound:
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 	P1_palette_picked = 1 # reset picked palette
 	$P1_Picker.rect_position = $Grid.get_child(P1_picker_pos).rect_global_position # move picker
 	if P1_picker_pos in char_grid: # update art/select sprite/name
@@ -459,7 +459,7 @@ func P1_changed_character():
 	
 func P2_changed_character():
 	if sound:
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 	P2_palette_picked = 1 # reset picked palette
 	$P2_Picker.rect_position = $Grid.get_child(P2_picker_pos).rect_global_position # move picker
 	if P2_picker_pos in char_grid:
@@ -482,7 +482,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 	
 	if P1_phase == 0 and P1_p_dir != 0 and P1_picker_pos in char_grid and $P1_Sprite.get_child_count() > 0: # last one is just in case
 		P1_palette_picked += P1_p_dir # move pointer
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 		var char_name: String = char_grid[P1_picker_pos]
 		P1_palette_picked = wrapi(P1_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 		if P1_palette_picked == 1:
@@ -494,7 +494,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 			
 	if P2_phase == 0 and P2_p_dir != 0 and P2_picker_pos in char_grid and $P2_Sprite.get_child_count() > 0: # last one is just in case
 		P2_palette_picked += P2_p_dir # move pointer
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 		var char_name: String = char_grid[P2_picker_pos]
 		P2_palette_picked = wrapi(P2_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 		
@@ -508,7 +508,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 
 func P1_picked_character():
 	if P1_picker_pos in char_grid:
-		play_audio("ui_accept2", {"vol":-5})
+		play_audio("ui_accept2", {})
 		$P1_Picker/AnimationPlayer.play("RESET")
 		$P1_FullArt/AnimationPlayer.play("flash")
 		yield(get_tree(),"idle_frame")
@@ -529,7 +529,7 @@ func P1_picked_character():
 	
 func P2_picked_character():
 	if P2_picker_pos in char_grid:
-		play_audio("ui_accept2", {"vol":-5})
+		play_audio("ui_accept2", {})
 		$P2_Picker/AnimationPlayer.play("RESET")
 		$P2_FullArt/AnimationPlayer.play("flash")
 		yield(get_tree(),"idle_frame")
@@ -578,7 +578,7 @@ func shift_stage_list(player_ID, v_dir):
 		
 		if v_dir == 1: # move down, shift list upward
 			if sound:
-				play_audio("ui_move2", {"vol":-12})
+				play_audio("ui_move2", {"vol":-10})
 			first_child.free() # remove 1st child
 			var index = stage_array.find(last_child.text) # find index of last child in stage_array
 			index = wrapi(index + 1, 0, stage_array.size()) # get index of next stage in stage_array, wraparound
@@ -587,7 +587,7 @@ func shift_stage_list(player_ID, v_dir):
 			new_stagelabel.text = stage_array[index]
 		elif v_dir == -1: # move up, shift list downward
 			if sound:
-				play_audio("ui_move2", {"vol":-12})
+				play_audio("ui_move2", {"vol":-10})
 			last_child.free() # remove last child
 			var index = stage_array.find(first_child.text) # find index of first child in stage_array
 			index = wrapi(index - 1, 0, stage_array.size()) # get index of previous stage in stage_array, wraparound
@@ -607,7 +607,7 @@ func shift_stage_list(player_ID, v_dir):
 		
 		if v_dir == 1: # move down, shift list upward
 			if sound:
-				play_audio("ui_move2", {"vol":-12})
+				play_audio("ui_move2", {"vol":-10})
 			first_child.free() # remove 1st child
 			var index = stage_array.find(last_child.text) # find index of last child in stage_array
 			index = wrapi(index + 1, 0, stage_array.size()) # get index of next stage in stage_array, wraparound
@@ -616,7 +616,7 @@ func shift_stage_list(player_ID, v_dir):
 			new_stagelabel.text = stage_array[index]
 		elif v_dir == -1: # move up, shift list downward
 			if sound:
-				play_audio("ui_move2", {"vol":-12})
+				play_audio("ui_move2", {"vol":-10})
 			last_child.free() # remove last child
 			var index = stage_array.find(first_child.text) # find index of first child in stage_array
 			index = wrapi(index - 1, 0, stage_array.size()) # get index of previous stage in stage_array, wraparound
@@ -631,14 +631,14 @@ func shift_stage_list(player_ID, v_dir):
 		$P2_StageSelect/StageList.get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at
 	
 func P1_picked_stage():
-	play_audio("ui_accept2", {"vol":-5})
+	play_audio("ui_accept2", {})
 	$P1_Stage/AnimationPlayer.play("flash")
 	yield(get_tree(),"idle_frame")
 	P1_phase = 2
 	$P1_StageSelect.hide()
 	
 func P2_picked_stage():
-	play_audio("ui_accept2", {"vol":-5})
+	play_audio("ui_accept2", {})
 	$P2_Stage/AnimationPlayer.play("flash")
 	yield(get_tree(),"idle_frame")
 	P2_phase = 2

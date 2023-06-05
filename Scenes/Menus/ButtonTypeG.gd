@@ -76,7 +76,7 @@ func play_audio(audio_ref, aux_data):
 
 
 func _on_Entry_text_entered(new_text):
-	play_audio("ui_accept2", {"vol":-5})
+	play_audio("ui_accept2", {})
 	initial_focus()
 	if numbers_only:
 		$Entry.text = str(int(new_text))

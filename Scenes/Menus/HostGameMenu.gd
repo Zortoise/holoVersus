@@ -216,7 +216,7 @@ func triggered(triggered_node):
 					$IPCopied2/AnimationPlayer.play("show")
 			"Kick":
 				if get_tree().get_network_connected_peers().size() > 0:
-					play_audio("ui_accept2", {"vol":-5})
+					play_audio("ui_accept2", {})
 					get_tree().get_network_peer().disconnect_peer(get_tree().get_network_connected_peers()[0])
 				else:
 					play_audio("ui_deny", {"vol" : -9})
@@ -266,7 +266,7 @@ master func host_ready_acknowledged(ready_state: bool):
 	if ready_state:
 		if !host_readied:
 			save_config()
-			play_audio("ui_accept2", {"vol":-5})
+			play_audio("ui_accept2", {})
 			$PlayerList/PlayersList/Player1/Ready/AnimationPlayer.play("flashing")
 			host_readied = true
 	else:

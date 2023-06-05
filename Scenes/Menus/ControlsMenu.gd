@@ -493,7 +493,7 @@ func triggered(triggered_node):
 			"SaveList":
 				match triggered_node.name:
 					"ConfirmSavePreset":
-						play_audio("ui_accept2", {"vol":-5})
+						play_audio("ui_accept2", {})
 						save_preset()
 						$PopUpSave.hide()
 						$ControlsListBottom/SavePreset.initial_focus()
@@ -511,7 +511,7 @@ func triggered(triggered_node):
 						else:
 							play_audio("ui_deny", {"vol" : -5})
 					"ConfirmLoadPreset":
-						play_audio("ui_accept2", {"vol":-5})
+						play_audio("ui_accept2", {})
 						$PopUpLoad.hide()
 						$ControlsListBottom/LoadPreset.initial_focus()
 						load_selected_preset()
@@ -520,7 +520,7 @@ func triggered(triggered_node):
 						$PopUpRename.show()
 						$PopUpRename/RenameList/Rename.initial_focus()
 					"DeletePreset":
-						play_audio("ui_accept2", {"vol":-5})
+						play_audio("ui_accept2", {})
 						delete_preset()
 					"CancelLoadPreset":
 						play_audio("ui_back", {})
@@ -531,7 +531,7 @@ func triggered(triggered_node):
 				match triggered_node.name:
 					"SaveName":
 						if $PopUpRename/RenameList/Rename.is_valid():
-							play_audio("ui_accept2", {"vol":-5})
+							play_audio("ui_accept2", {})
 							rename_preset()
 							$PopUpRename.hide()
 							$PopUpLoad/LoadList/RenamePreset.initial_focus()

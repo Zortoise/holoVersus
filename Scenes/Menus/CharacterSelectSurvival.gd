@@ -368,7 +368,7 @@ func move_pickers(P1_dir, P2_dir):
 	
 func P1_changed_character():
 	if sound:
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 	P1_palette_picked = 1 # reset picked palette
 	$P1_Picker.rect_position = $Grid.get_child(P1_picker_pos).rect_global_position # move picker
 	if P1_picker_pos in char_grid: # update art/select sprite/name
@@ -388,7 +388,7 @@ func P1_changed_character():
 	
 func P2_changed_character():
 	if sound:
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 	P2_palette_picked = 1 # reset picked palette
 	$P2_Picker.rect_position = $Grid.get_child(P2_picker_pos).rect_global_position # move picker
 	if P2_picker_pos in char_grid:
@@ -411,7 +411,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 	
 	if P1_phase == 0 and P1_p_dir != 0 and P1_picker_pos in char_grid and $P1_Sprite.get_child_count() > 0: # last one is just in case
 		P1_palette_picked += P1_p_dir # move pointer
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 		var char_name: String = char_grid[P1_picker_pos]
 		P1_palette_picked = wrapi(P1_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 		if P1_palette_picked == 1:
@@ -423,7 +423,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 			
 	if P2_phase == 0 and P2_p_dir != 0 and P2_picker_pos in char_grid and $P2_Sprite.get_child_count() > 0: # last one is just in case
 		P2_palette_picked += P2_p_dir # move pointer
-		play_audio("ui_move2", {"vol":-12})
+		play_audio("ui_move2", {"vol":-10})
 		var char_name: String = char_grid[P2_picker_pos]
 		P2_palette_picked = wrapi(P2_palette_picked, 1, character_data[char_name]["palettes"].size() + 2) # wrap around pointer
 		
@@ -437,7 +437,7 @@ func change_palette(P1_p_dir, P2_p_dir):
 
 func P1_picked_character():
 	if P1_picker_pos in char_grid:
-		play_audio("ui_accept2", {"vol":-5})
+		play_audio("ui_accept2", {})
 		$P1_Picker/AnimationPlayer.play("RESET")
 		$P1_FullArt/AnimationPlayer.play("flash")
 		yield(get_tree(),"idle_frame")
@@ -457,7 +457,7 @@ func P1_picked_character():
 	
 func P2_picked_character():
 	if P2_picker_pos in char_grid:
-		play_audio("ui_accept2", {"vol":-5})
+		play_audio("ui_accept2", {})
 		$P2_Picker/AnimationPlayer.play("RESET")
 		$P2_FullArt/AnimationPlayer.play("flash")
 		yield(get_tree(),"idle_frame")

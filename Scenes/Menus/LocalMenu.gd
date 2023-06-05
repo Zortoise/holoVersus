@@ -75,7 +75,7 @@ func triggered(triggered_node):
 					"custom_playlist" : $LocalList/CustomPlaylist.option_pointer,
 				}
 				Settings.save_game_config(game_config)
-				play_audio("ui_accept2", {"vol":-5})
+				play_audio("ui_accept2", {})
 				BGM.fade()
 				$Transition.play("transit_to_char_select")
 				Globals.starting_stock_pts = STOCKPOINTS_OPTIONS[game_config.stock_points]

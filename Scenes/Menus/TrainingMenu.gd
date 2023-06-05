@@ -57,7 +57,7 @@ func triggered(triggered_node):
 					"custom_playlist" : $LocalList/CustomPlaylist.option_pointer,
 				}
 				Settings.save_training_config(training_config)
-				play_audio("ui_accept2", {"vol":-5})
+				play_audio("ui_accept2", {})
 				BGM.fade()
 				$Transition.play("transit_to_char_select")
 				Globals.assists = training_config.assists

@@ -100,7 +100,7 @@ func play_audio(audio_ref, aux_data):
 
 
 func _on_Entry_text_entered(_new_text):
-	play_audio("ui_accept2", {"vol":-5})
+	play_audio("ui_accept2", {})
 	initial_focus()
 	remove_spaces_and_dots()
 	red_text()

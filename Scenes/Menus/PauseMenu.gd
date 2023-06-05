@@ -68,7 +68,7 @@ func open():
 	show()
 	$CanvasLayer.show()
 	$AltInputs.active = true
-	get_parent().play_audio("ui_accept2", {"vol":-5})
+	get_parent().play_audio("ui_accept2", {})
 	
 	$CanvasLayer/Cursor.show()
 	if !Globals.training_mode:
@@ -100,7 +100,7 @@ func close(yielding = true):
 func _process(_delta):
 	if visible and Input.is_action_just_pressed("ui_cancel"):
 		if $CanvasLayer/TrainingControl/TrainingSettings.visible:
-			get_parent().play_audio("ui_accept2", {"vol":-5})
+			get_parent().play_audio("ui_accept2", {})
 			$CanvasLayer/TrainingControl/TrainingList.show()
 			$CanvasLayer/TrainingControl/TrainingSettings.hide()
 			$CanvasLayer/TrainingControl/TrainingList/TrainingSettings.initial_focus()

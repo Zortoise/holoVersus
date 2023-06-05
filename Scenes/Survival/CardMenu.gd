@@ -271,7 +271,7 @@ func P1_changed_card(sound := true): # update card currently being hovered over
 	P1_held_timer = 0
 	P1_hold_lock = true
 	if sound:
-		get_parent().play_audio("ui_move2", {"vol":-12})
+		get_parent().play_audio("ui_move2", {"vol":-10})
 	$P1/Picker.position = get_position_of_card(0, P1_picker_pos)  # move picker
 	
 	# update description
@@ -291,7 +291,7 @@ func P2_changed_card(sound := true): # update card currently being hovered over
 	P2_held_timer = 0
 	P2_hold_lock = true
 	if sound:
-		get_parent().play_audio("ui_move2", {"vol":-12})
+		get_parent().play_audio("ui_move2", {"vol":-10})
 	$P2/Picker.position = get_position_of_card(1, P2_picker_pos)  # move picker
 	
 	# update description
@@ -379,7 +379,7 @@ func timer_check():
 			0:
 				P1_buying = P1_picker_pos[1]
 			1:
-				get_parent().play_audio("ui_accept2", {"vol":-5})
+				get_parent().play_audio("ui_accept2", {})
 				P1_sell()
 		
 	if Globals.player_count > 1 and P2_held_timer >= 45:
@@ -389,7 +389,7 @@ func timer_check():
 			0:
 				P2_buying = P2_picker_pos[1]
 			1:
-				get_parent().play_audio("ui_accept2", {"vol":-5})
+				get_parent().play_audio("ui_accept2", {})
 				P2_sell()
 				
 	if Globals.player_count > 1 and P1_buying != null and P2_buying != null and P1_buying == P2_buying: # both players buying at the same time
@@ -399,11 +399,11 @@ func timer_check():
 			P1_buying = null
 			
 	if P1_buying != null:
-		get_parent().play_audio("ui_accept2", {"vol":-5})
+		get_parent().play_audio("ui_accept2", {})
 		P1_buy()
 		
 	if P2_buying != null:
-		get_parent().play_audio("ui_accept2", {"vol":-5})
+		get_parent().play_audio("ui_accept2", {})
 		P2_buy()
 	
 		

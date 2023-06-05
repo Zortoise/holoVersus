@@ -74,7 +74,7 @@ func triggered(triggered_node):
 					"difficulty" : $SurvivalList/Difficulty.option_pointer,
 				}
 				Settings.save_survival_config(survival_config)
-				play_audio("ui_accept2", {"vol":-5})
+				play_audio("ui_accept2", {})
 				BGM.fade()
 				$Transition.play("transit_to_char_select_surv")
 				Globals.survival_level = level_select_filenames[survival_config.level_select]

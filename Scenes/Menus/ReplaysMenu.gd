@@ -149,7 +149,7 @@ func triggered(triggered_node):
 					else:
 						play_audio("ui_deny", {"vol" : -9})
 				"WatchReplay":
-					play_audio("ui_accept2", {"vol":-5})
+					play_audio("ui_accept2", {})
 					watch_replay()
 				"RenameReplay":
 					play_audio("ui_accept", {"vol":-8})
@@ -157,7 +157,7 @@ func triggered(triggered_node):
 					$RenameMenu/RenameList/Rename.initial_focus()
 				"SaveName":
 					if $RenameMenu/RenameList/Rename.is_valid():
-						play_audio("ui_accept2", {"vol":-5})
+						play_audio("ui_accept2", {})
 						rename_replay()
 						$ReplaysList/RenameReplay.initial_focus()
 						$RenameMenu.hide()
@@ -172,7 +172,7 @@ func triggered(triggered_node):
 					$DeleteMenu.show()
 					$DeleteMenu/DeleteList/CancelDelete.initial_focus()
 				"Delete":
-					play_audio("ui_accept2", {"vol":-5})
+					play_audio("ui_accept2", {})
 					delete_replay()
 					$ReplaysList/DeleteReplay.initial_focus()
 					$DeleteMenu.hide()
