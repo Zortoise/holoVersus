@@ -144,9 +144,11 @@ func _on_level_cleared():
 	$HUD/Announcer2/Wave.text = "ALL WAVES"
 	$HUD/Announcer2/Cleared.text = "CLEARED!"
 	$HUD/Announcer2/AnimationPlayer.play("all_wave_cleared")
+	Globals.survival_time = Globals.Game.frametime
 	
-func _on_level_failed():
+func _on_level_failed(wave_ID):
 	$HUD/Announcer2/Survival.text = "DEFEATED"
+	$HUD/Announcer2/Survival2.text = "SURVIVED TILL WAVE " + str(wave_ID)
 	$HUD/Announcer2/AnimationPlayer.play("defeated")
 
 # ------------------------------------------------------------------------------------------------------------

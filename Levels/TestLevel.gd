@@ -25,7 +25,13 @@ var RESOURCE_ADD = {
 				"scene" : load("res://Mobs/GuraM/Entities/TridentProjM.tscn"),
 				"frame_data" : ResourceLoader.load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
 				"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
+			},
+			"WaterDriveM" : {
+				"scene" : load("res://Mobs/GuraM/Entities/WaterDriveM.tscn"),
+				"frame_data" : ResourceLoader.load("res://Characters/Gura/Entities/FrameData/WaterDrive.tres"),
+				"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/WaterDriveSprite.png")
 			}
+			
 		}
 	}	
 }
@@ -42,7 +48,7 @@ const WAVES2 = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "test",
+					{"mob" : "GuraM", "level" : 3, "variant" : "dash",
 					"attr" : {
 						Em.mob_attr.RAGE:true
 						} },
@@ -62,7 +68,14 @@ const WAVES = {
 						} },
 				],
 				3000 : [
-					{"mob" : "GuraM", "level" : 1, "variant" : "shark",
+					{"mob" : "GuraM", "level" : 2, "variant" : "zone",
+					"attr" : {
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 0
+						} },
+				],
+				6000 : [
+					{"mob" : "GuraM", "level" : 2, "variant" : "jump",
 					"attr" : {
 						} },
 				],
@@ -72,15 +85,13 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 3, "variant" : "base",
+					{"mob" : "GuraM", "level" : 2, "variant" : "dash",
 					"attr" : {
 						} },
 				],
-				1800 : [
-					{"mob" : "GuraM", "level" : 2, "variant" : "zone",
+				3000 : [
+					{"mob" : "GuraM", "level" : 2, "variant" : "shark",
 					"attr" : {
-						Em.mob_attr.HP : 1,
-						Em.mob_attr.TOUGH : 0
 						} },
 				],
 			}
@@ -89,10 +100,10 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 0, "variant" : "base",
+					{"mob" : "GuraM", "level" : 2, "variant" : "base",
 					"attr" : {
 						} },
-					{"mob" : "GuraM", "level" : 0, "variant" : "jump",
+					{"mob" : "GuraM", "level" : 2, "variant" : "base",
 					"attr" : {
 						} },
 				],
@@ -107,19 +118,19 @@ const WAVES = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 3, "variant" : "zone",
 					"attr" : {
 						Em.mob_attr.HP : 1,
 						Em.mob_attr.TOUGH : 0
 						} },
-					{"mob" : "GuraM", "level" : 0, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 3, "variant" : "zone",
 					"attr" : {
 						Em.mob_attr.HP : 1,
 						Em.mob_attr.TOUGH : 0
 						} },
 				],
 				1800 : [
-					{"mob" : "GuraM", "level" : 5, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 7, "variant" : "zone",
 					"attr" : {
 						Em.mob_attr.HP : 1,
 						Em.mob_attr.TOUGH : 1
@@ -258,13 +269,17 @@ const WAVES = {
 						} },
 				],
 				4200 : [
-					{"mob" : "GuraM", "level" : 6, "variant" : "base",
+					{"mob" : "GuraM", "level" : 6, "variant" : "dash",
 					"attr" : {
 						Em.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 1,
 						} },
 					{"mob" : "GuraM", "level" : 6, "variant" : "base",
 					"attr" : {
 						Em.mob_attr.RAGE : true,
+						Em.mob_attr.HP : 1,
+						Em.mob_attr.TOUGH : 1,
 						} },
 				],
 			}

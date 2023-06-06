@@ -54,7 +54,9 @@ func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_da
 	position = in_position
 	set_true_position()
 	
-	if aux_data.facing != 0: # just in case
+	if !"facing" in aux_data:
+		face(Globals.Game.get_player_node(master_ID).facing) # face in same direction as master
+	elif aux_data.facing != 0: # just in case
 		face(aux_data.facing)
 	
 	# for sprites:

@@ -612,7 +612,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str($BurstLockTimer.time)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(Globals.Game.frametime)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -1889,14 +1889,14 @@ func bounce(against_ground: bool):
 						if scaled_damage < WALL_SLAM_MIN_DAMAGE * 3: # lvl 2 slam
 							hitstop = 12
 							slam_level = 1
-							play_audio("break3", {"vol" : -15,})
+							play_audio("break3", {"vol" : -16,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
 						else: # lvl 3 slam
 							hitstop = 15
 							slam_level = 2
-							play_audio("break3", {"vol" : -12,})
+							play_audio("break3", {"vol" : -14,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))

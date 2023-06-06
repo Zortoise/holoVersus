@@ -225,7 +225,7 @@ func init(mob_name: String, level: int, variant: String, attr: Dictionary, start
 	
 	Globals.Game.spawn_SFX("Respawn", "Respawn", position, {"back":true, "facing":Globals.Game.rng_facing(), \
 			"v_mirror":Globals.Game.rng_bool()}, "white")
-	play_audio("bling7", {"vol" : -30, "bus" : "LowPass"})
+	play_audio("bling7", {"vol" : -27, "bus" : "LowPass"})
 	play_audio("bling7", {"vol" : -12, "bus" : "PitchUp"})
 	
 	
@@ -570,10 +570,12 @@ func simulate2(): # only ran if not in hitstop
 	match new_state: # quick turn
 		Em.char_state.GROUND_ATK_STARTUP:
 			if Animator.time <= 6:
-				face_opponent()
+				if !Em.atk_attr.NO_TURN in query_atk_attr():
+					face_opponent()
 		Em.char_state.AIR_ATK_STARTUP:
 			if Animator.time <= 6:
-				face_opponent()
+				if !Em.atk_attr.NO_TURN in query_atk_attr():
+					face_opponent()
 	
 	# air strafing
 	if !grounded and new_state in [Em.char_state.AIR_STANDBY, Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE]:
@@ -1353,13 +1355,13 @@ func bounce(against_ground: bool):
 						if scaled_damage < 150:
 							hitstop = 12
 							slam_level = 1
-							play_audio("break3", {"vol" : -15,})
+							play_audio("break3", {"vol" : -16,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
 						else:
 							hitstop = 15
 							slam_level = 2
-							play_audio("break3", {"vol" : -12,})
+							play_audio("break3", {"vol" : -14,})
 							modulate_play("punish_sweet_flash")
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
 					else:
@@ -1459,7 +1461,7 @@ func animate(anim):
 	Animator.play(anim)
 	new_state = state_detect(anim)
 	
-	if anim.ends_with("Active"):
+	if anim.ends_with("Active") and !Em.atk_attr.NO_HITCOUNT_RESET in UniqChar.query_atk_attr(get_move_name()):
 		atk_startup_resets() # need to do this here to work! resets hitcount and ignore list
 
 	

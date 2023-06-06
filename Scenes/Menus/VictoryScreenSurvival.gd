@@ -18,6 +18,16 @@ func _ready():
 	else:
 		$P2_FullArt.hide()
 		$Background/Triangle2.modulate = Color(0.73, 0.19, 0.27)
+		
+	var time = int(round(Globals.survival_time * (1.0/60.0 * 100)))
+	var centiseconds: int = posmod(time, 100)
+	time = int(time/100)
+	var seconds: int = posmod(time, 60)
+	time = int(time/60)
+	var minutes: int = time
+	var difficulty = ["Standard", "Forgiving", "Hardcore", "Must Die"]
+		
+	$Victory2.text = difficulty[Globals.difficulty] + "\nTime - " + str(minutes) + ":" + str(seconds) + ":" + str(centiseconds)
 
 	
 	for node in $VictoryMenu/VictoryList.get_children():

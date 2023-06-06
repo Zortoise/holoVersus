@@ -4,7 +4,7 @@ signal wave_start (wave_ID)
 signal wave_cleared
 signal level_cleared
 # warning-ignore:unused_signal
-signal level_failed
+signal level_failed (wave_ID)
 
 const STARTING_TIME = -48
 const ITEM_LIMIT = 40
@@ -339,7 +339,7 @@ func simulate():
 		if failure:
 			Globals.Game.game_set = true
 			level_active = false
-			emit_signal("level_failed")
+			emit_signal("level_failed", wave_ID)
 		
 	if level_active:
 		if wave_standby_timer > 0:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=172 format=2]
+[gd_scene load_steps=174 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -1996,6 +1996,28 @@ Button/styles/hover = null
 Button/styles/normal = null
 Button/styles/pressed = null
 
+[sub_resource type="DynamicFont" id=184]
+size = 70
+outline_size = 7
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=185]
+default_font = SubResource( 184 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 15 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 47 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
 [sub_resource type="Animation" id=142]
 length = 0.001
 tracks/0/type = "value"
@@ -2116,6 +2138,18 @@ tracks/9/keys = {
 "update": 0,
 "values": [ Color( 1, 1, 1, 1 ) ]
 }
+tracks/10/type = "value"
+tracks/10/path = NodePath("Survival2:modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
 
 [sub_resource type="Animation" id=143]
 resource_name = "all_wave_cleared"
@@ -2201,7 +2235,7 @@ tracks/6/keys = {
 
 [sub_resource type="Animation" id=144]
 resource_name = "defeated"
-length = 2.0
+length = 3.0
 step = 0.05
 tracks/0/type = "value"
 tracks/0/path = NodePath("Survival:modulate")
@@ -2237,7 +2271,7 @@ tracks/2/keys = {
 "times": PoolRealArray( 0, 0.4 ),
 "transitions": PoolRealArray( 0.353553, 1 ),
 "update": 0,
-"values": [ Vector2( -64, 448 ), Vector2( -64, 352 ) ]
+"values": [ Vector2( 0, 448 ), Vector2( 0, 352 ) ]
 }
 tracks/3/type = "animation"
 tracks/3/path = NodePath("../../Transition")
@@ -2247,7 +2281,7 @@ tracks/3/imported = false
 tracks/3/enabled = true
 tracks/3/keys = {
 "clips": PoolStringArray( "transit_to_survival" ),
-"times": PoolRealArray( 2 )
+"times": PoolRealArray( 3 )
 }
 tracks/4/type = "value"
 tracks/4/path = NodePath("Survival:custom_colors/font_color")
@@ -2297,6 +2331,18 @@ tracks/7/keys = {
 "update": 0,
 "values": [ Color( 1, 1, 1, 1 ), Color( 0.501961, 0.501961, 0.501961, 1 ) ]
 }
+tracks/8/type = "value"
+tracks/8/path = NodePath("Survival2:modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0.4, 0.65 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
 
 [sub_resource type="Animation" id=145]
 resource_name = "start_wave"
@@ -2336,7 +2382,7 @@ tracks/2/keys = {
 "times": PoolRealArray( 0, 0.25 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Vector2( -64, 448 ), Vector2( -64, 352 ) ]
+"values": [ Vector2( 0, 448 ), Vector2( 0, 352 ) ]
 }
 
 [sub_resource type="Animation" id=146]
@@ -4051,9 +4097,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -11.2323
+margin_left = -256.0
 margin_top = 312.0
-margin_right = 1908.76
+margin_right = 1663.99
 margin_bottom = 632.0
 theme = SubResource( 149 )
 custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
@@ -4092,7 +4138,23 @@ margin_bottom = 683.979
 theme = SubResource( 141 )
 custom_colors/font_color = Color( 0.121569, 0.121569, 0.121569, 1 )
 custom_colors/font_outline_modulate = Color( 0.941176, 0.941176, 0.941176, 1 )
-text = "WAVE 1"
+text = "DEFEATED"
+align = 1
+valign = 1
+
+[node name="Survival2" type="Label" parent="HUD/Announcer2"]
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_top = 480.0
+margin_right = 1920.0
+margin_bottom = 799.978
+theme = SubResource( 185 )
+custom_colors/font_color = Color( 0.658824, 0.0941176, 0.0941176, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+text = "Survived till wave 10"
 align = 1
 valign = 1
 

@@ -65,6 +65,7 @@ var training_settings := {
 
 var survival_level = null
 var difficulty := 0
+var survival_time := 0
 
 #onready var debugger = load("res://Scenes/Debugger.gd").new()
 

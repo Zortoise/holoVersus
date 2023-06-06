@@ -65,8 +65,8 @@ const UNIQUE_DATA_REF = {
 }
 
 const STARTERS = ["L1", "L3", "F1", "F2", "F3", "H", "aL1", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "aSP1", \
-	"aSP2", "SP3", "SP6[ex]"]
-const NO_IMPULSE = ["SP1"]
+	"aSP2", "SP3", "SP6[ex]", "SP9"]
+#const NO_IMPULSE = ["SP1", "SP9", "SP9a", "SP9c", "SP9d"]
 
 
 const MOVE_DATABASE = {
@@ -258,7 +258,7 @@ const MOVE_DATABASE = {
 	},
 	"SP1": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL, # used for chaining
-		Em.move.ATK_ATTR : [],
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE],
 	},
 	"aSP2" : {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
@@ -316,6 +316,72 @@ const MOVE_DATABASE = {
 			Em.move.ATK_LVL : 4,
 		}
 	},
+	
+	"SP9": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN],
+		Em.move.MOVE_SOUND : [{ ref = "water4", aux_data = {"vol" : -16, "bus" : "LowPass"} }, { ref = "launch1", aux_data = {"vol" : -10} }],
+	},
+	
+	"aSP9a": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 2,
+		Em.move.IGNORE_TIME : 4,
+		Em.move.DMG : 60,
+		Em.move.FIXED_KB_MULTI : 200 * FMath.S,
+		Em.move.KB : 500 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 5,
+		Em.move.FIXED_KB_ANGLE_MULTI : 0,
+		Em.move.KB_ANGLE : -25,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN],
+		Em.move.MOVE_SOUND : [{ ref = "water4", aux_data = {"vol" : -15} }, { ref = "whoosh7", aux_data = {"vol" : -15,} }],
+		Em.move.HIT_SOUND : [{ ref = "cut2", aux_data = {"vol" : -18} }, { ref = "water1", aux_data = {"vol" : -9} }],
+	},
+	
+	"aSP9c": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 70,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 3,
+		Em.move.KB_ANGLE : -75,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_IMPULSE, Em.atk_attr.NO_TURN],
+		Em.move.MOVE_SOUND : [{ ref = "whoosh13", aux_data = {"vol" : -13,} }, { ref = "whoosh9", aux_data = {"vol" : -13,"bus" : "LowPass"} }],
+		Em.move.HIT_SOUND : [{ ref = "impact16", aux_data = {"vol" : -15} },{ ref = "impact19", aux_data = {"vol" : -20,"bus" : "LowPass"} }]
+	},
+	
+	"aSP9c[r]": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 80,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 5,
+		Em.move.KB_ANGLE : 70,
+		Em.move.ATK_ATTR : [],
+		Em.move.MOVE_SOUND : { ref = "whoosh7", aux_data = {"vol" : -12,} },
+		Em.move.HIT_SOUND : [{ ref = "impact12", aux_data = {"vol" : -15} }, { ref = "impact19", aux_data = {"vol" : -20,"bus" : "LowPass"} }],
+	},
+	
+	"aSP9c[r]b": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.HITCOUNT : 1,
+		Em.move.DMG : 80,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 5,
+		Em.move.KB_ANGLE : 70,
+		Em.move.ATK_ATTR : [Em.atk_attr.NO_TURN, Em.atk_attr.NO_HITCOUNT_RESET],
+		Em.move.HIT_SOUND : [{ ref = "impact12", aux_data = {"vol" : -15} }, { ref = "impact19", aux_data = {"vol" : -20,"bus" : "LowPass"} }],
+	},
+	
+	"SP9d": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.MOVE_SOUND : { ref = "water11", aux_data = {"vol" : -8,} },
+		Em.move.ATK_ATTR : [],
+	},
 
 }
 
@@ -367,6 +433,7 @@ const COMMANDS = {
 				TRIGGERS.anti_air_long,
 			]
 		},
+		
 #		"seek_test": {
 #			"action": "run",
 #			"rand_time" :[998, 999],
@@ -586,6 +653,11 @@ const COMMANDS = {
 			"anim" : "SP6[ex]Startup",
 		},
 		
+		"command_dash": {
+			"action": "anim",
+			"anim" : "SP9Startup",
+		},
+		
 		# PROJECTILES ------------------------------------------------------------------------------------------------
 		
 		"throw_trident": {
@@ -674,9 +746,9 @@ const ATK_LOOKUP = {
 	atk_range.CLOSE_RANGE : {
 		rank.LOW : ["dash", "double_stab", "backswing", "rush_upthrust"],
 		rank.MID : ["dash", "dash_dance", "shorthop", "double_stab_combo1", "thrust", "backswing", "sharkstomp", "sharkstomp", \
-				"rush_upthrust", "overhead"],
+				"rush_upthrust", "overhead", "command_dash"],
 		rank.HIGH : ["dash", "dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust_combo", "backswing_combo", \
-				"hammerhead_combo", "rush_upthrust_combo", "overhead", "sharkstomp", "sharkstomp_combo"],
+				"hammerhead_combo", "rush_upthrust_combo", "overhead", "sharkstomp", "sharkstomp_combo", "command_dash", "command_dash"],
 		rank.RUSH : ["dash", "dash_dance", "dash_dance", "shorthop", "double_stab_combo2", "thrust", "backswing_combo", "sharkstomp", \
 				"rush_upthrust_combo", "hammerhead", "sharkstomp"],
 		rank.SHARK : ["dash", "dash_dance", "shorthop", "sharkstomp", "hammerhead", "shorthop"],
@@ -684,19 +756,20 @@ const ATK_LOOKUP = {
 	},
 	atk_range.MID_RANGE : {
 		rank.LOW : ["dash", "rush_upthrust", "thrust", "backswing", "dash"],
-		rank.MID : ["dash", "shorthop", "thrust", "backswing_combo", "rush_upthrust_combo", "dash", "throw_trident"],
+		rank.MID : ["dash", "shorthop", "thrust", "backswing_combo", "rush_upthrust_combo", "dash", "throw_trident", "command_dash"],
 		rank.HIGH : ["dash", "shorthop", "shorthop", "sharkstomp_combo", "thrust_combo", "backswing_combo", "rush_upthrust_combo", \
-				"throw_trident"],
+				"throw_trident", "command_dash", "command_dash"],
 		rank.SHARK : ["shorthop", "sharkstomp", "dash", "shorthop"],
-		rank.RUSH : ["dash", "dash", "shorthop", "shorthop", "thrust", "backswing_combo", "rush_upthrust", "rush_upthrust_combo"],
+		rank.RUSH : ["dash", "dash", "shorthop", "shorthop", "thrust", "backswing_combo", "rush_upthrust", "rush_upthrust_combo",
+				"command_dash", "command_dash"],
 		rank.ZONE : ["back_dash", "back_jump", "back_dash", "back_jump", "throw_trident"]
 	},
 	atk_range.LONG_RANGE : {
 		rank.LOW : ["idle"],
-		rank.MID : ["throw_trident"],
-		rank.HIGH : ["throw_trident", "tri_throw_trident", "up_tri_throw_trident"],
+		rank.MID : ["throw_trident", "command_dash"],
+		rank.HIGH : ["throw_trident", "tri_throw_trident", "up_tri_throw_trident", "command_dash", "command_dash"],
 		rank.SHARK : ["seek"],
-		rank.RUSH : ["seek"],
+		rank.RUSH : ["seek", "command_dash"],
 		rank.ZONE : ["throw_trident", "throw_trident", "tri_throw_trident", "up_tri_throw_trident"],
 	},
 	atk_range.ANTI_AIR_SHORT: {
@@ -717,10 +790,10 @@ const ATK_LOOKUP = {
 	},
 	atk_range.ANTI_AIR_LONG: {
 		rank.LOW : ["forward_jump"],
-		rank.MID : ["forward_jump", "dash", "up_throw_trident"],
-		rank.HIGH : ["forward_jump", "dash", "dash", "up_throw_trident"],
+		rank.MID : ["forward_jump", "dash", "up_throw_trident", "command_dash"],
+		rank.HIGH : ["forward_jump", "dash", "dash", "up_throw_trident", "command_dash", "command_dash"],
 		rank.SHARK : ["forward_jump", "dash", "dash"],
-		rank.RUSH : ["forward_jump", "dash", "dash"],
+		rank.RUSH : ["forward_jump", "dash", "dash", "command_dash", "command_dash"],
 		rank.ZONE : ["up_throw_trident", "up_tri_throw_trident"]
 	},
 	atk_range.AIR_CLOSE: {
@@ -799,7 +872,7 @@ func decision(decision_ref = null) -> bool:
 #					filter(atk_range.CLOSE_RANGE)
 #					return true
 				"start", "passive", "standby", null:
-					Character.start_command("seek")
+					Character.start_command("command_dash")
 					return true
 					
 		"base":
@@ -1181,6 +1254,17 @@ func decision(decision_ref = null) -> bool:
 					else:
 						Character.start_command("option_close")
 						return true
+						
+		"dash":
+			match decision_ref:
+				"start", "passive", "standby", null:
+					if Globals.Game.rng_generate(100) < idle_chance():
+						Character.start_command("idle")
+						return true
+					else:
+						Character.target_closest()
+						Character.start_command("command_dash")
+						return true
 					
 	return false
 
@@ -1396,6 +1480,19 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.GROUND_ATK_REC
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
 			return Em.char_state.SEQUENCE_USER
+			
+		"SP9Startup", "SP9aStartup", "SP9cStartup", "SP9dStartup":
+			return Em.char_state.GROUND_ATK_STARTUP
+		"aSP9c[r]Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"SP9Active", "SP9dActive", "SP9d[u]Active":
+			return Em.char_state.GROUND_ATK_ACTIVE
+		"aSP9aActive", "aSP9cActive", "aSP9c[r]Active", "aSP9c[r]bActive":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"SP9Rec", "SP9aRec", "SP9c[r]Rec", "SP9dRec":
+			return Em.char_state.GROUND_ATK_REC
+		"aSP9Rec", "aSP9aRec":
+			return Em.char_state.AIR_ATK_REC
 		
 	print("Error: " + anim + " not found.")
 		
@@ -1409,12 +1506,23 @@ func check_semi_invuln():
 
 func simulate():
 	
-	# can strafe up/down while doing air surf
-	if Character.state == Em.char_state.AIR_ATK_ACTIVE and Animator.query_current(["aSP2Active"]):
-		var v_dir = Character.get_opponent_v_dir()  # if +1, target is under, if -1, target is above
-		if v_dir != 0:
-			Character.velocity.y += v_dir * 100 * FMath.S
-			
+	match Character.state:
+		Em.char_state.AIR_ATK_ACTIVE:
+			if Animator.query_current(["aSP2Active"]): # can strafe up/down while doing air surf
+				var v_dir = Character.get_opponent_v_dir()  # if +1, target is under, if -1, target is above
+				if v_dir != 0:
+					Character.velocity.y += v_dir * 100 * FMath.S
+					
+			elif Animator.query_current(["aSP9c[r]Active", "aSP9c[r]bActive"]): # landing helm splitter
+				if Character.grounded:
+					Character.animate("SP9c[r]Rec")
+		
+		Em.char_state.GROUND_ATK_ACTIVE: # command dash
+			if Animator.query_current(["SP9Active"]) and Character.facing == Character.get_opponent_dir():
+				if Character.are_players_in_box(Vector2(0, -100), Vector2(150, 200)):
+					Character.animate("SP9cStartup")
+				elif Character.are_players_in_box(Vector2.ZERO, Vector2(270, 100)):
+					Character.animate("SP9aStartup")
 
 
 
@@ -1433,12 +1541,16 @@ func afterimage_trail():# process afterimage trail
 	match Animator.to_play_anim:
 		"Dash", "aDash", "aDashD", "aDashU":
 			Character.afterimage_trail()
+		"aSP9cActive":
+			Character.afterimage_trail()
 
 			
 func unique_flash():
 	match Animator.to_play_anim:
-		_:
-			pass
+		"SP9Active":
+			if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S:
+				Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
+						{"facing":-Character.facing, "grounded":true}, Character.palette_ref, Character.mob_ref)
 			
 			
 # GET DATA --------------------------------------------------------------------------------------------------
@@ -1469,6 +1581,15 @@ func refine_move_name(move_name):
 			
 		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
 			return "aSP6[ex]"
+			
+		"SP9a":
+			return "aSP9a"
+		"SP9c":
+			return "aSP9c"
+		"SP9c[r]":
+			return "aSP9c[r]b"
+		"SP9d[u]":
+			return "SP9d"
 			
 	return move_name
 			
@@ -2000,6 +2121,35 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP6[ex]GrabRec":
 			Character.animate("Idle")
 			
+		"SP9Startup":
+			Character.animate("SP9Active")
+		"SP9Active":
+			var drive_chance = [0, 0, 0, 40, 55, 70, 85, 100, 100]
+			if Globals.Game.rng_generate(100) < drive_chance[Character.mob_level]:
+				Character.animate("SP9dStartup")
+			else:
+				Character.animate("SP9Rec")
+		"SP9Rec","SP9aRec", "SP9c[r]Rec", "SP9dRec":
+			Character.animate("Idle")
+		"SP9aStartup":
+			Character.animate("aSP9aActive")
+		"aSP9aActive":
+			Character.animate("SP9aRec")
+		"SP9cStartup":
+			Character.animate("aSP9cActive")
+		"aSP9cActive":
+			Character.animate("aSP9c[r]Startup")
+		"aSP9c[r]Startup":
+			Character.animate("aSP9c[r]Active")
+		"aSP9c[r]Active":
+			Character.animate("aSP9c[r]bActive")
+		"SP9dStartup":
+			if !Character.get_target().grounded:
+				Character.animate("SP9d[u]Active")
+			else:
+				Character.animate("SP9dActive")
+		"SP9dActive", "SP9d[u]Active":
+			Character.animate("SP9dRec")
 			
 	if Em.mob_attr.CHAIN in Character.mob_attr:
 		if Character.is_atk_recovery():
@@ -2024,23 +2174,26 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 func _on_SpritePlayer_anim_started(anim_name):
 				
-	if Em.mob_attr.CHAIN in Character.mob_attr and \
-			Character.is_atk_startup() and Character.get_move_name() in STARTERS:
-		if Character.chain_memory.size() == 0: # 1st attack in chain set the rand_max_chain_size
-			Character.rand_max_chain_size = Globals.Game.rng_generate(Character.mob_attr[Em.mob_attr.CHAIN] + 1)
-		Character.chain_memory.append(anim_name)
-						
-	if Character.chaining:
-#		Character.afterimage_cancel()
-		Character.face_opponent()
-		Character.chaining = false
-		
+
 	if Character.is_atk_startup():
+		
+		var move_name = Character.get_move_name()
+		
+		if Em.mob_attr.CHAIN in Character.mob_attr and move_name in STARTERS:
+			if Character.chain_memory.size() == 0: # 1st attack in chain set the rand_max_chain_size
+				Character.rand_max_chain_size = Globals.Game.rng_generate(Character.mob_attr[Em.mob_attr.CHAIN] + 1)
+			Character.chain_memory.append(anim_name)
+		
+		if Character.chaining:
+	#		Character.afterimage_cancel()
+			Character.face_opponent()
+			Character.chaining = false
+		
 		if !Character.grounded: # slow down when doing aerials for more accuracy
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = FMath.percent(Character.velocity.y, 50)
 			
-		elif Character.can_impulse and !refine_move_name(Character.get_move_name()) in NO_IMPULSE: # impulse
+		elif Character.can_impulse and !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # impulse
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 200)
 	#			Character.velocity.x = int(clamp(Character.velocity.x, -Character.get_stat("SPEED"), Character.get_stat("SPEED")))
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
@@ -2158,22 +2311,22 @@ func _on_SpritePlayer_anim_started(anim_name):
 #func spawn_mob_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, \
 #		mob_level: int, mob_attr: Dictionary, creator_mob_ref: String, out_palette_ref = null):
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID}, Character.mob_level, Character.mob_attr, \
-					Character.palette_ref, "GuraM")
+					{"target_ID" : Character.target_ID}, Character.mob_level, Character.mob_attr, \
+					Character.palette_ref, Character.mob_ref)
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c1]Active": # spawn projectile at EntitySpawn
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID, "alt_aim" : true}, Character.mob_level, Character.mob_attr, \
-					Character.palette_ref, "GuraM")
+					{"target_ID" : Character.target_ID, "alt_aim" : true}, Character.mob_level, Character.mob_attr, \
+					Character.palette_ref, Character.mob_ref)
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP1[c1]Active":
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID, "aerial" : true}, Character.mob_level, Character.mob_attr, \
-					Character.palette_ref, "GuraM")
+					{"target_ID" : Character.target_ID, "aerial" : true}, Character.mob_level, Character.mob_attr, \
+					Character.palette_ref, Character.mob_ref)
 		"aSP1[d][c1]Active":
 			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "TridentProjM", Animator.query_point("entityspawn"), \
-					{"facing": Character.facing, "target_ID" : Character.target_ID, "aerial" : true, "alt_aim" : true}, Character.mob_level, \
-					Character.mob_attr, Character.palette_ref, "GuraM")
+					{"target_ID" : Character.target_ID, "aerial" : true, "alt_aim" : true}, Character.mob_level, \
+					Character.mob_attr, Character.palette_ref, Character.mob_ref)
 		"aSP1Rec":
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
@@ -2217,6 +2370,45 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP6[ex]GrabRec":
 			Character.face(-Character.facing)
 			
+		"SP9Active":
+			Character.velocity.x = 800 * FMath.S * Character.facing
+			Character.anim_friction_mod = 0
+			Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
+					{"facing":-Character.facing, "grounded":true}, Character.palette_ref, Character.mob_ref)
+		"SP9Rec":
+			Character.anim_friction_mod = 150
+		"SP9aStartup":
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
+		"aSP9aActive":
+			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
+			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, \
+					Character.palette_ref, Character.mob_ref)
+		"aSP9cActive":
+			Character.velocity.y = -1000 * FMath.S
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"aSP9c[r]Active":
+			Character.anim_gravity_mod = 50
+		"aSP9c[r]bActive":
+			Character.anim_gravity_mod = 150
+		"SP9c[r]Rec":
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"grounded":true})
+			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Animator.query_point("sfxspawn"), \
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_ref, Character.mob_ref)
+			Character.play_audio("water7", {"vol" : -12})
+		"SP9dStartup":
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+		"SP9dActive":
+			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "WaterDriveM", Animator.query_point("entityspawn"), \
+					{}, Character.mob_level, Character.mob_attr, Character.palette_ref, Character.mob_ref)
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing, "grounded":true})
+		"SP9d[u]Active":
+			Globals.Game.LevelControl.spawn_mob_entity(Character.player_ID, "WaterDriveM", Animator.query_point("entityspawn"), \
+					{"alt_aim": true}, Character.mob_level, Character.mob_attr, Character.palette_ref, Character.mob_ref)
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing, "grounded":true})
 			
 	start_audio(anim_name)
 

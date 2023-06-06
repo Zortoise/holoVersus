@@ -14,15 +14,15 @@ var common_music = {
 	"char_select" : {
 		"name" : "char_select",
 		"audio" : ResourceLoader.load("res://Assets/Music/CharSelect.ogg"),
-#		"loop_end": 111.42,
-		"loop_end": 125.14,
+		"loop_start": 0.1,
+		"loop_end": 125.25,
 		"vol" : 0,
 		},
 	"victory" : {
 		"name" : "victory",
 		"audio" : ResourceLoader.load("res://Assets/Music/VictoryScreen.ogg"),
-		"loop_start": 0.63,
-		"loop_end": 94.1,
+		"loop_start": 0.71,
+		"loop_end": 94.18,
 		"vol" : 1,
 		}
 }
