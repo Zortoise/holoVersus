@@ -142,6 +142,7 @@ func _ready():
 		add_child(NetgameSetup)
 		move_child(NetgameSetup, 0)
 		NetgameSetup.init()
+		# runs setup() only after both players are synchronized
 		
 	elif Globals.watching_replay:
 		var ReplayControl = load("res://Scenes/ReplayControl.tscn").instance()
@@ -226,6 +227,25 @@ func setup():
 	var point_btw_char = players_position / $Players.get_child_count() # get midpoint
 	point_btw_char.y -= get_viewport_rect().size.y / 10.0 # lower it by a little
 	$CameraRef.position = point_btw_char
+	
+	if Globals.survival_level == null:
+		var music_names := []
+		var music_list := []
+		if "music" in stage: # append stage music
+			var new_music_dict = stage.music
+			music_names.append(new_music_dict.name)
+			music_list.append(new_music_dict)
+		for player in $Players.get_children(): # append character music
+			if "music" in player.UniqChar:
+				var new_music_dict = player.UniqChar.music
+				if !new_music_dict.name in music_names: # only append if the music is not already appended
+					music_names.append(new_music_dict.name)
+					music_list.append(new_music_dict)
+		if music_list.size() > 0:
+			var random = rng_generate(music_list.size()) # pick a random music and load it
+			var chosen_music_dict = music_list[random].duplicate()
+			chosen_music_dict["audio"] = ResourceLoader.load(chosen_music_dict.audio_filename)
+			BGM.bgm(chosen_music_dict)
 
 # --------------------------------------------------------------------------------------------------
 
@@ -2096,7 +2116,7 @@ func rng_generate(upper_limit: int) -> int: # will return a number from 0 to (up
 	current_rng_seed = wrapi(result, 1, 10000) # each call to generate a number changes the current seed
 	return posmod(result, upper_limit)
 			
-func rng_range(lower_limit: int, upper_limit: int) -> int:
+func rng_range(lower_limit: int, upper_limit: int) -> int: # will return a number from lower_limit to (upper_limit - 1)
 	return lower_limit + rng_generate(upper_limit - lower_limit)
 			
 func rng_facing():

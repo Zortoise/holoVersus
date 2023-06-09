@@ -25,6 +25,7 @@ var character_data = { # to be filled at _ready()
 
 var stage_data = { # to be filled at _ready()
 	"Random" : {
+		"name" : "Random",
 		"select" : ResourceLoader.load("res://Assets/UI/random_select.png"), 
 	}
 #	"Aurora" : {
@@ -144,6 +145,7 @@ func _ready():
 		while stage_name != "":
 			if !stage_name.begins_with("."):
 				stage_data[stage_name] = {}
+				stage_data[stage_name]["name"] = load("res://Stages/" + stage_name + "/" + stage_name + ".tscn").instance().NAME
 				stage_data[stage_name]["select"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select.png")
 			stage_name = dir.get_next()
 	else: print("Error: Cannot open Stages folder from CharacterSelect.gd")
@@ -187,7 +189,7 @@ func load_last_picked():
 		
 	if last_picked.P1_stage != null:
 		if last_picked.P1_stage in stage_array:
-			while my_stageselect.get_node("StageList").get_child(3).text != last_picked.P1_stage:
+			while my_stageselect.get_node("StageList").get_child(3).stage_name != last_picked.P1_stage:
 				shift_stage_list(1)
 			
 	
@@ -245,8 +247,10 @@ func populate_stage_lists():
 		var new_stagelabel2 = loaded_stagelabel.instance()
 		my_stageselect.add_child(new_stagelabel2)
 		# change text
-		new_stagelabel.text = stage_array[stage_array_pointer]
-		new_stagelabel2.text = stage_array[stage_array_pointer]
+		new_stagelabel.stage_name = stage_array[stage_array_pointer]
+		new_stagelabel.text = stage_data[stage_array[stage_array_pointer]].name
+		new_stagelabel2.stage_name = stage_array[stage_array_pointer]
+		new_stagelabel2.text = stage_data[stage_array[stage_array_pointer]].name
 		# next stage, wrap around
 		stage_array_pointer += 1
 		stage_array_pointer = wrapi(stage_array_pointer, 0, stage_array.size())
@@ -446,23 +450,25 @@ func shift_stage_list(v_dir):
 		if sound:
 			play_audio("ui_move2", {"vol":-10})
 		first_child.free() # remove 1st child
-		var index = stage_array.find(last_child.text) # find index of last child in stage_array
+		var index = stage_array.find(last_child.stage_name) # find index of last child in stage_array
 		index = wrapi(index + 1, 0, stage_array.size()) # get index of next stage in stage_array, wraparound
 		var new_stagelabel = loaded_stagelabel.instance() # add new child
 		my_stageselect.get_node("StageList").add_child(new_stagelabel)
-		new_stagelabel.text = stage_array[index]
+		new_stagelabel.stage_name = stage_array[index]
+		new_stagelabel.text = stage_data[stage_array[index]].name
 	elif v_dir == -1: # move up, shift list downward
 		if sound:
 			play_audio("ui_move2", {"vol":-10})
 		last_child.free() # remove last child
-		var index = stage_array.find(first_child.text) # find index of first child in stage_array
+		var index = stage_array.find(first_child.stage_name) # find index of first child in stage_array
 		index = wrapi(index - 1, 0, stage_array.size()) # get index of previous stage in stage_array, wraparound
 		var new_stagelabel = loaded_stagelabel.instance() # add new child
 		my_stageselect.get_node("StageList").add_child(new_stagelabel)
 		my_stageselect.get_node("StageList").move_child(new_stagelabel, 0) # make child the new first child
-		new_stagelabel.text = stage_array[index]
+		new_stagelabel.stage_name = stage_array[index]
+		new_stagelabel.text = stage_data[stage_array[index]].name
 		
-	my_stage.texture = stage_data[my_stageselect.get_node("StageList").get_child(3).text].select # update stage texture
+	my_stage.texture = stage_data[my_stageselect.get_node("StageList").get_child(3).stage_name].select # update stage texture
 	for x in my_stageselect.get_node("StageList").get_children(): # return color to normal
 		x.modulate = Color(1.0, 1.0, 1.0)
 	my_stageselect.get_node("StageList").get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten stage pointed at
@@ -478,7 +484,7 @@ func picked_stage():
 	# cannot unpick stage in netplay, send payload here
 	my_payload.character = char_grid[my_picker_pos]
 	my_payload.palette = my_palette_picked
-	my_payload.stage = my_stageselect.get_node("StageList").get_child(3).text
+	my_payload.stage = my_stageselect.get_node("StageList").get_child(3).stage_name
 #	my_payload.input_style = my_input_style_picked
 	rpc("opponent_ready", my_payload)
 	save_last_picked()

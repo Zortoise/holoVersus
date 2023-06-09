@@ -26,6 +26,7 @@ var stage_select
 
 var stage_data = { # to be filled at _ready()
 	"Random" : {
+		"name" : "Random",
 		"select" : ResourceLoader.load("res://Assets/UI/random_select.png"), 
 	}
 #	"Aurora" : {
@@ -106,10 +107,10 @@ func _ready():
 #	var last_picked = {
 #		"P1_character" : P1_picker_pos,
 #		"P1_palette" : P1_palette_picked,
-#		"P1_stage" : $P1_StageSelect/StageList.get_child(3).text,
+#		"P1_stage" : $P1_StageSelect/StageList.get_child(3).stage_name,
 #		"P2_character" : P2_picker_pos,
 #		"P2_palette" : P2_palette_picked,
-#		"P2_stage" : $P2_StageSelect/StageList.get_child(3).text,
+#		"P2_stage" : $P2_StageSelect/StageList.get_child(3).stage_name,
 #	}
 	if last_picked != null:
 		load_last_picked(last_picked)
@@ -514,10 +515,10 @@ func start_battle():
 #	var last_picked = {
 #		"P1_character" : P1_picker_pos,
 #		"P1_palette" : P1_palette_picked,
-#		"P1_stage" : $P1_StageSelect/StageList.get_child(3).text,
+#		"P1_stage" : $P1_StageSelect/StageList.get_child(3).stage_name,
 #		"P2_character" : P2_picker_pos,
 #		"P2_palette" : P2_palette_picked,
-#		"P2_stage" : $P2_StageSelect/StageList.get_child(3).text,
+#		"P2_stage" : $P2_StageSelect/StageList.get_child(3).stage_name,
 #	}
 	if last_picked == null: # set up if no last_picked
 		last_picked = {

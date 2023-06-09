@@ -36,6 +36,7 @@ func open_shop():
 	else:
 		$P2/Picker.hide()
 		$P2/Box.hide()
+#	BGM.muffle()
 	
 func set_active(set: bool): # called by animationplayer
 	active = set
@@ -194,6 +195,7 @@ func _physics_process(_delta):
 		
 		if (Globals.player_count == 1 and P1_phase == 1) or (Globals.player_count > 1 and P1_phase == 1 and P2_phase == 1):
 			$AnimationPlayer.play("close")
+#			BGM.unmuffle()
 		
 	
 func move_pickers(P1_dir, P2_dir):

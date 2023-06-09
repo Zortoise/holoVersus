@@ -713,12 +713,14 @@ func simulate(new_input_state):
 #			enhance_card(Cards.effect_ref.REWIND, true)
 
 			# warning-ignore:return_value_discarded
-			super_cost(20000)
+#			super_cost(20000)
+#			BGM.muffle()
+
 			pass
 
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
-			pass
+			BGM.unmuffle()
 #			Globals.Game.superfreeze(get_path())
 #			Globals.Game.set_screenstop()
 #			Globals.Game.set_screenshake()

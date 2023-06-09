@@ -112,6 +112,10 @@ func init():
 			Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
 			starting_coin = FMath.percent(UniqLevel.STARTING_COIN, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
+	if "music" in UniqLevel:
+		var music_dict = UniqLevel.music.duplicate()
+		music_dict["audio"] = ResourceLoader.load(music_dict.audio_filename)
+		BGM.bgm(music_dict)
 	
 	load_cards()
 	load_items()
@@ -366,7 +370,7 @@ func simulate():
 						to_spawn[wave_timer + 48].append({"offset": spawn.offset, "mob_data": spawn,})
 						
 					else: # if no listed offset, random spot
-						var new_spawn_point := Vector2(Globals.Game.rng_range(Globals.Game.left_corner, Globals.Game.right_corner), 0)
+						var new_spawn_point := Vector2(Globals.Game.rng_range(Globals.Game.left_corner, Globals.Game.right_corner + 1), 0)
 						var out_position = Globals.Game.middle_point + new_spawn_point
 						out_position.y -= 25
 						Globals.Game.spawn_SFX("Warning", "Warning", out_position, {})

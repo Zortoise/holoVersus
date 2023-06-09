@@ -2,10 +2,17 @@ extends Node
 
 const LEVEL_NAME = "Test Level"
 
-const STAGE = "Grid"
+const STAGE = "Grid" # filename
 const STARTING_STOCKS = 5
 const STARTING_COIN = 100
 const PRICE_SCALING = 10
+
+var music = {
+		"name" : "survival_test", # to not play the same music as the one currently being played
+		"audio_filename" : "res://Assets/Music/Survival1.ogg",
+		"loop_end": 157.09,
+		"vol" : -4,
+	}
 
 const MOB_LIST = [
 	["GuraM", "Gura"],
@@ -130,7 +137,7 @@ const WAVES = {
 						} },
 				],
 				1800 : [
-					{"mob" : "GuraM", "level" : 7, "variant" : "zone",
+					{"mob" : "GuraM", "level" : 6, "variant" : "zone",
 					"attr" : {
 						Em.mob_attr.HP : 1,
 						Em.mob_attr.TOUGH : 1

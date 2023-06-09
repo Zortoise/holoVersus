@@ -1,14 +1,15 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
-
-[sub_resource type="StyleBoxEmpty" id=35]
+[ext_resource path="res://Scenes/Menus/StageLabel.gd" type="Script" id=2]
 
 [sub_resource type="DynamicFont" id=36]
 size = 25
 use_filter = true
 extra_spacing_top = 5
 font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxEmpty" id=35]
 
 [sub_resource type="Theme" id=37]
 default_font = SubResource( 36 )
@@ -18,7 +19,7 @@ Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
 Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
 Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
 Button/constants/hseparation = 2
-Button/fonts/font = null
+Button/fonts/font = SubResource( 36 )
 Button/styles/disabled = null
 Button/styles/focus = SubResource( 35 )
 Button/styles/hover = null
@@ -33,3 +34,4 @@ theme = SubResource( 37 )
 custom_colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
 text = "Test Stage"
 align = 1
+script = ExtResource( 2 )

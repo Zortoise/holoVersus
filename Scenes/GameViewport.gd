@@ -150,6 +150,7 @@ func _on_level_failed(wave_ID):
 	$HUD/Announcer2/Survival.text = "DEFEATED"
 	$HUD/Announcer2/Survival2.text = "SURVIVED TILL WAVE " + str(wave_ID)
 	$HUD/Announcer2/AnimationPlayer.play("defeated")
+	BGM.muffle()
 
 # ------------------------------------------------------------------------------------------------------------
 	

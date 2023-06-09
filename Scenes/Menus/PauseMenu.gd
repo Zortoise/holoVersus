@@ -69,6 +69,7 @@ func open():
 	$CanvasLayer.show()
 	$AltInputs.active = true
 	get_parent().play_audio("ui_accept2", {})
+	BGM.muffle()
 	
 	$CanvasLayer/Cursor.show()
 	if !Globals.training_mode:
@@ -96,6 +97,7 @@ func close(yielding = true):
 		yield(get_tree().create_timer(0.15), "timeout")
 	get_tree().paused = false
 	Globals.pausing = false
+	BGM.unmuffle()
 	
 func _process(_delta):
 	if visible and Input.is_action_just_pressed("ui_cancel"):
