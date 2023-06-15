@@ -708,7 +708,7 @@ func linear_move(collision_box, horizontal: bool, move_amount: int, checklist_en
 					platform_boxes.append_array(get_tree().get_nodes_in_group("SemiSolidWalls"))
 				if Em.detect.CSOLID in checklist_enum:
 					platform_boxes.append_array(get_tree().get_nodes_in_group("CSolidPlatforms"))
-			if Em.detect.BLASTWALLS in checklist_enum:
+			if Em.detect.BLASTWALLS in checklist_enum and !Detection.detect_bool([get_soft_dbox(get_collision_box())], ["BlastWalls"]):
 				platform_boxes.append_array(get_tree().get_nodes_in_group("BlastWalls"))
 				
 #			if Em.detect.PLAYERS in checklist_enum:

@@ -84,6 +84,14 @@ const PALETTE_TO_HITSPARK_PALETTE = {
 	4: "white",
 }
 
+const music = {
+		"name" : "gura_theme", # to not play the same music as the one currently being played
+		"audio_filename" : "res://Characters/Gura/Music/GuraTheme.ogg",
+#		"loop_start": 27.42,
+		"loop_end": 164.57,
+		"vol" : -4,
+	}
+
 const UNIQUE_DATA_REF = {
 	"groundfin_count" : 0,
 	"groundfin_trigger" : false,

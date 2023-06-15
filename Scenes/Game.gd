@@ -1453,7 +1453,7 @@ func mob_projectile_miss(entity, defender):
 	
 func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 
-	if Globals.survival_level != null: return false # anti-air is not a thing in Survival
+#	if Globals.survival_level != null: return false # anti-air is not a thing in Survival
 
 	if attacker.grounded:
 		return false

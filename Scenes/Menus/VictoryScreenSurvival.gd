@@ -25,7 +25,7 @@ func _ready():
 	var seconds: int = posmod(time, 60)
 	time = int(time/60)
 	var minutes: int = time
-	var difficulty = ["Standard", "Forgiving", "Hardcore", "Must Die"]
+	var difficulty = ["Normal", "Hard", "Challenge", "Must Die"]
 		
 	$Victory2.text = difficulty[Globals.difficulty] + "\nTime - " + str(minutes) + ":" + str(seconds) + ":" + str(centiseconds)
 

@@ -427,7 +427,7 @@ func next_wave():
 			wave_standby_timer = 210
 		emit_signal("wave_cleared")
 		
-		if Globals.difficulty == 1:
+		if Globals.difficulty == 0: # stock handout
 			for player in get_tree().get_nodes_in_group("PlayerNodes"):
 				var quota: int
 				if Globals.player_count == 1:

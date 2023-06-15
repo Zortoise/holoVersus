@@ -3,7 +3,7 @@ extends Node2D
 var LEVEL_SELECT_OPTIONS = []
 var level_select_filenames = []
 const PLAYER_COUNT_OPTIONS = ["1", "2"]
-const DIFFICULTY_OPTIONS = ["Standard", "Forgiving", "Hardcore", "Must Die"]
+const DIFFICULTY_OPTIONS = ["Normal", "Hard", "Challenge", "Must Die"]
 
 func _ready():
 	
@@ -55,9 +55,9 @@ func shifted(_shifted_node):
 func update_diff_explain():
 	match $SurvivalList/Difficulty.option_pointer:
 		0:
-			$DiffExplain.text = ""
-		1:
 			$DiffExplain.text = "Regain 1 Stock after each wave if Stock count is below starting amount."
+		1:
+			$DiffExplain.text = "No Stock handouts after each wave."
 		2:
 			$DiffExplain.text = "One Stock. No Cards.\nShow me what you got."
 		3:

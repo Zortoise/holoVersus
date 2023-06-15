@@ -1347,7 +1347,7 @@ func bounce(against_ground: bool):
 				
 				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
 					wall_slammed = Em.wall_slam.HAS_SLAMMED
-					take_damage(scaled_damage)
+					take_damage(scaled_damage, true)
 					Globals.Game.spawn_damage_number(scaled_damage, position)
 					
 					var slam_level := 0
@@ -1393,7 +1393,7 @@ func bounce(against_ground: bool):
 				
 				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
 					wall_slammed = Em.wall_slam.HAS_SLAMMED
-					take_damage(scaled_damage)
+					take_damage(scaled_damage, true)
 					Globals.Game.spawn_damage_number(scaled_damage, position)
 						
 					var slam_level := 0
@@ -2268,8 +2268,11 @@ func get_guard_gauge_percent_below() -> int:
 		return 100 - FMath.get_fraction_percent(current_guard_gauge, GUARD_GAUGE_FLOOR)
 	else: return 100
 		
-func take_damage(damage: int): # called by attacker
+func take_damage(damage: int, non_lethal := false): # called by attacker
 	current_damage_value += damage
+	var limit = get_stat("DAMAGE_VALUE_LIMIT")
+	if non_lethal and current_damage_value >= limit: # non-lethal hits leave 1 hp
+		current_damage_value = limit - 1
 #	current_damage_value = int(clamp(current_damage_value, 0, 9999)) # cannot go under zero (take_damage is also used for healing)
 	damage_update()
 	
