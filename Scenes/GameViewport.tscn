@@ -1794,6 +1794,20 @@ tracks/9/keys = {
 "update": 0,
 "values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 0.941176, 0.941176, 0.941176, 0 ) ]
 }
+tracks/10/type = "method"
+tracks/10/path = NodePath("../..")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/keys = {
+"times": PoolRealArray( 0.8 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "start_battle_sound"
+} ]
+}
 
 [sub_resource type="Animation" id=136]
 resource_name = "start_survival"

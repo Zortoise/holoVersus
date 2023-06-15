@@ -1,7 +1,9 @@
-[gd_resource type="AudioBusLayout" load_steps=15 format=2]
+[gd_resource type="AudioBusLayout" load_steps=16 format=2]
 
-[sub_resource type="AudioEffectLimiter" id=10]
-resource_name = "Limiter"
+[sub_resource type="AudioEffectCompressor" id=19]
+resource_name = "Compressor"
+threshold = -5.0
+ratio = 15.0
 
 [sub_resource type="AudioEffectPitchShift" id=7]
 resource_name = "PitchShift"
@@ -21,6 +23,11 @@ cutoff_hz = 200.0
 resource_name = "Compressor"
 ratio = 48.0
 sidechain = "Game"
+
+[sub_resource type="AudioEffectCompressor" id=20]
+resource_name = "Compressor"
+ratio = 48.0
+sidechain = "UI"
 
 [sub_resource type="AudioEffectCompressor" id=18]
 resource_name = "Compressor"
@@ -65,7 +72,7 @@ bus/1/mute = false
 bus/1/bypass_fx = false
 bus/1/volume_db = -5.93075
 bus/1/send = "Reverb"
-bus/1/effect/0/effect = SubResource( 10 )
+bus/1/effect/0/effect = SubResource( 19 )
 bus/1/effect/0/enabled = true
 bus/2/name = "Music"
 bus/2/solo = false
@@ -77,6 +84,8 @@ bus/2/effect/0/effect = SubResource( 16 )
 bus/2/effect/0/enabled = false
 bus/2/effect/1/effect = SubResource( 17 )
 bus/2/effect/1/enabled = true
+bus/2/effect/2/effect = SubResource( 20 )
+bus/2/effect/2/enabled = true
 bus/3/name = "GameFade"
 bus/3/solo = false
 bus/3/mute = false

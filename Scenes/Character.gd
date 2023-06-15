@@ -715,7 +715,8 @@ func simulate(new_input_state):
 			# warning-ignore:return_value_discarded
 #			super_cost(20000)
 #			BGM.muffle()
-
+			Globals.Game.viewport.play_audio("defeated", {})
+			
 			pass
 
 		
@@ -3175,6 +3176,8 @@ func enhance_card(effect_ref: int, skip_cooldown = false):
 					Globals.Game.spawn_SFX("RewindEffect", "RewindEffect", position, {})
 					var to_loaded_state = enhance_data.rewind.saved_state.duplicate(true)
 					load_state(to_loaded_state, true)
+					hitstop = 0
+					status_effect_to_add = []
 # warning-ignore:return_value_discarded
 					enhance_data.erase("rewind")
 					Globals.Game.spawn_SFX("RewindEffect", "RewindEffect", position, {})

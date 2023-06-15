@@ -231,13 +231,13 @@ func setup():
 	if Globals.survival_level == null:
 		var music_names := []
 		var music_list := []
-		if "music" in stage: # append stage music
-			var new_music_dict = stage.music
+		if "MUSIC" in stage: # append stage music
+			var new_music_dict = stage.MUSIC
 			music_names.append(new_music_dict.name)
 			music_list.append(new_music_dict)
 		for player in $Players.get_children(): # append character music
-			if "music" in player.UniqChar:
-				var new_music_dict = player.UniqChar.music
+			if "MUSIC" in player.UniqChar:
+				var new_music_dict = player.UniqChar.MUSIC
 				if !new_music_dict.name in music_names: # only append if the music is not already appended
 					music_names.append(new_music_dict.name)
 					music_list.append(new_music_dict)
@@ -246,6 +246,7 @@ func setup():
 			var chosen_music_dict = music_list[random].duplicate()
 			chosen_music_dict["audio"] = ResourceLoader.load(chosen_music_dict.audio_filename)
 			BGM.bgm(chosen_music_dict)
+
 
 # --------------------------------------------------------------------------------------------------
 
@@ -2111,10 +2112,11 @@ func HUD_fade():
 # RNG GENERATOR --------------------------------------------------------------------------------------------------
 
 func rng_generate(upper_limit: int) -> int: # will return a number from 0 to (upper_limit - 1)
-	var result: int = current_rng_seed * Globals.PI_NUMBERS[posmod(current_rng_seed + frametime, 100)] + \
-			Globals.PI_NUMBERS[posmod(current_rng_seed, 100)] + posmod(frametime, 10000)
-	current_rng_seed = wrapi(result, 1, 10000) # each call to generate a number changes the current seed
-	return posmod(result, upper_limit)
+	var result: int = posmod(current_rng_seed, upper_limit)
+	var new_seed: int = current_rng_seed * Globals.PI_NUMBERS[posmod(current_rng_seed + frametime + upper_limit, 100)] + \
+			Globals.PI_NUMBERS[posmod(current_rng_seed, 100)] + posmod(frametime + upper_limit, 10000)
+	current_rng_seed = wrapi(new_seed, 1, 10000) # each call to generate a number changes the current seed
+	return result
 			
 func rng_range(lower_limit: int, upper_limit: int) -> int: # will return a number from lower_limit to (upper_limit - 1)
 	return lower_limit + rng_generate(upper_limit - lower_limit)

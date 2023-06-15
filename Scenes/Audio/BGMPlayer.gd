@@ -4,7 +4,8 @@ extends AudioStreamPlayer
 # WIP, handle looping and music transitions (fade out)
 var bgm_dictionary
 
-var decaying := false
+var ended := false
+var decaying := false # used to fade out music during transitions
 
 
 func init(in_bgm_dictionary, loop = false):
@@ -22,14 +23,15 @@ func init(in_bgm_dictionary, loop = false):
 		
 
 func _process(delta):
-	if decaying:
-		volume_db -= 60.0 * delta
-		if volume_db <= -80:
-			queue_free()
+	if ended or decaying:
+		if "fade" in bgm_dictionary or decaying:
+			volume_db -= 60.0 * delta
+			if volume_db <= -80:
+				queue_free()
 		
 	else:
 		if "loop_end" in bgm_dictionary and get_playback_position() >= bgm_dictionary.loop_end: # reach loop point
-			decaying = true
+			ended = true
 			var BGMPlayer = BGM.BGMPlayerScene.instance()
 			get_tree().get_root().add_child(BGMPlayer)
 			BGMPlayer.init(bgm_dictionary, true)
@@ -37,8 +39,11 @@ func _process(delta):
 			
 func _on_BGMPlayer_finished():
 	
-	if !decaying:
+	if !ended and !decaying:
 		if "loop_start" in bgm_dictionary:
 			play(bgm_dictionary.loop_start)
 		else:
 			play(0.0)
+			
+	else:
+		queue_free()

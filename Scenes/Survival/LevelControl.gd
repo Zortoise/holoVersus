@@ -112,8 +112,8 @@ func init():
 			Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
 			starting_coin = FMath.percent(UniqLevel.STARTING_COIN, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
-	if "music" in UniqLevel:
-		var music_dict = UniqLevel.music.duplicate()
+	if "MUSIC" in UniqLevel:
+		var music_dict = UniqLevel.MUSIC.duplicate()
 		music_dict["audio"] = ResourceLoader.load(music_dict.audio_filename)
 		BGM.bgm(music_dict)
 	

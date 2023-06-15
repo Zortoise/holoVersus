@@ -103,12 +103,19 @@ func start_battle(): # called from game, as need to be called when during simula
 	if Globals.Game.you_label != null and is_instance_valid(Globals.Game.you_label):
 		Globals.Game.you_label.free()
 	
+func start_battle_sound(): # play from animation player when BEGIN appears
+	play_audio("start_battle", {"bus" : "PitchDown"})
+	pass
 	
 func _on_Game_game_set():
 	$HUD/Announcer/AnimationPlayer.play("game_set")
+	play_audio("game_set", {"vol": -5, "bus" : "PitchUp"})
+	BGM.muffle()
 	
 func _on_Game_time_over():
 	$HUD/Announcer/AnimationPlayer.play("time_over")
+	play_audio("time_over", {})
+	BGM.muffle()
 
 func _on_Game_loaded_state():
 	$Test/SaveLoad.show()
@@ -139,18 +146,22 @@ func _on_wave_start(wave_ID):
 	
 func _on_wave_cleared():
 	$HUD/Announcer2/AnimationPlayer.play("wave_cleared")
+	play_audio("wave_cleared", {})
 	
 func _on_level_cleared():
 	$HUD/Announcer2/Wave.text = "ALL WAVES"
 	$HUD/Announcer2/Cleared.text = "CLEARED!"
 	$HUD/Announcer2/AnimationPlayer.play("all_wave_cleared")
 	Globals.survival_time = Globals.Game.frametime
+	play_audio("game_set", {"bus" : "PitchUp"})
+	BGM.muffle()
 	
 func _on_level_failed(wave_ID):
 	$HUD/Announcer2/Survival.text = "DEFEATED"
 	$HUD/Announcer2/Survival2.text = "SURVIVED TILL WAVE " + str(wave_ID)
 	$HUD/Announcer2/AnimationPlayer.play("defeated")
 	BGM.muffle()
+	play_audio("defeated", {})
 
 # ------------------------------------------------------------------------------------------------------------
 	
