@@ -10,15 +10,13 @@ enum effect_ref {
 		GROUND_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
 		HEAVY_DMG_MOD, SPECIAL_DMG_MOD, PROJ_DMG_MOD, SUPER_DMG_MOD, 
 		COIN_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
-		LESS_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, ARMOR_PIERCE, AUTO_PBLOCK_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
+		LESS_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
 		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_ARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, SUMMON_HORROR
 		PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND, TBLOCK_PROJ
 		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI
 }
-# NO_CROSSUP = can perfect block too
-# ARMOR_PIERCE = full damage on armored mobs
 
 const DESCRIBE = {
 	effect_ref.STOCK : {
@@ -168,13 +166,13 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"No Repeat Penalty",
 	},
-	effect_ref.ARMOR_PIERCE : {
+	effect_ref.FULL_DAMAGE : {
 		"type" : type.QUIRK,
-		"suffix" :"Full Dmg on Armored",
+		"suffix" :"Always Full Damage",
 	},
-	effect_ref.AUTO_PBLOCK_PROJ : {
+	effect_ref.AUTO_PARRY_PROJ : {
 		"type" : type.QUIRK,
-		"suffix" :"Auto-PBlock Proj",
+		"suffix" :"Auto-Parry Projectiles",
 	},
 #	effect_ref.FREE_RESET : {
 #		"type" : type.QUIRK,
@@ -399,7 +397,7 @@ const DATABASE = {
 #		"name" : "Test",
 #		"price" : 100,
 #		effect_ref.LANDED_EX_REGEN : 0,
-#		"quirks" : [effect_ref.ARMOR_PIERCE],
+#		"quirks" : [effect_ref.FULL_DAMAGE],
 #	},
 	
 	card_ref.GURA : {
@@ -662,7 +660,7 @@ const DATABASE = {
 		effect_ref.HP : 20,
 		effect_ref.HEAVY_DMG_MOD : 50,
 		effect_ref.SPECIAL_DMG_MOD : 50,
-		"quirks" : [effect_ref.ARMOR_PIERCE]
+		"quirks" : [effect_ref.FULL_DAMAGE]
 	},
 	card_ref.RUSHIA : {
 		"name" : "Rushia",
@@ -885,7 +883,7 @@ const DATABASE = {
 		"name" : "Zeta",
 		"price" : 100,
 		effect_ref.LIGHT_DMG_MOD : 50,
-		"quirks" : [effect_ref.DASH_IFRAME, effect_ref.AUTO_PBLOCK_PROJ, effect_ref.NO_CROSSUP],
+		"quirks" : [effect_ref.DASH_IFRAME, effect_ref.AUTO_PARRY_PROJ, effect_ref.NO_CROSSUP],
 	},
 	card_ref.REINE : {
 		"name" : "Reine",

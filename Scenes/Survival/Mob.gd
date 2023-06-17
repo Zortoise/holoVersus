@@ -3115,6 +3115,12 @@ func calculate_damage(hit_data) -> int:
 #			scaled_damage = FMath.percent(scaled_damage, 100)
 		else:
 			return 0
+			
+	elif Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.FULL_DAMAGE):
+		if hit_data[Em.hit.SWEETSPOTTED]:
+			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
+		return int(max(FMath.round_and_descale(scaled_damage), 1))
+		
 	elif hit_data[Em.hit.DOUBLE_REPEAT]:
 		scaled_damage = FMath.percent(scaled_damage, REPEAT_DMG_MOD)
 	elif Em.hit.SINGLE_REPEAT in hit_data:
@@ -3123,7 +3129,7 @@ func calculate_damage(hit_data) -> int:
 		if hit_data[Em.hit.SWEETSPOTTED]:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
 			
-	if !guardbroken and !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.ARMOR_PIERCE):
+	if !guardbroken:
 		scaled_damage = FMath.percent(scaled_damage, get_stat("ARMOR_DMG_MOD"))
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage

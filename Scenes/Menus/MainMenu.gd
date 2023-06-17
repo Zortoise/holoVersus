@@ -23,6 +23,10 @@ func focused(focused_node):
 func triggered(triggered_node):
 	if !$Transition.is_playing():
 		match triggered_node.name:
+			"Tutorial":
+				play_audio("ui_accept", {"vol":-8})
+# warning-ignore:return_value_discarded
+				OS.shell_open("https://zortoise.itch.io/holoversus/devlog/546597/beginners-tutorial")
 			"Survival":
 				Globals.main_menu_focus = triggered_node.name
 				play_audio("ui_accept", {"vol":-8})

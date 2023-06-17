@@ -1781,22 +1781,20 @@ func end_sequence_step(trigger = null): # this is ran at the end of certain sequ
 		Character.animate("Idle")
 		Partner.animate("Idle")
 		return true
-	
-	match Animator.to_play_anim:
-		"aF2SeqB":
-			Partner.sequence_launch()
-			return true
 			
-		"SP6[ex]SeqD": # ends when either you or parther hit the ground
-			if trigger == "ground" or trigger == "target_ground": # you/target hit the ground
-				Character.animate("SP6[ex]SeqE")
+	if trigger == null: # launching
+		match Animator.to_play_anim:
+			"aF2SeqB", "SP6[ex]SeqE":
+				Partner.sequence_launch()
 				return true
-#			elif trigger == "target_ground": # parther hit the ground but not you
-#				Character.animate("aSP6[ex]SeqE")
-#				return true
-		"SP6[ex]SeqE":
-			Partner.sequence_launch()
-			return true
+	else:
+		match Animator.to_play_anim:
+			"SP6[ex]SeqD":
+				if trigger == "ground" or trigger == "target_ground": # you/target hit the ground
+					Character.animate("SP6[ex]SeqE")
+					return true
+					
+	return false
 			
 			
 func rotate_partner(Partner): # rotate partner according to grabrotdir

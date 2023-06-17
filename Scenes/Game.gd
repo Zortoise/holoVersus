@@ -197,6 +197,9 @@ func setup():
 		$Players.add_child(P2)
 		P2.init(1, P2_character, P2_position, P2_facing, P2_palette)
 		frame_viewer.P2_node = P2
+		
+#		P2.test = true # testing purposes
+		
 	else:
 		HUD.get_node("P2_HUDRect").hide()
 	
@@ -215,7 +218,6 @@ func setup():
 		get_player_node(Netplay.my_player_id()).add_child(you_label)
 		
 	P1.test = true # testing purposes
-#	P2.test = true # testing purposes
 	
 	for player in $Players.get_children(): # each player target a random other player
 		player.initial_targeting()

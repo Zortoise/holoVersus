@@ -432,7 +432,6 @@ custom_constants/separation = 7
 [node name="Tutorial" parent="MainMenuList" instance=ExtResource( 3 )]
 rect_pivot_offset = Vector2( -1698, -24 )
 focus_neighbour_top = NodePath("../Quit")
-disabled = true
 text = "Tutorial"
 
 [node name="Survival" parent="MainMenuList" instance=ExtResource( 3 )]

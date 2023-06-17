@@ -612,7 +612,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(Globals.Game.frametime)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(seq_partner_ID)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -643,7 +643,8 @@ func _process(_delta):
 			$PlayerCollisionBox.show()
 		else:
 			$PlayerCollisionBox.hide()
-
+			
+#	test = true
 	if test:
 		if Globals.debug_mode2:
 			$TestNode2D.show()
@@ -830,6 +831,7 @@ func simulate2(): # only ran if not in hitstop
 		
 	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		seq_partner_ID = null
+
 		
 	if Globals.survival_level != null and Globals.difficulty != 3:
 		if Globals.Game.LevelControl.wave_standby_timer > 0:
@@ -5890,7 +5892,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
 										Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
 									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
-								elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PBLOCK_PROJ):
+								elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PARRY_PROJ):
 									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
 								else:
 									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
@@ -7035,17 +7037,21 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	test0()
 	
 	var Partner = get_seq_partner()
-	if Partner == null and new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+	if Partner == null and state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
 		animate("Idle")
 		return
 	
-	if new_state == Em.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		if Partner.new_state != Em.char_state.SEQUENCE_USER:
-			animate("Idle") # auto release if not released proberly, just in case
-			return
+	match state:
+		Em.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
+			if Partner.state != Em.char_state.SEQUENCE_USER:
+				animate("Idle") # auto release if not released proberly, just in case
+				return
 		
-	elif new_state == Em.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
-		UniqChar.simulate_sequence()
+		Em.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
+			UniqChar.simulate_sequence()
+		
+		_:
+			pass
 		
 		
 	if abs(velocity.x) < 5 * FMath.S:

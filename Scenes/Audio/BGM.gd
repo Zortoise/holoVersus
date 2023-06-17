@@ -8,7 +8,7 @@ var common_music = {
 		"name" : "TitleTheme", # to not play the same music as the one currently being played
 		"audio" : ResourceLoader.load("res://Assets/Music/TitleTheme.ogg"),
 #		"loop_start": 0.0,
-		"loop_end": 224.0,
+		"loop_end": 206.76,
 		"vol" : 4,
 		},
 	"char_select" : {
@@ -46,13 +46,13 @@ func bgm(bgm_dictionary):
 	
 	if current_music != bgm_dictionary.name:
 		fade() # just in case
+		unmuffle()
 		current_music = bgm_dictionary.name
 		
 		yield(get_tree(),"idle_frame")
 		var BGMPlayer = BGMPlayerScene.instance()
 		get_tree().get_root().add_child(BGMPlayer)
 		BGMPlayer.init(bgm_dictionary)
-		unmuffle()
 		
 		
 func _process(delta):
@@ -83,5 +83,10 @@ func muffle():
 func unmuffle():
 	if muffle_status == 1:
 		muffle_status = -1
+		
+#func instant_unmuffle():
+#	muffle_status = 0
+#	AudioServer.get_bus_effect(AudioServer.get_bus_index("Music"), 0).cutoff_hz = 22000
+#	AudioServer.set_bus_effect_enabled(AudioServer.get_bus_index("Music"), 0, false)
 
 	

@@ -35,6 +35,8 @@ func _ready():
 	
 func set_fade_sound(): # fade out sound when transiting to other scenes, called by animation
 	fade_sound = true
+	BGM.fade()
+	BGM.unmuffle()
 	
 
 func _physics_process(_delta):
@@ -166,6 +168,8 @@ func _on_level_failed(wave_ID):
 # ------------------------------------------------------------------------------------------------------------
 	
 func change_scene(new_scene: String): # called by animation
+	
+#	BGM.fade()
 	
 	# save these 2 before restoring controls so that they can be saved to replays
 	Globals.temp_input_buffer_time = Settings.input_buffer_time.duplicate(true)

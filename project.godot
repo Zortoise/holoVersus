@@ -26,6 +26,10 @@ boot_splash/bg_color=Color( 0, 0, 0, 1 )
 config/icon="res://Assets/UI/icon.png"
 config/windows_native_icon="res://Assets/UI/icon.ico"
 
+[audio]
+
+mix_rate=48000
+
 [autoload]
 
 Em="*res://Scenes/Autoloads/Em.gd"
