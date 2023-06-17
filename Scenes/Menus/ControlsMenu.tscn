@@ -1233,7 +1233,6 @@ focus_neighbour_top = NodePath("../../ControlsListL/Pause")
 margin_top = 39.0
 margin_right = 704.0
 margin_bottom = 74.0
-focus_neighbour_top = NodePath("../../ControlsListL/Pause")
 
 [node name="InputBuffer" parent="ControlsListBottom" instance=ExtResource( 5 )]
 margin_top = 78.0

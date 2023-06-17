@@ -5832,8 +5832,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		match state:
 			Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
-
-				hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
 				
 				if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
 					hit_data[Em.hit.ANTI_AIRED] = true
@@ -5899,6 +5897,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 							else:
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 				
+	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
+		hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
 	
