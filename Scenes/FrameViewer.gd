@@ -26,7 +26,7 @@ func _ready():
 
 func is_idle(player):
 	match player.state:
-		Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.CROUCHING, \
+		Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, \
 				Em.char_state.DEAD, Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC:
 			return true
 		Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK: # for block, block return is not considered idle

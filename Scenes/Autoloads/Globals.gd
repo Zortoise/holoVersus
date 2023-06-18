@@ -206,8 +206,6 @@ func char_state_to_string(state):
 			return "DEAD"
 		Em.char_state.GROUND_STANDBY:
 			return "GROUND_STANDBY"
-		Em.char_state.CROUCHING:
-			return "CROUCHING"
 		Em.char_state.AIR_STANDBY:
 			return "AIR_STANDBY"
 		Em.char_state.GROUND_STARTUP:

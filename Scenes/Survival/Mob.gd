@@ -617,7 +617,7 @@ func simulate2(): # only ran if not in hitstop
 	
 	if !grounded:
 		match new_state:
-			Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+			Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
 				Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_ACTIVE, Em.char_state.GROUND_REC, \
 				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
 				Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.GROUND_BLOCK:

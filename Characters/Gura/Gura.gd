@@ -461,7 +461,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					
 				# GROUND DASH ---------------------------------------------------------------------------------
 			
-					Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC:
+					Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC:
 						if !Character.button_light in Character.input_state.just_pressed and \
 								!Character.button_fierce in Character.input_state.just_pressed:
 							if !Animator.query(["DashBrake", "WaveDashBrake"]):
@@ -677,7 +677,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 		
 		"InstaAirDash": # needed to chain wavedashes
 			match new_state:
-				Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC:
+				Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC:
 					Character.animate("JumpTransit")
 					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
 					has_acted[0] = true
@@ -720,7 +720,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 #							return true
 	match new_state:
 			
-		Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC:
+		Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC:
 			if Character.grounded and attack_ref in STARTERS:
 				if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC] and \
 						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
@@ -1581,7 +1581,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aL2bRec":
 			Character.animate("FallTransit")
 		"aL2LandRec":
-			Character.animate("Crouch")
+			Character.animate("Idle")
 			
 		"aL3Startup":
 			Character.animate("aL3Active")
@@ -2435,9 +2435,9 @@ func stagger_anim():
 	
 	match Animator.current_anim:
 		"Run":
-			match sprite.frame:
-				38, 41:
-					Character.play_audio("footstep2", {"vol":-1})
+			match Animator.time:
+				12, 30:
+					Character.play_audio("footstep2", {})
 		"SP1[c1]Startup", "SP1[c2]Startup", "SP1[u][c1]Startup", "SP1[u][c2]Startup":
 			if Animator.time == 3:
 				Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \

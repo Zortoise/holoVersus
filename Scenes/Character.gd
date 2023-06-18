@@ -1221,21 +1221,21 @@ func simulate2(): # only ran if not in hitstop
 				
 			# TO CROUCH --------------------------------------------------------------------------------------------------
 			
-				Em.char_state.GROUND_STANDBY:
-					animate("CrouchTransit")
+#				Em.char_state.GROUND_STANDBY:
+#					animate("CrouchTransit")
 					
 			# CROUCH CANCELS FOR CHAINDASHING --------------------------------------------------------------------------------------------------
 				# crouch to cancel ground dash recovery
 		
-				Em.char_state.GROUND_C_REC:
-					if Animator.query_to_play(["SoftLanding", "HardLanding"]):
-						animate("Crouch")
-					elif Animator.query_to_play(["DashBrake", "WaveDashBrake"]):
-						pass
-	#					if Em.trait.CHAIN_DASH in query_traits():
-	#						animate("CrouchTransit")
-					else:
-						animate("CrouchTransit")
+#				Em.char_state.GROUND_C_REC:
+#					if Animator.query_to_play(["SoftLanding", "HardLanding"]):
+#						animate("Crouch")
+#					elif Animator.query_to_play(["DashBrake", "WaveDashBrake"]):
+#						pass
+#	#					if Em.trait.CHAIN_DASH in query_traits():
+#	#						animate("CrouchTransit")
+#					else:
+#						animate("CrouchTransit")
 
 			# FASTFALL --------------------------------------------------------------------------------------------------
 				# cannot fastfall right after jumping
@@ -1314,7 +1314,7 @@ func simulate2(): # only ran if not in hitstop
 				Em.char_state.GROUND_STANDBY:
 					animate("BlockStartup")
 				Em.char_state.GROUND_C_REC:
-					if has_trait(Em.trait.DASH_BLOCK):
+					if has_trait(Em.trait.GRD_C_REC_BLOCK):
 						animate("BlockStartup")
 					elif !Animator.query_to_play(["DashBrake", "WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
 						animate("BlockStartup")
@@ -1355,7 +1355,10 @@ func simulate2(): # only ran if not in hitstop
 					$VarJumpTimer.stop()
 					
 				Em.char_state.AIR_C_REC:
-					if !Animator.query_to_play(["aDashBrake"]):
+					if has_trait(Em.trait.AIR_C_REC_BLOCK):
+						animate("aBlockStartup")
+						$VarJumpTimer.stop()
+					elif !Animator.query_to_play(["aDashBrake"]):
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 							
@@ -1380,7 +1383,7 @@ func simulate2(): # only ran if not in hitstop
 	
 	if !grounded:
 		match new_state:
-			Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+			Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
 				Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_ACTIVE, Em.char_state.GROUND_REC, \
 				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
 				Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.GROUND_BLOCK:
@@ -1516,9 +1519,9 @@ func simulate2(): # only ran if not in hitstop
 			else: # no friction when moving
 				friction_this_frame = 0
 			
-		Em.char_state.CROUCHING:
-			if !button_down in input_state.pressed and Animator.query_to_play(["Crouch"]):
-				animate("CrouchReturn") # stand up
+#		Em.char_state.CROUCHING:
+#			if !button_down in input_state.pressed and Animator.query_to_play(["Crouch"]):
+#				animate("CrouchReturn") # stand up
 	
 		Em.char_state.GROUND_STARTUP:
 			friction_this_frame = 0 # no friction when starting a ground jump/dash
@@ -2470,7 +2473,7 @@ func process_input_buffer():
 						
 						# JUMPING ON GROUND --------------------------------------------------------------------------------------------------
 						
-						Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC:
+						Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC:
 							if button_down in input_state.pressed and soft_grounded:
 			#							!Character.button_left in Character.input_state.pressed and \f
 			#							!Character.button_right in Character.input_state.pressed: # don't use dir
@@ -2576,8 +2579,15 @@ func process_input_buffer():
 						Em.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
 							if active_cancel or test_jump_cancel_active():
 								afterimage_cancel()
-								animate("JumpTransit")
-								keep = false
+								if button_down in input_state.pressed and !button_dash in input_state.pressed \
+									and soft_grounded: # cannot be pressing dash
+									position.y += 2 # 1 will cause issues with downward moving platforms
+									set_true_position()
+									animate("FallTransit")
+									keep = false
+								else:
+									animate("JumpTransit")
+									keep = false
 								
 						Em.char_state.GROUND_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
 							if buffered_input[0] != button_jump:
@@ -2600,7 +2610,7 @@ func process_input_buffer():
 					keep = false
 				else:
 					match state: # not new state
-						Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+						Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
 							Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK, \
 							Em.char_state.GROUND_REC, Em.char_state.AIR_REC, \
@@ -2668,7 +2678,7 @@ func process_input_buffer():
 								
 				if keep:
 					match new_state:
-						Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+						Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
 								Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
 								Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, \
 								Em.char_state.GROUND_REC, Em.char_state.AIR_REC, \
@@ -2690,7 +2700,7 @@ func process_input_buffer():
 									
 			"Dodge":
 				match new_state:
-					Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+					Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
 							Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, \
 							Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK, Em.char_state.GROUND_D_REC:
@@ -2812,8 +2822,8 @@ func state_detect(anim) -> int:
 		# universal animations
 		"Idle", "RunTransit", "Run", "Brake":
 			return Em.char_state.GROUND_STANDBY
-		"CrouchTransit", "Crouch", "CrouchReturn":
-			return Em.char_state.CROUCHING
+#		"CrouchTransit", "Crouch", "CrouchReturn":
+#			return Em.char_state.CROUCHING
 		"JumpTransit", "DashTransit":
 			return Em.char_state.GROUND_STARTUP
 		"Dash", "Dash2":
@@ -3621,7 +3631,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 	if seq_partner_ID != null: return # no checking during start of sequence
 	match new_state:
 		
-		Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+		Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
 				Em.char_state.GROUND_D_REC:
 			animate("FallTransit")
 			
@@ -7320,9 +7330,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:
 		"RunTransit":
 			animate("Run")
-		"CrouchTransit", "HardLanding":
-			animate("Crouch")
-		"CrouchReturn", "SoftLanding", "Brake":
+		"HardLanding", "SoftLanding", "Brake":
 			animate("Idle")
 			
 		"JumpTransit":

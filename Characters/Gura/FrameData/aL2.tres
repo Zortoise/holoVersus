@@ -49,7 +49,7 @@ frame_data = {
 "SfxOver_hframes": 3,
 "SfxOver_spritesheet": "aL2SfxOver",
 "SfxOver_vframes": 1,
-"duration": 12,
+"duration": 16,
 "hframes": 6,
 "loop": false,
 "spritesheet": "aL2Sprite",
@@ -73,6 +73,13 @@ frame_data = {
 "frame": 9,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -15, 22 ), Vector2( 12, 22 ), Vector2( 12, -4 ), Vector2( -15, -4 ) ],
+"sdhurtbox": [  ]
+},
+12: {
+"SfxOver_frame": 0,
+"frame": 10,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -12, 22 ), Vector2( 13, 22 ), Vector2( 13, -13 ), Vector2( -12, -13 ) ],
 "sdhurtbox": [  ]
 }
 },
