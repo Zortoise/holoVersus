@@ -617,7 +617,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				if !Character.grounded:
 					keep = !process_move(new_state, "SP2", has_acted)
 				else:
-					if count_ground_fin() == 0:
+					if get_ground_fins().size() == 0:
 						keep = !process_move(new_state, "SP4", has_acted)
 						
 		"Sp.uF":
@@ -651,7 +651,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					if keep:
 						keep = !process_move(new_state, "SP2", has_acted)
 				else:
-					if count_ground_fin() <= 1:
+					if get_ground_fins().size() <= 1:
 						keep = !process_move(new_state, "SP4[ex]", has_acted)	
 						if keep:
 							keep = !process_move(new_state, "SP4", has_acted)
@@ -1370,22 +1370,23 @@ func unique_chaining_rules(move_name, attack_ref):
 #				trident_array.append(entity)
 #	return trident_array
 
-func count_ground_fin():
+func get_ground_fins() -> Array:
 	var ground_fin_array := []
-	for entity in Globals.Game.get_node("EntitiesFront").get_children():
+	var entity_array := []
+	if Globals.player_count > 2:
+		entity_array = get_tree().get_nodes_in_group("EntityNodes")
+	else:
+		entity_array = get_tree().get_nodes_in_group("P" + str(Character.player_ID + 1) + "EntityNodes")
+	for entity in entity_array:
 		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "ground_fin":
 			ground_fin_array.append(entity)
-	return ground_fin_array.size()
+	return ground_fin_array
 
 func get_closest_ground_fin():
 	var target = Character.get_target()
 	if target == null: return null
 	
-	var ground_fin_array := []
-	for entity in Globals.Game.get_node("EntitiesFront").get_children():
-		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "ground_fin":
-			ground_fin_array.append(entity)
-
+	var ground_fin_array := get_ground_fins()
 	if ground_fin_array.size() > 0:
 		return FMath.get_closest(ground_fin_array, target.position).entity_ID
 	else:

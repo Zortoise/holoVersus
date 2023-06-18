@@ -502,7 +502,7 @@ func reflect(reflector_id):
 	else:
 		face(-facing)
 		velocity.x = -velocity.x
-		if Globals.player_count > 2:
+		if Globals.player_count <= 2:
 			remove_from_group("P" + str(master_ID + 1) + "EntityNodes")
 			add_to_group("P" + str(reflector_id + 1) + "EntityNodes")
 		master_ID = reflector_id
