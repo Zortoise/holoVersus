@@ -93,7 +93,7 @@ const MUSIC = {
 	}
 
 const UNIQUE_DATA_REF = {
-	"groundfin_count" : 0,
+#	"groundfin_count" : 0,
 	"groundfin_trigger" : false,
 	"groundfin_target" : null,
 	"nibbler_count" : 0,

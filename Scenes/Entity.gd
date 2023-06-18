@@ -323,6 +323,8 @@ func interactions():
 			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in atk_attr or proj_level == 3:
 				indestructible = true
 				reflectable = false
+			if Em.atk_attr.NO_REFLECT_ENTITY in atk_attr or velocity.x == 0:
+				reflectable = false
 				
 			var can_clash := false
 			if absorption_value != null and absorption_value > 0:
@@ -344,7 +346,8 @@ func interactions():
 				if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
 						character.slowed >= 0:
 					var char_atk_attr = character.query_atk_attr()
-					if reflectable and Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
+					if reflectable and Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and \
+							sign(character.position.x - position.x) == sign(velocity.x): # can only reflect approaching projectiles
 						reflector_array_char.append(character)
 						
 					if !indestructible and (easy_destructible or Em.atk_attr.DESTROY_ENTITIES in char_atk_attr):
@@ -367,7 +370,8 @@ func interactions():
 				if entity.master_ID != master_ID and !entity.free and entity.slowed >= 0:
 					var entity_atk_attr = entity.query_atk_attr()
 					
-					if reflectable and Em.atk_attr.REFLECT_ENTITIES in entity_atk_attr and velocity.x != 0:
+					if reflectable and Em.atk_attr.REFLECT_ENTITIES in entity_atk_attr and \
+							sign(entity.position.x - position.x) == sign(velocity.x): # can only reflect approaching projectiles:
 						reflector_array_entity.append(entity)
 						
 					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity_atk_attr:

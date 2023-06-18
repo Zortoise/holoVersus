@@ -602,7 +602,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				
 		"Sp.L":
 			if !has_acted[0]:
-				if test_instinct():
+				if test_nostos():
 					keep = !process_move(new_state, "SP7", has_acted)
 				else:
 					keep = !process_move(new_state, "SP1", has_acted)
@@ -617,7 +617,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				if !Character.grounded:
 					keep = !process_move(new_state, "SP2", has_acted)
 				else:
-					if Character.unique_data.groundfin_count == 0:
+					if count_ground_fin() == 0:
 						keep = !process_move(new_state, "SP4", has_acted)
 						
 		"Sp.uF":
@@ -651,7 +651,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					if keep:
 						keep = !process_move(new_state, "SP2", has_acted)
 				else:
-					if Character.unique_data.groundfin_count <= 1:
+					if count_ground_fin() <= 1:
 						keep = !process_move(new_state, "SP4[ex]", has_acted)	
 						if keep:
 							keep = !process_move(new_state, "SP4", has_acted)
@@ -1370,6 +1370,13 @@ func unique_chaining_rules(move_name, attack_ref):
 #				trident_array.append(entity)
 #	return trident_array
 
+func count_ground_fin():
+	var ground_fin_array := []
+	for entity in Globals.Game.get_node("EntitiesFront").get_children():
+		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "ground_fin":
+			ground_fin_array.append(entity)
+	return ground_fin_array.size()
+
 func get_closest_ground_fin():
 	var target = Character.get_target()
 	if target == null: return null
@@ -1385,7 +1392,7 @@ func get_closest_ground_fin():
 		return null
 		
 			
-func test_instinct(): # to determine if move is usable
+func test_nostos(): # to determine if move is usable
 	if Character.unique_data.last_trident == null: return false
 	
 	var last_trident = Globals.Game.get_entity_node(Character.unique_data.last_trident)
@@ -1399,7 +1406,7 @@ func test_instinct(): # to determine if move is usable
 #	if get_trident_array().size() > 0: return true
 #	return false
 	
-func instinct():
+func nostos():
 	
 	if Character.unique_data.last_trident == null: return
 	
@@ -2232,18 +2239,15 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP4Active":
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", Animator.query_point("entityspawn"), {}, Character.palette_number, NAME)
-			Character.unique_data.groundfin_count += 1
 		"SP4[h]Active":
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", Animator.query_point("entityspawn"), \
 					{"held" : true}, Character.palette_number, NAME)
-			Character.unique_data.groundfin_count += 1
 		"SP4[ex]Active":
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 25)
 			var spawn_point = Animator.query_point("entityspawn")
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"ex" : true}, Character.palette_number, NAME)
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"held" : true, "ex" : true}, Character.palette_number, NAME)
-			Character.unique_data.groundfin_count += 2
 			
 		"SP5Startup", "aSP5Startup", "SP5[ex]Startup", "aSP5[ex]Startup":
 			Character.velocity_limiter.x_slow = 20
@@ -2301,7 +2305,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			Character.get_node("ModulatePlayer").play("unflinch_flash")
 		"aSP7Active":
-			instinct()
+			nostos()
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.down = 10
 		"SP7Rec":

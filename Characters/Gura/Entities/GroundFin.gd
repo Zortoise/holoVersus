@@ -61,20 +61,20 @@ func simulate():
 				Entity.play_audio("water4", {"vol" : -23})
 				Entity.play_audio("water8", {"vol" : -13})
 				# reduce ground fin count
-				master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
+#				master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
 				Entity.free = true
 				
 				
 func query_atk_attr(_move_name):
-	return [Em.atk_attr.HARMLESS_ENTITY, Em.atk_attr.DESTRUCTIBLE_ENTITY]
+	return [Em.atk_attr.HARMLESS_ENTITY, Em.atk_attr.DESTRUCTIBLE_ENTITY, Em.atk_attr.NO_REFLECT_ENTITY]
 
 	
 func kill(_sound = true):
 	if !Animator.to_play_anim.ends_with("Kill"):
 		Animator.play("Kill")
 		# reduce ground fin count
-		var master_node = Globals.Game.get_player_node(Entity.master_ID)
-		master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
+#		var master_node = Globals.Game.get_player_node(Entity.master_ID)
+#		master_node.unique_data.groundfin_count = max(0, master_node.unique_data.groundfin_count - 1)
 	
 func expire():
 	kill()
