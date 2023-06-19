@@ -59,7 +59,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # JUMP_CANCEL_ON_WHIFF = can jump cancel during recovery on whiff
 # JUMP_CANCEL_ON_HIT = can jump cancel during recovery on hit, for Specials since can already do it for Normals
 # VULN_LIMBS = take full damage from SDHits
-# DESTROY_ENTITIES = hitbox destroys entities
+# DESTROY_ENTITIES = hitbox destroys entities, mostly for other entities
 # DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
 # INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
 # HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)

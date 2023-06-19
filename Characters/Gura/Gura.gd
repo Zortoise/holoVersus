@@ -747,7 +747,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
 							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr("a" + attack_ref):
 						continue # certain moves cannot be performed during cancellable recovery
-					if !Character.test_dash_attack(attack_ref):
+					if !Character.test_dash_attack("a" + attack_ref):
 						continue # if dash attacking, cannot use attacks already used in the chain
 					if Character.is_ex_valid("a" + attack_ref):
 						Character.animate("a" + attack_ref + "Startup")

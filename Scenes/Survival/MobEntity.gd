@@ -249,13 +249,15 @@ func interactions():
 			for character in character_array:
 				if character.player_ID != master_ID and (!"free" in character or !character.free) and character.is_atk_active() and \
 						character.slowed >= 0:
-					var char_atk_attr = character.query_atk_attr()
+					var char_move_data = character.query_move_data()
 #					if Em.atk_attr.REFLECT_ENTITIES in char_atk_attr and velocity.x != 0:
 #						master_ID = character.player_ID
 #						velocity.x = -velocity.x
 #						return
 						
-					if !indestructible and (easy_destructible or Em.atk_attr.DESTROY_ENTITIES in char_atk_attr):
+					if !indestructible and Em.move.DMG in char_move_data and \
+							(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
+							Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
 						destroyer_array.append(character)
 					
 			 # get entities that can destroy or clash with this entity

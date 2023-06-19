@@ -612,7 +612,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(seq_partner_ID)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(chain_memory)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -714,9 +714,9 @@ func simulate(new_input_state):
 #			enhance_card(Cards.effect_ref.REWIND, true)
 
 			# warning-ignore:return_value_discarded
-#			super_cost(20000)
+			super_cost(2)
 #			BGM.muffle()
-			Globals.Game.viewport.play_audio("defeated", {})
+#			Globals.Game.viewport.play_audio("defeated", {})
 			
 			pass
 
@@ -4341,16 +4341,27 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 #	return true
 	
 		
-func super_cost(ex_cost: int, ex_lock = null, forced = false) -> bool:
+func super_cost(ex_bar_cost: int, forced = false) -> bool: # ex_bar_cost is the number of bars costed, not the EX amount!
+# if forced is true, can use even with current_ex_lock > 0, used for follow-up supers
 	
-	if current_ex_gauge < ex_cost: return false # not enough meter
+#	if current_ex_gauge < ex_cost: return false # not enough meter
+# warning-ignore:integer_division
+	var current_bars := int(current_ex_gauge / EX_LEVEL)
+	if current_bars + (3 - current_ex_lock) < ex_bar_cost: return false # not enough meter
 	if !forced and current_ex_lock > 0: return false # cannot use super if has EX Lock unless forced
 	
-	if ex_lock == null:
-		current_ex_lock = ex_cost
-	else: # some supers have different ex_cost and ex_lock
-		current_ex_lock = ex_lock
-	change_ex_gauge(-ex_cost)
+	if current_bars >= ex_bar_cost:
+		change_ex_gauge(-EX_LEVEL * ex_bar_cost)
+	else:
+		ex_bar_cost -= current_bars
+		current_ex_lock = ex_bar_cost * EX_LEVEL
+		change_ex_gauge(-EX_LEVEL * current_bars)
+	
+#	if ex_lock == null:
+#		current_ex_lock = ex_cost
+#	else: # some supers have different ex_cost and ex_lock
+#		current_ex_lock = ex_lock
+#	change_ex_gauge(-ex_cost)
 	
 	return true
 	
