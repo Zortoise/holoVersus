@@ -851,8 +851,11 @@ func simulate2(): # only ran if not in hitstop
 	if !$HitStopTimer.is_running() and is_hitstunned() and GG_swell_flag and !first_hit_flag and \
 			!state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER] and \
 			!(DI_seal and $BurstLockTimer.is_running()):
+		if $HitStunTimer.is_running():
 			current_guard_gauge = int(min(GUARD_GAUGE_CEIL, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
-			Globals.Game.guard_gauge_update(self)
+		else: # in techable state, lose GG slowly
+			current_guard_gauge = int(max(0, current_guard_gauge - FMath.percent(GUARD_GAUGE_DEGEN_AMOUNT, 25)))
+		Globals.Game.guard_gauge_update(self)
 
 	# regen/degen GG
 	elif !is_hitstunned_or_sequenced():
@@ -1901,6 +1904,7 @@ func bounce(against_ground: bool):
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+							first_hit_flag = true
 						else: # lvl 3 slam
 							hitstop = 15
 							slam_level = 2
@@ -1908,10 +1912,12 @@ func bounce(against_ground: bool):
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))
+							first_hit_flag = true
 					else: # lvl 1 slam
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
+						first_hit_flag = true
 						
 					if sign(velocity_previous_frame.x) > 0:
 						bounce_dust(Em.compass.E, slam_level)
@@ -1953,6 +1959,7 @@ func bounce(against_ground: bool):
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+							first_hit_flag = true
 						else:
 							hitstop = 15
 							slam_level = 2
@@ -1960,10 +1967,12 @@ func bounce(against_ground: bool):
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
 							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))
+							first_hit_flag = true
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
+						first_hit_flag = true
 
 					bounce_dust(Em.compass.N, slam_level)
 					return
@@ -6586,7 +6595,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 			pass
 		else: return 0
 	
-	if is_hitstunned() and GG_swell_flag and !first_hit_flag: # if Guard Swell is active, no Guard Drain
+	if is_hitstunned() and $HitStunTimer.is_running() and GG_swell_flag and !first_hit_flag: # if Guard Swell is active, no Guard Drain
 		return 0
 	
 #	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]

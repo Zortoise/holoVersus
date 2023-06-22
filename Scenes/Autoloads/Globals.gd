@@ -1,6 +1,6 @@
 extends Node
 
-const VERSION = "Test Build 7"
+const VERSION = "Test Build 8"
 
 const FRAME = 1.0/60.0
 const CAMERA_ZOOM_SPEED = 0.000006
