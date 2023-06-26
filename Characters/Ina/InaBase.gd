@@ -3,43 +3,43 @@ extends Node2D
 # CHARACTER DATA --------------------------------------------------------------------------------------------------
 # may be saved in a .tres file later? Or just leave it in the .gd file
 
-const NAME = "Gura"
+const NAME = "Ina'nis"
 
 # character movement stats, use to overwrite
-const SPEED = 340 * FMath.S # ground speed
-const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
-const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
-const JUMP_SPEED = 900 * FMath.S
-const VAR_JUMP_TIME = 10 # frames after jumping where holding jump will reduce gravity
+const SPEED = 300 * FMath.S # ground speed
+const AIR_STRAFE_SPEED_MOD = 15 # percent of ground speed
+const AIR_STRAFE_LIMIT_MOD = 900 # speed limit of air strafing, limit depends on calculated air strafe speed
+const JUMP_SPEED = 700 * FMath.S
+const VAR_JUMP_TIME = 20 # frames after jumping where holding jump will reduce gravity
 const VAR_JUMP_SLOW_POINT = 5 # frames where JUMP_SLOW starts
 #const JUMP_HORIZONTAL_SPEED = 110 * FMath.S
 const DIR_JUMP_HEIGHT_MOD = 85 # % of JUMP_SPEED when jumping while holding left/right
-const HORIZ_JUMP_BOOST_MOD = 20 # % of SPEED to gain when jumping with left/right held
-const HORIZ_JUMP_SPEED_MOD = 150 # % of velocity.x to gain when jumping with left/right held
+const HORIZ_JUMP_BOOST_MOD = 10 # % of SPEED to gain when jumping with left/right held
+const HORIZ_JUMP_SPEED_MOD = 125 # % of velocity.x to gain when jumping with left/right held
 const AIR_HORIZ_JUMP_SPEED_MOD = 125
 const HIGH_JUMP_SLOW = 10 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump held
 const SHORT_JUMP_SLOW = 20 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump unheld
-const AIR_JUMP_HEIGHT_MOD = 90 # percentage of JUMP_SPEED, reduce height of air jumps
+const AIR_JUMP_HEIGHT_MOD = 70 # percentage of JUMP_SPEED, reduce height of air jumps
 const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
 const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
-const WALL_AIR_JUMP_VERT_MOD = 100 # percentage of JUMP_SPEED when wall jumping
-const GRAVITY_MOD = 100 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 800 # affect terminal velocity downward
-const FASTFALL_MOD = 115 # fastfall speed, mod of terminal velocity
-const FRICTION = 15 # between 0 and 100
-const ACCELERATION = 15 # between 0 and 100
+const WALL_AIR_JUMP_VERT_MOD = 70 # percentage of JUMP_SPEED when wall jumping
+const GRAVITY_MOD = 80 # make sure variable's a float
+const TERMINAL_VELOCITY_MOD = 500 # affect terminal velocity downward
+const FASTFALL_MOD = 150 # fastfall speed, mod of terminal velocity
+const FRICTION = 4 # between 0 and 100
+const ACCELERATION = 3 # between 0 and 100
 const AIR_RESISTANCE = 3 # between 0 and 100
-const FALL_GRAV_MOD = 100 # reduced gravity when going down
+const FALL_GRAV_MOD = 40 # reduced gravity when going down
 const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 
-const MAX_AIR_JUMP = 1
-const MAX_AIR_DASH = 2
+const MAX_AIR_JUMP = 2
+const MAX_AIR_DASH = 1
 const MAX_AIR_DODGE = 1
 const MAX_SUPER_DASH = 1
 const GROUND_DASH_SPEED = 500 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
-const SDASH_SPEED = 450 * FMath.S # super dash
-const SDASH_TURN_RATE = 5 # exact navigate speed when sdashing
+const SDASH_SPEED = 370 * FMath.S # super dash
+const SDASH_TURN_RATE = 6 # exact navigate speed when sdashing
 const DODGE_GG_COST = 2500
 const DODGE_SPEED = 1000 * FMath.S
 

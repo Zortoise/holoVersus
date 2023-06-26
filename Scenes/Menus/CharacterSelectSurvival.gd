@@ -184,7 +184,10 @@ func populate_char_grid():
 	for character in character_data.keys(): # get Random to the back
 		if character != "Random":
 			char_names.append(character)
-	char_names.append("Random")
+	if posmod(char_names.size(), 2) != 0:
+		char_names.append("Random")
+	else:
+		char_names.insert(char_names.size() - 1, "Random") # to ensure Random is the rightmost one
 
 	for char_pos in char_names.size():
 		char_grid[index_array[char_pos]] = char_names[char_pos]

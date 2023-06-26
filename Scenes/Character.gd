@@ -303,7 +303,7 @@ var test_num := 0
 # SETUP CHARACTER --------------------------------------------------------------------------------------------------
 
 # this is run after adding this node to the tree
-func init(in_player_ID, in_character, start_position, start_facing, in_palette_number):
+func init(in_player_ID, in_char_ref, in_character, start_position, start_facing, in_palette_number):
 	add_to_group("PlayerNodes")
 	
 	set_player_id(in_player_ID)
@@ -315,7 +315,7 @@ func init(in_player_ID, in_character, start_position, start_facing, in_palette_n
 	UniqChar = in_character
 	add_child(UniqChar)
 	move_child(UniqChar, 0)
-	directory_name = "res://Characters/" + UniqChar.NAME + "/"
+	directory_name = "res://Characters/" + in_char_ref + "/"
 	
 	# setup load_data
 	if !UniqChar.NAME in Loader.char_data:
@@ -2795,17 +2795,17 @@ func animate(anim):
 
 	var old_new_state: int = new_state
 	
-	Animator.play(anim)
-	new_state = state_detect(anim)
-	
-	if anim.ends_with("Active") and !Em.atk_attr.NO_HITCOUNT_RESET in UniqChar.query_atk_attr(get_move_name()):
-		atk_startup_resets() # need to do this here to work! resets hitcount and ignore list
+	if Animator.play(anim):
+		new_state = state_detect(anim)
+		
+		if anim.ends_with("Active") and !Em.atk_attr.NO_HITCOUNT_RESET in UniqChar.query_atk_attr(get_move_name()):
+			atk_startup_resets() # need to do this here to work! resets hitcount and ignore list
 
-	# when changing to a non-attacking state from attack startup, auto-buffer pressed attack buttons
-	if Settings.input_assist[player_ID] and !startup_cancel_flag and !is_attacking():
-		match old_new_state:
-			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
-				rebuffer_actions()
+		# when changing to a non-attacking state from attack startup, auto-buffer pressed attack buttons
+		if Settings.input_assist[player_ID] and !startup_cancel_flag and !is_attacking():
+			match old_new_state:
+				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+					rebuffer_actions()
 
 			
 func rebuffer_actions():
@@ -3573,7 +3573,9 @@ func check_landing(): # called by physics.gd when character stopped by floor
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 					if dir == facing:
 						velocity.x = facing * FMath.percent(get_stat("GROUND_DASH_SPEED"), get_stat("WAVE_DASH_SPEED_MOD"))
-			
+						
+			else: # landing during AirDashDD
+				animate("HardLanding")
 			
 		Em.char_state.AIR_REC:
 			if Animator.query_to_play(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
@@ -3584,9 +3586,6 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			elif Animator.query_to_play(["Dodge", "DodgeRec", "SDash"]) or \
 					Animator.to_play_anim.begins_with("Burst"): # no landing
 				pass
-				
-			else: # landing during AirDashDD
-				animate("HardLanding")
 			
 		Em.char_state.AIR_ATK_STARTUP: # can land cancel on the 1st few frames (unless EX/Super), will auto-buffer pressed attacks
 			var move_name = get_move_name()
@@ -7473,7 +7472,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 	# do this at end of _on_SpritePlayer_anim_finished() as well
 	if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
-			Em.char_state.GROUND_REC, Em.char_state.AIR_REC]:
+			Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and !Animator.query_to_play(["SoftLanding"]):
 		from_move_rec = true
 		
 
@@ -7485,7 +7484,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #		print(Globals.char_state_to_string(state))
 	
 	if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
-			Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC]:
+			Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC] and !Animator.query_to_play(["SoftLanding"]):
 		from_move_rec = true
 	elif !is_atk_startup():
 		from_move_rec = false
@@ -7553,8 +7552,6 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		sprite.rotation = 0
 	
 	match anim_name:
-		"Run":
-			Globals.Game.spawn_SFX("RunDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 		
 		"Dash":
 			if Globals.survival_level != null and !ground_dash_enhance():

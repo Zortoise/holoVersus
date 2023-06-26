@@ -40,8 +40,10 @@ func play(anim: String):
 			set_up_texture()
 			process_timestamp(0)
 		sustain = true
+		return true
 	else:
 		print("Error: Animation " + anim + " not found.")
+		return false
 		
 func stop():
 	playing = false

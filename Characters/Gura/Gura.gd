@@ -723,6 +723,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC:
 			if Character.grounded and attack_ref in STARTERS:
 				if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC] and \
+						!Animator.query_to_play(["SoftLanding"]) and \
 						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 					continue # certain moves cannot be performed during cancellable recovery
 				if !Character.test_dash_attack(attack_ref):
@@ -1973,6 +1974,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 func _on_SpritePlayer_anim_started(anim_name):
 
 	match anim_name:
+		"Run":
+			Globals.Game.spawn_SFX("RunDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aDashTransit":
 			if Character.button_down in Character.input_state.pressed:
 				Character.velocity.y = 0 # for faster wavedashes
