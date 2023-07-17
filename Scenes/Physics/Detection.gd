@@ -130,20 +130,65 @@ func is_riding(platform_box, character_box):
 func wall_finder(global_pos: Vector2, facing, finding_range = 15):
 	# create a point
 	var point = Vector2(global_pos)
+	
 	var wall_array = get_tree().get_nodes_in_group("SolidPlatforms")
 	wall_array.append_array(get_tree().get_nodes_in_group("CSolidPlatforms"))
 	wall_array.append_array(get_tree().get_nodes_in_group("SemiSolidWalls"))
 	wall_array.append_array(get_tree().get_nodes_in_group("BlastWalls"))
 	
-	for x in finding_range:
-		for wall in wall_array:
-			if Rect2(wall.rect_global_position, wall.rect_size).has_point(point): # wall found
-				point.x -= facing
-				return point
-		point.x += facing
-		
-	return null # no walls found
+	var detect_box := Rect2(global_pos, Vector2(finding_range, 1))
+	if facing == -1:
+		detect_box.position.x -= finding_range
 	
+	var detected_walls := []
+	
+	for x in wall_array:
+		if detect_box.intersects(Rect2(x.rect_global_position, x.rect_size)):
+			detected_walls.append(x)
+			
+	if detected_walls.size() == 0 or facing == 0:
+		return null # no walls found
+	else:
+		match facing:
+			1:
+				point.x = get_leftmost_in_array(detected_walls)
+			-1:
+				point.x = get_rightmost_in_array(detected_walls)
+				
+	return point
+			
+#	for x in finding_range:
+#		for wall in wall_array:
+#			if Rect2(wall.rect_global_position, wall.rect_size).has_point(point): # wall found
+#				if facing == -1: # issue with right wall with 1 pixel difference
+#					point.x -= facing
+#				return point
+#		point.x += facing
+#
+#	return null # no walls found
+
+	
+func get_leftmost_in_array(stoppers: Array): # for moving to the right
+	var leftmost_point = null
+	for stopper in stoppers:
+		if leftmost_point == null:
+			leftmost_point = stopper.rect_global_position.x
+		else:
+			if stopper.rect_global_position.x < leftmost_point:
+				leftmost_point = stopper.rect_global_position.x
+	return leftmost_point
+	
+func get_rightmost_in_array(stoppers: Array): # for moving to the left
+	var rightmost_point = null
+	for stopper in stoppers:
+		if rightmost_point == null:
+			rightmost_point = stopper.rect_global_position.x + stopper.rect_size.x
+		else:
+			if stopper.rect_global_position.x + stopper.rect_size.x < rightmost_point:
+				rightmost_point = stopper.rect_global_position.x + stopper.rect_size.x
+	return rightmost_point
+	
+
 	
 # for offset, +ve x means right, +ve y means down
 # for v_bias, 0 = closest to center, 1 = highest, -1 = lowest

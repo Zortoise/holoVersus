@@ -1,0 +1,32 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Blink": {
+"duration": 12,
+"hframes": 5,
+"loop": false,
+"spritesheet": "BlinkSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+2: {
+"frame": 1
+},
+4: {
+"frame": 2
+},
+6: {
+"frame": 3
+},
+9: {
+"frame": 4
+}
+},
+"vframes": 1
+}
+}

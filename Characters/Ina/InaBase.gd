@@ -1,21 +1,19 @@
 extends Node2D
 
 # CHARACTER DATA --------------------------------------------------------------------------------------------------
-# may be saved in a .tres file later? Or just leave it in the .gd file
 
 const NAME = "Ina'nis"
 
 # character movement stats, use to overwrite
 const SPEED = 300 * FMath.S # ground speed
-const AIR_STRAFE_SPEED_MOD = 15 # percent of ground speed
-const AIR_STRAFE_LIMIT_MOD = 900 # speed limit of air strafing, limit depends on calculated air strafe speed
+const AIR_STRAFE_SPEED_MOD = 16 # percent of ground speed
+const AIR_STRAFE_LIMIT_MOD = 700 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
 const VAR_JUMP_TIME = 20 # frames after jumping where holding jump will reduce gravity
 const VAR_JUMP_SLOW_POINT = 5 # frames where JUMP_SLOW starts
-#const JUMP_HORIZONTAL_SPEED = 110 * FMath.S
 const DIR_JUMP_HEIGHT_MOD = 85 # % of JUMP_SPEED when jumping while holding left/right
-const HORIZ_JUMP_BOOST_MOD = 10 # % of SPEED to gain when jumping with left/right held
-const HORIZ_JUMP_SPEED_MOD = 125 # % of velocity.x to gain when jumping with left/right held
+const HORIZ_JUMP_BOOST_MOD = 20 # % of SPEED to gain when jumping with left/right held
+const HORIZ_JUMP_SPEED_MOD = 150 # % of velocity.x to gain when jumping with left/right held
 const AIR_HORIZ_JUMP_SPEED_MOD = 125
 const HIGH_JUMP_SLOW = 10 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump held
 const SHORT_JUMP_SLOW = 20 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump unheld
@@ -25,7 +23,7 @@ const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
 const WALL_AIR_JUMP_VERT_MOD = 70 # percentage of JUMP_SPEED when wall jumping
 const GRAVITY_MOD = 80 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 500 # affect terminal velocity downward
-const FASTFALL_MOD = 150 # fastfall speed, mod of terminal velocity
+const FASTFALL_MOD = 115 # fastfall speed, mod of terminal velocity
 const FRICTION = 4 # between 0 and 100
 const ACCELERATION = 3 # between 0 and 100
 const AIR_RESISTANCE = 3 # between 0 and 100
@@ -36,26 +34,31 @@ const MAX_AIR_JUMP = 2
 const MAX_AIR_DASH = 1
 const MAX_AIR_DODGE = 1
 const MAX_SUPER_DASH = 1
-const GROUND_DASH_SPEED = 500 * FMath.S # duration in animation data
-const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
-const SDASH_SPEED = 370 * FMath.S # super dash
+const GRD_DASH_SPEED = 120 * FMath.S # distance
+const AIR_DASH_SPEED = 120 * FMath.S # distance
+const SDASH_SPEED = 385 * FMath.S # super dash
 const SDASH_TURN_RATE = 6 # exact navigate speed when sdashing
+
+# fixed?
 const DODGE_GG_COST = 2500
 const DODGE_SPEED = 1000 * FMath.S
 
+# fixed?
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
-const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
+const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
 
-const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
-const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
+# fixed?
+const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower?
+const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher?
 
-const DAMAGE_VALUE_LIMIT = 1100
+const DAMAGE_VALUE_LIMIT = 1300
 
-const GG_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
-const GROUND_BLOCK_GG_COST = 35 # exact GG loss per frame when blocking on ground
-const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
-const WEAKBLOCK_CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
+const GG_REGEN_AMOUNT = 13 # exact GG regened per frame when GG < 100%
+const GRD_BLOCK_GG_COST = 30 # exact GG loss per frame when blocking on ground
+const AIR_BLOCK_GG_COST = 40 # exact GG loss per frame when blocking in air
+const WEAKBLOCK_CHIP_DMG_MOD = 20 # % of damage taken as chip damage when blocking
 
+# fixed?
 const BASE_EX_REGEN = 20
 const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
 const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
@@ -63,11 +66,14 @@ const BLOCKED_EX_REGEN_MOD = 200 # increase EX Regen when doing a blocked attack
 #const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
 #const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 
+const TRANSIT_SDASH = ["BlinkTransit", "EBlinkTransit"] # unique dash transits that you can quick cancel into SDash
+const TRANSIT_DODGE = ["BlinkTransit"] # unique dash transits that you can quick cancel into Dodge
+
 const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
-const DEFAULT_HITSPARK_PALETTE = "blue"
-const SDHitspark_COLOR = "blue"
+const DEFAULT_HITSPARK_PALETTE = "purple"
+const SDHitspark_COLOR = "purple"
 
 const PALETTE_TO_PORTRAIT = {
 	1: Color(0.75, 0.93, 1.25),
@@ -77,8 +83,7 @@ const PALETTE_TO_PORTRAIT = {
 }
 
 const PALETTE_TO_HITSPARK_PALETTE = {
-	3: "green",
-	4: "white",
+	1: "dark_purple",
 }
 
 const MUSIC = {
@@ -90,29 +95,16 @@ const MUSIC = {
 	}
 
 const UNIQUE_DATA_REF = {
-#	"groundfin_count" : 0,
-	"groundfin_trigger" : false,
-	"groundfin_target" : null,
-	"nibbler_count" : 0,
-#	"nibbler_cancel" : 0, # a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
-	"last_trident" : null
+	"float_used" : false,
+	"float_time" : 60,
 }
 
-const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF2", "aF3", "aH", "SP1", "SP1[ex]", "aSP1", "aSP1[ex]", \
-	"aSP2", "aSP2[ex]", "SP3", "aSP3", "SP3[ex]", "aSP3[ex]", "SP4", "SP4[ex]", "SP5", "aSP5", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]", \
-	"SP7", "aSP7", "SP8", "SP9", "SP9a", "SP9b", "SP9c", "aSP9c[r]", "SP9d"]
-#const SPECIALS = ["SP1", "aSP1", "aSP2", "SP3", "aSP3", "SP4", "SP5", "aSP5"]
-#const EX_MOVES = ["SP1[ex]", "aSP1[ex]", "aSP2[ex]", "SP3[ex]", "aSP3[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP6[ex]", "aSP6[ex]"]
-#const SUPERS = []
+const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF2", "aF3", "aH"]
 
-const UP_TILTS = ["L3", "F3", "SP3", "SP3[ex]", "aL3", "aF3", "aSP3", "aSP3[ex]", "SP9c"] # to know which moves can be cancelled from jumpsquat
+const UP_TILTS = ["L3", "F3", "aL3", "aF3"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
-const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1b[ex]", "aSP1b[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
-	"SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB"]
-#const EX_FLASH_ANIM = ["H", "Hb"]
-
-# const DIRECTORY_NAME = "res://Characters/Gura/"
+const EX_FLASH_ANIM = []
 
 # this contain move_data for each active animation this character has
 # use trim_suffix("Active") on animation name to find move in the database
@@ -120,56 +112,16 @@ const MOVE_DATABASE = {
 	"L1" : {
 		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 20,
-		Em.move.KB : 200 * FMath.S,
-		Em.move.KB_TYPE: Em.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
-		Em.move.ATK_LVL : 2,
-		Em.move.FIXED_HITSTOP : 10,
-		Em.move.FIXED_ATKER_HITSTOP : 1,
-		Em.move.KB_ANGLE : -36,
-		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN],
+		Em.move.DMG : 50,
+		Em.move.KB : 350 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
+		Em.move.ATK_LVL : 4,
+		Em.move.KB_ANGLE : 50,
+		Em.move.ATK_ATTR : [],
 		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
 		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
-	"L1b" : {
-		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
-		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 20,
-		Em.move.KB : 200 * FMath.S,
-		Em.move.KB_TYPE: Em.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
-		Em.move.ATK_LVL : 2,
-		Em.move.KB_ANGLE : -36,
-		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.NO_IMPULSE],
-		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
-		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
-	},
-	"L1b[h]" : {
-		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
-		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 20,
-		Em.move.KB : 200 * FMath.S,
-		Em.move.KB_TYPE: Em.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
-		Em.move.ATK_LVL : 3,
-		Em.move.FIXED_HITSTOP : 10,
-		Em.move.FIXED_ATKER_HITSTOP : 1,
-		Em.move.KB_ANGLE : -36,
-		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.NO_IMPULSE, Em.atk_attr.AUTOCHAIN],
-		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
-		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
-	},
-	"L1c" : {
-		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
-		Em.move.ROOT: "L1b",
-		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 20,
-		Em.move.KB : 200 * FMath.S,
-		Em.move.KB_TYPE: Em.knockback_type.FIXED, # for radial, +ve KB_angle means rotating clockwise, -ve is counterclockwise
-		Em.move.ATK_LVL : 2,
-		Em.move.KB_ANGLE : -36,
-		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.NO_IMPULSE],
-		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
-		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
-	},
+
 	"L2" : {
 		Em.move.ATK_TYPE : Em.atk_type.LIGHT,
 		Em.move.HITCOUNT : 1,

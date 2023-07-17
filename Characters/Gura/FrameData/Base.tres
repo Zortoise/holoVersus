@@ -119,35 +119,35 @@ frame_data = {
 },
 2: {
 "frame": 91,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 5: {
 "frame": 92,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 10: {
 "frame": 93,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 15: {
 "frame": 94,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 20: {
 "frame": 91,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 25: {
 "frame": 92,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 30: {
 "frame": 93,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 35: {
 "frame": 94,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 }
 },
 "vframes": 16
@@ -164,35 +164,35 @@ frame_data = {
 },
 2: {
 "frame": 91,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 5: {
 "frame": 92,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 10: {
 "frame": 93,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 15: {
 "frame": 94,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 20: {
 "frame": 91,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 25: {
 "frame": 92,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 30: {
 "frame": 93,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 35: {
 "frame": 94,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 }
 },
 "vframes": 16
@@ -234,35 +234,35 @@ frame_data = {
 },
 2: {
 "frame": 91,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 5: {
 "frame": 92,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 10: {
 "frame": 93,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 15: {
 "frame": 94,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 20: {
 "frame": 91,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 25: {
 "frame": 92,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 30: {
 "frame": 93,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 },
 35: {
 "frame": 94,
-"hurtbox": [ Vector2( -18, 7 ), Vector2( -17, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
+"hurtbox": [ Vector2( -18, 8 ), Vector2( -4, 8 ), Vector2( -4, 22 ), Vector2( 8, 22 ), Vector2( 8, 5 ), Vector2( 15, 5 ), Vector2( 15, -6 ), Vector2( 8, -6 ), Vector2( 8, -11 ), Vector2( 2, -11 ), Vector2( 2, -19 ), Vector2( -18, -19 ) ]
 }
 },
 "vframes": 16
@@ -322,23 +322,6 @@ frame_data = {
 },
 "vframes": 16
 },
-"Dash2": {
-"duration": 8,
-"hframes": 6,
-"loop": false,
-"spritesheet": "BaseSprite",
-"timestamps": {
-0: {
-"frame": 45,
-"hurtbox": [ Vector2( 7, 10 ), Vector2( 23, 10 ), Vector2( 23, -12 ), Vector2( 7, -12 ) ]
-},
-4: {
-"frame": 46,
-"hurtbox": [ Vector2( 7, 10 ), Vector2( 23, 10 ), Vector2( 23, -12 ), Vector2( 7, -12 ) ]
-}
-},
-"vframes": 16
-},
 "DashBrake": {
 "duration": 9,
 "hframes": 6,
@@ -361,7 +344,7 @@ frame_data = {
 "vframes": 16
 },
 "DashTransit": {
-"duration": 1,
+"duration": 2,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -369,6 +352,23 @@ frame_data = {
 0: {
 "frame": 44,
 "hurtbox": [ Vector2( -5, -8 ), Vector2( -12, -8 ), Vector2( -12, 22 ), Vector2( 6, 22 ), Vector2( 6, 5 ), Vector2( 20, 5 ), Vector2( 20, -18 ), Vector2( -5, -18 ) ]
+}
+},
+"vframes": 16
+},
+"Dash[h]": {
+"duration": 8,
+"hframes": 6,
+"loop": false,
+"spritesheet": "BaseSprite",
+"timestamps": {
+0: {
+"frame": 45,
+"hurtbox": [ Vector2( 7, 10 ), Vector2( 23, 10 ), Vector2( 23, -12 ), Vector2( 7, -12 ) ]
+},
+4: {
+"frame": 46,
+"hurtbox": [ Vector2( 7, 10 ), Vector2( 23, 10 ), Vector2( 23, -12 ), Vector2( 7, -12 ) ]
 }
 },
 "vframes": 16

@@ -128,8 +128,8 @@ var mob_attr := {}
 var palette_ref: String
 var player_ID: int
 
-var state = Em.char_state.GROUND_STANDBY
-var new_state = Em.char_state.GROUND_STANDBY
+var state = Em.char_state.GRD_STANDBY
+var new_state = Em.char_state.GRD_STANDBY
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
 var velocity := FVector.new()
 var facing := 1 # 1 for facing right, -1 for facing left
@@ -491,14 +491,14 @@ func simulate2(): # only ran if not in hitstop
 		wall_slammed = Em.wall_slam.CANNOT_SLAM
 		delayed_hit_effect = []
 		
-	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+	if !new_state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		seq_partner_ID = null
 		
 	if !is_attacking():
 		chain_memory = []
 		
 	# GG Swell during guardbroken state
-	if !$HitStopTimer.is_running() and !state in [Em.char_state.SEQUENCE_TARGET] and get_damage_percent() < 100:
+	if !$HitStopTimer.is_running() and !state in [Em.char_state.SEQ_TARGET] and get_damage_percent() < 100:
 		if guardbroken:
 			current_guard_gauge = int(min(0, current_guard_gauge + get_stat("GUARD_GAUGE_SWELL_RATE")))
 			if !$HitStunTimer.is_running(): # guardbroken and out of hitstun, instantly gain back all Guard Gauge
@@ -533,7 +533,7 @@ func simulate2(): # only ran if not in hitstop
 				guard_gauge_update()
 		
 		
-	if new_state in [Em.char_state.SEQUENCE_USER, Em.char_state.SEQUENCE_TARGET]:
+	if new_state in [Em.char_state.SEQ_USER, Em.char_state.SEQ_TARGET]:
 		simulate_sequence()
 		return
 	
@@ -542,7 +542,7 @@ func simulate2(): # only ran if not in hitstop
 			$ArmorTimer.time += 1
 	
 #	if !$ResistTimer.is_running(): # out of resist timer, recover automatically
-#		if state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and \
+#		if state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			if grounded:
 #				animate("Idle")
@@ -550,7 +550,7 @@ func simulate2(): # only ran if not in hitstop
 #				animate("FallTransit")
 #			$ArmorTimer.time = get_stat("ARMOR_TIME")
 #	else: # if no longer in Resisted Hitstun, set the timer to zero
-#		if state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and \
+#		if state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			pass
 #		else:
@@ -568,7 +568,7 @@ func simulate2(): # only ran if not in hitstop
 		$ZoneDrawer.activate()
 	
 	match new_state: # quick turn
-		Em.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GRD_ATK_STARTUP:
 			if Animator.time <= 6:
 				if !Em.atk_attr.NO_TURN in query_atk_attr():
 					face_opponent()
@@ -617,10 +617,10 @@ func simulate2(): # only ran if not in hitstop
 	
 	if !grounded:
 		match new_state:
-			Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
-				Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_ACTIVE, Em.char_state.GROUND_REC, \
-				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
-				Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.GROUND_BLOCK:
+			Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
+				Em.char_state.GRD_STARTUP, Em.char_state.GRD_ACTIVE, Em.char_state.GRD_REC, \
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
+				Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.GRD_BLOCK:
 				check_drop()
 	else: # just in case, normally called when physics.gd runs into a floor
 		match new_state:
@@ -706,7 +706,7 @@ func simulate2(): # only ran if not in hitstop
 		air_res_this_frame = HITSTUN_AIR_RES # 3
 	
 	match state:
-		Em.char_state.GROUND_STANDBY:
+		Em.char_state.GRD_STANDBY:
 			if dir == 0: # if not moving
 				# if in run animation, do brake animation
 				if Animator.query_to_play(["Run", "RunTransit"]):
@@ -714,7 +714,7 @@ func simulate2(): # only ran if not in hitstop
 			else: # no friction when moving
 				friction_this_frame = 0
 	
-		Em.char_state.GROUND_STARTUP:
+		Em.char_state.GRD_STARTUP:
 			friction_this_frame = 0 # no friction when starting a ground jump/dash
 
 		Em.char_state.AIR_STANDBY:
@@ -733,7 +733,7 @@ func simulate2(): # only ran if not in hitstop
 			if anim_gravity_mod == 0:
 				air_res_this_frame = 0
 			
-		Em.char_state.GROUND_FLINCH_HITSTUN:
+		Em.char_state.GRD_FLINCH_HITSTUN:
 			# when out of hitstun, recover
 			if !$HitStunTimer.is_running():
 				if Animator.query_to_play(["FlinchA"]):
@@ -922,8 +922,8 @@ func process_command():
 	if is_atk_recovery() and command_array_num > 0 and current_command in UniqChar.COMMANDS and \
 			"anim" in UniqChar.COMMANDS[current_command] and UniqChar.COMMANDS[current_command].anim is Array:
 		pass # chain series
-	elif !new_state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.GROUND_C_REC, \
-			Em.char_state.AIR_C_REC, Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC]:
+	elif !new_state in [Em.char_state.GRD_STANDBY, Em.char_state.AIR_STANDBY, Em.char_state.GRD_C_REC, \
+			Em.char_state.AIR_C_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC]:
 		return
 	
 	if !current_command in UniqChar.COMMANDS: # standby
@@ -976,12 +976,12 @@ func process_command():
 			match UniqChar.COMMANDS[current_command].action:
 						
 				"idle":
-					if !new_state in [Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC]:
+					if !new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC]:
 						face_opponent()
 							
 				"option": # see if activate triggers for 1 frame, then do "next" or "decision"
-					if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
-							Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC]:
+					if new_state in [Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
+							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC]:
 						return # maintain option during recovery states
 					if grounded:
 						if "next" in UniqChar.COMMANDS[current_command]:
@@ -993,7 +993,7 @@ func process_command():
 							UniqChar.decision()
 						
 				"run":
-					if new_state == Em.char_state.GROUND_STANDBY:
+					if new_state == Em.char_state.GRD_STANDBY:
 						if "dir" in UniqChar.COMMANDS[current_command]:
 							match UniqChar.COMMANDS[current_command].dir:
 								1, -1:
@@ -1030,14 +1030,14 @@ func process_command():
 						if !grounded: return # if in air while trying to do a ground animation, wait till grounded then do it
 						
 						match new_state:
-							Em.char_state.GROUND_ATK_REC: # chaining
+							Em.char_state.GRD_ATK_REC: # chaining
 								if command_array_num == 0: return
 								else: chaining = true
-							Em.char_state.GROUND_D_REC:
+							Em.char_state.GRD_D_REC:
 								if command_array_num == 0 and \
 										("no_c_rec" in UniqChar.COMMANDS[current_command] or "no_move_rec" in UniqChar.COMMANDS[current_command]):
 									return # some animations cannot be done during MOVE RECOVERY
-							Em.char_state.GROUND_C_REC:
+							Em.char_state.GRD_C_REC:
 								if command_array_num == 0 and "no_c_rec" in UniqChar.COMMANDS[current_command]:
 									return # some animations cannot be done during C_REC
 							
@@ -1090,7 +1090,7 @@ func process_command():
 						
 func is_ground_anim(anim): # for AI commands
 	match state_detect(anim):
-		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_STARTUP:
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_STARTUP:
 			return true
 	return false
 		
@@ -1475,15 +1475,15 @@ func state_detect(anim) -> int:
 	match anim:
 		# universal animations
 		"Idle", "RunTransit", "Run", "Brake", "TurnTransit":
-			return Em.char_state.GROUND_STANDBY
+			return Em.char_state.GRD_STANDBY
 		"JumpTransit", "DashTransit":
-			return Em.char_state.GROUND_STARTUP
+			return Em.char_state.GRD_STARTUP
 		"Dash":
-			return Em.char_state.GROUND_D_REC
+			return Em.char_state.GRD_D_REC
 		"SoftLanding":
-			return Em.char_state.GROUND_REC
+			return Em.char_state.GRD_REC
 		"DashBrake":
-			return Em.char_state.GROUND_C_REC
+			return Em.char_state.GRD_C_REC
 			
 		"JumpTransit3", "Jump", "FallTransit", "Fall":
 			return Em.char_state.AIR_STANDBY
@@ -1496,9 +1496,9 @@ func state_detect(anim) -> int:
 			return Em.char_state.AIR_C_REC
 			
 		"FlinchAStop", "FlinchA", "FlinchBStop", "FlinchB":
-			return Em.char_state.GROUND_FLINCH_HITSTUN
+			return Em.char_state.GRD_FLINCH_HITSTUN
 		"FlinchAReturn", "FlinchBReturn":
-			return Em.char_state.GROUND_C_REC
+			return Em.char_state.GRD_C_REC
 		"aFlinchAStop", "aFlinchA", "aFlinchBStop", "aFlinchB":
 			return Em.char_state.AIR_FLINCH_HITSTUN
 		"aFlinchAReturn", "aFlinchBReturn":
@@ -1507,22 +1507,22 @@ func state_detect(anim) -> int:
 			return Em.char_state.LAUNCHED_HITSTUN
 			
 		"ResistA", "ResistB":
-			return Em.char_state.GROUND_RESISTED_HITSTUN
+			return Em.char_state.GRD_RESISTED_HITSTUN
 		"aResistA", "aResistB":
 			return Em.char_state.AIR_RESISTED_HITSTUN
 		
 		"SeqFlinchAFreeze", "SeqFlinchBFreeze":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"SeqFlinchAStop", "SeqFlinchA", "SeqFlinchBStop", "SeqFlinchB":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"aSeqFlinchAFreeze", "aSeqFlinchBFreeze":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"aSeqFlinchAStop", "aSeqFlinchA", "aSeqFlinchBStop", "aSeqFlinchB":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"SeqLaunchFreeze":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"SeqLaunchStop", "SeqLaunchTransit", "SeqLaunch":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 			
 		"Death":
 			return Em.char_state.DEAD
@@ -1649,13 +1649,13 @@ func get_alive_players() -> Array:
 func check_drop():
 	if seq_partner_ID != null: return # no checking during start of sequence
 	match new_state:
-		Em.char_state.GROUND_FLINCH_HITSTUN:
+		Em.char_state.GRD_FLINCH_HITSTUN:
 			match Animator.to_play_anim:
 				"FlinchAStop", "FlinchA":
 					animate("aFlinchA")
 				"FlinchBStop", "FlinchB":
 					animate("aFlinchB")
-		Em.char_state.GROUND_RESISTED_HITSTUN:
+		Em.char_state.GRD_RESISTED_HITSTUN:
 			match Animator.to_play_anim:
 				"ResistA":
 					animate("aResistA")
@@ -1713,7 +1713,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 func check_collidable(): # called by Physics.gd
 	if slowed < 0: return false
 	match new_state:
-		Em.char_state.DEAD, Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER:
+		Em.char_state.DEAD, Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER:
 			return false
 			
 	return UniqChar.check_collidable()
@@ -1725,9 +1725,9 @@ func check_semi_invuln():
 	return false	
 	
 func check_passthrough():
-	if state == Em.char_state.SEQUENCE_USER:
+	if state == Em.char_state.SEQ_USER:
 		return UniqChar.sequence_passthrough() # for cinematic supers
-	elif state == Em.char_state.SEQUENCE_TARGET:
+	elif state == Em.char_state.SEQ_TARGET:
 		return get_target().sequence_partner_passthrough() # get passthrough state from the one grabbing you
 	return false
 		
@@ -1930,23 +1930,23 @@ func get_move_name():
 	
 func is_hitstunned():
 	match state: # use non-new state
-		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
-				Em.char_state.AIR_RESISTED_HITSTUN, Em.char_state.GROUND_RESISTED_HITSTUN:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
+				Em.char_state.AIR_RESISTED_HITSTUN, Em.char_state.GRD_RESISTED_HITSTUN:
 			return true
 	return false
 	
 func is_hitstunned_or_sequenced():
 	match state: # use non-new state
-		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
-				Em.char_state.SEQUENCE_TARGET, Em.char_state.AIR_RESISTED_HITSTUN, Em.char_state.GROUND_RESISTED_HITSTUN:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
+				Em.char_state.SEQ_TARGET, Em.char_state.AIR_RESISTED_HITSTUN, Em.char_state.GRD_RESISTED_HITSTUN:
 			return true
 	return false
 	
 func is_attacking():
 	match new_state:
-		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
 			Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC, \
-			Em.char_state.SEQUENCE_USER:
+			Em.char_state.SEQ_USER:
 			return true
 	return false
 	
@@ -1958,19 +1958,19 @@ func is_aerial():
 	
 func is_atk_startup():
 	match new_state:
-		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 			return true
 	return false
 	
 func is_atk_active():
 	match new_state:
-		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 			return true
 	return false
 	
 func is_atk_recovery():
 	match new_state:
-		Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+		Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 			return true
 	return false
 			
@@ -2501,7 +2501,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.NON_STRONG_PROJ] = true
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or Em.hit.NON_STRONG_PROJ in hit_data:
-		hit_data[Em.hit.NORMALARMORABLE] = true
+		hit_data[Em.hit.WEAKARMORABLE] = true
 	
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
@@ -2586,16 +2586,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			# WEAK block_state
 			# attacker can chain combo normally after hitting an armored defender
 			
-			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
-				if Em.atk_attr.SUPERARMOR_STARTUP in query_atk_attr() or \
-						(Em.atk_attr.NORMALARMOR_STARTUP in query_atk_attr() and Em.hit.NORMALARMORABLE in hit_data):
+			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
+				var defender_attr = query_atk_attr()
+				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
+						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
 					
-			Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
-				if Em.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
-						(Em.atk_attr.NORMALARMOR_ACTIVE in query_atk_attr() and Em.hit.NORMALARMORABLE in hit_data) or \
-						(Em.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr() and Em.hit.ENTITY_PATH in hit_data):
+			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+				var defender_attr = query_atk_attr()
+				if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
+						(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+						(Em.atk_attr.PROJ_ARMOR_ACTIVE in defender_attr and Em.hit.ENTITY_PATH in hit_data):
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
 						
@@ -2650,7 +2652,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		hit_data[Em.hit.RESISTED] = true
 #		if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data and \
-#				state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and \
+#				state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
 #			$ArmorTimer.time = ARMOR_TIME # gain armor if hit during Resisted Hitstun
 ##				else:
@@ -2751,7 +2753,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
 		if Em.hit.TOUGH_MOB in hit_data or hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.SEMI_DISJOINT]:
 			return
-		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
+		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GRD_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
 			return # quick grabs fail if target is in movement startup
 		if is_atk_startup() and Em.atk_attr.GRAB_INVULN_STARTUP in query_atk_attr():
@@ -2955,8 +2957,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 				# for atk level 1 attack on non-passive state, just push them back, no turn
 				# if is in passive state, will enter impact animation but 0 hitstun
-				elif !state in [Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_REC, \
-					Em.char_state.GROUND_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
+				elif !state in [Em.char_state.GRD_STANDBY, Em.char_state.GRD_REC, \
+					Em.char_state.GRD_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
 					Em.char_state.AIR_C_REC]:
 					no_impact = true
 						
@@ -2984,7 +2986,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					elif Animator.query_current(["aFlinchBStop"]):
 						animate("aFlinchAStop")
 						alternate_flag = true
-				elif state == Em.char_state.GROUND_FLINCH_HITSTUN:
+				elif state == Em.char_state.GRD_FLINCH_HITSTUN:
 					if Animator.query_current(["FlinchAStop"]):
 						animate("FlinchBStop")
 						alternate_flag = true
@@ -3158,10 +3160,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		guard_drain = FMath.percent(guard_drain, 50)
 		return guard_drain
 		
-#	if state in [Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, 
-#			Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, 
-#			Em.char_state.GROUND_REC, Em.char_state.AIR_REC, 
-#			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP]:
+#	if state in [Em.char_state.GRD_STANDBY, Em.char_state.AIR_STANDBY, 
+#			Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, 
+#			Em.char_state.GRD_REC, Em.char_state.AIR_REC, 
+#			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP]:
 #		return 0
 
 	if Em.hit.RESISTED in hit_data:
@@ -3511,16 +3513,16 @@ func get_default_hitspark_palette():
 func simulate_sequence(): # cut into this during simulate2() during sequences
 	
 	var Partner = get_seq_partner()
-	if Partner == null and new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+	if Partner == null and new_state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		animate("Idle")
 		return
 	
-	if new_state == Em.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-		if Partner.new_state != Em.char_state.SEQUENCE_USER:
+	if new_state == Em.char_state.SEQ_TARGET: # being the target of an opponent's sequence will be moved around by them
+		if Partner.new_state != Em.char_state.SEQ_USER:
 			animate("Idle") # auto release if not released proberly, just in case
 			return
 		
-	elif new_state == Em.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
+	elif new_state == Em.char_state.SEQ_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
 		UniqChar.simulate_sequence()
 		
 		
@@ -3536,7 +3538,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 #	velocity.x = results[0].x
 #	velocity.y = results[0].y
 	
-	if new_state == Em.char_state.SEQUENCE_USER:
+	if new_state == Em.char_state.SEQ_USER:
 		UniqChar.simulate_sequence_after() # move grabbed target after grabber has moved
 	
 	if results[0]: UniqChar.end_sequence_step("ground") # hit the ground, no effect if simulate_sequence_after() broke grab and animated "Idle"
@@ -3544,17 +3546,17 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 		
 func landed_a_sequence(hit_data):
 	
-	if new_state in [Em.char_state.SEQUENCE_USER]:
+	if new_state in [Em.char_state.SEQ_USER]:
 		return # no sequencing if you are already grabbing another player
 
 	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
 	
-	if defender == null or defender.new_state in [Em.char_state.SEQUENCE_TARGET]:
+	if defender == null or defender.new_state in [Em.char_state.SEQ_TARGET]:
 		return # no sequencing players that are already being grabbed
 		
 	if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data: return
 		
-	if defender.new_state in [Em.char_state.SEQUENCE_USER]: # both players grab each other at the same time, break grabs
+	if defender.new_state in [Em.char_state.SEQ_USER]: # both players grab each other at the same time, break grabs
 		animate("Idle")
 		defender.animate("Idle")
 		return
@@ -3843,7 +3845,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		
 	if is_atk_startup():
 		var atk_attr = query_atk_attr()
-		if Em.atk_attr.NORMALARMOR_STARTUP in atk_attr or Em.atk_attr.SUPERARMOR_STARTUP in atk_attr:
+		if Em.atk_attr.WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.SUPERARMOR_STARTUP in atk_attr:
 			modulate_play("armor_flash")
 	
 	match anim_name:

@@ -1530,7 +1530,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 #	var defender = get_node(hurtbox.owner_nodepath)
 #	var attacker_attr = hitbox.move_data[Em.move.ATK_ATTR]
 #	if Em.atk_attr.UNBLOCKABLE in attacker_attr or Em.atk_attr.ANTI_GUARD in attacker_attr:
-#		if defender.new_state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] or \
+#		if defender.new_state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] or \
 #				defender.Animator.query_to_play(["DashTransit", "aDashTransit"]):
 #			if defender.Animator.query_to_play(["Tech", "GuardTech"]):
 #				return false
@@ -1547,7 +1547,7 @@ func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
 ##		attacker_or_entity = get_node(hitbox[Em.hit.ENTITY_PATH]) # rare entity command grab
 #	var defender = get_node(hurtbox.owner_nodepath)
 #	if Em.atk_attr.COMMAND_GRAB in hitbox.move_data[Em.move.ATK_ATTR]:
-#		if defender.new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, Em.char_state.GROUND_BLOCKSTUN, \
+#		if defender.new_state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, Em.char_state.GRD_BLOCKSTUN, \
 #				Em.char_state.AIR_BLOCKSTUN]:
 #			return true # defender's evaded command grab
 #	return false

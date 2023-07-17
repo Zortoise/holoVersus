@@ -3,25 +3,26 @@ extends Node
 # holds all cross-nodes enumerations
 
 enum detect {SOLID, CSOLID, PASS_SIDE, SOFT, SEMISOLIDWALLS, BLASTWALLS, BLASTCEILING, PLAYERS, MOBS}
-enum char_state {DEAD, GROUND_STANDBY, AIR_STANDBY, GROUND_STARTUP, GROUND_ACTIVE, GROUND_REC,
-		GROUND_C_REC, GROUND_D_REC, AIR_STARTUP, AIR_ACTIVE, AIR_REC, AIR_C_REC, AIR_D_REC, GROUND_FLINCH_HITSTUN,
-		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GROUND_RESISTED_HITSTUN, AIR_RESISTED_HITSTUN, GROUND_ATK_STARTUP, 
-		GROUND_ATK_ACTIVE, GROUND_ATK_REC, AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_REC, GROUND_BLOCK, AIR_BLOCK,
-		SEQUENCE_USER, SEQUENCE_TARGET}
+enum char_state {DEAD, GRD_STANDBY, AIR_STANDBY, GRD_STARTUP, GRD_ACTIVE, GRD_REC,
+		GRD_C_REC, GRD_D_REC, AIR_STARTUP, AIR_ACTIVE, AIR_REC, AIR_C_REC, AIR_D_REC, GRD_FLINCH_HITSTUN,
+		AIR_FLINCH_HITSTUN, LAUNCHED_HITSTUN, GRD_RESISTED_HITSTUN, AIR_RESISTED_HITSTUN, GRD_ATK_STARTUP, 
+		GRD_ATK_ACTIVE, GRD_ATK_REC, AIR_ATK_STARTUP, AIR_ATK_ACTIVE, AIR_ATK_REC, GRD_BLOCK, AIR_BLOCK,
+		SEQ_USER, SEQ_TARGET}
 enum burst {AVAILABLE, CONSUMED, EXHAUSTED}
 enum atk_type {LIGHT, FIERCE, HEAVY, SPECIAL, EX, SUPER, ENTITY, SUPER_ENTITY}
 enum compass {N, NNE, NNE2, NE, ENE, E, ESE, SE, SSE2, SSE, S, SSW, SSW2, SW, WSW, W, WNW, NW, NNW2, NNW}
 enum angle_split {TWO, FOUR, FOUR_X, SIX, EIGHT, EIGHT_X, SIXTEEN}
 enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED, VELOCITY}
-enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, WEAKBLOCKED, STRONGBLOCKED, SUPER}
+enum chain_combo {RESET, NO_CHAIN, NORMAL, HEAVY, SPECIAL, BLOCKED, PARRIED, SUPER}
 enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, SUPER}
 enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_MOVE_REC
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
-		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, PROJ_ARMOR_ACTIVE, NORMALARMOR_STARTUP, NORMALARMOR_ACTIVE
+		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, P_SUPERARMOR_STARTUP, P_SUPERARMOR_ACTIVE, 
+		PROJ_ARMOR_ACTIVE, WEAKARMOR_STARTUP, WEAKARMOR_ACTIVE, P_WEAKARMOR_STARTUP, P_WEAKARMOR_ACTIVE, BI_DIR_ARMOR
 		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, CAN_REPEAT_ONCE, DI_MANUAL_SEAL
 		ONLY_CHAIN_ON_HIT, ONLY_CHAIN_INTO_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
-		JUMP_CANCEL_ACTIVE, JUMP_CANCEL_ON_WHIFF, JUMP_CANCEL_ON_HIT
+		JUMP_CANCEL_ACTIVE, JUMP_CANCEL_ON_WHIFF, JUMP_CANCEL_ON_HIT, NO_ACTIVE_CANCEL
 		VULN_LIMBS, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY, NO_REFLECT_ENTITY
 		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB, GRAB_INVULN_STARTUP, WHIFF_SDASH_CANCEL
 		AIR_REPEAT, REFLECT_ENTITIES, NO_SDASH_CANCEL, NO_SDC_DURING_ACTIVE, CAN_SDC_DURING_REC, PUNISH_ENTITY, NO_HITCOUNT_RESET}
@@ -40,9 +41,14 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
 # SUPERARMOR_STARTUP = weakblock all attacks during startup frames
 # SUPERARMOR_ACTIVE = weakblock all attacks during active frames
+# P_SUPERARMOR_STARTUP = weakblock all attacks during startup frames if GG is >= 0
+# P_SUPERARMOR_ACTIVE = weakblock all attacks during active frames if GG is >= 0
 # PROJ_ARMOR_ACTIVE = weakblock all projectiles during active frames
-# NORMALARMOR_STARTUP = weakblock all Normals/non-strong projectiles during startup frames
-# NORMALARMOR_ACTIVE = weakblock all Normals/non-strong projectiles during active frames
+# WEAKARMOR_STARTUP = weakblock all Normals/non-strong projectiles during startup frames
+# WEAKARMOR_ACTIVE = weakblock all Normals/non-strong projectiles during active frames
+# P_WEAKARMOR_STARTUP = weakblock all Normals/non-strong projectiles during startup frames if GG is >= 0
+# P_WEAKARMOR_ACTIVE = weakblock all Normals/non-strong projectiles during active frames if GG is >= 0
+# BI_DIR_ARMOR = for moves with weakarmor/superarmor, allow armoring from both directions
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
 # NO_STRAFE_NORMAL = for certain aerial normals, prevent air strafing during active frames
 # STRAFE_NON_NORMAL = for certain aerial non-normals, allow air strafing during active frames
@@ -58,6 +64,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # JUMP_CANCEL_ACTIVE = can jump cancel during active frames on hit
 # JUMP_CANCEL_ON_WHIFF = can jump cancel during recovery on whiff
 # JUMP_CANCEL_ON_HIT = can jump cancel during recovery on hit, for Specials since can already do it for Normals
+# NO_ACTIVE_CANCEL = for heavies only
 # VULN_LIMBS = take full damage from SDHits
 # DESTROY_ENTITIES = hitbox destroys entities, mostly for other entities
 # DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
@@ -82,10 +89,12 @@ enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, 
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, STRONG, WEAK}
-enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_NORMALARMOR, GRD_C_REC_BLOCK, AIR_C_REC_BLOCK
-		PERMA_SUPERARMOR, NO_LAUNCH}
-# PASSIVE_NORMALARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
-# GRD/AIR_C_REC_BLOCK = can block out of grounded/airborne cancellable recovery frames
+enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_WEAKARMOR, NO_GRD_C_REC_BLOCK, NO_AIR_C_REC_BLOCK
+		DASH_IMPULSE, PERMA_SUPERARMOR, NO_LAUNCH, GRD_DASH_JUMP, AIR_DASH_JUMP}
+# PASSIVE_WEAKARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
+# NO_GRD/AIR_C_REC_BLOCK = cannot block out of grounded/airborne cancellable recovery frames
+# DASH_IMPULSE = can impulse during D_REC, used for characters with certain unique dashes (like blinking)
+# GRD/AIR_DASH_JUMP = can jump while dashing
 
 #enum reset_type {STARTUP_RESET, ACTIVE_RESET}
 # STARTUP_RESET = can only a_reset this Special during startup just like Normals
@@ -101,7 +110,7 @@ enum hit {RECT, POLYGON, OWNER_ID, FACING, MOVE_NAME, MOVE_DATA, MOB, HURTBOX, S
 		ATKER_ID, DEFENDER_ID, HIT_CENTER, ATK_FACING, DEFEND_FACING, TOUGH_MOB, NO_HIT_SOUND_MOB
 		CANCELLED, ENTITY_PATH, ATKER, ATKER_OR_ENTITY, DEFENDER, ANGLE_TO_ATKER, LETHAL_HIT, PUNISH_HIT, CRUSH, STUN, BLOCK_STATE
 		REPEAT, DOUBLE_REPEAT, ANTI_AIRED, PULL, SECONDARY_HIT, LAST_HIT, GUARD_DRAIN, SINGLE_REPEAT
-		MULTIHIT, FIRST_HIT, AUTOCHAIN, FOLLOW_UP, NON_STRONG_PROJ, NORMALARMORABLE, CORNERED, WEAK_HIT, SUPERARMORED, HITSTOP, DEALT_DMG
+		MULTIHIT, FIRST_HIT, AUTOCHAIN, FOLLOW_UP, NON_STRONG_PROJ, WEAKARMORABLE, CORNERED, WEAK_HIT, SUPERARMORED, HITSTOP, DEALT_DMG
 		ADJUSTED_ATK_LVL, KB, KB_ANGLE, SEMI_DISJOINT, SWEETSPOTTED, PULL, MOB_BREAK, RESISTED, SDASH_ARMORED, MOB_ARMORED, IGNORE_RESIST}
 
 enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE, PERMANENT}

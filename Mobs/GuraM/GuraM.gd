@@ -1329,7 +1329,7 @@ func filter(atk_range: int):
 		Globals.remove_instances(results, "air_back_dash")
 		Globals.remove_instances(results, "back_jump")
 	
-	if Character.new_state == Em.char_state.GROUND_D_REC:
+	if Character.new_state == Em.char_state.GRD_D_REC:
 		Globals.remove_instances(results, "dash") # will not decide to dash again during option_cross while dashing
 		Globals.remove_instances(results, "dash_dance")
 				
@@ -1425,11 +1425,11 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 	match anim:
 			
 		"L1Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "HStartup":
-			return Em.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GRD_ATK_STARTUP
 		"L1Active", "L1Rec", "L1bActive", "L3Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive":
-			return Em.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GRD_ATK_ACTIVE
 		"L1bRec", "L3Rec", "F1Rec", "F2Rec", "F3Rec", "HbRec":
-			return Em.char_state.GROUND_ATK_REC
+			return Em.char_state.GRD_ATK_REC
 			
 		"aL1Startup", "aL3Startup", "aF1Startup", "aF2Startup", "aF3Startup", "aHStartup":
 			return Em.char_state.AIR_ATK_STARTUP
@@ -1439,16 +1439,16 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.AIR_ATK_REC
 
 		"aF2SeqA", "aF2SeqB":
-			return Em.char_state.SEQUENCE_USER
+			return Em.char_state.SEQ_USER
 		"aF2GrabRec":
 			return Em.char_state.AIR_C_REC
 
 		"SP1Startup", "SP1[b]Startup", "SP1[c1]bStartup", "SP1[u]Startup", "SP1[u][c1]bStartup":
-			return Em.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GRD_ATK_STARTUP
 		"SP1[c1]Active", "SP1[u][c1]Active":
-			return Em.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GRD_ATK_ACTIVE
 		"SP1Rec":
-			return Em.char_state.GROUND_ATK_REC
+			return Em.char_state.GRD_ATK_REC
 		"aSP1Startup", "aSP1[b]Startup", "aSP1[c1]bStartup", "aSP1[d]Startup", "aSP1[d][c1]bStartup":
 			return Em.char_state.AIR_ATK_STARTUP
 		"aSP1[c1]Active", "aSP1[d][c1]Active":
@@ -1466,31 +1466,31 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.AIR_C_REC
 			
 		"SP3Startup":
-			return Em.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GRD_ATK_STARTUP
 		"SP3Active", "SP3bActive":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP3Rec":
 			return Em.char_state.AIR_ATK_REC
 			
 		"SP6[ex]Startup":
-			return Em.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GRD_ATK_STARTUP
 		"aSP6[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"SP6[ex]Rec", "SP6[ex]GrabRec":
-			return Em.char_state.GROUND_ATK_REC
+			return Em.char_state.GRD_ATK_REC
 		"SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE":
-			return Em.char_state.SEQUENCE_USER
+			return Em.char_state.SEQ_USER
 			
 		"SP9Startup", "SP9aStartup", "SP9cStartup", "SP9dStartup":
-			return Em.char_state.GROUND_ATK_STARTUP
+			return Em.char_state.GRD_ATK_STARTUP
 		"aSP9c[r]Startup":
 			return Em.char_state.AIR_ATK_STARTUP
 		"SP9Active", "SP9dActive", "SP9d[u]Active":
-			return Em.char_state.GROUND_ATK_ACTIVE
+			return Em.char_state.GRD_ATK_ACTIVE
 		"aSP9aActive", "aSP9cActive", "aSP9c[r]Active", "aSP9c[r]bActive":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"SP9Rec", "SP9aRec", "SP9c[r]Rec", "SP9dRec":
-			return Em.char_state.GROUND_ATK_REC
+			return Em.char_state.GRD_ATK_REC
 		"aSP9Rec", "aSP9aRec":
 			return Em.char_state.AIR_ATK_REC
 		
@@ -1517,7 +1517,7 @@ func simulate():
 				if Character.grounded:
 					Character.animate("SP9c[r]Rec")
 		
-		Em.char_state.GROUND_ATK_ACTIVE: # command dash
+		Em.char_state.GRD_ATK_ACTIVE: # command dash
 			if Animator.query_current(["SP9Active"]) and Character.facing == Character.get_opponent_dir():
 				if Character.are_players_in_box(Vector2(0, -100), Vector2(150, 200)):
 					Character.animate("SP9cStartup")
@@ -1538,19 +1538,25 @@ func afterimage_trail():# process afterimage trail
 			Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
 			return
 	
-	match Animator.to_play_anim:
-		"Dash", "aDash", "aDashD", "aDashU":
-			Character.afterimage_trail()
-		"aSP9cActive":
-			Character.afterimage_trail()
+	match Character.new_state:
+		Em.char_state.GRD_D_REC:
+			if Animator.query_to_play(["Dash"]):
+				Character.afterimage_trail()
+		Em.char_state.AIR_D_REC:
+			if Animator.query_to_play(["aDash", "aDashD", "aDashU"]):
+				Character.afterimage_trail()
+		Em.char_state.AIR_ATK_ACTIVE:
+			if Animator.query_to_play(["aSP9cActive"]):
+				Character.afterimage_trail()
 
 			
 func unique_flash():
-	match Animator.to_play_anim:
-		"SP9Active":
-			if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S:
-				Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
-						{"facing":-Character.facing, "grounded":true}, Character.palette_ref, Character.mob_ref)
+	match Character.new_state:
+		Em.char_state.GRD_ATK_ACTIVE:
+			if Animator.query_to_play(["SP9Active"]):
+				if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S:
+					Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
+							{"facing":-Character.facing, "grounded":true}, Character.palette_ref, Character.mob_ref)
 			
 			
 # GET DATA --------------------------------------------------------------------------------------------------
@@ -2197,7 +2203,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 				
-	if Character.new_state in [Em.char_state.GROUND_D_REC]: # put this after impulse
+	if Character.new_state in [Em.char_state.GRD_D_REC]: # put this after impulse
 		Character.can_impulse = false
 	else:
 		Character.can_impulse = true
@@ -2429,30 +2435,38 @@ func start_audio(anim_name):
 			"SP1[c1]", "SP1[u][c1]", "aSP1[c1]", "aSP1[d][c1]":
 				Character.play_audio("whoosh12", {"bus":"PitchDown"})
 	
-	match anim_name:
-		"JumpTransit2":
-			Character.play_audio("jump1", {"bus":"PitchDown"})
-		"SoftLanding":
-			landing_sound()
-		"Dash":
-			Character.play_audio("dash1", {"vol" : -5, "bus":"PitchDown"})
-		"aDash", "aDashD", "aDashU":
-			Character.play_audio("dash1", {"vol" : -6})
-			
-		"LaunchTransit":
-			if Character.grounded and abs(Character.velocity.y) < 1 * FMath.S:
-				Character.play_audio("launch2", {"vol" : -3, "bus":"LowPass"})
-			else:
-				Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
+	match Character.state:
+		Em.char_state.AIR_STARTUP:
+			match anim_name:
+				"JumpTransit2":
+					Character.play_audio("jump1", {"bus":"PitchDown"})
+		Em.char_state.GRD_C_REC:
+			match anim_name:
+				"SoftLanding":
+					if Character.velocity_previous_frame.y > 0:
+						landing_sound()	
+		Em.char_state.GRD_D_REC:
+			match anim_name:
+				"Dash":
+					dash_sound()
+		Em.char_state.AIR_D_REC:
+			match anim_name:
+				"aDash", "aDashD", "aDashU":
+					Character.play_audio("dash1", {"vol" : -6})
 
 func landing_sound(): # can be called by main node
 	Character.play_audio("land1", {"vol" : -3})
+	
+func dash_sound():
+	Character.play_audio("dash1", {"vol" : -5, "bus":"PitchDown"})
 
 func stagger_anim():
-	match Animator.current_anim:
-		"Run":
-			match sprite.frame:
-				38, 41:
-					Character.play_audio("footstep2", {"vol":-1})
+	
+	match Character.state:
+		Em.char_state.GRD_STANDBY:
+			if Animator.query_current(["Run"]):
+				match Animator.time:
+					12, 30:
+						Character.play_audio("footstep2", {})
 					
 					

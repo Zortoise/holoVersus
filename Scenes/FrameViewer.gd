@@ -26,10 +26,10 @@ func _ready():
 
 func is_idle(player):
 	match player.state:
-		Em.char_state.GROUND_STANDBY, Em.char_state.AIR_STANDBY, \
-				Em.char_state.DEAD, Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC:
+		Em.char_state.GRD_STANDBY, Em.char_state.AIR_STANDBY, \
+				Em.char_state.DEAD, Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC:
 			return true
-		Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK: # for block, block return is not considered idle
+		Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK: # for block, block return is not considered idle
 			return true
 		Em.char_state.LAUNCHED_HITSTUN:
 			if !player.get_node("HitStunTimer").is_running():
@@ -59,41 +59,41 @@ func simulate():
 						pips[player_number][pip_number].modulate = Color(1.0, 0.0, 0.0)
 					else:
 						match players[player_number].state:
-							Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER:
+							Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(1.0, 0.0, 0.0)
-							Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP:
+							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.3, 1.0, 1.0)
-							Em.char_state.GROUND_ACTIVE, Em.char_state.AIR_ACTIVE:
+							Em.char_state.GRD_ACTIVE, Em.char_state.AIR_ACTIVE:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.3, 0.3, 0.7)
-							Em.char_state.GROUND_REC, Em.char_state.AIR_REC:
+							Em.char_state.GRD_REC, Em.char_state.AIR_REC:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.4, 0.4, 1.0)
-							Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
-									Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
+							Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
+									Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 								if !player_stopped[player_number]: stoptimes[player_number] = time
 								player_stopped[player_number] = true
 								pips[player_number][pip_number].modulate = Color(0.7, 0.3, 1.0)
 								
-							Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 								player_stopped[player_number] = false
 								if Em.atk_attr.SUPERARMOR_STARTUP in players[player_number].query_atk_attr_current():
 									pips[player_number][pip_number].modulate = Color(0.2, 0.7, 0.7)
 								else:
 									pips[player_number][pip_number].modulate = Color(0.3, 1.0, 1.0)
-							Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+							Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 								player_stopped[player_number] = false
 								if Em.atk_attr.SUPERARMOR_ACTIVE in players[player_number].query_atk_attr_current():
 									pips[player_number][pip_number].modulate = Color(0.7, 0.3, 0.3)
 								else:
 									pips[player_number][pip_number].modulate = Color(1.0, 0.5, 0.5)				
-							Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+							Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(0.4, 0.4, 1.0)				
 								
-							Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.AIR_FLINCH_HITSTUN:
+							Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.AIR_FLINCH_HITSTUN:
 								player_stopped[player_number] = false
 								pips[player_number][pip_number].modulate = Color(1.0, 1.0, 0.3)	
 							Em.char_state.LAUNCHED_HITSTUN:
@@ -102,10 +102,10 @@ func simulate():
 								pips[player_number][pip_number].modulate = Color(1.0, 1.0, 0.3)	
 #								else: # techable
 #									pips[player_number][pip_number].modulate = Color(0.6, 0.8, 0.3)	
-#							Em.char_state.GROUND_BLOCKSTUN, Em.char_state.AIR_BLOCKSTUN:
+#							Em.char_state.GRD_BLOCKSTUN, Em.char_state.AIR_BLOCKSTUN:
 #								player_stopped[player_number] = false
 #								pips[player_number][pip_number].modulate = Color(1.0, 0.8, 0.3)	
-#							Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK: # for BlockReturn
+#							Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK: # for BlockReturn
 #								if players[player_number].Animator.query_current(["BlockstunReturn", "aBlockstunReturn"]):
 #									player_stopped[player_number] = false
 #									pips[player_number][pip_number].modulate = Color(1.0, 0.8, 0.3)	
@@ -117,8 +117,8 @@ func simulate():
 								pass
 								
 				for player_number in players.size():
-					if !players[player_number].state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP,
-							Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP]:
+					if !players[player_number].state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP,
+							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP]:
 						if !startup_stopped[player_number]: startup_stoptimes[player_number] = time
 						startup_stopped[player_number] = true
 				

@@ -36,7 +36,7 @@ const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
 const MAX_AIR_DODGE = 1
 const MAX_SUPER_DASH = 1
-const GROUND_DASH_SPEED = 500 * FMath.S # duration in animation data
+const GRD_DASH_SPEED = 500 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
 const SDASH_SPEED = 450 * FMath.S # super dash
 const SDASH_TURN_RATE = 5 # exact navigate speed when sdashing
@@ -44,7 +44,7 @@ const DODGE_GG_COST = 2500
 const DODGE_SPEED = 1000 * FMath.S
 
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
-const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GROUND_DASH_SPEED
+const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
 
 const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
 const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
@@ -52,7 +52,7 @@ const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard
 const DAMAGE_VALUE_LIMIT = 1100
 
 const GG_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
-const GROUND_BLOCK_GG_COST = 35 # exact GG loss per frame when blocking on ground
+const GRD_BLOCK_GG_COST = 35 # exact GG loss per frame when blocking on ground
 const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
 const WEAKBLOCK_CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
 
@@ -63,7 +63,7 @@ const BLOCKED_EX_REGEN_MOD = 200 # increase EX Regen when doing a blocked attack
 #const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
 #const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 
-const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
+const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH, Em.trait.NO_AIR_C_REC_BLOCK, Em.trait.NO_GRD_C_REC_BLOCK, Em.trait.GRD_DASH_JUMP]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "blue"
@@ -639,7 +639,7 @@ const MOVE_DATABASE = {
 		Em.move.REKKA: "SP9", # allow Quick Cancel between Rekkas
 		Em.move.HITCOUNT : 2,
 		Em.move.IGNORE_TIME : 4,
-		Em.move.DMG : 60,
+		Em.move.DMG : 50,
 		Em.move.FIXED_KB_MULTI : 200 * FMath.S,
 		Em.move.KB : 500 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,

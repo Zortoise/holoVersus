@@ -38,22 +38,81 @@ func _ready():
 
 func state_detect(anim): # for unique animations, continued from state_detect() of main character node
 	match anim:
-		_:
-			pass
+		
+		"BlinkTransit", "EBlinkTransit":
+			return Em.char_state.AIR_STARTUP
+		"Blink", "EBlink":
+			return Em.char_state.AIR_REC
+		"BlinkRec", "EBlinkRec":
+			return Em.char_state.GRD_D_REC
+		"aBlinkRec", "aEBlinkRec":
+			return Em.char_state.AIR_D_REC
+		"BlinkCRec":
+			return Em.char_state.GRD_C_REC
+		"aBlinkCRec":
+			return Em.char_state.AIR_C_REC
+			
+		"FloatTransit":
+			return Em.char_state.AIR_STARTUP
+		"Float", "FFloatTransit", "FFloat", "FloatBrake", "FloatRec":
+			return Em.char_state.AIR_D_REC
+			
+		"L1Startup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"L1Active":
+			return Em.char_state.GRD_ATK_ACTIVE
+		"L1Rec":
+			return Em.char_state.GRD_ATK_REC
+			
 		
 	print("Error: " + anim + " not found.")
+	
+func check_jc_d_rec(): # some D_REC can be jump cancelled
+	match Character.new_state:
+		Em.char_state.AIR_D_REC:
+			if Animator.query_to_play(["aBlinkRec", "aEBlinkRec"]):
+				return true
+				
+	return false
 		
 func check_collidable():  # some characters have move that can pass through other characters
 	match Character.new_state:
-		_:
-			pass
+		Em.char_state.AIR_REC:
+			if Animator.query_to_play(["Blink", "EBlink"]):
+				return false
 	return true
+	
+func check_fallthrough():
+	match Character.new_state:
+		Em.char_state.AIR_REC:
+			if Animator.query_to_play(["Blink", "EBlink"]):
+				return true
+		Em.char_state.AIR_D_REC:
+			if Animator.query_to_play(["Float", "FFloatTransit", "FFloat", "FloatBrake"]):
+				return true
+	return false
 	
 func check_semi_invuln():
 	match Character.new_state:
 		_:
 			pass
 	return false
+
+func check_quick_turn(): # some unique character states cannot be quick turned
+	if Character.state == Em.char_state.AIR_STARTUP and Animator.current_anim == "EBlinkTransit":
+		return false
+	return true
+
+func punishable(): # some unique character states are punishable
+	match Character.new_state:
+		Em.char_state.AIR_STARTUP:
+			if Animator.query_to_play(["BlinkTransit", "EBlinkTransit"]):
+				return true
+		Em.char_state.AIR_REC:
+			if Animator.query_to_play(["Blink", "EBlink"]):
+				return true
+	return false
+				
 
 # UNIQUE INPUT CAPTURE --------------------------------------------------------------------------------------------------
 # some holdable buttons can have effect unique to the character
@@ -63,6 +122,40 @@ func simulate():
 #	Character.input_state
 #	Character.dir
 #	Character.v_dir
+
+	if Character.grounded:
+		Character.unique_data.float_used = false
+
+	# FLOAT --------------------------------------------------------------------------------------------------
+
+	if Character.state == Em.char_state.AIR_D_REC:
+		if Animator.query_current(["Float", "FFloat", "FFloatTransit", "FloatBrake"]):
+			
+			if Character.button_jump in Character.input_state.just_pressed or (Character.grounded and !Character.soft_grounded) or \
+					Character.unique_data.float_time <= 0: # unfloat
+				Character.animate("FloatRec")
+			else:
+				Character.unique_data.float_time -= 1
+				
+				var float_vec = get_float_vec()
+				
+				match Animator.current_anim: # turning and changing animations
+					"Float", "FloatBrake":
+						if Character.dir != 0:
+							Character.face(Character.dir)
+							Character.animate("FFloatTransit")
+					"FFloat", "FFloatTransit":
+						if Character.dir == 0:
+							Character.animate("FloatBrake")
+						elif Character.facing != Character.dir:
+							Character.face(Character.dir)
+							Character.animate("FFloatTransit")
+							
+				if float_vec.x != 0:
+					Character.velocity.x = FMath.f_lerp(Character.velocity.x, float_vec.x, 3)
+				if float_vec.y != 0:
+					Character.velocity.y = FMath.f_lerp(Character.velocity.y, float_vec.y, 10)
+
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 	
@@ -76,7 +169,7 @@ func simulate():
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
-#	if Character.state == Em.char_state.GROUND_C_REC and Animator.to_play_anim == "DashBrake": 	# dash dancing
+#	if Character.state == Em.char_state.GRD_C_REC and Animator.to_play_anim == "DashBrake": 	# dash dancing
 #		match Character.facing:
 #			1:
 #				if Character.dir == -1:
@@ -92,6 +185,8 @@ func simulate():
 
 
 func capture_combinations():
+	
+	Character.combination(Character.button_up, Character.button_jump, "uJump")
 	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
@@ -144,7 +239,7 @@ func process_instant_actions():
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
 
 # called by main character node
-func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: Array):
+func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted: Array):
 	var keep = true
 	match buffered_input[0]:
 		
@@ -152,93 +247,104 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				match new_state:
 					
-				# GROUND DASH ---------------------------------------------------------------------------------
+				# GROUND BLINK ---------------------------------------------------------------------------------
 			
-					Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC:
-						if !Character.button_light in Character.input_state.just_pressed and \
-								!Character.button_fierce in Character.input_state.just_pressed:
-							if !Animator.query(["DashBrake", "WaveDashBrake"]):
-								# cannot dash during dash brake
-								Character.animate("DashTransit")
-								keep = false
-							else: # during dash brake, can continue dash backwards, limited dash dancing
-								if Character.dir == -Character.facing:
-									Character.face(Character.dir)
-									Character.animate("Dash")
-									keep = false
-								elif Character.instant_dir == -Character.facing:
-									Character.face(Character.instant_dir)
-									Character.animate("Dash")
-									keep = false
-							
-#					Em.char_state.GROUND_D_REC:
+					Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC:
+						Character.animate("BlinkTransit")
+						keep = false
 						
-							
-				# AIR DASH ---------------------------------------------------------------------------------
+					Em.char_state.GRD_STARTUP: # cancel start of ground jump into blink, used for up-blinks
+						if Animator.query(["JumpTransit"]):
+							Character.animate("BlinkTransit")
+							keep = false
+						
+				# AIR BLINK ---------------------------------------------------------------------------------
 					
 					Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC:
-						
-						if Animator.query(["aDashBrake"]) and !Character.has_trait(Em.trait.AIR_CHAIN_DASH):
-							continue
-						
 						if Character.air_dash > 0:
-							
-							if Character.v_dir > 0 and Character.button_jump in Character.input_state.pressed and \
-									Character.is_button_tapped_in_last_X_frames(Character.button_jump, 1) and \
-									Character.check_snap_up() and \
-									Character.snap_up(): # for easy wavedashing on soft platforms
-								# cannot snap up if jump is pressed more than 1 frame ago, to allow easier down dash after fallthrough
-								
-								Character.animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
-								input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
-										
-							else: # not in snap range
-								Character.animate("aDashTransit")
-								if Animator.query_current(["JumpTransit2"]): # if starting an air dash on the 1st frame after a ground jump
-									Character.velocity.y = FMath.percent(Character.velocity.y, 50)
+							Character.animate("BlinkTransit")
 							keep = false
 							
-					Em.char_state.AIR_STARTUP: # cancel start of air jump into air dash, used for up-dashes
-						if Animator.query(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
+					Em.char_state.AIR_STARTUP: # cancel start of air jump into blink, used for up-blinks
+						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
 							if Character.air_dash > 0:
-								Character.animate("aDashTransit")
+								Character.animate("BlinkTransit")
 								keep = false
 
+				# ECHO BLINK ---------------------------------------------------------------------------------
+				
+					Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
+						if Animator.query_to_play(["BlinkRec", "aBlinkRec"]):
+							Character.animate("EBlinkTransit")
+							keep = false
+							
+						elif new_state == Em.char_state.AIR_D_REC and \
+								Animator.query_to_play(["Float", "FFloat", "FFloatTransit", "FloatBrake"]): # from float
+							if Character.air_dash > 0:
+								Character.animate("BlinkTransit")
+								keep = false
+						
 								
 				# DASH CANCELS ---------------------------------------------------------------------------------
 					# if land a sweetspot hit, can dash cancel on active
 								
-					Em.char_state.GROUND_ATK_REC:
+					Em.char_state.GRD_ATK_REC:
 						if Character.test_dash_cancel():
-							Character.animate("DashTransit")
+							Character.animate("BlinkTransit")
 							keep = false
 					
-					Em.char_state.GROUND_ATK_ACTIVE:
+					Em.char_state.GRD_ATK_ACTIVE:
 						if Character.active_cancel:
 							Character.afterimage_cancel() # need to do this manually for active cancel
-							Character.animate("DashTransit")
+							Character.animate("BlinkTransit")
 							keep = false
 							
 					Em.char_state.AIR_ATK_REC:
 						if Character.test_dash_cancel():
-							if !Character.grounded:
-								Character.animate("aDashTransit")
-								keep = false
-							else: # grounded
-								Character.animate("DashTransit")
-								keep = false
+							Character.animate("BlinkTransit")
+							keep = false
 					
 					Em.char_state.AIR_ATK_ACTIVE:
 						if Character.active_cancel:
 							if !Character.grounded:
 								if Character.air_dash > 0:
 									Character.afterimage_cancel() # need to do this manually for active cancel
-									Character.animate("aDashTransit")
+									Character.animate("BlinkTransit")
 									keep = false
 							else: # grounded
 								Character.afterimage_cancel() # need to do this manually for active cancel
-								Character.animate("DashTransit")
+								Character.animate("BlinkTransit")
 								keep = false
+							
+		"uJump":
+			if !has_acted[0]:
+				if !Character.unique_data.float_used:
+					match new_state:
+						
+						Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC, \
+								Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC:
+							Character.animate("FloatTransit")
+							keep = false
+								
+						Em.char_state.AIR_STARTUP: # cancel start of air jump into float
+							if Animator.query_to_play(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
+								Character.animate("FloatTransit")
+								keep = false
+								
+						Em.char_state.GRD_STARTUP: # cancel start of jump into float
+							if Animator.query_to_play(["JumpTransit"]):
+								Character.animate("FloatTransit")
+								keep = false
+								
+						Em.char_state.AIR_ATK_REC, Em.char_state.GRD_ATK_REC: # float cancel normals
+							if Character.is_normal_attack(Character.get_move_name()):
+								Character.animate("FloatTransit")
+								keep = false
+							
+	#					Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC: # ground instant float
+	#						Character.animate("JumpTransit")
+	#						input_to_add.append(["uJump", Settings.input_buffer_time[Character.player_ID]])
+	#						keep = false
 							
 		# ---------------------------------------------------------------------------------
 		
@@ -323,14 +429,14 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 #					keep = !process_move(new_state, "SP5", has_acted)
 						
 		# ---------------------------------------------------------------------------------
-		
-		"InstaAirDash": # needed to chain wavedashes
-			match new_state:
-				Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC:
-					Character.animate("JumpTransit")
-					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
-					has_acted[0] = true
-					keep = false
+#
+#		"InstaAirDash": # needed to chain wavedashes
+#			match new_state:
+#				Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC:
+#					Character.animate("JumpTransit")
+#					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
+#					has_acted[0] = true
+#					keep = false
 
 	
 	# ---------------------------------------------------------------------------------
@@ -354,9 +460,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 	
 	match new_state:
 			
-		Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC:
+		Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC:
 			if Character.grounded and attack_ref in STARTERS:
-				if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.GROUND_D_REC] and \
+				if new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC] and \
 						!Animator.query_to_play(["SoftLanding"]) and \
 						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 					continue # certain moves cannot be performed during cancellable recovery
@@ -367,7 +473,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					has_acted[0] = true
 					return true
 					
-		Em.char_state.GROUND_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
+		Em.char_state.GRD_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
 				if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]) and \
 						Character.test_qc_chain_combo(attack_ref):
@@ -401,7 +507,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						return true
 				
 		# chain cancel
-		Em.char_state.GROUND_ATK_REC, Em.char_state.GROUND_ATK_ACTIVE:
+		Em.char_state.GRD_ATK_REC, Em.char_state.GRD_ATK_ACTIVE:
 			if attack_ref in STARTERS:
 				if Character.test_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
@@ -414,7 +520,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						return true
 			
 		# quick cancel
-		Em.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GRD_ATK_STARTUP:
 			if Settings.input_assist[Character.player_ID]:
 				if Character.grounded and attack_ref in STARTERS:
 					if Character.check_quick_cancel(attack_ref): # must be within 1st frame, animation name must be in MOVE_DATABASE
@@ -480,18 +586,25 @@ func consume_one_air_dash(): # different characters can have different types of 
 #		Character.air_dash += 1
 
 func afterimage_trail():# process afterimage trail
-	match Animator.to_play_anim:
-		"SDashTransit", "SDash", "aSDash":
-			Character.afterimage_trail()
-		"Dodge":
-			Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
-		"DodgeRec", "DodgeCRec":
-			Character.afterimage_trail()
+	match Character.new_state:
+		Em.char_state.AIR_STARTUP:
+			if Animator.query_to_play(["SDashTransit"]):
+				Character.afterimage_trail()
+		Em.char_state.AIR_REC:
+			if Animator.query_to_play(["SDash", "DodgeRec"]):
+				Character.afterimage_trail()
+			if Animator.query_to_play(["Dodge"]):
+				Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
+		Em.char_state.AIR_D_REC:
+			if Animator.query_to_play(["Float", "FFloat", "FFloatTransit", "FloatBrake"]):
+				Character.afterimage_trail(Color(0,0,0), 0.6, 10)
+
 			
 func unique_flash():
-	match Animator.to_play_anim:
-		_:
-			pass
+	match Character.new_state:
+		Em.char_state.AIR_REC:
+			if Animator.query_to_play(["SDash"]):
+				Character.particle("Sparkle", "Particles", Character.get_default_hitspark_palette(), 4, 1, 25)
 			
 # GET DATA --------------------------------------------------------------------------------------------------
 
@@ -739,7 +852,23 @@ func unique_chaining_rules(_move_name, _attack_ref):
 				
 	return false
 	
-
+func get_float_vec():
+	var float_vec = FVector.new()
+	float_vec.set_vector(0, 0)
+	
+	if Character.dir == 0 and Character.v_dir == 0: return float_vec
+	
+	if Character.dir != 0:
+		float_vec.x = Character.dir * FMath.percent(Character.get_stat("SPEED"), 420)
+		if Character.v_dir != 0:
+			float_vec.x = FMath.percent(float_vec.x, 71) # *0.707
+	
+	if Character.v_dir != 0:
+		float_vec.y = Character.v_dir * FMath.percent(Character.get_stat("SPEED"), 50)
+		if Character.dir != 0:
+			float_vec.y = FMath.percent(float_vec.y, 71) # *0.707
+			
+	return float_vec
 
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 # these are ran by main character node when it gets the signals so that the order is easier to control
@@ -747,45 +876,56 @@ func unique_chaining_rules(_move_name, _attack_ref):
 func _on_SpritePlayer_anim_finished(anim_name):
 	
 	match anim_name:
-		"DashTransit":
-			Character.animate("Dash")
-		"Dash":
-			if Character.held_version(Character.button_dash):
-				Character.animate("Dash2")
+		"BlinkTransit":
+			Character.animate("Blink")
+		"Blink":
+			if Character.is_on_ground():
+				Character.animate("BlinkRec")
 			else:
-				Character.animate("DashBrake")
-		"Dash2":
-			Character.animate("DashBrake")
+				Character.animate("aBlinkRec")
+		"BlinkRec":
+			Character.animate("BlinkCRec")
+		"aBlinkRec":
+			Character.animate("aBlinkCRec")
+		"BlinkCRec":
+			Character.animate("Idle")
+		"aBlinkCRec":
+			Character.animate("Fall")
+			
+		"EBlinkTransit":
+			Character.animate("EBlink")
+		"EBlink":
+			if Character.is_on_ground():
+				Character.animate("EBlinkRec")
+			else:
+				Character.animate("aEBlinkRec")
+		"EBlinkRec":
+			Character.animate("BlinkCRec")
+		"aEBlinkRec":
+			Character.animate("aBlinkCRec")
+		
+		"FloatTransit", "FloatBrake":
+			Character.animate("Float")
+		"FFloatTransit":
+			Character.animate("FFloat")
+		"FloatRec":
+			if Character.is_on_ground():
+				Character.animate("Idle")
+			else:
+				Character.animate("Fall")
+			
 		"DashBrake", "WaveDashBrake":
 			Character.animate("Idle")
-		"aDashTransit":
-#			if Character.air_dash > 1:
-#				if Character.button_down in Character.input_state.pressed and Character.dir != 0: # downward air dash
-##					Character.face(Character.dir)
-#					Character.animate("aDashD")
-#				elif Character.button_up in Character.input_state.pressed and Character.dir != 0: # upward air dash
-##					Character.face(Character.dir)
-#					Character.animate("aDashU")
-#				elif Character.button_down in Character.input_state.pressed: # downward air dash
-#					Character.animate("AirDashDD")
-#				elif Character.button_up in Character.input_state.pressed: # upward air dash
-#					Character.animate("AirDashUU")
-#				else: # horizontal air dash
-#					Character.animate("aDash")
-#			else:
-			if Character.v_dir == 1: # downward air dash
-				if !Character.snap_up_wave_land_check():
-					Character.animate("aDashD")
-			elif Character.v_dir == -1: # upward air dash
-				Character.animate("aDashU")
-			else: # horizontal air dash
-				Character.animate("aDash")
-#		"aDash", "aDashD", "aDashU", "AirDashUU", "AirDashDD", "AirDashD2", "AirDashU2":
-		"aDash", "aDashD", "aDashU":
-			Character.animate("aDashBrake")
 		"aDashBrake":
 			Character.animate("Fall")
 			
+		"L1Startup":
+			Character.animate("L1Active")
+		"L1Active":
+			Character.animate("L1Rec")
+		"L1Rec":
+			Character.animate("Idle")
+				
 
 func _on_SpritePlayer_anim_started(anim_name):
 
@@ -794,43 +934,79 @@ func _on_SpritePlayer_anim_started(anim_name):
 			var point = Character.get_feet_pos()
 			point.x -= Character.facing * 5 # move back a bit
 			Globals.Game.spawn_SFX("RunDust", "DustClouds", point, {"facing":Character.facing, "grounded":true})
-		"aDashTransit":
-			if Character.button_down in Character.input_state.pressed:
-				Character.velocity.y = 0 # for faster wavedashes
-#			Character.velocity_limiter.y_slow = 75
-		"Dash":
-			Character.velocity.x = Character.get_stat("GROUND_DASH_SPEED") * Character.facing
+
+		"BlinkTransit", "EBlinkTransit":
+			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
-			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
-				{"facing":Character.facing, "grounded":true})
-		"Dash2":
-			Character.anim_friction_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
-		"aDash":
+			Character.velocity_limiter.x_slow = 15
+			Character.velocity_limiter.y_slow = 15
+		"Blink", "EBlink":
 			consume_one_air_dash()
-			Character.aerial_memory = []
-			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
+			Character.afterimage_cancel()
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
-			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
-		"aDashD":
-			consume_one_air_dash()
-			Character.aerial_memory = []
-			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
-			Character.velocity.rotate(26 * Character.facing)
+			Character.velocity.set_vector(0, 0)
+			var vector := FVector.new()
+			var blink_dist := int(max(GRD_DASH_SPEED, AIR_DASH_SPEED))
+			vector.set_vector(blink_dist, 0)
+			match Character.v_dir:
+				1: # down
+					if Character.dir == 0: # straight down
+						vector.y = vector.x
+						vector.x = 0
+					else:
+						vector.rotate(45)
+				-1: # up
+					if Character.dir == 0: # straight up
+						vector.y = -vector.x
+						vector.x = 0
+					else:
+						vector.rotate(-45)
+			if Character.dir != 0: # left/right
+				vector.x *= Character.dir
+			else:
+				vector.x *= Character.facing # not pressing left/right
+			Globals.Game.spawn_SFX("Blink", "Blink", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+			Character.move_amount(vector.convert_to_vec())
+			Character.set_true_position()
+			Globals.Game.spawn_SFX("Blink", "Blink", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+		"aBlinkRec", "aEBlinkRec":
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
-			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
-		"aDashU":
-			consume_one_air_dash()
-			Character.aerial_memory = []
-			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
-			Character.velocity.rotate(-26 * Character.facing)
-			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
-			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})
+		"aBlinkCRec":
+			Character.anim_gravity_mod = 50
 			
+		"FloatTransit":
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
+			Character.velocity_limiter.y_slow = 10
+			if !Character.is_on_ground():
+				Character.velocity.y = FMath.percent(Character.velocity.y, 20)
+			else:
+				Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+				Character.velocity.y = -100 * FMath.S # if grounded, float up a bit
+			
+			Character.unique_data.float_used = true
+			var feet_point = Character.get_feet_pos().y
+			if feet_point >= Globals.Game.middle_point.y:
+				Character.unique_data.float_time = UNIQUE_DATA_REF.float_time
+			else: # the higher you are the less time to float
+				var max_dist: int = Globals.Game.middle_point.y - Globals.Game.stage_box.rect_global_position.y
+				var char_dist: int = int(min(abs(Globals.Game.middle_point.y - feet_point), max_dist))
+				var weight = FMath.get_fraction_percent(char_dist, max_dist)
+				Character.unique_data.float_time = FMath.f_lerp(UNIQUE_DATA_REF.float_time, 0, weight)
+		"Float":
+			Character.anim_gravity_mod = 0
+			Character.velocity_limiter.x_slow = 5
+			Character.velocity_limiter.y_slow = 5
+		"FFloat", "FFloatTransit", "FloatBrake":
+			Character.anim_gravity_mod = 0
+			Character.velocity_limiter.x_slow = 5
+			Character.velocity_limiter.y_slow = 5
+		"FloatRec":
+			Character.anim_gravity_mod = 50
+			
+		"L1Startup":
+			Character.anim_friction_mod = 500
+
 	start_audio(anim_name)
 
 

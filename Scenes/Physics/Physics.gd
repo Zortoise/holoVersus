@@ -212,7 +212,7 @@ func move_sequence_player_by(move_amount: Vector2): # in some special cases wher
 	
 func not_in_sequence(collision_box): # when object is in sequence, will not be killed at ceiling and sides but will die at bottom
 	if (collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs")) and \
-			get("state") in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+			get("state") in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		return false
 	return true
 	

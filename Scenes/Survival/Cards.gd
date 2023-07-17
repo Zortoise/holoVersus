@@ -5,9 +5,9 @@ enum type {PERCENT, LINEAR, QUIRK}
 enum effect_ref {
 		STOCK, HP, COMBO_LEVEL, LANDED_EX_REGEN, PASSIVE_EX_REGEN, HITSTUN_EX_REGEN
 		SPEED, FRICTION, JUMP_SPEED, GRAVITY_MOD, MAX_AIR_JUMP, MAX_AIR_DASH, MAX_AIR_DODGE, MAX_SUPER_DASH, 
-		GROUND_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_SPEED,
+		GRD_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_SPEED,
 		GUARD_DRAIN_MOD,
-		GROUND_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
+		GRD_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
 		HEAVY_DMG_MOD, SPECIAL_DMG_MOD, PROJ_DMG_MOD, SUPER_DMG_MOD, 
 		COIN_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
 		LESS_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
@@ -81,7 +81,7 @@ const DESCRIBE = {
 		"suffix" :"Super Dash Count",
 	},
 	
-	effect_ref.GROUND_DASH_SPEED : {
+	effect_ref.GRD_DASH_SPEED : {
 		"type" : type.PERCENT,
 		"suffix" :"Ground Dash Speed",
 	},
@@ -103,7 +103,7 @@ const DESCRIBE = {
 		"suffix" :"Guard Drain",
 	},
 	
-	effect_ref.GROUND_NORMAL_DMG_MOD : {
+	effect_ref.GRD_NORMAL_DMG_MOD : {
 		"type" : type.PERCENT,
 		"suffix" :"Ground Normals Dmg",
 	},
@@ -436,7 +436,7 @@ const DATABASE = {
 	card_ref.AQUA : {
 		"name" : "Aqua",
 		"price" : 100,
-		effect_ref.GROUND_DASH_SPEED : 40,
+		effect_ref.GRD_DASH_SPEED : 40,
 		effect_ref.AIR_DASH_SPEED : 40,
 		effect_ref.SPECIAL_DMG_MOD: 50,
 		"quirks" : [effect_ref.SPECIAL_CHAIN, effect_ref.CAN_TRIP],
@@ -461,7 +461,7 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.SPEED : -10,
 		effect_ref.AIR_DASH_SPEED : 40,
-		effect_ref.GROUND_DASH_SPEED : 40,
+		effect_ref.GRD_DASH_SPEED : 40,
 		effect_ref.SPECIAL_DMG_MOD : 60,
 		"quirks" : [effect_ref.LESS_GUARD_DRAIN],
 	},
@@ -507,8 +507,8 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.SPEED : 10,
 		effect_ref.GRAVITY_MOD : 10,
-		effect_ref.GROUND_NORMAL_DMG_MOD : 60,
-		effect_ref.GROUND_DASH_SPEED : 40,
+		effect_ref.GRD_NORMAL_DMG_MOD : 60,
+		effect_ref.GRD_DASH_SPEED : 40,
 	},
 	card_ref.MUMEI : {
 		"name" : "Mumei",
@@ -577,7 +577,7 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.SPEED : 10,
 		effect_ref.LIGHT_DMG_MOD : 30,
-		effect_ref.GROUND_DASH_SPEED : 20,
+		effect_ref.GRD_DASH_SPEED : 20,
 		effect_ref.AIR_DASH_SPEED : 20,
 		"quirks" : [effect_ref.CHILLING_ATK]
 	},
@@ -691,7 +691,7 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.STOCK: 1,
 		effect_ref.HITSTUN_TAKEN : -50,
-		effect_ref.GROUND_NORMAL_DMG_MOD : 25,
+		effect_ref.GRD_NORMAL_DMG_MOD : 25,
 		"quirks" : [effect_ref.RESPAWN_POWER, effect_ref.POISON_ATK]
 	},
 	card_ref.AKI : {
@@ -699,8 +699,8 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.HP : 30,
 		effect_ref.SPEED : 10,
-		effect_ref.GROUND_DASH_SPEED : 20,
-		effect_ref.GROUND_NORMAL_DMG_MOD : 50,
+		effect_ref.GRD_DASH_SPEED : 20,
+		effect_ref.GRD_NORMAL_DMG_MOD : 50,
 		"quirks" : [effect_ref.NO_BLOCK_COST]
 	},
 	card_ref.WATAME : {
@@ -708,7 +708,7 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.STOCK: 1,
 		effect_ref.HP : 25,
-		effect_ref.GROUND_NORMAL_DMG_MOD : 25,
+		effect_ref.GRD_NORMAL_DMG_MOD : 25,
 		"quirks": [effect_ref.NO_BLOCK_COST, effect_ref.LESS_GUARD_DRAIN],
 	},
 	card_ref.BAELZ : {
@@ -717,7 +717,7 @@ const DATABASE = {
 		"random" : [card_ref.BAELZ, card_ref.BAELZ_b, card_ref.BAELZ_c, card_ref.BAELZ_d, card_ref.BAELZ_e, card_ref.BAELZ_f],
 		"replace" : "Random Out of 6 Sets\nChanges Every Wave",
 		effect_ref.SPEED : -50,
-		effect_ref.GROUND_DASH_SPEED : 50,
+		effect_ref.GRD_DASH_SPEED : 50,
 		effect_ref.AIR_DASH_SPEED : 50,
 		effect_ref.SDASH_SPEED : 50,
 		"quirks" : [effect_ref.WILDCARD],
@@ -755,7 +755,7 @@ const DATABASE = {
 		"random" : [card_ref.BAELZ, card_ref.BAELZ_b, card_ref.BAELZ_c, card_ref.BAELZ_d, card_ref.BAELZ_e, card_ref.BAELZ_f],
 		effect_ref.JUMP_SPEED: -90,
 		effect_ref.SPEED : 50,
-		effect_ref.GROUND_DASH_SPEED: 100,
+		effect_ref.GRD_DASH_SPEED: 100,
 		"quirks" : [effect_ref.DASH_IFRAME, effect_ref.WILDCARD],
 	},
 	card_ref.BAELZ_f : {

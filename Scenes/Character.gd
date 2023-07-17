@@ -203,8 +203,8 @@ var wall_jump := 0
 var air_dash := 0
 var air_dodge := 0
 var super_dash := 0
-var state = Em.char_state.GROUND_STANDBY
-var new_state = Em.char_state.GROUND_STANDBY
+var state = Em.char_state.GRD_STANDBY
+var new_state = Em.char_state.GRD_STANDBY
 var true_position := FVector.new() # scaled int vector, needed for slow and precise movement
 var velocity := FVector.new()
 var facing := 1 # 1 for facing right, -1 for facing left
@@ -829,7 +829,7 @@ func simulate2(): # only ran if not in hitstop
 		wall_slammed = Em.wall_slam.CANNOT_SLAM
 		delayed_hit_effect = []
 		
-	if !new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+	if !new_state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		seq_partner_ID = null
 
 		
@@ -849,7 +849,7 @@ func simulate2(): # only ran if not in hitstop
 		
 	# GG Swell during hitstun
 	if !$HitStopTimer.is_running() and is_hitstunned() and GG_swell_flag and !first_hit_flag and \
-			!state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER] and \
+			!state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER] and \
 			!(DI_seal and $BurstLockTimer.is_running()):
 		if $HitStunTimer.is_running():
 			current_guard_gauge = int(min(GUARD_GAUGE_CEIL, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
@@ -914,19 +914,19 @@ func simulate2(): # only ran if not in hitstop
 			var ex_change := get_stat("BASE_EX_REGEN") * FMath.S
 			if is_hitstunned():
 				ex_change = FMath.percent(ex_change, get_stat("HITSTUN_EX_REGEN_MOD"))
-			elif state == Em.char_state.SEQUENCE_TARGET:
+			elif state == Em.char_state.SEQ_TARGET:
 				ex_change = 0
 			else:
 				match chain_combo:
 					Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL: # landed an attack on opponent
 						ex_change = FMath.percent(ex_change, get_stat("LANDED_EX_REGEN_MOD"))
-					Em.chain_combo.WEAKBLOCKED, Em.chain_combo.STRONGBLOCKED: # landed an attack on blocking opponent
+					Em.chain_combo.BLOCKED, Em.chain_combo.PARRIED: # landed an attack on blocking opponent
 						ex_change = FMath.percent(ex_change, get_stat("BLOCKED_EX_REGEN_MOD"))
 					_:
 						continue # no whiff EX gain
 #						if Globals.survival_level != null:
 #							continue # no whiff EX Gain for Survival
-#						if is_attacking() and new_state != Em.char_state.SEQUENCE_USER:
+#						if is_attacking() and new_state != Em.char_state.SEQ_USER:
 #							var move_data = query_move_data()
 #							if !Em.move.DMG in move_data:
 #								ex_change = FMath.percent(ex_change, get_stat("NON_ATTACK_EX_REGEN_MOD")) # for non-attacks, reduce EX regen
@@ -1002,7 +1002,7 @@ func simulate2(): # only ran if not in hitstop
 		
 	if !is_attacking():
 		reset_cancels()
-		if !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GROUND_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.GROUND_D_REC]:
+		if !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GRD_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC]:
 			chain_memory = []
 		
 	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
@@ -1054,7 +1054,7 @@ func simulate2(): # only ran if not in hitstop
 #	elif button_left in input_state.just_pressed:
 #		dir = -1
 		
-	if new_state in [Em.char_state.SEQUENCE_USER, Em.char_state.SEQUENCE_TARGET]:
+	if new_state in [Em.char_state.SEQ_USER, Em.char_state.SEQ_TARGET]:
 		simulate_sequence()
 		return
 		
@@ -1065,7 +1065,7 @@ func simulate2(): # only ran if not in hitstop
 			
 	# GROUND MOVEMENT --------------------------------------------------------------------------------------------------
 	
-			Em.char_state.GROUND_STANDBY:
+			Em.char_state.GRD_STANDBY:
 				if dir != facing: # flipping over
 					face(dir)
 					animate("RunTransit") # restart run animation
@@ -1161,7 +1161,7 @@ func simulate2(): # only ran if not in hitstop
 		if Settings.input_assist[player_ID]:
 			# quick impulse
 			match state:
-				Em.char_state.GROUND_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP:
 					if !impulse_used and Animator.time <= 1:
 						var move_name = Animator.to_play_anim.trim_suffix("Startup")
 						if move_name in UniqChar.STARTERS:
@@ -1185,7 +1185,7 @@ func simulate2(): # only ran if not in hitstop
 
 #	if instant_dir != 0 and facing != instant_dir: # this allow for quick turns when you tap a direction while holding another direction
 #		match state:
-#			Em.char_state.GROUND_STANDBY:
+#			Em.char_state.GRD_STANDBY:
 #				face(instant_dir)
 #			Em.char_state.AIR_STANDBY:
 #				if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
@@ -1201,7 +1201,7 @@ func simulate2(): # only ran if not in hitstop
 	# IMPULSE --------------------------------------------------------------------------------------------------
 	
 #	if button_left in input_state.pressed or button_right in input_state.pressed: # don't use dir for this one...
-#		if new_state == Em.char_state.GROUND_ATK_STARTUP and Animator.time == QUICK_CANCEL_TIME: # only possible on frame 1
+#		if new_state == Em.char_state.GRD_ATK_STARTUP and Animator.time == QUICK_CANCEL_TIME: # only possible on frame 1
 #			var move_name = Animator.to_play_anim.trim_suffix("Startup")
 #			if move_name in UniqChar.MOVE_DATABASE and \
 #					!Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name): # ground impulse
@@ -1224,13 +1224,13 @@ func simulate2(): # only ran if not in hitstop
 				
 			# TO CROUCH --------------------------------------------------------------------------------------------------
 			
-#				Em.char_state.GROUND_STANDBY:
+#				Em.char_state.GRD_STANDBY:
 #					animate("CrouchTransit")
 					
 			# CROUCH CANCELS FOR CHAINDASHING --------------------------------------------------------------------------------------------------
 				# crouch to cancel ground dash recovery
 		
-#				Em.char_state.GROUND_C_REC:
+#				Em.char_state.GRD_C_REC:
 #					if Animator.query_to_play(["SoftLanding", "HardLanding"]):
 #						animate("Crouch")
 #					elif Animator.query_to_play(["DashBrake", "WaveDashBrake"]):
@@ -1285,7 +1285,7 @@ func simulate2(): # only ran if not in hitstop
 							animate("FastFallTransit")
 						
 							
-				Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC: # fastfall cancel from aerial hits
+				Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC: # fastfall cancel from aerial hits
 					if Settings.dj_fastfall[player_ID] == 0 or \
 						(Settings.dj_fastfall[player_ID] == 1 and button_jump in input_state.pressed):
 							
@@ -1311,13 +1311,13 @@ func simulate2(): # only ran if not in hitstop
 			match state: # don't use new_state or will be able to block Supers after screenfreeze
 				
 			# ground blocking
-	#			Em.char_state.GROUND_STARTUP: # can block on 1st frame of ground dash
+	#			Em.char_state.GRD_STARTUP: # can block on 1st frame of ground dash
 	#				if Animator.query_current(["DashTransit"]):
 	#					animate("BlockStartup")
-				Em.char_state.GROUND_STANDBY:
+				Em.char_state.GRD_STANDBY:
 					animate("BlockStartup")
-				Em.char_state.GROUND_C_REC:
-					if has_trait(Em.trait.GRD_C_REC_BLOCK):
+				Em.char_state.GRD_C_REC:
+					if !has_trait(Em.trait.NO_GRD_C_REC_BLOCK):
 						animate("BlockStartup")
 					elif !Animator.query_to_play(["DashBrake", "WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
 						animate("BlockStartup")
@@ -1332,7 +1332,7 @@ func simulate2(): # only ran if not in hitstop
 #	#					continue
 #						animate("BlockStartup")
 						
-				Em.char_state.GROUND_ATK_REC: # block cancelling
+				Em.char_state.GRD_ATK_REC: # block cancelling
 					if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
 						afterimage_cancel()
 						animate("BlockStartup")
@@ -1340,7 +1340,7 @@ func simulate2(): # only ran if not in hitstop
 						afterimage_cancel()
 						animate("BlockStartup")
 						
-				Em.char_state.GROUND_REC: # quick turn block
+				Em.char_state.GRD_REC: # quick turn block
 					if dir == -facing and Animator.query_current(["BlockRec"]):
 						face(dir)
 						animate("TBlockStartup")
@@ -1358,7 +1358,7 @@ func simulate2(): # only ran if not in hitstop
 					$VarJumpTimer.stop()
 					
 				Em.char_state.AIR_C_REC:
-					if has_trait(Em.trait.AIR_C_REC_BLOCK):
+					if !has_trait(Em.trait.NO_AIR_C_REC_BLOCK):
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 					elif !Animator.query_to_play(["aDashBrake"]):
@@ -1386,10 +1386,10 @@ func simulate2(): # only ran if not in hitstop
 	
 	if !grounded:
 		match new_state:
-			Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
-				Em.char_state.GROUND_STARTUP, Em.char_state.GROUND_ACTIVE, Em.char_state.GROUND_REC, \
-				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
-				Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.GROUND_BLOCK:
+			Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
+				Em.char_state.GRD_STARTUP, Em.char_state.GRD_ACTIVE, Em.char_state.GRD_REC, \
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
+				Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.GRD_BLOCK:
 				check_drop()
 				
 	elif velocity.y >= 0: # just in case, normally called when physics.gd runs into a floor
@@ -1505,16 +1505,16 @@ func simulate2(): # only ran if not in hitstop
 	
 	var friction_this_frame: int # 15
 	var air_res_this_frame: int
-	
-	if !is_hitstunned():
-		friction_this_frame = get_stat("FRICTION")
-		air_res_this_frame = get_stat("AIR_RESISTANCE")
-	else:
+		
+	if is_hitstunned() or (is_blocking() and $SBlockTimer.is_running()):
 		friction_this_frame = HITSTUN_FRICTION # 15
 		air_res_this_frame = HITSTUN_AIR_RES # 3
+	else:
+		friction_this_frame = get_stat("FRICTION")
+		air_res_this_frame = get_stat("AIR_RESISTANCE")
 	
 	match state:
-		Em.char_state.GROUND_STANDBY:
+		Em.char_state.GRD_STANDBY:
 			if dir == 0: # if not moving
 				# if in run animation, do brake animation
 				if Animator.query_to_play(["Run", "RunTransit"]):
@@ -1526,10 +1526,10 @@ func simulate2(): # only ran if not in hitstop
 #			if !button_down in input_state.pressed and Animator.query_to_play(["Crouch"]):
 #				animate("CrouchReturn") # stand up
 	
-		Em.char_state.GROUND_STARTUP:
+		Em.char_state.GRD_STARTUP:
 			friction_this_frame = 0 # no friction when starting a ground jump/dash
 				
-		Em.char_state.GROUND_C_REC:
+		Em.char_state.GRD_C_REC:
 			if Animator.query(["HardLanding"]): # lower friction when hardlanding?
 				friction_this_frame = FMath.percent(friction_this_frame, 50)
 
@@ -1589,8 +1589,6 @@ func simulate2(): # only ran if not in hitstop
 					else:
 						animate("DashBrake")
 				else:
-					if grounded and posmod(Globals.Game.frametime, 5) == 0: # drag rocks on ground
-						Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
 						
 					var vel_angle = velocity.angle() # rotation and navigation
 					var rotated := false
@@ -1611,7 +1609,7 @@ func simulate2(): # only ran if not in hitstop
 					face(-facing) # face opponent
 						
 					
-		Em.char_state.GROUND_BLOCK:
+		Em.char_state.GRD_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
 				if success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
 					animate("BlockCRec")
@@ -1619,11 +1617,11 @@ func simulate2(): # only ran if not in hitstop
 					animate("BlockRec")
 #			elif !success_block:
 #			if !$SBlockTimer.is_running():
-			change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST"))
+			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 				animate("BlockRec")
 			
-#		Em.char_state.GROUND_BLOCKSTUN:
+#		Em.char_state.GRD_BLOCKSTUN:
 #			if !$BlockStunTimer.is_running():
 #				animate("BlockstunReturn")
 			
@@ -1665,7 +1663,7 @@ func simulate2(): # only ran if not in hitstop
 			if anim_gravity_mod == 0:
 				air_res_this_frame = 0
 			
-		Em.char_state.GROUND_FLINCH_HITSTUN:
+		Em.char_state.GRD_FLINCH_HITSTUN:
 			# when out of hitstun, recover
 			if !$HitStunTimer.is_running():
 				if !tech():
@@ -1767,13 +1765,16 @@ func simulate2(): # only ran if not in hitstop
 			velocity.x = velocity_previous_frame.x
 			velocity.y = velocity_previous_frame.y
 		else:
-			if results[0]:
-				check_landing()
-			
-			if new_state == Em.char_state.AIR_REC and Animator.query_to_play(["SDash"]):
-				check_sdash_crash()
-			elif new_state == Em.char_state.LAUNCHED_HITSTUN:
-				bounce(results[0])
+			if UniqChar.has_method("collision") and UniqChar.collision(results):
+				pass # unique collisions, UniqChar.collision() returns true if has special outcome
+			else:
+				if results[0]:
+					check_landing()
+				
+				if new_state == Em.char_state.AIR_REC and Animator.query_to_play(["SDash"]):
+					check_sdash_crash()
+				elif new_state == Em.char_state.LAUNCHED_HITSTUN:
+					bounce(results[0])
 			
 			
 	# get overlapping characters, all grounded overlapping characters above you get sent to the back
@@ -2085,7 +2086,7 @@ func buffer_actions():
 	# quick cancel from button release
 	if Settings.input_assist[player_ID] and (button_up in input_state.just_released or button_down in input_state.just_released):
 		match new_state:
-			Em.char_state.GROUND_ATK_STARTUP:
+			Em.char_state.GRD_ATK_STARTUP:
 				if Animator.time <= 1 and Animator.time != 0:
 					rebuffer_actions()
 					UniqChar.rebuffer_EX()
@@ -2474,22 +2475,46 @@ func process_input_buffer():
 		match buffered_input[0]:
 			
 			button_jump, button_up:
-				if Animator.query(["JumpTransit", "aJumpTransit"]): # consume buffered jumps during jump transits
+				if Animator.query_current(["JumpTransit2", "aJumpTransit2", "WallTransit2"]): # consume buffered jumps during jump transits
 					keep = false
 					continue
 				if !has_acted[0]:
 					match new_state:
 						
+						# BUFFERING AN INSTANT AIRDASH ---------------------------------------------------------------------------------
+						# dash startup can be too fast, so can jump cancel 1st frame of Dash
+						
+#						Em.char_state.GRD_D_REC:
+#							if has_trait(Em.trait.FF_GD_JC) and Settings.input_assist[player_ID] and \
+#									Animator.time == 0 and button_dash in input_state.pressed and Animator.query_to_play(["Dash"]):
+#								animate("JumpTransit")
+#								input_to_add.append([button_dash, buffer_time()])
+#								has_acted[0] = true
+#								keep = false
+#							else:
+#								continue
+						
 						# JUMPING ON GROUND --------------------------------------------------------------------------------------------------
 						
-						Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC:
+						Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC:
+							
+							if new_state == Em.char_state.GRD_D_REC:
+								if UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
+									pass # some characters has certain jump cancellable d_rec
+								elif !has_trait(Em.trait.GRD_DASH_JUMP):
+									continue # some characters can jump while dashing
+								
+#							if new_state == Em.char_state.AIR_D_REC:
+#								if !grounded or !has_trait(Em.trait.AIR_DASH_JUMP):
+#									continue # some characters can ground jump while airdashing grounded
+							
 							if button_down in input_state.pressed and soft_grounded:
 			#							!Character.button_left in Character.input_state.pressed and \f
 			#							!Character.button_right in Character.input_state.pressed: # don't use dir
 								
 								# fallthrough
-#								if new_state in [Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, \
-#										Em.char_state.GROUND_C_REC]:
+#								if new_state in [Em.char_state.GRD_STANDBY, Em.char_state.CROUCHING, \
+#										Em.char_state.GRD_C_REC]:
 								position.y += 2 # 1 will cause issues with downward moving platforms
 								set_true_position()
 								animate("FallTransit")
@@ -2497,33 +2522,36 @@ func process_input_buffer():
 								keep = false
 									
 							if keep:
-								animate("JumpTransit") # ground jump
-								if button_dash in input_state.pressed: # for wavedash alternate input
+								
+								if button_dash in input_state.pressed and new_state != Em.char_state.GRD_D_REC and \
+										new_state != Em.char_state.AIR_D_REC: # for wavedash alternate input
 									input_buffer.append([button_dash, buffer_time()])
-									
+								
+								animate("JumpTransit") # ground jump
 								keep = false
 								
-						Em.char_state.GROUND_BLOCK:
+						Em.char_state.GRD_BLOCK: # instant air block
 							if Settings.input_assist[player_ID] and Animator.time <= 1:
 								animate("JumpTransit") 
 								keep = false
 							
-						# BUFFERING AN INSTANT AIRDASH ---------------------------------------------------------------------------------
-							
-						Em.char_state.GROUND_D_REC:
-							if Settings.input_assist[player_ID] and Animator.time == 0:
-								animate("JumpTransit")
-								input_to_add.append([button_dash, buffer_time()])
-								has_acted[0] = true
-								keep = false
 								
 						# AIR JUMPS  --------------------------------------------------------------------------------------------------
 			
-						Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC:
+						Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 #							if grounded:
 #								animate("JumpTransit") # ground jump
 #								keep = false
 #								continue
+							
+							if grounded:
+								continue
+
+							if new_state == Em.char_state.AIR_D_REC:
+								if UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
+									pass # some characters has certain jump cancellable d_rec
+								elif !has_trait(Em.trait.AIR_DASH_JUMP):
+									continue # some characters can jump while dashing
 							
 							if Settings.dj_fastfall[player_ID] == 1 and button_down in input_state.pressed:
 								continue
@@ -2573,7 +2601,7 @@ func process_input_buffer():
 								
 						# JUMP CANCELS ---------------------------------------------------------------------------------
 								
-						Em.char_state.GROUND_ATK_REC:
+						Em.char_state.GRD_ATK_REC:
 							if test_jump_cancel():
 								if button_down in input_state.pressed and !button_dash in input_state.pressed \
 									and soft_grounded: # cannot be pressing dash
@@ -2585,7 +2613,7 @@ func process_input_buffer():
 									animate("JumpTransit")
 									keep = false
 						
-						Em.char_state.GROUND_ATK_ACTIVE: # some attacks can jump cancel on active frames
+						Em.char_state.GRD_ATK_ACTIVE: # some attacks can jump cancel on active frames
 							if active_cancel or test_jump_cancel_active():
 								afterimage_cancel()
 								if button_down in input_state.pressed and !button_dash in input_state.pressed \
@@ -2598,7 +2626,7 @@ func process_input_buffer():
 									animate("JumpTransit")
 									keep = false
 								
-						Em.char_state.GROUND_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
+						Em.char_state.GRD_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
 							if buffered_input[0] != button_jump:
 								continue # cannot quick jump cancel with up button
 							if !Settings.input_assist[player_ID]:
@@ -2619,12 +2647,12 @@ func process_input_buffer():
 					keep = false
 				else:
 					match state: # not new state
-						Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
+						Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
-							Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK, \
-							Em.char_state.GROUND_REC, Em.char_state.AIR_REC, \
-							Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
-#							if state in [Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK] and \
+							Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK, \
+							Em.char_state.GRD_REC, Em.char_state.AIR_REC, \
+							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
+#							if state in [Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK] and \
 #									button_dash in input_state.pressed:
 #								continue # to make fdashing out of block easier
 							if burst_counter_check():
@@ -2639,24 +2667,24 @@ func process_input_buffer():
 #									has_acted[0] = true
 #									keep = false
 								
-						Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
+						Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
 							if burst_escape_check():
 								animate("BurstEscapeStartup")
 								has_acted[0] = true
 								keep = false
 								
 						# can Burst Counter if attack is blocked
-						Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
-							if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.WEAKBLOCKED, \
-									Em.chain_combo.STRONGBLOCKED] and burst_counter_check():
+						Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
+							if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED, \
+									Em.chain_combo.PARRIED] and burst_counter_check():
 								animate("BurstCounterStartup")
 								has_acted[0] = true
 								keep = false
 							else: continue
 
-#						Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
-#								Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC, \
-#								Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+#						Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
+#								Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC, \
+#								Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 #							if is_attacking(): # new state must not be standby
 #								var move_name = get_move_name()
 #								if burst_extend_check(move_name):
@@ -2667,9 +2695,9 @@ func process_input_buffer():
 			"SDash":
 				if is_attacking(): # new state must not be standby
 					match state:
-#						Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
-#								Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC, \
-#								Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+#						Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
+#								Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC, \
+#								Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 #								var move_name = get_move_name()
 #								if a_reset_check(move_name):
 #									animate("AReset")
@@ -2677,9 +2705,9 @@ func process_input_buffer():
 #									keep = false
 #								else:
 #									continue
-						Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
-								Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
-								Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+						Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
+								Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
+								Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 							if test_sdash_cancel() or test_sdash_revoke():
 								animate("SDashTransit")
 								has_acted[0] = true
@@ -2687,20 +2715,23 @@ func process_input_buffer():
 								
 				if keep:
 					match new_state:
-						Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
+						Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
 								Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
-								Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, \
-								Em.char_state.GROUND_REC, Em.char_state.AIR_REC, \
-								Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC, \
-								Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
-							if new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP]:
+								Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, \
+								Em.char_state.GRD_REC, Em.char_state.AIR_REC, \
+								Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC, \
+								Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
+							if new_state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
 								if !Settings.input_assist[player_ID]:
 									continue
-								if !Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
-									continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
-							if new_state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC]:
-								if !Animator.query_to_play(["BlockRec", "aBlockRec"]):
-									continue # can only cancel from certain non-attack recovery frames
+								var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
+								if "TRANSIT_SDASH" in UniqChar:
+									transits.append_array(UniqChar.TRANSIT_SDASH) # for special types of dashes
+								if !Animator.query_to_play(transits):
+									continue # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
+#							if new_state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC]:
+#								if !Animator.query_to_play(["BlockRec", "aBlockRec"]):
+#									continue # can only cancel from certain non-attack recovery frames
 							if grounded or super_dash > 0:
 								animate("SDashTransit")
 								has_acted[0] = true
@@ -2709,38 +2740,41 @@ func process_input_buffer():
 									
 			"Dodge":
 				match new_state:
-					Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
+					Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
-							Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, \
-							Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK, Em.char_state.GROUND_D_REC:
-						if new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP]:
+							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, \
+							Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK, Em.char_state.GRD_D_REC:
+						if new_state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
 							if !Settings.input_assist[player_ID]:
 								continue
-							if !Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
-								continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
-						if new_state == Em.char_state.GROUND_D_REC:
+							var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
+							if "TRANSIT_DODGE" in UniqChar:
+								transits.append_array(UniqChar.TRANSIT_DODGE) # for special types of dashes
+							if !Animator.query_to_play(transits):
+								continue # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
+						if new_state == Em.char_state.GRD_D_REC:
 							if !Settings.input_assist[player_ID]:
 								continue
 							if Animator.time > 0:
 								continue # can cancel from 1st frame of ground dash
-						if new_state in [Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK]:
+						if new_state in [Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK]:
 							if !Settings.input_assist[player_ID]:
 								continue
 							if !Animator.query_to_play(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
-								continue # can only cancel from block startup for GROUND_BLOCK/AIR_BLOCK	
+								continue # can only cancel from block startup for GRD_BLOCK/AIR_BLOCK	
 						if dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
 							
-					Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+					Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 						if test_dodge_cancel() and dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
 							
 					# guard cancel dodge, can only be done when releasing block after blocking an attack
-					Em.char_state.GROUND_REC:
+					Em.char_state.GRD_REC:
 						if $SBlockTimer.is_running() and !$BurstLockTimer.is_running() and Animator.query_to_play(["BlockRec"]) and dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
@@ -2754,15 +2788,15 @@ func process_input_buffer():
 							
 #			"FDash":
 #				match new_state:
-#					Em.char_state.GROUND_STANDBY, Em.char_state.CROUCHING, Em.char_state.GROUND_C_REC, \
+#					Em.char_state.GRD_STANDBY, Em.char_state.CROUCHING, Em.char_state.GRD_C_REC, \
 #							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
-#							Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP, \
-#							Em.char_state.GROUND_REC, Em.char_state.AIR_REC, \
-#							Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
-#						if new_state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP] and \
+#							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, \
+#							Em.char_state.GRD_REC, Em.char_state.AIR_REC, \
+#							Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
+#						if new_state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP] and \
 #								!Animator.query_to_play(["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]):
-#							continue # can only cancel from Transits for GROUND_STARTUP/AIR_STARTUP
-#						if new_state in [Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and \
+#							continue # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
+#						if new_state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] and \
 #								!Animator.query_to_play(["BlockRec", "aBlockRec", "Dash", "aDash"]):
 #							continue # can only cancel from certain non-attack recovery frames
 #						if flying_dash > 0:
@@ -2804,7 +2838,7 @@ func animate(anim):
 		# when changing to a non-attacking state from attack startup, auto-buffer pressed attack buttons
 		if Settings.input_assist[player_ID] and !startup_cancel_flag and !is_attacking():
 			match old_new_state:
-				Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 					rebuffer_actions()
 
 			
@@ -2830,34 +2864,32 @@ func state_detect(anim) -> int:
 	match anim:
 		# universal animations
 		"Idle", "RunTransit", "Run", "Brake":
-			return Em.char_state.GROUND_STANDBY
+			return Em.char_state.GRD_STANDBY
 #		"CrouchTransit", "Crouch", "CrouchReturn":
 #			return Em.char_state.CROUCHING
-		"JumpTransit", "DashTransit":
-			return Em.char_state.GROUND_STARTUP
-		"Dash", "Dash2":
-			return Em.char_state.GROUND_D_REC
+		"JumpTransit":
+			return Em.char_state.GRD_STARTUP
+
 		"BlockRec":
-			return Em.char_state.GROUND_REC
+			return Em.char_state.GRD_REC
 		"SoftLanding", "DashBrake", "WaveDashBrake", "BlockCRec", "HardLanding":
-			return Em.char_state.GROUND_C_REC
+			return Em.char_state.GRD_C_REC
 			
 		"JumpTransit3","aJumpTransit3", "Jump", "FallTransit", "Fall", "FastFallTransit", "FastFall":
 			return Em.char_state.AIR_STANDBY
 		"aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2", "aDashTransit", "JumpTransit2", "DodgeTransit":
 			# ground/air jumps have 1 frame of AIR_STARTUP after lift-off to delay actions like instant air dash/wavedashing
 			return Em.char_state.AIR_STARTUP
-		"aDash", "aDashD", "aDashU", "aDashDD", "aDashUU":
-			return Em.char_state.AIR_D_REC
+
 		"aBlockRec", "Dodge", "DodgeRec":
 			return Em.char_state.AIR_REC
 		"aDashBrake", "aBlockCRec", "DodgeCRec":
 			return Em.char_state.AIR_C_REC
 			
 		"FlinchAStop", "FlinchA", "FlinchBStop", "FlinchB":
-			return Em.char_state.GROUND_FLINCH_HITSTUN
+			return Em.char_state.GRD_FLINCH_HITSTUN
 		"FlinchAReturn", "FlinchBReturn":
-			return Em.char_state.GROUND_C_REC
+			return Em.char_state.GRD_C_REC
 		"aFlinchAStop", "aFlinchA", "aFlinchBStop", "aFlinchB":
 			return Em.char_state.AIR_FLINCH_HITSTUN
 		"aFlinchAReturn", "aFlinchBReturn":
@@ -2866,24 +2898,24 @@ func state_detect(anim) -> int:
 			return Em.char_state.LAUNCHED_HITSTUN
 		
 		"SeqFlinchAFreeze", "SeqFlinchBFreeze":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"SeqFlinchAStop", "SeqFlinchA", "SeqFlinchBStop", "SeqFlinchB":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"aSeqFlinchAFreeze", "aSeqFlinchBFreeze":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"aSeqFlinchAStop", "aSeqFlinchA", "aSeqFlinchBStop", "aSeqFlinchB":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"SeqLaunchFreeze":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 		"SeqLaunchStop", "SeqLaunchTransit", "SeqLaunch":
-			return Em.char_state.SEQUENCE_TARGET
+			return Em.char_state.SEQ_TARGET
 			
 		"BlockStartup", "TBlockStartup":
-			return Em.char_state.GROUND_BLOCK
+			return Em.char_state.GRD_BLOCK
 		"aBlockStartup", "aTBlockStartup":
 			return Em.char_state.AIR_BLOCK
 		"Block", "BlockLanding":
-			return Em.char_state.GROUND_BLOCK
+			return Em.char_state.GRD_BLOCK
 		"aBlock":
 			return Em.char_state.AIR_BLOCK
 			
@@ -3017,9 +3049,9 @@ func get_stat(stat: String) -> int:
 				to_return += Inventory.modifier(player_ID, Cards.effect_ref.MAX_SUPER_DASH)
 				to_return = int(max(to_return, 0))
 				
-			"GROUND_DASH_SPEED":
+			"GRD_DASH_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
-				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GROUND_DASH_SPEED))
+				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GRD_DASH_SPEED))
 				to_return = int(max(to_return, 10))
 			"AIR_DASH_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
@@ -3048,7 +3080,7 @@ func get_stat(stat: String) -> int:
 #				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
 #					to_return = FMath.percent(to_return, 200)
 				
-			"GROUND_BLOCK_GG_COST", "AIR_BLOCK_GG_COST":
+			"GRD_BLOCK_GG_COST", "AIR_BLOCK_GG_COST":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
 #				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.BLOCK_GG_COST))
 #				to_return = int(max(to_return, 0))
@@ -3096,14 +3128,14 @@ func mod_damage(move_name):
 			if move_name.begins_with("a"):
 				mod += Inventory.modifier(player_ID, Cards.effect_ref.AIR_NORMAL_DMG_MOD, true)
 			else:
-				mod += Inventory.modifier(player_ID, Cards.effect_ref.GROUND_NORMAL_DMG_MOD, true)
+				mod += Inventory.modifier(player_ID, Cards.effect_ref.GRD_NORMAL_DMG_MOD, true)
 				
 		Em.atk_type.FIERCE:
 			mod += Inventory.modifier(player_ID, Cards.effect_ref.FIERCE_DMG_MOD, true)
 			if move_name.begins_with("a"):
 				mod += Inventory.modifier(player_ID, Cards.effect_ref.AIR_NORMAL_DMG_MOD, true)
 			else:
-				mod += Inventory.modifier(player_ID, Cards.effect_ref.GROUND_NORMAL_DMG_MOD, true)
+				mod += Inventory.modifier(player_ID, Cards.effect_ref.GRD_NORMAL_DMG_MOD, true)
 				
 		Em.atk_type.HEAVY:
 			mod += Inventory.modifier(player_ID, Cards.effect_ref.HEAVY_DMG_MOD, true)
@@ -3338,7 +3370,7 @@ func dodge_enhance():
 func trip():
 	face(-facing)
 	animate("LaunchStop")
-	velocity.x = get_stat("GROUND_DASH_SPEED") * -facing
+	velocity.x = get_stat("GRD_DASH_SPEED") * -facing
 	velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), 50)
 	launch_starting_rot = 0
 	launchstun_rotate = 0
@@ -3350,7 +3382,7 @@ func trip():
 		
 		
 func is_killable(vel_value):
-	if new_state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+	if new_state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		return false
 	if !lethal_flag: # must be in lethal hitstun off a lethal hit
 		return false
@@ -3470,7 +3502,7 @@ func respawn():
 	
 	$Sprites.show()
 	animate("Idle")
-	state = Em.char_state.GROUND_STANDBY
+	state = Em.char_state.GRD_STANDBY
 	add_status_effect([Em.status_effect.RESPAWN_GRACE, RESPAWN_GRACE_DURATION])
 	
 	var palette
@@ -3551,7 +3583,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				animate("SoftLanding")
 			
 		Em.char_state.AIR_STARTUP:
-			if Animator.query_to_play(["aJumpTransit"]):
+			if Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallTransit2"]):
 				animate("SoftLanding")
 				if Settings.input_assist[player_ID]:
 					input_buffer.append([button_jump, buffer_time()])
@@ -3564,18 +3596,19 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			pass # AIR_ACTIVE not used for now
 			
 		Em.char_state.AIR_D_REC:
-			if !Animator.to_play_anim.ends_with("DD"): # wave landing
-				if Globals.survival_level != null and !ground_dash_enhance():
-					pass
-				else:
-					animate("WaveDashBrake")
-					UniqChar.dash_sound()
-					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
-					if dir == facing:
-						velocity.x = facing * FMath.percent(get_stat("GROUND_DASH_SPEED"), get_stat("WAVE_DASH_SPEED_MOD"))
-						
-			else: # landing during AirDashDD
-				animate("HardLanding")
+			if Animator.to_play_anim.begins_with("aDash"):
+				if !Animator.to_play_anim.ends_with("DD"): # wave landing
+					if Globals.survival_level != null and !ground_dash_enhance():
+						pass
+					else:
+						animate("WaveDashBrake")
+						UniqChar.dash_sound()
+						Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
+						if dir == facing:
+							velocity.x = facing * FMath.percent(get_stat("GRD_DASH_SPEED"), get_stat("WAVE_DASH_SPEED_MOD"))
+							
+				else: # landing during AirDashDD
+					animate("HardLanding")
 			
 		Em.char_state.AIR_REC:
 			if Animator.query_to_play(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
@@ -3626,7 +3659,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 			if Animator.query_to_play(["aBlockStartup", "aTBlockStartup"]): # if dropping during block startup
-				change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST") * 10)
+				change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * 10)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
 #				remove_status_effect(Em.status_effect.POS_FLOW)
@@ -3639,29 +3672,29 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 	if seq_partner_ID != null: return # no checking during start of sequence
 	match new_state:
 		
-		Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_C_REC, \
-				Em.char_state.GROUND_D_REC:
+		Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
+				Em.char_state.GRD_D_REC:
 			animate("FallTransit")
 			
-		Em.char_state.GROUND_STARTUP:
+		Em.char_state.GRD_STARTUP:
 			if Animator.query_to_play(["JumpTransit"]): # instantly jump if dropped during jump transit
 				animate("JumpTransit2")
 			else:
 				animate("FallTransit")
 				
-		Em.char_state.GROUND_ACTIVE:
-			pass # GROUND_ACTIVE not used for now
+		Em.char_state.GRD_ACTIVE:
+			pass # GRD_ACTIVE not used for now
 
-		Em.char_state.GROUND_REC:
+		Em.char_state.GRD_REC:
 			if Animator.query_to_play(["BlockRec"]):
 				animate("aBlockRec")
 			else:
 				animate("FallTransit")
 				
-		Em.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GRD_ATK_STARTUP:
 			animate("FallTransit")
 				
-		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC:
+		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC:
 			var move_name = get_move_name()
 			if move_name in UniqChar.MOVE_DATABASE and \
 				Em.atk_attr.LEDGE_DROP in query_atk_attr(move_name):
@@ -3669,14 +3702,14 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			else:
 				animate("FallTransit")
 			
-		Em.char_state.GROUND_FLINCH_HITSTUN:
+		Em.char_state.GRD_FLINCH_HITSTUN:
 			match Animator.to_play_anim:
 				"FlinchAStop", "FlinchA":
 					animate("aFlinchA")
 				"FlinchBStop", "FlinchB":
 					animate("aFlinchB")
 			
-		Em.char_state.GROUND_BLOCK:
+		Em.char_state.GRD_BLOCK:
 			if Animator.query_to_play(["BlockStartup", "TBlockStartup"]):
 				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * 10)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
@@ -3701,9 +3734,9 @@ func check_collidable(): # called by Physics.gd
 	match new_state:
 		Em.char_state.LAUNCHED_HITSTUN:
 			return false
-		Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER:
+		Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER:
 			return false
-#		Em.char_state.GROUND_ATK_STARTUP: # crossover attack
+#		Em.char_state.GRD_ATK_STARTUP: # crossover attack
 #			if button_dash in input_state.pressed:
 ##					and chain_memory.size() == 0:
 #				return false
@@ -3717,7 +3750,7 @@ func check_collidable(): # called by Physics.gd
 				if Animator.query_to_play(["SDash"]):
 					if Inventory.has_quirk(player_ID, Cards.effect_ref.SDASH_IFRAME):
 						return false
-		Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
+		Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 			if Globals.survival_level != null:
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.DASH_IFRAME):
 					return false
@@ -3726,9 +3759,9 @@ func check_collidable(): # called by Physics.gd
 	
 		
 func check_fallthrough(): # during aerials, can drop through platforms if down is held
-	if state == Em.char_state.SEQUENCE_USER:
+	if state == Em.char_state.SEQ_USER:
 		return UniqChar.sequence_fallthrough()
-	elif state == Em.char_state.SEQUENCE_TARGET:
+	elif state == Em.char_state.SEQ_TARGET:
 		return true # when being grabbed, always fall through soft platforms
 #		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
 	elif new_state == Em.char_state.AIR_REC and Animator.query_to_play(["Dodge", "SDash"]):
@@ -3736,14 +3769,15 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 	elif !grounded and is_attacking():
 		if button_down in input_state.pressed:
 			return true
-	return false
+			
+	return UniqChar.check_fallthrough()
 	
 func check_semi_invuln():
 	if UniqChar.check_semi_invuln():
 		return true
 	else:
 		match new_state:
-			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 				if is_super(get_move_name()):
 					return true
 				elif Em.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
@@ -3759,7 +3793,7 @@ func check_semi_invuln():
 					if Animator.query_to_play(["SDash"]):
 						if Inventory.has_quirk(player_ID, Cards.effect_ref.SDASH_IFRAME):
 							return true
-			Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
+			Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 				if Globals.survival_level != null:
 					if Inventory.has_quirk(player_ID, Cards.effect_ref.DASH_IFRAME):
 						return true
@@ -3771,9 +3805,9 @@ func check_semi_invuln():
 	return false	
 	
 func check_passthrough():
-	if state == Em.char_state.SEQUENCE_USER:
+	if state == Em.char_state.SEQ_USER:
 		return UniqChar.sequence_passthrough() # for cinematic supers
-	elif state == Em.char_state.SEQUENCE_TARGET:
+	elif state == Em.char_state.SEQ_TARGET:
 		return get_target().sequence_partner_passthrough() # get passthrough state from the one grabbing you
 	return false
 	
@@ -3796,7 +3830,7 @@ func snap_up_wave_land_check():
 			if facing != dir:
 				face(dir)
 			animate("WaveDashBrake")
-			velocity.x = dir * get_stat("GROUND_DASH_SPEED")
+			velocity.x = dir * get_stat("GRD_DASH_SPEED")
 			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			UniqChar.dash_sound()
 		else:
@@ -3836,7 +3870,7 @@ func process_VDI():
 	if (dir != 0 or v_dir != 0) and !DI_seal and get_damage_percent() < 100 and \
 		((state == Em.char_state.LAUNCHED_HITSTUN and Animator.query_to_play(["LaunchTransit"]) and \
 		!Animator.query_current(["LaunchTransit"])) or \
-		(state == Em.char_state.GROUND_FLINCH_HITSTUN and Animator.query_to_play(["FlinchA", "FlinchB"]) and \
+		(state == Em.char_state.GRD_FLINCH_HITSTUN and Animator.query_to_play(["FlinchA", "FlinchB"]) and \
 		!Animator.query_current(["FlinchA", "FlinchB"])) or \
 		(state == Em.char_state.AIR_FLINCH_HITSTUN and Animator.query_to_play(["aFlinchA", "aFlinchB"]) and \
 		!Animator.query_current(["aFlinchA", "aFlinchB"]))):
@@ -4045,11 +4079,16 @@ func get_move_name():
 	return move_name
 	
 func check_quick_turn():
+	
+	if UniqChar.has_method("check_quick_turn"): # some unique character states cannot be quick turned
+		if !UniqChar.check_quick_turn():
+			return false
+	
 	if quick_turn_used: return false
 	
 	var can_turn := false
 	match state:
-		Em.char_state.GROUND_STARTUP:
+		Em.char_state.GRD_STARTUP:
 			can_turn = true
 		Em.char_state.AIR_STARTUP:
 #			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed) and \
@@ -4060,7 +4099,7 @@ func check_quick_turn():
 			else:
 				can_turn =  true
 	match new_state:
-		Em.char_state.GROUND_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
+		Em.char_state.GRD_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
 			if Animator.time <= 6 and Animator.time != 0:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqChar.STARTERS:
@@ -4080,7 +4119,7 @@ func check_quick_turn():
 				elif Em.atk_attr.NO_TURN in query_atk_attr(move_name):
 					can_turn = false
 				else: can_turn = true
-		Em.char_state.GROUND_BLOCK:
+		Em.char_state.GRD_BLOCK:
 			if Animator.query(["BlockStartup"]):
 				can_turn = true
 		Em.char_state.AIR_BLOCK:
@@ -4154,19 +4193,19 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	
 #func check_quick_cancel(turning = false): # return true if you can change direction or cancel into a combination action currently
 #	match state: # use current state instead of new_state
-#		Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP:
+#		Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
 #			if turning:
 #				return true
 #			elif Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
 #				return true
-#		Em.char_state.GROUND_ATK_STARTUP:
-#			if turning and new_state == Em.char_state.GROUND_ATK_STARTUP:
+#		Em.char_state.GRD_ATK_STARTUP:
+#			if turning and new_state == Em.char_state.GRD_ATK_STARTUP:
 #				var move_name = get_move_name()
 #				if move_name == null: return false # if name at name of animation not found in database
 #				if !Em.atk_attr.NO_TURN in query_atk_attr():
 #					return true
 #			else: continue
-#		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+#		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 #			if !turning:
 #				if Animator.time <= QUICK_CANCEL_TIME and Animator.time != 0:
 #					# when time = 0 state is still in the previous one, since state only update when a new animation begins
@@ -4174,7 +4213,7 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 #			else: # for turning, the QUICK_CANCEL_TIME is 1 frame lower, min is 1 frame
 #				if Animator.time <= max(QUICK_CANCEL_TIME - 1, 1) and Animator.time != 0:
 #					return true
-#		Em.char_state.GROUND_BLOCK:
+#		Em.char_state.GRD_BLOCK:
 #			if Animator.query(["BlockStartup"]):
 #				return true
 #		Em.char_state.AIR_BLOCK:
@@ -4189,7 +4228,7 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 	if is_attacking():
 		var move_name = get_move_name()
 		# test if move has LEDGE_DROP, no ledge stop if so
-		if new_state != Em.char_state.GROUND_ATK_STARTUP:
+		if new_state != Em.char_state.GRD_ATK_STARTUP:
 			if Em.atk_attr.LEDGE_DROP in query_atk_attr(move_name):
 				return false # even with LEDGE_DROP, startup animation will still stop you at the ledge
 			else:
@@ -4204,35 +4243,35 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 	
 func is_blocking():
 	match new_state:
-		Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
+		Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
 			return true
 	return false
 	
 func is_hitstunned():
 	match state: # use non-new state
-		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
 			return true
 	return false
 	
 func is_hitstunned_or_sequenced():
 	match state: # use non-new state
-		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
-				Em.char_state.SEQUENCE_TARGET:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
+				Em.char_state.SEQ_TARGET:
 			return true
 	return false
 	
 func is_hitstunned_or_sequenced2():
 	match new_state:
-		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GROUND_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
-				Em.char_state.SEQUENCE_USER, Em.char_state.SEQUENCE_TARGET:
+		Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN, \
+				Em.char_state.SEQ_USER, Em.char_state.SEQ_TARGET:
 			return true
 	return false
 	
 func is_attacking():
 	match new_state:
-		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
 			Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC, \
-			Em.char_state.SEQUENCE_USER:
+			Em.char_state.SEQ_USER:
 			return true
 	return false
 	
@@ -4244,19 +4283,19 @@ func is_aerial():
 	
 func is_atk_startup():
 	match new_state:
-		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 			return true
 	return false
 	
 func is_atk_active():
 	match new_state:
-		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 			return true
 	return false
 	
 func is_atk_recovery():
 	match new_state:
-		Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+		Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 			return true
 	return false
 	
@@ -4574,6 +4613,7 @@ func test_jump_cancel_active():
 	if Em.atk_attr.JUMP_CANCEL_ACTIVE in query_atk_attr(move_name):
 		return true
 		
+	return false
 	
 func test_dash_cancel():
 	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
@@ -5003,7 +5043,7 @@ func test_aerial_memory(attack_ref): # attack_ref already has "a" added for aeri
 func test_dash_attack(attack_ref):
 	
 	match new_state: # need to be in attack active/recovery
-		Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
+		Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 			pass
 		_:
 			return true
@@ -5015,8 +5055,8 @@ func test_dash_attack(attack_ref):
 	
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
 	match state: # need to be in attack active/recovery
-		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
-				Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
+				Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 			pass
 		_:
 			return false
@@ -5032,7 +5072,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		afterimage_cancel()
 		return true
 		
-	if chain_combo == Em.chain_combo.STRONGBLOCKED: return false # cannot cancel into anything but Burst Counter if strongblocked
+	if chain_combo == Em.chain_combo.PARRIED: return false # cannot cancel into anything but Burst Counter if strongblocked
 	
 	var from_move_data = query_move_data(move_name)
 	var to_move_data = query_move_data(attack_ref)
@@ -5041,7 +5081,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		Em.atk_type.LIGHT: # Light Normals can chain cancel on whiff
 			pass
 		Em.atk_type.FIERCE: # Fierce Normals cannot chain into Lights on whiff
-			if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.WEAKBLOCKED] and \
+			if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED] and \
 					to_move_data[Em.move.ATK_TYPE] == Em.atk_type.LIGHT:
 				return false
 		Em.atk_type.HEAVY: # Heavy Normals can only chain cancel into non-normals
@@ -5068,7 +5108,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 		_:
 			return false
 	
-	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL, Em.chain_combo.WEAKBLOCKED]:
+	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL, Em.chain_combo.BLOCKED]:
 		if is_atk_active(): # cannot chain on active frames unless landed an unblocked/weakblocked hit
 			return false
 #		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
@@ -5102,12 +5142,12 @@ func test_qc_chain_combo(attack_ref): # called during attack startup
 	
 	if chain_memory.size() == 0: return true # not chaining, can QC into any valid move
 
-#	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.WEAKBLOCKED]:
+#	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED]:
 #		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
 #			return false
 
 	# cannot qc jumpsquat from Active Cancel
-	if state in [Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP]:
+	if state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
 		if active_cancel:
 			return false
 	
@@ -5131,10 +5171,10 @@ func test_qc_chain_combo(attack_ref): # called during attack startup
 	
 func test_rekka(anim_name):
 	match state: # use current
-		Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, Em.char_state.AIR_ATK_REC:
+		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 			if Animator.query_current([anim_name]):
 				return true	
-		Em.char_state.GROUND_ATK_STARTUP, Em.char_state.GROUND_ATK_STARTUP:
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_ATK_STARTUP:
 			var parent_name = anim_name.trim_suffix("Active")
 			parent_name = parent_name.trim_suffix("Rec")
 			var move_name = Animator.current_anim.trim_suffix("Startup")
@@ -5501,13 +5541,15 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						chain_combo = Em.chain_combo.NORMAL
 						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
 							if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
-								active_cancel = true
+								if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+									active_cancel = true
 							if is_aerial():  # for unblocked aerial you regain 1 air jump
 								gain_one_air_jump()
 					Em.atk_type.HEAVY:
 						chain_combo = Em.chain_combo.HEAVY
 						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
-							active_cancel = true
+							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+								active_cancel = true
 							if is_aerial():  # for unblocked aerial you regain 1 air jump
 								gain_one_air_jump()
 					Em.atk_type.SPECIAL, Em.atk_type.EX:
@@ -5520,24 +5562,24 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 					
 			Em.block_state.WEAK:
-				chain_combo = Em.chain_combo.WEAKBLOCKED
+				chain_combo = Em.chain_combo.BLOCKED
 #				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 #					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-#						chain_combo = Em.chain_combo.WEAKBLOCKED
+#						chain_combo = Em.chain_combo.BLOCKED
 ##						if Em.atk_attr.NO_CHAIN_ON_WEAKBLOCK in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 ##							chain_combo = Em.chain_combo.NO_CHAIN
 #					Em.atk_type.HEAVY:
-#						chain_combo = Em.chain_combo.WEAKBLOCKED
+#						chain_combo = Em.chain_combo.BLOCKED
 #					Em.atk_type.SPECIAL, Em.atk_type.EX:
-#						chain_combo = Em.chain_combo.WEAKBLOCKED
+#						chain_combo = Em.chain_combo.BLOCKED
 #					Em.atk_type.SUPER:
-#						chain_combo = Em.chain_combo.WEAKBLOCKED
+#						chain_combo = Em.chain_combo.BLOCKED
 				
 			Em.block_state.STRONG:
-				chain_combo = Em.chain_combo.STRONGBLOCKED
+				chain_combo = Em.chain_combo.PARRIED
 #				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 #					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-#						chain_combo = Em.chain_combo.STRONGBLOCKED
+#						chain_combo = Em.chain_combo.PARRIED
 #					Em.atk_type.HEAVY:
 #						chain_combo = Em.chain_combo.HEAVY
 #					Em.atk_type.SPECIAL, Em.atk_type.EX:
@@ -5716,7 +5758,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.NON_STRONG_PROJ] = true
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or Em.hit.NON_STRONG_PROJ in hit_data:
-		hit_data[Em.hit.NORMALARMORABLE] = true
+		hit_data[Em.hit.WEAKARMORABLE] = true
 		
 	match dir_to_attacker:
 		1:
@@ -5798,6 +5840,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
+	var crossed_up: bool = check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER])
+
 	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or $SBlockTimer.is_running():
 		match new_state:
 			
@@ -5806,16 +5850,26 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			# WEAK block_state
 			# attacker can chain combo normally after hitting an armored defender
 			
-			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
-				if Em.atk_attr.SUPERARMOR_STARTUP in query_atk_attr() or \
-						(Em.atk_attr.NORMALARMOR_STARTUP in query_atk_attr() and Em.hit.NORMALARMORABLE in hit_data):
+			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
+				var defender_attr = query_atk_attr()
+				if crossed_up and !Em.atk_attr.BI_DIR_ARMOR in defender_attr:
+					continue # armored moves only armor from front unless has BI_DIR_ARMOR
+				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
+						(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
+						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+						(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
 					
-			Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
-				if Em.atk_attr.SUPERARMOR_ACTIVE in query_atk_attr() or \
-						(Em.atk_attr.NORMALARMOR_ACTIVE in query_atk_attr() and Em.hit.NORMALARMORABLE in hit_data) or \
-						(Em.atk_attr.PROJ_ARMOR_ACTIVE in query_atk_attr() and Em.hit.ENTITY_PATH in hit_data):
+			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
+				var defender_attr = query_atk_attr()
+				if crossed_up and !Em.atk_attr.BI_DIR_ARMOR in defender_attr:
+					continue # armored moves only armor from front unless has BI_DIR_ARMOR
+				if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
+						(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_ACTIVE in defender_attr) or \
+						(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+						(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+						(Em.atk_attr.PROJ_ARMOR_ACTIVE in defender_attr and Em.hit.ENTITY_PATH in hit_data):
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
 						
@@ -5841,16 +5895,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if has_trait(Em.trait.PERMA_SUPERARMOR):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 				hit_data[Em.hit.SUPERARMORED] = true
-			elif has_trait(Em.trait.PASSIVE_NORMALARMOR):
-				if current_guard_gauge >= 0 and Em.hit.NORMALARMORABLE in hit_data:
+			elif has_trait(Em.trait.PASSIVE_WEAKARMOR):
+				if current_guard_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
 					var can_armor := false
 					match new_state:
-						Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+						Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 							can_armor = true
-						Em.char_state.GROUND_STARTUP, Em.char_state.AIR_STARTUP:
+						Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
 							if Animator.query_to_play(["aDashTransit", "DashTransit", "SDashTransit"]):
 								can_armor = true
-						Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC:
+						Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 							can_armor = true
 					if can_armor:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
@@ -5860,7 +5914,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		# BLOCKING --------------------------------------------------------------------------------------------------
 		
 		match state:
-			Em.char_state.GROUND_BLOCK, Em.char_state.AIR_BLOCK:
+			Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
 				
 				if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
 					hit_data[Em.hit.ANTI_AIRED] = true
@@ -5868,7 +5922,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 					
 					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-						if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
+						if crossed_up:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
 							# to strongblock a physical attack, you need to either perfect block them or
@@ -5894,14 +5948,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 
 					Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX: # can weakblock heavy/special/EX at high GG cost
-						if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
+						if crossed_up:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 							hit_data[Em.hit.GUARD_DRAIN] = true
 						
 					Em.atk_type.SUPER: # can weakblock super
-						if attacker != null and check_if_crossed_up(attacker, hit_data[Em.hit.ANGLE_TO_ATKER]):
+						if crossed_up:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
@@ -5915,7 +5969,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 							if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 								hit_data[Em.hit.GUARD_DRAIN] = true
-							elif !check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
+							elif !crossed_up:
 								if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
 										Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
 									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
@@ -5939,18 +5993,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		# cannot Punish Hit for weak hits, non-strong projectiles and non-damaging moves like Burst
 		# remember that multi-hit moves cannot do punish hits
 		match new_state:
-			Em.char_state.GROUND_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 				if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 					punish_hit = true
-			Em.char_state.GROUND_ATK_ACTIVE, Em.char_state.GROUND_ATK_REC, \
+			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
 				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC:
 				punish_hit = true
 			# check for Punish Hits for dashes
-			Em.char_state.GROUND_STARTUP:
+			Em.char_state.GRD_STARTUP:
 				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
 					if Animator.query_to_play(["DashTransit"]):
 						punish_hit = true
-			Em.char_state.GROUND_D_REC:
+			Em.char_state.GRD_D_REC:
 				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
 					punish_hit = true
 			Em.char_state.AIR_STARTUP:
@@ -5966,6 +6020,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Em.char_state.AIR_C_REC:
 				if Animator.query_to_play(["DodgeCRec"]):
 					punish_hit = true
+					
+		if !punish_hit:
+			if UniqChar.has_method("punishable"):
+				punish_hit = UniqChar.punishable() # for thnngs like Blink
 			
 	if punish_hit:
 		if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
@@ -6066,7 +6124,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			return # cannot grab someone who just blocked an attack
 		if hit_data[Em.hit.SEMI_DISJOINT] or hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data:
 			return # cannot grab if has repeat penalty
-		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GROUND_STARTUP, \
+		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GRD_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
 			return # quick grabs fail if target is in movement startup
 		if is_atk_startup() and Em.atk_attr.GRAB_INVULN_STARTUP in query_atk_attr():
@@ -6212,6 +6270,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	$VarJumpTimer.stop()
 	
+	var mass_proj_repeat := false # if a projectile hit a hitstopped opponent under repeat penalty, it does not reduce hitstun and knockback
+	if $HitStopTimer.time >= 0 and Em.hit.ENTITY_PATH in hit_data and (Em.hit.SINGLE_REPEAT in hit_data or Em.hit.DOUBLE_REPEAT in hit_data):
+		mass_proj_repeat = true
+	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
@@ -6220,7 +6282,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			pass
 #			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
-			$HitStunTimer.time = calculate_hitstun(hit_data)
+			var hitstun = calculate_hitstun(hit_data)
+			if $HitStunTimer.time > hitstun and mass_proj_repeat:
+				pass # projectiles under repeat penalty will not reduce hitstun for opponents during hitstop
+				# this allows projectile spreads to do less damage and still retain hitstun, while reducing hitstun for multiple spreads
+			else:
+				$HitStunTimer.time = hitstun
 			launchstun_rotate = 0 # used to calculation sprite rotation during launched state
 	
 	# HITSTOP ---------------------------------------------------------------------------------------------------
@@ -6317,7 +6384,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if Globals.survival_level == null and (knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1):
+		if Globals.survival_level == null and (knockback_strength < LAUNCH_THRESHOLD or (adjusted_atk_level <= 1 and !mass_proj_repeat)):
 
 #			if !Em.hit.ENTITY_PATH in hit_data:
 #				face(dir_to_attacker) # turn towards attacker
@@ -6340,8 +6407,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 				# for atk level 1 attack on non-passive state, just push them back, no turn
 				# if is in passive state, will enter impact animation but 0 hitstun
-				elif !state in [Em.char_state.GROUND_STANDBY, Em.char_state.GROUND_REC, \
-					Em.char_state.GROUND_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
+				elif !state in [Em.char_state.GRD_STANDBY, Em.char_state.GRD_REC, \
+					Em.char_state.GRD_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
 					Em.char_state.AIR_C_REC]:
 					no_impact = true
 						
@@ -6374,7 +6441,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					elif Animator.query_current(["aFlinchBStop"]):
 						animate("aFlinchAStop")
 						alternate_flag = true
-				elif state == Em.char_state.GROUND_FLINCH_HITSTUN:
+				elif state == Em.char_state.GRD_FLINCH_HITSTUN:
 					if Animator.query_current(["FlinchAStop"]):
 						animate("FlinchBStop")
 						alternate_flag = true
@@ -6553,9 +6620,9 @@ func calculate_damage(hit_data) -> int:
 	else:
 		if hit_data[Em.hit.STUN]:
 			scaled_damage = FMath.percent(scaled_damage, STUN_DMG_MOD)
-		if hit_data[Em.hit.SWEETSPOTTED]:
+		if hit_data[Em.hit.SWEETSPOTTED] or Em.hit.SWEETSPOTTED in delayed_hit_effect:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
-		if hit_data[Em.hit.PUNISH_HIT]:
+		if hit_data[Em.hit.PUNISH_HIT] or Em.hit.PUNISH_HIT in delayed_hit_effect:
 			scaled_damage = FMath.percent(scaled_damage, PUNISH_DMG_MOD)
 
 	if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
@@ -6916,6 +6983,8 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 	var hitstop_temp: int = 3 * FMath.S + int(knockback_strength / 90) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
 	if hit_data[Em.hit.SEMI_DISJOINT]: # on semi-disjoint hits, lowest hitstop
+		if Em.atk_attr.VULN_LIMBS in query_atk_attr():
+			return MIN_HITSTOP * 2
 		return MIN_HITSTOP
 	else:
 		if hit_data[Em.hit.SWEETSPOTTED]: # sweetspotted hits has 30% more hitstop
@@ -7066,17 +7135,17 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 	test0()
 	
 	var Partner = get_seq_partner()
-	if Partner == null and state in [Em.char_state.SEQUENCE_TARGET, Em.char_state.SEQUENCE_USER]:
+	if Partner == null and state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		animate("Idle")
 		return
 	
 	match state:
-		Em.char_state.SEQUENCE_TARGET: # being the target of an opponent's sequence will be moved around by them
-			if Partner.state != Em.char_state.SEQUENCE_USER:
+		Em.char_state.SEQ_TARGET: # being the target of an opponent's sequence will be moved around by them
+			if Partner.state != Em.char_state.SEQ_USER:
 				animate("Idle") # auto release if not released proberly, just in case
 				return
 		
-		Em.char_state.SEQUENCE_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
+		Em.char_state.SEQ_USER: # using a sequence, will follow the steps in UniqChar.SEQUENCES[sequence_name]
 			UniqChar.simulate_sequence()
 		
 		_:
@@ -7095,7 +7164,7 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 #	velocity.x = results[0].x
 #	velocity.y = results[0].y
 	
-	if new_state == Em.char_state.SEQUENCE_USER:
+	if new_state == Em.char_state.SEQ_USER:
 		UniqChar.simulate_sequence_after() # move grabbed target after grabber has moved
 	
 	if results[0]: UniqChar.end_sequence_step("ground") # hit the ground, no effect if simulate_sequence_after() broke grab and animated "Idle"
@@ -7105,17 +7174,17 @@ func simulate_sequence(): # cut into this during simulate2() during sequences
 		
 func landed_a_sequence(hit_data):
 	
-	if new_state in [Em.char_state.SEQUENCE_USER]:
+	if new_state in [Em.char_state.SEQ_USER]:
 		return # no sequencing if you are already grabbing another player
 
 	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
 	
-	if defender == null or defender.new_state in [Em.char_state.SEQUENCE_TARGET]:
+	if defender == null or defender.new_state in [Em.char_state.SEQ_TARGET]:
 		return # no sequencing players that are already being grabbed
 		
 	if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data: return
 		
-	if defender.new_state in [Em.char_state.SEQUENCE_USER]: # both players grab each other at the same time, break grabs
+	if defender.new_state in [Em.char_state.SEQ_USER]: # both players grab each other at the same time, break grabs
 		animate("Idle")
 		defender.animate("Idle")
 		return
@@ -7405,7 +7474,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Launch")
 			
 		"BlockStartup", "TBlockStartup":
-			change_guard_gauge(-get_stat("GROUND_BLOCK_GG_COST") * 10)
+			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * 10)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
@@ -7471,8 +7540,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 	UniqChar._on_SpritePlayer_anim_finished(anim_name)
 
 	# do this at end of _on_SpritePlayer_anim_finished() as well
-	if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
-			Em.char_state.GROUND_REC, Em.char_state.AIR_REC] and !Animator.query_to_play(["SoftLanding"]):
+	if new_state in [Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
+			Em.char_state.GRD_REC, Em.char_state.AIR_REC] and !Animator.query_to_play(["SoftLanding"]):
 		from_move_rec = true
 		
 
@@ -7483,8 +7552,8 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #		print(anim_name)
 #		print(Globals.char_state_to_string(state))
 	
-	if new_state in [Em.char_state.GROUND_C_REC, Em.char_state.AIR_C_REC, \
-			Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC] and !Animator.query_to_play(["SoftLanding"]):
+	if new_state in [Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
+			Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC] and !Animator.query_to_play(["SoftLanding"]):
 		from_move_rec = true
 	elif !is_atk_startup():
 		from_move_rec = false
@@ -7494,7 +7563,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				
 		if dir != 0: # impulse
 			match state:
-				Em.char_state.GROUND_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP:
 					if !impulse_used and move_name in UniqChar.STARTERS and !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
 						impulse_used = true
 						var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))
@@ -7511,11 +7580,12 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 						strafe_lock_dir = dir
 						
 		var atk_attr = query_atk_attr(move_name)
-		if Em.atk_attr.NORMALARMOR_STARTUP in atk_attr or Em.atk_attr.SUPERARMOR_STARTUP in atk_attr:
+		if Em.atk_attr.WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.SUPERARMOR_STARTUP in atk_attr or \
+				(current_guard_gauge >= 0 and (Em.atk_attr.P_WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.P_SUPERARMOR_STARTUP in atk_attr)):
 			modulate_play("armor_flash")
 						
 	else:
-		if new_state in [Em.char_state.GROUND_D_REC, Em.char_state.AIR_D_REC]:
+		if new_state in [Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC] and !has_trait(Em.trait.DASH_IMPULSE):
 			impulse_used = true  # no impulse if cancelling from dash
 		else:
 			impulse_used = false

@@ -204,20 +204,20 @@ func char_state_to_string(state):
 	match state:
 		Em.char_state.DEAD:
 			return "DEAD"
-		Em.char_state.GROUND_STANDBY:
-			return "GROUND_STANDBY"
+		Em.char_state.GRD_STANDBY:
+			return "GRD_STANDBY"
 		Em.char_state.AIR_STANDBY:
 			return "AIR_STANDBY"
-		Em.char_state.GROUND_STARTUP:
-			return "GROUND_STARTUP"
-		Em.char_state.GROUND_ACTIVE:
-			return "GROUND_ACTIVE"
-		Em.char_state.GROUND_REC:
-			return "GROUND_REC"
-		Em.char_state.GROUND_C_REC:
-			return "GROUND_C_REC"
-		Em.char_state.GROUND_D_REC:
-			return "GROUND_D_REC"
+		Em.char_state.GRD_STARTUP:
+			return "GRD_STARTUP"
+		Em.char_state.GRD_ACTIVE:
+			return "GRD_ACTIVE"
+		Em.char_state.GRD_REC:
+			return "GRD_REC"
+		Em.char_state.GRD_C_REC:
+			return "GRD_C_REC"
+		Em.char_state.GRD_D_REC:
+			return "GRD_D_REC"
 		Em.char_state.AIR_STARTUP:
 			return "AIR_STARTUP"
 		Em.char_state.AIR_ACTIVE:
@@ -228,36 +228,36 @@ func char_state_to_string(state):
 			return "AIR_C_REC"
 		Em.char_state.AIR_D_REC:
 			return "AIR_D_REC"
-		Em.char_state.GROUND_FLINCH_HITSTUN:
-			return "GROUND_FLINCH_HITSTUN"
+		Em.char_state.GRD_FLINCH_HITSTUN:
+			return "GRD_FLINCH_HITSTUN"
 		Em.char_state.AIR_FLINCH_HITSTUN:
 			return "AIR_FLINCH_HITSTUN"
 		Em.char_state.LAUNCHED_HITSTUN:
 			return "LAUNCHED_HITSTUN"
-		Em.char_state.GROUND_RESISTED_HITSTUN:
-			return "GROUND_RESISTED_HITSTUN"
+		Em.char_state.GRD_RESISTED_HITSTUN:
+			return "GRD_RESISTED_HITSTUN"
 		Em.char_state.AIR_RESISTED_HITSTUN:
 			return "AIR_RESISTED_HITSTUN"
-		Em.char_state.GROUND_ATK_STARTUP:
-			return "GROUND_ATK_STARTUP"
-		Em.char_state.GROUND_ATK_ACTIVE:
-			return "GROUND_ATK_ACTIVE"
-		Em.char_state.GROUND_ATK_REC:
-			return "GROUND_ATK_REC"
+		Em.char_state.GRD_ATK_STARTUP:
+			return "GRD_ATK_STARTUP"
+		Em.char_state.GRD_ATK_ACTIVE:
+			return "GRD_ATK_ACTIVE"
+		Em.char_state.GRD_ATK_REC:
+			return "GRD_ATK_REC"
 		Em.char_state.AIR_ATK_STARTUP:
 			return "AIR_ATK_STARTUP"
 		Em.char_state.AIR_ATK_ACTIVE:
 			return "AIR_ATK_ACTIVE"
 		Em.char_state.AIR_ATK_REC:
 			return "AIR_ATK_REC"
-		Em.char_state.GROUND_BLOCK:
-			return "GROUND_BLOCK"
+		Em.char_state.GRD_BLOCK:
+			return "GRD_BLOCK"
 		Em.char_state.AIR_BLOCK:
 			return "AIR_BLOCK"
-		Em.char_state.SEQUENCE_TARGET:
-			return "SEQUENCE_TARGET"
-		Em.char_state.SEQUENCE_USER:
-			return "SEQUENCE_USER"
+		Em.char_state.SEQ_TARGET:
+			return "SEQ_TARGET"
+		Em.char_state.SEQ_USER:
+			return "SEQ_USER"
 			
 
 func change_zoom_level(change):
