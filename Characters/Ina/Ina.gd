@@ -64,6 +64,101 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1Rec":
 			return Em.char_state.GRD_ATK_REC
 			
+		"L2Startup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"L2bStartup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"L2Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"L2Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"L3Startup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"L3Active":
+			return Em.char_state.GRD_ATK_ACTIVE
+		"L3Rec":
+			return Em.char_state.GRD_ATK_REC
+			
+		"F1Startup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"F1Active", "F1[u]Active", "F1[d]Active", "F1[h]Active", "F1[h][u]Active", "F1[h][d]Active":
+			return Em.char_state.GRD_ATK_ACTIVE
+		"F1Rec":
+			return Em.char_state.GRD_ATK_REC
+			
+		"F2Startup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"F2Active", "F2[u]Active", "F2[d]Active":
+			return Em.char_state.GRD_ATK_ACTIVE
+		"F2Rec":
+			return Em.char_state.GRD_ATK_REC
+			
+		"F3Startup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"F3Active", "F3[u]Active", "F3[d]Active":
+			return Em.char_state.GRD_ATK_ACTIVE
+		"F3Rec":
+			return Em.char_state.GRD_ATK_REC
+		"F3CRec":
+			return Em.char_state.GRD_C_REC
+			
+		"HStartup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"HActive":
+			return Em.char_state.GRD_ATK_ACTIVE
+		"HRec":
+			return Em.char_state.GRD_ATK_REC
+			
+		"aL1Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aL1Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aL1Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aL2Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aL2Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aL2Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aL3Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aL3Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aL3Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aF1Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aF1Active", "aF1[u]Active", "aF1[d]Active", "aF1[h]Active", "aF1[h][u]Active", "aF1[h][d]Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aF1Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aF2Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aF2Active", "aF2[u]Active", "aF2[d]Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aF2Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aF3Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aF3Active", "aF3[u]Active", "aF3[d]Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aF3Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aHStartup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aHActive":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aHRec":
+			return Em.char_state.AIR_ATK_REC
+			
 		
 	print("Error: " + anim + " not found.")
 	
@@ -90,6 +185,9 @@ func check_fallthrough():
 		Em.char_state.AIR_D_REC:
 			if Animator.query_to_play(["Float", "FFloatTransit", "FFloat", "FloatBrake"]):
 				return true
+#		Em.char_state.AIR_ATK_ACTIVE:
+#			if Animator.query_to_play(["aHActive"]):
+#				return true
 	return false
 	
 func check_semi_invuln():
@@ -128,34 +226,67 @@ func simulate():
 
 	# FLOAT --------------------------------------------------------------------------------------------------
 
-	if Character.state == Em.char_state.AIR_D_REC:
-		if Animator.query_current(["Float", "FFloat", "FFloatTransit", "FloatBrake"]):
-			
-			if Character.button_jump in Character.input_state.just_pressed or (Character.grounded and !Character.soft_grounded) or \
-					Character.unique_data.float_time <= 0: # unfloat
-				Character.animate("FloatRec")
-			else:
-				Character.unique_data.float_time -= 1
+	match Character.state:
+		Em.char_state.AIR_D_REC:
+			if Animator.query_current(["Float", "FFloat", "FFloatTransit", "FloatBrake"]):
 				
-				var float_vec = get_float_vec()
+				if Character.button_jump in Character.input_state.just_pressed or (Character.grounded and !Character.soft_grounded) or \
+						Character.unique_data.float_time <= 0: # unfloat
+					Character.animate("FloatRec")
+				else:
+					Character.unique_data.float_time -= 1
+					
+					var float_vec = get_float_vec()
+					
+					match Animator.current_anim: # turning and changing animations
+						"Float", "FloatBrake":
+							if Character.dir != 0:
+								Character.face(Character.dir)
+								Character.animate("FFloatTransit")
+						"FFloat", "FFloatTransit":
+							if Character.dir == 0:
+								Character.animate("FloatBrake")
+							elif Character.facing != Character.dir:
+								Character.face(Character.dir)
+								Character.animate("FFloatTransit")
+								
+					if float_vec.x != 0:
+						Character.velocity.x = FMath.f_lerp(Character.velocity.x, float_vec.x, 3)
+					if float_vec.y != 0:
+						Character.velocity.y = FMath.f_lerp(Character.velocity.y, float_vec.y, 10)
+						
+						
+		Em.char_state.AIR_ATK_ACTIVE: # aH 8-way strafe
+			if Animator.query_current(["aHActive"]):
+				var strafe_vec = FVector.new()
+				strafe_vec.set_vector(0, 0)
+					
+				if Character.dir != 0:
+					strafe_vec.x = Character.dir * FMath.percent(Character.get_stat("SPEED"), 5)
+					if Character.v_dir != 0:
+						strafe_vec.x = FMath.percent(strafe_vec.x, 71) # *0.707
 				
-				match Animator.current_anim: # turning and changing animations
-					"Float", "FloatBrake":
-						if Character.dir != 0:
-							Character.face(Character.dir)
-							Character.animate("FFloatTransit")
-					"FFloat", "FFloatTransit":
-						if Character.dir == 0:
-							Character.animate("FloatBrake")
-						elif Character.facing != Character.dir:
-							Character.face(Character.dir)
-							Character.animate("FFloatTransit")
-							
-				if float_vec.x != 0:
-					Character.velocity.x = FMath.f_lerp(Character.velocity.x, float_vec.x, 3)
-				if float_vec.y != 0:
-					Character.velocity.y = FMath.f_lerp(Character.velocity.y, float_vec.y, 10)
+				if Character.v_dir != 0:
+					strafe_vec.y = Character.v_dir * FMath.percent(Character.get_stat("SPEED"), 5)
+					if Character.dir != 0:
+						strafe_vec.y = FMath.percent(strafe_vec.y, 71) # *0.707
+						
+				Character.velocity.x += strafe_vec.x
+				Character.velocity.y += strafe_vec.y
+				
 
+	# EASIER BLINKS --------------------------------------------------------------------------------------------------
+
+		Em.char_state.AIR_STARTUP:
+			if Animator.time == 8 and Animator.query_current(["BlinkTransit"]):
+				Character.unique_data.blink_vec.x = Character.dir
+				Character.unique_data.blink_vec.y = Character.v_dir
+		
+	# VACUUM EFFECT --------------------------------------------------------------------------------------------------
+			
+		Em.char_state.GRD_ATK_ACTIVE:
+			if Animator.query_current(["HActive"]):
+				vortex()
 
 	# LAND CANCEL --------------------------------------------------------------------------------------------------
 	
@@ -186,8 +317,6 @@ func simulate():
 
 func capture_combinations():
 	
-	Character.combination(Character.button_up, Character.button_jump, "uJump")
-	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
 	Character.combination(Character.button_up, Character.button_fierce, "uF")
@@ -211,7 +340,9 @@ func capture_combinations():
 #	Character.doubletap_combination(Character.button_special, Character.button_fierce, "SpSp.F")
 
 func capture_unique_combinations():
-	Character.combination_trio(Character.button_unique, Character.button_down, Character.button_fierce, "U.dF")
+	
+	Character.combination(Character.button_unique, Character.button_jump, "Float")
+
 
 func rebuffer_actions(): # for when there are air and ground versions
 	Character.rebuffer(Character.button_up, Character.button_light, "uL")
@@ -316,7 +447,7 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 								Character.animate("BlinkTransit")
 								keep = false
 							
-		"uJump":
+		"Float":
 			if !has_acted[0]:
 				if !Character.unique_data.float_used:
 					match new_state:
@@ -340,6 +471,13 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 							if Character.is_normal_attack(Character.get_move_name()):
 								Character.animate("FloatTransit")
 								keep = false
+								Character.afterimage_cancel()
+								
+						Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GRD_ATK_ACTIVE: # float cancel landed normals during active
+							if Character.chain_combo == Em.chain_combo.NORMAL and Character.is_normal_attack(Character.get_move_name()):
+								Character.animate("FloatTransit")
+								keep = false
+								Character.afterimage_cancel()
 							
 	#					Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC: # ground instant float
 	#						Character.animate("JumpTransit")
@@ -598,6 +736,12 @@ func afterimage_trail():# process afterimage trail
 		Em.char_state.AIR_D_REC:
 			if Animator.query_to_play(["Float", "FFloat", "FFloatTransit", "FloatBrake"]):
 				Character.afterimage_trail(Color(0,0,0), 0.6, 10)
+		Em.char_state.AIR_ATK_ACTIVE:
+			if Animator.query_to_play(["aHActive"]):
+				if posmod(Animator.time, 2) == 0:
+					Globals.Game.spawn_afterimage(Character.player_ID, false, Character.sprite_texture_ref.sfx_over, Character.sfx_over.get_path(), 
+							NAME, Character.palette_number, Color(0,0,0), 0.5, 12)
+
 
 			
 func unique_flash():
@@ -636,8 +780,20 @@ func get_root(move_name): # for aerial, chain and repeat memory, only needed for
 func refine_move_name(move_name):
 		
 	match move_name:
-		_:
-			pass
+		"L2b":
+			return "L2"
+		"F1[u]", "F1[d]", "F1[h]", "F1[h][u]", "F1[h][d]":
+			return "F1"
+		"F2[u]", "F2[d]":
+			return "F2"
+		"F3[u]", "F3[d]":
+			return "F3"
+		"aF1[u]", "aF1[d]", "aF1[h]", "aF1[h][u]", "aF1[h][d]":
+			return "aF1"
+		"aF2[u]", "aF2[d]":
+			return "aF2"
+		"aF3[u]", "aF3[d]":
+			return "aF3"
 			
 	return move_name
 			
@@ -655,8 +811,12 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 	move_data[Em.move.ATK_ATTR] = query_atk_attr(orig_move_name)
 	
 	match orig_move_name:
-		_:
-			pass
+		"F1[u]", "F1[h][u]", "F2[u]", "F3[u]", "aF1[u]", "aF1[h][u]", "aF2[u]", "aF3[u]":
+			move_data[Em.move.KB_ANGLE] -= 15
+		"F1[d]", "F1[h][d]", "F2[d]", "F3[d]", "aF1[d]", "aF1[h][d]", "aF3[d]":
+			move_data[Em.move.KB_ANGLE] += 15
+		"aF2[d]":
+			move_data[Em.move.KB_ANGLE] = 125
 			
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 #		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Character.SURV_BASE_DMG)
@@ -687,6 +847,16 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 	
 
 # HIT REACTIONS --------------------------------------------------------------------------------------------------
+
+#func landed_a_hit0(hit_data): # reaction, can change hit_data from here
+#
+#	match hit_data[Em.hit.MOVE_NAME]:
+#		_:
+##			hit_data[Em.hit.SOUR_HIT] = true
+##			hit_data[Em.hit.SWEETSPOTTED] = false
+#
+#			pass
+			
 
 func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	
@@ -869,6 +1039,99 @@ func get_float_vec():
 			float_vec.y = FMath.percent(float_vec.y, 71) # *0.707
 			
 	return float_vec
+	
+	
+func get_target_height():
+	var target = Character.get_target()
+	if target == Character: return 0
+	
+	return target.position.y - Character.position.y
+	
+func get_target_dist_f3():
+	var target = Character.get_target()
+	if target == Character: return 0
+	
+	return Character.facing * (target.position.x - (Character.position.x + Character.facing * 31))
+	
+func get_target_angle(atk_angle):
+	
+#	var atk_angle = -37
+	
+	var target = Character.get_target()
+	if target == Character: return 0
+	
+	var fvec = FVector.new()
+	fvec.set_from_vec(target.position - Character.position)
+	var angle = fvec.angle()
+
+	if Character.facing == -1: angle = 180 - angle # flip over
+	if angle > 180: angle = -(360 - angle) # set to negative if over 180
+	
+	var angle_diff = angle - atk_angle
+	if angle_diff < -50 or angle_diff > 50:
+		return 0 # neutral, out of cone
+	elif angle_diff < -12:
+		return -1 # upward
+	elif angle_diff > 12:
+		return 1 # downward
+	else:
+		return 0 # neutral
+	
+	# F2 is -37 degrees, +/- 14 degrees, 53 degree limit
+	# aF2 is 65 degrees, aF3 is -65 degrees
+	
+func vortex():
+	
+	var vortex_point = Character.position # vortex origin is above
+	vortex_point.y -= 58
+	
+	var max_hitcount = MOVE_DATABASE["H"][Em.move.HITCOUNT] # opponents who took all hits will not be sucked in
+	
+	var nodes
+	if Globals.survival_level == null:
+		nodes = get_tree().get_nodes_in_group("PlayerNodes")
+	else:
+		nodes = get_tree().get_nodes_in_group("MobNodes")
+	
+	for node in nodes:
+		if node != Character and Character.get_hitcount(node.player_ID) < max_hitcount:
+			
+			var repeated := false
+			for array in node.repeat_memory:
+				if array[0] == Character.player_ID and array[1] == "H":
+					repeated = true # no suction if already used once
+					break
+			if repeated: break
+			
+			var fvec = FVector.new()
+			fvec.set_from_vec(vortex_point - node.position)
+			if !fvec.is_longer_than(120 * FMath.S): # radius of suction
+				var force: int
+				if node.state == Em.char_state.LAUNCHED_HITSTUN:
+					force = 500 * FMath.S
+				else:
+					force = 250 * FMath.S
+					
+				node.gravity_frame_mod = 0
+				
+#				if !node.grounded or node.get_feet_pos().y < Character.get_feet_pos().y:
+					# grounded enemies same level or below experience no horizontal suction
+				if node.position.x > vortex_point.x: # target is right side
+					if node.velocity.x > -force:
+						node.velocity.x = int(max(-force, node.velocity.x - force))
+				elif node.position.x < vortex_point.x: # target is left side
+					if node.velocity.x < force:
+						node.velocity.x = int(min(force, node.velocity.x + force))
+						
+#				if !node.grounded: # grounded opponent experience no vertical suction
+				if node.position.y > vortex_point.y: # target is below
+					if node.velocity.y > -force:
+						node.velocity.y = int(max(-force, node.velocity.y - force))
+				elif node.position.y < vortex_point.y: # target is above
+					if node.velocity.y < force:
+						node.velocity.y = int(min(force, node.velocity.y + force))
+				
+	
 
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 # these are ran by main character node when it gets the signals so that the order is easier to control
@@ -925,6 +1188,155 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("L1Rec")
 		"L1Rec":
 			Character.animate("Idle")
+			
+		"L2Startup":
+			Character.animate("L2bStartup")
+		"L2bStartup":
+			Character.animate("L2Active")
+		"L2Active":
+			Character.animate("L2Rec")
+		"L2Rec":
+			Character.animate("Fall")
+			
+		"L3Startup":
+			Character.animate("L3Active")
+		"L3Active":
+			Character.animate("L3Rec")
+		"L3Rec":
+			Character.animate("Idle")
+			
+		"F1Startup":
+			if Character.held_version(Character.button_fierce):
+				var height_diff = get_target_height()
+				if height_diff > 32:
+					Character.animate("F1[h][d]Active")
+				elif height_diff < -32:
+					Character.animate("F1[h][u]Active")
+				else:
+					Character.animate("F1[h]Active")
+			else:
+				var height_diff = get_target_height()
+				if height_diff > 32:
+					Character.animate("F1[d]Active")
+				elif height_diff < -32:
+					Character.animate("F1[u]Active")
+				else:
+					Character.animate("F1Active")
+		"F1Active", "F1[u]Active", "F1[d]Active", "F1[h]Active", "F1[h][u]Active", "F1[h][d]Active":
+			Character.animate("F1Rec")
+		"F1Rec":
+			Character.animate("Idle")
+			
+		"F2Startup":
+			match get_target_angle(-37):
+				0:
+					Character.animate("F2Active")
+				1:
+					Character.animate("F2[d]Active")
+				-1:
+					Character.animate("F2[u]Active")
+		"F2Active", "F2[u]Active", "F2[d]Active":
+			Character.animate("F2Rec")
+		"F2Rec":
+			Character.animate("Idle")
+			
+		"F3Startup":
+			var target_dist = get_target_dist_f3()
+			if target_dist > 18:
+				Character.animate("F3[d]Active")
+			elif target_dist < -18:
+				Character.animate("F3[u]Active")
+			else:
+				Character.animate("F3Active")
+		"F3Active", "F3[u]Active", "F3[d]Active":
+			Character.animate("F3Rec")
+		"F3Rec":
+			Character.animate("F3CRec")
+		"F3CRec":
+			Character.animate("Idle")
+			
+		"HStartup":
+			Character.animate("HActive")
+		"HActive":
+			Character.animate("HRec")
+		"HRec":
+			Character.animate("Idle")
+			
+		"aL1Startup":
+			Character.animate("aL1Active")
+		"aL1Active":
+			Character.animate("aL1Rec")
+		"aL1Rec":
+			Character.animate("FallTransit")
+			
+		"aL2Startup":
+			Character.animate("aL2Active")
+		"aL2Active":
+			Character.animate("aL2Rec")
+		"aL2Rec":
+			Character.animate("FallTransit")
+			
+		"aL3Startup":
+			Character.animate("aL3Active")
+		"aL3Active":
+			Character.animate("aL3Rec")
+		"aL3Rec":
+			Character.animate("FallTransit")
+			
+		"aF1Startup":
+			if Character.held_version(Character.button_fierce):
+				var height_diff = get_target_height()
+				if height_diff > 32:
+					Character.animate("aF1[h][d]Active")
+				elif height_diff < -32:
+					Character.animate("aF1[h][u]Active")
+				else:
+					Character.animate("aF1[h]Active")
+			else:
+				var height_diff = get_target_height()
+				if height_diff > 32:
+					Character.animate("aF1[d]Active")
+				elif height_diff < -32:
+					Character.animate("aF1[u]Active")
+				else:
+					Character.animate("aF1Active")
+		"aF1Active", "aF1[u]Active", "aF1[d]Active", "aF1[h]Active", "aF1[h][u]Active", "aF1[h][d]Active":
+			Character.animate("aF1Rec")
+		"aF1Rec":
+			Character.animate("FallTransit")
+			
+		"aF2Startup":
+			match get_target_angle(65):
+				0:
+					Character.animate("aF2Active")
+				1:
+					Character.animate("aF2[d]Active")
+				-1:
+					Character.animate("aF2[u]Active")
+		"aF2Active", "aF2[u]Active", "aF2[d]Active":
+			Character.animate("aF2Rec")
+		"aF2Rec":
+			Character.animate("FallTransit")
+			
+		"aF3Startup":
+			match get_target_angle(-65):
+				0:
+					Character.animate("aF3Active")
+				1:
+					Character.animate("aF3[d]Active")
+				-1:
+					Character.animate("aF3[u]Active")
+		"aF3Active", "aF3[u]Active", "aF3[d]Active":
+			Character.animate("aF3Rec")
+		"aF3Rec":
+			Character.animate("FallTransit")
+			
+		"aHStartup":
+			Character.animate("aHActive")
+		"aHActive":
+			Character.animate("aHRec")
+		"aHRec":
+			Character.animate("FallTransit")
 				
 
 func _on_SpritePlayer_anim_started(anim_name):
@@ -943,32 +1355,44 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Blink", "EBlink":
 			consume_one_air_dash()
 			Character.afterimage_cancel()
+			Character.aerial_memory = []
 			Character.anim_gravity_mod = 0
 			Character.velocity.set_vector(0, 0)
 			var vector := FVector.new()
 			var blink_dist := int(max(GRD_DASH_SPEED, AIR_DASH_SPEED))
 			vector.set_vector(blink_dist, 0)
-			match Character.v_dir:
+			var y_direction : int = 0
+			var x_direction : int = 0
+			match anim_name:
+				"Blink":
+					y_direction = Character.unique_data.blink_vec.y
+					x_direction = Character.unique_data.blink_vec.x
+				"EBlink":
+					y_direction = Character.v_dir
+					x_direction = Character.dir
+			match y_direction:
 				1: # down
-					if Character.dir == 0: # straight down
+					if x_direction == 0: # straight down
 						vector.y = vector.x
 						vector.x = 0
 					else:
 						vector.rotate(45)
 				-1: # up
-					if Character.dir == 0: # straight up
+					if x_direction == 0: # straight up
 						vector.y = -vector.x
 						vector.x = 0
 					else:
 						vector.rotate(-45)
-			if Character.dir != 0: # left/right
-				vector.x *= Character.dir
+			if x_direction != 0: # left/right
+				vector.x *= x_direction
 			else:
 				vector.x *= Character.facing # not pressing left/right
 			Globals.Game.spawn_SFX("Blink", "Blink", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 			Character.move_amount(vector.convert_to_vec())
 			Character.set_true_position()
 			Globals.Game.spawn_SFX("Blink", "Blink", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+			Character.play_audio("energy8", {"vol": -25, "bus":"PitchDown"})
+			Character.play_audio("bling8", {"vol": -15, "bus":"PitchUp"})
 		"aBlinkRec", "aEBlinkRec":
 			Character.anim_gravity_mod = 0
 		"aBlinkCRec":
@@ -978,6 +1402,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			Character.velocity_limiter.y_slow = 10
+			Character.aerial_memory = []
+			Character.chain_memory = []
 			if !Character.is_on_ground():
 				Character.velocity.y = FMath.percent(Character.velocity.y, 20)
 			else:
@@ -993,6 +1419,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 				var char_dist: int = int(min(abs(Globals.Game.middle_point.y - feet_point), max_dist))
 				var weight = FMath.get_fraction_percent(char_dist, max_dist)
 				Character.unique_data.float_time = FMath.f_lerp(UNIQUE_DATA_REF.float_time, 0, weight)
+			Character.play_audio("buff1", {"vol": -20, "bus":"PitchDown2"})
+			Character.play_audio("bling1", {"vol": -15, "bus":"PitchDown2"})
 		"Float":
 			Character.anim_gravity_mod = 0
 			Character.velocity_limiter.x_slow = 5
@@ -1004,8 +1432,51 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"FloatRec":
 			Character.anim_gravity_mod = 50
 			
-		"L1Startup":
+		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "HStartup":
 			Character.anim_friction_mod = 500
+		"L2bStartup":
+			Character.anim_gravity_mod = 0
+			Character.velocity.y = -200 * FMath.S
+			Globals.Game.spawn_SFX("JumpDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+			Character.play_audio("jump1", {"bus":"PitchDown"})
+		"L2Active":
+			Character.anim_gravity_mod = 0
+			Character.velocity.set_vector(400 * FMath.S * -Character.facing, 0)
+			Character.velocity.rotate(-45 * -Character.facing)
+			
+		"F1Active", "F1[u]Active", "F1[d]Active", "F1[h]Active", "F1[h][u]Active", "F1[h][d]Active", \
+				"F2Active", "F2[u]Active", "F2[d]Active", "F3Active", "F3[u]Active", "F3[d]Active":
+			Character.velocity.x = 0
+			Character.velocity_limiter.x = 0
+			
+		"HActive":
+			Character.velocity.x = 0
+			Character.velocity_limiter.x = 0
+
+		"aL1Startup", "aL1Active", "aL2Startup", "aL2Active", "aL3Startup", "aL3Active", "aF1Startup", "aF2Startup", "aF3Startup", "aHStartup":
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
+		"aL1Rec", "aL2Rec", "aL3Rec", "aF1Rec", "aF2Rec", "aF3Rec", "aHRec":
+			Character.velocity_limiter.x = 70
+			Character.velocity_limiter.down = 70
+			
+		"aF1Active", "aF1[u]Active", "aF1[d]Active", "aF1[h]Active", "aF1[h][u]Active", "aF1[h][d]Active", \
+				"aF2Active", "aF2[u]Active", "aF2[d]Active", "aF3Active", "aF3[u]Active", "aF3[d]Active":
+			Character.velocity.x = 0
+			Character.velocity.y = 0
+			Character.velocity_limiter.x = 0
+			Character.velocity_limiter.down = 0
+			Character.velocity_limiter.up = 0
+			Character.anim_gravity_mod = 0
+			
+		"aHActive":
+			Character.velocity_limiter.x = 50
+			Character.velocity_limiter.down = 50
+			Character.velocity_limiter.up = 50
+			Character.velocity_limiter.x_slow = 5
+			Character.velocity_limiter.y_slow = 5
+			Character.anim_gravity_mod = 0
 
 	start_audio(anim_name)
 
@@ -1028,26 +1499,35 @@ func start_audio(anim_name):
 			_:
 				pass
 	
-	match anim_name:
-		"JumpTransit2", "WallJumpTransit2":
-			Character.play_audio("jump1", {"bus":"PitchDown"})
-		"aJumpTransit2":
-			Character.play_audio("jump1", {"vol":-2})
-		"SoftLanding", "HardLanding", "BlockLanding":
-			if Character.velocity_previous_frame.y > 0:
-				landing_sound()
-		"LaunchTransit":
-			if Character.grounded and abs(Character.velocity.y) < 1 * FMath.S:
-				Character.play_audio("launch2", {"vol" : -3, "bus":"LowPass"})
-			else:
-				Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
-		"Dash":
-			dash_sound()
-		"aDash", "aDashD", "aDashU":
-			Character.play_audio("dash1", {"vol" : -6})
-		"SDash":
-			Character.play_audio("dash1", {"vol" : -6})
-			Character.play_audio("launch1", {"vol" : -11})
+	match Character.state:
+		Em.char_state.AIR_STARTUP:
+			match anim_name:
+				"JumpTransit2", "WallJumpTransit2":
+					Character.play_audio("jump1", {"bus":"PitchDown"})
+				"aJumpTransit2":
+					Character.play_audio("jump1", {"vol":-2})
+		Em.char_state.GRD_C_REC:
+			match anim_name:
+				"SoftLanding", "HardLanding":
+					if Character.velocity_previous_frame.y > 0:
+						landing_sound()	
+		Em.char_state.GRD_BLOCK:
+			match anim_name:
+				"BlockLanding":
+					if Character.velocity_previous_frame.y > 0:
+						landing_sound()	
+		Em.char_state.AIR_REC:
+			match anim_name:
+				"SDash":
+					Character.play_audio("dash1", {"vol" : -6})
+					Character.play_audio("launch1", {"vol" : -11})
+		Em.char_state.LAUNCHED_HITSTUN:
+			match anim_name:
+				"LaunchTransit":
+					if Character.grounded and abs(Character.velocity.y) < 1 * FMath.S:
+						Character.play_audio("launch2", {"vol" : -3, "bus":"LowPass"})
+					else:
+						Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
 
 			
 		
@@ -1062,7 +1542,7 @@ func dash_sound(): # can be called by snap-up wavelanding
 
 func stagger_anim():
 	
-	match Animator.current_anim:
+	match Character.state:
 		_:
 			pass
 					

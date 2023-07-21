@@ -1,0 +1,23 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/book2.wav-07c73fa7d7813d2a7ab528555b46e29f.sample"
+
+[deps]
+
+source_file="res://Characters/Ina/UniqueAudio/book2.wav"
+dest_files=[ "res://.import/book2.wav-07c73fa7d7813d2a7ab528555b46e29f.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

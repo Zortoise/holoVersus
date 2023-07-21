@@ -2078,6 +2078,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 75
 		"aL1Active", "aL3Active":
 			Character.velocity_limiter.x = 85
+			Character.velocity_limiter.down = 120
 			Character.anim_gravity_mod = 75
 		"aL1Rec", "aL3Rec":
 			Character.velocity_limiter.x = 85
@@ -2473,6 +2474,13 @@ func start_audio(anim_name):
 				"SDash":
 					Character.play_audio("dash1", {"vol" : -6})
 					Character.play_audio("launch1", {"vol" : -11})
+		Em.char_state.LAUNCHED_HITSTUN:
+			match anim_name:
+				"LaunchTransit":
+					if Character.grounded and abs(Character.velocity.y) < 1 * FMath.S:
+						Character.play_audio("launch2", {"vol" : -3, "bus":"LowPass"})
+					else:
+						Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
 
 
 func landing_sound(): # can be called by main node

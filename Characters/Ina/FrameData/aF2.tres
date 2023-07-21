@@ -1,0 +1,284 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"aF2Active": {
+"SfxOver_hframes": 6,
+"SfxOver_spritesheet": "aF2SfxOver",
+"SfxOver_vframes": 4,
+"duration": 26,
+"hframes": 6,
+"loop": false,
+"spritesheet": "aF2Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 3,
+"frame": 3,
+"hitbox": [ Vector2( 8, 46 ), Vector2( 15, 46 ), Vector2( 15, 78 ), Vector2( 32, 78 ), Vector2( 32, 112 ), Vector2( 56, 112 ), Vector2( 56, 76 ), Vector2( 47, 76 ), Vector2( 47, 46 ), Vector2( 35, 46 ), Vector2( 35, 19 ), Vector2( 8, 19 ) ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 46 ), Vector2( 15, 46 ), Vector2( 15, 78 ), Vector2( 32, 78 ), Vector2( 32, 112 ), Vector2( 56, 112 ), Vector2( 56, 76 ), Vector2( 47, 76 ), Vector2( 47, 46 ), Vector2( 35, 46 ), Vector2( 35, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+2: {
+"SfxOver_frame": 4,
+"frame": 4,
+"hitbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 45, 116 ), Vector2( 45, 173 ), Vector2( 70, 173 ), Vector2( 70, 226 ), Vector2( 107, 226 ), Vector2( 107, 134 ), Vector2( 80, 134 ), Vector2( 80, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 45, 116 ), Vector2( 45, 173 ), Vector2( 70, 173 ), Vector2( 70, 226 ), Vector2( 107, 226 ), Vector2( 107, 134 ), Vector2( 80, 134 ), Vector2( 80, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [ Vector2( 62, 226 ), Vector2( 123, 226 ), Vector2( 123, 165 ), Vector2( 62, 165 ) ]
+},
+6: {
+"SfxOver_frame": 5,
+"frame": 5,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 45, 116 ), Vector2( 45, 173 ), Vector2( 70, 173 ), Vector2( 70, 216 ), Vector2( 103, 216 ), Vector2( 103, 134 ), Vector2( 80, 134 ), Vector2( 80, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+10: {
+"SfxOver_frame": 6,
+"frame": 6,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 45, 116 ), Vector2( 45, 173 ), Vector2( 70, 173 ), Vector2( 70, 209 ), Vector2( 100, 209 ), Vector2( 100, 134 ), Vector2( 80, 134 ), Vector2( 80, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+14: {
+"SfxOver_frame": 7,
+"frame": 7,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 55 ), Vector2( 39, 55 ), Vector2( 39, 174 ), Vector2( 67, 174 ), Vector2( 67, 183 ), Vector2( 88, 183 ), Vector2( 88, 162 ), Vector2( 81, 162 ), Vector2( 81, 33 ), Vector2( 45, 33 ), Vector2( 45, 18 ), Vector2( 8, 18 ) ],
+"sweetbox": [  ]
+},
+18: {
+"SfxOver_frame": 8,
+"frame": 8,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 6, 46 ), Vector2( -4, 46 ), Vector2( -4, 84 ), Vector2( 55, 84 ), Vector2( 55, 76 ), Vector2( 67, 76 ), Vector2( 67, 65 ), Vector2( 55, 65 ), Vector2( 55, 16 ), Vector2( 6, 16 ) ],
+"sweetbox": [  ]
+},
+22: {
+"SfxOver_frame": 9,
+"frame": 9,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( -6, 58 ), Vector2( 13, 58 ), Vector2( 13, 71 ), Vector2( 28, 71 ), Vector2( 28, 58 ), Vector2( 53, 58 ), Vector2( 53, 21 ), Vector2( -6, 21 ) ],
+"sweetbox": [  ]
+}
+},
+"vframes": 2
+},
+"aF2Rec": {
+"SfxOver_hframes": 6,
+"SfxOver_spritesheet": "aF2SfxOver",
+"SfxOver_vframes": 4,
+"duration": 9,
+"hframes": 6,
+"loop": false,
+"spritesheet": "aF2Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 20,
+"frame": 10,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 3, 21 ), Vector2( 3, 14 ), Vector2( 11, 14 ), Vector2( 11, -18 ), Vector2( -11, -18 ) ],
+"sdhurtbox": [ Vector2( 5, 39 ), Vector2( 20, 39 ), Vector2( 20, 53 ), Vector2( 41, 53 ), Vector2( 41, 39 ), Vector2( 44, 39 ), Vector2( 44, 19 ), Vector2( 5, 19 ) ],
+"sweetbox": [  ]
+},
+3: {
+"SfxOver_frame": 21,
+"frame": 10,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 3, 21 ), Vector2( 3, 14 ), Vector2( 11, 14 ), Vector2( 11, -18 ), Vector2( -11, -18 ) ],
+"sdhurtbox": [ Vector2( 9, 38 ), Vector2( 28, 38 ), Vector2( 28, 21 ), Vector2( 9, 21 ) ],
+"sweetbox": [  ]
+},
+6: {
+"SfxOver_frame": 0,
+"frame": 11,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -13, 25 ), Vector2( 3, 25 ), Vector2( 3, 18 ), Vector2( 9, 18 ), Vector2( 9, -21 ), Vector2( -13, -21 ) ],
+"sdhurtbox": [  ],
+"sweetbox": [  ]
+}
+},
+"vframes": 2
+},
+"aF2Startup": {
+"SfxOver_hframes": 6,
+"SfxOver_spritesheet": "aF2SfxOver",
+"SfxOver_vframes": 4,
+"duration": 12,
+"hframes": 6,
+"loop": false,
+"spritesheet": "aF2Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 0,
+"frame": 0,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -13, 25 ), Vector2( 3, 25 ), Vector2( 3, 18 ), Vector2( 9, 18 ), Vector2( 9, -21 ), Vector2( -13, -21 ) ],
+"sdhurtbox": [  ],
+"sweetbox": [  ]
+},
+3: {
+"SfxOver_frame": 1,
+"frame": 1,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -8, -11 ), Vector2( -17, -11 ), Vector2( -17, 2 ), Vector2( -8, 2 ), Vector2( -8, 20 ), Vector2( 8, 20 ), Vector2( 8, 1 ), Vector2( 14, 1 ), Vector2( 14, -19 ), Vector2( -8, -19 ) ],
+"sdhurtbox": [  ],
+"sweetbox": [  ]
+},
+6: {
+"SfxOver_frame": 2,
+"frame": 2,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -7, -14 ), Vector2( -21, -14 ), Vector2( -21, -5 ), Vector2( -8, -5 ), Vector2( -8, 19 ), Vector2( 9, 19 ), Vector2( 9, -3 ), Vector2( 15, -3 ), Vector2( 15, -20 ), Vector2( -7, -20 ) ],
+"sdhurtbox": [  ],
+"sweetbox": [  ]
+}
+},
+"vframes": 2
+},
+"aF2[d]Active": {
+"SfxOver_hframes": 6,
+"SfxOver_spritesheet": "aF2SfxOver",
+"SfxOver_vframes": 4,
+"duration": 26,
+"hframes": 6,
+"loop": false,
+"spritesheet": "aF2Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 15,
+"frame": 3,
+"hitbox": [ Vector2( 8, 46 ), Vector2( 15, 46 ), Vector2( 15, 78 ), Vector2( 32, 78 ), Vector2( 32, 117 ), Vector2( 49, 117 ), Vector2( 49, 46 ), Vector2( 35, 46 ), Vector2( 35, 19 ), Vector2( 8, 19 ) ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 46 ), Vector2( 15, 46 ), Vector2( 15, 78 ), Vector2( 32, 78 ), Vector2( 32, 117 ), Vector2( 49, 117 ), Vector2( 49, 46 ), Vector2( 35, 46 ), Vector2( 35, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+2: {
+"SfxOver_frame": 16,
+"frame": 4,
+"hitbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 174 ), Vector2( 4, 174 ), Vector2( 4, 205 ), Vector2( 35, 205 ), Vector2( 35, 188 ), Vector2( 54, 188 ), Vector2( 54, 67 ), Vector2( 47, 67 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 174 ), Vector2( 4, 174 ), Vector2( 4, 205 ), Vector2( 35, 205 ), Vector2( 35, 188 ), Vector2( 54, 188 ), Vector2( 54, 67 ), Vector2( 47, 67 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [ Vector2( -11, 205 ), Vector2( 50, 205 ), Vector2( 50, 144 ), Vector2( -11, 144 ) ]
+},
+6: {
+"SfxOver_frame": 17,
+"frame": 5,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 174 ), Vector2( 12, 174 ), Vector2( 12, 197 ), Vector2( 35, 197 ), Vector2( 35, 188 ), Vector2( 54, 188 ), Vector2( 54, 67 ), Vector2( 47, 67 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+10: {
+"SfxOver_frame": 18,
+"frame": 6,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 188 ), Vector2( 54, 188 ), Vector2( 54, 67 ), Vector2( 47, 67 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+14: {
+"SfxOver_frame": 19,
+"frame": 7,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( -2, 101 ), Vector2( 66, 101 ), Vector2( 66, 142 ), Vector2( 82, 142 ), Vector2( 82, 91 ), Vector2( 25, 91 ), Vector2( 25, 19 ), Vector2( -2, 19 ) ],
+"sweetbox": [  ]
+},
+18: {
+"SfxOver_frame": 8,
+"frame": 8,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 6, 46 ), Vector2( -4, 46 ), Vector2( -4, 84 ), Vector2( 55, 84 ), Vector2( 55, 76 ), Vector2( 67, 76 ), Vector2( 67, 65 ), Vector2( 55, 65 ), Vector2( 55, 16 ), Vector2( 6, 16 ) ],
+"sweetbox": [  ]
+},
+22: {
+"SfxOver_frame": 9,
+"frame": 9,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( -6, 58 ), Vector2( 13, 58 ), Vector2( 13, 71 ), Vector2( 28, 71 ), Vector2( 28, 58 ), Vector2( 53, 58 ), Vector2( 53, 21 ), Vector2( -6, 21 ) ],
+"sweetbox": [  ]
+}
+},
+"vframes": 2
+},
+"aF2[u]Active": {
+"SfxOver_hframes": 6,
+"SfxOver_spritesheet": "aF2SfxOver",
+"SfxOver_vframes": 4,
+"duration": 26,
+"hframes": 6,
+"loop": false,
+"spritesheet": "aF2Sprite",
+"timestamps": {
+0: {
+"SfxOver_frame": 10,
+"frame": 3,
+"hitbox": [ Vector2( 8, 46 ), Vector2( 15, 46 ), Vector2( 15, 78 ), Vector2( 32, 78 ), Vector2( 32, 112 ), Vector2( 64, 112 ), Vector2( 64, 76 ), Vector2( 47, 76 ), Vector2( 47, 46 ), Vector2( 35, 46 ), Vector2( 35, 19 ), Vector2( 8, 19 ) ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 46 ), Vector2( 15, 46 ), Vector2( 15, 78 ), Vector2( 32, 78 ), Vector2( 32, 112 ), Vector2( 64, 112 ), Vector2( 64, 76 ), Vector2( 47, 76 ), Vector2( 47, 46 ), Vector2( 35, 46 ), Vector2( 35, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+2: {
+"SfxOver_frame": 11,
+"frame": 4,
+"hitbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 53, 116 ), Vector2( 53, 140 ), Vector2( 159, 140 ), Vector2( 159, 115 ), Vector2( 86, 115 ), Vector2( 86, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 53, 116 ), Vector2( 53, 140 ), Vector2( 159, 140 ), Vector2( 159, 115 ), Vector2( 86, 115 ), Vector2( 86, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [ Vector2( 98, 159 ), Vector2( 159, 159 ), Vector2( 159, 98 ), Vector2( 98, 98 ) ]
+},
+6: {
+"SfxOver_frame": 12,
+"frame": 5,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 53, 116 ), Vector2( 53, 140 ), Vector2( 147, 140 ), Vector2( 147, 115 ), Vector2( 86, 115 ), Vector2( 86, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+10: {
+"SfxOver_frame": 13,
+"frame": 6,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 8, 78 ), Vector2( 26, 78 ), Vector2( 26, 116 ), Vector2( 53, 116 ), Vector2( 53, 140 ), Vector2( 135, 140 ), Vector2( 135, 115 ), Vector2( 86, 115 ), Vector2( 86, 88 ), Vector2( 61, 88 ), Vector2( 61, 55 ), Vector2( 47, 55 ), Vector2( 47, 19 ), Vector2( 8, 19 ) ],
+"sweetbox": [  ]
+},
+14: {
+"SfxOver_frame": 14,
+"frame": 7,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 15, 18 ), Vector2( 8, 18 ), Vector2( 8, 50 ), Vector2( 46, 50 ), Vector2( 46, 89 ), Vector2( 30, 89 ), Vector2( 30, 142 ), Vector2( 73, 142 ), Vector2( 73, 128 ), Vector2( 56, 128 ), Vector2( 56, 101 ), Vector2( 73, 101 ), Vector2( 73, 33 ), Vector2( 46, 33 ), Vector2( 46, 16 ), Vector2( 15, 16 ) ],
+"sweetbox": [  ]
+},
+18: {
+"SfxOver_frame": 8,
+"frame": 8,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( 6, 46 ), Vector2( -4, 46 ), Vector2( -4, 84 ), Vector2( 55, 84 ), Vector2( 55, 76 ), Vector2( 67, 76 ), Vector2( 67, 65 ), Vector2( 55, 65 ), Vector2( 55, 16 ), Vector2( 6, 16 ) ],
+"sweetbox": [  ]
+},
+22: {
+"SfxOver_frame": 9,
+"frame": 9,
+"hitbox": [  ],
+"hurtbox": [ Vector2( -10, 11 ), Vector2( -3, 11 ), Vector2( -3, 21 ), Vector2( 8, 21 ), Vector2( 8, 11 ), Vector2( 15, 11 ), Vector2( 15, -14 ), Vector2( -10, -14 ) ],
+"sdhurtbox": [ Vector2( -6, 58 ), Vector2( 13, 58 ), Vector2( 13, 71 ), Vector2( 28, 71 ), Vector2( 28, 58 ), Vector2( 53, 58 ), Vector2( 53, 21 ), Vector2( -6, 21 ) ],
+"sweetbox": [  ]
+}
+},
+"vframes": 2
+}
+}

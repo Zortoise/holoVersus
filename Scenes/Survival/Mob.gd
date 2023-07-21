@@ -19,8 +19,8 @@ const PLAYER_PUSH_SLOWDOWN = 95 # how much characters are slowed when they push 
 
 const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
-const REPEAT_DMG_MOD = 50 # damage modifier on double_repeat
-const PARTIAL_REPEAT_DMG_MOD = 70
+const REPEAT_DMG_MOD = 30 # damage modifier on double_repeat
+const PARTIAL_REPEAT_DMG_MOD = 80
 const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Guard Gauge is at 100%
 
 # old hitstun
@@ -185,6 +185,7 @@ var can_impulse := true # set to false when starting a MOVEMENT RECOVERY, set to
 var slowed := 0
 var wall_slammed = Em.wall_slam.CANNOT_SLAM
 var delayed_hit_effect := [] # store things like Em.hit.SWEETSPOTTED and Em.hit.PUNISH_HIT for autochain and multi-hit moves
+var gravity_frame_mod := 100 # modify gravity this frame
 
 var test := false # used to test specific player, set by main game scene to just one player
 var test_num := 0
@@ -641,6 +642,10 @@ func simulate2(): # only ran if not in hitstop
 		
 	if anim_gravity_mod != 100:
 		gravity_temp = FMath.percent(GRAVITY, anim_gravity_mod) # anim_gravity_mod is based off current animation
+
+	if gravity_frame_mod != 100: # for temp gravity changes
+		gravity_temp = FMath.percent(GRAVITY, gravity_frame_mod)
+		gravity_frame_mod = 100
 
 	if !grounded and (abs(velocity.y) < PEAK_DAMPER_LIMIT): # reduce gravity at peak of jump
 # warning-ignore:narrowing_conversion
@@ -2522,6 +2527,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 	elif Em.hit.LAST_HIT in hit_data and Em.hit.SWEETSPOTTED in delayed_hit_effect:
 		hit_data[Em.hit.SWEETSPOTTED] = true
+		
+	if is_attacking():	
+		hit_data[Em.hit.DEFENDER_ATTR] = query_atk_attr()
+	else:
+		hit_data[Em.hit.DEFENDER_ATTR] = []
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -2567,11 +2577,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	#		a move nerfed by Repeat Penalty
 	#		a move that only hits the SDHurtbox of the target
 	#		the non-final hit of a multi-hit move
+	#		a sourspotted hit
 	# Weak Hits cannot cause Lethal Hit, cannot cause Stun, cannot cause Sweetspotted Hits, cannot cause Punish Hits
 	
 	var weak_hit := false
 	if (Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1) or hit_data[Em.hit.DOUBLE_REPEAT] or \
-		hit_data[Em.hit.SEMI_DISJOINT] or Em.hit.MULTIHIT in hit_data:
+		hit_data[Em.hit.SEMI_DISJOINT] or Em.hit.MULTIHIT in hit_data or Em.hit.SOUR_HIT in hit_data:
 		weak_hit = true
 		hit_data[Em.hit.SWEETSPOTTED] = false
 		
@@ -2587,14 +2598,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			# attacker can chain combo normally after hitting an armored defender
 			
 			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
-				var defender_attr = query_atk_attr()
+				var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
 				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
-				var defender_attr = query_atk_attr()
+				var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
 				if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
 						(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 						(Em.atk_attr.PROJ_ARMOR_ACTIVE in defender_attr and Em.hit.ENTITY_PATH in hit_data):
@@ -2704,8 +2715,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEALT_DMG] = damage
 		if damage > 0:
 			if guardbroken:
-				if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or adjusted_atk_level == 1:
+				if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or Em.hit.SOUR_HIT in hit_data:
 					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
+				elif adjusted_atk_level == 1:
+					if hit_data[Em.hit.SEMI_DISJOINT] and Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
+						Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
+					else:
+						 Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
 				else:
 					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
 			else:
@@ -2756,7 +2772,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GRD_STARTUP, \
 				Em.char_state.AIR_STARTUP]:
 			return # quick grabs fail if target is in movement startup
-		if is_atk_startup() and Em.atk_attr.GRAB_INVULN_STARTUP in query_atk_attr():
+		if is_atk_startup() and Em.atk_attr.GRAB_INVULN_STARTUP in hit_data[Em.hit.DEFENDER_ATTR]:
 			return # grabs fail if target is in attack startup with an attack with GRAB_INVULN_STARTUP atk attr
 		attacker_or_entity.landed_a_sequence(hit_data)
 		return		
@@ -2814,7 +2830,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.NO_HIT_SOUND_MOB] = true
 #		add_status_effect(Em.status_effect.REPEAT, 10)
 
-	elif hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in query_atk_attr(): # SD Hit sound
+	elif hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]: # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
 		
 	elif Em.hit.MOB_BREAK in hit_data:
@@ -2850,13 +2866,22 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
+	var mass_proj_repeat := false # if a projectile hit a hitstopped opponent under repeat penalty, it does not reduce hitstun and knockback
+	if $HitStopTimer.time >= 0 and Em.hit.ENTITY_PATH in hit_data and (Em.hit.SINGLE_REPEAT in hit_data or Em.hit.DOUBLE_REPEAT in hit_data):
+		mass_proj_repeat = true
+	
 	if guardbroken:
 		if adjusted_atk_level <= 1 and $HitStunTimer.is_running():
 			# for atk level 1 hits on hitstunned opponent, no change to hitstun
 			pass
 #			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
-			$HitStunTimer.time = calculate_hitstun(hit_data)
+			var hitstun = calculate_hitstun(hit_data)
+			if $HitStunTimer.time > hitstun and mass_proj_repeat:
+				pass # projectiles under repeat penalty will not reduce hitstun for opponents during hitstop
+				# this allows projectile spreads to do less damage and still retain hitstun, while reducing hitstun for multiple spreads
+			else:
+				$HitStunTimer.time = hitstun
 			launchstun_rotate = 0 # used to calculation sprite rotation during launched state
 		if $HitStunTimer.time > 0:
 			start_command("standby")
@@ -2943,7 +2968,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if guardbroken:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if has_trait(Em.trait.NO_LAUNCH) or knockback_strength < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
+		if has_trait(Em.trait.NO_LAUNCH) or knockback_strength < LAUNCH_THRESHOLD or (adjusted_atk_level <= 1 and !mass_proj_repeat):
 
 			var no_impact := false
 			
@@ -2960,7 +2985,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				elif !state in [Em.char_state.GRD_STANDBY, Em.char_state.GRD_REC, \
 					Em.char_state.GRD_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
 					Em.char_state.AIR_C_REC]:
-					no_impact = true
+						
+					if hit_data[Em.hit.SEMI_DISJOINT] and !Em.hit.ENTITY_PATH in hit_data:
+						pass # semi-disjoint melee hits still have impact even if atk level is 1
+					else:
+						no_impact = true
 						
 			if !no_impact and !no_impact_and_vel_change:
 				var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
@@ -3112,7 +3141,7 @@ func calculate_damage(hit_data) -> int:
 	if scaled_damage == 0: return 0
 
 	if hit_data[Em.hit.SEMI_DISJOINT]:
-		if Em.atk_attr.VULN_LIMBS in query_atk_attr():
+		if Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
 			pass # VULN_LIMBS trait cause SD hits to do damage
 #			scaled_damage = FMath.percent(scaled_damage, 100)
 		else:
@@ -3125,7 +3154,7 @@ func calculate_damage(hit_data) -> int:
 		
 	elif hit_data[Em.hit.DOUBLE_REPEAT]:
 		scaled_damage = FMath.percent(scaled_damage, REPEAT_DMG_MOD)
-	elif Em.hit.SINGLE_REPEAT in hit_data:
+	elif Em.hit.SINGLE_REPEAT in hit_data or Em.hit.SOUR_HIT in hit_data:
 		scaled_damage = FMath.percent(scaled_damage, PARTIAL_REPEAT_DMG_MOD)
 	else:
 		if hit_data[Em.hit.SWEETSPOTTED]:
@@ -3326,7 +3355,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	if hit_data[Em.hit.SEMI_DISJOINT]: # semi-disjoint hits limit hitstun
 		atk_level -= 1 # atk lvl 2 become weak hit
 		atk_level = int(clamp(atk_level, 1, 2))
-	elif Em.hit.SINGLE_REPEAT in hit_data:
+	elif Em.hit.SINGLE_REPEAT in hit_data or Em.hit.SOUR_HIT in hit_data:
 		atk_level -= 1
 		atk_level = int(clamp(atk_level, 1, 8))
 	elif hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
@@ -3338,11 +3367,13 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	
 func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's Guard Gauge
 	
-	if Em.move.FIXED_HITSTUN in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT]:
-		return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTUN]
-		
-	if hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1 and !is_hitstunned():
-		return 0 # weak hit on opponent not in hitstun
+	if !hit_data[Em.hit.SEMI_DISJOINT]:
+	
+		if Em.move.FIXED_HITSTUN in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT]:
+			return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTUN]
+			
+		if hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1 and !is_hitstunned():
+			return 0 # weak hit on opponent not in hitstun
 		
 	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 0
@@ -3416,7 +3447,7 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 
 func generate_hitspark(hit_data): # hitspark size determined by knockback power
 
-	if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in query_atk_attr():
+	if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
 		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()}, UniqChar.SDHitspark_COLOR)
 		return
@@ -4043,6 +4074,7 @@ func save_state():
 		"slowed" : slowed,
 		"wall_slammed" : wall_slammed,
 		"delayed_hit_effect" : delayed_hit_effect,
+		"gravity_frame_mod" : gravity_frame_mod,
 		
 	}
 
@@ -4135,6 +4167,7 @@ func load_state(state_data):
 	slowed = state_data.slowed
 	wall_slammed = state_data.wall_slammed
 	delayed_hit_effect = state_data.delayed_hit_effect
+	gravity_frame_mod = state_data.gravity_frame_mod
 
 	
 #--------------------------------------------------------------------------------------------------

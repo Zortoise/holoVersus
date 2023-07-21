@@ -2453,6 +2453,13 @@ func start_audio(anim_name):
 			match anim_name:
 				"aDash", "aDashD", "aDashU":
 					Character.play_audio("dash1", {"vol" : -6})
+		Em.char_state.LAUNCHED_HITSTUN:
+			match anim_name:
+				"LaunchTransit":
+					if Character.grounded and abs(Character.velocity.y) < 1 * FMath.S:
+						Character.play_audio("launch2", {"vol" : -3, "bus":"LowPass"})
+					else:
+						Character.play_audio("launch1", {"vol":-15, "bus":"PitchDown"})
 
 func landing_sound(): # can be called by main node
 	Character.play_audio("land1", {"vol" : -3})
