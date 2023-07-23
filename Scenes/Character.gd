@@ -4668,8 +4668,8 @@ func test_sdash_revoke():
 #		return false
 		
 	match move_data[Em.move.ATK_TYPE]:
-		Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-			return false
+#		Em.atk_type.LIGHT, Em.atk_type.FIERCE:
+#			return false
 		Em.atk_type.SUPER:
 			return false
 		

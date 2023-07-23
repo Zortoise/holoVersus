@@ -21,11 +21,11 @@ const AIR_JUMP_HEIGHT_MOD = 70 # percentage of JUMP_SPEED, reduce height of air 
 const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
 const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
 const WALL_AIR_JUMP_VERT_MOD = 70 # percentage of JUMP_SPEED when wall jumping
-const GRAVITY_MOD = 80 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 500 # affect terminal velocity downward
+const GRAVITY_MOD = 90 # make sure variable's a float
+const TERMINAL_VELOCITY_MOD = 600 # affect terminal velocity downward
 const FASTFALL_MOD = 115 # fastfall speed, mod of terminal velocity
-const FRICTION = 4 # between 0 and 100
-const ACCELERATION = 3 # between 0 and 100
+const FRICTION = 7 # between 0 and 100
+const ACCELERATION = 7 # between 0 and 100
 const AIR_RESISTANCE = 3 # between 0 and 100
 const FALL_GRAV_MOD = 40 # reduced gravity when going down
 const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
@@ -144,7 +144,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.RADIAL,
 		Em.move.ATK_LVL : 4,
 		Em.move.KB_ANGLE : 0,
-		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS],
+		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS, Em.atk_attr.ANTI_AIR, Em.atk_attr.ONLY_CHAIN_ON_HIT],
 		Em.move.MOVE_SOUND : { ref = "whoosh6", aux_data = {"vol" : -10, "bus" : "PitchDown"} },
 		Em.move.HIT_SOUND : [{ ref = "cut8", aux_data = {"vol" : -5} }, { ref = "cut8", aux_data = {"vol" : -2, "bus" : "LowPass"} }],
 	},

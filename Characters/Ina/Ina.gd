@@ -317,6 +317,8 @@ func simulate():
 
 func capture_combinations():
 	
+	Character.combination(Character.button_special, Character.button_dash, "Float")
+	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
 	Character.combination(Character.button_up, Character.button_fierce, "uF")
@@ -341,7 +343,8 @@ func capture_combinations():
 
 func capture_unique_combinations():
 	
-	Character.combination(Character.button_unique, Character.button_jump, "Float")
+	pass
+#	Character.combination(Character.button_unique, Character.button_jump, "Float")
 
 
 func rebuffer_actions(): # for when there are air and ground versions
@@ -457,15 +460,15 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 							Character.animate("FloatTransit")
 							keep = false
 								
-						Em.char_state.AIR_STARTUP: # cancel start of air jump into float
-							if Animator.query_to_play(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
+						Em.char_state.AIR_STARTUP: # cancel start of blink into float
+							if Animator.query_to_play(["BlinkTransit"]):
 								Character.animate("FloatTransit")
 								keep = false
-								
-						Em.char_state.GRD_STARTUP: # cancel start of jump into float
-							if Animator.query_to_play(["JumpTransit"]):
-								Character.animate("FloatTransit")
-								keep = false
+#
+#						Em.char_state.GRD_STARTUP: # cancel start of jump into float
+#							if Animator.query_to_play(["JumpTransit"]):
+#								Character.animate("FloatTransit")
+#								keep = false
 								
 						Em.char_state.AIR_ATK_REC, Em.char_state.GRD_ATK_REC: # float cancel normals
 							if Character.is_normal_attack(Character.get_move_name()):
@@ -474,7 +477,8 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 								Character.afterimage_cancel()
 								
 						Em.char_state.AIR_ATK_ACTIVE, Em.char_state.GRD_ATK_ACTIVE: # float cancel landed normals during active
-							if Character.chain_combo == Em.chain_combo.NORMAL and Character.is_normal_attack(Character.get_move_name()):
+							if Character.chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED] and \
+									Character.is_normal_attack(Character.get_move_name()):
 								Character.animate("FloatTransit")
 								keep = false
 								Character.afterimage_cancel()
@@ -1208,17 +1212,17 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"F1Startup":
 			if Character.held_version(Character.button_fierce):
 				var height_diff = get_target_height()
-				if height_diff > 32:
+				if height_diff > 28:
 					Character.animate("F1[h][d]Active")
-				elif height_diff < -32:
+				elif height_diff < -28:
 					Character.animate("F1[h][u]Active")
 				else:
 					Character.animate("F1[h]Active")
 			else:
 				var height_diff = get_target_height()
-				if height_diff > 32:
+				if height_diff > 28:
 					Character.animate("F1[d]Active")
-				elif height_diff < -32:
+				elif height_diff < -28:
 					Character.animate("F1[u]Active")
 				else:
 					Character.animate("F1Active")
@@ -1286,17 +1290,17 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aF1Startup":
 			if Character.held_version(Character.button_fierce):
 				var height_diff = get_target_height()
-				if height_diff > 32:
+				if height_diff > 28:
 					Character.animate("aF1[h][d]Active")
-				elif height_diff < -32:
+				elif height_diff < -28:
 					Character.animate("aF1[h][u]Active")
 				else:
 					Character.animate("aF1[h]Active")
 			else:
 				var height_diff = get_target_height()
-				if height_diff > 32:
+				if height_diff > 28:
 					Character.animate("aF1[d]Active")
-				elif height_diff < -32:
+				elif height_diff < -28:
 					Character.animate("aF1[u]Active")
 				else:
 					Character.animate("aF1Active")
@@ -1404,6 +1408,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.y_slow = 10
 			Character.aerial_memory = []
 			Character.chain_memory = []
+			Character.spent_special = true
 			if !Character.is_on_ground():
 				Character.velocity.y = FMath.percent(Character.velocity.y, 20)
 			else:
@@ -1433,7 +1438,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 50
 			
 		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "HStartup":
-			Character.anim_friction_mod = 500
+			Character.anim_friction_mod = 300
 		"L2bStartup":
 			Character.anim_gravity_mod = 0
 			Character.velocity.y = -200 * FMath.S
