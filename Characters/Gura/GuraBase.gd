@@ -74,11 +74,13 @@ const PALETTE_TO_PORTRAIT = {
 	2: Color(1.20, 0.70, 0.70),
 	3: Color(0.75, 0.90, 0.70),
 	4: Color(1.00, 1.00, 1.10),
+	5: Color(0.50, 0.90, 1.00),
 }
 
 const PALETTE_TO_HITSPARK_PALETTE = {
 	3: "green",
 	4: "white",
+	5: "pink"
 }
 
 const MUSIC = {

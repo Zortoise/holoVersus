@@ -55,14 +55,14 @@ script = ExtResource( 1 )
 motion_scale = Vector2( 0.3, 0.5 )
 
 [node name="Background" type="Sprite" parent="ParallaxBackground/ParallaxLayer"]
-position = Vector2( -100, 0 )
+position = Vector2( 0, -32 )
 texture = ExtResource( 5 )
 
 [node name="Aurora" type="AnimatedSprite" parent="ParallaxBackground/ParallaxLayer"]
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 11
+frame = 12
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]

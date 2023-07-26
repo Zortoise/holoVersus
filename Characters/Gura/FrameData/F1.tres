@@ -24,14 +24,14 @@ frame_data = {
 },
 3: {
 "SfxOver_frame": 1,
-"frame": 3,
+"frame": 4,
 "hitbox": [ Vector2( 19, 0 ), Vector2( -32, 0 ), Vector2( -32, 10 ), Vector2( 42, 10 ), Vector2( 42, 6 ), Vector2( 61, 6 ), Vector2( 61, 3 ), Vector2( 77, 3 ), Vector2( 77, -2 ), Vector2( 91, -2 ), Vector2( 91, -10 ), Vector2( 77, -10 ), Vector2( 77, -14 ), Vector2( 19, -14 ) ],
 "hurtbox": [ Vector2( -8, -5 ), Vector2( -19, -5 ), Vector2( -19, 1 ), Vector2( -8, 1 ), Vector2( -8, 22 ), Vector2( 19, 22 ), Vector2( 19, -17 ), Vector2( -8, -17 ) ],
 "sdhurtbox": [ Vector2( 19, 0 ), Vector2( -32, 0 ), Vector2( -32, 10 ), Vector2( 42, 10 ), Vector2( 42, 6 ), Vector2( 61, 6 ), Vector2( 61, 3 ), Vector2( 77, 3 ), Vector2( 77, -2 ), Vector2( 91, -2 ), Vector2( 91, -10 ), Vector2( 77, -10 ), Vector2( 77, -14 ), Vector2( 19, -14 ) ],
 "sweetbox": [  ]
 }
 },
-"vframes": 1
+"vframes": 2
 },
 "F1Rec": {
 "SfxOver_hframes": 4,
@@ -44,7 +44,7 @@ frame_data = {
 "timestamps": {
 0: {
 "SfxOver_frame": 2,
-"frame": 4,
+"frame": 5,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -8, -5 ), Vector2( -19, -5 ), Vector2( -19, 1 ), Vector2( -8, 1 ), Vector2( -8, 22 ), Vector2( 19, 22 ), Vector2( 19, -17 ), Vector2( -8, -17 ) ],
 "sdhurtbox": [ Vector2( -36, 10 ), Vector2( 42, 10 ), Vector2( 42, 6 ), Vector2( 62, 6 ), Vector2( 62, -1 ), Vector2( -36, -1 ) ],
@@ -52,7 +52,7 @@ frame_data = {
 },
 6: {
 "SfxOver_frame": 3,
-"frame": 4,
+"frame": 5,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -8, -5 ), Vector2( -19, -5 ), Vector2( -19, 1 ), Vector2( -8, 1 ), Vector2( -8, 22 ), Vector2( 19, 22 ), Vector2( 19, -17 ), Vector2( -8, -17 ) ],
 "sdhurtbox": [ Vector2( -37, 10 ), Vector2( -8, 10 ), Vector2( -8, -1 ), Vector2( -37, -1 ) ],
@@ -60,7 +60,7 @@ frame_data = {
 },
 12: {
 "SfxOver_frame": 0,
-"frame": 4,
+"frame": 5,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -8, -5 ), Vector2( -19, -5 ), Vector2( -19, 1 ), Vector2( -8, 1 ), Vector2( -8, 22 ), Vector2( 19, 22 ), Vector2( 19, -17 ), Vector2( -8, -17 ) ],
 "sdhurtbox": [ Vector2( -37, 10 ), Vector2( -8, 10 ), Vector2( -8, -1 ), Vector2( -37, -1 ) ],
@@ -68,14 +68,14 @@ frame_data = {
 },
 17: {
 "SfxOver_frame": 0,
-"frame": 5,
+"frame": 6,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -10, 9 ), Vector2( -11, 9 ), Vector2( -11, 22 ), Vector2( 15, 22 ), Vector2( 15, -17 ), Vector2( -10, -17 ) ],
 "sdhurtbox": [  ],
 "sweetbox": [  ]
 }
 },
-"vframes": 1
+"vframes": 2
 },
 "F1Startup": {
 "SfxOver_hframes": 4,
@@ -111,6 +111,6 @@ frame_data = {
 "sweetbox": [  ]
 }
 },
-"vframes": 1
+"vframes": 2
 }
 }

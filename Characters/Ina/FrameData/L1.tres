@@ -6,16 +6,16 @@
 script = ExtResource( 1 )
 frame_data = {
 "L1Active": {
-"SfxUnder_hframes": 4,
+"SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "L1SfxUnder",
-"SfxUnder_vframes": 1,
+"SfxUnder_vframes": 2,
 "duration": 7,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L1Sprite",
 "timestamps": {
 0: {
-"SfxUnder_frame": 1,
+"SfxUnder_frame": 2,
 "frame": 4,
 "hitbox": [ Vector2( -12, -18 ), Vector2( 9, -18 ), Vector2( 9, 25 ), Vector2( 44, 25 ), Vector2( 44, -19 ), Vector2( 37, -19 ), Vector2( 37, -31 ), Vector2( 27, -31 ), Vector2( 27, -38 ), Vector2( -12, -38 ) ],
 "hurtbox": [ Vector2( 6, 2 ), Vector2( -10, 2 ), Vector2( -10, 25 ), Vector2( 8, 25 ), Vector2( 8, 16 ), Vector2( 25, 16 ), Vector2( 25, -9 ), Vector2( 6, -9 ) ],
@@ -23,7 +23,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( 4, -19 ), Vector2( 18, -19 ), Vector2( 18, -11 ), Vector2( 30, -11 ), Vector2( 30, 23 ), Vector2( 44, 23 ), Vector2( 44, -22 ), Vector2( 37, -22 ), Vector2( 37, -30 ), Vector2( 23, -30 ), Vector2( 23, -38 ), Vector2( 4, -38 ) ]
 },
 3: {
-"SfxUnder_frame": 2,
+"SfxUnder_frame": 3,
 "frame": 5,
 "hitbox": [ Vector2( 27, 23 ), Vector2( 44, 23 ), Vector2( 44, -17 ), Vector2( 37, -17 ), Vector2( 37, -27 ), Vector2( 27, -27 ) ],
 "hurtbox": [ Vector2( 6, 2 ), Vector2( -10, 2 ), Vector2( -10, 25 ), Vector2( 8, 25 ), Vector2( 8, 16 ), Vector2( 25, 16 ), Vector2( 25, -9 ), Vector2( 6, -9 ) ],
@@ -34,16 +34,16 @@ frame_data = {
 "vframes": 2
 },
 "L1Rec": {
-"SfxUnder_hframes": 4,
+"SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "L1SfxUnder",
-"SfxUnder_vframes": 1,
+"SfxUnder_vframes": 2,
 "duration": 19,
 "hframes": 6,
 "loop": false,
 "spritesheet": "L1Sprite",
 "timestamps": {
 0: {
-"SfxUnder_frame": 3,
+"SfxUnder_frame": 4,
 "frame": 6,
 "hitbox": [  ],
 "hurtbox": [ Vector2( 6, 2 ), Vector2( -10, 2 ), Vector2( -10, 25 ), Vector2( 8, 25 ), Vector2( 8, 16 ), Vector2( 25, 16 ), Vector2( 25, -9 ), Vector2( 6, -9 ) ],
@@ -51,7 +51,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( 30, 23 ), Vector2( 44, 23 ), Vector2( 44, 4 ), Vector2( 30, 4 ) ]
 },
 5: {
-"SfxUnder_frame": 0,
+"SfxUnder_frame": 5,
 "frame": 7,
 "hitbox": [  ],
 "hurtbox": [ Vector2( 6, 2 ), Vector2( -10, 2 ), Vector2( -10, 25 ), Vector2( 8, 25 ), Vector2( 8, 16 ), Vector2( 25, 16 ), Vector2( 25, -9 ), Vector2( 6, -9 ) ],
@@ -59,7 +59,7 @@ frame_data = {
 "sdhurtbox": [  ]
 },
 9: {
-"SfxUnder_frame": 0,
+"SfxUnder_frame": 6,
 "frame": 8,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -7, -8 ), Vector2( -10, -8 ), Vector2( -10, 24 ), Vector2( 5, 24 ), Vector2( 5, 19 ), Vector2( 11, 19 ), Vector2( 11, -13 ), Vector2( -7, -13 ) ],
@@ -67,7 +67,7 @@ frame_data = {
 "sdhurtbox": [  ]
 },
 12: {
-"SfxUnder_frame": 0,
+"SfxUnder_frame": 7,
 "frame": 9,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -7, -8 ), Vector2( -10, -8 ), Vector2( -10, 24 ), Vector2( 5, 24 ), Vector2( 5, 19 ), Vector2( 11, 19 ), Vector2( 11, -13 ), Vector2( -7, -13 ) ],
@@ -86,9 +86,9 @@ frame_data = {
 "vframes": 2
 },
 "L1Startup": {
-"SfxUnder_hframes": 4,
+"SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "L1SfxUnder",
-"SfxUnder_vframes": 1,
+"SfxUnder_vframes": 2,
 "duration": 6,
 "hframes": 6,
 "loop": false,
@@ -103,7 +103,7 @@ frame_data = {
 "sdhurtbox": [  ]
 },
 1: {
-"SfxUnder_frame": 0,
+"SfxUnder_frame": 1,
 "frame": 1,
 "hitbox": [  ],
 "hurtbox": [ Vector2( -11, -14 ), Vector2( -18, -14 ), Vector2( -18, -5 ), Vector2( -10, -5 ), Vector2( -10, 25 ), Vector2( 7, 25 ), Vector2( 7, 14 ), Vector2( 15, 14 ), Vector2( 15, 0 ), Vector2( 7, 0 ), Vector2( 7, -23 ), Vector2( -11, -23 ) ],

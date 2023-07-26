@@ -2459,8 +2459,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data[Em.hit.ATKER_OR_ENTITY] = attacker_or_entity
 	hit_data[Em.hit.DEFENDER] = self # for hit_reactions
 
-	attacker.target_ID = player_ID # attacker target defender
-	target_ID = attacker.player_ID # target opponent who last attacked you
+	if attacker != null and attacker != self:
+		attacker.target_ID = player_ID # attacker target defender
+		target_ID = attacker.player_ID # target opponent who last attacked you
 	
 	remove_status_effect(Em.status_effect.CRUSH)
 	$HitStopTimer.stop() # cancel pre-existing hitstop

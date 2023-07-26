@@ -125,13 +125,13 @@ var card_entity_data = {
 	},
 	"TakoE" : {
 		"scene" : load("res://Cards/TakoE.tscn"),
-		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Tako.tres"),
-		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TakoSprite.png"),
+		"frame_data" : ResourceLoader.load("res://Characters/Ina/Entities/FrameData/Tako.tres"),
+		"spritesheet" : ResourceLoader.load("res://Characters/Ina/Entities/Spritesheets/TakoSprite.png"),
 	},
 	"TakoGateE" : {
 		"scene" : load("res://Cards/TakoGateE.tscn"),
-		"frame_data" : ResourceLoader.load("res://Cards/FrameData/TakoGate.tres"),
-		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/TakoGateSprite.png"),
+		"frame_data" : ResourceLoader.load("res://Characters/Ina/Entities/FrameData/TakoGate.tres"),
+		"spritesheet" : ResourceLoader.load("res://Characters/Ina/Entities/Spritesheets/TakoGateSprite.png"),
 	},
 	"TBlockE" : {
 		"scene" : load("res://Cards/TBlockE.tscn"),
@@ -168,6 +168,10 @@ var card_sfx = {
 	"BigSplash" : {
 		"frame_data" : ResourceLoader.load("res://Characters/Gura/SFX/FrameData/BigSplash.tres"),
 		"spritesheet" : ResourceLoader.load("res://Characters/Gura/SFX/Spritesheets/BigSplashSprite.png"),
+	},
+	"TakoFlash" : {
+		"frame_data" : ResourceLoader.load("res://Characters/Ina/SFX/FrameData/TakoFlash.tres"),
+		"spritesheet" : ResourceLoader.load("res://Characters/Ina/SFX/Spritesheets/TakoFlashSprite.png"),
 	},
 }
 

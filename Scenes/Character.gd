@@ -718,7 +718,7 @@ func simulate(new_input_state):
 #			super_cost(2)
 #			BGM.muffle()
 #			Globals.Game.viewport.play_audio("defeated", {})
-			UniqChar.get_target_angle()
+#			add_status_effect([Em.status_effect.INVERT_DIR, 9999])
 			
 			pass
 
@@ -1039,6 +1039,10 @@ func simulate2(): # only ran if not in hitstop
 		
 	if dir == 0 and button_right in input_state.pressed and button_left in input_state.pressed:
 		dir = last_dir
+		
+	if query_status_effect(Em.status_effect.INVERT_DIR):
+		dir *= -1
+		instant_dir *= -1
 		
 	last_dir = dir
 	
@@ -2737,9 +2741,9 @@ func process_input_buffer():
 									transits.append_array(UniqChar.TRANSIT_SDASH) # for special types of dashes
 								if !Animator.query_to_play(transits):
 									continue # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
-#							if new_state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC]:
-#								if !Animator.query_to_play(["BlockRec", "aBlockRec"]):
-#									continue # can only cancel from certain non-attack recovery frames
+							if new_state in [Em.char_state.AIR_REC]:
+								if Animator.query_to_play(["SDash"]):
+									continue # prevent SDashing from SDash
 							if grounded or super_dash > 0:
 								animate("SDashTransit")
 								has_acted[0] = true
@@ -4010,7 +4014,7 @@ func process_afterimage_trail():# process afterimage trail
 	UniqChar.afterimage_trail()
 			
 			
-func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime: int = 10, \
+func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime: int = 10, \
 		afterimage_shader = Em.afterimage_shader.MASTER): # one afterimage every 3 frames
 			
 	if afterimage_timer <= 0:
@@ -4044,7 +4048,7 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 		afterimage_timer -= 1
 		
 		
-func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
+func afterimage_cancel(starting_modulate_a = 0.4, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
 		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_under, sfx_under.get_path(), UniqChar.NAME, palette_number, null, \
@@ -4307,21 +4311,21 @@ func is_atk_recovery():
 			return true
 	return false
 	
-#func is_normal_attack(move_name):
-#	match query_move_data(move_name)[Em.move.ATK_TYPE]:
-#		Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY: # can only chain combo into a Normal
-#			return true
-#	return false
+func is_normal_or_heavy(move_name):
+	match query_move_data(move_name)[Em.move.ATK_TYPE]:
+		Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY:
+			return true
+	return false
 	
 func is_normal_attack(move_name):
 	match query_move_data(move_name)[Em.move.ATK_TYPE]:
-		Em.atk_type.LIGHT, Em.atk_type.FIERCE: # can only chain combo into a Normal
+		Em.atk_type.LIGHT, Em.atk_type.FIERCE:
 			return true
 	return false
 	
 func is_heavy(move_name):
 	match query_move_data(move_name)[Em.move.ATK_TYPE]:
-		Em.atk_type.HEAVY: # can only chain combo into a Normal
+		Em.atk_type.HEAVY:
 			return true
 	return false
 	
@@ -5719,10 +5723,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data[Em.hit.ATKER_OR_ENTITY] = attacker_or_entity
 	hit_data[Em.hit.DEFENDER] = self # for hit_reactions
 		
-	if attacker != null:	
+	if attacker != null and attacker != self:	
 		attacker.target_ID = player_ID # attacker target defender
-	if Globals.survival_level == null:
-		target_ID = hit_data[Em.hit.ATKER_ID] # if not survival mode, target attacking opponent
+		if Globals.survival_level == null:
+			target_ID = hit_data[Em.hit.ATKER_ID] # if not survival mode, target attacking opponent
 	
 	remove_status_effect(Em.status_effect.STUN)
 	remove_status_effect(Em.status_effect.CRUSH)

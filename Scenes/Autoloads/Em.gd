@@ -85,7 +85,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # PUNISH_ENTITY = entity can land punish hit without being Proj Level 3, used for projectiles with special effects on landing punish hits
 # NO_HITCOUNT_RESET = attack does not reset hitcount on being active frames being animated, used for multi-part attacks sharing hitcount
 
-enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED}
+enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED, INVERT_DIR}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, STRONG, WEAK}

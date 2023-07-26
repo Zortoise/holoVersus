@@ -471,7 +471,7 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 #								keep = false
 								
 						Em.char_state.AIR_ATK_REC, Em.char_state.GRD_ATK_REC: # float cancel normals
-							if Character.is_normal_attack(Character.get_move_name()):
+							if Character.is_normal_or_heavy(Character.get_move_name()):
 								Character.animate("FloatTransit")
 								keep = false
 								Character.afterimage_cancel()

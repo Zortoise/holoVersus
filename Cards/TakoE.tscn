@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Cards/TakoE.gd" type="Script" id=1]
-[ext_resource path="res://Cards/Spritesheets/TakoSprite.png" type="Texture" id=2]
+[ext_resource path="res://Characters/Ina/Entities/Spritesheets/TakoSprite.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Shaders/White.gdshader" type="Shader" id=3]
 
 [sub_resource type="ShaderMaterial" id=1]

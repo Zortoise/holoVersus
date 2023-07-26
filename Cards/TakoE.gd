@@ -113,11 +113,11 @@ func kill(sound = true):
 	
 func expire():
 	Entity.free = true
-	Globals.Game.spawn_SFX("TakoGateEffect", "TakoGateEffect", Entity.position, {"facing":Entity.facing})
+	Globals.Game.spawn_SFX("TakoFlash", "TakoFlash", Entity.position, {"facing":Entity.facing})
 	
 #func collision(): # collided with a platform
 #	Entity.free = true
-#	Globals.Game.spawn_SFX("TakoGateEffect", "TakoGateEffect", Entity.position, {"facing":Entity.facing})
+#	Globals.Game.spawn_SFX("TakoFlash", "TakoFlash", Entity.position, {"facing":Entity.facing})
 
 func landed_a_hit(_hit_data):
 	kill(false)
