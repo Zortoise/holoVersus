@@ -55,7 +55,7 @@ const HITSTUN_AIR_RES = 3 # air resistance during hitstun
 const SD_KNOCKBACK_LIMIT = 300 * FMath.S # knockback strength limit of a semi-disjoint hit
 #const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
 
-const SWEETSPOT_KB_MOD = 115
+#const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
 const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
 
@@ -3240,8 +3240,8 @@ func calculate_knockback_strength(hit_data) -> int:
 	if Em.hit.AUTOCHAIN in hit_data:
 		return knockback_strength
 		
-	if hit_data[Em.hit.SWEETSPOTTED]:
-		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
+#	if hit_data[Em.hit.SWEETSPOTTED]:
+#		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
 		
 #	elif !guardbroken: # KB for non-guardbreak
 #		knockback_strength = FMath.percent(knockback_strength, get_stat("ARMOR_KNOCKBACK_MOD"))

@@ -81,7 +81,7 @@ const LETHAL_HITSTUN_MOD = 150 # multiply hitstun when defender is at Damage Val
 const SD_KNOCKBACK_LIMIT = 300 * FMath.S # knockback strength limit of a semi-disjoint hit
 #const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
 
-const SWEETSPOT_KB_MOD = 115
+#const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
 const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
 
@@ -6601,8 +6601,8 @@ func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but
 		return true
 	if hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
 		return false
-	if hit_data[Em.hit.SWEETSPOTTED]:
-		return true
+#	if hit_data[Em.hit.SWEETSPOTTED]:
+#		return true
 		# non-strong hits that become strong hits via Sweetspotting may still not give lethal hits if knockback is lacking
 	if get_damage_percent() < 150:
 		if Em.hit.NON_STRONG_PROJ in hit_data:
@@ -6753,8 +6753,8 @@ func calculate_knockback_strength(hit_data) -> int:
 	if Em.hit.AUTOCHAIN in hit_data:
 		return knockback_strength
 		
-	if hit_data[Em.hit.SWEETSPOTTED]:
-		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
+#	if hit_data[Em.hit.SWEETSPOTTED]:
+#		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
 	
 	if hit_data[Em.hit.STUN]:
 		knockback_strength += LAUNCH_THRESHOLD # increased knockback on a Break hit
