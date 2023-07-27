@@ -87,6 +87,7 @@ const SWEETSPOT_HITSTOP_MOD = 130 # sweetspotted hits has 30% more hitstop
 
 const PUNISH_DMG_MOD = 150 # damage modifier on punish_hit
 const PUNISH_HITSTOP_MOD = 130 # punish hits has 30% more hitstop
+#const PUNISH_HITSTUN_MOD = 120 # multiply hitstun on punish_hit
 
 const STUN_DMG_MOD = 150 # damage modifier on stun
 const STUN_TIME = 60 # number of frames stun time last for Stun
@@ -613,7 +614,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(chain_memory)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(status_effects)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -825,7 +826,8 @@ func simulate2(): # only ran if not in hitstop
 		repeat_memory = []
 		first_hit_flag = false
 		GG_swell_flag = false
-#		$BurstLockTimer.stop()
+		if !is_blocking():
+			$BurstLockTimer.stop()
 		DI_seal = false
 		lethal_flag = false
 		wall_slammed = Em.wall_slam.CANNOT_SLAM
@@ -1809,13 +1811,6 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	test1()
 	
 	progress_tap_and_release_memory()
-	
-	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
-										   # useful for status effects that are removed after being hit
-		remove_status_effect(effect)
-		
-	for effect in status_effect_to_add:
-		add_status_effect(effect)
 		
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
 		hitstop = null
@@ -1877,6 +1872,13 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		
 		if Globals.survival_level != null and enhance_cooldowns.size() > 0:
 			enhance_cooldown()
+			
+	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
+										   # useful for status effects that are removed after being hit
+		remove_status_effect(effect)
+		
+	for effect in status_effect_to_add:
+		add_status_effect(effect)
 	
 	test2()
 	
@@ -3386,6 +3388,8 @@ func trip():
 	velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), 50)
 	launch_starting_rot = 0
 	launchstun_rotate = 0
+	$BurstLockTimer.time = 9999
+	DI_seal = true
 #	$HitStunTimer.time = 30
 	play_audio("whoosh11", {"vol" : -25})
 	Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
@@ -3515,7 +3519,7 @@ func respawn():
 	$Sprites.show()
 	animate("Idle")
 	state = Em.char_state.GRD_STANDBY
-	add_status_effect([Em.status_effect.RESPAWN_GRACE, RESPAWN_GRACE_DURATION])
+	status_effect_to_add.append([Em.status_effect.RESPAWN_GRACE, RESPAWN_GRACE_DURATION])
 	
 	var palette
 	match player_ID:
@@ -5502,7 +5506,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	match hit_data[Em.hit.BLOCK_STATE]: # gain Positive Flow if unblocked, GG is under 100%, atk_level > 1, or semi-disjoint hit
 		Em.block_state.UNBLOCKED:
 			if current_guard_gauge < 0 and ((!hit_data[Em.hit.WEAK_HIT] and hit_data[Em.hit.ADJUSTED_ATK_LVL] > 1) or hit_data[Em.hit.SEMI_DISJOINT]):
-				add_status_effect([Em.status_effect.POS_FLOW, null])
+				status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 
 			remove_status_effect_on_landing_hit()
 			
@@ -6204,7 +6208,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	# gain POS_FLOW on strongblock
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.STRONG and current_guard_gauge < 0:
-		add_status_effect([Em.status_effect.POS_FLOW, null])
+		status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 
 	if (Em.hit.SINGLE_REPEAT in hit_data and !hit_data[Em.hit.LETHAL_HIT]) or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
@@ -6697,7 +6701,12 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if $SBlockTimer.is_running():
 		return 0
 
-	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+	var guard_drain : int
+	
+	if !hit_data[Em.hit.SEMI_DISJOINT]:
+		guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+	else:
+		guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
 	
 	match hit_data[Em.hit.BLOCK_STATE]:
 		Em.block_state.STRONG:
@@ -6728,6 +6737,9 @@ func calculate_knockback_strength(hit_data) -> int:
 
 	var knockback_strength: int = hit_data[Em.hit.MOVE_DATA][Em.move.KB] # scaled by FMath.S
 	
+	if hit_data[Em.hit.SEMI_DISJOINT]:
+		return int(clamp(knockback_strength, 0, SD_KNOCKBACK_LIMIT))
+	
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and Em.atk_attr.FIXED_KNOCKBACK_STR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		return knockback_strength
 	
@@ -6738,11 +6750,8 @@ func calculate_knockback_strength(hit_data) -> int:
 		else:
 			return knockback_strength
 			
-	if  Em.hit.AUTOCHAIN in hit_data:
+	if Em.hit.AUTOCHAIN in hit_data:
 		return knockback_strength
-	
-	if hit_data[Em.hit.SEMI_DISJOINT]:
-		return int(clamp(knockback_strength, 0, SD_KNOCKBACK_LIMIT))
 		
 	if hit_data[Em.hit.SWEETSPOTTED]:
 		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
@@ -6899,7 +6908,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 		atk_level = int(clamp(atk_level, 1, 8))
 	else: # sweetspotted and Punish Hits give more hitstun
 		if hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-			atk_level += 3
+			atk_level += 1
 			atk_level = int(clamp(atk_level, 1, 8))
 		if hit_data[Em.hit.PUNISH_HIT]:
 			atk_level += 3
@@ -6943,6 +6952,9 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 		if get_damage_percent() > 1.0:
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 	else:
+#		if hit_data[Em.hit.PUNISH_HIT]: # punish hits have higher hitstun in addition to +1 atk_lvl
+#			scaled_hitstun = FMath.percent(scaled_hitstun, PUNISH_HITSTUN_MOD)
+			
 		if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
 #				if hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
 			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
@@ -6961,6 +6973,9 @@ func check_if_crossed_up(attacker, angle_to_atker: int):
 		return false
 	
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CROSSUP):
+		return false
+		
+	if attacker.has_method("query_status_effect") and attacker.query_status_effect(Em.status_effect.NO_CROSSUP):
 		return false
 	
 # warning-ignore:narrowing_conversion
@@ -7038,8 +7053,12 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 #		var aux_data = {"facing":Globals.Game.rng_facing(), "v_mirror":Globals.Game.rng_bool()}
 #		if UniqChar.SDHitspark_COLOR != "red":
 #			aux_data["palette"] = UniqChar.SDHitspark_COLOR
+		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
+		else:
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
 		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool()}, UniqChar.SDHitspark_COLOR)
+				"v_mirror":Globals.Game.rng_bool()}, hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE])
 		return
 	
 	var hitspark_level: int
@@ -7852,7 +7871,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				change_ex_gauge(MAX_EX_GAUGE)
 				reset_jumps()
 				if current_guard_gauge < 0: # gain positive flow
-					add_status_effect([Em.status_effect.POS_FLOW, null])
+					status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 				change_burst_token(Em.burst.CONSUMED)
 			play_audio("blast1", {"vol" : -18,})
 		"BurstCRec":

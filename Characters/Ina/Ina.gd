@@ -1150,6 +1150,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.animate("BlinkRec")
 			else:
 				Character.animate("aBlinkRec")
+			Character.status_effect_to_add.append([Em.status_effect.NO_CROSSUP, 20])
 		"BlinkRec":
 			Character.animate("BlinkCRec")
 		"aBlinkRec":
@@ -1166,6 +1167,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.animate("EBlinkRec")
 			else:
 				Character.animate("aEBlinkRec")
+			Character.status_effect_to_add.append([Em.status_effect.NO_CROSSUP, 20])
 		"EBlinkRec":
 			Character.animate("BlinkCRec")
 		"aEBlinkRec":

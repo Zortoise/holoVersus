@@ -118,7 +118,9 @@ func _ready():
 				character_data[character_name]["portrait"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/portrait.png")
 				character_data[character_name]["art"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/full_art.png")
 				character_data[character_name]["select_sprite"] = load("res://Characters/" + character_name + "/SelectSprite.tscn")
-				character_data[character_name]["name"] = load("res://Characters/" + character_name + "/" + character_name + ".tscn").instance().NAME
+				var character_file = load("res://Characters/" + character_name + "/" + character_name + ".tscn").instance()
+				character_data[character_name]["name"] = character_file.NAME
+				if "ORDER" in character_file: character_data[character_name]["order"] = character_file.ORDER
 				
 				# load in palettes
 				character_data[character_name]["palettes"] = {}
@@ -196,13 +198,13 @@ func load_last_picked():
 func populate_char_grid():
 	
 	var total = $Grid.get_child_count()
-	grid_dimensions[0] = $Grid.columns
-	grid_dimensions[1] = int(ceil(total/grid_dimensions[0]))
+	grid_dimensions[0] = $Grid.columns # 12
+	grid_dimensions[1] = int(ceil(total/grid_dimensions[0])) # 3
 	
-	var center_indexes = [] # 5, 17, 29
-	var left_indexes = []
-	var right_indexes = []
-	var center_point = int((grid_dimensions[0] - 1) / 2.0)
+	var center_indexes = [] # 6, 18, 30
+	var left_indexes = [] # 0, 12, 24
+	var right_indexes = [] # 11, 23, 35
+	var center_point = int((grid_dimensions[0] - 1) / 2.0) + 1 # 6
 	
 	for y in grid_dimensions[1]:
 		center_indexes.append(center_point + (y * grid_dimensions[0]))
@@ -212,7 +214,7 @@ func populate_char_grid():
 	var index_array = []
 	for level in center_indexes.size():
 		var current_coord = center_indexes[level]
-		var changer := 1
+		var changer := -1
 		while current_coord >= left_indexes[level] and current_coord <= right_indexes[level]:
 			index_array.append(current_coord)
 			current_coord += changer
@@ -220,11 +222,18 @@ func populate_char_grid():
 			if changer < 0: changer -= 1
 			else: changer += 1
 			
-	var char_names = []
-	for character in character_data.keys(): # get Random to the back
-		if character != "Random":
-			char_names.append(character)
-	if posmod(char_names.size(), 2) != 0:
+	var char_names := []
+	var char_names2 := []
+	for character in character_data.keys(): # list of name_keys
+		if "order" in character_data[character]:
+			var order = min(character_data[character].order, char_names.size())
+			char_names.insert(order, character)
+		elif character != "Random":
+			char_names2.append(character)
+			
+	char_names.append_array(char_names2)
+	
+	if posmod(char_names.size(), 2) == 0:
 		char_names.append("Random")
 	else:
 		char_names.insert(char_names.size() - 1, "Random") # to ensure Random is the rightmost one

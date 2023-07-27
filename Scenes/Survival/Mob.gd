@@ -848,12 +848,6 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				
 	advance_command()
 	
-	
-	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
-										   # useful for status effects that are removed after being hit
-		remove_status_effect(effect)
-	for effect in status_effect_to_add:
-		add_status_effect(effect)
 		
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID:
 		hitstop = null
@@ -901,6 +895,12 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		
 	$ModulatePlayer.simulate() # modulate animations continue even in hitstop
 	$LongFailTimer.simulate()
+	
+	for effect in status_effect_to_remove: # remove certain status effects at end of frame after hit detection
+										   # useful for status effects that are removed after being hit
+		remove_status_effect(effect)
+	for effect in status_effect_to_add:
+		add_status_effect(effect)
 	
 	test2()
 	
@@ -2647,7 +2647,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.PUNISH_HIT] = true
 		
 	
-	if Em.hit.SUPERARMORED in hit_data:
+	if hit_data[Em.hit.SEMI_DISJOINT]:
+		hit_data[Em.hit.RESISTED] = true
+	elif Em.hit.SUPERARMORED in hit_data:
 		hit_data[Em.hit.RESISTED] = true
 	elif Em.hit.IGNORE_RESIST in hit_data:
 		pass # true hitstun
@@ -2940,7 +2942,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if Em.hit.SUPERARMORED in hit_data:
 			Globals.Game.spawn_SFX("Superarmorspark", "Blocksparks", hit_data[Em.hit.HIT_CENTER], {"rot" : deg2rad(hit_data[Em.hit.ANGLE_TO_ATKER])})
 		elif Em.hit.RESISTED in hit_data:
-			Globals.Game.spawn_SFX("WBlockspark2", "Blocksparks", hit_data[Em.hit.HIT_CENTER], {"rot" : deg2rad(hit_data[Em.hit.ANGLE_TO_ATKER])})
+			if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
+				generate_hitspark(hit_data)
+			else:
+				Globals.Game.spawn_SFX("WBlockspark2", "Blocksparks", hit_data[Em.hit.HIT_CENTER], {"rot" : deg2rad(hit_data[Em.hit.ANGLE_TO_ATKER])})
 		else:
 			Globals.Game.spawn_SFX("MobArmorspark", "Blocksparks", hit_data[Em.hit.HIT_CENTER], {"rot" : deg2rad(hit_data[Em.hit.ANGLE_TO_ATKER])})
 	else:
@@ -3143,8 +3148,7 @@ func calculate_damage(hit_data) -> int:
 
 	if hit_data[Em.hit.SEMI_DISJOINT]:
 		if Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
-			pass # VULN_LIMBS trait cause SD hits to do damage
-#			scaled_damage = FMath.percent(scaled_damage, 100)
+			return int(max(FMath.round_and_descale(scaled_damage), 1)) # VULN_LIMBS trait cause SD hits to do damage
 		else:
 			return 0
 			
@@ -3161,7 +3165,7 @@ func calculate_damage(hit_data) -> int:
 		if hit_data[Em.hit.SWEETSPOTTED]:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
 			
-	if !guardbroken:
+	if !guardbroken: # resisted or or mobarmored or superarmored
 		scaled_damage = FMath.percent(scaled_damage, get_stat("ARMOR_DMG_MOD"))
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
@@ -3181,6 +3185,12 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		
 #	if Em.hit.SUPERARMORED in hit_data:
 #		return 0
+
+	if hit_data[Em.hit.SEMI_DISJOINT]:
+		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
+		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
+		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
+		return guard_drain
 		
 #	if Em.hit.SUPERARMORED in hit_data or ($ArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
 	if Em.hit.SUPERARMORED in hit_data or $ArmorTimer.is_running(): # halves GDrain on armored
@@ -3214,6 +3224,9 @@ func calculate_knockback_strength(hit_data) -> int:
 
 	var knockback_strength: int = hit_data[Em.hit.MOVE_DATA][Em.move.KB] # scaled by FMath.S
 	
+	if hit_data[Em.hit.SEMI_DISJOINT]:
+		return int(clamp(knockback_strength, 0, SD_KNOCKBACK_LIMIT))
+	
 	if Em.atk_attr.FIXED_KNOCKBACK_STR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		return knockback_strength
 	
@@ -3224,11 +3237,8 @@ func calculate_knockback_strength(hit_data) -> int:
 		else:
 			return knockback_strength
 			
-	if  Em.hit.AUTOCHAIN in hit_data:
+	if Em.hit.AUTOCHAIN in hit_data:
 		return knockback_strength
-	
-	if hit_data[Em.hit.SEMI_DISJOINT]:
-		return int(clamp(knockback_strength, 0, SD_KNOCKBACK_LIMIT))
 		
 	if hit_data[Em.hit.SWEETSPOTTED]:
 		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
@@ -3360,7 +3370,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 		atk_level -= 1
 		atk_level = int(clamp(atk_level, 1, 8))
 	elif hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
-		atk_level += 3
+		atk_level += 1
 		atk_level = int(clamp(atk_level, 1, 8))
 		
 	return atk_level
@@ -3449,8 +3459,12 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 func generate_hitspark(hit_data): # hitspark size determined by knockback power
 
 	if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
+		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
+		else:
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
 		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
-				"v_mirror":Globals.Game.rng_bool()}, UniqChar.SDHitspark_COLOR)
+				"v_mirror":Globals.Game.rng_bool()}, hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE])
 		return
 
 	var hitspark_level: int

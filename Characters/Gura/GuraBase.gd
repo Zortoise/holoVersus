@@ -4,6 +4,7 @@ extends Node2D
 # may be saved in a .tres file later? Or just leave it in the .gd file
 
 const NAME = "Gura"
+const ORDER = 1
 
 # character movement stats, use to overwrite
 const SPEED = 340 * FMath.S # ground speed

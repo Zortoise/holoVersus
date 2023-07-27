@@ -3,6 +3,7 @@ extends Node2D
 # CHARACTER DATA --------------------------------------------------------------------------------------------------
 
 const NAME = "Ina'nis"
+const ORDER = 0
 
 # character movement stats, use to overwrite
 const SPEED = 300 * FMath.S # ground speed

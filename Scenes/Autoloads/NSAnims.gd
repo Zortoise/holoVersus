@@ -219,7 +219,7 @@ var modulate_animations = {
 		}
 	},
 	"dodge_flash" :{
-		"priority" : priority.ACTION,
+		"priority" : priority.FLASH,
 		"duration": 10,
 		"loop" : false,
 		"monochrome" : true,
