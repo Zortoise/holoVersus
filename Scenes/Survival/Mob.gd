@@ -90,8 +90,8 @@ const ARMOR_DMG_MOD = 50 # % of damage taken when attacked during special armor
 #const ARMOR_KNOCKBACK_MOD = 150 # % of knockback mob experience when attacked during special armor
 #const RESISTED_KB_MOD = 200 # % of knockback mob experience
 
-const WEAKBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when wrongblocked, fixed
-const STRONGBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when strongblocked, fixed
+const BLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when blocked, fixed
+const PARRY_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when parried, fixed
 
 const AUTOCHAIN_HITSTOP = 7
 const WEAK_HIT_HITSTOP = 6
@@ -2411,16 +2411,16 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	else:
 		
 		match hit_data[Em.hit.BLOCK_STATE]:					
-			Em.block_state.WEAK, Em.block_state.STRONG:
+			Em.block_state.BLOCKED, Em.block_state.PARRIED:
 				
 				if Em.hit.SUPERARMORED in hit_data:
 					continue
 				
 				var pushback_strength: = 0
-				if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.WEAK:
-					pushback_strength = WEAKBLOCK_ATKER_PUSHBACK
+				if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.BLOCKED:
+					pushback_strength = BLOCK_ATKER_PUSHBACK
 				else:
-					pushback_strength = STRONGBLOCK_ATKER_PUSHBACK
+					pushback_strength = PARRY_ATKER_PUSHBACK
 				
 				var pushback_dir_enum = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.SIX, facing) # this return an enum
 				var pushback_dir = Globals.compass_to_angle(pushback_dir_enum) # pushback for weak/strong blocked hits in 6 directions only
@@ -2602,7 +2602,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
 				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
-#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
@@ -2610,30 +2610,32 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
 						(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 						(Em.atk_attr.PROJ_ARMOR_ACTIVE in defender_attr and Em.hit.ENTITY_PATH in hit_data):
-#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 						
 						
 			Em.char_state.AIR_REC:
 				 # air superdash has projectile superarmor against non-strong projectiles
 				if Animator.query_current(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
-#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 		if !is_hitstunned_or_sequenced():
 			if Em.mob_attr.PASSIVE_ARMOR in mob_attr:
 				if current_guard_gauge >= 0:
-#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 	# RESISTED HIT ----------------------------------------------------------------------------------------------
 	
 	var punish_hit := false
-	if is_atk_active() or is_atk_recovery():
-		if (!hit_data[Em.hit.WEAK_HIT] or Em.hit.MULTIHIT in hit_data) and (!Em.hit.NON_STRONG_PROJ in hit_data or \
-				Em.atk_attr.PUNISH_ENTITY in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
-				(Em.move.DMG in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.DMG] > 0) and \
-				!Em.hit.SUPERARMORED in hit_data:
+	if (!hit_data[Em.hit.WEAK_HIT] or Em.hit.MULTIHIT in hit_data) and (!Em.hit.NON_STRONG_PROJ in hit_data or \
+			Em.atk_attr.PUNISH_ENTITY in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]) and \
+			(Em.move.DMG in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.DMG] > 0) and \
+			!Em.hit.SUPERARMORED in hit_data:
+		if query_status_effect(Em.status_effect.SCANNED):
+			punish_hit = true
+		elif is_atk_active() or is_atk_recovery():
 			punish_hit = true
 			
 	if punish_hit:
@@ -2657,7 +2659,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		pass # true hitstun
 	elif $ArmorTimer.is_running() or $HitStunTimer.is_running():
 		pass # mob_armored or already in hitstun
-	elif is_atk_active() or is_atk_recovery():
+	elif hit_data[Em.hit.PUNISH_HIT]:
 		pass # true hitstun
 	elif Em.mob_attr.TOUGH in mob_attr and mob_attr[Em.mob_attr.TOUGH] <= 1:
 		pass # true hitstun

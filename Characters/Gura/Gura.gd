@@ -388,7 +388,7 @@ func capture_combinations():
 #	Character.doubletap_combination(Character.button_special, Character.button_fierce, "SpSp.F")
 
 func capture_unique_combinations():
-	Character.combination_trio(Character.button_unique, Character.button_down, Character.button_fierce, "U.dF")
+	Character.combination(Character.button_unique, Character.button_dash, "U.Dash")
 
 func rebuffer_actions(): # for when there are air and ground versions
 	Character.rebuffer(Character.button_up, Character.button_light, "uL")
@@ -409,8 +409,8 @@ func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 #	Character.ex_rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
 	
 func capture_instant_actions():
-	if !Character.button_down in Character.input_state.pressed or !Character.grounded:
-		Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
+#	if !Character.button_down in Character.input_state.pressed or !Character.grounded:
+	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
 	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
 
 
@@ -640,7 +640,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP5", has_acted)
 				
-		"U.dF":
+		"U.Dash":
 			if !has_acted[0]:
 				var closest_fin = get_closest_ground_fin()
 				if closest_fin != null:
@@ -747,8 +747,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					
 		Em.char_state.GRD_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
-				if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]) and \
-						Character.test_qc_chain_combo(attack_ref):
+				if !Character.no_jumpsquat_cancel and Character.grounded and attack_ref in UP_TILTS and \
+						Animator.query_to_play(["JumpTransit"]) and Character.test_qc_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
@@ -769,7 +769,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						
 		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
-				if ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
+				if !Character.no_jumpsquat_cancel and ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
 						!Character.button_jump in Character.input_state.pressed and \
 						Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
 						Character.test_qc_chain_combo("a" + attack_ref):
@@ -1477,7 +1477,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"DashTransit":
 			Character.animate("Dash")
 		"Dash":
-			if Character.held_version(Character.button_dash):
+			if Character.held_version(Character.button_dash) and Character.facing == Character.get_opponent_dir():
 				Character.animate("Dash[h]")
 			else:
 				Character.animate("DashBrake")
@@ -2017,7 +2017,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 				Character.velocity.y = 0 # for faster wavedashes
 #			Character.velocity_limiter.y_slow = 75
 		"Dash":
-			Character.velocity.x = Character.get_stat("GRD_DASH_SPEED") * Character.facing
+			var speed_target = Character.get_stat("GRD_DASH_SPEED") * Character.facing
+			if Character.facing != Character.get_opponent_dir():
+				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+			Character.velocity.x = speed_target
 			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
@@ -2028,14 +2031,20 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aDash":
 			consume_one_air_dash()
 			Character.aerial_memory = []
-			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
+			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
+			if Character.facing != Character.get_opponent_dir():
+				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+			Character.velocity.set_vector(speed_target, 0)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 		"aDashD":
 			consume_one_air_dash()
 			Character.aerial_memory = []
-			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
+			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
+			if Character.facing != Character.get_opponent_dir():
+				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+			Character.velocity.set_vector(speed_target, 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
@@ -2043,7 +2052,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aDashU":
 			consume_one_air_dash()
 			Character.aerial_memory = []
-			Character.velocity.set_vector(Character.get_stat("AIR_DASH_SPEED") * Character.facing, 0)
+			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
+			if Character.facing != Character.get_opponent_dir():
+				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+			Character.velocity.set_vector(speed_target, 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail

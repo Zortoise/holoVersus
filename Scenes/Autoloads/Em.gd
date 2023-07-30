@@ -20,7 +20,7 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, P_SUPERARMOR_STARTUP, P_SUPERARMOR_ACTIVE, 
 		PROJ_ARMOR_ACTIVE, WEAKARMOR_STARTUP, WEAKARMOR_ACTIVE, P_WEAKARMOR_STARTUP, P_WEAKARMOR_ACTIVE, BI_DIR_ARMOR
-		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, CAN_REPEAT_ONCE, DI_MANUAL_SEAL
+		DRAG_KB, NO_STRAFE_NORMAL, STRAFE_NON_NORMAL, REPEATABLE, CAN_REPEAT_ONCE, DI_MANUAL_SEAL, NO_CROSSUP
 		ONLY_CHAIN_ON_HIT, ONLY_CHAIN_INTO_ON_HIT, CANNOT_CHAIN_INTO, LATE_CHAIN, LATE_CHAIN_INTO, CRUSH
 		JUMP_CANCEL_ACTIVE, JUMP_CANCEL_ON_WHIFF, JUMP_CANCEL_ON_HIT, NO_ACTIVE_CANCEL
 		VULN_LIMBS, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY, NO_REFLECT_ENTITY
@@ -55,8 +55,9 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # REPEATABLE = will not incur repeat penalty, use for multi-entities
 # CAN_REPEAT_ONCE = no penalty on partial penalty
 # DI_MANUAL_SEAL = seal DI till next hit
-# ONLY_CHAIN_ON_HIT = cannot chain into other moves on whiff and weakblock
-# ONLY_CHAIN_INTO_ON_HIT = cannot chain into from other moves on whiff and weakblock, for command dashes
+# NO_CROSSUP = cannot crossup
+# ONLY_CHAIN_ON_HIT = cannot chain into other moves on whiff and block
+# ONLY_CHAIN_INTO_ON_HIT = cannot chain into from other moves on whiff and block, for command dashes?
 # CANNOT_CHAIN_INTO = automatically fails test_chain_combo(), for stuff like command grabs
 # LATE_CHAIN = can only chain into other moves during recovery and not active frames
 # LATE_CHAIN_INTO = can only be chained into from other moves during recovery and not active frames
@@ -86,10 +87,10 @@ enum atk_attr {NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO
 # NO_HITCOUNT_RESET = attack does not reset hitcount on being active frames being animated, used for multi-part attacks sharing hitcount
 
 enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED, INVERT_DIR
-		NO_CROSSUP}
+		NO_CROSSUP, SCANNED}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
-enum block_state {UNBLOCKED, STRONG, WEAK}
+enum block_state {UNBLOCKED, PARRIED, BLOCKED}
 enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_WEAKARMOR, NO_GRD_C_REC_BLOCK, NO_AIR_C_REC_BLOCK
 		DASH_IMPULSE, PERMA_SUPERARMOR, NO_LAUNCH, GRD_DASH_JUMP, AIR_DASH_JUMP}
 # PASSIVE_WEAKARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles

@@ -483,7 +483,7 @@ frame_data = {
 "vframes": 20
 },
 "DodgeTransit": {
-"duration": 2,
+"duration": 1,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",

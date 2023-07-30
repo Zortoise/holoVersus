@@ -94,14 +94,14 @@ const STUN_TIME = 60 # number of frames stun time last for Stun
 const STUN_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Stun
 const CRUSH_TIME = 40 # number of frames stun time last for Crush
 
-const WEAKBLOCK_HITSTOP = 5
-const WEAKBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when wrongblocked, fixed
-const WEAKBLOCK_KNOCKBACK_MOD = 200 # % of knockback defender experience when wrongblocking
-const STRONGBLOCK_HITSTOP = 7
-const STRONGBLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when strongblocked, fixed
-const STRONGBLOCK_KNOCKBACK_MOD = 0 # % of knockback defender experience when strongblocking
+const BLOCK_HITSTOP = 5
+const BLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when blocked, fixed
+const BLOCK_KNOCKBACK_MOD = 200 # % of knockback defender experience when blocked
+const PARRY_HITSTOP = 7
+const PARRY_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when parried, fixed
+const PARRY_KNOCKBACK_MOD = 0 # % of knockback defender experience when parried
 #const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
-const MOBBLOCK_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
+const RESIST_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
 const SPECIAL_GDRAIN_MOD = 125 # extra GDrain when blocking heavy/special/ex moves
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
@@ -278,6 +278,7 @@ var spent_unique := false # used a move that requires Unique to be held, releasi
 var wall_slammed = Em.wall_slam.CANNOT_SLAM
 var delayed_hit_effect := [] # store things like Em.hit.SWEETSPOTTED and Em.hit.PUNISH_HIT for autochain and multi-hit moves
 var gravity_frame_mod := 100 # modify gravity this frame
+var no_jumpsquat_cancel := false # set to true when jump cancelling an animation, prevent quick cancelling the jumpsquat
 
 # controls
 var button_up
@@ -614,7 +615,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(status_effects)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(no_jumpsquat_cancel)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -719,7 +720,7 @@ func simulate(new_input_state):
 #			super_cost(2)
 #			BGM.muffle()
 #			Globals.Game.viewport.play_audio("defeated", {})
-#			add_status_effect([Em.status_effect.INVERT_DIR, 9999])
+#			if test: add_status_effect([Em.status_effect.SCANNED, 9999])
 			
 			pass
 
@@ -806,6 +807,17 @@ func simulate2(): # only ran if not in hitstop
 		
 	if grounded:
 		reset_jumps()
+		
+	if no_jumpsquat_cancel:
+		match state: # do not use new_state!
+			Em.char_state.GRD_STARTUP:
+				if !Animator.query_current(["JumpTransit"]):
+					no_jumpsquat_cancel = false
+			Em.char_state.AIR_STARTUP:
+				if !Animator.query_current(["aJumpTransit"]):
+					no_jumpsquat_cancel = false
+			_:
+				no_jumpsquat_cancel = false
 		
 #	if is_on_ground($SoftPlatformDBox):
 #		grounded = true
@@ -1081,7 +1093,11 @@ func simulate2(): # only ran if not in hitstop
 				if !Animator.query(["Run", "RunTransit"]):
 					animate("RunTransit")
 						
-				velocity.x = FMath.f_lerp(velocity.x, dir * get_stat("SPEED"), get_stat("ACCELERATION"))
+				var speed_target = dir * get_stat("SPEED")
+				if "AWAY_SPEED_MOD" in UniqChar:
+					if dir != get_opponent_dir():
+						speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+				velocity.x = FMath.f_lerp(velocity.x, speed_target, get_stat("ACCELERATION"))
 	
 	# AIR STRAFE --------------------------------------------------------------------------------------------------
 		# can air strafe during aerials at reduced speed
@@ -2608,10 +2624,12 @@ func process_input_buffer():
 										afterimage_cancel()
 										animate("aJumpTransit")
 										keep = false
+										no_jumpsquat_cancel = true
 								else: # grounded
 									afterimage_cancel()
 									animate("JumpTransit")
 									keep = false
+									no_jumpsquat_cancel = true
 								
 						# JUMP CANCELS ---------------------------------------------------------------------------------
 								
@@ -2636,9 +2654,11 @@ func process_input_buffer():
 									set_true_position()
 									animate("FallTransit")
 									keep = false
+									no_jumpsquat_cancel = true
 								else:
 									animate("JumpTransit")
 									keep = false
+									no_jumpsquat_cancel = true
 								
 						Em.char_state.GRD_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
 							if buffered_input[0] != button_jump:
@@ -3621,7 +3641,11 @@ func check_landing(): # called by physics.gd when character stopped by floor
 						UniqChar.dash_sound()
 						Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 						if dir == facing:
-							velocity.x = facing * FMath.percent(get_stat("GRD_DASH_SPEED"), get_stat("WAVE_DASH_SPEED_MOD"))
+							var speed_target = get_stat("GRD_DASH_SPEED")
+							if "AWAY_SPEED_MOD" in UniqChar:
+								if facing != get_opponent_dir():
+									speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+							velocity.x = facing * FMath.percent(speed_target, get_stat("WAVE_DASH_SPEED_MOD"))
 							
 				else: # landing during AirDashDD
 					animate("HardLanding")
@@ -3846,7 +3870,13 @@ func snap_up_wave_land_check():
 			if facing != dir:
 				face(dir)
 			animate("WaveDashBrake")
-			velocity.x = dir * get_stat("GRD_DASH_SPEED")
+			if dir == facing:
+				var speed_target = get_stat("GRD_DASH_SPEED")
+				if "AWAY_SPEED_MOD" in UniqChar:
+					if facing != get_opponent_dir():
+						speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+				velocity.x = facing * FMath.percent(speed_target, get_stat("WAVE_DASH_SPEED_MOD"))
+#			velocity.x = dir * get_stat("GRD_DASH_SPEED")
 			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 			UniqChar.dash_sound()
 		else:
@@ -3871,7 +3901,8 @@ func get_pos_from_feet(feet_pos: Vector2):
 func can_DI(): # already checked for HitStunTimer
 	if Globals.survival_level == null and current_guard_gauge <= 0:
 		return false
-	if get_damage_percent() >= 100:
+#	if get_damage_percent() >= 100:
+	if lethal_flag:
 		return false
 	if DI_seal and $BurstLockTimer.is_running():
 		return false
@@ -4515,7 +4546,7 @@ func burst_counter_check(): # check if have resources to do it, then take away t
 func burst_escape_check(): # check if have resources to do it, then take away those resources and return a bool
 	if $BurstLockTimer.is_running():
 		return false
-	if get_damage_percent() >= 100: # cannot Burst Escape at lethal range
+	if lethal_flag: # cannot Burst Escape lethal hits
 		return false
 		
 	if Globals.survival_level == null:
@@ -4944,6 +4975,7 @@ func remove_all_status_effects():
 	
 func remove_status_effect_on_landing_hit():
 	status_effect_to_remove.append(Em.status_effect.POISON)
+	status_effect_to_remove.append(Em.status_effect.SCANNED)
 	
 func remove_status_effect_on_taking_hit():
 	status_effect_to_remove.append(Em.status_effect.POS_FLOW)
@@ -5579,7 +5611,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 #					active_cancel = true
 
 					
-			Em.block_state.WEAK:
+			Em.block_state.BLOCKED:
 				chain_combo = Em.chain_combo.BLOCKED
 #				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 #					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
@@ -5593,7 +5625,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 #					Em.atk_type.SUPER:
 #						chain_combo = Em.chain_combo.BLOCKED
 				
-			Em.block_state.STRONG:
+			Em.block_state.PARRIED:
 				chain_combo = Em.chain_combo.PARRIED
 #				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 #					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
@@ -5617,7 +5649,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				
 				if Globals.survival_level != null: # mob pushback when resisting or armoring
 					if (Em.hit.RESISTED in hit_data or Em.hit.MOB_ARMORED in hit_data) and !Em.hit.MOB_BREAK in hit_data:
-						var pushback_strength = MOBBLOCK_ATKER_PUSHBACK
+						var pushback_strength = RESIST_ATKER_PUSHBACK
 						
 						var pushback_dir_enum = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.SIX, facing)
 						var pushback_dir = Globals.compass_to_angle(pushback_dir_enum)
@@ -5639,16 +5671,16 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 							if defender.position.x > Globals.Game.right_corner:
 								velocity.x -= pushback_strength
 								
-			Em.block_state.WEAK, Em.block_state.STRONG:
+			Em.block_state.BLOCKED, Em.block_state.PARRIED:
 				
 				if Em.hit.SUPERARMORED in hit_data:
 					continue
 				
 				var pushback_strength: = 0
-				if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.WEAK:
-					pushback_strength = WEAKBLOCK_ATKER_PUSHBACK
+				if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.BLOCKED:
+					pushback_strength = BLOCK_ATKER_PUSHBACK
 				else:
-					pushback_strength = STRONGBLOCK_ATKER_PUSHBACK
+					pushback_strength = PARRY_ATKER_PUSHBACK
 				
 				var pushback_dir_enum = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.SIX, facing) # this return an enum
 				var pushback_dir = Globals.compass_to_angle(pushback_dir_enum) # pushback for weak/strong blocked hits in 6 directions only
@@ -5863,7 +5895,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
-	var crossed_up: bool = check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER])
+	var crossed_up: bool = check_if_crossed_up(hit_data)
 
 	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or $SBlockTimer.is_running():
 		match new_state:
@@ -5881,7 +5913,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
 						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 						(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
-					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
@@ -5893,18 +5925,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 						(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 						(Em.atk_attr.PROJ_ARMOR_ACTIVE in defender_attr and Em.hit.ENTITY_PATH in hit_data):
-					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 						
 			Em.char_state.AIR_STARTUP:
 				if Animator.query_to_play(["SDashTransit"]) and Em.hit.NON_STRONG_PROJ in hit_data:
-					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					hit_data[Em.hit.SDASH_ARMORED] = true
 			Em.char_state.AIR_REC:
 				 # air superdash has projectile superarmor against non-strong projectiles
 				if Animator.query_to_play(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
-					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					hit_data[Em.hit.SDASH_ARMORED] = true
 				
@@ -5912,11 +5944,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if !is_hitstunned_or_sequenced() and !is_blocking():
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR):
 				if current_guard_gauge >= 0:
-					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 			
 			if has_trait(Em.trait.PERMA_SUPERARMOR):
-				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
 			elif has_trait(Em.trait.PASSIVE_WEAKARMOR):
 				if current_guard_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
@@ -5930,7 +5962,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 							can_armor = true
 					if can_armor:
-						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 						hit_data[Em.hit.SUPERARMORED] = true
 			
 				
@@ -5955,53 +5987,53 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	#						if Globals.survival_level != null and close_enough:
 	##							if !Inventory.has_quirk(player_ID, Cards.effect_ref.PROXIMITY_PARRY):
 	#							close_enough = false
-
-							if Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
+							if hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED):
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
+							elif Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
 	#							if Globals.survival_level != null:
-	#								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # no proximity parry for Survival Mode
+	#								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED # no proximity parry for Survival Mode
 								if Em.hit.ANTI_AIRED in hit_data:
-									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK # anti-air normals force weakblock on airblockers
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED # anti-air normals force weakblock on airblockers
 								else:
 									# if perfect blocked or blocking attacker close enough, a Strongblock occurs
 									# attacker is pushed back, and cannot chain into anything except Burst Counter
-									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 							elif success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
-								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 							else:
-								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 
 					Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX: # can weakblock heavy/special/EX at high GG cost
 						if crossed_up:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
-							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 							hit_data[Em.hit.GUARD_DRAIN] = true
 						
 					Em.atk_type.SUPER: # can weakblock super
 						if crossed_up:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
-							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 						
 					Em.atk_type.ENTITY, Em.atk_type.SUPER_ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE
 	#					if check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
 	#						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-						if Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-						else:
-							if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
-								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
-								hit_data[Em.hit.GUARD_DRAIN] = true
-							elif !crossed_up:
-								if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
-										Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
-									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
-								elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PARRY_PROJ):
-									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.STRONG
-								else:
-									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+						if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
+							hit_data[Em.hit.GUARD_DRAIN] = true
+						elif hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED):
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
+						elif !crossed_up:
+							if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
+									Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
+							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PARRY_PROJ):
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 							else:
-								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.WEAK
+								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
+						else:
+							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
@@ -6014,35 +6046,38 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			(Em.move.DMG in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.DMG] > 0) and \
 			!Em.hit.SUPERARMORED in hit_data:
 		# cannot Punish Hit for weak hits, non-strong projectiles and non-damaging moves like Burst
-		# remember that multi-hit moves cannot do punish hits
-		match new_state:
-			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
-				if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-					punish_hit = true
-			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
-				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC:
-				punish_hit = true
-			# check for Punish Hits for dashes
-			Em.char_state.GRD_STARTUP:
-				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
-					if Animator.query_to_play(["DashTransit"]):
+		if query_status_effect(Em.status_effect.SCANNED):
+			punish_hit = true
+			remove_status_effect(Em.status_effect.SCANNED)
+		else:
+			match new_state:
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+					if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 						punish_hit = true
-			Em.char_state.GRD_D_REC:
-				if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
+				Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
+					Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC:
 					punish_hit = true
-			Em.char_state.AIR_STARTUP:
-				if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
-					if Animator.query_to_play(["aDashTransit", "SDashTransit"]):
+				# check for Punish Hits for dashes
+				Em.char_state.GRD_STARTUP:
+					if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
+						if Animator.query_to_play(["DashTransit"]):
+							punish_hit = true
+				Em.char_state.GRD_D_REC:
+					if has_trait(Em.trait.VULN_GRD_DASH): # fast characters have VULN_GRD_DASH
 						punish_hit = true
-			Em.char_state.AIR_REC:
-				if Animator.query_to_play(["DodgeRec", "SDash"]):
-					punish_hit = true
-			Em.char_state.AIR_D_REC:
-				if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
-					punish_hit = true
-			Em.char_state.AIR_C_REC:
-				if Animator.query_to_play(["DodgeCRec"]):
-					punish_hit = true
+				Em.char_state.AIR_STARTUP:
+					if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
+						if Animator.query_to_play(["aDashTransit", "SDashTransit"]):
+							punish_hit = true
+				Em.char_state.AIR_REC:
+					if Animator.query_to_play(["DodgeRec", "SDash"]):
+						punish_hit = true
+				Em.char_state.AIR_D_REC:
+					if has_trait(Em.trait.VULN_AIR_DASH): # most characters except heavyweights have VULN_AIR_DASH
+						punish_hit = true
+				Em.char_state.AIR_C_REC:
+					if Animator.query_to_play(["DodgeCRec"]):
+						punish_hit = true
 					
 		if !punish_hit:
 			if UniqChar.has_method("punishable"):
@@ -6207,7 +6242,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
 	# gain POS_FLOW on strongblock
-	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.STRONG and current_guard_gauge < 0:
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.PARRIED and current_guard_gauge < 0:
 		status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 
 	if (Em.hit.SINGLE_REPEAT in hit_data and !hit_data[Em.hit.LETHAL_HIT]) or hit_data[Em.hit.DOUBLE_REPEAT]:
@@ -6258,7 +6293,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	elif hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		match hit_data[Em.hit.BLOCK_STATE]:
-			Em.block_state.WEAK:
+			Em.block_state.BLOCKED:
 				if Em.hit.SUPERARMORED in hit_data:
 					modulate_play("armor_flash")
 					play_audio("block3", {"vol" : -15})
@@ -6268,7 +6303,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				else:
 					modulate_play("weakblock_flash")
 					play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
-			Em.block_state.STRONG:
+			Em.block_state.PARRIED:
 				modulate_play("strongblock_flash")
 				play_audio("bling2", {"vol" : -8, "bus" : "PitchDown"})
 
@@ -6287,7 +6322,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 #	if adjusted_atk_level > 1:
 ##		if Globals.survival_level == null:
-##			if !hit_data[Em.hit.BLOCK_STATE] in [Em.block_state.STRONG]:
+##			if !hit_data[Em.hit.BLOCK_STATE] in [Em.block_state.PARRIED]:
 ##				 # loses Positive Flow for atk_level > 1 if not strongblocked
 ##				status_effect_to_remove.append(Em.status_effect.POS_FLOW)
 ##				# remove it at end of frame, this way both players loses positive flow during clashes
@@ -6328,7 +6363,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	hit_data[Em.hit.HITSTOP] = hitstop # send this to attacker as well
 	
-#	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.WEAK and \
+#	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.BLOCKED and \
 #			hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX, \
 #			Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
 #		hitstop += 10 # extra hitstop when blocking heavy/special/ex/super
@@ -6553,10 +6588,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					face(1)
 		
 		match hit_data[Em.hit.BLOCK_STATE]:
-			Em.block_state.STRONG:
+			Em.block_state.PARRIED:
 				success_block = Em.success_block.SBLOCKED # can cancel block recovery
 				$SBlockTimer.time = SBlockTimer_TIME
-			Em.block_state.WEAK:
+			Em.block_state.BLOCKED:
 				success_block = Em.success_block.WBLOCKED # cannot cancel block recovery
 				$SBlockTimer.time = SBlockTimer_TIME
 			_:
@@ -6662,7 +6697,7 @@ func calculate_damage(hit_data) -> int:
 		scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
 
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
-		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.WEAK:
+		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.BLOCKED:
 			# each character take different amount of chip damage
 #			if Em.hit.SUPERARMORED in hit_data:
 #				scaled_damage = FMath.percent(scaled_damage, SUPERARMOR_CHIP_DMG_MOD)
@@ -6709,10 +6744,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
 	
 	match hit_data[Em.hit.BLOCK_STATE]:
-		Em.block_state.STRONG:
+		Em.block_state.PARRIED:
 			return 0
 		
-		Em.block_state.WEAK: # no Guard Drain on blocking normals
+		Em.block_state.BLOCKED: # no Guard Drain on blocking normals
 			if Em.hit.GUARD_DRAIN in hit_data:
 				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # increase guard drain when blocking heavy/special/ex
 				if !grounded and Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
@@ -6761,14 +6796,14 @@ func calculate_knockback_strength(hit_data) -> int:
 		
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		match hit_data[Em.hit.BLOCK_STATE]:
-			Em.block_state.WEAK:
-				knockback_strength = FMath.percent(knockback_strength, WEAKBLOCK_KNOCKBACK_MOD) # KB for weakblock
+			Em.block_state.BLOCKED:
+				knockback_strength = FMath.percent(knockback_strength, BLOCK_KNOCKBACK_MOD) # KB for weakblock
 #				if  hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX, \
 #						Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
 #					knockback_strength = FMath.percent(knockback_strength, SPECIAL_BLOCK_KNOCKBACK_MOD)
 #					# increased KB when blocking heavy/special/ex/super
-			Em.block_state.STRONG:
-				knockback_strength = FMath.percent(knockback_strength, STRONGBLOCK_KNOCKBACK_MOD) # KB for strongblock
+			Em.block_state.PARRIED:
+				knockback_strength = FMath.percent(knockback_strength, PARRY_KNOCKBACK_MOD) # KB for strongblock
 #			Em.block_state.PARRY:
 #				knockback_strength = 0 # no KB for strongblock and parry
 
@@ -6967,22 +7002,28 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 
 	
 	
-func check_if_crossed_up(attacker, angle_to_atker: int):
+func check_if_crossed_up(hit_data):
 	
 	if $SBlockTimer.is_running():
+		return false
+	
+	if Em.atk_attr.NO_CROSSUP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		return false
 	
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CROSSUP):
 		return false
 		
-	if attacker.has_method("query_status_effect") and attacker.query_status_effect(Em.status_effect.NO_CROSSUP):
+	var attacker = hit_data[Em.hit.ATKER_OR_ENTITY]
+		
+	if attacker.has_method("query_status_effect") and \
+			(attacker.query_status_effect(Em.status_effect.NO_CROSSUP) or attacker.query_status_effect(Em.status_effect.SCANNED)):
 		return false
 	
 # warning-ignore:narrowing_conversion
 	var x_dist: int = abs(attacker.position.x - position.x)
 	if x_dist <= CROSS_UP_MIN_DIST: return false
 	
-	var segment = Globals.split_angle(angle_to_atker, Em.angle_split.EIGHT)
+	var segment = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.EIGHT)
 	if segment == Em.compass.N or segment == Em.compass.S:
 		return false
 	match segment:
@@ -6998,18 +7039,18 @@ func check_if_crossed_up(attacker, angle_to_atker: int):
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
 		
 	if Em.hit.SUPERARMORED in hit_data:
-		return STRONGBLOCK_HITSTOP
+		return PARRY_HITSTOP
 		
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		if Em.hit.MULTIHIT in hit_data: return 5 # blocked multihit attack has less blockstop
 		match hit_data[Em.hit.BLOCK_STATE]:
-			Em.block_state.WEAK:
+			Em.block_state.BLOCKED:
 				if Em.hit.ENTITY_PATH in hit_data:
 					return 5 # hitstop on blocking projectile has less blockstop
 				else:
-					return WEAKBLOCK_HITSTOP
-			Em.block_state.STRONG:
-				return STRONGBLOCK_HITSTOP
+					return BLOCK_HITSTOP
+			Em.block_state.PARRIED:
+				return PARRY_HITSTOP
 #			Em.block_state.PARRY:
 #				return PARRY_HITSTOP
 
@@ -7161,14 +7202,14 @@ func generate_blockspark(hit_data):
 	var blockspark
 	
 	match hit_data[Em.hit.BLOCK_STATE]:
-		Em.block_state.WEAK:
+		Em.block_state.BLOCKED:
 			if Em.hit.SUPERARMORED in hit_data:
 				blockspark = "Superarmorspark"
 			elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running():
 				blockspark = "WBlockspark2"
 			else:
 				blockspark = "WBlockspark"
-		Em.block_state.STRONG:
+		Em.block_state.PARRIED:
 			blockspark = "SBlockspark"
 #		Em.block_state.PARRY:
 #			blockspark = "Parryspark"
@@ -8073,6 +8114,7 @@ func save_state():
 		"wall_slammed" : wall_slammed,
 		"delayed_hit_effect" : delayed_hit_effect,
 		"gravity_frame_mod" : gravity_frame_mod,
+		"no_jumpsquat_cancel" : no_jumpsquat_cancel,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -8173,6 +8215,7 @@ func load_state(state_data, command_rewind := false):
 	wall_slammed = state_data.wall_slammed
 	delayed_hit_effect = state_data.delayed_hit_effect
 	gravity_frame_mod = state_data.gravity_frame_mod
+	no_jumpsquat_cancel = state_data.no_jumpsquat_cancel
 	if Globals.survival_level != null and !command_rewind:
 		enhance_cooldowns = state_data.enhance_cooldowns
 		enhance_data = state_data.enhance_data

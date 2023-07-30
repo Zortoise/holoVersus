@@ -617,8 +617,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					
 		Em.char_state.GRD_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
-				if Character.grounded and attack_ref in UP_TILTS and Animator.query_to_play(["JumpTransit"]) and \
-						Character.test_qc_chain_combo(attack_ref):
+				if !Character.no_jumpsquat_cancel and Character.grounded and attack_ref in UP_TILTS and \
+						Animator.query_to_play(["JumpTransit"]) and Character.test_qc_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
@@ -639,7 +639,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						
 		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
-				if ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
+				if !Character.no_jumpsquat_cancel and ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
 						!Character.button_jump in Character.input_state.pressed and \
 						Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
 						Character.test_qc_chain_combo("a" + attack_ref):
