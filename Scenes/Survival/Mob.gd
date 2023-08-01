@@ -113,7 +113,7 @@ var floor_level
 
 var dir := 0
 var grounded := true
-var hitstop = null # holder to influct hitstop at end of frame
+var hitstop = null # holder to inflict hitstop at end of frame
 var status_effect_to_remove = [] # holder to remove status effects at end of frame
 var status_effect_to_add = []
 
@@ -165,6 +165,7 @@ var repeat_memory = [] # appended whenever hit by a move, cleared whenever you r
 
 var target_ID = null # nodepath of the opponent, changes whenever you land a hit on an opponent or is attacked
 var seq_partner_ID = null
+var seq_partner_type = Em.seq_partner.CHAR
 
 var current_command: String = "start" # key to a COMMANDS dictionary on UniqChar
 var command_timer := 0 # timer that counts up
@@ -279,7 +280,7 @@ func setup_boxes(ref_rect): # set up detection boxes
 	
 	$PlayerCollisionBox.rect_position = ref_rect.rect_position
 	$PlayerCollisionBox.rect_size = ref_rect.rect_size
-	$PlayerCollisionBox.add_to_group("Mobs")
+	$PlayerCollisionBox.add_to_group("MobBoxes")
 	$PlayerCollisionBox.add_to_group("Grounded")
 
 
@@ -318,7 +319,17 @@ func initial_targeting(): # target closest player at start
 	
 func get_seq_partner():
 	if seq_partner_ID == null: return null
-	var Partner = Globals.Game.get_player_node(seq_partner_ID)
+	var Partner
+	if state == Em.char_state.SEQ_USER:
+		Partner = Globals.Game.get_player_node(seq_partner_ID)
+	else:
+		match seq_partner_type:
+			Em.seq_partner.CHAR:
+				Partner = Globals.Game.get_player_node(seq_partner_ID)
+			Em.seq_partner.ENTITY:
+				Partner = Globals.Game.get_entity_node(seq_partner_ID)
+			Em.seq_partner.NPC, Em.seq_partner.ASSIST:
+				Partner = Globals.Game.get_NPC_node(seq_partner_ID)
 	if Partner == null:
 		return null
 	if Partner == self:
@@ -1695,20 +1706,18 @@ func check_landing(): # called by physics.gd when character stopped by floor
 				UniqChar.landing_sound() # only make landing sound if landed fast enough, or very annoying
 			
 		Em.char_state.LAUNCHED_HITSTUN: # land during launch_hitstun, can bounce or tech land
-			if new_state == Em.char_state.LAUNCHED_HITSTUN:
-				# need to use new_state to prevent an issue with grounded Break state causing HardLanding on flinch
-				# check using either velocity this frame or last frame
+			# check using either velocity this frame or last frame
 					
-				var vector_to_check
-				if velocity.is_longer_than_another(velocity_previous_frame):
-					vector_to_check = velocity
-				else:
-					vector_to_check = velocity_previous_frame
-				
-				if !vector_to_check.is_longer_than(TECHLAND_THRESHOLD):
-					animate("SoftLanding")
-					$HitStunTimer.stop()
-					velocity.y = 0 # stop bouncing
+			var vector_to_check
+			if velocity.is_longer_than_another(velocity_previous_frame):
+				vector_to_check = velocity
+			else:
+				vector_to_check = velocity_previous_frame
+			
+			if !vector_to_check.is_longer_than(TECHLAND_THRESHOLD):
+				animate("SoftLanding")
+				$HitStunTimer.stop()
+				velocity.y = 0 # stop bouncing
 #					UniqChar.landing_sound()
 #					modulate_play("unflinch_flash")
 #					play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
@@ -1869,14 +1878,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 #		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 
-		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, \
 				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
 	else:
@@ -1886,14 +1895,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, null, \
 				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 		
-	Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
+	Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
 			starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, null, \
 				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 		
@@ -2376,10 +2385,18 @@ func query_move_data(in_move_name = null):
 	
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
+	var defender
+	var defender_ID2 : int  # depends if defender is player or NPC
+	if Em.hit.NPC_DEFENDER_PATH in hit_data:
+		defender = 	Globals.Game.get_node(hit_data[Em.hit.NPC_DEFENDER_PATH])
+		defender_ID2 = defender.NPC_ID
+	else:
+		defender = 	Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
+		defender_ID2 = defender.player_ID
+		
 	if defender == null:
 		return # defender is deleted
-	increment_hitcount(hit_data[Em.hit.DEFENDER_ID]) # for measuring hitcount of attacks
+	increment_hitcount(defender_ID2) # for measuring hitcount of attacks
 	
 	match hit_data[Em.hit.BLOCK_STATE]:
 		Em.block_state.UNBLOCKED:
@@ -2406,7 +2423,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 
 	# PUSHBACK ----------------------------------------------------------------------------------------------
 		
-	if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data or !can_air_strafe(hit_data[Em.hit.MOVE_DATA]):
+	if Em.hit.NPC_DEFENDER_PATH in hit_data:
+		pass # no pushback when hitting NPCs
+	elif Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data or !can_air_strafe(hit_data[Em.hit.MOVE_DATA]):
 		pass # if an attack does not allow air strafing, it cannot be pushed back
 	else:
 		
@@ -2450,6 +2469,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var attacker_or_entity = attacker # cleaner code
 	if Em.hit.ENTITY_PATH in hit_data:
 		attacker_or_entity = get_node(hit_data[Em.hit.ENTITY_PATH])
+	elif Em.hit.NPC_PATH in hit_data:
+		attacker_or_entity = get_node(hit_data[Em.hit.NPC_PATH])
 
 	if attacker_or_entity == null:
 		hit_data[Em.hit.CANCELLED] = true
@@ -2544,6 +2565,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		root_move_name = hit_data[Em.hit.MOVE_DATA][Em.move.ROOT]
 	else:
 		root_move_name = hit_data[Em.hit.MOVE_NAME]
+		
+	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		root_move_name += "Assist"
 	
 	if !Em.atk_attr.REPEATABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !Em.hit.ENTITY_PATH in hit_data:
 		
@@ -2680,6 +2704,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.hit.ENTITY_PATH in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit0"):
 			attacker_or_entity.UniqEntity.landed_a_hit0(hit_data) # reaction, can change hit_data from there
+	elif Em.hit.NPC_PATH in hit_data:
+		if attacker_or_entity.UniqNPC.has_method("landed_a_hit0"):
+			attacker_or_entity.UniqNPC.landed_a_hit0(hit_data) # reaction, can change hit_data from there
 	elif attacker.UniqChar.has_method("landed_a_hit0"):
 		attacker.UniqChar.landed_a_hit0(hit_data) # reaction, can change hit_data from there
 	
@@ -2752,6 +2779,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.hit.ENTITY_PATH in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit"):
 			attacker_or_entity.UniqEntity.landed_a_hit(hit_data) # reaction, can change hit_data from there
+	elif Em.hit.NPC_PATH in hit_data:
+		if attacker_or_entity.UniqNPC.has_method("landed_a_hit"):
+			attacker_or_entity.UniqNPC.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	elif attacker.UniqChar.has_method("landed_a_hit"):
 		attacker.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
 	
@@ -2894,7 +2924,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# HITSTOP ---------------------------------------------------------------------------------------------------
 	
 	if !hit_data[Em.hit.LETHAL_HIT]:
-		hitstop = calculate_hitstop(hit_data, knockback_strength)
+		hitstop = calculate_hitstop(hit_data, hit_data[Em.hit.KB])
 	else:
 		hitstop = LETHAL_HITSTOP # set for defender, attacker has no hitstop during LETHAL_HITSTOP
 								# screenfreeze for everyone but the defender till their hitstop is over
@@ -2932,6 +2962,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.hit.ENTITY_PATH in hit_data:
 		if attacker_or_entity.UniqEntity.has_method("landed_a_hit2"):
 			attacker_or_entity.UniqEntity.landed_a_hit2(hit_data) # reaction, can change hit_data from there
+	elif Em.hit.NPC_PATH in hit_data:
+		if attacker_or_entity.UniqNPC.has_method("landed_a_hit2"):
+			attacker_or_entity.UniqNPC.landed_a_hit2(hit_data) # reaction, can change hit_data from there
 	elif attacker.UniqChar.has_method("landed_a_hit2"):
 		attacker.UniqChar.landed_a_hit2(hit_data) # reaction, can change hit_data from there
 	
@@ -2962,7 +2995,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.hit.SUPERARMORED in hit_data and !hit_data[Em.hit.LETHAL_HIT]:
 		if grounded:
 			var knock_dir := 0
-			var segment = Globals.split_angle(knockback_dir, Em.angle_split.FOUR, hit_data[Em.hit.ATK_FACING])
+			var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.FOUR, hit_data[Em.hit.ATK_FACING])
 			match segment:
 				Em.compass.E:
 					knock_dir = 1
@@ -2976,7 +3009,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if guardbroken:
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if has_trait(Em.trait.NO_LAUNCH) or knockback_strength < LAUNCH_THRESHOLD or (adjusted_atk_level <= 1 and !mass_proj_repeat):
+		if has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or (adjusted_atk_level <= 1 and !mass_proj_repeat):
 
 			var no_impact := false
 			
@@ -3000,7 +3033,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						no_impact = true
 						
 			if !no_impact and !no_impact_and_vel_change:
-				var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
+				var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.TWO, -dir_to_attacker)
 				if !Em.hit.PULL in hit_data:
 					match segment:
 						Em.compass.E:
@@ -3051,8 +3084,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				else:
 					wall_slammed = Em.wall_slam.CANNOT_SLAM
 			
-			knockback_strength += LAUNCH_BOOST
-			var segment = Globals.split_angle(knockback_dir, Em.angle_split.EIGHT, dir_to_attacker)
+			hit_data[Em.hit.KB] += LAUNCH_BOOST
+			var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.EIGHT, dir_to_attacker)
 			match segment:
 				Em.compass.N:
 					face(dir_to_attacker) # turn towards attacker
@@ -3091,7 +3124,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				!Em.hit.SINGLE_REPEAT in hit_data and \
 				hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
 			
-			var segment = Globals.split_angle(knockback_dir, Em.angle_split.TWO, -dir_to_attacker)
+			var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.TWO, -dir_to_attacker)
 			if !Em.hit.PULL in hit_data:
 				match segment:
 					Em.compass.E:
@@ -3124,8 +3157,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 					
 	if !no_impact_and_vel_change:
-		velocity.set_vector(knockback_strength, 0)  # reset momentum
-		velocity.rotate(knockback_dir)
+		velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
+		velocity.rotate(hit_data[Em.hit.KB_ANGLE])
 		
 		if !guardbroken and grounded and !hit_data[Em.hit.LETHAL_HIT]:
 			velocity.y = 0 # set to horizontal pushback on non-guardbroken grounded defender
@@ -3174,10 +3207,17 @@ func calculate_damage(hit_data) -> int:
 	
 
 func calculate_guard_gauge_change(hit_data) -> int:
-	
-	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data) or Em.hit.FOLLOW_UP in hit_data:  
-	# for multi-hit/autochain moves, only first hit affect GG
+		
+	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data: # for multi-hit, only first hit affect GG
 		return 0
+		
+	if Em.hit.FOLLOW_UP in hit_data:
+		if hit_data[Em.hit.ATKER_OR_ENTITY] != null and (("chain_combo" in hit_data[Em.hit.ATKER_OR_ENTITY] and \
+				hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.RESET) or \
+				("autochain_landed" in hit_data[Em.hit.ATKER_OR_ENTITY] and !hit_data[Em.hit.ATKER_OR_ENTITY].autochain_landed)):
+			# for autochain, followups only affect GG if first hit whiffs
+			pass
+		else: return 0
 
 	if guardbroken: # if guardbroken, no Guard Drain
 		return 0
@@ -3615,6 +3655,7 @@ func landed_a_sequence(hit_data):
 		
 	seq_partner_ID = defender.player_ID
 	defender.seq_partner_ID = player_ID
+	defender.seq_partner_type = Em.seq_partner.CHAR
 		
 	animate(hit_data[Em.hit.MOVE_DATA][Em.move.SEQ])
 	defender.animate("aSeqFlinchAFreeze") # first pose to set defender's state
@@ -3647,7 +3688,13 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 		animate("Idle")
 		return
 		
-	var seq_hit_data = seq_user.UniqChar.get_seq_hit_data(hit_key)
+	var UniqData
+	if "NPC_ID" in seq_user:
+		UniqData = seq_user.UniqNPC
+	else:
+		UniqData = seq_user.UniqChar
+		
+	var seq_hit_data = UniqData.get_seq_hit_data(hit_key)
 	var lethal = take_seq_damage(seq_hit_data[Em.move.DMG])
 	
 	if Em.move.SEQ_HITSTOP in seq_hit_data and !Em.move.SEQ_WEAK in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
@@ -3673,9 +3720,15 @@ func sequence_launch():
 	var dir_to_attacker = sign(position.x - seq_user.position.x)
 	if dir_to_attacker == 0: dir_to_attacker = facing
 	
-	if !seq_user.Animator.to_play_anim in seq_user.UniqChar.MOVE_DATABASE:
+	var UniqData
+	if "NPC_ID" in seq_user:
+		UniqData = seq_user.UniqNPC
+	else:
+		UniqData = seq_user.UniqChar
+	
+	if !seq_user.Animator.to_play_anim in UniqData.MOVE_DATABASE:
 		print("Error: " + Animator.to_play_anim + " auto-sequence not found in database.")
-	var seq_data = seq_user.UniqChar.get_seq_launch_data()
+	var seq_data = UniqData.get_seq_launch_data()
 	
 #		Em.move.SEQ_LAUNCH : { # for final hit of sequence
 #			Em.move.DMG : 0,
@@ -3818,7 +3871,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					if healed != null and healed > 0:
 						Globals.Game.spawn_damage_number(healed, killer.position, Em.dmg_num_col.GREEN)
 						
-			Globals.Game.spawn_afterimage(player_ID, false, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
 					1.0, 20, Em.afterimage_shader.WHITE)
 			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})
@@ -4042,6 +4095,7 @@ func save_state():
 		"launchstun_rotate" : launchstun_rotate,
 		"target_ID" : target_ID,
 		"seq_partner_ID" : seq_partner_ID,
+		"seq_partner_type" : seq_partner_type,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -4126,6 +4180,7 @@ func load_state(state_data):
 	launchstun_rotate = state_data.launchstun_rotate
 	target_ID = state_data.target_ID
 	seq_partner_ID = state_data.seq_partner_ID
+	seq_partner_type = state_data.seq_partner_type
 	
 	sprite_texture_ref = state_data.sprite_texture_ref
 	

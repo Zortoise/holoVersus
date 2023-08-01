@@ -28,7 +28,7 @@ func init_with_loaded_frame_data(in_sprite, loaded_frame_data):
 	for key in loaded_frame_data.frame_data.keys():
 		animations[key] = loaded_frame_data.frame_data[key]
 		
-# for mobs which require frame data already loaded, can have multiple .tres files so pass in an array
+# for things which require frame data already loaded, can have multiple .tres files so pass in an array
 func init_with_loaded_frame_data_array(in_sprite, in_sfx_over, in_sfx_under, frame_data_array):
 	
 	sprite = in_sprite

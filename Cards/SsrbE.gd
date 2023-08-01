@@ -48,7 +48,7 @@ func init(_aux_data: Dictionary):
 	Entity.life_point = 1
 	
 	Entity.unique_data["timer_ID"] = Globals.Game.spawn_entity(Entity.master_ID, "SsrbTimerE", Entity.position, \
-			{"facing" : 1, "sticky_ID" : Entity.entity_ID}).entity_ID
+			{"facing" : 1, "sticky_ID" : Entity.entity_ID}).entity_ID # note, this is NOT a sticky SFX
 	
 	Entity.play_audio("matches1", {"vol" : -15})
 		

@@ -200,6 +200,7 @@ func change_scene(new_scene: String): # called by animation
 		Settings.save_training_settings(Globals.training_settings)
 		
 	Globals.training_mode = false
+	Loader.reset()
 		
 	get_tree().change_scene(new_scene)
 	

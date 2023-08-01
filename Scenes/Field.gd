@@ -146,42 +146,95 @@ func simulate():
 			for node in get_tree().get_nodes_in_group("EntityNodes"):
 				if node.master_ID != master_ID:
 					inflict(node)
+					
+		if Em.field_target.NPCS in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("NPCNodes"):
+				inflict(node)
+					
+		if Em.field_target.MASTER_NPCS in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("NPCNodes"):
+				if node.master_ID == master_ID:
+					inflict(node)
+					
+		if Em.field_target.OPPONENT_NPCS in UniqEntity.TARGETS:
+			for node in get_tree().get_nodes_in_group("NPCNodes"):
+				if node.master_ID != master_ID:
+					inflict(node)
 
 				
 		if Em.field_target.EFFECTS in UniqEntity.TARGETS:
-			for node in Globals.Game.get_node("SFXFront").get_children(): # sticky_ID != positive
+			
+			var sfx_nodes = Globals.Game.get_node("SFXFront").get_children()
+			sfx_nodes.append_array(Globals.Game.get_node("SFXBack").get_children())
+			
+			for node in sfx_nodes:
 				if node.field: pass
 				elif node.sticky_ID != null:
+					
 					if Em.field_target.MOBS in UniqEntity.TARGETS:
-						if node.sticky_ID < 0: inflict(node)
+						if node.sticky_type == Em.sticky_sfx_type.CHAR and node.sticky_ID < 0: inflict(node)
 					if Em.field_target.PLAYERS in UniqEntity.TARGETS:
-						if node.sticky_ID >= 0: inflict(node)
+						if node.sticky_type == Em.sticky_sfx_type.CHAR and node.sticky_ID >= 0: inflict(node)
 					if Em.field_target.MASTER in UniqEntity.TARGETS:
-						if node.sticky_ID == master_ID: inflict(node)
+						if node.sticky_type == Em.sticky_sfx_type.CHAR and node.sticky_ID == master_ID: inflict(node)
 					if Em.field_target.OPPONENTS in UniqEntity.TARGETS:
-						if node.sticky_ID != master_ID: inflict(node)
+						if node.sticky_type == Em.sticky_sfx_type.CHAR and node.sticky_ID != master_ID: inflict(node)
+						
+					if Em.field_target.PLAYER_ENTITIES in UniqEntity.TARGETS:
+						if node.sticky_type == Em.sticky_sfx_type.ENTITY and \
+								Globals.Game.get_entity_node(node.sticky_ID).master_ID >= 0: inflict(node)
+					if Em.field_target.MOB_ENTITIES in UniqEntity.TARGETS:
+						if node.sticky_type == Em.sticky_sfx_type.ENTITY and \
+								Globals.Game.get_entity_node(node.sticky_ID).master_ID < 0: inflict(node)
+					if Em.field_target.MASTER_ENTITIES in UniqEntity.TARGETS:
+						if node.sticky_type == Em.sticky_sfx_type.ENTITY and \
+								Globals.Game.get_entity_node(node.sticky_ID).master_ID == master_ID: inflict(node)
+					if Em.field_target.OPPONENT_ENTITIES in UniqEntity.TARGETS:
+						if node.sticky_type == Em.sticky_sfx_type.ENTITY and \
+								Globals.Game.get_entity_node(node.sticky_ID).master_ID != master_ID: inflict(node)
+					
+					if Em.field_target.NPCS in UniqEntity.TARGETS:
+						if node.sticky_type == Em.sticky_sfx_type.NPC: inflict(node)		
+					if Em.field_target.MASTER_NPCS in UniqEntity.TARGETS:
+						if node.sticky_type == Em.sticky_sfx_type.NPC and \
+								Globals.Game.get_NPC_node(node.sticky_ID).master_ID == master_ID: inflict(node)
+					if Em.field_target.OPPONENT_NPCS in UniqEntity.TARGETS:
+						if node.sticky_type == Em.sticky_sfx_type.NPC and \
+								Globals.Game.get_NPC_node(node.sticky_ID).master_ID != master_ID: inflict(node)
+						
 				else: inflict(node)
-			for node in Globals.Game.get_node("SFXBack").get_children(): # sticky_ID != positive
-				if node.field: pass
-				elif node.sticky_ID != null:
-					if Em.field_target.MOBS in UniqEntity.TARGETS:
-						if node.sticky_ID < 0: inflict(node)
-					if Em.field_target.PLAYERS in UniqEntity.TARGETS:
-						if node.sticky_ID >= 0: inflict(node)
-					if Em.field_target.MASTER in UniqEntity.TARGETS:
-						if node.sticky_ID == master_ID: inflict(node)
-					if Em.field_target.OPPONENTS in UniqEntity.TARGETS:
-						if node.sticky_ID != master_ID: inflict(node)
-				else: inflict(node)
+				
 			for node in Globals.Game.get_node("Afterimages").get_children(): # original_ID is negative
 				if Em.field_target.MOBS in UniqEntity.TARGETS:
-					if node.original_ID < 0: inflict(node)
+					if node.type == Em.afterimage_type.CHAR and node.original_ID < 0: inflict(node)
 				if Em.field_target.PLAYERS in UniqEntity.TARGETS:
-					if node.original_ID >= 0: inflict(node)
+					if node.type == Em.afterimage_type.CHAR and node.original_ID >= 0: inflict(node)
 				if Em.field_target.MASTER in UniqEntity.TARGETS:
-					if node.original_ID == master_ID: inflict(node)
+					if node.type == Em.afterimage_type.CHAR and node.original_ID == master_ID: inflict(node)
 				if Em.field_target.OPPONENTS in UniqEntity.TARGETS:
-					if node.original_ID != master_ID: inflict(node)
+					if node.type == Em.afterimage_type.CHAR and node.original_ID != master_ID: inflict(node)
+					
+				if Em.field_target.PLAYER_ENTITIES in UniqEntity.TARGETS:
+					if node.type == Em.afterimage_type.ENTITY and \
+							Globals.Game.get_entity_node(node.original_ID).master_ID >= 0: inflict(node)
+				if Em.field_target.MOB_ENTITIES in UniqEntity.TARGETS:
+					if node.type == Em.afterimage_type.ENTITY and \
+							Globals.Game.get_entity_node(node.original_ID).master_ID < 0: inflict(node)
+				if Em.field_target.MASTER_ENTITIES in UniqEntity.TARGETS:
+					if node.type == Em.afterimage_type.ENTITY and \
+							Globals.Game.get_entity_node(node.original_ID).master_ID == master_ID: inflict(node)
+				if Em.field_target.OPPONENT_ENTITIES in UniqEntity.TARGETS:
+					if node.type == Em.afterimage_type.ENTITY and \
+							Globals.Game.get_entity_node(node.original_ID).master_ID != master_ID: inflict(node)
+				
+				if Em.field_target.NPCS in UniqEntity.TARGETS:
+					if node.type == Em.afterimage_type.NPC: inflict(node)		
+				if Em.field_target.MASTER_NPCS in UniqEntity.TARGETS:
+					if node.type == Em.afterimage_type.NPC and \
+							Globals.Game.get_NPC_node(node.original_ID).master_ID == master_ID: inflict(node)
+				if Em.field_target.OPPONENT_NPCS in UniqEntity.TARGETS:
+					if node.type == Em.afterimage_type.NPC and \
+							Globals.Game.get_NPC_node(node.original_ID).master_ID != master_ID: inflict(node)
 				
 
 

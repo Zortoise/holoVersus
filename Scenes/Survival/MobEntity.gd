@@ -105,7 +105,7 @@ func load_entity():
 		var ref_rect = UniqEntity.get_node("DefaultCollisionBox")
 		$EntityCollisionBox.rect_position = ref_rect.rect_position
 		$EntityCollisionBox.rect_size = ref_rect.rect_size
-		$EntityCollisionBox.add_to_group("Entities")
+		$EntityCollisionBox.add_to_group("EntityBoxes")
 		
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
@@ -244,6 +244,7 @@ func interactions():
 
 			 # get characters that can destroy this entity
 			var character_array = get_tree().get_nodes_in_group("PlayerNodes")
+			var npc_array = get_tree().get_nodes_in_group("NPCNodes")
 			var destroyer_array = []
 			
 			for character in character_array:
@@ -259,6 +260,16 @@ func interactions():
 							(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
 							Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
 						destroyer_array.append(character)
+						
+				for npc in npc_array:
+					if npc.master_ID != master_ID and (!"free" in npc or !npc.free) and npc.is_atk_active() and \
+							npc.slowed >= 0:
+						var char_move_data = npc.query_move_data()
+
+						if !indestructible and Em.move.DMG in char_move_data and \
+								(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
+								Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
+							destroyer_array.append(npc)
 					
 			 # get entities that can destroy or clash with this entity
 			var entity_array = get_tree().get_nodes_in_group("EntityNodes")
@@ -281,6 +292,12 @@ func interactions():
 						if intersect_polygons.size() > 0: # detected intersection
 							UniqEntity.kill()
 							to_destroy = true
+							if "UniqChar" in destroyer:
+								if destroyer.UniqChar.has_method("destroyed_entity"):
+									destroyer.UniqChar.destroyed_entity()
+							elif "UniqNPC" in destroyer:
+								if destroyer.UniqNPC.has_method("destroyed_entity"):
+									destroyer.UniqNPC.destroyed_entity()
 							break
 					
 			# check for clashes
@@ -468,13 +485,18 @@ func modify_stat(to_return, attr: int, values: Array):
 
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 	
-	var attacker = Globals.Game.get_player_node(hit_data[Em.hit.ATKER_ID]) # will be this entity's master
-	if attacker != null:
-		attacker.target_ID = hit_data[Em.hit.DEFENDER_ID] # target last attacked opponent
-
-#	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
-	
-	increment_hitcount(hit_data[Em.hit.DEFENDER_ID]) # for measuring hitcount of attacks
+	var defender
+	var defender_ID2 : int  # depends if defender is player or NPC
+	if Em.hit.NPC_DEFENDER_PATH in hit_data:
+		defender = 	Globals.Game.get_node(hit_data[Em.hit.NPC_DEFENDER_PATH])
+		defender_ID2 = defender.NPC_ID
+	else:
+		defender = 	Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
+		defender_ID2 = defender.player_ID
+		
+	if defender == null:
+		return # defender is deleted
+	increment_hitcount(defender_ID2) # for measuring hitcount of attacks
 
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------

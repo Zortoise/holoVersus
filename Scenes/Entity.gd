@@ -119,7 +119,7 @@ func load_entity():
 		var ref_rect = UniqEntity.get_node("DefaultCollisionBox")
 		$EntityCollisionBox.rect_position = ref_rect.rect_position
 		$EntityCollisionBox.rect_size = ref_rect.rect_size
-		$EntityCollisionBox.add_to_group("Entities")
+		$EntityCollisionBox.add_to_group("EntityBoxes")
 		
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")
@@ -155,10 +155,15 @@ func load_entity():
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Loader.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", Loader.sfx_palettes[palette_ref])
-		elif master_ref != null and palette_ref in Loader.char_data[master_ref].palettes: # same palette as creator, just don't add PALETTE to UniqEntity
+		elif master_ref != null and master_ref in Loader.char_data and palette_ref in Loader.char_data[master_ref].palettes:
+			# same palette as creator, just don't add PALETTE to UniqEntity
 			$Sprite.material = ShaderMaterial.new()
 			$Sprite.material.shader = Loader.loaded_palette_shader
 			$Sprite.material.set_shader_param("swap", Loader.char_data[master_ref].palettes[palette_ref])
+		elif master_ref != null and master_ref in Loader.NPC_data and palette_ref in Loader.NPC_data[master_ref].palettes:
+			$Sprite.material = ShaderMaterial.new()
+			$Sprite.material.shader = Loader.loaded_palette_shader
+			$Sprite.material.set_shader_param("swap", Loader.NPC_data[master_ref].palettes[palette_ref])
 				
 	if UniqEntity.has_method("load_entity"):
 		UniqEntity.load_entity()
@@ -279,7 +284,8 @@ func moving_platform(position_change: Vector2, rider_boxes: Array):
 	
 	# apply position_change vector to all riding entities
 	for rider_box in rider_boxes:
-		if rider_box.is_in_group("Players") or rider_box.is_in_group("Mobs") or rider_box.is_in_group("Entities"):
+		if rider_box.is_in_group("PlayerBoxes") or rider_box.is_in_group("MobBoxes") or rider_box.is_in_group("NPCBoxes") or \
+				rider_box.is_in_group("EntityBoxes"):
 			 # rider is player character/grounded entity
 			# position_change need to be in integer!'
 			var rider = rider_box.get_parent()
@@ -301,7 +307,7 @@ func moving_platform(position_change: Vector2, rider_boxes: Array):
 			rider_box.get_parent().position += position_change # for grounded sfx, don't need to check for collision
 			
 	
-func interactions():
+func interactions(): # not active in survival_mode due to performance issues
 	
 	if !to_destroy and UniqEntity.has_method("kill") and !Animator.to_play_anim.ends_with("Kill"):
 		var my_hitbox = Animator.query_polygon("hitbox")
@@ -332,9 +338,8 @@ func interactions():
 #			elif Em.atk_attr.REFLECT_ENTITIES in query_atk_attr()
 
 			 # get characters that can destroy this entity
-			var character_array = []
-#			if Globals.survival_level == null:
-			character_array = get_tree().get_nodes_in_group("PlayerNodes")
+			var character_array = get_tree().get_nodes_in_group("PlayerNodes")
+			var npc_array = get_tree().get_nodes_in_group("NPCNodes")
 #			else:
 #				character_array = get_tree().get_nodes_in_group("MobNodes")
 			var destroyer_array = []
@@ -354,6 +359,19 @@ func interactions():
 							(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
 							Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
 						destroyer_array.append(character)
+						
+			for npc in npc_array:
+				if npc.master_ID != master_ID and (!"free" in npc or !npc.free) and npc.is_atk_active() and \
+						npc.slowed >= 0:
+					var char_move_data = npc.query_move_data()
+					if reflectable and Em.atk_attr.REFLECT_ENTITIES in char_move_data[Em.move.ATK_ATTR] and \
+							sign(npc.position.x - position.x) == sign(velocity.x): # can only reflect approaching projectiles
+						reflector_array_char.append(npc)
+
+					if !indestructible and Em.move.DMG in char_move_data and \
+							(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
+							Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
+						destroyer_array.append(npc)
 					
 #			if Globals.survival_level == null:
 				 # get entities that can destroy or clash with this entity
@@ -389,10 +407,15 @@ func interactions():
 					
 					if my_rect.intersects(their_rect):
 						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
-						if intersect_polygons.size() > 0: # detected intersection	
-							reflect(reflector.player_ID)
-							if reflector.UniqChar.has_method("reflected_entity"):
-								reflector.UniqChar.reflected_entity()
+						if intersect_polygons.size() > 0: # detected intersection
+							if "UniqChar" in reflector:
+								reflect(reflector.player_ID)
+								if reflector.UniqChar.has_method("reflected_entity"):
+									reflector.UniqChar.reflected_entity()
+							elif "UniqNPC" in reflector:
+								reflect(reflector.master_ID)
+								if reflector.UniqNPC.has_method("reflected_entity"):
+									reflector.UniqNPC.reflected_entity()
 							return
 							
 			for reflector in reflector_array_entity:
@@ -419,6 +442,12 @@ func interactions():
 						if intersect_polygons.size() > 0: # detected intersection
 							UniqEntity.kill()
 							to_destroy = true
+							if "UniqChar" in destroyer:
+								if destroyer.UniqChar.has_method("destroyed_entity"):
+									destroyer.UniqChar.destroyed_entity()
+							elif "UniqNPC" in destroyer:
+								if destroyer.UniqNPC.has_method("destroyed_entity"):
+									destroyer.UniqNPC.destroyed_entity()
 							break
 					
 			# check for clashes
@@ -621,12 +650,18 @@ func get_proj_level(in_move_name = null):
 
 func landed_a_hit(hit_data): # called by main game node when landing a hit
 
-	var defender = Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
+	var defender
+	var defender_ID2 : int  # depends if defender is player or NPC
+	if Em.hit.NPC_DEFENDER_PATH in hit_data:
+		defender = 	Globals.Game.get_node(hit_data[Em.hit.NPC_DEFENDER_PATH])
+		defender_ID2 = defender.NPC_ID
+	else:
+		defender = 	Globals.Game.get_player_node(hit_data[Em.hit.DEFENDER_ID])
+		defender_ID2 = defender.player_ID
+		
 	if defender == null:
 		return # defender is deleted
-	increment_hitcount(hit_data[Em.hit.DEFENDER_ID]) # for measuring hitcount of attacks
-	
-	Globals.Game.get_player_node(master_ID).target_ID = hit_data[Em.hit.DEFENDER_ID] # target last attacked opponent
+	increment_hitcount(defender_ID2) # for measuring hitcount of attacks
 
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame

@@ -71,7 +71,7 @@ func load_entity():
 		var ref_rect = UniqEntity.get_node("DefaultCollisionBox")
 		$EntityCollisionBox.rect_position = ref_rect.rect_position
 		$EntityCollisionBox.rect_size = ref_rect.rect_size
-		$EntityCollisionBox.add_to_group("Entities") # for moving platforms and offstage detection
+		$EntityCollisionBox.add_to_group("EntityBoxes") # for moving platforms and offstage detection
 		
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			$EntityCollisionBox.add_to_group("Grounded")

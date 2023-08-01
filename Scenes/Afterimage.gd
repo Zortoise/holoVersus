@@ -11,7 +11,7 @@ var color_modulate
 var starting_modulate_a
 
 var original_ID : int
-var is_entity : bool
+var type : int
 var spritesheet_ref: String
 var master_ref = null
 var palette_ref = null
@@ -20,11 +20,11 @@ var ignore_freeze := false
 var slowed := 0
 
 
-func init(in_original_ID : int, in_is_entity: bool, in_spritesheet_ref: String, sprite_node_path: NodePath, in_master_ref = null, in_palette_ref = null, \
+func init(in_original_ID : int, in_type: int, in_spritesheet_ref: String, sprite_node_path: NodePath, in_master_ref = null, in_palette_ref = null, \
 		in_color_modulate = null, in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Em.afterimage_shader.MASTER):
 	
 	original_ID = in_original_ID
-	is_entity = in_is_entity
+	type = in_type
 	spritesheet_ref = in_spritesheet_ref
 	master_ref = in_master_ref
 	palette_ref = in_palette_ref
@@ -58,16 +58,22 @@ func init(in_original_ID : int, in_is_entity: bool, in_spritesheet_ref: String, 
 		
 func set_texture():
 	
-	if is_entity:
-		if spritesheet_ref in Loader.entity_data: # entity afterimage
-			$Sprite.texture = Loader.entity_data[spritesheet_ref].spritesheet
-		else:
-			print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
-	else:
-		if master_ref in Loader.char_data: # character afterimage
-			$Sprite.texture = Loader.char_data[master_ref].spritesheet[spritesheet_ref]
-		else:
-			print("Error: " + master_ref + " spritesheet not found in Afterimage.gd.")
+	match type:
+		Em.afterimage_type.ENTITY:
+			if spritesheet_ref in Loader.entity_data: # entity afterimage
+				$Sprite.texture = Loader.entity_data[spritesheet_ref].spritesheet
+			else:
+				print("Error: " + spritesheet_ref + " spritesheet not found in Afterimage.gd.")
+		Em.afterimage_type.CHAR:
+			if master_ref in Loader.char_data: # character afterimage
+				$Sprite.texture = Loader.char_data[master_ref].spritesheet[spritesheet_ref]
+			else:
+				print("Error: " + master_ref + " spritesheet not found in Afterimage.gd.")
+		Em.afterimage_type.NPC:
+			if master_ref in Loader.NPC_data: # NPC afterimage
+				$Sprite.texture = Loader.NPC_data[master_ref].spritesheet[spritesheet_ref]
+			else:
+				print("Error: " + master_ref + " spritesheet not found in Afterimage.gd.")
 	
 #	if mob_ref == null:
 #		if master_ID != 999:
@@ -98,10 +104,20 @@ func apply_shader():
 		Em.afterimage_shader.NONE:
 			pass
 		Em.afterimage_shader.MASTER:
-			if palette_ref in Loader.char_data[master_ref].palettes:
+			if master_ref in Loader.char_data and palette_ref in Loader.char_data[master_ref].palettes:
 				$Sprite.material = ShaderMaterial.new()
 				$Sprite.material.shader = Loader.loaded_palette_shader
 				$Sprite.material.set_shader_param("swap", Loader.char_data[master_ref].palettes[palette_ref])
+			elif master_ref in Loader.NPC_data and palette_ref in Loader.NPC_data[master_ref].palettes:
+				$Sprite.material = ShaderMaterial.new()
+				$Sprite.material.shader = Loader.loaded_palette_shader
+				$Sprite.material.set_shader_param("swap", Loader.NPC_data[master_ref].palettes[palette_ref])
+			
+#			if palette_ref in Loader.char_data[master_ref].palettes:
+#				$Sprite.material = ShaderMaterial.new()
+#				$Sprite.material.shader = Loader.loaded_palette_shader
+#				$Sprite.material.set_shader_param("swap", Loader.char_data[master_ref].palettes[palette_ref])
+
 #			if mob_ref != null:
 #				if mob_palette_ref in Globals.Game.LevelControl.mob_data[mob_ref].palettes:
 #					$Sprite.material = ShaderMaterial.new()
@@ -126,15 +142,19 @@ func simulate():
 		return
 	slowed = 0
 	
-	if is_entity:
-		var entity_node = Globals.Game.get_entity_node(original_ID)
-		if entity_node != null and entity_node.get_node("HitStopTimer").is_running():
-			return
-	
-	else:
-		var master_node = Globals.Game.get_player_node(original_ID)
-		if master_node != null and master_node.get_node("HitStopTimer").is_running() and !master_node.get_node("HitStunTimer").is_running():
-			return # does not advance if afterimage owner is a player and is in attacker hitstop
+	match type:
+		Em.afterimage_type.ENTITY:
+			var entity_node = Globals.Game.get_entity_node(original_ID)
+			if entity_node != null and entity_node.get_node("HitStopTimer").is_running():
+				return
+		Em.afterimage_type.CHAR:
+			var master_node = Globals.Game.get_player_node(original_ID)
+			if master_node != null and master_node.get_node("HitStopTimer").is_running() and !master_node.get_node("HitStunTimer").is_running():
+				return # does not advance if afterimage owner is a player and is in attacker hitstop
+		Em.afterimage_type.NPC:
+			var master_node = Globals.Game.get_NPC_node(original_ID)
+			if master_node != null and master_node.get_node("HitStopTimer").is_running():
+				return
 	
 	life -= 1.0
 	$Sprite.modulate.a = lerp(starting_modulate_a, 0.0, 1.0 - float(life)/lifetime)
@@ -148,7 +168,7 @@ func simulate():
 func save_state():
 	var state_data = {
 		"original_ID" : original_ID,
-		"is_entity" : is_entity,
+		"type" : type,
 		"spritesheet_ref" : spritesheet_ref,
 		"master_ref" : master_ref,
 		"palette_ref" : palette_ref,
@@ -173,7 +193,7 @@ func save_state():
 func load_state(state_data):
 	
 	original_ID = state_data.original_ID
-	is_entity = state_data.is_entity
+	type = state_data.type
 	spritesheet_ref = state_data.spritesheet_ref
 	master_ref = state_data.master_ref
 	palette_ref = state_data.palette_ref

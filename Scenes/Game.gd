@@ -19,6 +19,9 @@ var screen_shake_amount: float
 const SCREEN_DARKEN = Color(0.5, 0.5, 0.5)
 const FLASHING_TIME_THRESHOLD = 10
 
+const ASSIST_CD_PENALTY = 200 # increased cooldown if assist is used during hitstun or is attacked
+const ASSIST_RESCUE_OFFSET = 120 # directional offset if assist is used during hitstun
+
 onready var stage_ref = Globals.stage_ref
 onready var P1_char_ref = Globals.P1_char_ref
 onready var P1_palette = Globals.P1_palette
@@ -82,7 +85,7 @@ var darken := false # stage will turn dark
 var input_lock := true
 var screenstop := 0 # when set to a number pause game for that number of frames, used mostly for non-lethal last hit of supers
 					# (especially projectile and beam supers), often used with screenshake
-var entity_ID_ref := 0 # used to assign entity ID to entities
+var entity_ID_ref := 100 # used to assign entity ID to entities, start from 100
 
 # -----------------------------------------------------------------------------------------------------------------------
 
@@ -162,6 +165,36 @@ func setup():
 		Globals.orig_rng_seed = orig_rng_seed
 		
 	matchtime = Globals.time_limit * 60
+	
+	if Globals.survival_level == null:
+		for player in Globals.player_count:
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Coin").queue_free()
+		card_menu.queue_free()
+	else:
+		for player in Globals.player_count:
+			if Globals.difficulty >= 2:
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Coin").hide()
+			else:
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Coin").show()
+		
+	if !Globals.watching_replay:
+		viewport.get_node("ReplayControls").queue_free()
+		
+	if !Globals.training_mode:
+		if !Globals.watching_replay:
+			for player in Globals.player_count:
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/Inputs").queue_free()
+		frame_viewer.queue_free()
+		frame_viewer = null
+			
+	Globals.assists = 1 # TESTING
+			
+	if Globals.assists == 0:
+		for player in Globals.player_count:
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").queue_free()
+	else:
+		for player in Globals.player_count:
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").show()
 
 	# remove test stage node and add the real stage node
 #	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
@@ -174,15 +207,12 @@ func setup():
 	set_camera_limit()
 	
 	if Globals.time_limit == 0: # no time limit
-		HUD.get_node("MatchTime").hide()
-		HUD.get_node("TimeFrame").hide()
+		HUD.get_node("MatchTime").queue_free()
+		HUD.get_node("TimeFrame").queue_free()
 	else:
 		HUD.get_node("MatchTime").show()
 		HUD.get_node("TimeFrame").show()
 	
-	if Globals.survival_level == null or Globals.difficulty >= 2:
-		HUD.get_node("P1_HUDRect/Portrait/Coin").hide()
-		HUD.get_node("P2_HUDRect/Portrait/Coin").hide()
 	
 # ADD PLAYERS --------------------------------------------------------------------------------------------------
 	
@@ -196,7 +226,8 @@ func setup():
 		var P2 = Loader.loaded_character_scene.instance() # main character node, not unique character node
 		$Players.add_child(P2)
 		P2.init(1, P2_char_ref, P2_character, P2_position, P2_facing, P2_palette)
-		frame_viewer.P2_node = P2
+		if frame_viewer != null:
+			frame_viewer.P2_node = P2
 		
 #		P2.test = true # testing purposes
 		
@@ -211,7 +242,8 @@ func setup():
 	var P1 = Loader.loaded_character_scene.instance()
 	$Players.add_child(P1)
 	P1.init(0, P1_char_ref, P1_character, P1_position, P1_facing, P1_palette)
-	frame_viewer.P1_node = P1
+	if frame_viewer != null:
+		frame_viewer.P1_node = P1
 	
 	if Netplay.is_netplay():
 		you_label = load("res://Scenes/YouLabel.tscn").instance()
@@ -368,10 +400,12 @@ func _physics_process(_delta):
 	if Globals.debug_mode:
 		$PolygonDrawer.show()
 		if Globals.survival_level == null:
-			frame_viewer.show()
+			if frame_viewer != null:
+				frame_viewer.show()
 	else:
 		$PolygonDrawer.hide()
-		frame_viewer.hide()
+		if frame_viewer != null:
+			frame_viewer.hide()
 			
 	if Globals.watching_replay:
 		if $ReplayControl.show_hitbox:
@@ -526,6 +560,12 @@ func camera():
 			if valid:
 				focused_player_count += 1
 				players_position += player.position # add together to find midpoint
+				
+#		var NPCs = $NPCs.get_children()
+#		NPCs.append_array($Assists.get_children())
+#		for npc in NPCs:
+#			focused_player_count += 1
+#			players_position += npc.position # add together to find midpoint
 			
 	else: # survival mode
 		var player_1 = get_player_node(0)
@@ -565,6 +605,12 @@ func camera():
 				if target != player_2:
 					focused_player_count += 1
 					players_position += target.position
+					
+#		var NPCs = $NPCs.get_children()
+#		NPCs.append_array($Assists.get_children())
+#		for npc in NPCs:
+#			focused_player_count += 1
+#			players_position += npc.position # add together to find midpoint
 					
 		if focused_player_count == 0:
 			focused_player_count += 1 # mid point, if no one left alive
@@ -736,6 +782,18 @@ func simulate(rendering = true):
 			player.free() # remove killed mobs
 		else:
 			player.simulate(player_input_state)
+			
+	for npc in $NPCs.get_children():
+		if "free" in npc and npc.free:
+			npc.free() # remove freed NPCs
+		else:
+			npc.simulate()
+			
+	for assist in $Assists.get_children():
+		if "free" in assist and assist.free:
+			assist.free() # remove freed assists
+		else:
+			assist.simulate()
 
 	for entity in $EntitiesBack.get_children():
 		if entity.free:
@@ -768,6 +826,12 @@ func simulate(rendering = true):
 	# activate player's simulate_after()
 	for player in $Players.get_children():
 		player.simulate_after()
+		
+	for npc in $NPCs.get_children():
+		npc.simulate_after()
+			
+	for assist in $Assists.get_children():
+		assist.simulate_after()
 		
 	for entity in $EntitiesBack.get_children():
 		entity.simulate_after()
@@ -820,7 +884,8 @@ func simulate(rendering = true):
 	check_lethalfreeze()
 	process_screenstop()
 			
-	frame_viewer.simulate()
+	if frame_viewer != null:
+		frame_viewer.simulate()
 
 # --------------------------------------------------------------------------------------------------
 
@@ -865,6 +930,8 @@ func save_state(timestamp):
 			},
 		"current_rng_seed" : null,
 		"player_data" : {},
+		"npc_data" : [],
+		"assist_data" : [],
 		"afterimage_data" : [],
 		"entities_back_data" : [],
 		"entities_front_data" : [],
@@ -897,6 +964,12 @@ func save_state(timestamp):
 
 	for player in $Players.get_children():
 		game_state.player_data[player.player_ID] = player.save_state()
+		
+	for npc in $NPCs.get_children():
+		game_state.npc_data.append(npc.save_state())
+		
+	for assist in $Assists.get_children():
+		game_state.assist_data.append(assist.save_state())
 
 	for afterimage in $Afterimages.get_children():
 		game_state.afterimage_data.append(afterimage.save_state())
@@ -981,18 +1054,22 @@ func load_state(game_state, loading_autosave = true):
 
 	for mob in get_tree().get_nodes_in_group("MobNodes"):
 		mob.free()
-	for load_player_id in loaded_game_state.player_data.keys():
-		if load_player_id >= 0:
+	for load_player_id in loaded_game_state.player_data.keys(): # get all nodes in saved Players
+		if load_player_id >= 0: # positive player_ID is player, just load their state
 			get_player_node(load_player_id).load_state(loaded_game_state.player_data[load_player_id])
-		else:
+		else: # negative player_ID is mob, must create new mob
 			var new_mob = LevelControl.loaded_mob_scene.instance()
 			$Players.add_child(new_mob)
 			new_mob.load_state(loaded_game_state.player_data[load_player_id])
 		
-	for player in $Players.get_children():
-		player.load_state(loaded_game_state.player_data[player.player_ID])
+#	for player in $Players.get_children():
+#		player.load_state(loaded_game_state.player_data[player.player_ID])
 	
 	# remove children
+	for npc in $NPCs.get_children():
+		npc.free()
+	for assist in $Assists.get_children():
+		assist.free()
 	for afterimage in $Afterimages.get_children():
 		afterimage.free()
 	for entity in $EntitiesBack.get_children():
@@ -1016,6 +1093,16 @@ func load_state(game_state, loading_autosave = true):
 		
 		
 	# re-add children
+	for state_data in loaded_game_state.npc_data:
+		var new_npc = Loader.loaded_NPC_scene.instance()
+		$NPCs.add_child(new_npc)
+		new_npc.load_state(state_data)
+		
+	for state_data in loaded_game_state.assist_data:
+		var new_assist = Loader.loaded_assist_scene.instance()
+		$Assists.add_child(new_assist)
+		new_assist.load_state(state_data)
+	
 	for state_data in loaded_game_state.afterimage_data:
 		var new_afterimage = Loader.loaded_afterimage_scene.instance()
 		$Afterimages.add_child(new_afterimage)
@@ -1266,6 +1353,45 @@ func detect_hit():
 				hitbox[Em.hit.VACPOINT] =  polygons_queried[Em.hit.VACPOINT]
 				
 			mob_hitboxes.append(hitbox)
+			
+	var NPCs = $NPCs.get_children()
+	NPCs.append_array($Assists.get_children())
+	
+	for npc in NPCs:
+		var polygons_queried = npc.query_polygons()
+		if polygons_queried[Em.hit.HITBOX] != null: # if hitbox is not empty
+			var move_data_and_name = npc.query_move_data_and_name()
+			var hitbox = {
+				Em.hit.RECT: polygons_queried[Em.hit.RECT],
+				Em.hit.POLYGON : polygons_queried[Em.hit.HITBOX],
+				Em.hit.OWNER_ID : npc.master_ID,
+				Em.hit.NPC_PATH : npc.get_path(),
+				Em.hit.FACING: npc.facing,
+				Em.hit.MOVE_NAME : move_data_and_name[Em.hit.MOVE_NAME],
+				Em.hit.MOVE_DATA : move_data_and_name[Em.hit.MOVE_DATA], # damage, attack level, etc
+			}
+			if polygons_queried[Em.hit.SWEETBOX] != null: # if sweetbox is not empty
+				hitbox[Em.hit.SWEETBOX] = polygons_queried[Em.hit.SWEETBOX]
+			if polygons_queried[Em.hit.KBORIGIN] != null: # if kborigin is not null
+				hitbox[Em.hit.KBORIGIN] = polygons_queried[Em.hit.KBORIGIN]
+			if polygons_queried[Em.hit.VACPOINT] != null: # if kborigin is not null
+				hitbox[Em.hit.VACPOINT] =  polygons_queried[Em.hit.VACPOINT]
+				
+			player_hitboxes.append(hitbox)
+			
+		if polygons_queried[Em.hit.HURTBOX] != null:
+			var hurtbox = {
+				Em.hit.RECT: polygons_queried[Em.hit.RECT],
+				Em.hit.POLYGON : polygons_queried[Em.hit.HURTBOX],
+				Em.hit.OWNER_ID : npc.master_ID,
+				Em.hit.NPC_DEFENDER_PATH : npc.get_path(),
+				Em.hit.FACING: npc.facing,
+			}
+			if polygons_queried[Em.hit.SDHURTBOX] != null:
+				hurtbox[Em.hit.SDHURTBOX] = polygons_queried[Em.hit.SDHURTBOX]
+				
+			player_hurtboxes.append(hurtbox)
+	
 	
 	if $PolygonDrawer.visible:
 		$PolygonDrawer.activate(player_hitboxes, mob_hitboxes, player_hurtboxes, mob_hurtboxes)
@@ -1288,15 +1414,27 @@ func detect_hit():
 		var attacker_or_entity = attacker
 		if Em.hit.ENTITY_PATH in hit_data:
 			attacker_or_entity = get_node(hit_data[Em.hit.ENTITY_PATH])
+		elif Em.hit.NPC_PATH in hit_data:
+			attacker_or_entity = get_node(hit_data[Em.hit.NPC_PATH])
 			
-		var defender = get_player_node(hit_data[Em.hit.DEFENDER_ID])
+		var defender
+		var defender_ID2: int # depends if defender is player or NPC
+		if Em.hit.NPC_DEFENDER_PATH in hit_data:
+			defender = get_node(hit_data[Em.hit.NPC_DEFENDER_PATH])
+			defender_ID2 = defender.NPC_ID
+		else:
+			defender = get_player_node(hit_data[Em.hit.DEFENDER_ID])
+			defender_ID2 = defender.player_ID
 		
-		if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hit_data[Em.hit.MOVE_DATA]):
+		if attacker_or_entity.is_hitcount_maxed(defender_ID2, hit_data[Em.hit.MOVE_DATA]):
 			continue # attacker/entity must still have hitcount left, some attacks changes hitcount record of other attacks, so put this here
 		
 		defender.being_hit(hit_data) # will add stuff to hit_data, passing by reference
 		
 		if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA] and !Em.hit.CANCELLED in hit_data:
+#			if Em.hit.NPC_DEFENDER_PATH in hit_data and !Em.hit.ENTITY_PATH in hit_data:
+#				pass # if an NPC is hit by a physical attack, attacker does not do landed_a_hit()
+#			else:
 #			if !Em.hit.ENTITY_PATH in hit_data:
 #				attacker.landed_a_hit(hit_data)
 #	#				$Players.move_child(get_node(hit_data.attacker_nodepath), 0) # move attacker to bottom layer to see defender easier
@@ -1308,13 +1446,30 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 	for hitbox in hitboxes:
 		for hurtbox in hurtboxes:
 			if hitbox[Em.hit.OWNER_ID] == hurtbox[Em.hit.OWNER_ID]:
-				continue # defender must not be owner of hitbox
+				continue # defender must not be owner of hitbox, works for players and entities
+			
+#			var master_atker_ID : int = hitbox[Em.hit.OWNER_ID]
+#			var master_defender_ID : int = hurtbox[Em.hit.OWNER_ID]
 			
 			var attacker = get_player_node(hitbox[Em.hit.OWNER_ID])
 			var attacker_or_entity = attacker
 			if Em.hit.ENTITY_PATH in hitbox:
 				attacker_or_entity = get_node(hitbox[Em.hit.ENTITY_PATH])
-			var defender = get_player_node(hurtbox[Em.hit.OWNER_ID])
+			elif Em.hit.NPC_PATH in hitbox:
+				attacker_or_entity = get_node(hitbox[Em.hit.NPC_PATH])
+#				master_atker_ID = attacker_or_entity.master_ID
+				
+			var defender
+			var defender_ID2: int # depends if defender is player or NPC
+			if Em.hit.NPC_DEFENDER_PATH in hurtbox:
+				defender = get_node(hurtbox[Em.hit.NPC_DEFENDER_PATH])
+				defender_ID2 = defender.NPC_ID
+#				master_defender_ID = defender.master_ID
+			else:
+				defender = get_player_node(hurtbox[Em.hit.OWNER_ID])
+				defender_ID2 = defender.player_ID
+				
+#			if master_atker_ID == master_defender_ID: continue # cannot hit self with NPCs
 
 			if attacker_or_entity == null or defender == null: continue # invalid attack
 			
@@ -1339,7 +1494,7 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 #			else: # for entities
 #				if attacker_or_entity.is_hitcount_maxed(defender.player_ID, hitbox.move_data):
 #					continue # entity must still have hitcount left
-			if attacker_or_entity.is_player_in_ignore_list(defender.player_ID):
+			if attacker_or_entity.is_player_in_ignore_list(defender_ID2):
 				continue # defender must not be in entity's ignore list
 #			if Globals.survival_level != null and defender_mob_grace(hitbox, attacker, hurtbox, defender):
 #				continue # attacking mob cannot hit hitstunned player if not being targeted
@@ -1389,7 +1544,7 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_ent
 	
 	var hit_data = { # send this to both attacker and defender
 		Em.hit.ATKER_ID : hitbox[Em.hit.OWNER_ID],
-		Em.hit.DEFENDER_ID : hurtbox[Em.hit.OWNER_ID],
+		Em.hit.DEFENDER_ID : hurtbox[Em.hit.OWNER_ID], # for NPC defender this is their master_ID
 		Em.hit.HIT_CENTER : hit_center,
 		Em.hit.SEMI_DISJOINT: semi_disjoint,
 		Em.hit.SWEETSPOTTED : sweetspotted,
@@ -1407,6 +1562,12 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_ent
 	
 	if Em.hit.ENTITY_PATH in hitbox: # flag hit as a entity
 		hit_data[Em.hit.ENTITY_PATH] = hitbox[Em.hit.ENTITY_PATH]
+		
+	if Em.hit.NPC_PATH in hitbox: # flag attacker as an NPC
+		hit_data[Em.hit.NPC_PATH] = hitbox[Em.hit.NPC_PATH]
+		
+	if Em.hit.NPC_DEFENDER_PATH in hurtbox: # flag defender as an NPC
+		hit_data[Em.hit.NPC_DEFENDER_PATH] = hurtbox[Em.hit.NPC_DEFENDER_PATH]
 	
 	hit_data_array.append(hit_data)
 	
@@ -1751,6 +1912,7 @@ func is_stage_paused():
 # HUD ELEMENTS  --------------------------------------------------------------------------------------------------
 
 func set_input_indicator():
+		
 	for player_ID in Globals.player_count:
 		var player = get_player_node(player_ID)
 		var indicator = HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Inputs")
@@ -1819,6 +1981,17 @@ func damage_update(character, damage: int = 0):
 	if damage > 0:
 		dmg_val_indicator.get_node("../AnimationPlayer").stop() # this will restart the animation if it is playing it
 		dmg_val_indicator.get_node("../AnimationPlayer").play("damage") # shake label
+		
+				
+func install_update(character):
+	
+	var install_timer = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/InstallTime")
+	
+	if character.install_time != null and character.get_node("InstallTimer").is_running():
+		install_timer.show()
+		install_timer.value = int((character.get_node("InstallTimer").time * 100) / character.install_time)
+	else:
+		install_timer.hide()
 		
 				
 func guard_gauge_update(character):
@@ -1971,6 +2144,39 @@ func stock_points_update(character):
 					Globals.winner = [0, get_player_node(0).UniqChar.NAME]
 				
 				
+func assist_update(character):
+	if Globals.assists != 0:	
+		var assist_text = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/Assist/Text")
+		var assist_icon = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistChar")
+		
+		if character.get_node("AssistCDTimer").is_running():
+			if !character.assist_active:
+				assist_text.text = str(character.get_node("AssistCDTimer").time)
+			else:
+				assist_text.text = "Active"
+				
+			assist_text.get_node("AnimationPlayer").play("cooldown")
+			if assist_icon.material == null:
+				assist_icon.material = ShaderMaterial.new()
+				assist_icon.material.shader = Loader.monochrome_shader
+				assist_icon.modulate = Color(0.5,0.5,0.5)
+		else:
+			if character.is_hitstunned() and (character.get_node("BurstLockTimer").is_running() or character.current_guard_gauge <= 0):
+				assist_text.text = "X"
+				assist_text.get_node("AnimationPlayer").play("cooldown")
+				if assist_icon.material == null:
+					assist_icon.material = ShaderMaterial.new()
+					assist_icon.material.shader = Loader.monochrome_shader
+					assist_icon.modulate = Color(0.5,0.5,0.5)
+			else:
+				assist_text.text = "OK!"
+				assist_text.get_node("AnimationPlayer").play("ok")
+				if assist_icon.material != null:
+					assist_icon.material = null
+					assist_icon.modulate = Color(1,1,1)
+	
+
+				
 func burst_update(character):
 	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/BurstToken")
 	if character.burst_token == Em.burst.AVAILABLE:
@@ -1980,9 +2186,10 @@ func burst_update(character):
 	elif character.burst_token == Em.burst.EXHAUSTED:
 		burst_token.get_node("AnimationPlayer").play("gray")
 		
-func coin_update(character):	
-	var coin_counter = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Coin/Amount")
-	coin_counter.text = str(character.coin_count)
+func coin_update(character):
+	if Globals.survival_level != null:	
+		var coin_counter = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Coin/Amount")
+		coin_counter.text = str(character.coin_count)
 		
 				
 func set_uniqueHUD(player_ID, uniqueHUD):
@@ -2001,6 +2208,19 @@ func get_player_node(player_ID):
 			if player.player_ID == player_ID:
 				return player
 	return null
+	
+	
+func get_NPC_node(NPC_ID):
+	if NPC_ID == null: return null
+	for npc in $NPCs.get_children():
+		if npc.NPC_ID == NPC_ID:
+			return npc
+	for npc in $Assists.get_children():
+		if npc.NPC_ID == NPC_ID:
+			return npc
+			
+	return null
+			
 	
 func get_entity_node(entity_ID):
 	if entity_ID == null: return null
@@ -2055,7 +2275,7 @@ func HUD_fade():
 		$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 2.75
 	$TopHUDBoxP1.rect_position.y -= $TopHUDBoxP1.rect_size.y * 4
 	
-	if Detection.detect_bool([$TopHUDBoxP1], ["Players"]):
+	if Detection.detect_bool([$TopHUDBoxP1], ["PlayerBoxes"]):
 		HUD.get_node("P1_HUDRect/Portrait").modulate.a = HUD_FADE
 	else:
 		HUD.get_node("P1_HUDRect/Portrait").modulate.a = 1.0
@@ -2069,7 +2289,7 @@ func HUD_fade():
 		$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 2.75
 	$BottomHUDBoxP1.rect_position.y += $BottomHUDBoxP1.rect_size.y * 3
 	
-	if Detection.detect_bool([$BottomHUDBoxP1], ["Players"]):
+	if Detection.detect_bool([$BottomHUDBoxP1], ["PlayerBoxes"]):
 		HUD.get_node("P1_HUDRect/GaugesUnder").modulate.a = HUD_FADE
 	else:
 		HUD.get_node("P1_HUDRect/GaugesUnder").modulate.a = 1.0
@@ -2081,7 +2301,7 @@ func HUD_fade():
 		$TopHUDBoxP2.rect_position.x += $TopHUDBoxP2.rect_size.x * 1.0
 		$TopHUDBoxP2.rect_position.y -= $TopHUDBoxP2.rect_size.y * 4
 		
-		if Detection.detect_bool([$TopHUDBoxP2], ["Players"]):
+		if Detection.detect_bool([$TopHUDBoxP2], ["PlayerBoxes"]):
 			HUD.get_node("P2_HUDRect/Portrait").modulate.a = HUD_FADE
 		else:
 			HUD.get_node("P2_HUDRect/Portrait").modulate.a = 1.0
@@ -2092,7 +2312,7 @@ func HUD_fade():
 		$BottomHUDBoxP2.rect_position.x += $BottomHUDBoxP2.rect_size.x * 1.0
 		$BottomHUDBoxP2.rect_position.y += $BottomHUDBoxP2.rect_size.y * 3	
 		
-		if Detection.detect_bool([$BottomHUDBoxP2], ["Players"]):
+		if Detection.detect_bool([$BottomHUDBoxP2], ["PlayerBoxes"]):
 			HUD.get_node("P2_HUDRect/GaugesUnder").modulate.a = HUD_FADE
 		else:
 			HUD.get_node("P2_HUDRect/GaugesUnder").modulate.a = 1.0
@@ -2104,7 +2324,7 @@ func HUD_fade():
 		$TimeHUDBox.rect_position.x -= $TimeHUDBox.rect_size.x * 0.5
 		$TimeHUDBox.rect_position.y += $TimeHUDBox.rect_size.y * 5.35	
 		
-		if Detection.detect_bool([$TimeHUDBox], ["Players"]):
+		if Detection.detect_bool([$TimeHUDBox], ["PlayerBoxes"]):
 			HUD.get_node("MatchTime").modulate.a = HUD_FADE
 			HUD.get_node("TimeFrame").modulate.a = HUD_FADE
 		else:
@@ -2142,6 +2362,33 @@ func rng_array(array: Array):
 			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------
 
+func spawn_NPC(master_ID: int, NPC_ref: String, out_position, start_facing, palette_ref = null):
+	var npc = Loader.loaded_NPC_scene.instance()
+	$NPCs.add_child(npc)
+	npc.init(master_ID, NPC_ref, out_position, start_facing, palette_ref)
+	return npc
+	
+func call_assist(master_ID: int, NPC_ref: String, out_position, palette_ref = null, atk_ID: int = 0):
+	var aux_data = {
+		"NPC_ref" : NPC_ref,
+		"out_position" : out_position,
+		"start_facing" : get_player_node(master_ID).get_opponent_dir(),
+		"palette_ref" : palette_ref,
+		"atk_ID" : atk_ID,
+	}
+	if NPC_ref in Loader.NPC_data:
+		var data_reader = Loader.NPC_data[NPC_ref].scene.instance()
+		data_reader.preprocess(master_ID, aux_data) # modify aux_data based on move used
+	else:
+		print("Error: " + NPC_ref + " NPC not found in Loader.NPC_data")
+	
+	spawn_entity(master_ID, "AssistSpawner", aux_data.out_position, aux_data) # call a spawner carrying the data
+	
+	
+func spawn_assist(master_ID: int, NPC_ref: String, out_position, start_facing, palette_ref = null, atk_ID: int = 0):
+	var assist = Loader.loaded_assist_scene.instance()
+	$Assists.add_child(assist)
+	assist.init(master_ID, NPC_ref, out_position, start_facing, palette_ref, atk_ID)
 
 func spawn_entity(master_ID: int, entity_ref: String, out_position, aux_data: Dictionary, palette_ref = null, master_ref = null):
 	var entity = Loader.loaded_entity_scene.instance()
@@ -2171,11 +2418,11 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary,
 
 # master_ID is passed in to freeze afterimages during hitstop
 # master_ref is used to locate spritesheet_ref for character afterimages and locate palettes as well
-func spawn_afterimage(master_ID: int, is_entity: bool, spritesheet_ref: String, sprite_node_path: NodePath, master_ref = null, \
+func spawn_afterimage(master_ID: int, afterimage_type: int, spritesheet_ref: String, sprite_node_path: NodePath, master_ref = null, \
 		palette_ref = null, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 	var afterimage = Loader.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
-	afterimage.init(master_ID, is_entity, spritesheet_ref, sprite_node_path, master_ref, palette_ref, color_modulate, starting_modulate_a, \
+	afterimage.init(master_ID, afterimage_type, spritesheet_ref, sprite_node_path, master_ref, palette_ref, color_modulate, starting_modulate_a, \
 			lifetime, afterimage_shader)
 	return afterimage
 	

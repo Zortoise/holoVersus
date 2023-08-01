@@ -76,7 +76,7 @@ func move_amount(move_amount:Vector2, ledge_stop := false):
 	if "grounded" in self and !get("grounded"):
 		ledge_stop = false
 	var offstage_stop := false
-	if collision_box.is_in_group("Players"):
+	if collision_box.is_in_group("PlayerBoxes"):
 		offstage_stop = true
 	
 	# horizontal_movement
@@ -125,7 +125,7 @@ func move_amount(move_amount:Vector2, ledge_stop := false):
 #		elif !is_against_wall(collision_box, soft_platform_dbox, sign(move_amount.x), checklist):
 #
 #			# for players, has to test collision with other players as well
-#			if collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs"):
+#			if collision_box.is_in_group("PlayerBoxes") or collision_box.is_in_group("MobBoxes"):
 #
 #				var colliding_characters = get_colliding_characters_side(collision_box, checklist, sign(move_amount.x))
 #				if colliding_characters.size() == 0: # no collision with other players
@@ -211,7 +211,7 @@ func move_sequence_player_by(move_amount: Vector2): # in some special cases wher
 	
 	
 func not_in_sequence(collision_box): # when object is in sequence, will not be killed at ceiling and sides but will die at bottom
-	if (collision_box.is_in_group("Players") or collision_box.is_in_group("Mobs")) and \
+	if (collision_box.is_in_group("PlayerBoxes") or collision_box.is_in_group("MobBoxes") or collision_box.is_in_group("NPCBoxes")) and \
 			get("state") in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		return false
 	return true
@@ -233,9 +233,9 @@ func move_no_collision():
 	
 	
 func check_offstage(collision_box):
-	if collision_box.is_in_group("Players") and Globals.Game.detect_kill(collision_box):
+	if collision_box.is_in_group("PlayerBoxes") and Globals.Game.detect_kill(collision_box):
 		return true
-	elif collision_box.is_in_group("Entities") and collision_box.get_parent().has_node("EntitySpriteBox") and \
+	elif collision_box.is_in_group("EntityBoxes") and collision_box.get_parent().has_node("EntitySpriteBox") and \
 			Globals.Game.detect_offstage(collision_box.get_parent().get_node("EntitySpriteBox")):
 		# detect_offstage() will handle entities' reaction when becoming offstage
 		return true
@@ -325,7 +325,7 @@ func create_checklist_enum() -> Array:
 			if !Detection.detect_bool([soft_dbox], ["SoftPlatforms"]):
 				to_check.append(Em.detect.SOFT)
 			
-	if is_in_group("PlayerNodes") or is_in_group("MobNodes"):
+	if is_in_group("PlayerNodes") or is_in_group("MobNodes") or is_in_group("NPCNodes"):
 		to_check.append(Em.detect.BLASTWALLS)
 		to_check.append(Em.detect.BLASTCEILING)
 		if has_method("is_killable"):
@@ -334,7 +334,7 @@ func create_checklist_enum() -> Array:
 			if call("is_killable", get("velocity").y):
 				to_check.erase(Em.detect.BLASTCEILING)
 			
-		if has_method("check_collidable") and call("check_collidable"):
+		if has_method("check_collidable") and call("check_collidable"): # NPCs are not collidable, does not have the method
 			to_check.append(Em.detect.PLAYERS)
 			if is_in_group("PlayerNodes"): to_check.append(Em.detect.MOBS)
 			
@@ -807,9 +807,9 @@ func linear_move(collision_box, horizontal: bool, move_amount: int, checklist_en
 	else: # player_collision
 		var player_boxes := []
 		if Em.detect.PLAYERS in checklist_enum:
-			player_boxes.append_array(get_tree().get_nodes_in_group("Players"))
+			player_boxes.append_array(get_tree().get_nodes_in_group("PlayerBoxes"))
 		if Em.detect.MOBS in checklist_enum:
-			player_boxes.append_array(get_tree().get_nodes_in_group("Mobs"))
+			player_boxes.append_array(get_tree().get_nodes_in_group("MobBoxes"))
 		if player_boxes.size() == 0: # no collision with players
 			position += target_box.position - collision_box.rect_global_position
 			return results

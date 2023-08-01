@@ -4,6 +4,8 @@ extends Node
 # preloading scenes will cause issues, do them on onready variables instead
 onready var loaded_audio_scene := load("res://Scenes/Audio/AudioManager.tscn")
 onready var loaded_character_scene := load("res://Scenes/Character.tscn")
+onready var loaded_NPC_scene := load("res://Scenes/NPC.tscn")
+onready var loaded_assist_scene := load("res://Scenes/Assist.tscn")
 onready var loaded_entity_scene := load("res://Scenes/Entity.tscn")
 onready var loaded_SFX_scene := load("res://Scenes/SFX.tscn")
 onready var loaded_afterimage_scene := load("res://Scenes/Afterimage.tscn")
@@ -12,6 +14,7 @@ onready var loaded_palette_shader = load("res://Scenes/Shaders/Palette.gdshader"
 onready var monochrome_shader = load("res://Scenes/Shaders/Monochrome.gdshader")
 onready var screeninvert_shader = load("res://Scenes/Shaders/ScreenInvert.gdshader")
 onready var white_shader = load("res://Scenes/Shaders/White.gdshader")
+onready var black_replace_shader = load("res://Scenes/Shaders/BlackReplace.gdshader")
 onready var loaded_guard_gauge = ResourceLoader.load("res://Assets/UI/guard_gauge1.png")
 onready var loaded_guard_gauge_pos = load("res://Assets/UI/guard_gauge_pos.tres")
 onready var loaded_dmg_num_scene = load("res://Scenes/DamageNumber.tscn")
@@ -34,6 +37,11 @@ onready var common_entity_data = {
 		"scene" : load("res://Assets/Entities/BurstAwakening.tscn"),
 		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
 		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
+	},
+	"AssistSpawner" : {
+		"scene" : load("res://Assets/Entities/AssistSpawner.tscn"),
+		"frame_data" : load("res://Assets/Entities/FrameData/AssistSpawner.tres"),
+		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/AssistSpawnerSprite.png")
 	},
 }
 
@@ -101,6 +109,23 @@ var char_data = {
 #	}
 }
 
+var NPC_data = {
+#	"GuraTest" : {
+#		"scene" : load("res://Characters/Gura/GuraNPCtest.tscn"),
+#		"frame_data_array" : [
+#			ResourceLoader.load("res://Characters/Gura/FrameData/Base.tres"), 
+#			ResourceLoader.load("res://Characters/Gura/FrameData/F1.tres"), 
+#		]
+#		"spritesheet" : {
+#			"BaseSprite" : ResourceLoader.load("res://Characters/Gura/Spritesheets/BaseSprite.png"),
+#			"F1SfxOver" : ResourceLoader.load("res://Characters/Gura/Spritesheets/F1SfxOver.png"),
+#		},
+#		"palettes" : {
+#			"2" : ResourceLoader.load("res://Characters/Gura/Palettes/2.png")
+#		}
+#	}
+}
+
 var entity_data = {
 #	"TridentProj" : { # example
 #		"scene" : load("res://Characters/Gura/Entities/TridentProj.tscn"),
@@ -133,6 +158,7 @@ func reset(): # run at start of every battle
 	char_data = {}
 	entity_data = {}
 	item_data = {}
+	NPC_data = {}
 	sfx = {}
 	sfx_palettes = {}
 	audio = {}

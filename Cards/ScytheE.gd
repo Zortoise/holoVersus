@@ -86,7 +86,7 @@ func simulate():
 	Entity.velocity.x = clamp(Entity.velocity.x, -START_SPEED, START_SPEED)
 	
 	Entity.get_node("Sprite").rotation += 5*PI * Globals.FRAME * Entity.facing
-	Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), null, null, \
+	Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), null, null, \
 		Color(0.8, 0.0, 0.3), 0.5, 10, Em.afterimage_shader.WHITE)
 	
 func kill(_sound = true):

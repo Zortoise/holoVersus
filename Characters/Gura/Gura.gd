@@ -38,6 +38,31 @@ func _ready():
 	uniqueHUD.get_node("Bitemark2").hide()
 	uniqueHUD.get_node("Bitemark3").hide()
 	
+func set_up_unique(): # TESTING
+	
+	Loader.NPC_data["GuraNPCtest"] = {
+		"scene" : load("res://Characters/Gura/GuraNPCtest.tscn"),
+		"frame_data_array" : Loader.char_data[NAME].frame_data_array,
+		"spritesheet" : Loader.char_data[NAME].spritesheet,
+		"palettes" : Loader.char_data[NAME].palettes,
+	}
+	
+	Loader.NPC_data["GuraA"] = {
+		"scene" : load("res://Assists/GuraA/GuraA.tscn"),
+		"frame_data_array" : Loader.char_data[NAME].frame_data_array,
+		"spritesheet" : Loader.char_data[NAME].spritesheet,
+		"palettes" : Loader.char_data[NAME].palettes,
+	}
+	
+	Loader.entity_data["TridentProjA"] = {
+		"scene" : load("res://Assists/GuraA/Entities/TridentProjA.tscn"),
+		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png"),
+	}
+	
+	pass
+	
+	
 # STATE_DETECT --------------------------------------------------------------------------------------------------
 
 func state_detect(anim): # for unique animations, continued from state_detect() of main character node
@@ -904,8 +929,8 @@ func afterimage_trail():# process afterimage trail
 		Em.char_state.GRD_ATK_ACTIVE:
 			if Animator.query_to_play(["SP9bActive"]):
 				if posmod(Animator.time, 2) == 0:
-					Globals.Game.spawn_afterimage(Character.player_ID, false, Character.sprite_texture_ref.sfx_under, Character.sfx_under.get_path(), 
-							NAME, Character.palette_number, null, 0.5, 12)
+					Globals.Game.spawn_afterimage(Character.player_ID, Em.afterimage_type.CHAR, Character.sprite_texture_ref.sfx_under, \
+							Character.sfx_under.get_path(), NAME, Character.palette_number, null, 0.5, 12)
 			
 func unique_flash():
 	match Character.new_state:

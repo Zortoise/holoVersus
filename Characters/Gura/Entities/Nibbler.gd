@@ -98,8 +98,8 @@ func simulate():
 	match Animator.to_play_anim: # afterimage trail
 		"Active", "bActive":
 			if posmod(Entity.lifetime, 5) == 0:
-				Globals.Game.spawn_afterimage(Entity.entity_ID, true, Entity.entity_ref, sprite.get_path(), Entity.master_ref, Entity.palette_ref, \
-						null, 1.0, 10.0, Em.afterimage_shader.WHITE)
+				Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), \
+						Entity.master_ref, Entity.palette_ref, null, 1.0, 10.0, Em.afterimage_shader.WHITE)
 	
 #func spawn_afterimage(master_ID: int, is_entity: bool, master_ref: String, spritesheet_ref: String, sprite_node_path: NodePath, \
 #		palette_ref, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):

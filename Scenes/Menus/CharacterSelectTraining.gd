@@ -38,11 +38,11 @@ var sound := false
 var battle_lock := false # set to true after starting battle, prevent certain actions like cancelling during the fade to black
 
 var phase := 0 # 0 is picking characters, 1 is dummy picking character, 2 is picking stage
-var P1_picker_pos := 5
+var P1_picker_pos := 0
 var P1_palette_picked := 1
 #var P1_input_style := 0
 
-var P2_picker_pos := 6
+var P2_picker_pos := 0
 var P2_palette_picked := 1
 #var P2_input_style := 0
 
@@ -164,13 +164,13 @@ func load_last_picked(last_picked):
 func populate_char_grid():
 	
 	var total = $Grid.get_child_count()
-	grid_dimensions[0] = $Grid.columns # 12
+	grid_dimensions[0] = $Grid.columns # 8
 	grid_dimensions[1] = int(ceil(total/grid_dimensions[0])) # 3
 	
-	var center_indexes = [] # 6, 18, 30
-	var left_indexes = [] # 0, 12, 24
-	var right_indexes = [] # 11, 23, 35
-	var center_point = int((grid_dimensions[0] - 1) / 2.0) + 1 # 6
+	var center_indexes = [] # 4, 12, 20
+	var left_indexes = [] # 0, 8, 16
+	var right_indexes = [] # 7, 15, 23
+	var center_point = int(ceil((grid_dimensions[0] + 1) / 2.0)) - 1 # 4
 	
 	for y in grid_dimensions[1]:
 		center_indexes.append(center_point + (y * grid_dimensions[0]))
@@ -210,6 +210,9 @@ func populate_char_grid():
 	for character_number in char_grid.keys():
 		$Grid.get_child(character_number).texture = character_data[char_grid[character_number]]["portrait"]
 		$Grid.get_child(character_number).modulate = Color(1.0, 1.0, 1.0, 1.0)
+	
+	P1_picker_pos = center_point - (1 - posmod(grid_dimensions[0], 2))
+	P2_picker_pos = center_point
 	
 	
 func populate_stage_lists():

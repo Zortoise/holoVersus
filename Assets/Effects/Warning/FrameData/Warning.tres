@@ -5,9 +5,39 @@
 [resource]
 script = ExtResource( 1 )
 frame_data = {
+"Assist1": {
+"duration": 8,
+"hframes": 6,
+"loop": true,
+"spritesheet": "WarningSprite",
+"timestamps": {
+0: {
+"frame": 2
+},
+4: {
+"frame": 3
+}
+},
+"vframes": 1
+},
+"Assist2": {
+"duration": 8,
+"hframes": 6,
+"loop": true,
+"spritesheet": "WarningSprite",
+"timestamps": {
+0: {
+"frame": 4
+},
+4: {
+"frame": 5
+}
+},
+"vframes": 1
+},
 "Warning": {
 "duration": 48,
-"hframes": 2,
+"hframes": 6,
 "loop": false,
 "spritesheet": "WarningSprite",
 "timestamps": {

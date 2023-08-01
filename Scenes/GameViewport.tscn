@@ -1,4 +1,4 @@
-[gd_scene load_steps=174 format=2]
+[gd_scene load_steps=186 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -43,6 +43,7 @@
 [ext_resource path="res://Assets/UI/EX_lock_under.png" type="Texture" id=41]
 [ext_resource path="res://Assets/UI/guard_label.png" type="Texture" id=42]
 [ext_resource path="res://Assets/UI/coin.png" type="Texture" id=43]
+[ext_resource path="res://Assets/UI/ring_back.png" type="Texture" id=44]
 [ext_resource path="res://Assets/UI/basic_bar.png" type="Texture" id=45]
 [ext_resource path="res://Assets/UI/basic_bar_back.png" type="Texture" id=46]
 [ext_resource path="res://Assets/UI/card/P1_picker.png" type="Texture" id=47]
@@ -51,6 +52,10 @@
 [ext_resource path="res://Scenes/Menus/UIFrameTimer.gd" type="Script" id=50]
 [ext_resource path="res://Scenes/Survival/CardMenu.gd" type="Script" id=51]
 [ext_resource path="res://Scenes/Menus/P1DirInputs.gd" type="Script" id=52]
+[ext_resource path="res://Assets/UI/ring_front.png" type="Texture" id=53]
+[ext_resource path="res://Assets/UI/assist_frame.png" type="Texture" id=54]
+[ext_resource path="res://Assets/UI/assist_back.png" type="Texture" id=55]
+[ext_resource path="res://Assists/GuraA/Icon.png" type="Texture" id=56]
 
 [sub_resource type="Animation" id=5]
 length = 0.001
@@ -831,6 +836,61 @@ tracks/2/keys = {
 "values": [ Color( 1, 1, 1, 1 ) ]
 }
 
+[sub_resource type="DynamicFont" id=186]
+size = 35
+outline_size = 5
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="Animation" id=187]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.8, 0.8, 0.8, 1 ) ]
+}
+
+[sub_resource type="Animation" id=189]
+resource_name = "cooldown"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=188]
+resource_name = "ok"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.588235, 0.588235, 0.588235, 1 ), Color( 1, 1, 1, 1 ), Color( 0.588235, 0.588235, 0.588235, 1 ) ]
+}
+
 [sub_resource type="ShaderMaterial" id=107]
 shader = ExtResource( 37 )
 
@@ -1214,6 +1274,54 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 0,
 "values": [ Color( 1.5, 0.6, 0.6, 1 ) ]
+}
+
+[sub_resource type="Animation" id=190]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.8, 0.8, 0.8, 1 ) ]
+}
+
+[sub_resource type="Animation" id=191]
+resource_name = "cooldown"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=192]
+resource_name = "ok"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.588235, 0.588235, 0.588235, 1 ), Color( 1, 1, 1, 1 ), Color( 0.588235, 0.588235, 0.588235, 1 ) ]
 }
 
 [sub_resource type="DynamicFont" id=17]
@@ -3499,7 +3607,6 @@ align = 1
 valign = 1
 
 [node name="BurstToken" type="Label" parent="HUD/P1_HUDRect/Portrait"]
-modulate = Color( 0.501961, 0.501961, 0.501961, 0 )
 margin_left = -62.0
 margin_top = 19.0
 margin_right = -18.0
@@ -3515,6 +3622,7 @@ anims/flash = SubResource( 104 )
 anims/gray = SubResource( 113 )
 
 [node name="Coin" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
+visible = false
 position = Vector2( 0, 2 )
 
 [node name="Coin" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Coin"]
@@ -3529,6 +3637,18 @@ margin_bottom = 101.0
 custom_colors/font_color = Color( 0.890196, 0.819608, 0.47451, 1 )
 custom_fonts/font = SubResource( 150 )
 text = "8888"
+
+[node name="InstallTime" type="TextureProgress" parent="HUD/P1_HUDRect/Portrait"]
+visible = false
+margin_left = -7.0
+margin_top = -5.0
+margin_right = 70.0
+margin_bottom = 72.0
+value = 50.0
+texture_under = ExtResource( 44 )
+texture_progress = ExtResource( 53 )
+fill_mode = 4
+tint_progress = Color( 0.945098, 0.470588, 1, 1 )
 
 [node name="GaugesUnder" type="Sprite" parent="HUD/P1_HUDRect"]
 position = Vector2( 240, 966 )
@@ -3547,8 +3667,7 @@ value = 100.0
 texture_progress = ExtResource( 9 )
 
 [node name="EXLock" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder/EXGauges"]
-visible = false
-modulate = Color( 0.752941, 0.227451, 0.227451, 1 )
+modulate = Color( 2.5, 2.5, 5, 1 )
 margin_left = -13.0
 margin_top = 1.0
 margin_right = 56.0
@@ -3636,6 +3755,7 @@ position = Vector2( 1, 1 )
 texture = ExtResource( 12 )
 
 [node name="EXLabel" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
+modulate = Color( 1.5, 0.6, 0.6, 1 )
 position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
@@ -3646,8 +3766,44 @@ texture = ExtResource( 42 )
 [node name="Unique" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
 position = Vector2( 0, -78 )
 
+[node name="Assist" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
+visible = false
+position = Vector2( -65, -22 )
+
+[node name="AssistBack" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder/Assist"]
+position = Vector2( -235, 129 )
+texture = ExtResource( 55 )
+offset = Vector2( 202, -43 )
+
+[node name="AssistChar" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder/Assist"]
+position = Vector2( -33, 87 )
+scale = Vector2( 3, 3 )
+texture = ExtResource( 56 )
+
+[node name="AssistFrame" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder/Assist"]
+position = Vector2( -235, 129 )
+texture = ExtResource( 54 )
+offset = Vector2( 202, -43 )
+
+[node name="Text" type="Label" parent="HUD/P1_HUDRect/GaugesUnder/Assist"]
+modulate = Color( 0.8, 0.8, 0.8, 1 )
+margin_left = 18.0
+margin_top = 70.0
+margin_right = 275.0
+margin_bottom = 106.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 186 )
+text = "OK!"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/GaugesUnder/Assist/Text"]
+autoplay = "ok"
+anims/RESET = SubResource( 187 )
+anims/cooldown = SubResource( 189 )
+anims/ok = SubResource( 188 )
+
 [node name="Inputs" type="Node2D" parent="HUD/P1_HUDRect"]
-position = Vector2( 240, 1032 )
+visible = false
+position = Vector2( -8, 976 )
 
 [node name="InputFrame" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
 modulate = Color( 1, 1, 1, 0.5 )
@@ -3779,6 +3935,7 @@ anims/flash = SubResource( 125 )
 anims/gray = SubResource( 126 )
 
 [node name="Coin" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+visible = false
 position = Vector2( 0, 2 )
 
 [node name="Coin" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Coin"]
@@ -3793,6 +3950,18 @@ margin_bottom = 101.0
 custom_colors/font_color = Color( 0.890196, 0.819608, 0.47451, 1 )
 custom_fonts/font = SubResource( 150 )
 text = "8888"
+
+[node name="InstallTime" type="TextureProgress" parent="HUD/P2_HUDRect/Portrait"]
+visible = false
+margin_left = -7.0
+margin_top = -5.0
+margin_right = 70.0
+margin_bottom = 72.0
+value = 50.0
+texture_under = ExtResource( 44 )
+texture_progress = ExtResource( 53 )
+fill_mode = 4
+tint_progress = Color( 0.945098, 0.470588, 1, 1 )
 
 [node name="GaugesUnder" type="Sprite" parent="HUD/P2_HUDRect"]
 position = Vector2( 240, 966 )
@@ -3908,8 +4077,43 @@ texture = ExtResource( 42 )
 [node name="Unique" type="Node2D" parent="HUD/P2_HUDRect/GaugesUnder"]
 position = Vector2( 0, -78 )
 
+[node name="Assist" type="Node2D" parent="HUD/P2_HUDRect/GaugesUnder"]
+position = Vector2( -65, -22 )
+
+[node name="AssistBack" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder/Assist"]
+position = Vector2( -235, 129 )
+texture = ExtResource( 55 )
+offset = Vector2( 202, -43 )
+
+[node name="AssistChar" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder/Assist"]
+position = Vector2( -33, 87 )
+scale = Vector2( 3, 3 )
+texture = ExtResource( 56 )
+
+[node name="AssistFrame" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder/Assist"]
+position = Vector2( -235, 129 )
+texture = ExtResource( 54 )
+offset = Vector2( 202, -43 )
+
+[node name="Text" type="Label" parent="HUD/P2_HUDRect/GaugesUnder/Assist"]
+modulate = Color( 0.8, 0.8, 0.8, 1 )
+margin_left = 18.0
+margin_top = 70.0
+margin_right = 275.0
+margin_bottom = 106.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 186 )
+text = "OK!"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P2_HUDRect/GaugesUnder/Assist/Text"]
+autoplay = "ok"
+anims/RESET = SubResource( 190 )
+anims/cooldown = SubResource( 191 )
+anims/ok = SubResource( 192 )
+
 [node name="Inputs" type="Node2D" parent="HUD/P2_HUDRect"]
-position = Vector2( 240, 1032 )
+visible = false
+position = Vector2( 488, 976 )
 
 [node name="InputFrame" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
 modulate = Color( 1, 1, 1, 0.5 )
