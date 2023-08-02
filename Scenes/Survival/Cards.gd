@@ -136,6 +136,10 @@ const DESCRIBE = {
 		"type" : type.PERCENT,
 		"suffix" :"Super Move Dmg",
 	},
+	effect_ref.ASSIST_DMG_MOD: {
+		"type" : type.PERCENT,
+		"suffix" :"Assist Dmg",
+	},
 	
 	effect_ref.COIN_GAIN : {
 		"type" : type.LINEAR,

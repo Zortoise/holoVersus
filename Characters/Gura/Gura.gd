@@ -40,12 +40,12 @@ func _ready():
 	
 func set_up_unique(): # TESTING
 	
-	Loader.NPC_data["GuraNPCtest"] = {
-		"scene" : load("res://Characters/Gura/GuraNPCtest.tscn"),
-		"frame_data_array" : Loader.char_data[NAME].frame_data_array,
-		"spritesheet" : Loader.char_data[NAME].spritesheet,
-		"palettes" : Loader.char_data[NAME].palettes,
-	}
+#	Loader.NPC_data["GuraNPCtest"] = {
+#		"scene" : load("res://Characters/Gura/GuraNPCtest.tscn"),
+#		"frame_data_array" : Loader.char_data[NAME].frame_data_array,
+#		"spritesheet" : Loader.char_data[NAME].spritesheet,
+#		"palettes" : Loader.char_data[NAME].palettes,
+#	}
 	
 	pass
 	

@@ -748,11 +748,11 @@ func simulate(new_input_state):
 #				install(180)
 
 #
-			if Globals.Game.get_node("NPCs").get_children().size() == 0:
-				Globals.Game.spawn_NPC(player_ID, "GuraNPCtest", get_feet_pos(), facing, palette_number)
-			else:
-				for child in Globals.Game.get_node("NPCs").get_children():
-					child.free = true
+#			if Globals.Game.get_node("NPCs").get_children().size() == 0:
+#				Globals.Game.spawn_NPC(player_ID, "GuraNPCtest", get_feet_pos(), facing, palette_number)
+#			else:
+#				for child in Globals.Game.get_node("NPCs").get_children():
+#					child.free = true
 
 #			call_assist(Em.assist.NEUTRAL)
 			
@@ -3842,8 +3842,8 @@ func check_sdash_crash():
 func check_collidable(): # called by Physics.gd
 	if slowed < 0: return false
 	match new_state:
-#		Em.char_state.LAUNCHED_HITSTUN:
-#			return false
+		Em.char_state.LAUNCHED_HITSTUN:
+			return false
 		Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER:
 			return false
 #		Em.char_state.GRD_ATK_STARTUP: # crossover attack
@@ -6454,7 +6454,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if Em.hit.SUPERARMORED in hit_data:
 					modulate_play("armor_flash")
 					play_audio("block3", {"vol" : -15})
-				elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running():
+				elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data:
 					modulate_play("weakblock_flash")
 					play_audio("block3", {"vol" : -15})
 				else:
@@ -7268,19 +7268,30 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 
 func generate_hitspark(hit_data): # hitspark size determined by knockback power
 	
+	if !Em.move.HITSPARK_TYPE in hit_data[Em.hit.MOVE_DATA]:
+		hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = Em.hitspark_type.HIT
+		if Em.hit.NPC_PATH in hit_data:
+			if hit_data[Em.hit.ATKER_OR_ENTITY] != null and hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_type"):
+				hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_type()
+		elif hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_type"):
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER].get_default_hitspark_type()
+			
+	if !Em.move.HITSPARK_PALETTE in hit_data[Em.hit.MOVE_DATA]:
+		hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
+		if Em.hit.NPC_PATH in hit_data:
+			if hit_data[Em.hit.ATKER_OR_ENTITY] != null and hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_palette"):
+				hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_palette()
+		elif hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
+			
+	
 	# SD hits have special hitspark, unless has VULN_LIMBS
 	if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
-#		var aux_data = {"facing":Globals.Game.rng_facing(), "v_mirror":Globals.Game.rng_bool()}
-#		if UniqChar.SDHitspark_COLOR != "red":
-#			aux_data["palette"] = UniqChar.SDHitspark_COLOR
-		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
-		else:
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
 		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()}, hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE])
 		return
-	
+		
+
 	var hitspark_level: int
 	
 	if Globals.survival_level != null and !hit_data[Em.hit.WEAK_HIT] and !Em.hit.AUTOCHAIN in hit_data:
@@ -7307,22 +7318,6 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # if sweetspotted/punish hit, hitspark level increased by 1
 			hitspark_level = int(clamp(hitspark_level + 1, 1, 5)) # max is 5
 		
-		
-	if !Em.move.HITSPARK_TYPE in hit_data[Em.hit.MOVE_DATA]:
-#		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_type"):
-#			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_type()
-		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_type"):
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER].get_default_hitspark_type()
-		else:
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = Em.hitspark_type.HIT
-			
-	if !Em.move.HITSPARK_PALETTE in hit_data[Em.hit.MOVE_DATA]:
-#		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_palette"):
-#			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_palette()
-		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
-		else:
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
 		
 	var hitspark = ""
 	match hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE]:
@@ -7384,7 +7379,7 @@ func generate_blockspark(hit_data):
 		Em.block_state.BLOCKED:
 			if Em.hit.SUPERARMORED in hit_data:
 				blockspark = "Superarmorspark"
-			elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running():
+			elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data:
 				blockspark = "WBlockspark2"
 			else:
 				blockspark = "WBlockspark"

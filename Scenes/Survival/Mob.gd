@@ -1727,6 +1727,8 @@ func check_landing(): # called by physics.gd when character stopped by floor
 func check_collidable(): # called by Physics.gd
 	if slowed < 0: return false
 	match new_state:
+		Em.char_state.LAUNCHED_HITSTUN:
+			return false
 		Em.char_state.DEAD, Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER:
 			return false
 			
@@ -3500,11 +3502,25 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 
 func generate_hitspark(hit_data): # hitspark size determined by knockback power
 
-	if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
-		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
+	if !Em.move.HITSPARK_TYPE in hit_data[Em.hit.MOVE_DATA]:
+		hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = Em.hitspark_type.HIT
+		if Em.hit.NPC_PATH in hit_data:
+			if hit_data[Em.hit.ATKER_OR_ENTITY] != null and hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_type"):
+				hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_type()
+		elif hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_type"):
+			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER].get_default_hitspark_type()
+			
+	if !Em.move.HITSPARK_PALETTE in hit_data[Em.hit.MOVE_DATA]:
+		hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
+		if Em.hit.NPC_PATH in hit_data:
+			if hit_data[Em.hit.ATKER_OR_ENTITY] != null and hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_palette"):
+				hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_palette()
+		elif hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
 			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
-		else:
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
+			
+	
+	# SD hits have special hitspark, unless has VULN_LIMBS
+	if hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
 		Globals.Game.spawn_SFX("SDHitspark", "SDHitspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()}, hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE])
 		return
@@ -3532,22 +3548,6 @@ func generate_hitspark(hit_data): # hitspark size determined by knockback power
 		if hit_data[Em.hit.SWEETSPOTTED]: # if sweetspotted, hitspark level increased by 1
 			hitspark_level = int(clamp(hitspark_level + 1, 1, 5)) # max is 5
 
-			
-	if !Em.move.HITSPARK_TYPE in hit_data[Em.hit.MOVE_DATA]:
-#		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_type"):
-#			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_type()
-		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_type"):
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = hit_data[Em.hit.ATKER].get_default_hitspark_type()
-		else:
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE] = Em.hitspark_type.HIT
-			
-	if !Em.move.HITSPARK_PALETTE in hit_data[Em.hit.MOVE_DATA]:
-#		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_default_hitspark_palette"):
-#			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER_OR_ENTITY].get_default_hitspark_palette()
-		if hit_data[Em.hit.ATKER] != null and hit_data[Em.hit.ATKER].has_method("get_default_hitspark_palette"):
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = hit_data[Em.hit.ATKER].get_default_hitspark_palette()
-		else:
-			hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_PALETTE] = "red"
 		
 	var hitspark = ""
 	match hit_data[Em.hit.MOVE_DATA][Em.move.HITSPARK_TYPE]:

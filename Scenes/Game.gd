@@ -2166,7 +2166,12 @@ func assist_update(character):
 					assist_icon.modulate = Color(0.5,0.5,0.5)
 			else:
 				assist_text.get_node("AnimationPlayer").play("fever")
-				if assist_icon.material != null:
+				if character.assist_active:
+					if assist_icon.material == null:
+						assist_icon.material = ShaderMaterial.new()
+						assist_icon.material.shader = Loader.monochrome_shader
+						assist_icon.modulate = Color(0.5,0.5,0.5)
+				elif assist_icon.material != null:
 					assist_icon.material = null
 					assist_icon.modulate = Color(1,1,1)
 		else:

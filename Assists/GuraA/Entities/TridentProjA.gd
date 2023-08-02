@@ -21,6 +21,8 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 3,
 		Em.move.KB_ANGLE : -45,
 		Em.move.PROJ_LVL : 1,
+		Em.move.HITSPARK_TYPE: Em.hitspark_type.HIT,
+		Em.move.HITSPARK_PALETTE: "blue",
 		Em.move.ATK_ATTR : [],
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
