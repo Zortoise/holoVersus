@@ -1,4 +1,4 @@
-[gd_scene load_steps=186 format=2]
+[gd_scene load_steps=188 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -874,6 +874,23 @@ tracks/0/keys = {
 "values": [ Color( 1, 1, 1, 1 ) ]
 }
 
+[sub_resource type="Animation" id=194]
+resource_name = "fever"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 3, 0.8, 0.8, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 1.2, 1.2, 3, 1 ), Color( 2, 0.8, 2, 1 ), Color( 3, 0.8, 0.8, 1 ) ]
+}
+
 [sub_resource type="Animation" id=188]
 resource_name = "ok"
 length = 0.2
@@ -1305,6 +1322,23 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 0,
 "values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=193]
+resource_name = "fever"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 3, 0.8, 0.8, 1 ), Color( 1.5, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 0.7, 1 ), Color( 0.7, 1.5, 1.5, 1 ), Color( 1.2, 1.2, 3, 1 ), Color( 2, 0.8, 2, 1 ), Color( 3, 0.8, 0.8, 1 ) ]
 }
 
 [sub_resource type="Animation" id=192]
@@ -3767,7 +3801,6 @@ texture = ExtResource( 42 )
 position = Vector2( 0, -78 )
 
 [node name="Assist" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
-visible = false
 position = Vector2( -65, -22 )
 
 [node name="AssistBack" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder/Assist"]
@@ -3799,6 +3832,7 @@ text = "OK!"
 autoplay = "ok"
 anims/RESET = SubResource( 187 )
 anims/cooldown = SubResource( 189 )
+anims/fever = SubResource( 194 )
 anims/ok = SubResource( 188 )
 
 [node name="Inputs" type="Node2D" parent="HUD/P1_HUDRect"]
@@ -3971,6 +4005,7 @@ texture = ExtResource( 7 )
 position = Vector2( -66, -31 )
 
 [node name="EXGauge" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder/EXGauges"]
+modulate = Color( 3, 0.8, 0.8, 1 )
 margin_left = -13.0
 margin_top = 1.0
 margin_right = 56.0
@@ -3992,7 +4027,7 @@ texture_progress = ExtResource( 40 )
 fill_mode = 1
 
 [node name="EXGauge2" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder/EXGauges"]
-modulate = Color( 1, 0.9, 0.8, 1 )
+modulate = Color( 3, 0.8, 0.8, 1 )
 margin_left = 58.0
 margin_top = 1.0
 margin_right = 127.0
@@ -4014,7 +4049,7 @@ texture_progress = ExtResource( 40 )
 fill_mode = 1
 
 [node name="EXGauge3" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder/EXGauges"]
-modulate = Color( 1, 1, 1, 0 )
+modulate = Color( 3, 0.8, 0.8, 1 )
 margin_left = 129.0
 margin_top = 1.0
 margin_right = 198.0
@@ -4067,6 +4102,7 @@ position = Vector2( 1, 1 )
 texture = ExtResource( 12 )
 
 [node name="EXLabel" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
+modulate = Color( 3, 0.8, 0.8, 1 )
 position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
@@ -4109,6 +4145,7 @@ text = "OK!"
 autoplay = "ok"
 anims/RESET = SubResource( 190 )
 anims/cooldown = SubResource( 191 )
+anims/fever = SubResource( 193 )
 anims/ok = SubResource( 192 )
 
 [node name="Inputs" type="Node2D" parent="HUD/P2_HUDRect"]

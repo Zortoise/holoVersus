@@ -70,7 +70,7 @@ const TECHLAND_THRESHOLD = 300 * FMath.S # max velocity when hitting the ground 
 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
 const WALL_SLAM_VEL_LIMIT_MOD = 1000
-const WALL_SLAM_MIN_DAMAGE = 50
+const WALL_SLAM_MIN_VALUE = 50
 const HORIZ_WALL_SLAM_UP_BOOST = 500 * FMath.S # if bounce horizontally on ground, boost up a little
 
 const LAUNCH_DUST_THRESHOLD = 1400 * FMath.S # velocity where launch dust increase in frequency
@@ -1359,16 +1359,16 @@ func bounce(against_ground: bool):
 			if wall_slammed == Em.wall_slam.CAN_SLAM and \
 					abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
-				var scaled_damage = wall_slam(velocity.x)
+				var scaled_value = wall_slam(velocity_previous_frame.x)
 				
-				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+				if scaled_value >= WALL_SLAM_MIN_VALUE:
 					wall_slammed = Em.wall_slam.HAS_SLAMMED
-					take_damage(scaled_damage, true)
-					Globals.Game.spawn_damage_number(scaled_damage, position)
+#					take_damage(scaled_damage, true)
+#					Globals.Game.spawn_damage_number(scaled_damage, position)
 					
 					var slam_level := 0
-					if scaled_damage >= 100:
-						if scaled_damage < 150:
+					if scaled_value >= 100:
+						if scaled_value < 150:
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -16,})
@@ -1405,16 +1405,16 @@ func bounce(against_ground: bool):
 			if wall_slammed == Em.wall_slam.CAN_SLAM and \
 					abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
-				var scaled_damage = wall_slam(velocity.y)
+				var scaled_value = wall_slam(velocity_previous_frame.y)
 				
-				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+				if scaled_value >= WALL_SLAM_MIN_VALUE:
 					wall_slammed = Em.wall_slam.HAS_SLAMMED
-					take_damage(scaled_damage, true)
-					Globals.Game.spawn_damage_number(scaled_damage, position)
+#					take_damage(scaled_damage, true)
+#					Globals.Game.spawn_damage_number(scaled_damage, position)
 						
 					var slam_level := 0
-					if scaled_damage >= WALL_SLAM_MIN_DAMAGE * 2:
-						if scaled_damage < WALL_SLAM_MIN_DAMAGE * 3: # lvl 2 slam
+					if scaled_value >= WALL_SLAM_MIN_VALUE * 2:
+						if scaled_value < WALL_SLAM_MIN_VALUE * 3: # lvl 2 slam
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -15,})
@@ -1440,7 +1440,7 @@ func bounce(against_ground: bool):
 				
 	elif against_ground:
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
-		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
+		if abs(velocity_previous_frame.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
 			bounce_dust(Em.compass.S)
 			play_audio("rock3", {"vol" : -10,})
 			
@@ -1448,8 +1448,8 @@ func bounce(against_ground: bool):
 func wall_slam(vel) -> int:
 	var weight: int = FMath.get_fraction_percent(int(abs(vel)) - WALL_SLAM_THRESHOLD, \
 			FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MIN_DAMAGE * 4, weight)
-	return scaled_damage
+	var scaled_value = FMath.f_lerp(0, WALL_SLAM_MIN_VALUE * 4, weight)
+	return scaled_value
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
 	# to move an object, first do move_true_position(), then get_rounded_position()

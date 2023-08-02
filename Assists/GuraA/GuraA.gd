@@ -55,8 +55,9 @@ func preprocess(master_ID: int, aux_data: Dictionary): # modify aux_data based o
 	
 	if master_node.is_hitstunned(): # increase cooldown if used during hitstun
 		cooldown = FMath.percent(cooldown, Globals.Game.ASSIST_CD_PENALTY)
-	master_node.get_node("AssistCDTimer").time = cooldown # set the cooldown
-	
+	elif master_node.assist_fever:
+		cooldown = FMath.percent(cooldown, Globals.Game.ASSIST_FEVER_CD_REDUCE)
+	master_node.get_node("AssistCDTimer").time += cooldown # set the cooldown
 	
 	
 func offset(aux_data: Dictionary, master_node, offset_vec: = Vector2.ZERO): # positive is towards facing, ALWAYS DO OFFSET FIRST!
@@ -66,8 +67,6 @@ func offset(aux_data: Dictionary, master_node, offset_vec: = Vector2.ZERO): # po
 	else:
 		aux_data.out_position.x += master_node.dir * Globals.Game.ASSIST_RESCUE_OFFSET
 
-		
-	
 func min_height(aux_data: Dictionary, height: int):
 	aux_data.out_position.y = min(aux_data.out_position.y, Globals.Game.middle_point.y - height)
 
@@ -81,7 +80,15 @@ func bring_to_ground(aux_data: Dictionary):
 	if ground_found:
 		aux_data.out_position = ground_found
 	
+	
+# SUMMON ACTIONS --------------------------------------------------------------------------------------------------
+	
 func start_attack(atk_ID: int):
+	shine()
+	Character.play_audio("bling3", {"vol" : -20})
+	Character.play_audio("bling7", {"vol" : -15, "bus" : "HighPass"})
+	
+	Character.modulate_play("sweet_flash")
 	Character.face_opponent()
 	match atk_ID:
 		Em.assist.NEUTRAL:
@@ -94,6 +101,26 @@ func start_attack(atk_ID: int):
 		Em.assist.UP:
 			Character.animate("SP3Startup")
 
+func unsummon(assist_attacked := false): # can be different if custom assist
+	Character.master_node.assist_active = false
+	if assist_attacked:
+		Character.master_node.get_node("AssistCDTimer").time = FMath.percent(Character.master_node.get_node("AssistCDTimer").time, \
+				Globals.Game.ASSIST_CD_PENALTY)
+		Character.play_audio("bling8", {"vol" : -18})
+	else:
+		Character.play_audio("bling3", {"vol" : -18})
+		Character.play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
+	shine()
+	Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sprite, sprite.get_path(), \
+			Character.NPC_ref, Character.palette_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+				
+func shine():
+	var player_palette := "red"
+	match Character.master_ID:
+		1:
+			player_palette = "blue"
+	Globals.Game.spawn_SFX("Summon", "Summon", Character.position, {"facing":Globals.Game.rng_facing(), \
+			"v_mirror":Globals.Game.rng_bool()}, player_palette)
 	
 # STATE_DETECT --------------------------------------------------------------------------------------------------
 
@@ -103,14 +130,18 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		
 		"SP1Startup", "SP1[b]Startup", "SP1[c1]Startup", "SP1[c1]bStartup":
 			return Em.char_state.GRD_ATK_STARTUP
-		"SP1[c1]Active":
+		"SP1[u]Startup", "SP1[u][c1]Startup", "SP1[u][c1]bStartup":
+			return Em.char_state.GRD_ATK_STARTUP
+		"SP1[c1]Active", "SP1[u][c1]Active":
 			return Em.char_state.GRD_ATK_ACTIVE
 		"SP1Rec":
 			return Em.char_state.GRD_ATK_REC
 			
 		"aSP1Startup", "aSP1[b]Startup", "aSP1[c1]Startup", "aSP1[c1]bStartup":
 			return Em.char_state.AIR_ATK_STARTUP
-		"aSP1[c1]Active":
+		"aSP1[d]Startup", "aSP1[d][c1]Startup", "aSP1[d][c1]bStartup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aSP1[c1]Active", "aSP1[d][c1]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP1Rec":
 			return Em.char_state.AIR_ATK_REC
@@ -217,7 +248,8 @@ func get_root(move_name): # for aerial, chain and repeat memory, only needed for
 func refine_move_name(move_name):
 		
 	match move_name:
-		"SP1[b]", "aSP1", "aSP1[b]", "SP1[c1]", "SP1[c1]b", "aSP1[c1]", "aSP1[c1]b":
+		"SP1[b]", "aSP1", "aSP1[b]", "SP1[c1]", "SP1[c1]b", "aSP1[c1]", "aSP1[c1]b", \
+				"SP1[u]", "SP1[u][c1]", "SP1[u][c1]b", "aSP1[d]", "aSP1[d][c1]", "aSP1[d][c1]b":
 			return "SP1"
 		"SP3":
 			return "aSP3"
@@ -274,8 +306,15 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 
 # HIT REACTIONS --------------------------------------------------------------------------------------------------
 
-func landed_a_hit(_hit_data): # reaction, can change hit_data from here
-	pass
+func landed_a_hit(hit_data): # reaction, can change hit_data from here
+	fever(hit_data)
+
+func fever(hit_data):
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
+		if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
+			return
+		if !hit_data[Em.hit.DEFENDER].assist_rescue_protect:
+			hit_data[Em.hit.ATKER].assist_fever = true
 			
 func being_hit(_hit_data):
 	pass
@@ -419,7 +458,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 
 
 		"SP1Startup":
-			Character.animate("SP1[b]Startup")
+			match Character.get_opponent_angle_seg(Em.angle_split.FOUR):
+				Em.compass.N:
+					Character.animate("SP1[u]Startup")
+				_:
+					Character.animate("SP1[b]Startup")
 		"SP1[b]Startup":
 			Character.animate("SP1[c1]Startup")
 		"SP1[c1]Startup":
@@ -431,8 +474,21 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP1Rec":
 			Character.unsummon()
 			
+		"SP1[u]Startup":
+			Character.animate("SP1[u][c1]Startup")
+		"SP1[u][c1]Startup":
+			Character.animate("SP1[u][c1]bStartup")
+		"SP1[u][c1]bStartup":
+			Character.animate("SP1[u][c1]Active")
+		"SP1[u][c1]Active":
+			Character.animate("SP1Rec")
+			
 		"aSP1Startup":
-			Character.animate("aSP1[b]Startup")
+			match Character.get_opponent_angle_seg(Em.angle_split.FOUR):
+				Em.compass.S:
+					Character.animate("aSP1[d]Startup")
+				_:
+					Character.animate("aSP1[b]Startup")
 		"aSP1[b]Startup":
 			Character.animate("aSP1[c1]Startup")
 		"aSP1[c1]Startup":
@@ -443,6 +499,15 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP1Rec")
 		"aSP1Rec":
 			Character.unsummon()
+			
+		"aSP1[d]Startup":
+			Character.animate("aSP1[d][c1]Startup")
+		"aSP1[d][c1]Startup":
+			Character.animate("aSP1[d][c1]bStartup")
+		"aSP1[d][c1]bStartup":
+			Character.animate("aSP1[d][c1]Active")
+		"aSP1[d][c1]Active":
+			Character.animate("aSP1Rec")
 			
 		"aSP2Startup":
 			Character.animate("aSP2Active")
@@ -476,21 +541,30 @@ func _on_SpritePlayer_anim_started(anim_name):
 
 	match anim_name:
 			
-		"aSP1Startup", "aSP1[b]Startup":
+		"aSP1Startup", "aSP1[b]Startup", "aSP1[d]Startup":
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
-		"aSP1[c1]Startup", "aSP1[c1]bStartup":
+		"aSP1[c1]Startup", "aSP1[c1]bStartup", "aSP1[d][c1]Startup", "aSP1[d][c1]bStartup":
 			Character.velocity_limiter.x = 20
 			Character.velocity_limiter.down = 20
 		"SP1[c1]Active": # spawn projectile at EntitySpawn
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
+			Globals.Game.spawn_entity(Character.master_ID, "TridentProjA", Animator.query_point("entityspawn"), {"facing": Character.facing}, \
+					Character.palette_ref, Character.NPC_ref)
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
+		"SP1[u][c1]Active": # spawn projectile at EntitySpawn
+			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.master_ID, "TridentProjA", Animator.query_point("entityspawn"), {"facing": Character.facing, \
-					"charge_lvl" : 1}, Character.palette_ref, Character.NPC_ref)
+					"alt_aim" : true}, Character.palette_ref, Character.NPC_ref)
 			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP1[c1]Active":
 			Globals.Game.spawn_entity(Character.master_ID, "TridentProjA", \
 					Animator.query_point("entityspawn"), {"facing": Character.facing, "aerial" : true}, \
+					Character.palette_ref, Character.NPC_ref)
+		"aSP1[d][c1]Active":
+			Globals.Game.spawn_entity(Character.master_ID, "TridentProjA", \
+					Animator.query_point("entityspawn"), {"facing": Character.facing, "aerial" : true, "alt_aim" : true}, \
 					Character.palette_ref, Character.NPC_ref)
 
 		"aSP1Rec":
@@ -538,7 +612,7 @@ func start_audio(anim_name):
 						Character.play_audio(sound.ref, sound.aux_data)
 						
 		match orig_move_name:
-			"SP1[c1]", "aSP1[c1]":
+			"SP1[c1]", "SP1[u][c1]", "aSP1[c1]", "aSP1[d][c1]":
 				Character.play_audio("whoosh12", {"bus":"PitchDown"})
 
 	match Character.state:

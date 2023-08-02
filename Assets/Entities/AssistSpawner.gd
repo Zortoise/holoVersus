@@ -32,6 +32,8 @@ func init(aux_data: Dictionary):
 			Animator.play("Assist1")
 			
 	Entity.unique_data["aux"] = aux_data
+	Entity.play_audio("bling5", {"vol" : -10})
+	
 
 func simulate():
 	if Entity.lifetime >= ASSIST_SPAWN_TIME:

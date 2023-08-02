@@ -743,7 +743,7 @@ func afterimage_trail():# process afterimage trail
 		Em.char_state.AIR_ATK_ACTIVE:
 			if Animator.query_to_play(["aHActive"]):
 				if posmod(Animator.time, 2) == 0:
-					Globals.Game.spawn_afterimage(Character.player_ID, Em.afterimage_type.ENTITY, Character.sprite_texture_ref.sfx_over, \
+					Globals.Game.spawn_afterimage(Character.player_ID, Em.afterimage_type.CHAR, Character.sprite_texture_ref.sfx_over, \
 							Character.sfx_over.get_path(), NAME, Character.palette_number, Color(0,0,0), 0.5, 12)
 
 

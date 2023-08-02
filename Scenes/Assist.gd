@@ -122,7 +122,7 @@ func load_NPC(): # ran when loading state
 	
 	
 # this is run after adding this node to the tree and not when loading state
-func init(in_master_ID, in_NPC_ref, start_position, start_facing, in_palette_ref, atk_ID: int):
+func init(in_master_ID, in_NPC_ref, start_position, start_facing, in_palette_ref, atk_ID: = 0):
 	
 	NPC_ID = Globals.Game.entity_ID_ref
 	Globals.Game.entity_ID_ref += 1
@@ -201,11 +201,8 @@ func palette():
 		
 func unsummon(assist_attacked := false):
 	free = true
-	master_node.assist_active = false
-	if assist_attacked:
-		master_node.get_node("AssistCDTimer").time = FMath.percent(master_node.get_node("AssistCDTimer").time, Globals.Game.ASSIST_CD_PENALTY)
-	Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), NPC_ref, palette_ref, null, \
-		0.8, 15, Em.afterimage_shader.WHITE)
+	if UniqNPC.has_method("unsummon"):
+		UniqNPC.unsummon(assist_attacked)
 	
 # TESTING --------------------------------------------------------------------------------------------------
 
@@ -296,6 +293,11 @@ func simulate2(): # only ran if not in hitstop
 		match new_state:
 			Em.char_state.GRD_STANDBY, Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC:
 				unsummon()
+				
+	elif velocity.y >= 0: # just in case, normally called when physics.gd runs into a floor
+		match new_state:
+			Em.char_state.LAUNCHED_HITSTUN:
+				check_landing()
 
 				
 # GRAVITY --------------------------------------------------------------------------------------------------
@@ -622,6 +624,39 @@ func get_opponent_dir():
 	var target = get_target()
 	if target.position.x == position.x: return facing
 	else: return int(sign(target.position.x - position.x))
+	
+func get_opponent_v_dir():
+	var target = get_target()
+	if target.position.y == position.y: return 0
+	else: return int(sign(target.position.y - position.y)) # if +1, target is under, if -1, target is above
+	
+func get_opponent_x_dist():
+	var target = get_target()
+	return int(abs(target.position.x - position.x))
+	
+func get_opponent_y_dist():
+	var target = get_target()
+	return int(abs(target.position.y - position.y))
+	
+func get_opponent_angle_seg(angle_split):
+	var target = get_target()
+	var vec_to_opponent = FVector.new()
+	vec_to_opponent.set_from_vec(target.position - position)
+	return Globals.split_angle(vec_to_opponent.angle(), angle_split)
+
+func is_opponent_in_box(origin: Vector2, size:Vector2) -> bool:
+	origin.x = origin.x * facing
+	origin = position + origin
+	var left_bound = origin.x - int(size.x/2)
+	var right_bound = origin.x + int(size.x/2)
+	var top_bound = origin.y - int(size.y/2)
+	var bottom_bound = origin.y + int(size.y/2)
+
+	var target = get_target()
+	if target.position.x >= left_bound and target.position.x <= right_bound and \
+			target.position.y <= bottom_bound and target.position.y >= top_bound:
+		return true
+	return false
 	
 	
 func check_landing(): # called by physics.gd when character stopped by floor

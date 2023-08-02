@@ -126,7 +126,7 @@ const WEAK_HIT_AUDIO_NERF = -9
 
 const WALL_SLAM_THRESHOLD = 100 * FMath.S # min velocity towards surface needed to do Wall Slams and release BounceDust when bouncing
 const WALL_SLAM_VEL_LIMIT_MOD = 1000
-const WALL_SLAM_MIN_DAMAGE = 30
+const WALL_SLAM_MIN_VALUE = 30
 const HORIZ_WALL_SLAM_UP_BOOST = 500 * FMath.S # if bounce horizontally on ground, boost up a little
 
 const KILL_VEL_THRESHOLD = 900 * FMath.S
@@ -284,6 +284,7 @@ var gravity_frame_mod := 100 # modify gravity this frame
 var no_jumpsquat_cancel := false # set to true when jump cancelling an animation, prevent quick cancelling the jumpsquat
 var assist_active := false # true if assist is not active
 var assist_rescue_protect := false # set to true if hit by assist rescue till you recover, reduce damage and hitstun of assist moves
+var assist_fever := false # true if an assist land an unblocked hit on a hitstunned opponent, last till targeted opponent recovers
 
 # controls
 var button_up
@@ -747,11 +748,11 @@ func simulate(new_input_state):
 #				install(180)
 
 #
-#			if Globals.Game.get_node("NPCs").get_children().size() == 0:
-#				Globals.Game.spawn_NPC(player_ID, "GuraNPCtest", get_feet_pos(), facing, palette_number)
-#			else:
-#				for child in Globals.Game.get_node("NPCs").get_children():
-#					child.free = true
+			if Globals.Game.get_node("NPCs").get_children().size() == 0:
+				Globals.Game.spawn_NPC(player_ID, "GuraNPCtest", get_feet_pos(), facing, palette_number)
+			else:
+				for child in Globals.Game.get_node("NPCs").get_children():
+					child.free = true
 
 #			call_assist(Em.assist.NEUTRAL)
 			
@@ -884,7 +885,11 @@ func simulate2(): # only ran if not in hitstop
 		
 	if !new_state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		seq_partner_ID = null
-
+		
+	if assist_fever:
+		var target = get_target()
+		if !target.get_node("HitStunTimer").is_running() or target.current_guard_gauge >= GUARD_GAUGE_CEIL:
+			assist_fever = false
 		
 	if Globals.survival_level != null and Globals.difficulty != 3:
 		if Globals.Game.LevelControl.wave_standby_timer > 0:
@@ -1966,18 +1971,18 @@ func bounce(against_ground: bool):
 			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
 					abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
-				var scaled_damage = wall_slam(velocity.x)
+				var scaled_value = wall_slam(velocity_previous_frame.x)
 				
-				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+				if scaled_value >= WALL_SLAM_MIN_VALUE:
 					wall_slammed = Em.wall_slam.HAS_SLAMMED
-					take_damage(scaled_damage)
-					if Globals.survival_level == null:
-						Globals.Game.spawn_damage_number(scaled_damage, position)
-					else: Globals.Game.spawn_damage_number(scaled_damage, position, Em.dmg_num_col.RED)
+#					take_damage(scaled_damage)
+#					if Globals.survival_level == null:
+#						Globals.Game.spawn_damage_number(scaled_damage, position)
+#					else: Globals.Game.spawn_damage_number(scaled_damage, position, Em.dmg_num_col.RED)
 					
 					var slam_level := 0
-					if scaled_damage >= WALL_SLAM_MIN_DAMAGE * 2:
-						if scaled_damage < WALL_SLAM_MIN_DAMAGE * 3: # lvl 2 slam
+					if scaled_value >= WALL_SLAM_MIN_VALUE * 2:
+						if scaled_value < WALL_SLAM_MIN_VALUE * 3: # lvl 2 slam
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -16,})
@@ -2021,18 +2026,18 @@ func bounce(against_ground: bool):
 			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
 					abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
-				var scaled_damage = wall_slam(velocity.y)
+				var scaled_value = wall_slam(velocity_previous_frame.y)
 				
-				if scaled_damage >= WALL_SLAM_MIN_DAMAGE:
+				if scaled_value >= WALL_SLAM_MIN_VALUE:
 					wall_slammed = Em.wall_slam.HAS_SLAMMED
-					take_damage(scaled_damage)
-					if Globals.survival_level == null:
-						Globals.Game.spawn_damage_number(scaled_damage, position)
-					else: Globals.Game.spawn_damage_number(scaled_damage, position, Em.dmg_num_col.RED)
+#					take_damage(scaled_damage)
+#					if Globals.survival_level == null:
+#						Globals.Game.spawn_damage_number(scaled_damage, position)
+#					else: Globals.Game.spawn_damage_number(scaled_damage, position, Em.dmg_num_col.RED)
 					
 					var slam_level := 0
-					if scaled_damage >= 100:
-						if scaled_damage < 150:
+					if scaled_value >= 100:
+						if scaled_value < 150:
 							hitstop = 12
 							slam_level = 1
 							play_audio("break3", {"vol" : -15,})
@@ -2066,7 +2071,7 @@ func bounce(against_ground: bool):
 			velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
 		else:
 			velocity.y = -FMath.percent(velocity_previous_frame.y, 50) # shorter bounce if techable
-		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
+		if abs(velocity_previous_frame.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
 			bounce_dust(Em.compass.S)
 			play_audio("rock3", {"vol" : -10,})
 			
@@ -2074,8 +2079,8 @@ func bounce(against_ground: bool):
 func wall_slam(vel) -> int:
 	var weight: int = FMath.get_fraction_percent(int(abs(vel)) - WALL_SLAM_THRESHOLD, \
 			FMath.percent(WALL_SLAM_THRESHOLD, WALL_SLAM_VEL_LIMIT_MOD))
-	var scaled_damage = FMath.f_lerp(0, WALL_SLAM_MIN_DAMAGE * 4, weight)
-	return scaled_damage
+	var scaled_value = FMath.f_lerp(0, WALL_SLAM_MIN_VALUE * 4, weight)
+	return scaled_value
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
 	# to move an object, first do move_true_position(), then get_rounded_position()
@@ -4547,7 +4552,10 @@ func check_for_assist():
 	if assist_active: # cannot call if has an assist out
 		return
 	if $AssistCDTimer.is_running():
-		return #  cannot call during cooldown
+		if assist_fever:
+			pass
+		else:
+			return #  cannot call during cooldown
 	if is_hitstunned():
 #		if $HitStopTimer.is_running():
 #			return false
@@ -6327,6 +6335,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		remove_status_effect_on_taking_hit()
 	
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
+		if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
+			return # assist rescue command grabs will not work
 		if $SBlockTimer.is_running():
 			return # cannot grab someone who just blocked an attack
 		if hit_data[Em.hit.SEMI_DISJOINT] or hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data:
@@ -6780,6 +6790,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but all moves except non-strong proj can Punish Hit)
 	if get_damage_percent() < 100:
 		return false
+	if Em.hit.NPC_PATH in hit_data:
+		return false # NPCs cannot kill
 	if hit_data[Em.hit.WEAK_HIT] or Em.hit.AUTOCHAIN in hit_data or hit_data[Em.hit.MOVE_DATA][Em.move.DMG] <= 0:
 		return false
 	if "MOB" in hit_data[Em.hit.ATKER_OR_ENTITY] or "MOB_ENTITY" in hit_data[Em.hit.ATKER_OR_ENTITY]:
@@ -8297,6 +8309,7 @@ func save_state():
 		"gravity_frame_mod" : gravity_frame_mod,
 		"no_jumpsquat_cancel" : no_jumpsquat_cancel,
 		"assist_rescue_protect" : assist_rescue_protect,
+		"assist_fever" : assist_fever,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -8405,6 +8418,7 @@ func load_state(state_data, command_rewind := false):
 	gravity_frame_mod = state_data.gravity_frame_mod
 	no_jumpsquat_cancel = state_data.no_jumpsquat_cancel
 	assist_rescue_protect = state_data.assist_rescue_protect
+	assist_fever = state_data.assist_fever
 	
 	if Globals.survival_level != null and !command_rewind:
 		enhance_cooldowns = state_data.enhance_cooldowns

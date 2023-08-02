@@ -36,8 +36,12 @@ func init(aux_data: Dictionary):
 	var rot: int
 	
 	 # starting animation
-	rot = -14
-	Animator.play("[c1]Spawn")
+	if !"alt_aim" in aux_data:
+		rot = -14
+		Animator.play("[c1]Spawn")
+	else:
+		rot = -68
+		Animator.play("[u][c1]Spawn")
 
 				
 	if "aerial" in aux_data:
@@ -51,7 +55,8 @@ func init(aux_data: Dictionary):
 			Entity.velocity.x *= Entity.facing
 			Entity.absorption_value = 1
 			Entity.life_point = 1
-
+			Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
+					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.palette_ref, Entity.master_ref)
 
 #func spin():
 #	match Animator.to_play_anim:
@@ -282,11 +287,21 @@ func killsound():
 func collision(): # collided with a platform
 	kill()
 	
-func landed_a_hit(_hit_data):
+func landed_a_hit(hit_data):
 	Entity.life_point -= 1
 	if Entity.life_point <= 0:
 		kill(false)
 		Entity.hitstop = 0
+		
+	fever(hit_data)
+
+func fever(hit_data):
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
+		if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
+			return
+		if !hit_data[Em.hit.DEFENDER].assist_rescue_protect:
+			hit_data[Em.hit.ATKER].assist_fever = true
+			
 		
 func on_offstage():
 	Entity.free = true
@@ -297,7 +312,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Animator.play("[c1]Active")
 		"[u][c1]Spawn":
 			Animator.play("[u][c1]Active")
-		"[c1]Spin", "[c2]Spin":
+		"[c1]Spin":
 			turn_to_enemy()
 			
 func _on_SpritePlayer_anim_started(anim_name):
@@ -306,6 +321,6 @@ func _on_SpritePlayer_anim_started(anim_name):
 		
 	else:
 		match anim_name:
-			"[c1]Spin", "[c2]Spin":
+			"[c1]Spin":
 				if Entity.v_facing == -1:
 					Entity.v_face(1)

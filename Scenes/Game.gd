@@ -21,6 +21,7 @@ const FLASHING_TIME_THRESHOLD = 10
 
 const ASSIST_CD_PENALTY = 200 # increased cooldown if assist is used during hitstun or is attacked
 const ASSIST_RESCUE_OFFSET = 120 # directional offset if assist is used during hitstun
+const ASSIST_FEVER_CD_REDUCE = 70 # reduce CD during assist fever
 
 onready var stage_ref = Globals.stage_ref
 onready var P1_char_ref = Globals.P1_char_ref
@@ -280,6 +281,8 @@ func setup():
 			var chosen_music_dict = music_list[random].duplicate()
 			chosen_music_dict["audio"] = ResourceLoader.load(chosen_music_dict.audio_filename)
 			BGM.bgm(chosen_music_dict)
+			
+	LoadAssist.load_assist("GuraA") # test
 
 
 # --------------------------------------------------------------------------------------------------
@@ -2155,11 +2158,17 @@ func assist_update(character):
 			else:
 				assist_text.text = "Active"
 				
-			assist_text.get_node("AnimationPlayer").play("cooldown")
-			if assist_icon.material == null:
-				assist_icon.material = ShaderMaterial.new()
-				assist_icon.material.shader = Loader.monochrome_shader
-				assist_icon.modulate = Color(0.5,0.5,0.5)
+			if !character.assist_fever:
+				assist_text.get_node("AnimationPlayer").play("cooldown")
+				if assist_icon.material == null:
+					assist_icon.material = ShaderMaterial.new()
+					assist_icon.material.shader = Loader.monochrome_shader
+					assist_icon.modulate = Color(0.5,0.5,0.5)
+			else:
+				assist_text.get_node("AnimationPlayer").play("fever")
+				if assist_icon.material != null:
+					assist_icon.material = null
+					assist_icon.modulate = Color(1,1,1)
 		else:
 			if character.is_hitstunned() and (character.get_node("BurstLockTimer").is_running() or character.current_guard_gauge <= 0):
 				assist_text.text = "X"

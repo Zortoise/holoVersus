@@ -45,6 +45,7 @@ Netcode="*res://Scenes/Netplay/Netcode.gd"
 Cards="*res://Scenes/Survival/Cards.gd"
 Inventory="*res://Scenes/Survival/Inventory.gd"
 Loader="*res://Scenes/Autoloads/Loader.gd"
+LoadAssist="*res://Scenes/Autoloads/LoadAssist.gd"
 
 [display]
 

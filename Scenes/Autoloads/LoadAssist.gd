@@ -1,0 +1,159 @@
+extends Node
+
+const ASSIST_BORROW = {
+	"GuraA": {
+		"NPC_data": {
+			"scene" : "res://Assists/GuraA/GuraA.tscn",
+			"frame_data_array" : [
+				"res://Characters/Gura/FrameData/Base.tres",
+				"res://Characters/Gura/FrameData/SP1.tres",
+				"res://Characters/Gura/FrameData/SP2.tres",
+				"res://Characters/Gura/FrameData/SP3.tres",
+			],
+			"spritesheet" : {
+				"BaseSprite" : "res://Characters/Gura/Spritesheets/BaseSprite.png",
+				"SP1Sprite" : "res://Characters/Gura/Spritesheets/SP1Sprite.png",
+				"SP1SfxOver" : "res://Characters/Gura/Spritesheets/SP1SfxOver.png",
+				"SP2Sprite" : "res://Characters/Gura/Spritesheets/SP2Sprite.png",
+				"SP2SfxUnder" : "res://Characters/Gura/Spritesheets/SP2SfxUnder.png",
+				"SP3Sprite" : "res://Characters/Gura/Spritesheets/SP3Sprite.png",
+				"SP3SfxUnder" : "res://Characters/Gura/Spritesheets/SP3SfxUnder.png",
+			}
+		},
+		"entity_data": {
+			"TridentProjA" : {
+				"scene" : "res://Assists/GuraA/Entities/TridentProjA.tscn",
+				"frame_data" : "res://Characters/Gura/Entities/FrameData/TridentProj.tres",
+				"spritesheet" : "res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png",
+			}
+		},
+		"sfx_data": {
+			"TridentRing": {
+				"frame_data" : "res://Characters/Gura/SFX/FrameData/TridentRing.tres",
+				"spritesheet" : "res://Characters/Gura/SFX/Spritesheets/TridentRingSprite.png",
+			},
+			"BigSplash": {
+				"frame_data" : "res://Characters/Gura/SFX/FrameData/BigSplash.tres",
+				"spritesheet" : "res://Characters/Gura/SFX/Spritesheets/BigSplashSprite.png",
+			},
+			"WaterJet": {
+				"frame_data" : "res://Characters/Gura/SFX/FrameData/WaterJet.tres",
+				"spritesheet" : "res://Characters/Gura/SFX/Spritesheets/WaterJetSprite.png",
+			},
+		},
+		"audio_data": {
+			"water1": "res://Characters/Gura/UniqueAudio/water1.wav",
+			"water4": "res://Characters/Gura/UniqueAudio/water4.wav",
+			"water7": "res://Characters/Gura/UniqueAudio/water7.wav",
+			"water8": "res://Characters/Gura/UniqueAudio/water8.wav",
+		},
+	}
+}
+
+func load_assist(assist_ref: String):
+	
+	if assist_ref in Loader.NPC_data: return # already loaded
+	
+	if assist_ref in ASSIST_BORROW: # is an assist that borrows resources from a playable character
+		Loader.NPC_data[assist_ref] = {
+			"scene" : load(ASSIST_BORROW[assist_ref].NPC_data.scene),
+			"frame_data_array" : [],
+			"spritesheet" : {},
+			"palettes" : {},
+		}
+		for frame_data in ASSIST_BORROW[assist_ref].NPC_data.frame_data_array:
+			Loader.NPC_data[assist_ref].frame_data_array.append(ResourceLoader.load(frame_data))
+		for spritename in ASSIST_BORROW[assist_ref].NPC_data.spritesheet.keys():
+			Loader.NPC_data[assist_ref].spritesheet[spritename] = \
+					ResourceLoader.load(ASSIST_BORROW[assist_ref].NPC_data.spritesheet[spritename])
+					
+		for entity_name in ASSIST_BORROW[assist_ref].entity_data.keys():
+			if !entity_name in Loader.entity_data:
+				Loader.entity_data[entity_name] = {
+					"scene" : load(ASSIST_BORROW[assist_ref].entity_data[entity_name].scene),
+					"frame_data" : ResourceLoader.load(ASSIST_BORROW[assist_ref].entity_data[entity_name].frame_data),
+					"spritesheet" : ResourceLoader.load(ASSIST_BORROW[assist_ref].entity_data[entity_name].spritesheet),
+				}
+				
+		for sfx_name in ASSIST_BORROW[assist_ref].sfx_data.keys():
+			if !sfx_name in Loader.sfx:
+				Loader.sfx[sfx_name] = {
+					"frame_data" : ResourceLoader.load(ASSIST_BORROW[assist_ref].sfx_data[sfx_name].frame_data),
+					"spritesheet" : ResourceLoader.load(ASSIST_BORROW[assist_ref].sfx_data[sfx_name].spritesheet),
+				}
+				
+		for audio_name in ASSIST_BORROW[assist_ref].audio_data.keys():
+			if !audio_name in Loader.audio:
+				Loader.audio[audio_name] = ResourceLoader.load(ASSIST_BORROW[assist_ref].audio_data[audio_name])
+
+		
+	else: # standalone, load the data inside the folders
+		pass # WIP
+
+
+#	Loader.NPC_data["GuraA"] = {
+#		"scene" : load("res://Assists/GuraA/GuraA.tscn"),
+#		"frame_data_array" : Loader.char_data[NAME].frame_data_array,
+#		"spritesheet" : Loader.char_data[NAME].spritesheet,
+#		"palettes" : Loader.char_data[NAME].palettes,
+#	}
+#
+#	Loader.entity_data["TridentProjA"] = {
+#		"scene" : load("res://Assists/GuraA/Entities/TridentProjA.tscn"),
+#		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png"),
+#	}
+
+#var NPC_data = {
+##	"GuraTest" : {
+##		"scene" : load("res://Characters/Gura/GuraNPCtest.tscn"),
+##		"frame_data_array" : [
+##			ResourceLoader.load("res://Characters/Gura/FrameData/Base.tres"), 
+##			ResourceLoader.load("res://Characters/Gura/FrameData/F1.tres"), 
+##		]
+##		"spritesheet" : {
+##			"BaseSprite" : ResourceLoader.load("res://Characters/Gura/Spritesheets/BaseSprite.png"),
+##			"F1SfxOver" : ResourceLoader.load("res://Characters/Gura/Spritesheets/F1SfxOver.png"),
+##		},
+##		"palettes" : {
+##			"2" : ResourceLoader.load("res://Characters/Gura/Palettes/2.png")
+##		}
+##	}
+#}
+#
+#var entity_data = {
+##	"TridentProj" : { # example
+##		"scene" : load("res://Characters/Gura/Entities/TridentProj.tscn"),
+##		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+##		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
+##	},
+##	"TridentProjM" : { # example
+##		"scene" : load("res://Mobs/GuraM/Entities/TridentProjM.tscn"),
+##		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
+##		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
+##	},
+#}
+
+#	sfx = {
+#		"DustClouds" : {
+#			"frame_data" : load("res://Assets/Effects/DustClouds/FrameData/DustClouds.tres")
+#			"spritesheet" : ResourceLoader.load("res://Assets/Effects/DustClouds/Spritesheets/DustCloudsSprite.png")
+#		}
+#		"HitsparkB" : {
+#			"frame_data" : load("res://Assets/Effects/Hitsparks/FrameData/HitsparkB.tres")
+#			"spritesheet" : ResourceLoader.load("res://Assets/Effects/Hitsparks/Spritesheets/HitsparkBSprite.png")
+#		}
+#	}
+
+#var audio = { # code in _ready() will load this with .wav files at start
+## example:
+##	"jump1" : ResourceLoader.load("res://Assets/Audio/Common/jump1.wav")
+#}
+
+
+
+
+	
+	
+	
+
