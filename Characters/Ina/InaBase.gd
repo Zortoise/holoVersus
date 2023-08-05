@@ -57,7 +57,7 @@ const DAMAGE_VALUE_LIMIT = 1300
 const GG_REGEN_AMOUNT = 13 # exact GG regened per frame when GG < 100%
 const GRD_BLOCK_GG_COST = 30 # exact GG loss per frame when blocking on ground
 const AIR_BLOCK_GG_COST = 40 # exact GG loss per frame when blocking in air
-const WEAKBLOCK_CHIP_DMG_MOD = 20 # % of damage taken as chip damage when blocking
+const CHIP_DMG_MOD = 20 # % of damage taken as chip damage when blocking
 
 # fixed?
 const BASE_EX_REGEN = 20

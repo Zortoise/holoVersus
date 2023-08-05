@@ -860,6 +860,28 @@ func simulate2(): # only ran if not in hitstop
 	else: # apply air resistance if in air
 		velocity.x = FMath.f_lerp(velocity.x, 0, air_res_this_frame)
 	
+	
+# UNIQUE JUMP/FASTFALL CANCEL --------------------------------------------------------------------------------------------------
+# pressing Unique will cancel fastfall if done immediately afterwards while Down is held
+# and also cancel jumps if tap_jump is on if done immediately afterwards while Up is held
+# these allow for input leniency for Unique + Up/Down actions
+	
+	if Settings.input_assist[master_ID]:
+		if button_unique in input_state.just_pressed:
+			if button_down in input_state.pressed:
+				match new_state:
+					Em.char_state.AIR_STANDBY:
+						if Animator.query_to_play(["FastFallTransit"]):
+							animate("Fall")
+			if Settings.tap_jump[master_ID] == 1 and button_up in input_state.pressed:
+				match new_state:
+					Em.char_state.GRD_STARTUP:
+						if Animator.query_to_play(["JumpTransit"]):
+							animate("Idle")
+					Em.char_state.AIR_STARTUP:
+						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit"]):
+							animate("Fall")
+						
 # --------------------------------------------------------------------------------------------------
 
 	buffer_actions()

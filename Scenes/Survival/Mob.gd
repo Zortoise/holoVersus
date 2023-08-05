@@ -2614,7 +2614,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.SWEETSPOTTED] = false
 		
 	hit_data[Em.hit.WEAK_HIT] = weak_hit
+	
+	# ARMOR AND RESISTANCE ----------------------------------------------------------------------------------------------
 
+	if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
+		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_feet_pos") and hit_data[Em.hit.ATKER_OR_ENTITY].get_feet_pos() < get_feet_pos():
+			hit_data[Em.hit.ANTI_AIRED] = true
 
 	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		match new_state:
@@ -2663,6 +2668,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			punish_hit = true
 		elif is_atk_active() or is_atk_recovery():
 			punish_hit = true
+		match new_state:
+			Em.char_state.GRD_ATK_STARTUP:
+				if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+					punish_hit = true
+			Em.char_state.AIR_ATK_STARTUP:
+				if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+					punish_hit = true
+				elif Em.hit.ANTI_AIRED in hit_data: # anti-airing airborne moves during startup cause Punish Hit
+					punish_hit = true
 			
 	if punish_hit:
 		if Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
@@ -3254,6 +3268,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
 		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
+		if Em.hit.ANTI_AIRED in hit_data:
+			guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airborne resisting mob with an anti-air
 		return guard_drain
 		
 	return GUARD_GAUGE_FLOOR

@@ -251,6 +251,8 @@ func refine_move_name(move_name):
 		"SP1[b]", "aSP1", "aSP1[b]", "SP1[c1]", "SP1[c1]b", "aSP1[c1]", "aSP1[c1]b", \
 				"SP1[u]", "SP1[u][c1]", "SP1[u][c1]b", "aSP1[d]", "aSP1[d][c1]", "aSP1[d][c1]b":
 			return "SP1"
+		"aSP2C":
+			return "aSP2"
 		"SP3":
 			return "aSP3"
 		"SP3b":

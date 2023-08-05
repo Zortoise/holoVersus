@@ -146,7 +146,7 @@ const SURVIVAL_HITSTOP = 15
 
 const ASSIST_PASSIVE_REGEN = 5 # reduce assist CD by 1 frame every X frames
 const ASSIST_RESCUE_COST = 5000
-const ASSIST_RESCUE_HITSTUN = 10 # fixed
+#const ASSIST_RESCUE_HITSTUN = 10 # fixed
 
 # variables used, don't touch these
 #var loaded_palette = null
@@ -1784,6 +1784,27 @@ func simulate2(): # only ran if not in hitstop
 	else: # apply air resistance if in air
 		velocity.x = FMath.f_lerp(velocity.x, 0, air_res_this_frame)
 	
+# UNIQUE JUMP/FASTFALL CANCEL --------------------------------------------------------------------------------------------------
+# pressing Unique will cancel fastfall if done immediately afterwards while Down is held
+# and also cancel jumps if tap_jump is on if done immediately afterwards while Up is held
+# these allow for input leniency for Unique + Up/Down actions
+	
+	if Settings.input_assist[player_ID]:
+		if button_unique in input_state.just_pressed:
+			if button_down in input_state.pressed:
+				match new_state:
+					Em.char_state.AIR_STANDBY:
+						if Animator.query_to_play(["FastFallTransit"]):
+							animate("Fall")
+			if Settings.tap_jump[player_ID] == 1 and button_up in input_state.pressed:
+				match new_state:
+					Em.char_state.GRD_STARTUP:
+						if Animator.query_to_play(["JumpTransit"]):
+							animate("Idle")
+					Em.char_state.AIR_STARTUP:
+						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit"]):
+							animate("Fall")
+				
 # --------------------------------------------------------------------------------------------------
 
 	buffer_actions()
@@ -2953,6 +2974,7 @@ func query_state(query_states: Array):
 		if state == x or new_state == x:
 			return true
 	return false
+		
 
 func state_detect(anim) -> int:
 	match anim:
@@ -3190,9 +3212,9 @@ func get_stat(stat: String) -> int:
 #				to_return = int(max(to_return, 0))
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_BLOCK_COST):
 					to_return = 0
-			"WEAKBLOCK_CHIP_DMG_MOD":
+			"CHIP_DMG_MOD":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.WEAKBLOCK_CHIP_DMG_MOD))
+#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.CHIP_DMG_MOD))
 #				to_return = int(max(to_return, 0))
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CHIP_DMG):
 					to_return = 0
@@ -5869,6 +5891,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		hit_data[Em.hit.CANCELLED] = true
 #		return # cannot be attacked twice during survival mode
 	
+	if assist_rescue_protect:
+		if !Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			hit_data[Em.hit.CANCELLED] = true
+			return # cannot be attacked by non-assist moves till you recover if hit by assist rescue
+	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = TrainingRegenTimer_TIME
 
@@ -6029,6 +6056,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
+	if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
+		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_feet_pos") and hit_data[Em.hit.ATKER_OR_ENTITY].get_feet_pos() < get_feet_pos():
+			hit_data[Em.hit.ANTI_AIRED] = true
+
 	var crossed_up: bool = check_if_crossed_up(hit_data)
 
 	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or $SBlockTimer.is_running():
@@ -6104,9 +6135,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		match state:
 			Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
-				
-				if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
-					hit_data[Em.hit.ANTI_AIRED] = true
 
 				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 					
@@ -6127,7 +6155,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	#							if Globals.survival_level != null:
 	#								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED # no proximity parry for Survival Mode
 								if Em.hit.ANTI_AIRED in hit_data:
-									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED # anti-air normals force weakblock on airblockers
+									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED # anti-air normals cannot be parried by airblockers
 								else:
 									# if perfect blocked or blocking attacker close enough, a Strongblock occurs
 									# attacker is pushed back, and cannot chain into anything except Burst Counter
@@ -6185,8 +6213,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			remove_status_effect(Em.status_effect.SCANNED)
 		else:
 			match new_state:
-				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP:
 					if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+						punish_hit = true
+				Em.char_state.AIR_ATK_STARTUP:
+					if Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+						punish_hit = true
+					elif Em.hit.ANTI_AIRED in hit_data: # anti-airing airborne moves during startup cause Punish Hit
 						punish_hit = true
 				Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
 					Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC:
@@ -6454,7 +6487,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if Em.hit.SUPERARMORED in hit_data:
 					modulate_play("armor_flash")
 					play_audio("block3", {"vol" : -15})
-				elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data:
+				elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
+					(Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
 					modulate_play("weakblock_flash")
 					play_audio("block3", {"vol" : -15})
 				else:
@@ -6864,7 +6898,7 @@ func calculate_damage(hit_data) -> int:
 #			if Em.hit.SUPERARMORED in hit_data:
 #				scaled_damage = FMath.percent(scaled_damage, SUPERARMOR_CHIP_DMG_MOD)
 #			else:
-			scaled_damage = FMath.percent(scaled_damage, get_stat("WEAKBLOCK_CHIP_DMG_MOD"))
+			scaled_damage = FMath.percent(scaled_damage, get_stat("CHIP_DMG_MOD"))
 		else:
 			return 0
 
@@ -6922,8 +6956,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 				return 0
 			if Em.hit.GUARD_DRAIN in hit_data:
 				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # increase guard drain when blocking heavy/special/ex
-				if !grounded and Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-					guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airblocking opponent with an anti-air special
+				if Em.hit.ANTI_AIRED in hit_data:
+					guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airblocking opponent with an anti-air
 			else:
 				if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
 					return 0
@@ -7126,9 +7160,9 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	
 func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's Guard Gauge
 	
-	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect: # assist rescue
-		if hit_data[Em.hit.SEMI_DISJOINT]: return 0 
-		return ASSIST_RESCUE_HITSTUN
+#	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect: # assist rescue
+#		if hit_data[Em.hit.SEMI_DISJOINT]: return 0 
+#		return ASSIST_RESCUE_HITSTUN
 		
 	if !hit_data[Em.hit.SEMI_DISJOINT]:
 	
@@ -7379,7 +7413,8 @@ func generate_blockspark(hit_data):
 		Em.block_state.BLOCKED:
 			if Em.hit.SUPERARMORED in hit_data:
 				blockspark = "Superarmorspark"
-			elif Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data:
+			elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
+					(Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
 				blockspark = "WBlockspark2"
 			else:
 				blockspark = "WBlockspark"

@@ -25,7 +25,8 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 		JUMP_CANCEL_ACTIVE, JUMP_CANCEL_ON_WHIFF, JUMP_CANCEL_ON_HIT, NO_ACTIVE_CANCEL
 		VULN_LIMBS, DESTROY_ENTITIES, DESTRUCTIBLE_ENTITY, INDESTRUCTIBLE_ENTITY, HARMLESS_ENTITY, NO_REFLECT_ENTITY
 		NO_TERMINAL_VEL_ACTIVE, FIXED_KNOCKBACK_STR, NO_SS_ATK_LVL_BOOST, QUICK_GRAB, GRAB_INVULN_STARTUP, WHIFF_SDASH_CANCEL
-		AIR_REPEAT, REFLECT_ENTITIES, NO_SDASH_CANCEL, NO_SDC_DURING_ACTIVE, CAN_SDC_DURING_REC, PUNISH_ENTITY, NO_HITCOUNT_RESET}
+		AIR_REPEAT, REFLECT_ENTITIES, NO_SDASH_CANCEL, NO_SDC_DURING_ACTIVE, CAN_SDC_DURING_REC, PUNISH_ENTITY, NO_HITCOUNT_RESET
+		CHIPPER}
 # ASSIST = add "Assist" behind move name when adding to Repeat Memory
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
@@ -86,6 +87,7 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # CAN_SDC_DURING_REC = can SDash Cancel during recovery
 # PUNISH_ENTITY = entity can land punish hit without being Proj Level 3, used for projectiles with special effects on landing punish hits
 # NO_HITCOUNT_RESET = attack does not reset hitcount on being active frames being animated, used for multi-part attacks sharing hitcount
+# CHIPPER = doubles chip damage
 
 enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED, INVERT_DIR
 		NO_CROSSUP, SCANNED}
