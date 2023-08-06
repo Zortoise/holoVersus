@@ -863,8 +863,7 @@ func simulate2(): # only ran if not in hitstop
 	
 # UNIQUE JUMP/FASTFALL CANCEL --------------------------------------------------------------------------------------------------
 # pressing Unique will cancel fastfall if done immediately afterwards while Down is held
-# and also cancel jumps if tap_jump is on if done immediately afterwards while Up is held
-# these allow for input leniency for Unique + Up/Down actions
+# these allow for input leniency for Unique + Down actions
 	
 	if Settings.input_assist[master_ID]:
 		if button_unique in input_state.just_pressed:
@@ -873,14 +872,14 @@ func simulate2(): # only ran if not in hitstop
 					Em.char_state.AIR_STANDBY:
 						if Animator.query_to_play(["FastFallTransit"]):
 							animate("Fall")
-			if Settings.tap_jump[master_ID] == 1 and button_up in input_state.pressed:
-				match new_state:
-					Em.char_state.GRD_STARTUP:
-						if Animator.query_to_play(["JumpTransit"]):
-							animate("Idle")
-					Em.char_state.AIR_STARTUP:
-						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit"]):
-							animate("Fall")
+#			if Settings.tap_jump[master_ID] == 1 and button_up in input_state.pressed:
+#				match new_state:
+#					Em.char_state.GRD_STARTUP:
+#						if Animator.query_to_play(["JumpTransit"]):
+#							animate("Idle")
+#					Em.char_state.AIR_STARTUP:
+#						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit"]):
+#							animate("Fall")
 						
 # --------------------------------------------------------------------------------------------------
 
@@ -2025,14 +2024,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 			
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), NPC_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, NPC_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 			
-		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), NPC_ref, palette_ref, \
+		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, NPC_ref, \
 				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), NPC_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, NPC_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
 	else:
@@ -2042,14 +2041,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 func afterimage_cancel(starting_modulate_a = 0.4, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), NPC_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, NPC_ref, null, \
 			starting_modulate_a, lifetime)
 		
-	Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), NPC_ref, palette_ref, null, \
+	Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, NPC_ref, null, \
 		starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), NPC_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, NPC_ref, null, \
 			starting_modulate_a, lifetime)
 	
 	

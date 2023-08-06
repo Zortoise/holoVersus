@@ -1880,14 +1880,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 #		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, mob_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 
-		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, mob_ref, \
 				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, mob_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
 	else:
@@ -1897,14 +1897,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), mob_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, mob_ref, null, \
 				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 		
-	Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
+	Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, mob_ref, null, \
 			starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), mob_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, mob_ref, null, \
 				starting_modulate_a, lifetime, Em.afterimage_shader.MASTER)
 	
 		
@@ -3887,7 +3887,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					if healed != null and healed > 0:
 						Globals.Game.spawn_damage_number(healed, killer.position, Em.dmg_num_col.GREEN)
 						
-			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), mob_ref, palette_ref, null, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, mob_ref, null, \
 					1.0, 20, Em.afterimage_shader.WHITE)
 			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()})

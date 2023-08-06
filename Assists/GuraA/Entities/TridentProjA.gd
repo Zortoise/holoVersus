@@ -26,6 +26,21 @@ const MOVE_DATABASE = {
 		Em.move.ATK_ATTR : [],
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
+	"[c2]Active" : {
+		Em.move.ROOT : "TridentProj",
+		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.HITCOUNT : 2,
+		Em.move.DMG : 55,
+		Em.move.KB : 450 * FMath.S,
+		Em.move.KB_TYPE: Em.knockback_type.FIXED,
+		Em.move.ATK_LVL : 3,
+		Em.move.KB_ANGLE : -45,
+		Em.move.PROJ_LVL : 2,
+		Em.move.HITSPARK_TYPE: Em.hitspark_type.HIT,
+		Em.move.HITSPARK_PALETTE: "blue",
+		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
+	},
 }
 
 func _ready():
@@ -34,31 +49,31 @@ func _ready():
 func init(aux_data: Dictionary):
 	
 	# set up starting data
-	Entity.unique_data = {"new_facing" : null, "new_v_facing" : null, "reset_rot" : null, "spun" : false}
+	Entity.unique_data = {"new_facing" : null, "new_v_facing" : null, "reset_rot" : null}
 	var rot: int
 	
 	 # starting animation
 	if !"alt_aim" in aux_data:
 		rot = -14
-		Animator.play("[c1]Spawn")
+		Animator.play("[c2]Spawn")
 	else:
 		rot = -68
-		Animator.play("[u][c1]Spawn")
+		Animator.play("[u][c2]Spawn")
 
 				
 	if "aerial" in aux_data:
 		rot = -rot
 		Entity.v_face(-1)
 				
-	match Animator.to_play_anim:
-		"[c1]Spawn", "[u][c1]Spawn":
-			Entity.velocity.set_vector(500 * FMath.S, 0)
-			Entity.velocity.rotate(rot)
-			Entity.velocity.x *= Entity.facing
-			Entity.absorption_value = 1
-			Entity.life_point = 1
-			Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
-					{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.palette_ref, Entity.master_ref)
+
+	Entity.velocity.set_vector(600 * FMath.S, 0)
+	Entity.velocity.rotate(rot)
+	Entity.velocity.x *= Entity.facing
+	Entity.absorption_value = 2
+	Entity.life_point = 2
+	Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
+			{"facing":Entity.facing, "rot":deg2rad(rot)}, Entity.palette_ref, Entity.master_ref)
+			
 
 #func spin():
 #	match Animator.to_play_anim:
@@ -148,8 +163,10 @@ func turn_to_enemy():
 func refine_move_name(move_name):
 		
 	match move_name:
-		"[c1]Spawn", "[u][c1]Spawn", "[u][c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE", "[c1]TurnESE":
+		"[u][c1]Active", "[c1]TurnE", "[c1]TurnS", "[c1]TurnSE", "[c1]TurnSSE", "[c1]TurnESE":
 			return "[c1]Active"
+		"[c2]Spawn", "[u][c2]Spawn", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
+			return "[c2]Active"
 	return move_name
 
 func query_move_data(move_name) -> Dictionary:
@@ -169,24 +186,24 @@ func query_move_data(move_name) -> Dictionary:
 #		move_data[Em.move.KB_ANGLE] = -25
 #	else:
 	match orig_move_name:
-		"[c1]TurnE":
+		"[c1]TurnE", "[c2]TurnE":
 			move_data[Em.move.KB_ANGLE] = -31
-		"[c1]TurnS":
+		"[c1]TurnS", "[c2]TurnS":
 			if Entity.v_facing == 1:
 				move_data[Em.move.KB_ANGLE] = 90
 			else:
 				move_data[Em.move.KB_ANGLE] = -90
-		"[c1]TurnSE":
+		"[c1]TurnSE", "[c2]TurnSE":
 			if Entity.v_facing == 1:
 				move_data[Em.move.KB_ANGLE] = 0
 			else:
 				move_data[Em.move.KB_ANGLE] = -76
-		"[c1]TurnSSE":
+		"[c1]TurnSSE", "[c2]TurnSSE":
 			if Entity.v_facing == 1:
 				move_data[Em.move.KB_ANGLE] = 31
 			else:
 				move_data[Em.move.KB_ANGLE] = -83
-		"[c1]TurnESE":
+		"[c1]TurnESE", "[c2]TurnESE":
 			if Entity.v_facing == 1:
 				move_data[Em.move.KB_ANGLE] = -25
 			else:
@@ -205,8 +222,6 @@ func query_move_data(move_name) -> Dictionary:
 		if Em.move.DMG in move_data:
 	#		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	
 			move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.ASSIST_DMG_MOD))
-		if move_name == "[c3]Active":
-			move_data[Em.move.PROJ_LVL] = 2
 	
 	return move_data
 	
@@ -250,9 +265,11 @@ func simulate():
 			Entity.velocity.percent(80)
 			Entity.get_node("Sprite").rotation += 9*PI * Globals.FRAME * Entity.facing
 
-		"[c1]Active", "[u][c1]Active":
-			if Entity.lifetime > 25 and Entity.unique_data.spun == false:
-				Entity.unique_data.spun = true
+		"[c2]Active", "[u][c2]Active":
+			if posmod(Entity.lifetime, 3) == 0:
+				Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), \
+						Entity.palette_ref, Entity.master_ref, Color(1.5, 1.5, 1.5), 0.5, 10.0)
+			if Entity.lifetime > 15:
 				var master_node = Globals.Game.get_player_node(Entity.master_ID)
 				if master_node != null and !master_node.is_hitstunned_or_sequenced():
 					Animator.play("[c1]Spin")
@@ -261,25 +278,25 @@ func simulate():
 	
 func kill(sound = true):
 	match Animator.to_play_anim:
-		"[c1]Spawn", "[c1]Active":
+		"[c2]Spawn", "[c2]Active":
 			Animator.play("Kill")
-			if sound: killsound()
-		"[u][c1]Spawn", "[u][c1]Active":
+			if sound: killsound() # don't put this outside, Spin animation has no kill()
+		"[u][c2]Spawn", "[u][c2]Active":
 			Animator.play("[u]Kill")
 			if sound: killsound()
-		"[c1]TurnE":
+		"[c1]TurnE", "[c2]TurnE":
 			Animator.play("EKill")
 			if sound: killsound()
-		"[c1]TurnS":
+		"[c1]TurnS", "[c2]TurnS":
 			Animator.play("SKill")
 			if sound: killsound()
-		"[c1]TurnSE":
+		"[c1]TurnSE", "[c2]TurnSE":
 			Animator.play("SEKill")
 			if sound: killsound()
-		"[c1]TurnSSE":
+		"[c1]TurnSSE", "[c2]TurnSSE":
 			Animator.play("SSEKill")
 			if sound: killsound()
-		"[c1]TurnESE":
+		"[c1]TurnESE", "[c2]TurnESE":
 			Animator.play("ESEKill")
 			if sound: killsound()
 
@@ -310,10 +327,10 @@ func on_offstage():
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:
-		"[c1]Spawn":
-			Animator.play("[c1]Active")
-		"[u][c1]Spawn":
-			Animator.play("[u][c1]Active")
+		"[c2]Spawn":
+			Animator.play("[c2]Active")
+		"[u][c2]Spawn":
+			Animator.play("[u][c2]Active")
 		"[c1]Spin":
 			turn_to_enemy()
 			

@@ -2432,11 +2432,11 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary,
 
 # master_ID is passed in to freeze afterimages during hitstop
 # master_ref is used to locate spritesheet_ref for character afterimages and locate palettes as well
-func spawn_afterimage(master_ID: int, afterimage_type: int, spritesheet_ref: String, sprite_node_path: NodePath, master_ref = null, \
-		palette_ref = null, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
+func spawn_afterimage(master_ID: int, afterimage_type: int, spritesheet_ref: String, sprite_node_path: NodePath, palette_ref = null, \
+		master_ref = null, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 	var afterimage = Loader.loaded_afterimage_scene.instance()
 	$Afterimages.add_child(afterimage)
-	afterimage.init(master_ID, afterimage_type, spritesheet_ref, sprite_node_path, master_ref, palette_ref, color_modulate, starting_modulate_a, \
+	afterimage.init(master_ID, afterimage_type, spritesheet_ref, sprite_node_path, palette_ref, master_ref, color_modulate, starting_modulate_a, \
 			lifetime, afterimage_shader)
 	return afterimage
 	

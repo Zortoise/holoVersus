@@ -7,17 +7,15 @@ const ASSIST_BORROW = {
 			"frame_data_array" : [
 				"res://Characters/Gura/FrameData/Base.tres",
 				"res://Characters/Gura/FrameData/SP1.tres",
-				"res://Characters/Gura/FrameData/SP2.tres",
-				"res://Characters/Gura/FrameData/SP3.tres",
+				"res://Characters/Gura/FrameData/SP9.tres",
 			],
 			"spritesheet" : {
 				"BaseSprite" : "res://Characters/Gura/Spritesheets/BaseSprite.png",
 				"SP1Sprite" : "res://Characters/Gura/Spritesheets/SP1Sprite.png",
 				"SP1SfxOver" : "res://Characters/Gura/Spritesheets/SP1SfxOver.png",
-				"SP2Sprite" : "res://Characters/Gura/Spritesheets/SP2Sprite.png",
-				"SP2SfxUnder" : "res://Characters/Gura/Spritesheets/SP2SfxUnder.png",
-				"SP3Sprite" : "res://Characters/Gura/Spritesheets/SP3Sprite.png",
-				"SP3SfxUnder" : "res://Characters/Gura/Spritesheets/SP3SfxUnder.png",
+				"SP9Sprite" : "res://Characters/Gura/Spritesheets/SP9Sprite.png",
+				"SP9SfxOver" : "res://Characters/Gura/Spritesheets/SP9SfxOver.png",
+				"SP9SfxUnder" : "res://Characters/Gura/Spritesheets/SP9SfxUnder.png",
 			}
 		},
 		"entity_data": {
@@ -32,20 +30,18 @@ const ASSIST_BORROW = {
 				"frame_data" : "res://Characters/Gura/SFX/FrameData/TridentRing.tres",
 				"spritesheet" : "res://Characters/Gura/SFX/Spritesheets/TridentRingSprite.png",
 			},
-			"BigSplash": {
-				"frame_data" : "res://Characters/Gura/SFX/FrameData/BigSplash.tres",
-				"spritesheet" : "res://Characters/Gura/SFX/Spritesheets/BigSplashSprite.png",
-			},
 			"WaterJet": {
 				"frame_data" : "res://Characters/Gura/SFX/FrameData/WaterJet.tres",
 				"spritesheet" : "res://Characters/Gura/SFX/Spritesheets/WaterJetSprite.png",
+			},
+			"WaterBurst": {
+				"frame_data" : "res://Characters/Gura/SFX/FrameData/WaterBurst.tres",
+				"spritesheet" : "res://Characters/Gura/SFX/Spritesheets/WaterBurstSprite.png",
 			},
 		},
 		"audio_data": {
 			"water1": "res://Characters/Gura/UniqueAudio/water1.wav",
 			"water4": "res://Characters/Gura/UniqueAudio/water4.wav",
-			"water7": "res://Characters/Gura/UniqueAudio/water7.wav",
-			"water8": "res://Characters/Gura/UniqueAudio/water8.wav",
 		},
 	}
 }

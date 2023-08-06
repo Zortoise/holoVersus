@@ -31,7 +31,7 @@ const DEFAULT_PRESETS = {
 			"buffer" : 5,
 			"input_assist" : 1,
 			"deadzone" : 3,
-			"extra_buttons" : [],
+			"extra_buttons" : [["unique", KEY_L], ["aux", KEY_L]],
 		},
 		"NavKeys" : {
 			"up" : KEY_W,
@@ -56,7 +56,7 @@ const DEFAULT_PRESETS = {
 			"buffer" : 5,
 			"input_assist" : 1,
 			"deadzone" : 3,
-			"extra_buttons" : [],
+			"extra_buttons" : [["unique", KEY_PAGEUP], ["aux", KEY_PAGEUP]],
 		},
 		"Test_P2" : {
 			"up" : KEY_UP,

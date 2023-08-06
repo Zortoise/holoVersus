@@ -400,7 +400,7 @@ func simulate():
 		"[c2]Active", "[u][c2]Active", "[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":
 			if posmod(Entity.lifetime, 3) == 0:
 				Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), \
-						Entity.master_ref, Entity.palette_ref, Color(1.5, 1.5, 1.5), 0.5, 10.0)
+						Entity.palette_ref, Entity.master_ref, Color(1.5, 1.5, 1.5), 0.5, 10.0)
 #				spawn_afterimage(master_path, spritesheet_ref, sprite_node_path, in_position, color_modulate = null, starting_modulate_a = 0.5, lifetime = 10.0)
 			if !Animator.to_play_anim in ["[c2]Active", "[u][c2]Active"]:
 				if Entity.lifetime > 25 and Entity.hitcount_record.size() == 0:
@@ -410,7 +410,7 @@ func simulate():
 		"[c3]Active", "[ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), \
-						Entity.master_ref, Entity.palette_ref, Color(1.5, 1.5, 1.5), 0.5, 10.0)
+						Entity.palette_ref,Entity.master_ref,  Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
 						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-14)}, Entity.palette_ref, Entity.master_ref)
@@ -418,7 +418,7 @@ func simulate():
 		"[u][c3]Active", "[u][ex]Active":
 			if posmod(Entity.lifetime, 2) == 0:
 				Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), \
-						Entity.master_ref, Entity.palette_ref, Color(1.5, 1.5, 1.5), 0.5, 10.0)
+						Entity.palette_ref, Entity.master_ref, Color(1.5, 1.5, 1.5), 0.5, 10.0)
 			if posmod(Entity.lifetime, 6) == 0:
 				Globals.Game.spawn_SFX("TridentRing", "TridentRing", Entity.position, \
 						{"facing":Entity.facing, "rot": Entity.v_facing * deg2rad(-68)}, Entity.palette_ref, Entity.master_ref)

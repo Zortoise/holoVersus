@@ -696,7 +696,7 @@ func afterimage_trail():# process afterimage trail
 			if Animator.query_to_play(["SP9bActive"]):
 				if posmod(Animator.time, 2) == 0:
 					Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sfx_under, \
-							Character.sfx_under.get_path(), Character.NPC_ref, Character.palette_ref, null, 0.5, 12)
+							Character.sfx_under.get_path(), Character.palette_ref, Character.NPC_ref, null, 0.5, 12)
 			
 func unique_flash():
 	match Character.new_state:

@@ -64,6 +64,8 @@ const BASE_EX_REGEN = 20
 const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
 const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
 const BLOCKED_EX_REGEN_MOD = 200 # increase EX Regen when doing a blocked attack
+const BLOCKING_EX_REGEN_MOD = 200 # increase EX Regen when blocking attack
+const PARRYING_EX_REGEN_MOD = 600 # increase EX Regen when parrying attack
 #const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
 #const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 

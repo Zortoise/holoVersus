@@ -787,14 +787,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 			
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), NPC_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, NPC_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 			
-		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), NPC_ref, palette_ref, \
+		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, NPC_ref, \
 				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), NPC_ref, palette_ref, \
+			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, NPC_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
 	else:
@@ -804,14 +804,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 func afterimage_cancel(starting_modulate_a = 0.4, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), NPC_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_ref, NPC_ref, null, \
 			starting_modulate_a, lifetime)
 		
-	Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), NPC_ref, palette_ref, null, \
+	Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, NPC_ref, null, \
 		starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), NPC_ref, palette_ref, null, \
+		Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, NPC_ref, null, \
 			starting_modulate_a, lifetime)
 	
 	

@@ -20,7 +20,7 @@ var ignore_freeze := false
 var slowed := 0
 
 
-func init(in_original_ID : int, in_type: int, in_spritesheet_ref: String, sprite_node_path: NodePath, in_master_ref = null, in_palette_ref = null, \
+func init(in_original_ID : int, in_type: int, in_spritesheet_ref: String, sprite_node_path: NodePath, in_palette_ref = null, in_master_ref = null, \
 		in_color_modulate = null, in_starting_modulate_a = 0.5, in_lifetime = 10.0, in_afterimage_shader = Em.afterimage_shader.MASTER):
 	
 	original_ID = in_original_ID

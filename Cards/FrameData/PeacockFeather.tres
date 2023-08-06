@@ -13,43 +13,43 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 1,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 4: {
 "frame": 2,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 8: {
 "frame": 3,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 12: {
 "frame": 4,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 16: {
 "frame": 5,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 20: {
 "frame": 6,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 24: {
 "frame": 7,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 28: {
 "frame": 8,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 32: {
 "frame": 9,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 },
 36: {
 "frame": 10,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 }
 },
 "vframes": 4
@@ -128,7 +128,7 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 0,
-"hitbox": [ Vector2( -7, 7 ), Vector2( 7, 7 ), Vector2( 7, -7 ), Vector2( -7, -7 ) ]
+"hitbox": [ Vector2( -10, 8 ), Vector2( 8, 8 ), Vector2( 8, -10 ), Vector2( -10, -10 ) ]
 }
 },
 "vframes": 4

@@ -165,7 +165,7 @@ func query_polygon(target = "hurtbox"):
 	var owner_pos = get_parent().position
 	
 	# first, find the latest frame
-	var new_time = time
+	var new_time: int = time
 	if !new_time in animations[to_play_anim]["timestamps"]:
 		while new_time > 0:
 			new_time -= 1

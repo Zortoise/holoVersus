@@ -423,7 +423,8 @@ func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 func capture_instant_actions():
 #	if !Character.button_down in Character.input_state.pressed or !Character.grounded:
 	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
-	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
+#	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
+	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", null)
 
 
 func process_instant_actions():
@@ -436,15 +437,15 @@ func process_instant_actions():
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 			
-		if "BitemarkTriggerU" in Character.instant_actions and Character.get_target() != Character:
-			if Character.unique_data.nibbler_count > 0:
-				var spawn_point = Character.get_target().position
-				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
-				if spawn_point != null:
-					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
-					Character.play_audio("water15", {})
-					Character.unique_data.nibbler_count -= 1
-					update_uniqueHUD()
+#		if "BitemarkTriggerU" in Character.instant_actions and Character.get_target() != Character:
+#			if Character.unique_data.nibbler_count > 0:
+#				var spawn_point = Character.get_target().position
+#				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
+#				if spawn_point != null:
+#					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
+#					Character.play_audio("water15", {})
+#					Character.unique_data.nibbler_count -= 1
+#					update_uniqueHUD()
 						
 		if "BitemarkTriggerD" in Character.instant_actions and Character.get_target() != Character:
 			if Character.unique_data.nibbler_count > 0:
@@ -917,7 +918,7 @@ func afterimage_trail():# process afterimage trail
 			if Animator.query_to_play(["SP9bActive"]):
 				if posmod(Animator.time, 2) == 0:
 					Globals.Game.spawn_afterimage(Character.player_ID, Em.afterimage_type.CHAR, Character.sprite_texture_ref.sfx_under, \
-							Character.sfx_under.get_path(), NAME, Character.palette_number, null, 0.5, 12)
+							Character.sfx_under.get_path(), Character.palette_number, NAME, null, 0.5, 12)
 			
 func unique_flash():
 	match Character.new_state:

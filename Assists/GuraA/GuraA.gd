@@ -8,6 +8,7 @@ extends "res://Characters/Gura/GuraBase.gd"
 # Character.cancel_action() has no parameters
 # remove all move_child() in sequences
 # add "facing" : Character.facing to aux_data of all entities
+# for enitity and SFX spawns, replace "Character.palette_number, NAME" with "Character.palette_ref, Character.NPC_ref"
 
 # --------------------------------------------------------------------------------------------------
 
@@ -38,17 +39,13 @@ func preprocess(master_ID: int, aux_data: Dictionary): # modify aux_data based o
 	
 	match aux_data.atk_ID:
 		Em.assist.NEUTRAL:
-			cooldown = 200
+			cooldown = 300
 			offset(aux_data, master_node, Vector2(-30, 0))
 			if aux_data.out_position.y < floor_level: # if called in the air
 				min_height(aux_data, 75)
 		Em.assist.DOWN:
-			cooldown = 200
-			offset(aux_data, master_node, Vector2(-25, 0))
-			min_height(aux_data, 16)
-		Em.assist.UP:
-			cooldown = 200
-			offset(aux_data, master_node, Vector2(40, 0))
+			cooldown = 300
+			offset(aux_data, master_node, Vector2(-40, 0))
 			bring_to_ground(aux_data)
 		
 	clamp_pos(aux_data)
@@ -97,22 +94,22 @@ func start_attack(atk_ID: int):
 			else:
 				Character.animate("aSP1Startup")
 		Em.assist.DOWN:
-			Character.animate("aSP2Startup")
-		Em.assist.UP:
-			Character.animate("SP3Startup")
+			Character.animate("SP9Startup")
+
 
 func unsummon(assist_attacked := false): # can be different if custom assist
-	Character.master_node.assist_active = false
-	if assist_attacked:
-		Character.master_node.get_node("AssistCDTimer").time = FMath.percent(Character.master_node.get_node("AssistCDTimer").time, \
-				Globals.Game.ASSIST_CD_PENALTY)
-		Character.play_audio("bling8", {"vol" : -18})
-	else:
-		Character.play_audio("bling3", {"vol" : -18})
-		Character.play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
-	shine()
-	Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sprite, sprite.get_path(), \
-			Character.NPC_ref, Character.palette_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+	if Character.master_node.assist_active:
+		Character.master_node.assist_active = false
+		if assist_attacked:
+			Character.master_node.get_node("AssistCDTimer").time = FMath.percent(Character.master_node.get_node("AssistCDTimer").time, \
+					Globals.Game.ASSIST_CD_PENALTY)
+			Character.play_audio("bling8", {"vol" : -18})
+		else:
+			Character.play_audio("bling3", {"vol" : -18})
+			Character.play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
+		shine()
+		Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sprite, sprite.get_path(), \
+				Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
 				
 func shine():
 	var player_palette := "red"
@@ -146,24 +143,16 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aSP1Rec":
 			return Em.char_state.AIR_ATK_REC
 			
-		"aSP2Startup":
-			return Em.char_state.AIR_ATK_STARTUP
-		"aSP2Active":
-			return Em.char_state.AIR_ATK_ACTIVE
-		"aSP2Rec":
-			return Em.char_state.AIR_ATK_REC
-		"aSP2CRec":
-			return Em.char_state.AIR_ATK_REC
-			
-		"SP3Startup":
+		"SP9Startup", "SP9aStartup":
 			return Em.char_state.GRD_ATK_STARTUP
-		"aSP3Active", "SP3Active", "SP3bActive":
+		"SP9Active":
+			return Em.char_state.GRD_ATK_ACTIVE
+		"aSP9aActive":
 			return Em.char_state.AIR_ATK_ACTIVE
-		"aSP3Rec":
-			return Em.char_state.AIR_ATK_REC
-		"SP3Rec":
+		"SP9aRec":
 			return Em.char_state.GRD_ATK_REC
-			
+		"aSP9aRec":
+			return Em.char_state.AIR_ATK_REC
 
 	print("Error: " + anim + " not found.")
 		
@@ -174,9 +163,6 @@ func check_fallthrough():
 	match Character.new_state:
 		Em.char_state.AIR_ATK_ACTIVE:
 			return true
-		Em.char_state.AIR_ATK_REC:
-			if Animator.query_to_play(["aSP3Rec"]):
-				return true
 	return false
 
 func check_semi_invuln():
@@ -188,24 +174,11 @@ func check_semi_invuln():
 func simulate():
 	
 	match Character.state:
-		
-		Em.char_state.AIR_ATK_ACTIVE:
-			# vertical air strafe for surfboard
-			if Animator.query_current(["aSP2Active", "aSP2[ex]Active"]):
-				var height_diff = Character.get_target().position.y - Character.position.y
-				if height_diff > 20:
-					Character.velocity.y += 100 * FMath.S
-				elif height_diff < -20:
-					Character.velocity.y -= 100 * FMath.S
-					
-		Em.char_state.AIR_ATK_REC:
-			
-			if Animator.query_current(["aSP3Rec"]):
-				if Character.grounded:
-					Character.animate("SP3Rec")
-					landing_sound()
-					Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
-								{"facing":Character.facing, "grounded":true})	
+		Em.char_state.GRD_ATK_ACTIVE:
+			if Animator.query_to_play(["SP9Active"]):
+				var dist = Character.get_target().position.x - Character.position.x
+				if sign(dist) == Character.facing and abs(dist) <= 135:
+					Character.animate("aSP9aActive")
 
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 
@@ -217,10 +190,12 @@ func afterimage_trail():# process afterimage trail
 			
 func unique_flash():
 	match Character.new_state:
-		_:
-			pass
+		Em.char_state.GRD_ATK_ACTIVE:
+			if Animator.query_to_play(["SP9Active"]):
+				if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S:
+					Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
+							{"facing":-Character.facing}, Character.palette_ref, Character.NPC_ref)
 
-			
 # GET DATA --------------------------------------------------------------------------------------------------
 
 func get_stat(stat: String): # later can have effects that changes stats
@@ -251,12 +226,10 @@ func refine_move_name(move_name):
 		"SP1[b]", "aSP1", "aSP1[b]", "SP1[c1]", "SP1[c1]b", "aSP1[c1]", "aSP1[c1]b", \
 				"SP1[u]", "SP1[u][c1]", "SP1[u][c1]b", "aSP1[d]", "aSP1[d][c1]", "aSP1[d][c1]b":
 			return "SP1"
-		"aSP2C":
-			return "aSP2"
-		"SP3":
-			return "aSP3"
-		"SP3b":
-			return "aSP3b"
+		"aSP9":
+			return "SP9"
+		"SP9a":
+			return "aSP9a"
 
 	return move_name
 			
@@ -298,8 +271,8 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 		return []
 	
 	match orig_move_name: # can add various atk_attr to certain animations under under conditions
-		"SP3", "SP3b":
-			atk_attr.append_array([Em.atk_attr.ANTI_AIR])
+		_:
+			pass
 			
 	atk_attr.append(Em.atk_attr.ASSIST) # add "Assist" to move name when added to Repeat Memory
 			
@@ -510,33 +483,21 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP1[d][c1]Active")
 		"aSP1[d][c1]Active":
 			Character.animate("aSP1Rec")
-			
-		"aSP2Startup":
-			Character.animate("aSP2Active")
-		"aSP2Active":
-			Character.animate("aSP2Rec")
-		"aSP2Rec":
-			Character.animate("aSP2CRec")
-		"aSP2CRec":
-			Character.unsummon()
-			
-		"SP3Startup":
-			Character.animate("SP3Active")
-			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing(), "grounded":true, "back":true}, Character.palette_ref, Character.NPC_ref)
-		"aSP3Startup":
-			Character.animate("aSP3Active")
-			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Character.position, {"facing":Character.facing, "rot":-PI/2}, \
-					Character.palette_ref, Character.NPC_ref)
-		"aSP3Active":
-			Character.animate("aSP3bActive")
-		"SP3Active":
-			Character.animate("SP3bActive")
-		"aSP3bActive", "SP3bActive":
-			Character.animate("aSP3Rec")
-		"aSP3Rec", "SP3Rec":
-			Character.unsummon()
 
+		"SP9Startup":
+			Character.animate("SP9Active")
+		"SP9Active":
+			Character.animate("SP9aStartup")
+			
+		"SP9aStartup":
+			Character.animate("aSP9aActive")
+		"aSP9aActive":
+			if Character.is_on_ground():
+				Character.animate("SP9aRec")
+			else:
+				Character.animate("aSP9aRec")
+		"SP9aRec", "aSP9aRec":
+			Character.unsummon()
 			
 
 func _on_SpritePlayer_anim_started(anim_name):
@@ -573,29 +534,22 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 70
 			Character.velocity_limiter.down = 70
 			
-		"aSP2Startup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
-			Character.anim_gravity_mod = 0
-		"aSP2Active":
-			Character.velocity.set_vector(Character.facing * 450 * FMath.S, 0)
+		"SP9Active":
+			Character.velocity.x = 800 * FMath.S * Character.facing
+			Character.anim_friction_mod = 0
+			Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
+					{"facing":-Character.facing}, Character.palette_ref, Character.NPC_ref)
+		"SP9aStartup":
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-			Character.velocity_limiter.y_slow = 50
+		"aSP9aActive":
+			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0)
+			Character.anim_gravity_mod = 0
+			Character.anim_friction_mod = 0
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, \
 					Character.palette_ref, Character.NPC_ref)
-		"aSP2Rec", "aSP2CRec":
-			Character.velocity_limiter.down = 70
-			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
-			Character.anim_gravity_mod = 25
-		
-		"SP3Active":
-			Character.velocity.x = 100 * FMath.S * Character.facing
-			Character.velocity.y = -600 * FMath.S
-			Character.anim_gravity_mod = 0
-		"aSP3Rec":
-			Character.velocity_limiter.x = 70
-			
+					
 	start_audio(anim_name)
 
 

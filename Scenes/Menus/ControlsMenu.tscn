@@ -1720,138 +1720,138 @@ size_flags_horizontal = 3
 text = "Light"
 
 [node name="Down" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
-margin_top = 47.0
+margin_top = 39.0
 margin_right = 290.0
-margin_bottom = 90.0
+margin_bottom = 74.0
 size_flags_horizontal = 3
 text = "Down"
 
 [node name="Fierce" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 47.0
+margin_top = 39.0
 margin_right = 584.0
-margin_bottom = 90.0
+margin_bottom = 74.0
 size_flags_horizontal = 3
 text = "Fierce"
 
 [node name="Left" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
-margin_top = 94.0
+margin_top = 78.0
 margin_right = 290.0
-margin_bottom = 137.0
+margin_bottom = 113.0
 size_flags_horizontal = 3
 text = "Left"
 
 [node name="Dash" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 94.0
+margin_top = 78.0
 margin_right = 584.0
-margin_bottom = 137.0
+margin_bottom = 113.0
 size_flags_horizontal = 3
 text = "Dash"
 
 [node name="Right" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
-margin_top = 141.0
+margin_top = 117.0
 margin_right = 290.0
-margin_bottom = 184.0
+margin_bottom = 152.0
 size_flags_horizontal = 3
 text = "Right"
 
 [node name="Aux" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 141.0
+margin_top = 117.0
 margin_right = 584.0
-margin_bottom = 184.0
+margin_bottom = 152.0
 size_flags_horizontal = 3
 text = "Aux"
 
 [node name="Jump" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
-margin_top = 188.0
+margin_top = 156.0
 margin_right = 290.0
-margin_bottom = 231.0
-focus_neighbour_bottom = NodePath("../CancelSelection")
+margin_bottom = 191.0
 size_flags_horizontal = 3
 text = "Jump"
 
 [node name="Block" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 188.0
+margin_top = 156.0
 margin_right = 584.0
-margin_bottom = 231.0
+margin_bottom = 191.0
 size_flags_horizontal = 3
 text = "Block"
 
 [node name="Special" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
-margin_top = 235.0
+margin_top = 195.0
 margin_right = 290.0
-margin_bottom = 278.0
+margin_bottom = 230.0
 size_flags_horizontal = 3
 text = "Special"
 
 [node name="RS_Up" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 235.0
+margin_top = 195.0
 margin_right = 584.0
-margin_bottom = 278.0
+margin_bottom = 230.0
 size_flags_horizontal = 3
 text = "RS Up"
 
 [node name="Unique" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
-margin_top = 282.0
+margin_top = 234.0
 margin_right = 290.0
-margin_bottom = 325.0
+margin_bottom = 269.0
+focus_neighbour_bottom = NodePath("../CancelSelection")
 size_flags_horizontal = 3
 text = "Unique"
 
 [node name="RS_Down" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 282.0
+margin_top = 234.0
 margin_right = 584.0
-margin_bottom = 325.0
+margin_bottom = 269.0
 size_flags_horizontal = 3
 text = "RS Down"
 
 [node name="Blank2" type="Label" parent="PopUpExtra/ExtraButtonActions"]
-margin_top = 343.0
+margin_top = 283.0
 margin_right = 290.0
-margin_bottom = 357.0
+margin_bottom = 297.0
 
 [node name="RS_Left" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 329.0
+margin_top = 273.0
 margin_right = 584.0
-margin_bottom = 372.0
+margin_bottom = 308.0
 size_flags_horizontal = 3
 text = "RS Left"
 
 [node name="Blank3" type="Label" parent="PopUpExtra/ExtraButtonActions"]
-margin_top = 390.0
+margin_top = 322.0
 margin_right = 290.0
-margin_bottom = 404.0
+margin_bottom = 336.0
 
 [node name="RS_Right" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0
-margin_top = 376.0
+margin_top = 312.0
 margin_right = 584.0
-margin_bottom = 419.0
+margin_bottom = 347.0
 size_flags_horizontal = 3
 text = "RS Right"
 
 [node name="Blank4" type="Label" parent="PopUpExtra/ExtraButtonActions"]
-margin_top = 423.0
+margin_top = 351.0
 margin_right = 290.0
-margin_bottom = 437.0
+margin_bottom = 365.0
 
 [node name="Blank5" type="Label" parent="PopUpExtra/ExtraButtonActions"]
 margin_left = 294.0
-margin_top = 423.0
+margin_top = 351.0
 margin_right = 584.0
-margin_bottom = 437.0
+margin_bottom = 365.0
 
 [node name="CancelSelection" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
-margin_top = 441.0
+margin_top = 369.0
 margin_right = 290.0
-margin_bottom = 484.0
-focus_neighbour_top = NodePath("../Jump")
+margin_bottom = 404.0
+focus_neighbour_top = NodePath("../Unique")
 focus_neighbour_bottom = NodePath("../Up")
 size_flags_horizontal = 3
 text = "Cancel Selection"

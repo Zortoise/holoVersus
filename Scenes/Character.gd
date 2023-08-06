@@ -974,7 +974,7 @@ func simulate2(): # only ran if not in hitstop
 				ex_change = FMath.percent(ex_change, get_stat("HITSTUN_EX_REGEN_MOD"))
 			elif state == Em.char_state.SEQ_TARGET:
 				ex_change = 0
-			else:
+			elif is_attacking():
 				match chain_combo:
 					Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL: # landed an attack on opponent
 						ex_change = FMath.percent(ex_change, get_stat("LANDED_EX_REGEN_MOD"))
@@ -992,6 +992,12 @@ func simulate2(): # only ran if not in hitstop
 #								ex_change = FMath.percent(ex_change, get_stat("ATTACK_EX_REGEN_MOD")) # physical attack, raise EX regen
 #						if !grounded: # reduce EX Gain if whiffing aerials
 #							ex_change = FMath.percent(ex_change, 50)
+			elif $SBlockTimer.is_running():
+				if success_block != Em.success_block.PARRIED:
+					ex_change = FMath.percent(ex_change, get_stat("BLOCKING_EX_REGEN_MOD"))
+				else:
+					ex_change = FMath.percent(ex_change, get_stat("PARRYING_EX_REGEN_MOD"))	
+					
 
 			if Globals.survival_level != null:
 				
@@ -1681,7 +1687,7 @@ func simulate2(): # only ran if not in hitstop
 					
 		Em.char_state.GRD_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["Block"]):
-				if success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
+				if success_block == Em.success_block.PARRIED and $SBlockTimer.is_running():
 					animate("BlockCRec")
 				else:
 					animate("BlockRec")
@@ -1697,7 +1703,7 @@ func simulate2(): # only ran if not in hitstop
 			
 		Em.char_state.AIR_BLOCK:
 			if !button_block in input_state.pressed and !button_dash in input_state.pressed and Animator.query_current(["aBlock"]): # don't use to_play
-				if success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
+				if success_block == Em.success_block.PARRIED and $SBlockTimer.is_running():
 					animate("aBlockCRec")
 				else:
 					animate("aBlockRec")
@@ -1784,10 +1790,10 @@ func simulate2(): # only ran if not in hitstop
 	else: # apply air resistance if in air
 		velocity.x = FMath.f_lerp(velocity.x, 0, air_res_this_frame)
 	
-# UNIQUE JUMP/FASTFALL CANCEL --------------------------------------------------------------------------------------------------
+# UNIQUE FASTFALL CANCEL --------------------------------------------------------------------------------------------------
 # pressing Unique will cancel fastfall if done immediately afterwards while Down is held
-# and also cancel jumps if tap_jump is on if done immediately afterwards while Up is held
-# these allow for input leniency for Unique + Up/Down actions
+# these allow for input leniency for Unique + Down actions
+# no Unique + Up actions
 	
 	if Settings.input_assist[player_ID]:
 		if button_unique in input_state.just_pressed:
@@ -1796,14 +1802,14 @@ func simulate2(): # only ran if not in hitstop
 					Em.char_state.AIR_STANDBY:
 						if Animator.query_to_play(["FastFallTransit"]):
 							animate("Fall")
-			if Settings.tap_jump[player_ID] == 1 and button_up in input_state.pressed:
-				match new_state:
-					Em.char_state.GRD_STARTUP:
-						if Animator.query_to_play(["JumpTransit"]):
-							animate("Idle")
-					Em.char_state.AIR_STARTUP:
-						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit"]):
-							animate("Fall")
+#			if Settings.tap_jump[player_ID] == 1 and button_up in input_state.pressed:
+#				match new_state:
+#					Em.char_state.GRD_STARTUP:
+#						if Animator.query_to_play(["JumpTransit"]):
+#							animate("Idle")
+#					Em.char_state.AIR_STARTUP:
+#						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit"]):
+#							animate("Fall")
 				
 # --------------------------------------------------------------------------------------------------
 
@@ -1957,6 +1963,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 					$AssistCDTimer.simulate()
 				elif !chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN, Em.chain_combo.PARRIED]:
 					$AssistCDTimer.simulate() # cool down when attacking
+				elif $SBlockTimer.is_running():
+					$AssistCDTimer.simulate() # cool down when blocking
 					
 				if posmod(Globals.Game.frametime, ASSIST_PASSIVE_REGEN) == 0:
 					$AssistCDTimer.simulate()
@@ -2512,7 +2520,7 @@ func capture_and_process_instant_actions(): # capture instant actions after dire
 		else:
 			UniqChar.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
 			if Globals.assists != 0:
-				instant_action_tilt_combination(button_aux, "AssistN", "AssistD", "AssistU")
+				instant_action_tilt_combination(button_aux, "AssistN", "AssistD", null)
 			
 	if Globals.assists != 0:
 		check_for_assist()
@@ -4161,14 +4169,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 #		starting_modulate_a = 0.5, lifetime = 10, afterimage_shader = Em.afterimage_shader.MASTER):
 		
 		if sfx_under.visible:
-			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), UniqChar.NAME, palette_number, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_number, UniqChar.NAME, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 			
-		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), UniqChar.NAME, palette_number, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), palette_number, UniqChar.NAME, \
 				main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 		
 		if sfx_over.visible:
-			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), UniqChar.NAME, palette_number, \
+			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_number, UniqChar.NAME, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
 	else:
@@ -4178,14 +4186,14 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 func afterimage_cancel(starting_modulate_a = 0.4, lifetime: int = 12): # no need color_modulate for now
 	
 	if sfx_under.visible:
-		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), UniqChar.NAME, palette_number, null, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_under, sfx_under.get_path(), palette_number, UniqChar.NAME, null, \
 			starting_modulate_a, lifetime)
 		
-	Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), UniqChar.NAME, palette_number, null, \
+	Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), palette_number, UniqChar.NAME, null, \
 		starting_modulate_a, lifetime)
 	
 	if sfx_over.visible:
-		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), UniqChar.NAME, palette_number, null, \
+		Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_number, UniqChar.NAME, null, \
 			starting_modulate_a, lifetime)
 		
 		
@@ -4590,8 +4598,8 @@ func check_for_assist():
 		call_assist(Em.assist.NEUTRAL)
 	elif "AssistD" in instant_actions:
 		call_assist(Em.assist.DOWN)
-	elif "AssistU" in instant_actions:
-		call_assist(Em.assist.UP)
+#	elif "AssistU" in instant_actions:
+#		call_assist(Em.assist.UP)
 		
 		
 func call_assist(atk_ID: int):
@@ -6160,7 +6168,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 									# if perfect blocked or blocking attacker close enough, a Strongblock occurs
 									# attacker is pushed back, and cannot chain into anything except Burst Counter
 									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
-							elif success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running():
+							elif success_block == Em.success_block.PARRIED and $SBlockTimer.is_running():
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 							else:
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
@@ -6187,7 +6195,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						elif hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED):
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 						elif !crossed_up:
-							if (success_block == Em.success_block.SBLOCKED and $SBlockTimer.is_running()) or \
+							if (success_block == Em.success_block.PARRIED and $SBlockTimer.is_running()) or \
 									Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 							elif Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.AUTO_PARRY_PROJ):
@@ -6783,10 +6791,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		match hit_data[Em.hit.BLOCK_STATE]:
 			Em.block_state.PARRIED:
-				success_block = Em.success_block.SBLOCKED # can cancel block recovery
+				success_block = Em.success_block.PARRIED # can cancel block recovery
 				$SBlockTimer.time = SBlockTimer_TIME
 			Em.block_state.BLOCKED:
-				success_block = Em.success_block.WBLOCKED # cannot cancel block recovery
+				success_block = Em.success_block.BLOCKED # cannot cancel block recovery
 				$SBlockTimer.time = SBlockTimer_TIME
 			_:
 				success_block = Em.success_block.NONE

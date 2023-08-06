@@ -36,7 +36,7 @@ func init(aux_data: Dictionary):
 	Entity.absorption_value = 1
 	Entity.life_point = 1
 	Entity.lifespan = LIFESPAN
-	Entity.get_node("Sprite").rotation = deg2rad(90) * Entity.facing
+#	Entity.get_node("Sprite").rotation = deg2rad(90) * Entity.facing
 	if "alt" in aux_data:
 		Entity.unique_data["alt"] = true
 		
