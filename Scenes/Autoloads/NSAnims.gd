@@ -19,7 +19,7 @@ var modulate_animations = {
 		}
 	},
 	"yellow_burst" : {
-		"priority" : priority.ACTION,
+		"priority" : priority.FLASH,
 		"duration": 22,
 		"loop" : false,
 		"timestamps" : {
@@ -54,7 +54,7 @@ var modulate_animations = {
 		}
 	},
 	"blue_burst" : {
-		"priority" : priority.ACTION,
+		"priority" : priority.FLASH,
 		"duration": 22,
 		"loop" : false,
 		"timestamps" : {
@@ -89,7 +89,7 @@ var modulate_animations = {
 		}
 	},
 	"white_burst" :{
-		"priority" : priority.ACTION,
+		"priority" : priority.FLASH,
 		"duration": 25,
 		"loop" : false,
 		"timestamps" : {

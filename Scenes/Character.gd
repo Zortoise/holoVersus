@@ -1641,6 +1641,9 @@ func simulate2(): # only ran if not in hitstop
 					sdashing = true
 #					if !grounded: # if airborne, change to aSDash
 #						animate("aSDash")
+				elif button_rs_up in input_state.pressed or button_rs_down in input_state.pressed or button_rs_left in input_state.pressed or \
+					button_rs_right in input_state.pressed:
+					sdashing = true
 				else:
 					if !grounded:
 						animate("aDashBrake")
@@ -1668,13 +1671,35 @@ func simulate2(): # only ran if not in hitstop
 						
 					var vel_angle = velocity.angle() # rotation and navigation
 					var rotated := false
-					if dir != 0 or v_dir != 0:
-						var target_angle = Globals.dir_to_angle(dir, v_dir, facing)
+					
+					var rs_dir := Vector2(0, 0)
+					if button_rs_up in input_state.pressed:
+						rs_dir.y -= 1
+					if button_rs_down in input_state.pressed:
+						rs_dir.y += 1
+					if button_rs_left in input_state.pressed:
+						rs_dir.x -= 1
+					if button_rs_right in input_state.pressed:
+						rs_dir.x += 1
+						
+					if rs_dir == Vector2(0, 0): # LS sdash	
+						if dir != 0 or v_dir != 0:
+							var target_angle = Globals.dir_to_angle(dir, v_dir, facing)
+							var new_angle = Globals.navigate(vel_angle, target_angle, get_stat("SDASH_TURN_RATE"))
+							if new_angle != vel_angle:
+								velocity.rotate(new_angle - vel_angle)
+								rotate_sprite(new_angle)
+								rotated = true
+					else:
+# warning-ignore:narrowing_conversion
+# warning-ignore:narrowing_conversion
+						var target_angle = Globals.dir_to_angle(rs_dir.x, rs_dir.y, facing)
 						var new_angle = Globals.navigate(vel_angle, target_angle, get_stat("SDASH_TURN_RATE"))
 						if new_angle != vel_angle:
 							velocity.rotate(new_angle - vel_angle)
 							rotate_sprite(new_angle)
-							rotated = true
+							rotated = true		
+							
 					if !rotated:
 						rotate_sprite(vel_angle)
 					
@@ -2210,7 +2235,7 @@ func buffer_actions():
 					
 	if button_rs_up in input_state.just_pressed or button_rs_down in input_state.just_pressed or button_rs_left in input_state.just_pressed or \
 			button_rs_right in input_state.just_pressed:
-		input_buffer.append(["Dodge", buffer_time()])
+		input_buffer.append(["SDash", buffer_time()])
 		
 	if spent_special:
 		if button_special in input_state.just_pressed or (!button_special in input_state.pressed and \
@@ -2229,11 +2254,9 @@ func capture_combinations():
 	# instant air dash, place at back
 	if Settings.input_assist[player_ID]:
 		combination(button_jump, button_dash, "InstaAirDash")
-	combination(button_aux, button_dash, "Dodge")
-	combination(button_block, button_dash, "SDash")
 	
-	if !button_unique in input_state.pressed: # this allows you to use Unique + Aux command when blocking without doing a Burst
-		combination(button_block, button_aux, "Burst")
+#	if !button_unique in input_state.pressed: # this allows you to use Unique + Aux command when blocking without doing a Burst
+#		combination(button_block, button_aux, "Burst")
 #		if button_aux in input_state.just_pressed and alt_block == true:
 #			input_buffer.append(["Burst", buffer_time()])
 			
@@ -2245,6 +2268,10 @@ func capture_combinations():
 		UniqChar.capture_combinations()
 	else:
 		UniqChar.capture_unique_combinations()
+		
+	combination(button_light, button_dash, "Dodge")
+	combination(button_fierce, button_dash, "SDash")
+	combination(button_block, button_dash, "Burst")
 
 
 #func combination_single(button1, action, back = false): # useful for Special/EX/Super Moves
@@ -2519,10 +2546,9 @@ func capture_and_process_instant_actions(): # capture instant actions after dire
 			pass
 		else:
 			UniqChar.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
-			if Globals.assists != 0:
-				instant_action_tilt_combination(button_aux, "AssistN", "AssistD", null)
 			
 	if Globals.assists != 0:
+		instant_action_assist("AssistN", "AssistD")
 		check_for_assist()
 		
 	UniqChar.process_instant_actions() # process stored instant actions in instant_actions array last frame
@@ -2533,6 +2559,27 @@ func capture_and_process_instant_actions(): # capture instant actions after dire
 # 	stored in instant_actions array
 # capturing up/down tilt instant actions will erase neutral instant actions in instant_actions array
 # releasing up/down will erase up-tilt/down-tilt instant actions instant_actions array and capture a neutral one
+
+func instant_action_assist(neutral_action, down_tilt_action):
+	if !button_aux in input_state.pressed: return
+	
+	var down_tilted := false
+	if down_tilt_action != null:
+		down_tilted = combination(button_down, button_aux, down_tilt_action, false, true)
+		
+	if !down_tilted:
+		if button_aux in input_state.just_pressed:
+			instant_actions_temp.append(neutral_action)
+	else:
+		if Settings.input_assist[player_ID]:
+			instant_actions.erase(neutral_action) # a down_tilt has been captured, erase neutral action captured last frame
+		
+	if Settings.input_assist[player_ID]:
+		# releasing down will erase down-tilt instant actions instant_actions array and capture a neutral one
+		if down_tilt_action != null and button_down in input_state.just_released and down_tilt_action in instant_actions:
+			instant_actions.erase(down_tilt_action)
+			instant_actions_temp.append(neutral_action)
+				
 
 func instant_action_tilt_combination(attack_button, neutral_action, down_tilt_action, up_tilt_action):
 	
@@ -2774,7 +2821,8 @@ func process_input_buffer():
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
 							Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK, \
 							Em.char_state.GRD_REC, Em.char_state.AIR_REC, \
-							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
+							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC, \
+							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
 #							if state in [Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK] and \
 #									button_dash in input_state.pressed:
 #								continue # to make fdashing out of block easier
@@ -2828,8 +2876,7 @@ func process_input_buffer():
 #									keep = false
 #								else:
 #									continue
-						Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
-								Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
+						Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
 								Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 							if test_sdash_cancel() or test_sdash_revoke():
 								animate("SDashTransit")
@@ -2843,19 +2890,32 @@ func process_input_buffer():
 								Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, \
 								Em.char_state.GRD_REC, Em.char_state.AIR_REC, \
 								Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC, \
-								Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
-							if new_state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
-								if !Settings.input_assist[player_ID]:
-									continue
-								var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
-								if "TRANSIT_SDASH" in UniqChar:
-									transits.append_array(UniqChar.TRANSIT_SDASH) # for special types of dashes
-								if !Animator.query_to_play(transits):
-									continue # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
-							if new_state in [Em.char_state.AIR_REC]:
-								if Animator.query_to_play(["SDash"]):
-									continue # prevent SDashing from SDash
-							if grounded or super_dash > 0:
+								Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK, \
+								Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+									
+							var flag := true
+							match new_state:
+								Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
+									if !Settings.input_assist[player_ID]:
+										flag = false
+									var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
+									if "TRANSIT_SDASH" in UniqChar:
+										transits.append_array(UniqChar.TRANSIT_SDASH) # for special types of dashes
+									if !Animator.query_to_play(transits):
+										flag = false # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
+								Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+									if !Settings.input_assist[player_ID]:
+										flag = false
+									if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
+										flag = false
+									if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining
+										flag = false
+									if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
+										flag = false
+								Em.char_state.AIR_REC:
+									if Animator.query_to_play(["SDash"]):
+										flag = false # prevent SDashing from SDash
+							if flag and (grounded or super_dash > 0):
 								animate("SDashTransit")
 								has_acted[0] = true
 								keep = false
@@ -2866,26 +2926,39 @@ func process_input_buffer():
 					Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
 							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, \
-							Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK, Em.char_state.GRD_D_REC:
-						if new_state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
-							if !Settings.input_assist[player_ID]:
-								continue
-							var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
-							if "TRANSIT_DODGE" in UniqChar:
-								transits.append_array(UniqChar.TRANSIT_DODGE) # for special types of dashes
-							if !Animator.query_to_play(transits):
-								continue # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
-						if new_state == Em.char_state.GRD_D_REC:
-							if !Settings.input_assist[player_ID]:
-								continue
-							if Animator.time > 0:
-								continue # can cancel from 1st frame of ground dash
-						if new_state in [Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK]:
-							if !Settings.input_assist[player_ID]:
-								continue
-							if !Animator.query_to_play(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
-								continue # can only cancel from block startup for GRD_BLOCK/AIR_BLOCK	
-						if dodge_check():
+							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC, \
+							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+							
+						var flag := true
+						match new_state:
+							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
+								if !Settings.input_assist[player_ID]:
+									flag = false
+								var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
+								if "TRANSIT_DODGE" in UniqChar:
+									transits.append_array(UniqChar.TRANSIT_DODGE) # for special types of dashes
+								if !Animator.query_to_play(transits):
+									flag = false # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
+							Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC:
+								if !Settings.input_assist[player_ID]:
+									flag = false
+								if Animator.time > 1 or Animator.time == 0:
+									flag = false # can cancel from 1st frame of dash
+							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+								if !Settings.input_assist[player_ID]:
+									flag = false
+								if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
+									flag = false
+								if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining
+									flag = false
+								if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
+									flag = false
+#						if new_state in [Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK]:
+#							if !Settings.input_assist[player_ID]:
+#								continue
+#							if !Animator.query_to_play(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
+#								continue # can only cancel from block startup for GRD_BLOCK/AIR_BLOCK	
+						if flag and dodge_check():
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
@@ -8064,37 +8137,14 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		"Dodge":
 			face_opponent()
 			var tech_angle: int
-				
-			var rs_dir := Vector2(0, 0)
-			if button_rs_up in input_state.pressed:
-				rs_dir.y -= 1
-			if button_rs_down in input_state.pressed:
-				rs_dir.y += 1
-			if button_rs_left in input_state.pressed:
-				rs_dir.x -= 1
-			if button_rs_right in input_state.pressed:
-				rs_dir.x += 1
-				
-			if rs_dir == Vector2(0, 0): # LS dodge
-				if !grounded or soft_grounded:
-					tech_angle = Globals.dir_to_angle(dir, v_dir, facing)
+			
+			if !grounded or soft_grounded:
+				tech_angle = Globals.dir_to_angle(dir, v_dir, facing)
+			else:
+				if v_dir == -1:
+					tech_angle = Globals.dir_to_angle(dir, -1, facing)
 				else:
-					if v_dir == -1:
-						tech_angle = Globals.dir_to_angle(dir, -1, facing)
-					else:
-						tech_angle = Globals.dir_to_angle(dir, 0, facing)
-			else: # RS dodge
-				if !grounded or soft_grounded:
-# warning-ignore:narrowing_conversion
-# warning-ignore:narrowing_conversion
-					tech_angle = Globals.dir_to_angle(rs_dir.x, rs_dir.y, facing)
-				else:
-					if rs_dir.y == -1:
-# warning-ignore:narrowing_conversion
-						tech_angle = Globals.dir_to_angle(rs_dir.x, -1, facing)
-					else:
-# warning-ignore:narrowing_conversion
-						tech_angle = Globals.dir_to_angle(rs_dir.x, 0, facing)
+					tech_angle = Globals.dir_to_angle(dir, 0, facing)
 						
 			velocity.set_vector(get_stat("DODGE_SPEED"), 0)
 			velocity.rotate(tech_angle)
@@ -8170,13 +8220,38 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			if !grounded:
 				super_dash = int(max(0, super_dash - 1))
 			var sdash_angle: int
-			if !grounded or soft_grounded:
-				sdash_angle = Globals.dir_to_angle(dir, v_dir, facing)
-			else:
-				if v_dir == -1:
-					sdash_angle = Globals.dir_to_angle(dir, -1, facing)
+			
+			var rs_dir := Vector2(0, 0)
+			if button_rs_up in input_state.pressed:
+				rs_dir.y -= 1
+			if button_rs_down in input_state.pressed:
+				rs_dir.y += 1
+			if button_rs_left in input_state.pressed:
+				rs_dir.x -= 1
+			if button_rs_right in input_state.pressed:
+				rs_dir.x += 1
+				
+			if rs_dir == Vector2(0, 0): # LS sdash
+				if !grounded or soft_grounded:
+					sdash_angle = Globals.dir_to_angle(dir, v_dir, facing)
 				else:
-					sdash_angle = Globals.dir_to_angle(dir, 0, facing)
+					if v_dir == -1:
+						sdash_angle = Globals.dir_to_angle(dir, -1, facing)
+					else:
+						sdash_angle = Globals.dir_to_angle(dir, 0, facing)
+			else: # RS dodge
+				if !grounded or soft_grounded:
+# warning-ignore:narrowing_conversion
+# warning-ignore:narrowing_conversion
+					sdash_angle = Globals.dir_to_angle(rs_dir.x, rs_dir.y, facing)
+				else:
+					if rs_dir.y == -1:
+# warning-ignore:narrowing_conversion
+						sdash_angle = Globals.dir_to_angle(rs_dir.x, -1, facing)
+					else:
+# warning-ignore:narrowing_conversion
+						sdash_angle = Globals.dir_to_angle(rs_dir.x, 0, facing)
+			
 			velocity.set_vector(get_stat("SDASH_SPEED"), 0)
 			velocity.rotate(sdash_angle)
 			anim_gravity_mod = 0

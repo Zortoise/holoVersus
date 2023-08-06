@@ -1111,6 +1111,9 @@ func buffer_actions():
 				if Animator.time <= 5 and Animator.time != 0:
 					rebuffer_actions()
 					
+	if button_rs_up in input_state.just_pressed or button_rs_down in input_state.just_pressed or button_rs_left in input_state.just_pressed or \
+			button_rs_right in input_state.just_pressed:
+		input_buffer.append(["SDash", buffer_time()])
 		
 		
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
@@ -1120,14 +1123,15 @@ func capture_combinations():
 	# instant air dash, place at back
 	if Settings.input_assist[master_ID]:
 		combination(button_jump, button_dash, "InstaAirDash")
-	combination(button_block, button_dash, "SDash")
-	
 		
 	if !button_unique in input_state.pressed:
 		UniqNPC.capture_combinations()
 	else:
 		UniqNPC.capture_unique_combinations()
 
+	combination(button_light, button_dash, "Dodge")
+	combination(button_fierce, button_dash, "SDash")
+	combination(button_block, button_dash, "Burst")
 
 # used for rebuffer_actions()
 func rebuffer(button1, button2, action, back = false):
@@ -1414,8 +1418,7 @@ func process_input_buffer():
 			"SDash":
 				if is_attacking(): # new state must not be standby
 					match state:
-						Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
-								Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
+						Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
 								Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
 							if test_sdash_cancel():
 								animate("SDashTransit")
@@ -1429,23 +1432,36 @@ func process_input_buffer():
 								Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, \
 								Em.char_state.GRD_REC, Em.char_state.AIR_REC, \
 								Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC, \
-								Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
-							if new_state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
-								if !Settings.input_assist[master_ID]:
-									continue
-								var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
-								if "TRANSIT_SDASH" in UniqNPC:
-									transits.append_array(UniqNPC.TRANSIT_SDASH) # for special types of dashes
-								if !Animator.query_to_play(transits):
-									continue # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
-							if new_state in [Em.char_state.AIR_REC]:
-								if Animator.query_to_play(["SDash"]):
-									continue # prevent SDashing from SDash
-							if grounded or super_dash > 0:
+								Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK, \
+								Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+									
+							var flag := true
+							match new_state:
+								Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
+									if !Settings.input_assist[master_ID]:
+										flag = false
+									var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
+									if "TRANSIT_SDASH" in UniqNPC:
+										transits.append_array(UniqNPC.TRANSIT_SDASH) # for special types of dashes
+									if !Animator.query_to_play(transits):
+										flag = false # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
+								Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+									if !Settings.input_assist[master_ID]:
+										flag = false
+									if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
+										flag = false
+									if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining
+										flag = false
+									if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
+										flag = false
+								Em.char_state.AIR_REC:
+									if Animator.query_to_play(["SDash"]):
+										flag = false # prevent SDashing from SDash
+							if flag and (grounded or super_dash > 0):
 								animate("SDashTransit")
 								has_acted[0] = true
 								keep = false
-									
+			
 
 			_:
 				# pass to process_buffered_input() in unique character node, it returns a bool of whether input should be kept
@@ -3479,6 +3495,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				animate("SoftLanding")
 			else:
 				animate("FastFall")
+				
+		"DodgeTransit":
+			animate("Dodge")
+		"Dodge":
+			animate("DodgeRec")
+		"DodgeRec":
+			animate("Fall")
 			
 		"FlinchAStop":
 			animate("FlinchA")
@@ -3666,6 +3689,38 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		"SoftLanding":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
+		"DodgeTransit":
+			aerial_memory = []
+			anim_gravity_mod = 0
+			anim_friction_mod = 0
+			velocity_limiter.x_slow = 10
+			velocity_limiter.y_slow = 10
+		"Dodge":
+			face_opponent()
+			var tech_angle: int
+				
+			if !grounded or soft_grounded:
+				tech_angle = Globals.dir_to_angle(dir, v_dir, facing)
+			else:
+				if v_dir == -1:
+					tech_angle = Globals.dir_to_angle(dir, -1, facing)
+				else:
+					tech_angle = Globals.dir_to_angle(dir, 0, facing)
+						
+			velocity.set_vector(get_stat("DODGE_SPEED"), 0)
+			velocity.rotate(tech_angle)
+			anim_gravity_mod = 0
+			anim_friction_mod = 0
+			velocity_limiter.x_slow = 12
+			velocity_limiter.y_slow = 12
+			afterimage_timer = 1 # sync afterimage trail
+			modulate_play("dodge_flash")
+		"DodgeRec", "DodgeCRec":
+			anim_gravity_mod = 0
+			anim_friction_mod = 0
+			velocity_limiter.x_slow = 12
+			velocity_limiter.y_slow = 12
+			
 		"SDashTransit":
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
@@ -3677,13 +3732,38 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			if !grounded:
 				super_dash = int(max(0, super_dash - 1))
 			var sdash_angle: int
-			if !grounded or soft_grounded:
-				sdash_angle = Globals.dir_to_angle(dir, v_dir, facing)
-			else:
-				if v_dir == -1:
-					sdash_angle = Globals.dir_to_angle(dir, -1, facing)
+
+			var rs_dir := Vector2(0, 0)
+			if button_rs_up in input_state.pressed:
+				rs_dir.y -= 1
+			if button_rs_down in input_state.pressed:
+				rs_dir.y += 1
+			if button_rs_left in input_state.pressed:
+				rs_dir.x -= 1
+			if button_rs_right in input_state.pressed:
+				rs_dir.x += 1
+				
+			if rs_dir == Vector2(0, 0): # LS sdash
+				if !grounded or soft_grounded:
+					sdash_angle = Globals.dir_to_angle(dir, v_dir, facing)
 				else:
-					sdash_angle = Globals.dir_to_angle(dir, 0, facing)
+					if v_dir == -1:
+						sdash_angle = Globals.dir_to_angle(dir, -1, facing)
+					else:
+						sdash_angle = Globals.dir_to_angle(dir, 0, facing)
+			else: # RS sdash
+				if !grounded or soft_grounded:
+# warning-ignore:narrowing_conversion
+# warning-ignore:narrowing_conversion
+					sdash_angle = Globals.dir_to_angle(rs_dir.x, rs_dir.y, facing)
+				else:
+					if rs_dir.y == -1:
+# warning-ignore:narrowing_conversion
+						sdash_angle = Globals.dir_to_angle(rs_dir.x, -1, facing)
+					else:
+# warning-ignore:narrowing_conversion
+						sdash_angle = Globals.dir_to_angle(rs_dir.x, 0, facing)
+
 			velocity.set_vector(get_stat("SDASH_SPEED"), 0)
 			velocity.rotate(sdash_angle)
 			anim_gravity_mod = 0
