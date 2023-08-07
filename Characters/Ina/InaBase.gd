@@ -49,8 +49,8 @@ const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
 
 # fixed?
-const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower?
-const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher?
+#const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower?
+#const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher?
 
 const DAMAGE_VALUE_LIMIT = 1300
 

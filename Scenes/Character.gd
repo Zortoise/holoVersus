@@ -61,7 +61,11 @@ const DMG_VAL_KB_LIMIT = 300 # max damage percent before knockback stop increasi
 const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
 #const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
 #const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
-const DMG_REDUCTION_AT_MAX_GG = 30 # max reduction in damage when defender's Guard Gauge is at 200%
+
+const DMG_REDUCTION_AT_MAX_GG = 20 # max reduction in damage when defender's Guard Gauge is at 200%
+const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
+const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%
+
 #const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
 const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
 const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
@@ -1063,7 +1067,8 @@ func simulate2(): # only ran if not in hitstop
 #		reset_modulate()
 		
 	if !is_attacking():
-		reset_cancels()
+		chain_combo = Em.chain_combo.RESET
+		active_cancel = false
 		if !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GRD_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC]:
 			chain_memory = []
 		
@@ -1285,7 +1290,7 @@ func simulate2(): # only ran if not in hitstop
 
 # DOWN BUTTON --------------------------------------------------------------------------------------------------
 	
-	if button_down in input_state.pressed and !button_unique in input_state.pressed:
+	if button_down in input_state.pressed and !button_unique in input_state.pressed and !button_aux in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
 		else:
@@ -1616,6 +1621,9 @@ func simulate2(): # only ran if not in hitstop
 				
 			if Animator.query_to_play(["FastFallTransit", "FastFall"]) and !button_down in input_state.pressed:
 				animate("Fall")
+				
+			if Globals.assists != 0 and button_aux in input_state.just_pressed and Animator.query_to_play(["FastFallTransit"]):
+				animate("Fall") # cancel fastfall if assist is called
 	
 		Em.char_state.AIR_D_REC:
 			air_res_this_frame = 0
@@ -1986,7 +1994,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 					
 				if is_hitstunned_or_sequenced(): # cool down when being hit
 					$AssistCDTimer.simulate()
-				elif !chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN, Em.chain_combo.PARRIED]:
+				elif !chain_combo in [Em.chain_combo.RESET, Em.chain_combo.WHIFF, Em.chain_combo.NO_CHAIN, Em.chain_combo.PARRIED]:
 					$AssistCDTimer.simulate() # cool down when attacking
 				elif $SBlockTimer.is_running():
 					$AssistCDTimer.simulate() # cool down when blocking
@@ -2908,7 +2916,7 @@ func process_input_buffer():
 										flag = false
 									if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
 										flag = false
-									if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining
+									if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining/whiffing
 										flag = false
 									if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
 										flag = false
@@ -2949,7 +2957,7 @@ func process_input_buffer():
 									flag = false
 								if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
 									flag = false
-								if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining
+								if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining/whiffing
 									flag = false
 								if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
 									flag = false
@@ -3762,7 +3770,7 @@ func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock)
 		air_jump += 1
 	
 func reset_cancels(): # done whenever you use an attack, after startup frames finish and before active frames begin
-	chain_combo = Em.chain_combo.RESET
+	chain_combo = Em.chain_combo.WHIFF
 	active_cancel = false
 	
 func check_wall_jump():
@@ -4660,6 +4668,8 @@ func check_for_assist():
 		else:
 			return #  cannot call during cooldown
 	if is_hitstunned():
+		if Globals.survival_level != null:
+			return false # no assist rescue during Survival Mode
 #		if $HitStopTimer.is_running():
 #			return false
 		if $BurstLockTimer.is_running():
@@ -4852,7 +4862,9 @@ func test_jump_cancel():
 	var atk_attr = query_atk_attr(move_name)
 	if Em.atk_attr.NO_REC_CANCEL in atk_attr : return false # Normals with NO_REC_CANCEL cannot be jump cancelled
 	
-	if chain_combo in [Em.chain_combo.RESET]:
+	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN]:
+		return false
+	if chain_combo in [Em.chain_combo.WHIFF]:
 		if !Em.atk_attr.JUMP_CANCEL_ON_WHIFF in atk_attr:
 			return false # some rare attacks can jump cancel on whiff
 	if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
@@ -4868,8 +4880,8 @@ func test_jump_cancel():
 func test_jump_cancel_active():
 	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
-	if chain_combo in [Em.chain_combo.RESET]:
-		return false # cannot cancel on whiff
+	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN, Em.chain_combo.WHIFF]:
+		return false
 	
 	var move_name = get_move_name()
 	if Em.atk_attr.JUMP_CANCEL_ACTIVE in query_atk_attr(move_name):
@@ -4997,7 +5009,7 @@ func test_sdash_cancel():
 #					can_reset_on_whiff = true
 			
 			if !chain_combo in [Em.chain_combo.SPECIAL]:
-				if chain_combo in [Em.chain_combo.RESET] and can_reset_on_whiff:
+				if chain_combo in [Em.chain_combo.WHIFF] and can_reset_on_whiff:
 					pass # some attacks can s_dash cancel on whiffed hits
 				else:
 					return false # can only s_dash cancel on SPECIAL hit
@@ -6077,6 +6089,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEFENDER_ATTR] = query_atk_attr()
 	else:
 		hit_data[Em.hit.DEFENDER_ATTR] = []
+		
+	var proj_on_hitstop := false # if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
+	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time >= 0) and Em.hit.ENTITY_PATH in hit_data:
+		proj_on_hitstop = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -6259,7 +6275,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 						
-					Em.atk_type.ENTITY, Em.atk_type.SUPER_ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE
+					Em.atk_type.ENTITY, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER_ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE
 	#					if check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
 	#						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
@@ -6484,6 +6500,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		lethal_flag = true
 		
+	var proj_on_hitstop_no_kb := false
+	var vel_length = velocity.length()
+	if proj_on_hitstop:
+		if hit_data[Em.hit.KB] < vel_length:
+			proj_on_hitstop_no_kb = true # when projectiles hit a hitstopped opponent, no knockback if knockback is less that their current KB
+		
 	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT] and attacker != null:
 		if hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstCounter":
 			attacker.reset_jumps()
@@ -6605,10 +6627,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	$VarJumpTimer.stop()
 	
-	var mass_proj_repeat := false # if a projectile hit a hitstopped opponent under repeat penalty, it does not reduce hitstun and knockback
-	if $HitStopTimer.time >= 0 and Em.hit.ENTITY_PATH in hit_data and (Em.hit.SINGLE_REPEAT in hit_data or Em.hit.DOUBLE_REPEAT in hit_data):
-		mass_proj_repeat = true
-	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
@@ -6618,8 +6636,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			var hitstun = calculate_hitstun(hit_data)
-			if $HitStunTimer.time > hitstun and mass_proj_repeat:
-				pass # projectiles under repeat penalty will not reduce hitstun for opponents during hitstop
+			if $HitStunTimer.time > hitstun and proj_on_hitstop:
+				pass # projectiles on hitstopped player will not reduce hitstun for opponents during hitstop
 				# this allows projectile spreads to do less damage and still retain hitstun, while reducing hitstun for multiple spreads
 			else:
 				$HitStunTimer.time = hitstun
@@ -6717,12 +6735,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				move_amount(Vector2(knock_dir * 7, 0), true)
 				set_true_position()
 		return
-
+		
 
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
+		
+		if proj_on_hitstop_no_kb:
+			hit_data[Em.hit.KB] = vel_length # so that will not go from Launched to Flinch animation when projectile hit a hitstopped player
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if Globals.survival_level == null and (hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or (adjusted_atk_level <= 1 and !mass_proj_repeat)):
+		if Globals.survival_level == null and (hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or adjusted_atk_level <= 1):
 
 #			if !Em.hit.ENTITY_PATH in hit_data:
 #				face(dir_to_attacker) # turn towards attacker
@@ -6874,7 +6895,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				$SBlockTimer.stop()
 					
 					
-	if !no_impact_and_vel_change:
+	if !no_impact_and_vel_change and !proj_on_hitstop_no_kb:
 		velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
 		velocity.rotate(hit_data[Em.hit.KB_ANGLE])
 		
@@ -6971,7 +6992,11 @@ func calculate_damage(hit_data) -> int:
 			scaled_damage = FMath.percent(scaled_damage, PUNISH_DMG_MOD)
 
 	if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
-		scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
+		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
+			var weight: int = FMath.percent(get_guard_gauge_percent_above(), 50) # EX and Supers are scaled less
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), weight)
+		else:
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
 
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.BLOCKED:
@@ -7008,7 +7033,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if Em.hit.FOLLOW_UP in hit_data:
 		if Globals.survival_level != null: return 0
 		if hit_data[Em.hit.ATKER_OR_ENTITY] != null and (("chain_combo" in hit_data[Em.hit.ATKER_OR_ENTITY] and \
-				hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.RESET) or \
+				hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.WHIFF) or \
 				("autochain_landed" in hit_data[Em.hit.ATKER_OR_ENTITY] and !hit_data[Em.hit.ATKER_OR_ENTITY].autochain_landed)):
 			# for autochain, followups only affect GG if first hit whiffs
 			pass
@@ -7592,7 +7617,7 @@ func landed_a_sequence(hit_data):
 #	status_effect_to_remove.append(Em.status_effect.POS_FLOW)	# lose positive flow
 	
 	
-func take_seq_damage(base_damage: int) -> bool: # return true if lethal
+func take_seq_damage(base_damage: int, atk_type := Em.atk_type.SPECIAL) -> bool: # return true if lethal
 	
 #	$HitStunGraceTimer.time = HitStunGraceTimer_TIME # reset HitStunGraceTimer which only ticks down out of hitstun
 	if Globals.training_mode:
@@ -7602,7 +7627,11 @@ func take_seq_damage(base_damage: int) -> bool: # return true if lethal
 	if scaled_damage == 0: return false
 	
 	if current_guard_gauge > 0: # damage is reduced by Guard Gauge when it is > 100%
-		scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
+		if atk_type in [Em.atk_type.EX, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
+			var weight: int = FMath.percent(get_guard_gauge_percent_above(), 50) # EX and Supers are scaled less
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), weight)
+		else:
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
 		
 	var seq_user = get_seq_partner()
 	if Globals.survival_level != null and seq_user != null:
@@ -7637,7 +7666,7 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 		UniqData = seq_user.UniqChar
 	
 	var seq_hit_data = UniqData.get_seq_hit_data(hit_key)
-	var lethal = take_seq_damage(seq_hit_data[Em.move.DMG])
+	var lethal = take_seq_damage(seq_hit_data[Em.move.DMG], UniqData.MOVE_DATABASE[seq_user.Animator.to_play_anim][Em.move.ATK_TYPE])
 	
 	if Em.move.SEQ_HITSTOP in seq_hit_data and !Em.move.SEQ_WEAK in seq_hit_data: # if weak, no lethal effect, place it for non-final hits
 		if lethal:
@@ -7683,7 +7712,7 @@ func sequence_launch():
 
 	# DAMAGE
 	var damage = seq_data[Em.move.DMG]
-	var lethal = take_seq_damage(damage)
+	var lethal = take_seq_damage(damage, UniqData.MOVE_DATABASE[seq_user.Animator.to_play_anim][Em.move.ATK_TYPE])
 	if damage > 0 and seq_data[Em.move.SEQ_HITSTOP] > 0: # launch is a hit (rare)
 		if lethal and !Em.move.SEQ_WEAK in seq_data:
 			hitstop = LETHAL_HITSTOP
@@ -8042,9 +8071,9 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("DIR_JUMP_HEIGHT_MOD"))
 				velocity.x += dir * FMath.percent(get_stat("SPEED"), get_stat("HORIZ_JUMP_BOOST_MOD"))
 				if velocity.x > get_stat("SPEED"):
-					velocity.x = FMath.f_lerp(velocity.x, get_stat("SPEED"), 50)
+					velocity.x = FMath.f_lerp(velocity.x, get_stat("SPEED"), 70)
 				elif velocity.x < -get_stat("SPEED"):
-					velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 50)
+					velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 70)
 				velocity.x = FMath.percent(velocity.x, get_stat("HORIZ_JUMP_SPEED_MOD"))
 			else:
 				velocity.y = -get_stat("JUMP_SPEED")

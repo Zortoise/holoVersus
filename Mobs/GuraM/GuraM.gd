@@ -222,6 +222,7 @@ const MOVE_DATABASE = {
 	},
 	"aF2SeqB": {
 		Em.move.STARTER : "aF2",
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.SEQ_LAUNCH : {
 			Em.move.DMG : 30,
 			Em.move.SEQ_HITSTOP : 0,
@@ -307,6 +308,7 @@ const MOVE_DATABASE = {
 	
 	"SP6[ex]SeqE": {
 		Em.move.STARTER : "aSP6[ex]",
+		Em.move.ATK_TYPE : Em.atk_type.EX,
 		Em.move.SEQ_HITS : [{Em.move.DMG:150, Em.move.SEQ_HITSTOP: 15}], # for hits during sequence, has a key, only contain damage
 		Em.move.SEQ_LAUNCH : { # for final hit of sequence
 			Em.move.DMG : 0,

@@ -532,7 +532,7 @@ func atk_type_to_tier(atk_type):
 			return 2
 		Em.atk_type.SUPER:
 			return 3
-		Em.atk_type.ENTITY, Em.atk_type.SUPER_ENTITY: # just in case
+		_: # just in case
 			return -1
 	
 #enum status_priority {

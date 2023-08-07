@@ -315,11 +315,12 @@ func landed_a_hit(hit_data):
 	fever(hit_data)
 
 func fever(hit_data):
-	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
-		if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
-			return
-		if !hit_data[Em.hit.DEFENDER].assist_rescue_protect:
-			hit_data[Em.hit.ATKER].assist_fever = true
+	if Globals.survival_level == null:
+		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
+			if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
+				return
+			if !hit_data[Em.hit.DEFENDER].assist_rescue_protect:
+				hit_data[Em.hit.ATKER].assist_fever = true
 			
 		
 func on_offstage():

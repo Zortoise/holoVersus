@@ -48,8 +48,8 @@ const DODGE_SPEED = 1000 * FMath.S
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
 
-const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
-const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
+#const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
+#const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 1100
 
@@ -342,6 +342,7 @@ const MOVE_DATABASE = {
 	},
 	"aF2SeqB": {
 		Em.move.STARTER : "aF2",
+		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.SEQ_LAUNCH : {
 			Em.move.DMG : 30,
 			Em.move.SEQ_HITSTOP : 0,
@@ -598,6 +599,7 @@ const MOVE_DATABASE = {
 	
 	"SP6[ex]SeqE": {
 		Em.move.STARTER : "aSP6[ex]", # for cards in survival mode
+		Em.move.ATK_TYPE : Em.atk_type.EX,
 		Em.move.SEQ_HITS : [{Em.move.DMG:200, Em.move.SEQ_HITSTOP: 15}], # for hits during sequence, has a key, only contain damage
 		Em.move.SEQ_LAUNCH : { # for final hit of sequence
 			Em.move.DMG : 0,
@@ -611,6 +613,7 @@ const MOVE_DATABASE = {
 	},
 	"aSP6[ex]SeqE": { # if Grabbed hit a ledge while Grabber doesn't
 		Em.move.STARTER : "aSP6[ex]",
+		Em.move.ATK_TYPE : Em.atk_type.EX,
 		Em.move.SEQ_HITS : [{Em.move.DMG:200, Em.move.SEQ_HITSTOP: 15}],
 		Em.move.SEQ_LAUNCH : {
 			Em.move.DMG : 0,

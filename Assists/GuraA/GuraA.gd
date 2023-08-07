@@ -108,8 +108,19 @@ func unsummon(assist_attacked := false): # can be different if custom assist
 			Character.play_audio("bling3", {"vol" : -18})
 			Character.play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
 		shine()
+
+				
+		if Character.sfx_under.visible:
+			Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sfx_under, \
+					Character.sfx_under.get_path(), Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+				
 		Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sprite, sprite.get_path(), \
 				Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+		
+		if Character.sfx_over.visible:
+			Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sfx_over, \
+					Character.sfx_over.get_path(), Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+					
 				
 func shine():
 	var player_palette := "red"
@@ -285,11 +296,12 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	fever(hit_data)
 
 func fever(hit_data):
-	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
-		if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
-			return
-		if !hit_data[Em.hit.DEFENDER].assist_rescue_protect:
-			hit_data[Em.hit.ATKER].assist_fever = true
+	if Globals.survival_level == null:
+		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
+			if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
+				return
+			if !hit_data[Em.hit.DEFENDER].assist_rescue_protect:
+				hit_data[Em.hit.ATKER].assist_fever = true
 			
 func being_hit(_hit_data):
 	pass

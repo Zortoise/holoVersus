@@ -2175,7 +2175,8 @@ func assist_update(character):
 					assist_icon.material = null
 					assist_icon.modulate = Color(1,1,1)
 		else:
-			if character.is_hitstunned() and (character.get_node("BurstLockTimer").is_running() or character.current_guard_gauge <= 0):
+			if character.is_hitstunned() and (Globals.survival_level != null or \
+					character.get_node("BurstLockTimer").is_running() or character.current_guard_gauge <= 0):
 				assist_text.text = "X"
 				assist_text.get_node("AnimationPlayer").play("cooldown")
 				if assist_icon.material == null:
@@ -2396,8 +2397,10 @@ func call_assist(master_ID: int, NPC_ref: String, out_position, palette_ref = nu
 	else:
 		print("Error: " + NPC_ref + " NPC not found in Loader.NPC_data")
 	
-	spawn_entity(master_ID, "AssistSpawner", aux_data.out_position, aux_data) # call a spawner carrying the data
-	
+	if Globals.survival_level == null:
+		spawn_entity(master_ID, "AssistSpawner", aux_data.out_position, aux_data) # call a spawner carrying the data
+	else: # instant spawn for Survival Mode
+		spawn_assist(master_ID, aux_data.NPC_ref, aux_data.out_position, aux_data.start_facing, aux_data.palette_ref, aux_data.atk_ID)
 	
 func spawn_assist(master_ID: int, NPC_ref: String, out_position, start_facing, palette_ref = null, atk_ID: int = 0):
 	var assist = Loader.loaded_assist_scene.instance()

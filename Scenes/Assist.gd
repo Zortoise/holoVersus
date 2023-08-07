@@ -209,7 +209,7 @@ func unsummon(assist_attacked := false):
 # for testing only
 func test1():
 	if Globals.debug_mode2:
-		if $HitStopTimer.is_running() or $RespawnTimer.is_running():
+		if $HitStopTimer.is_running():
 			test0()
 		$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "old state: " + Globals.char_state_to_string(state) + \
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + "\n"
@@ -450,7 +450,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 	
 	flashes()
 	
-	if !$HitStopTimer.is_running():
+	if !$HitStopTimer.is_running() and !free:
 		
 		process_afterimage_trail() 	# do afterimage trails
 		

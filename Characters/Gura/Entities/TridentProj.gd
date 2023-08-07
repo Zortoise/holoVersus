@@ -57,7 +57,7 @@ const MOVE_DATABASE = {
 	},
 	"[ex]Active" : {
 		Em.move.ROOT : "TridentProjEX",
-		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
+		Em.move.ATK_TYPE : Em.atk_type.EX_ENTITY,
 		Em.move.HITCOUNT : 3,
 		Em.move.DMG : 50,
 		Em.move.KB : 500 * FMath.S,

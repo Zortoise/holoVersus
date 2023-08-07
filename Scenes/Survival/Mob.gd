@@ -2556,6 +2556,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEFENDER_ATTR] = query_atk_attr()
 	else:
 		hit_data[Em.hit.DEFENDER_ATTR] = []
+		
+	var proj_on_hitstop := false # if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
+	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time >= 0) and Em.hit.ENTITY_PATH in hit_data:
+		proj_on_hitstop = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -2839,6 +2843,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	var knockback_strength: int = calculate_knockback_strength(hit_data)
 	hit_data[Em.hit.KB] = knockback_strength
 	
+	var proj_on_hitstop_no_kb := false
+	var vel_length = velocity.length()
+	if proj_on_hitstop:
+		if hit_data[Em.hit.KB] < vel_length:
+			proj_on_hitstop_no_kb = true # when projectiles hit a hitstopped opponent, no knockback if knockback is less that their current K
+	
 	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT] and attacker != null:
 		if hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstCounter":
 			attacker.reset_jumps()
@@ -2917,10 +2927,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
-	var mass_proj_repeat := false # if a projectile hit a hitstopped opponent under repeat penalty, it does not reduce hitstun and knockback
-	if $HitStopTimer.time >= 0 and Em.hit.ENTITY_PATH in hit_data and (Em.hit.SINGLE_REPEAT in hit_data or Em.hit.DOUBLE_REPEAT in hit_data):
-		mass_proj_repeat = true
-	
 	if guardbroken:
 		if adjusted_atk_level <= 1 and $HitStunTimer.is_running():
 			# for atk level 1 hits on hitstunned opponent, no change to hitstun
@@ -2928,8 +2934,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			var hitstun = calculate_hitstun(hit_data)
-			if $HitStunTimer.time > hitstun and mass_proj_repeat:
-				pass # projectiles under repeat penalty will not reduce hitstun for opponents during hitstop
+			if $HitStunTimer.time > hitstun and proj_on_hitstop:
+				pass # projectiles on hitstopped player will not reduce hitstun for opponents during hitstop
 				# this allows projectile spreads to do less damage and still retain hitstun, while reducing hitstun for multiple spreads
 			else:
 				$HitStunTimer.time = hitstun
@@ -3020,12 +3026,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if knock_dir != 0:
 				move_amount(Vector2(knock_dir * 7, 0), true)
 				set_true_position()
+		check_death(hit_data)
 		return
 
 	if guardbroken:
+		
+		if proj_on_hitstop_no_kb:
+			hit_data[Em.hit.KB] = vel_length # so that will not go from Launched to Flinch animation when projectile hit a hitstopped player
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or (adjusted_atk_level <= 1 and !mass_proj_repeat):
+		if has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
 
 			var no_impact := false
 			
@@ -3172,13 +3182,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				no_impact_and_vel_change = true # no KB if mob is doing a special move
 					
 					
-	if !no_impact_and_vel_change:
+	if !no_impact_and_vel_change and !proj_on_hitstop_no_kb:
 		velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
 		velocity.rotate(hit_data[Em.hit.KB_ANGLE])
 		
 		if !guardbroken and grounded and !hit_data[Em.hit.LETHAL_HIT]:
 			velocity.y = 0 # set to horizontal pushback on non-guardbroken grounded defender
 			
+	check_death(hit_data)
+			
+			
+func check_death(hit_data: Dictionary):
 	if hit_data[Em.hit.LETHAL_HIT]:				
 		animate("Death")
 		var angle: int

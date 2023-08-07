@@ -288,7 +288,7 @@ func palette():
 # for testing only
 func test1():
 	if Globals.debug_mode2:
-		if $HitStopTimer.is_running() or $RespawnTimer.is_running():
+		if $HitStopTimer.is_running():
 			test0()
 		$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "old state: " + Globals.char_state_to_string(state) + \
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + "\n"
@@ -397,7 +397,8 @@ func simulate2(): # only ran if not in hitstop
 		
 
 	if !is_attacking():
-		reset_cancels()
+		chain_combo = Em.chain_combo.RESET
+		active_cancel = false
 		if !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GRD_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC]:
 			chain_memory = []
 
@@ -524,7 +525,7 @@ func simulate2(): # only ran if not in hitstop
 
 # DOWN BUTTON --------------------------------------------------------------------------------------------------
 	
-	if button_down in input_state.pressed and !button_unique in input_state.pressed:
+	if button_down in input_state.pressed and !button_unique in input_state.pressed and !button_aux in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
 		else:
@@ -762,6 +763,9 @@ func simulate2(): # only ran if not in hitstop
 				
 			if Animator.query_to_play(["FastFallTransit", "FastFall"]) and !button_down in input_state.pressed:
 				animate("Fall")
+				
+			if Globals.assists != 0 and button_aux in input_state.just_pressed and Animator.query_to_play(["FastFallTransit"]):
+				animate("Fall") # cancel fastfall if assist is called
 	
 		Em.char_state.AIR_D_REC:
 			air_res_this_frame = 0
@@ -1731,7 +1735,7 @@ func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock)
 		air_jump += 1
 	
 func reset_cancels(): # done whenever you use an attack, after startup frames finish and before active frames begin
-	chain_combo = Em.chain_combo.RESET
+	chain_combo = Em.chain_combo.WHIFF
 	active_cancel = false
 	
 func check_wall_jump():
@@ -2287,7 +2291,9 @@ func test_jump_cancel():
 	var atk_attr = query_atk_attr(move_name)
 	if Em.atk_attr.NO_REC_CANCEL in atk_attr : return false # Normals with NO_REC_CANCEL cannot be jump cancelled
 	
-	if chain_combo in [Em.chain_combo.RESET]:
+	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN]:
+		return false
+	if chain_combo in [Em.chain_combo.WHIFF]:
 		if !Em.atk_attr.JUMP_CANCEL_ON_WHIFF in atk_attr:
 			return false # some rare attacks can jump cancel on whiff
 	if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
@@ -2303,8 +2309,8 @@ func test_jump_cancel():
 func test_jump_cancel_active():
 	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
-	if chain_combo in [Em.chain_combo.RESET]:
-		return false # cannot cancel on whiff
+	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN, Em.chain_combo.WHIFF]:
+		return false
 	
 	var move_name = get_move_name()
 	if Em.atk_attr.JUMP_CANCEL_ACTIVE in query_atk_attr(move_name):
@@ -2809,6 +2815,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	# CANCELING ----------------------------------------------------------------------------------------------
 		# only set chain_combo and dash_cancel to true if no Repeat Penalty
 		
+	if Em.hit.NPC_DEFENDER_PATH in hit_data:
+		chain_combo = Em.chain_combo.RESET # no chain on NPC hits
+		
 	if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SOUR_HIT in hit_data:
 		chain_combo = Em.chain_combo.NO_CHAIN
 	
@@ -3018,7 +3027,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		match state:
 			Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
 				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
-					Em.atk_type.ENTITY, Em.atk_type.SUPER_ENTITY:
+					Em.atk_type.ENTITY, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER_ENTITY:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					_:
 						if crossed_up:
@@ -3625,9 +3634,9 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("DIR_JUMP_HEIGHT_MOD"))
 				velocity.x += dir * FMath.percent(get_stat("SPEED"), get_stat("HORIZ_JUMP_BOOST_MOD"))
 				if velocity.x > get_stat("SPEED"):
-					velocity.x = FMath.f_lerp(velocity.x, get_stat("SPEED"), 50)
+					velocity.x = FMath.f_lerp(velocity.x, get_stat("SPEED"), 70)
 				elif velocity.x < -get_stat("SPEED"):
-					velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 50)
+					velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 70)
 				velocity.x = FMath.percent(velocity.x, get_stat("HORIZ_JUMP_SPEED_MOD"))
 			else:
 				velocity.y = -get_stat("JUMP_SPEED")
