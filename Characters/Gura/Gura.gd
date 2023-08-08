@@ -1145,13 +1145,15 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			update_uniqueHUD()
 			
 
-func being_hit(hit_data):
+func being_hit(_hit_data):
 #	var defender = get_node(hit_data.defender_nodepath)
 					
-	if hit_data[Em.hit.BLOCK_STATE] in [Em.block_state.UNBLOCKED]:
-#		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
-		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
-		update_uniqueHUD()
+#	if hit_data[Em.hit.BLOCK_STATE] in [Em.block_state.UNBLOCKED]:
+##		Character.unique_data.nibbler_cancel = 2 # cancel spawning nibblers
+#		Character.unique_data.nibbler_count = max(Character.unique_data.nibbler_count - 1, 0)
+#		update_uniqueHUD()
+
+	pass
 		
 	
 # AUTO SEQUENCES --------------------------------------------------------------------------------------------------

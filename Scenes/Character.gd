@@ -2030,8 +2030,8 @@ func bounce(against_ground: bool):
 		if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
 			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+#			abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) 
 			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
-					abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
 				var scaled_value = wall_slam(velocity_previous_frame.x)
 				
@@ -2050,26 +2050,32 @@ func bounce(against_ground: bool):
 							play_audio("break3", {"vol" : -16,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 40))
+							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 180)
 							first_hit_flag = true
 						else: # lvl 3 slam
 							hitstop = 15
 							slam_level = 2
 							play_audio("break3", {"vol" : -14,})
 							modulate_play("punish_sweet_flash")
-							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 60))
+							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 220)
 							first_hit_flag = true
 					else: # lvl 1 slam
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
+						change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 20))
+						$HitStunTimer.time = FMath.percent($HitStunTimer.time, 140)
 						first_hit_flag = true
 						
 					if sign(velocity_previous_frame.x) > 0:
 						bounce_dust(Em.compass.E, slam_level)
 					else:
 						bounce_dust(Em.compass.W, slam_level)
+					if UniqChar.has_method("wall_slammed"):
+						UniqChar.wall_slammed(slam_level) # unique character interaction with wall slams
+						
 					return
 				
 			
@@ -2085,8 +2091,8 @@ func bounce(against_ground: bool):
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
 			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+#			abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x)
 			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
-					abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
 				var scaled_value = wall_slam(velocity_previous_frame.y)
 				
@@ -2105,7 +2111,8 @@ func bounce(against_ground: bool):
 							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 40))
+							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 180)
 							first_hit_flag = true
 						else:
 							hitstop = 15
@@ -2113,15 +2120,21 @@ func bounce(against_ground: bool):
 							play_audio("break3", {"vol" : -12,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 100))
+							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 60))
+							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 220)
 							first_hit_flag = true
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
+						change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 20))
+						$HitStunTimer.time = FMath.percent($HitStunTimer.time, 140)
 						first_hit_flag = true
 
 					bounce_dust(Em.compass.N, slam_level)
+					if UniqChar.has_method("wall_slammed"):
+						UniqChar.wall_slammed(slam_level) # unique character interaction with wall slams
+					
 					return
 				
 			bounce_dust(Em.compass.N)
@@ -4115,8 +4128,18 @@ func process_VDI():
 		if dir != 0 and v_dir != 0: # diagonal, multiply by 0.71
 			VDI_amount = FMath.percent(VDI_amount, 71)
 			
+#		var old_velocity = FVector.new()
+#		old_velocity.x = velocity.x
+#		old_velocity.y = velocity.y
+		
 		velocity.x += dir * VDI_amount
 		velocity.y += v_dir * VDI_amount
+		
+#		if old_velocity.is_longer_than_another(velocity): # cannot reduce knockback strength via DI
+#			var new_angle = velocity.angle()
+#			velocity.x = old_velocity.length()
+#			velocity.y = 0
+#			velocity.rotate(new_angle)
 		
 
 # SPECIAL EFFECTS --------------------------------------------------------------------------------------------------
