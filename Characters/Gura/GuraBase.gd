@@ -42,7 +42,7 @@ const GRD_DASH_SPEED = 500 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
 const SDASH_SPEED = 450 * FMath.S # super dash
 const SDASH_TURN_RATE = 5 # exact navigate speed when sdashing
-const DODGE_GG_COST = 2500
+const DODGE_GG_COST = 3000
 const DODGE_SPEED = 1000 * FMath.S
 
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity

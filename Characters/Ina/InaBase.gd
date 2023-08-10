@@ -41,7 +41,7 @@ const SDASH_SPEED = 385 * FMath.S # super dash
 const SDASH_TURN_RATE = 6 # exact navigate speed when sdashing
 
 # fixed?
-const DODGE_GG_COST = 2500
+const DODGE_GG_COST = 3000
 const DODGE_SPEED = 1000 * FMath.S
 
 # fixed?
@@ -87,6 +87,7 @@ const PALETTE_TO_PORTRAIT = {
 
 const PALETTE_TO_HITSPARK_PALETTE = {
 	1: "dark_purple",
+	2: "pink",
 }
 
 const MUSIC = {

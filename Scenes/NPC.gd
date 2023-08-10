@@ -1318,6 +1318,8 @@ func process_input_buffer():
 						Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 							
 							if grounded:
+								animate("JumpTransit") # ground jump
+								keep = false
 								continue
 
 							if new_state == Em.char_state.AIR_D_REC:

@@ -401,6 +401,7 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 		coin_count = Globals.Game.LevelControl.starting_coin
 
 	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
+	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
 	
 	yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
 #	Globals.Game.damage_limit_update(self)
@@ -2726,13 +2727,13 @@ func process_input_buffer():
 						# AIR JUMPS  --------------------------------------------------------------------------------------------------
 			
 						Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
-#							if grounded:
-#								animate("JumpTransit") # ground jump
-#								keep = false
-#								continue
-							
 							if grounded:
+								animate("JumpTransit") # ground jump
+								keep = false
 								continue
+							
+#							if grounded:
+#								continue
 
 							if new_state == Em.char_state.AIR_D_REC:
 								if UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
@@ -2860,10 +2861,15 @@ func process_input_buffer():
 #									keep = false
 								
 						Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
-							if burst_escape_check():
-								animate("BurstEscapeStartup")
+							if $HitStunTimer.is_running():
+								if burst_escape_check():
+									animate("BurstEscapeStartup")
+									has_acted[0] = true
+									keep = false
+							elif burst_counter_check(): # during techable hitstun, will do Burst Counter instead
+								animate("BurstCounterStartup")
 								has_acted[0] = true
-								keep = false
+								keep = false	
 								
 						# can Burst Counter if attack is blocked
 						Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
@@ -2934,7 +2940,7 @@ func process_input_buffer():
 									if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
 										flag = false
 								Em.char_state.AIR_REC:
-									if Animator.query_to_play(["SDash"]):
+									if Animator.query_to_play(["SDash"]) or Animator.to_play_anim.begins_with("Burst"):
 										flag = false # prevent SDashing from SDash
 							if flag and (grounded or super_dash > 0):
 								animate("SDashTransit")
@@ -3669,8 +3675,8 @@ func on_kill():
 				if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
 					opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
 				
-				if current_damage_value > UniqChar.DAMAGE_VALUE_LIMIT: # targeted opponent heals Damage Value equal to overkill damage
-					opponent.take_damage(-(current_damage_value - UniqChar.DAMAGE_VALUE_LIMIT))
+				if current_damage_value > UniqChar.DAMAGE_VALUE_LIMIT: # targeted opponent heals Damage Value equal to double overkill damage
+					opponent.take_damage(-FMath.percent(current_damage_value - UniqChar.DAMAGE_VALUE_LIMIT, 200))
 					
 				Globals.Game.damage_update(opponent)
 
@@ -4722,12 +4728,12 @@ func call_assist(atk_ID: int):
 func tech():
 	if button_dash in input_state.pressed:
 		if dir != 0 or v_dir != 0:
-			if button_block in input_state.pressed:
+			if button_fierce in input_state.pressed:
 				animate("SDashTransit")
 #				modulate_play("unlaunch_flash")
 #				play_audio("bling4", {"vol" : -15, "bus" : "PitchDown"})
 				return true
-			elif button_aux in input_state.pressed:
+			elif button_light in input_state.pressed:
 				animate("DodgeTransit")
 				if current_guard_gauge > 0:
 					reset_guard_gauge()
@@ -4735,9 +4741,9 @@ func tech():
 				
 	if button_rs_up in input_state.pressed or button_rs_down in input_state.pressed or button_rs_left in input_state.pressed or \
 		button_rs_right in input_state.pressed:
-		animate("DodgeTransit")
-		if current_guard_gauge > 0:
-			reset_guard_gauge()
+		animate("SDashTransit")
+#		if current_guard_gauge > 0:
+#			reset_guard_gauge()
 		return true
 		
 	return false
@@ -4761,6 +4767,9 @@ func dodge_check():
 func perfect_dodge(): # called from Game.gd
 	if new_state == Em.char_state.AIR_REC and Animator.query_to_play(["DodgeTransit", "Dodge"]):
 		success_dodge = true
+		
+	if UniqChar.has_method("perfect_dodge"):
+		UniqChar.perfect_dodge()
 #		if Globals.survival_level != null:
 #			p_dodge_enhance()
 	

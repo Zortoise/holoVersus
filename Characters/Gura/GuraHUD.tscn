@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Characters/Gura/UI/hud1.png" type="Texture" id=1]
+[ext_resource path="res://Characters/Gura/UI/hub_back.png" type="Texture" id=2]
 
 [sub_resource type="Animation" id=2]
 length = 0.001
@@ -36,6 +37,11 @@ tracks/0/keys = {
 }
 
 [node name="GuraHUD" type="Node2D"]
+
+[node name="Back" type="Sprite" parent="."]
+modulate = Color( 1, 1, 1, 0.74902 )
+position = Vector2( -63, 15 )
+texture = ExtResource( 2 )
 
 [node name="Bitemark1" type="Sprite" parent="."]
 position = Vector2( -104, 13 )

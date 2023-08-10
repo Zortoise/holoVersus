@@ -34,9 +34,6 @@ func _ready():
 	get_node("TestSprite").free() # test sprite is for sizing collision box
 	uniqueHUD = load("res://Characters/Gura/GuraHUD.tscn").instance()
 	Globals.Game.set_uniqueHUD(Character.player_ID, uniqueHUD)
-	uniqueHUD.get_node("Bitemark1").hide()
-	uniqueHUD.get_node("Bitemark2").hide()
-	uniqueHUD.get_node("Bitemark3").hide()
 	
 func set_up_unique(): # TESTING
 	
@@ -437,25 +434,25 @@ func process_instant_actions():
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 			
-#		if "BitemarkTriggerU" in Character.instant_actions and Character.get_target() != Character:
-#			if Character.unique_data.nibbler_count > 0:
-#				var spawn_point = Character.get_target().position
-#				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
-#				if spawn_point != null:
-#					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
-#					Character.play_audio("water15", {})
-#					Character.unique_data.nibbler_count -= 1
-#					update_uniqueHUD()
-						
 		if "BitemarkTriggerD" in Character.instant_actions and Character.get_target() != Character:
 			if Character.unique_data.nibbler_count > 0:
-				var spawn_point = Character.position
+				var spawn_point = Character.get_target().position
 				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
 				if spawn_point != null:
 					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
 					Character.play_audio("water15", {})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
+						
+#		if "BitemarkTriggerD" in Character.instant_actions and Character.get_target() != Character:
+#			if Character.unique_data.nibbler_count > 0:
+#				var spawn_point = Character.position
+#				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
+#				if spawn_point != null:
+#					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
+#					Character.play_audio("water15", {})
+#					Character.unique_data.nibbler_count -= 1
+#					update_uniqueHUD()
 						
 		if "BitemarkTrigger" in Character.instant_actions and Character.get_target() != Character:
 			if Character.unique_data.nibbler_count > 0:
@@ -481,27 +478,30 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 	match buffered_input[0]:
 		
 		Character.button_dash:
+			if Character.button_light in Character.input_state.pressed or \
+					Character.button_fierce in Character.input_state.pressed:
+				continue
+				
 			if !has_acted[0]:
 				match new_state:
 					
 				# GROUND DASH ---------------------------------------------------------------------------------
 			
 					Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC:
-						if !Character.button_light in Character.input_state.just_pressed and \
-								!Character.button_fierce in Character.input_state.just_pressed:
-							if !Animator.query_to_play(["DashBrake", "WaveDashBrake"]):
-								# cannot dash during dash brake
-								Character.animate("DashTransit")
+
+						if !Animator.query_to_play(["DashBrake", "WaveDashBrake"]):
+							# cannot dash during dash brake
+							Character.animate("DashTransit")
+							keep = false
+						else: # during dash brake, can continue dash backwards, limited dash dancing
+							if Character.dir == -Character.facing:
+								Character.face(Character.dir)
+								Character.animate("Dash")
 								keep = false
-							else: # during dash brake, can continue dash backwards, limited dash dancing
-								if Character.dir == -Character.facing:
-									Character.face(Character.dir)
-									Character.animate("Dash")
-									keep = false
-								elif Character.instant_dir == -Character.facing:
-									Character.face(Character.instant_dir)
-									Character.animate("Dash")
-									keep = false
+							elif Character.instant_dir == -Character.facing:
+								Character.face(Character.instant_dir)
+								Character.animate("Dash")
+								keep = false
 							
 #					Em.char_state.GRD_D_REC:
 						
@@ -509,6 +509,10 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 				# AIR DASH ---------------------------------------------------------------------------------
 					
 					Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC:
+							
+						if Character.grounded: # for AIR_C_REC
+							Character.animate("DashTransit")
+							keep = false
 						
 						if Animator.query_to_play(["aDashBrake"]) and !Character.has_trait(Em.trait.AIR_CHAIN_DASH):
 							continue
@@ -745,9 +749,11 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 #							return true
 	match new_state:
 			
-		Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC:
+		Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_C_REC:
+			if new_state == Em.char_state.AIR_C_REC and !Character.grounded: continue
+			
 			if Character.grounded and attack_ref in STARTERS:
-				if new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC] and \
+				if new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_C_REC] and \
 						!Animator.query_to_play(["SoftLanding"]) and \
 						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
 					continue # certain moves cannot be performed during cancellable recovery
@@ -865,18 +871,22 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 func update_uniqueHUD():
 	match Character.unique_data.nibbler_count:
 		0:
+			uniqueHUD.get_node("Back").hide()
 			uniqueHUD.get_node("Bitemark1").hide()
 			uniqueHUD.get_node("Bitemark2").hide()
 			uniqueHUD.get_node("Bitemark3").hide()
 		1:
+			uniqueHUD.get_node("Back").show()
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").hide()
 			uniqueHUD.get_node("Bitemark3").hide()
 		2:
+			uniqueHUD.get_node("Back").show()
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").show()
 			uniqueHUD.get_node("Bitemark3").hide()
 		3:
+			uniqueHUD.get_node("Back").show()
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").show()
 			uniqueHUD.get_node("Bitemark3").show()
