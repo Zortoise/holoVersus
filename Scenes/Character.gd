@@ -28,7 +28,7 @@ const GUARD_GAUGE_DEGEN_AMOUNT = 150 # exact GG degened per frame when GG > 100%
 
 const SDC_EX_COST = 5000
 const BURSTCOUNTER_EX_COST = 10000
-const BURSTESCAPE_GG_COST = 5000
+#const BURSTESCAPE_GG_COST = 5000
 const EX_MOVE_COST = 10000
 
 const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blocking
@@ -143,6 +143,9 @@ const GDI_UP_MAX = 80 # gravity decrease upward Gravity DI at 200% Guard Gauge
 const GDI_DOWN_MAX = 130 # gravity increase downward Gravity DI at 200% Guard Gauge
 const VDI_MAX = 30 # change in knockback vector when using Vector DI at 200% Guard Gauge
 #const DI_MIN_MOD = 0 # percent of max DI at 100% Guard Gauge
+const FDITimer_TIME = 30 # min duration of Force DI
+const FDI_EX_DEGEN = -200 * FMath.S # amount of EX lost per frame while FDIing
+const FDI_MOD = 75 # mod to DI weight when FDIing
 
 const SURVIVAL_HITSTOP = 15
 #const MOB_GRACE_DURATION = 30 # how long invincibility last after being hit by a mob
@@ -913,10 +916,10 @@ func simulate2(): # only ran if not in hitstop
 	# GG Swell during hitstun
 	if !$HitStopTimer.is_running() and is_hitstunned() and GG_swell_flag and !first_hit_flag and \
 			!state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER] and \
-			!(DI_seal and $BurstLockTimer.is_running()):
+			!(DI_seal and $BurstLockTimer.is_running()) and !$FDITimer.is_running(): # no Guard Swell while FDIing:
 		if $HitStunTimer.is_running():
 			current_guard_gauge = int(min(GUARD_GAUGE_CEIL, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
-		else: # in techable state, lose GG slowly
+		else: # in techable state or, lose GG slowly
 			current_guard_gauge = int(max(0, current_guard_gauge - FMath.percent(GUARD_GAUGE_DEGEN_AMOUNT, 25)))
 		Globals.Game.guard_gauge_update(self)
 
@@ -973,10 +976,13 @@ func simulate2(): # only ran if not in hitstop
 #			if velocity.x != 0 and distance != 0 and sign(velocity.x) != sign(distance):
 #				no_regen = true
 		
-		if !Globals.Game.input_lock and current_ex_gauge < MAX_EX_GAUGE and state != Em.char_state.DEAD:
+		if !Globals.Game.input_lock and state != Em.char_state.DEAD:
 			var ex_change := get_stat("BASE_EX_REGEN") * FMath.S
 			if is_hitstunned():
-				ex_change = FMath.percent(ex_change, get_stat("HITSTUN_EX_REGEN_MOD"))
+				if !$FDITimer.is_running():
+					ex_change = FMath.percent(ex_change, get_stat("HITSTUN_EX_REGEN_MOD"))
+				else:
+					ex_change = FDI_EX_DEGEN
 			elif state == Em.char_state.SEQ_TARGET:
 				ex_change = 0
 			elif is_attacking():
@@ -1082,6 +1088,22 @@ func simulate2(): # only ran if not in hitstop
 #	if pos_flow_seal and !$PosFlowSealTimer.is_running():
 #		if !get_node(targeted_opponent_path).get_node("HitStunTimer").is_running():
 #			pos_flow_seal = false
+
+
+# FORCE DI --------------------------------------------------------------------------------------------------
+
+	if Globals.survival_level == null:
+		if $HitStunTimer.is_running() and can_DI() and current_ex_gauge != 0:
+			if !$FDITimer.is_running():
+				if button_special in input_state.just_pressed:
+					$FDITimer.time = FDITimer_TIME
+					modulate_play("unflinch_flash")
+					current_guard_gauge = 1
+					Globals.Game.guard_gauge_update(self)
+						
+		if $FDITimer.is_running():
+			if !can_DI() or current_ex_gauge == 0:
+				$FDITimer.stop()
 
 
 # CAPTURE DIRECTIONAL INPUTS --------------------------------------------------------------------------------------------------
@@ -1209,14 +1231,15 @@ func simulate2(): # only ran if not in hitstop
 					var DDI_speed: int
 					var DDI_speed_limit: int
 					
+					var weight: = 100
 					if Globals.survival_level == null:
-						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_above())
-						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_above())
-					else:
-#						DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, get_guard_gauge_percent_true())
-#						DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, get_guard_gauge_percent_true())
-						DDI_speed = DDI_SIDE_MAX
-						DDI_speed_limit = MAX_DDI_SIDE_SPEED
+						if $FDITimer.is_running():
+	#						weight = FMath.percent(100 + weight, FDI_MOD)
+							weight = FDI_MOD
+						else:
+							weight = get_guard_gauge_percent_above()
+					DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, weight)
+					DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, weight)
 					
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
 						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit (can scale speed limit to guard gauge?)
@@ -1509,18 +1532,18 @@ func simulate2(): # only ran if not in hitstop
 		
 		if is_hitstunned():
 			if can_DI(): # up/down DI, depends on Guard Gauge
+				var weight: = 100
 				if Globals.survival_level == null:
-					if v_dir == -1: # DIing upward
-						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_above())
-					elif v_dir == 1: # DIing downward
-						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_above())
-				else:
-					if v_dir == -1: # DIing upward
-#						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), get_guard_gauge_percent_true())
-						gravity_temp = FMath.percent(gravity_temp, GDI_UP_MAX)
-					elif v_dir == 1: # DIing downward
-#						gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), get_guard_gauge_percent_true())
-						gravity_temp = FMath.percent(gravity_temp, GDI_DOWN_MAX)
+					if $FDITimer.is_running():
+#						weight = FMath.percent(100 + weight, FDI_MOD)
+						weight = FDI_MOD
+					else:
+						weight = get_guard_gauge_percent_above()
+				if v_dir == -1: # DIing upward
+					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), weight)
+				elif v_dir == 1: # DIing downward
+					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_DOWN_MAX), weight)
+
 		else:
 			if velocity.y > 0: # some characters may fall at different speed compared to going up
 				gravity_temp = FMath.percent(gravity_temp, get_stat("FALL_GRAV_MOD"))
@@ -1782,6 +1805,7 @@ func simulate2(): # only ran if not in hitstop
 					elif Animator.query_to_play(["FlinchB"]):
 						animate("FlinchBReturn")
 					modulate_play("unflinch_flash")
+					$SBlockTimer.time = SBlockTimer_TIME # no unblockable/guard drain immediately after recovering from flinch
 			else:
 				friction_this_frame = FMath.percent(friction_this_frame, 50) # lower friction during flinch hitstun
 					
@@ -1796,6 +1820,7 @@ func simulate2(): # only ran if not in hitstop
 					elif Animator.query_to_play(["aFlinchB"]):
 						animate("aFlinchBReturn")
 					modulate_play("unflinch_flash")
+					$SBlockTimer.time = SBlockTimer_TIME  # no unblockable/guard drain immediately after recovering from flinch
 		
 		Em.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
@@ -1961,6 +1986,8 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$NoCollideTimer.simulate()
 				$InstallTimer.simulate()
 				$SBlockTimer.simulate()
+				if Globals.survival_level == null and ($FDITimer.time != 1 or !button_special in input_state.pressed):
+					$FDITimer.simulate()
 #				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
 				if !get_target().is_hitstunned_or_sequenced():
 					# no counting down EX Seal if opponent is hitstunned or sequenced
@@ -4099,8 +4126,9 @@ func get_pos_from_feet(feet_pos: Vector2):
 #	else: return null
 	
 func can_DI(): # already checked for HitStunTimer
-	if Globals.survival_level == null and current_guard_gauge <= 0:
-		return false
+	if Globals.survival_level == null:
+		if current_guard_gauge <= 0:
+			return false
 #	if get_damage_percent() >= 100:
 	if lethal_flag:
 		return false
@@ -4125,11 +4153,14 @@ func process_VDI():
 		var VDI_amount_max: int = FMath.percent(velocity_length, VDI_MAX)
 		var VDI_amount: int
 		
+		var weight: = 100
 		if Globals.survival_level == null:
-			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_above()) # adjust according to Guard Gauge
-		else:
-#			VDI_amount = FMath.f_lerp(0, VDI_amount_max, get_guard_gauge_percent_true()) # adjust according to Guard Gauge
-			VDI_amount = VDI_amount_max
+			if $FDITimer.is_running():
+#				weight = FMath.percent(100 + weight, FDI_MOD)
+				weight = FDI_MOD
+			else:
+				weight = get_guard_gauge_percent_above()
+		VDI_amount = FMath.f_lerp(0, VDI_amount_max, weight) # adjust according to Guard Gauge
 		
 		if dir != 0 and v_dir != 0: # diagonal, multiply by 0.71
 			VDI_amount = FMath.percent(VDI_amount, 71)
@@ -4811,10 +4842,11 @@ func burst_escape_check(): # check if have resources to do it, then take away th
 		if current_guard_gauge >= GUARD_GAUGE_CEIL:
 			change_guard_gauge(-10000) # higher cost if GG is full, but cost no Burst Token
 			return true
-		if burst_token != Em.burst.AVAILABLE or current_guard_gauge <= 0:
+		if burst_token != Em.burst.AVAILABLE:
+#			if current_guard_gauge <= 0:
 			return false # not enough resouces to use it
 		
-		change_guard_gauge(-BURSTESCAPE_GG_COST)
+#		change_guard_gauge(-BURSTESCAPE_GG_COST)
 		change_burst_token(Em.burst.EXHAUSTED)
 		return true
 	
@@ -6499,8 +6531,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
 		if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
 			return # assist rescue command grabs will not work
-		if $SBlockTimer.is_running():
-			return # cannot grab someone who just blocked an attack
+		if is_blocking() and $SBlockTimer.is_running():
+			return # cannot grab someone blocking who just blocked an attack
 		if hit_data[Em.hit.SEMI_DISJOINT] or hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data:
 			return # cannot grab if has repeat penalty
 		if Em.atk_attr.QUICK_GRAB in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and new_state in [Em.char_state.GRD_STARTUP, \
@@ -8184,7 +8216,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			
 		"BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup":
 			success_block = Em.success_block.NONE
-			$SBlockTimer.stop()
+#			$SBlockTimer.stop()
 			if Globals.survival_level != null:
 				block_enhance()
 			
@@ -8535,6 +8567,8 @@ func save_state():
 	if Globals.survival_level != null:
 		state_data["enhance_cooldowns"] = enhance_cooldowns
 		state_data["enhance_data"] = enhance_data
+	else:
+		state_data["FDITimer_time"] = $FDITimer.time
 		
 	if Globals.assists != 0:
 		state_data["assist_active"] = assist_active
@@ -8613,8 +8647,11 @@ func load_state(state_data, command_rewind := false):
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.stock_points_update(self)
 	Globals.Game.burst_update(self)
+	
 	if Globals.survival_level != null:
 		Globals.Game.coin_update(self)
+	else:
+		$FDITimer.time = state_data.FDITimer_time
 	
 	unique_data = state_data.unique_data
 	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()

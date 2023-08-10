@@ -96,6 +96,8 @@ margin_bottom = 22.0
 
 [node name="AssistCDTimer" parent="." instance=ExtResource( 4 )]
 
+[node name="FDITimer" parent="." instance=ExtResource( 4 )]
+
 [node name="TestNode2D" type="Node2D" parent="."]
 visible = false
 position = Vector2( 0, 24 )

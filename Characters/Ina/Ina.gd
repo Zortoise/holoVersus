@@ -740,6 +740,9 @@ func consume_one_air_dash(): # different characters can have different types of 
 
 func afterimage_trail():# process afterimage trail
 	match Character.new_state:
+		Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
+			if Character.get_node("FDITimer").is_running():
+				Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
 		Em.char_state.AIR_STARTUP:
 			if Animator.query_to_play(["SDashTransit"]):
 				Character.afterimage_trail()
