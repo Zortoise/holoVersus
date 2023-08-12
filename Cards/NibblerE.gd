@@ -63,6 +63,7 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
+#	move_data[Em.move.ATK_ATTR] = query_atk_attr(move_name)
 	
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 #		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	

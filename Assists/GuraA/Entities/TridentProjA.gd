@@ -172,7 +172,6 @@ func refine_move_name(move_name):
 func query_move_data(move_name) -> Dictionary:
 	
 	var orig_move_name = move_name
-
 	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
@@ -180,7 +179,7 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-#	move_data[Em.move.ATK_ATTR] = query_atk_attr(move_name, true)
+	move_data[Em.move.ATK_ATTR] = query_atk_attr(move_name)
 	
 #	if orig_move_name.begins_with("a"):
 #		move_data[Em.move.KB_ANGLE] = -25
@@ -228,6 +227,7 @@ func query_move_data(move_name) -> Dictionary:
 
 func query_atk_attr(move_name):
 	
+#	var orig_move_name = move_name
 	move_name = refine_move_name(move_name)
 
 	var atk_attr := []

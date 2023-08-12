@@ -20,7 +20,7 @@ var zoom_level := 2.0  # only betweem 1.5 and 2.0! changed by distance between c
 var Game # hold the node for main game scene
 var random
 var pausing := false # set to true when a player tries to pause the game
-var winner = [0, "Gura"] # 0 is the player ID, 1 is the character's name, pass to victory screen
+var winner = [0, "Gura", "Gura"] # 0 is the player ID, 1 is the character filename, 2 is the character's real name, pass to victory screen
 var damage_numbers := false
 
 var debug_mode := false

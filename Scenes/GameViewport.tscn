@@ -1,4 +1,4 @@
-[gd_scene load_steps=188 format=2]
+[gd_scene load_steps=189 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -56,6 +56,7 @@
 [ext_resource path="res://Assets/UI/assist_frame.png" type="Texture" id=54]
 [ext_resource path="res://Assets/UI/assist_back.png" type="Texture" id=55]
 [ext_resource path="res://Assists/GuraA/Icon.png" type="Texture" id=56]
+[ext_resource path="res://Characters/Ina/UI/portrait.png" type="Texture" id=57]
 
 [sub_resource type="Animation" id=5]
 length = 0.001
@@ -3584,9 +3585,10 @@ margin_right = 720.0
 margin_bottom = 1080.0
 
 [node name="Portrait" type="Sprite" parent="HUD/P1_HUDRect"]
+self_modulate = Color( 0.839216, 0.768627, 1, 1 )
 material = SubResource( 106 )
 position = Vector2( 153, 106 )
-texture = ExtResource( 11 )
+texture = ExtResource( 57 )
 
 [node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
 texture = ExtResource( 5 )

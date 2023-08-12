@@ -158,13 +158,13 @@ func load_last_picked(last_picked):
 func populate_char_grid():
 	
 	var total = $Grid.get_child_count()
-	grid_dimensions[0] = $Grid.columns # 8
+	grid_dimensions[0] = $Grid.columns # 10
 	grid_dimensions[1] = int(ceil(total/grid_dimensions[0])) # 3
 	
-	var center_indexes = [] # 4, 12, 20
-	var left_indexes = [] # 0, 8, 16
-	var right_indexes = [] # 7, 15, 23
-	var center_point = int(ceil((grid_dimensions[0] + 1) / 2.0)) - 1 # 4
+	var center_indexes = [] # 5, 15, 25
+	var left_indexes = [] # 0, 10, 20
+	var right_indexes = [] # 9, 19, 29
+	var center_point = int(ceil((grid_dimensions[0] + 1) / 2.0)) - 1 # 5
 	
 	for y in grid_dimensions[1]:
 		center_indexes.append(center_point + (y * grid_dimensions[0]))

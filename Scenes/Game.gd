@@ -19,7 +19,7 @@ var screen_shake_amount: float
 const SCREEN_DARKEN = Color(0.5, 0.5, 0.5)
 const FLASHING_TIME_THRESHOLD = 10
 
-const ASSIST_CD_PENALTY = 200 # increased cooldown if assist is used during hitstun or is attacked
+const ASSIST_CD_PENALTY = 150 # increased cooldown if assist is used during hitstun or is attacked
 const ASSIST_RESCUE_OFFSET = 120 # directional offset if assist is used during hitstun
 const ASSIST_FEVER_CD_REDUCE = 70 # reduce CD during assist fever
 
@@ -536,7 +536,11 @@ func _physics_process(_delta):
 					if player.current_damage_value <= damage_value_of_winner: # whoever has less damage wins
 						winner_ID = player.player_ID
 						damage_value_of_winner = player.current_damage_value		
-			Globals.winner = [winner_ID, get_player_node(winner_ID).UniqChar.NAME]
+			match winner_ID:
+				0:
+					Globals.winner = [winner_ID, Globals.P1_char_ref, get_player_node(winner_ID).UniqChar.NAME]
+				1:
+					Globals.winner = [winner_ID, Globals.P2_char_ref, get_player_node(winner_ID).UniqChar.NAME]
 			
 	camera()
 	
@@ -2142,9 +2146,9 @@ func stock_points_update(character):
 			
 			match character.player_ID:
 				0:
-					Globals.winner = [1, get_player_node(1).UniqChar.NAME]
+					Globals.winner = [1, Globals.P2_char_ref, get_player_node(1).UniqChar.NAME]
 				1:
-					Globals.winner = [0, get_player_node(0).UniqChar.NAME]
+					Globals.winner = [0, Globals.P1_char_ref, get_player_node(0).UniqChar.NAME]
 				
 				
 func assist_update(character):

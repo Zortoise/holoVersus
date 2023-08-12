@@ -1,15 +1,14 @@
-[gd_scene load_steps=73 format=2]
+[gd_scene load_steps=72 format=2]
 
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/UI/character_picker_P1.png" type="Texture" id=2]
 [ext_resource path="res://Assets/UI/character_select.png" type="Texture" id=3]
-[ext_resource path="res://Assets/UI/portrait_blank.png" type="Texture" id=4]
+[ext_resource path="res://Scenes/Menus/CharacterGrid.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Characters/Gura/UI/full_art.png" type="Texture" id=5]
 [ext_resource path="res://Scenes/Shaders/White.gdshader" type="Shader" id=6]
 [ext_resource path="res://Scenes/Menus/ButtonTypeE2.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Stages/Aurora/Resources/select.png" type="Texture" id=8]
 [ext_resource path="res://Assets/UI/character_picker_P2.png" type="Texture" id=9]
-[ext_resource path="res://Scenes/Menus/MenuTheme.tres" type="Theme" id=10]
 [ext_resource path="res://Scenes/Shaders/Palette.gdshader" type="Shader" id=12]
 [ext_resource path="res://Characters/Gura/Palettes/2.png" type="Texture" id=13]
 [ext_resource path="res://Scenes/Menus/CharacterSelectNet.gd" type="Script" id=14]
@@ -795,7 +794,7 @@ anims/flash = SubResource( 43 )
 
 [node name="P1_FullArt" type="Sprite" parent="."]
 material = SubResource( 54 )
-position = Vector2( 400, 566 )
+position = Vector2( 384, 624 )
 texture = ExtResource( 5 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="P1_FullArt"]
@@ -805,7 +804,7 @@ anims/flash = SubResource( 43 )
 
 [node name="P2_FullArt" type="Sprite" parent="."]
 material = SubResource( 55 )
-position = Vector2( 1520, 566 )
+position = Vector2( 1536, 624 )
 texture = ExtResource( 5 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="P2_FullArt"]
@@ -906,7 +905,7 @@ position = Vector2( 640, 576 )
 scale = Vector2( 3, 3 )
 
 [node name="SelectSprite" parent="P1_Sprite" instance=ExtResource( 17 )]
-frame = 3
+frame = 1
 
 [node name="P2_Sprite" type="Node2D" parent="."]
 position = Vector2( 1280, 576 )
@@ -914,343 +913,11 @@ scale = Vector2( -3, 3 )
 
 [node name="SelectSprite" parent="P2_Sprite" instance=ExtResource( 17 )]
 material = SubResource( 28 )
-frame = 2
+frame = 0
 
-[node name="Grid" type="GridContainer" parent="."]
-margin_left = 506.0
-margin_top = 652.0
-margin_right = 1413.0
-margin_bottom = 1035.0
-grow_horizontal = 2
-theme = ExtResource( 10 )
-custom_constants/vseparation = 10
-custom_constants/hseparation = 10
-columns = 8
-
-[node name="Blank" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25098 )
-margin_right = 121.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank2" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 131.0
-margin_right = 252.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank3" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 262.0
-margin_right = 383.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank4" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 393.0
-margin_right = 514.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank5" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 524.0
-margin_right = 645.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank6" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 655.0
-margin_right = 776.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank7" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 786.0
-margin_right = 907.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank8" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 917.0
-margin_right = 1038.0
-margin_bottom = 121.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank9" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_top = 131.0
-margin_right = 121.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank10" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 131.0
-margin_top = 131.0
-margin_right = 252.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank11" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 262.0
-margin_top = 131.0
-margin_right = 383.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank12" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 393.0
-margin_top = 131.0
-margin_right = 514.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank13" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 524.0
-margin_top = 131.0
-margin_right = 645.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank14" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 655.0
-margin_top = 131.0
-margin_right = 776.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank15" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 786.0
-margin_top = 131.0
-margin_right = 907.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank16" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 917.0
-margin_top = 131.0
-margin_right = 1038.0
-margin_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank17" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_top = 262.0
-margin_right = 121.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank18" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 131.0
-margin_top = 262.0
-margin_right = 252.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank19" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 262.0
-margin_top = 262.0
-margin_right = 383.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank20" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 393.0
-margin_top = 262.0
-margin_right = 514.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank21" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25 )
-margin_left = 524.0
-margin_top = 262.0
-margin_right = 645.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank22" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25098 )
-margin_left = 655.0
-margin_top = 262.0
-margin_right = 776.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank23" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25098 )
-margin_left = 786.0
-margin_top = 262.0
-margin_right = 907.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
-
-[node name="Blank24" type="TextureRect" parent="Grid"]
-modulate = Color( 0, 0, 0, 0.25098 )
-margin_left = 917.0
-margin_top = 262.0
-margin_right = 1038.0
-margin_bottom = 383.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-texture = ExtResource( 4 )
-stretch_mode = 4
+[node name="Grid" parent="." instance=ExtResource( 4 )]
+margin_left = 309.5
+margin_right = 1609.5
 
 [node name="P1_Picker" type="TextureRect" parent="."]
 modulate = Color( 0, 0, 0, 1 )
@@ -1398,6 +1065,7 @@ anims/RESET = SubResource( 40 )
 anims/flashing = SubResource( 41 )
 
 [node name="P1_ButtonCheck" type="Control" parent="."]
+visible = false
 margin_left = 64.0
 margin_top = 64.0
 margin_right = 64.0
@@ -1599,6 +1267,7 @@ custom_colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
 text = "On"
 
 [node name="P2_ButtonCheck" type="Control" parent="."]
+visible = false
 margin_left = 1280.0
 margin_top = 64.0
 margin_right = 1280.0

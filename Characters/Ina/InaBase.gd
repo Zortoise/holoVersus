@@ -75,14 +75,12 @@ const TRANSIT_DODGE = ["BlinkTransit"] # unique dash transits that you can quick
 const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
-const DEFAULT_HITSPARK_PALETTE = "purple"
-const SDHitspark_COLOR = "purple"
+const DEFAULT_HITSPARK_PALETTE = "dark_purple"
+const SDHitspark_COLOR = "dark_purple"
 
 const PALETTE_TO_PORTRAIT = {
-	1: Color(0.75, 0.93, 1.25),
-	2: Color(1.20, 0.70, 0.70),
-	3: Color(0.75, 0.90, 0.70),
-	4: Color(1.00, 1.00, 1.10),
+	1: Color(0.84, 0.77, 1.00),
+	2: Color(0.86, 0.75, 0.67),
 }
 
 const PALETTE_TO_HITSPARK_PALETTE = {

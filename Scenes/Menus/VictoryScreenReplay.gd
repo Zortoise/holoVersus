@@ -9,7 +9,7 @@ func _ready():
 	
 	# load the winner
 	$Control/Winner.text = "Player " + str(Globals.winner[0] + 1)
-	$Control/Character.text = Globals.winner[1]
+	$Control/Character.text = Globals.winner[2]
 	$FullArt.texture = ResourceLoader.load("res://Characters/" + Globals.winner[1] + "/UI/full_art.png")
 	match Globals.winner[0]:
 		0:

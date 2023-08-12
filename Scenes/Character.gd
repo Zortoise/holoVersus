@@ -389,6 +389,9 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	sfx_under.hide()
 	sfx_over.hide()
 	
+	Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").texture = \
+			ResourceLoader.load("res://Characters/" + Globals.get("P" + str(player_ID + 1) + "_char_ref") + "/UI/portrait.png")
+
 	if palette_number in UniqChar.PALETTE_TO_PORTRAIT:
 		Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").self_modulate = \
 			UniqChar.PALETTE_TO_PORTRAIT[palette_number]
@@ -2059,7 +2062,7 @@ func bounce(against_ground: bool):
 			
 			# if bounce off hard enough, take damage scaled to velocity and guard gauge
 #			abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) 
-			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
+			if !lethal_flag and wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
 				var scaled_value = wall_slam(velocity_previous_frame.x)
 				
@@ -2120,7 +2123,7 @@ func bounce(against_ground: bool):
 			
 			# if bounce off hard enough, take damage scaled to velocity and guard gauge
 #			abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x)
-			if wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
+			if !lethal_flag and wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
 				var scaled_value = wall_slam(velocity_previous_frame.y)
 				
@@ -6437,6 +6440,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			first_hit_flag = false
 	
 	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
+	
+#	print(hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR])
 	
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		if hit_data[Em.hit.ATKER].is_hitstunned():

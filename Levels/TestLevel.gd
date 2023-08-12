@@ -55,13 +55,13 @@ const WAVES2 = {
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 8, "variant" : "rush",
+					{"mob" : "GuraM", "level" : 1, "variant" : "rush",
 					"attr" : {
 						Em.mob_attr.SPEED : 0,
-						Em.mob_attr.HP : 4,
-						Em.mob_attr.TOUGH : 5,
-						Em.mob_attr.TRAIL : true,
-						Em.mob_attr.RAGE : true,
+#						Em.mob_attr.HP : 4,
+#						Em.mob_attr.TOUGH : 5,
+#						Em.mob_attr.TRAIL : true,
+#						Em.mob_attr.RAGE : true,
 						} },
 				],
 			}
