@@ -508,6 +508,13 @@ func simulate2(): # only ran if not in hitstop
 		
 	if !is_attacking():
 		chain_memory = []
+		hitcount_record = []
+		ignore_list = []
+	elif is_atk_active():
+		var refined_move = UniqChar.refine_move_name(get_move_name())
+		if Em.move.MULTI_HIT_REFRESH in UniqChar.MOVE_DATABASE[refined_move]:
+			if Animator.time in UniqChar.MOVE_DATABASE[refined_move][Em.move.MULTI_HIT_REFRESH]:
+				ignore_list = []
 		
 	# GG Swell during guardbroken state
 	if !$HitStopTimer.is_running() and !state in [Em.char_state.SEQ_TARGET] and get_damage_percent() < 100:
@@ -2533,8 +2540,23 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.WEAKARMORABLE] = true
 	
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
-	if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
-		attacker_or_entity.append_ignore_list(player_ID, hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME])
+	if Em.hit.MULTIHIT in hit_data:
+		
+		if Em.move.LAST_HIT_RANGE in hit_data[Em.hit.MOVE_DATA] and \
+				attacker_or_entity.Animator.time >= hit_data[Em.hit.MOVE_DATA][Em.move.LAST_HIT_RANGE]:
+			# some multi-hit moves have a time marker that mark any hit after it as LAST_HIT
+			attacker_or_entity.append_ignore_list(player_ID, 999)
+			hit_data.erase(Em.hit.MULTIHIT)
+			hit_data[Em.hit.LAST_HIT] = true
+		
+		elif Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
+			attacker_or_entity.append_ignore_list(player_ID, hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME])
+		elif Em.move.MULTI_HIT_REFRESH in hit_data[Em.hit.MOVE_DATA]:
+			# some multi-hit moves only have hitboxes on certain frames, only hit once in each interval, last interval always LAST_HIT
+			attacker_or_entity.append_ignore_list(player_ID, 999)
+			if attacker_or_entity.Animator.time >= hit_data[Em.hit.MOVE_DATA][Em.move.MULTI_HIT_REFRESH].back():
+				hit_data.erase(Em.hit.MULTIHIT)
+				hit_data[Em.hit.LAST_HIT] = true
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.SUPER] or \
 			(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):

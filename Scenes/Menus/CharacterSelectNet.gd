@@ -412,6 +412,7 @@ func changed_character():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			my_sprite.add_child(new_sprite)
+			my_sprite.position.y -= (my_sprite.get_node("Feet").position.y - 23)
 		my_name.text = character_data[char_name]["name"]
 	else: # blank panel
 		my_fullart.texture = null

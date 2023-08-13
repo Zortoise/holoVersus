@@ -56,5 +56,8 @@ animations = [ {
 
 [node name="SelectSprite" type="AnimatedSprite"]
 frames = SubResource( 20 )
-frame = 9
+frame = 1
 playing = true
+
+[node name="Feet" type="Position2D" parent="."]
+position = Vector2( 0, 23 )

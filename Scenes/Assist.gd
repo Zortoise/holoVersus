@@ -283,6 +283,18 @@ func simulate2(): # only ran if not in hitstop
 	if !new_state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		seq_partner_ID = null
 		
+		
+	if !is_attacking():
+		hitcount_record = []
+		ignore_list = []
+		
+	elif is_atk_active():
+		var refined_move = UniqNPC.refine_move_name(get_move_name())
+		if Em.move.MULTI_HIT_REFRESH in UniqNPC.MOVE_DATABASE[refined_move]:
+			if Animator.time in UniqNPC.MOVE_DATABASE[refined_move][Em.move.MULTI_HIT_REFRESH]:
+				ignore_list = []
+				
+		
 	if new_state in [Em.char_state.SEQ_USER, Em.char_state.SEQ_TARGET]:
 		simulate_sequence()
 		return

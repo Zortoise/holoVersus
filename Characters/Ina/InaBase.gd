@@ -190,6 +190,7 @@ const MOVE_DATABASE = {
 	"H" : {
 		Em.move.ATK_TYPE : Em.atk_type.HEAVY,
 		Em.move.HITCOUNT : 3,
+		Em.move.LAST_HIT_RANGE : 19,
 		Em.move.IGNORE_TIME : 4,
 		Em.move.FIXED_HITSTOP: 7,
 		Em.move.FIXED_ATKER_HITSTOP: 3,
@@ -279,7 +280,8 @@ const MOVE_DATABASE = {
 	"aH" : {
 		Em.move.ATK_TYPE : Em.atk_type.HEAVY,
 		Em.move.HITCOUNT : 3,
-		Em.move.IGNORE_TIME : 4,
+		Em.move.LAST_HIT_RANGE : 28,
+		Em.move.IGNORE_TIME : 5,
 		Em.move.FIXED_HITSTOP: 7,
 		Em.move.FIXED_ATKER_HITSTOP: 3,
 		Em.move.DMG : 30,

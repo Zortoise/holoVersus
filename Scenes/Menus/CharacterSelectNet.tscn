@@ -905,7 +905,7 @@ position = Vector2( 640, 576 )
 scale = Vector2( 3, 3 )
 
 [node name="SelectSprite" parent="P1_Sprite" instance=ExtResource( 17 )]
-frame = 1
+frame = 2
 
 [node name="P2_Sprite" type="Node2D" parent="."]
 position = Vector2( 1280, 576 )
@@ -913,7 +913,6 @@ scale = Vector2( -3, 3 )
 
 [node name="SelectSprite" parent="P2_Sprite" instance=ExtResource( 17 )]
 material = SubResource( 28 )
-frame = 0
 
 [node name="Grid" parent="." instance=ExtResource( 4 )]
 margin_left = 309.5

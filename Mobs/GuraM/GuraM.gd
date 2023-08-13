@@ -264,6 +264,7 @@ const MOVE_DATABASE = {
 	"aSP2" : {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
 		Em.move.HITCOUNT : 3,
+		Em.move.LAST_HIT_RANGE : 27,
 		Em.move.IGNORE_TIME : 6,
 		Em.move.DMG : 40,
 		Em.move.KB : 500 * FMath.S,
@@ -328,6 +329,7 @@ const MOVE_DATABASE = {
 	"aSP9a": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
 		Em.move.HITCOUNT : 2,
+		Em.move.LAST_HIT_RANGE : 7,
 		Em.move.IGNORE_TIME : 4,
 		Em.move.DMG : 60,
 		Em.move.FIXED_KB_MULTI : 200 * FMath.S,

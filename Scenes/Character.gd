@@ -1081,6 +1081,14 @@ func simulate2(): # only ran if not in hitstop
 		active_cancel = false
 		if !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GRD_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC]:
 			chain_memory = []
+		hitcount_record = []
+		ignore_list = []
+		
+	elif is_atk_active():
+		var refined_move = UniqChar.refine_move_name(get_move_name())
+		if Em.move.MULTI_HIT_REFRESH in UniqChar.MOVE_DATABASE[refined_move]:
+			if Animator.time in UniqChar.MOVE_DATABASE[refined_move][Em.move.MULTI_HIT_REFRESH]:
+				ignore_list = []
 		
 	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
 		timed_enhance()
@@ -6137,8 +6145,23 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data[Em.hit.CORNERED] = true
 		
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
-	if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
-		attacker_or_entity.append_ignore_list(player_ID, hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME])
+	if Em.hit.MULTIHIT in hit_data:
+		
+		if Em.move.LAST_HIT_RANGE in hit_data[Em.hit.MOVE_DATA] and \
+				attacker_or_entity.Animator.time >= hit_data[Em.hit.MOVE_DATA][Em.move.LAST_HIT_RANGE]:
+			# some multi-hit moves have a time marker that mark any hit after it as LAST_HIT
+			attacker_or_entity.append_ignore_list(player_ID, 999)
+			hit_data.erase(Em.hit.MULTIHIT)
+			hit_data[Em.hit.LAST_HIT] = true
+			
+		elif Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
+			attacker_or_entity.append_ignore_list(player_ID, hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME])
+		elif Em.move.MULTI_HIT_REFRESH in hit_data[Em.hit.MOVE_DATA]:
+			# some multi-hit moves only have hitboxes on certain frames, only hit once in each interval, last interval always LAST_HIT
+			attacker_or_entity.append_ignore_list(player_ID, 999)
+			if attacker_or_entity.Animator.time >= hit_data[Em.hit.MOVE_DATA][Em.move.MULTI_HIT_REFRESH].back():
+				hit_data.erase(Em.hit.MULTIHIT)
+				hit_data[Em.hit.LAST_HIT] = true
 		
 	if !Em.hit.SECONDARY_HIT in hit_data:
 		delayed_hit_effect = []

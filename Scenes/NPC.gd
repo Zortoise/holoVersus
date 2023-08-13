@@ -401,6 +401,14 @@ func simulate2(): # only ran if not in hitstop
 		active_cancel = false
 		if !new_state in [Em.char_state.AIR_STARTUP, Em.char_state.GRD_STARTUP, Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC]:
 			chain_memory = []
+		hitcount_record = []
+		ignore_list = []
+		
+	elif is_atk_active():
+		var refined_move = UniqNPC.refine_move_name(get_move_name())
+		if Em.move.MULTI_HIT_REFRESH in UniqNPC.MOVE_DATABASE[refined_move]:
+			if Animator.time in UniqNPC.MOVE_DATABASE[refined_move][Em.move.MULTI_HIT_REFRESH]:
+				ignore_list = []
 
 
 # CAPTURE DIRECTIONAL INPUTS --------------------------------------------------------------------------------------------------

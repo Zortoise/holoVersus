@@ -377,6 +377,7 @@ func P1_changed_character():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			$P1_Sprite.add_child(new_sprite)
+			new_sprite.position.y -= (new_sprite.get_node("Feet").position.y - 23)
 		$P1_Name.text = character_data[char_name]["name"]
 	else: # blank panel
 		$P1_FullArt.texture = null
@@ -397,6 +398,7 @@ func P2_changed_character():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			$P2_Sprite.add_child(new_sprite)
+			new_sprite.position.y -= (new_sprite.get_node("Feet").position.y - 23)
 		$P2_Name.text = character_data[char_name]["name"]
 	else:
 		$P2_FullArt.texture = null

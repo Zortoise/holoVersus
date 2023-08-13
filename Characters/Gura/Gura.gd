@@ -1084,9 +1084,7 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 #		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Character.SURV_BASE_DMG)
 		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Character.mod_damage(move_name))
 
-
 	return move_data
-
 
 						
 func query_atk_attr(move_name) -> Array: # can change under conditions
