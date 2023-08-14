@@ -3445,9 +3445,18 @@ func enhance_card(effect_ref: int, skip_cooldown = false):
 			if !Cards.effect_ref.SUMMON_HORROR in enhance_cooldowns:
 				var target = get_target()
 				if target != null and target != self:
-					Globals.Game.spawn_entity(player_ID, "HorrorE", get_target().position, {})
+					Globals.Game.spawn_entity(player_ID, "HorrorE", target.position, {})
 					if !skip_cooldown:
 						enhance_cooldowns[Cards.effect_ref.SUMMON_HORROR] = Cards.HORROR_COOLDOWN
+		Cards.effect_ref.SUMMON_MOAI:
+			if !Cards.effect_ref.SUMMON_MOAI in enhance_cooldowns:
+				var target = get_target()
+				if target != null and target != self:
+					var target_pos = target.position
+					target_pos.y = floor_level
+					Globals.Game.spawn_entity(player_ID, "MoaiE", target_pos, {"facing" : get_opponent_dir()})
+					if !skip_cooldown:
+						enhance_cooldowns[Cards.effect_ref.SUMMON_MOAI] = Cards.MOAI_COOLDOWN
 		Cards.effect_ref.KERIS_PROJ:
 			if !Cards.effect_ref.KERIS_PROJ in enhance_cooldowns:
 				Globals.Game.spawn_entity(player_ID, "KerisE", position + Vector2(50, -50), {})
@@ -3473,6 +3482,18 @@ func enhance_card(effect_ref: int, skip_cooldown = false):
 					Globals.Game.spawn_entity(player_ID, "PhoenixFeatherE", position + Vector2(25 * facing, -10), {"air3":true})
 				if !skip_cooldown:
 					enhance_cooldowns[Cards.effect_ref.PHOENIX_PROJ] = Cards.PHOENIX_COOLDOWN
+		Cards.effect_ref.RAVEN_PROJ:
+			if !Cards.effect_ref.RAVEN_PROJ in enhance_cooldowns:
+				if grounded:
+					Globals.Game.spawn_entity(player_ID, "RavenFeatherE", position + Vector2(25 * facing, 5), {})
+					Globals.Game.spawn_entity(player_ID, "RavenFeatherE", position + Vector2(25 * facing, -15), {})
+					Globals.Game.spawn_entity(player_ID, "RavenFeatherE", position + Vector2(25 * facing, -35), {})
+				else:
+					Globals.Game.spawn_entity(player_ID, "RavenFeatherE", position + Vector2(25 * facing, 0), {})
+					Globals.Game.spawn_entity(player_ID, "RavenFeatherE", position + Vector2(25 * facing, 20), {})
+					Globals.Game.spawn_entity(player_ID, "RavenFeatherE", position + Vector2(25 * facing, -20), {})
+				if !skip_cooldown:
+					enhance_cooldowns[Cards.effect_ref.RAVEN_PROJ] = Cards.RAVEN_COOLDOWN
 		Cards.effect_ref.PEACOCK_PROJ:
 			if !Cards.effect_ref.PEACOCK_PROJ in enhance_cooldowns:
 				Globals.Game.spawn_entity(player_ID, "PeacockFeatherE", position + Vector2(40 * facing, 0), {})
@@ -3556,6 +3577,24 @@ func enhance_card(effect_ref: int, skip_cooldown = false):
 				if !skip_cooldown:
 					enhance_cooldowns[Cards.effect_ref.SUMMON_NOUSAGI] = Cards.NOUSAGI_COOLDOWN
 				
+		Cards.effect_ref.FUWA_SLASH:
+			if !Cards.effect_ref.FUWA_SLASH in enhance_cooldowns:
+				var target = get_target()
+				if target != null and target != self:
+					if Inventory.has_quirk(player_ID, Cards.effect_ref.MOCO_SLASH):
+						Globals.Game.spawn_entity(player_ID, "FuwaSlashE", target.position, {"dual":true})
+					else:
+						Globals.Game.spawn_entity(player_ID, "FuwaSlashE", target.position, {})
+					if !skip_cooldown:
+						enhance_cooldowns[Cards.effect_ref.FUWA_SLASH] = Cards.SLASH_COOLDOWN
+		Cards.effect_ref.MOCO_SLASH:
+			if !Cards.effect_ref.MOCO_SLASH in enhance_cooldowns:
+				var target = get_target()
+				if target != null and target != self:
+					Globals.Game.spawn_entity(player_ID, "MocoSlashE", target.position, {})
+					if !skip_cooldown:
+						enhance_cooldowns[Cards.effect_ref.MOCO_SLASH] = Cards.SLASH_COOLDOWN
+				
 func timed_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_SHARK):
 		enhance_card(Cards.effect_ref.SUMMON_SHARK)
@@ -3596,6 +3635,8 @@ func attack_enhance(atk_type: int):
 		Em.atk_type.FIERCE:
 			if Inventory.has_quirk(player_ID, Cards.effect_ref.PHOENIX_PROJ):
 				enhance_card(Cards.effect_ref.PHOENIX_PROJ)
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.RAVEN_PROJ):
+				enhance_card(Cards.effect_ref.RAVEN_PROJ)
 			if Inventory.has_quirk(player_ID, Cards.effect_ref.TBLOCK_PROJ):
 				enhance_card(Cards.effect_ref.TBLOCK_PROJ)
 		Em.atk_type.HEAVY:
@@ -3609,7 +3650,10 @@ func attack_enhance(atk_type: int):
 func landed_enhance(atk_type: int):
 	match atk_type:
 		Em.atk_type.LIGHT:
-			pass
+			if Inventory.has_quirk(player_ID, Cards.effect_ref.FUWA_SLASH):
+				enhance_card(Cards.effect_ref.FUWA_SLASH)
+			elif Inventory.has_quirk(player_ID, Cards.effect_ref.MOCO_SLASH):
+				enhance_card(Cards.effect_ref.MOCO_SLASH)
 		Em.atk_type.FIERCE:
 			pass
 		Em.atk_type.HEAVY:
@@ -3627,6 +3671,11 @@ func block_enhance():
 		enhance_card(Cards.effect_ref.PEACOCK_PROJ)
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.FLASK_PROJ):
 		enhance_card(Cards.effect_ref.FLASK_PROJ)
+		
+func blocked_atk_enhance():
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.SUMMON_MOAI):
+		enhance_card(Cards.effect_ref.SUMMON_MOAI)
+
 		
 func ground_dash_enhance():
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.CAN_TRIP) and Globals.Game.rng_generate(100) < Cards.TRIP_CHANCE:
@@ -6996,7 +7045,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 			
 	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
-		being_hit_enhance()
+		match hit_data[Em.hit.BLOCK_STATE]:
+			Em.block_state.BLOCKED, Em.block_state.PARRIED:
+				blocked_atk_enhance()
+			_:
+				being_hit_enhance()
 			
 #	if Globals.survival_level != null and $HitStunTimer.is_running():
 #		attacked_this_frame = true

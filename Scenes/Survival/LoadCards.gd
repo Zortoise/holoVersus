@@ -70,6 +70,12 @@ var card_art = {
 	Cards.card_ref.RISU : ResourceLoader.load("res://Cards/CardArt/Risu.png"),
 	Cards.card_ref.LAPLUS : ResourceLoader.load("res://Cards/CardArt/Laplus.png"),
 	Cards.card_ref.SANA : ResourceLoader.load("res://Cards/CardArt/Sana.png"),
+
+	Cards.card_ref.FUWAWA : ResourceLoader.load("res://Cards/CardArt/Fuwawa.png"),
+	Cards.card_ref.MOCOCO : ResourceLoader.load("res://Cards/CardArt/Mococo.png"),
+	Cards.card_ref.NERISSA : ResourceLoader.load("res://Cards/CardArt/Nerissa.png"),
+	Cards.card_ref.SHIORI : ResourceLoader.load("res://Cards/CardArt/Shiori.png"),
+	Cards.card_ref.BIJOU : ResourceLoader.load("res://Cards/CardArt/Bijou.png"),
 }
 
 var card_entity_data = {
@@ -157,6 +163,26 @@ var card_entity_data = {
 		"scene" : load("res://Cards/NousagiE.tscn"),
 		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Nousagi.tres"),
 		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/NousagiSprite.png"),
+	},
+	"FuwaSlashE" : {
+		"scene" : load("res://Cards/FuwaSlashE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/FuwaSlash.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/FuwaSlashSprite.png"),
+	},
+	"MocoSlashE" : {
+		"scene" : load("res://Cards/MocoSlashE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/MocoSlash.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/MocoSlashSprite.png"),
+	},
+	"RavenFeatherE" : {
+		"scene" : load("res://Cards/RavenFeatherE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/RavenFeather.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/RavenFeatherSprite.png"),
+	},
+	"MoaiE" : {
+		"scene" : load("res://Cards/MoaiE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Moai.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/MoaiSprite.png"),
 	},
 }
 

@@ -1,0 +1,69 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 22,
+"hframes": 6,
+"loop": false,
+"spritesheet": "MoaiSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -27, 0 ), Vector2( 27, 0 ), Vector2( 27, -70 ), Vector2( -27, -70 ) ]
+},
+3: {
+"frame": 1,
+"hitbox": [ Vector2( -27, 0 ), Vector2( 27, 0 ), Vector2( 27, -83 ), Vector2( -27, -83 ) ]
+},
+6: {
+"frame": 2,
+"hitbox": [ Vector2( -27, 0 ), Vector2( 27, 0 ), Vector2( 27, -83 ), Vector2( -27, -83 ) ]
+},
+7: {
+"frame": 3,
+"hitbox": [  ]
+},
+8: {
+"frame": 4,
+"hitbox": [  ]
+},
+9: {
+"frame": 5,
+"hitbox": [  ]
+},
+10: {
+"frame": 6,
+"hitbox": [  ]
+},
+11: {
+"frame": 7,
+"hitbox": [  ]
+},
+12: {
+"frame": 8,
+"hitbox": [  ]
+},
+14: {
+"frame": 9,
+"hitbox": [  ]
+},
+16: {
+"frame": 10,
+"hitbox": [  ]
+},
+18: {
+"frame": 11,
+"hitbox": [  ]
+},
+20: {
+"frame": 12,
+"hitbox": [  ]
+}
+},
+"vframes": 3
+}
+}

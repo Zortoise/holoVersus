@@ -15,7 +15,7 @@ enum effect_ref {
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
 		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_ARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, SUMMON_HORROR
 		PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND, TBLOCK_PROJ
-		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI
+		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI, FUWA_SLASH, MOCO_SLASH, RAVEN_PROJ, SUMMON_MOAI
 }
 
 const DESCRIBE = {
@@ -293,6 +293,10 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"Shoot Feathers via Fierce",
 	},
+	effect_ref.RAVEN_PROJ: {
+		"type" : type.QUIRK,
+		"suffix" :"Shoot Feathers via Fierce",
+	},
 	effect_ref.PEACOCK_PROJ: {
 		"type" : type.QUIRK,
 		"suffix" :"Spawn Feathers via Block",
@@ -341,7 +345,18 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"Call Nousagi via Light",
 	},
-	
+	effect_ref.FUWA_SLASH: {
+		"type" : type.QUIRK,
+		"suffix" :"Light Hit performs Slash",
+	},
+	effect_ref.MOCO_SLASH: {
+		"type" : type.QUIRK,
+		"suffix" :"Light Hit performs Slash",
+	},
+	effect_ref.SUMMON_MOAI: {
+		"type" : type.QUIRK,
+		"suffix" :"Summon Moai on Block",	
+	}
 }
 
 const TRIP_CHANCE = 5
@@ -361,6 +376,7 @@ const ENFEEBLE_DURATION = 180
 const ENFEEBLE_DEGREE = 50
 const KERIS_COOLDOWN = 600
 const PHOENIX_COOLDOWN = 300
+const RAVEN_COOLDOWN = 300
 const PEACOCK_COOLDOWN = 600
 const SCYTHE_COOLDOWN = 600
 const TBLOCK_COOLDOWN = 600
@@ -372,6 +388,8 @@ const REWIND_RANGE = 120
 const FLASK_COOLDOWN = 600
 const NOUSAGI_COOLDOWN = 600
 const SSRB_COOLDOWN = 1000
+const SLASH_COOLDOWN = 600
+const MOAI_COOLDOWN = 1000
 
 # CARDS ------------------------------------------------------------------------------------------------------------------------------------
 
@@ -381,7 +399,7 @@ enum card_ref {
 	SUISEI, KANATA, LUI, ANYA, COCO, RUSHIA, KRONII, MIKO, OLLIE, AKI, WATAME, 
 	BAELZ, BAELZ_b, BAELZ_c, BAELZ_d, BAELZ_e, BAELZ_f, KAELA,
 	MEL, TOWA, LUNA, CHLOE, KOYORI, SUBARU, ALOE, AZKI, OKAYU, CHOCO, MOONA, IOFIFTEEN,
-	MATSURI, NENE, ZETA, REINE, RISU, LAPLUS, SANA
+	MATSURI, NENE, ZETA, REINE, RISU, LAPLUS, SANA, FUWAWA, MOCOCO, NERISSA, SHIORI, BIJOU
 }
 
 const LIST = [
@@ -393,7 +411,8 @@ const LIST = [
 	card_ref.MIKO, card_ref.OLLIE, card_ref.AKI, card_ref.WATAME, card_ref.BAELZ, card_ref.KAELA,
 	card_ref.MEL, card_ref.TOWA, card_ref.LUNA, card_ref.CHLOE, card_ref.KOYORI, card_ref.SUBARU, card_ref.ALOE,
 	card_ref.AZKI, card_ref.OKAYU, card_ref.CHOCO, card_ref.MOONA, card_ref.IOFIFTEEN, card_ref.MATSURI, card_ref.NENE,
-	card_ref.ZETA, card_ref.REINE, card_ref.RISU, card_ref.LAPLUS, card_ref.SANA
+	card_ref.ZETA, card_ref.REINE, card_ref.RISU, card_ref.LAPLUS, card_ref.SANA, card_ref.FUWAWA, card_ref.MOCOCO,
+	card_ref.NERISSA, card_ref.SHIORI, card_ref.BIJOU
 ]
 
 const DATABASE = {
@@ -921,5 +940,43 @@ const DATABASE = {
 		effect_ref.HEAVY_DMG_MOD : 50,
 		"quirks" : [effect_ref.VORTEX],
 	},
-
+	card_ref.FUWAWA : {
+		"name" : "Fuwawa",
+		"price" : 100,
+		effect_ref.AIR_DASH_SPEED : 20,
+		effect_ref.JUMP_SPEED : 20,
+		effect_ref.GRAVITY_MOD : -15,
+		"quirks" : [effect_ref.FUWA_SLASH],
+	},
+	card_ref.MOCOCO : {
+		"name" : "Mococo",
+		"price" : 100,
+		effect_ref.GRD_DASH_SPEED : 20,
+		effect_ref.SPEED : 10,
+		effect_ref.GRAVITY_MOD : 15,
+		"quirks" : [effect_ref.MOCO_SLASH],
+	},
+	card_ref.NERISSA : {
+		"name" : "Nerissa",
+		"price" : 100,
+		effect_ref.MAX_AIR_JUMP : 1,
+		effect_ref.MAX_AIR_DASH : 1,
+		effect_ref.FIERCE_DMG_MOD : 50,
+		"quirks" : [effect_ref.RAVEN_PROJ],
+	},
+	card_ref.SHIORI : {
+		"name" : "Shiori",
+		"price" : 100,
+		effect_ref.SPECIAL_DMG_MOD: 60,
+		effect_ref.PASSIVE_EX_REGEN : 15,
+		effect_ref.LIFESTEAL_RATE : 15,
+		"quirks" : [effect_ref.NO_CROSSUP],
+	},
+	card_ref.BIJOU : {
+		"name" : "Bijou",
+		"price" : 100,
+		effect_ref.GRAVITY_MOD : 15,
+		effect_ref.SPEED : -10,
+		"quirks" : [effect_ref.NO_BLOCK_COST, effect_ref.NO_CHIP_DMG, effect_ref.SUMMON_MOAI],
+	},
 }
