@@ -2548,6 +2548,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker_or_entity.append_ignore_list(player_ID, 999)
 			hit_data.erase(Em.hit.MULTIHIT)
 			hit_data[Em.hit.LAST_HIT] = true
+			
+		elif Em.atk_attr.LAST_HIT_WAVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			# multi-hit wave-type entities have this attribute on the last wave
+			# when a wave-type entity is spawned, it checks if the next spot is available for spawning the next one, if not it has LAST_HIT_WAVE as well
+			hit_data.erase(Em.hit.MULTIHIT)
+			hit_data[Em.hit.LAST_HIT] = true
 		
 		elif Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
 			attacker_or_entity.append_ignore_list(player_ID, hit_data[Em.hit.MOVE_DATA][Em.move.IGNORE_TIME])
@@ -2580,7 +2586,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEFENDER_ATTR] = []
 		
 	var proj_on_hitstop := false # if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
-	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time >= 0) and Em.hit.ENTITY_PATH in hit_data:
+	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
 		proj_on_hitstop = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
@@ -3384,7 +3390,7 @@ func calculate_knockback_dir(hit_data) -> int:
 		elif Em.move.FIXED_KB_ANGLE_MULTI in hit_data[Em.hit.MOVE_DATA]: # or fixed angle till the last hit
 			knockback_dir = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_ANGLE_MULTI]
 			if hit_data[Em.hit.ATK_FACING] < 0:
-				knockback_dir = posmod(180 - knockback_dir, 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(knockback_dir) # mirror knockback angle horizontally if facing other way
 			return knockback_dir
 			
 				
@@ -3407,7 +3413,7 @@ func calculate_knockback_dir(hit_data) -> int:
 			if hit_data[Em.hit.ATK_FACING] > 0:
 				knockback_dir = posmod(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360)
 			else:
-				knockback_dir = posmod(180 - hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE]) # mirror knockback angle horizontally if facing other way
 				
 			if knockback_type == Em.knockback_type.MIRRORED: # mirror it again if wrong way
 #				if KBOrigin:
@@ -3415,10 +3421,10 @@ func calculate_knockback_dir(hit_data) -> int:
 				match segment:
 					Em.compass.E:
 						if ref_vector.x < 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 					Em.compass.W:
 						if ref_vector.x > 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
 		Em.knockback_type.VELOCITY: # in direction of attacker's velocity
@@ -3850,7 +3856,7 @@ func sequence_launch():
 	if seq_user.facing > 0:
 		launch_angle = posmod(seq_data[Em.move.KB_ANGLE], 360)
 	else:
-		launch_angle = posmod(180 - seq_data[Em.move.KB_ANGLE], 360) # if mirrored
+		launch_angle = Globals.mirror_angle(seq_data[Em.move.KB_ANGLE]) # if mirrored
 		
 	# LAUNCHING
 	sprite.rotation = 0

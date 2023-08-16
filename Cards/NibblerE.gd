@@ -109,7 +109,7 @@ func kill(sound = true):
 			Entity.play_audio("water1", {"vol" : -12})
 	
 	
-func collision(): # collided with a platform
+func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a platform
 	var splash_pos = Entity.position + Vector2(0, Entity.get_node("EntityCollisionBox").rect_position.y + \
 			Entity.get_node("EntityCollisionBox").rect_size.y) # get feet pos
 	Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", splash_pos, {"facing":Entity.facing, "grounded":true})

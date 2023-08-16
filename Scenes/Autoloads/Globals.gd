@@ -7,7 +7,7 @@ const CAMERA_ZOOM_SPEED = 0.000006
 const RespawnTimer_WAIT_TIME = 75
 const FLAT_STOCK_LOSS = 1000
 const CORNER_SIZE = 64
-const ENTITY_AUTO_DESPAWN = 3600
+const ENTITY_AUTO_DESPAWN = 3600 # 1 minute
 
 
 var editor: bool # check if running in editor or not
@@ -489,6 +489,10 @@ func dir_to_angle(dir: int, v_dir: int, bias: int):
 					return 0
 				1:
 					return 45
+					
+					
+func mirror_angle(angle: int):
+	return posmod(180 - angle, 360)
 
 
 ## TURNING CLOCKWISE/COUNTERCLOCKWISE USING DIRECTIONAL KEYS -------------------------------------------------------------------

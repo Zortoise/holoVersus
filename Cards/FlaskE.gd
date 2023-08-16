@@ -170,7 +170,7 @@ func kill():
 			Animator.play("PoisonKill")
 #	if sound: Entity.play_audio("impact25", {"vol" : -12})
 	
-func collision(): # collided with a platform
+func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a platform
 	match Animator.to_play_anim:
 		"BurnActive":
 			if Entity.is_on_solid_ground(Entity.get_node("EntityCollisionBox")):

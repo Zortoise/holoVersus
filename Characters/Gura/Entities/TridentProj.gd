@@ -451,7 +451,8 @@ func kill(sound = true):
 func killsound():
 	Entity.play_audio("break2", {"vol" : -15})
 	
-func collision(): # collided with a platform
+	
+func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a platform
 	
 	match Animator.to_play_anim:
 		"[c2]TurnE", "[c2]TurnS", "[c2]TurnSE", "[c2]TurnSSE", "[c2]TurnESE":

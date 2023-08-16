@@ -107,7 +107,7 @@ func kill(sound = true):
 	if sound: Entity.play_audio("impact25", {"vol" : -12})
 	
 	
-func collision(): # collided with a platform
+func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a platform
 	if Animator.to_play_anim in ["Jump", "FallTransit", "Fall"]:
 		if Entity.is_on_ground(Entity.get_node("EntityCollisionBox")):
 			Animator.play("Land")

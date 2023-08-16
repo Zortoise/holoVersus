@@ -116,7 +116,7 @@ func expire():
 	Entity.free = true
 	Globals.Game.spawn_SFX("TakoFlash", "TakoFlash", Entity.position, {"facing":Entity.facing})
 	
-#func collision(): # collided with a platform
+#func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a platform
 #	Entity.free = true
 #	Globals.Game.spawn_SFX("TakoFlash", "TakoFlash", Entity.position, {"facing":Entity.facing})
 

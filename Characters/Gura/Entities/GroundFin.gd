@@ -79,7 +79,7 @@ func kill(_sound = true):
 func expire():
 	kill()
 	
-func collision(): # collided with a wall, turns
+func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a wall, turns
 	ledge_stop()
 	
 func ledge_stop(): # about to go off the ledge, turns

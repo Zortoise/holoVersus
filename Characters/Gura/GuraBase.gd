@@ -8,7 +8,7 @@ const ORDER = 1
 
 # character movement stats, use to overwrite
 const SPEED = 360 * FMath.S # ground speed
-const AWAY_SPEED_MOD = 70 # % of ground speed when moving away from opponent, may not have this const
+const AWAY_SPEED_MOD = 75 # % of ground speed when moving away from opponent, may not have this const
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 900 * FMath.S

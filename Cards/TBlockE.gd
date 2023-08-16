@@ -144,7 +144,7 @@ func kill():
 		Animator.play("Kill")
 		
 	
-func collision(): # collided with a platform
+func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a platform
 	kill()
 
 func landed_a_hit(_hit_data):

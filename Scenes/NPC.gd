@@ -510,7 +510,9 @@ func simulate2(): # only ran if not in hitstop
 		if Settings.input_assist[master_ID]:
 			# quick impulse
 			match state:
-				Em.char_state.GRD_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+					if state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
+					
 					if !impulse_used and Animator.time <= 1:
 						var move_name = Animator.to_play_anim.trim_suffix("Startup")
 						if move_name in UniqNPC.STARTERS:
@@ -2105,7 +2107,8 @@ func check_quick_turn():
 		Em.char_state.AIR_STARTUP:
 			can_turn =  true
 	match new_state:
-		Em.char_state.GRD_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
+			if new_state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
 			if Animator.time <= 6 and Animator.time != 0:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqNPC.STARTERS:
@@ -3246,7 +3249,7 @@ func calculate_knockback_dir(hit_data) -> int:
 		elif Em.move.FIXED_KB_ANGLE_MULTI in hit_data[Em.hit.MOVE_DATA]: # or fixed angle till the last hit
 			knockback_dir = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_ANGLE_MULTI]
 			if hit_data[Em.hit.ATK_FACING] < 0:
-				knockback_dir = posmod(180 - knockback_dir, 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(knockback_dir) # mirror knockback angle horizontally if facing other way
 			return knockback_dir
 			
 				
@@ -3269,7 +3272,7 @@ func calculate_knockback_dir(hit_data) -> int:
 			if hit_data[Em.hit.ATK_FACING] > 0:
 				knockback_dir = posmod(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360)
 			else:
-				knockback_dir = posmod(180 - hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE]) # mirror knockback angle horizontally if facing other way
 				
 			if knockback_type == Em.knockback_type.MIRRORED: # mirror it again if wrong way
 #				if KBOrigin:
@@ -3277,10 +3280,10 @@ func calculate_knockback_dir(hit_data) -> int:
 				match segment:
 					Em.compass.E:
 						if ref_vector.x < 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 					Em.compass.W:
 						if ref_vector.x > 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
 		Em.knockback_type.VELOCITY: # in direction of attacker's velocity
@@ -3590,7 +3593,9 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				
 		if dir != 0: # impulse
 			match state:
-				Em.char_state.GRD_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+					if state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
+					
 					if !impulse_used and move_name in UniqNPC.STARTERS and !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
 						impulse_used = true
 						var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))

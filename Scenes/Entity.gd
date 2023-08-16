@@ -236,7 +236,7 @@ func simulate2(): # only ran if not in hitstop
 					velocity.x = orig_vel_x
 					velocity.y = orig_vel_y
 				else:
-					UniqEntity.collision()
+					UniqEntity.collision(results[0], orig_vel_x, orig_vel_y)
 		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
 			if !is_on_ground(): # spawned in the air, kill it
 				UniqEntity.kill()

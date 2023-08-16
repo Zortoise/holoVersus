@@ -1271,7 +1271,9 @@ func simulate2(): # only ran if not in hitstop
 		if Settings.input_assist[player_ID]:
 			# quick impulse
 			match state:
-				Em.char_state.GRD_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+					if state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
+					
 					if !impulse_used and Animator.time <= 1:
 						var move_name = Animator.to_play_anim.trim_suffix("Startup")
 						if move_name in UniqChar.STARTERS:
@@ -3454,7 +3456,7 @@ func enhance_card(effect_ref: int, skip_cooldown = false):
 				if target != null and target != self:
 					var target_pos = target.position
 					target_pos.y = floor_level
-					Globals.Game.spawn_entity(player_ID, "MoaiE", target_pos, {"facing" : get_opponent_dir()})
+					Globals.Game.spawn_entity(player_ID, "MoaiE", target_pos, {"back": true, "facing" : get_opponent_dir()})
 					if !skip_cooldown:
 						enhance_cooldowns[Cards.effect_ref.SUMMON_MOAI] = Cards.MOAI_COOLDOWN
 		Cards.effect_ref.KERIS_PROJ:
@@ -4447,7 +4449,8 @@ func check_quick_turn():
 			else:
 				can_turn =  true
 	match new_state:
-		Em.char_state.GRD_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
+			if new_state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
 			if Animator.time <= 6 and Animator.time != 0:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqChar.STARTERS:
@@ -6165,18 +6168,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data[Em.hit.MOVE_DATA]):
 			hit_data[Em.hit.MULTIHIT] = true
 			if attacker_or_entity.is_hitcount_first_hit(player_ID):
-				hit_data[Em.hit.FIRST_HIT] = true
+				hit_data[Em.hit.FIRST_HIT] = true # for guard drain and guard swell
 		else:
-			hit_data[Em.hit.LAST_HIT] = true
+			hit_data[Em.hit.LAST_HIT] = true # for triggering delayed_hit_effect
 		if !Em.hit.FIRST_HIT in hit_data:
-			hit_data[Em.hit.SECONDARY_HIT] = true
+			hit_data[Em.hit.SECONDARY_HIT] = true # for clearing delayed_hit_effect
 	if Em.atk_attr.AUTOCHAIN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.AUTOCHAIN] = true
 	if Em.atk_attr.FOLLOW_UP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-		hit_data[Em.hit.FOLLOW_UP] = true
-		hit_data[Em.hit.SECONDARY_HIT] = true
+		hit_data[Em.hit.FOLLOW_UP] = true # for guard drain and guard swell
+		hit_data[Em.hit.SECONDARY_HIT] = true # for clearing delayed_hit_effect
 		if !Em.hit.AUTOCHAIN in hit_data:
-			hit_data[Em.hit.LAST_HIT] = true
+			hit_data[Em.hit.LAST_HIT] = true # for triggering delayed_hit_effect
 	
 	
 	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] < 3:
@@ -6200,6 +6203,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				attacker_or_entity.Animator.time >= hit_data[Em.hit.MOVE_DATA][Em.move.LAST_HIT_RANGE]:
 			# some multi-hit moves have a time marker that mark any hit after it as LAST_HIT
 			attacker_or_entity.append_ignore_list(player_ID, 999)
+			hit_data.erase(Em.hit.MULTIHIT)
+			hit_data[Em.hit.LAST_HIT] = true
+			
+		elif Em.atk_attr.LAST_HIT_WAVE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			# multi-hit wave-type entities have this attribute on the last wave
+			# when a wave-type entity is spawned, it checks if the next spot is available for spawning the next one, if not it has LAST_HIT_WAVE as well
 			hit_data.erase(Em.hit.MULTIHIT)
 			hit_data[Em.hit.LAST_HIT] = true
 			
@@ -6230,7 +6239,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEFENDER_ATTR] = []
 		
 	var proj_on_hitstop := false # if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
-	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time >= 0) and Em.hit.ENTITY_PATH in hit_data:
+	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
 		proj_on_hitstop = true
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
@@ -6495,7 +6504,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 	elif Em.hit.LAST_HIT in hit_data and Em.hit.PUNISH_HIT in delayed_hit_effect:
 		hit_data[Em.hit.PUNISH_HIT] = true
-						
+				
+#	if Em.atk_attr.AUTO_CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+#		hit_data[Em.hit.CRUSH] = true
 	if hit_data[Em.hit.PUNISH_HIT] and Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.CRUSH] = true
 			
@@ -7316,7 +7327,7 @@ func calculate_knockback_dir(hit_data) -> int:
 		elif Em.move.FIXED_KB_ANGLE_MULTI in hit_data[Em.hit.MOVE_DATA]: # or fixed angle till the last hit
 			knockback_dir = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_ANGLE_MULTI]
 			if hit_data[Em.hit.ATK_FACING] < 0:
-				knockback_dir = posmod(180 - knockback_dir, 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(knockback_dir) # mirror knockback angle horizontally if facing other way
 			return knockback_dir
 			
 				
@@ -7339,7 +7350,7 @@ func calculate_knockback_dir(hit_data) -> int:
 			if hit_data[Em.hit.ATK_FACING] > 0:
 				knockback_dir = posmod(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360)
 			else:
-				knockback_dir = posmod(180 - hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE]) # mirror knockback angle horizontally if facing other way
 				
 			if knockback_type == Em.knockback_type.MIRRORED: # mirror it again if wrong way
 #				if KBOrigin:
@@ -7347,10 +7358,10 @@ func calculate_knockback_dir(hit_data) -> int:
 				match segment:
 					Em.compass.E:
 						if ref_vector.x < 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 					Em.compass.W:
 						if ref_vector.x > 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
 		Em.knockback_type.VELOCITY: # in direction of attacker's velocity
@@ -7927,7 +7938,7 @@ func sequence_launch():
 	if seq_user.facing > 0:
 		launch_angle = posmod(seq_data[Em.move.KB_ANGLE], 360)
 	else:
-		launch_angle = posmod(180 - seq_data[Em.move.KB_ANGLE], 360) # if mirrored
+		launch_angle = Globals.mirror_angle(seq_data[Em.move.KB_ANGLE]) # if mirrored
 		
 	# LAUNCHING
 	sprite.rotation = 0
@@ -8129,7 +8140,9 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				
 		if dir != 0: # impulse
 			match state:
-				Em.char_state.GRD_ATK_STARTUP:
+				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+					if state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
+					
 					if !impulse_used and move_name in UniqChar.STARTERS and !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
 						impulse_used = true
 						var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))

@@ -18,6 +18,8 @@ var sticky_ID = null
 var sticky_offset = null
 var sticky_type = Em.sticky_sfx_type.CHAR
 
+var spin_speed = null
+
 # for common sfx, in_sfx_ref is a string pointing to loaded sfx in NSAnims.gb
 # for master's palette, place "palette_master_ID" : player_ID in aux_data
 # aux_data contain {"back" : bool, "facing" : 1/-1, "v_mirror" : bool, "rot" : radians, "grounded" : true, "back" : true}
@@ -40,6 +42,8 @@ func init(in_anim: String, in_sfx_ref: String, in_position: Vector2, aux_data: D
 		$Sprite.scale.y = -1
 	if "rot" in aux_data:
 		$Sprite.rotation = aux_data.rot * $Sprite.scale.x
+	if "spin_speed" in aux_data:
+		spin_speed = aux_data.spin_speed
 	if "grounded" in aux_data:
 		$GroundedBox.add_to_group("Grounded")
 	if "sticky_ID" in aux_data:
@@ -133,13 +137,15 @@ func simulate():
 			position = master_node.position + sticky_offset
 		else:
 			free = true
-
 		
 	if Globals.Game.is_stage_paused() and !ignore_freeze: return
 	if slowed != 0 and (slowed < 0 or posmod(Globals.Game.frametime, slowed) != 0):
 		slowed = 0
 		return
 	slowed = 0
+	
+	if spin_speed != null:
+		$Sprite.rotation += deg2rad(spin_speed) * $Sprite.scale.x
 	
 	$SpritePlayer.simulate()
 
@@ -165,6 +171,7 @@ func save_state():
 		"sticky_ID" : sticky_ID,
 		"sticky_offset" : sticky_offset,
 		"sticky_type" : sticky_type,
+		"spin_speed" : spin_speed,
 		"slowed" : slowed,
 		"field" : field,
 	}
@@ -193,6 +200,7 @@ func load_state(state_data):
 	sticky_ID = state_data.sticky_ID
 	sticky_offset = state_data.sticky_offset
 	sticky_type = state_data.sticky_type
+	spin_speed = state_data.spin_speed
 #	if sticky_ID != null:
 #		var master_node
 #		if sticky_entity:

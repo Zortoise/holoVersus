@@ -176,7 +176,7 @@ func simulate():
 			
 	#		if UniqEntity.has_method("collision"): # entity can collide with solid platforms
 	#			if results[1]: # if colliding with a solid platform, runs collision() which can kill it or bounce it
-	#				UniqEntity.collision()
+	#				UniqEntity.collision(results[0])
 					
 			
 		else: # no collision with platforms

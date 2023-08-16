@@ -1400,7 +1400,7 @@ func calculate_knockback_dir(hit_data) -> int:
 		elif Em.move.FIXED_KB_ANGLE_MULTI in hit_data[Em.hit.MOVE_DATA]: # or fixed angle till the last hit
 			knockback_dir = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_ANGLE_MULTI]
 			if hit_data[Em.hit.ATK_FACING] < 0:
-				knockback_dir = posmod(180 - knockback_dir, 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(knockback_dir) # mirror knockback angle horizontally if facing other way
 			return knockback_dir
 			
 				
@@ -1423,7 +1423,7 @@ func calculate_knockback_dir(hit_data) -> int:
 			if hit_data[Em.hit.ATK_FACING] > 0:
 				knockback_dir = posmod(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360)
 			else:
-				knockback_dir = posmod(180 - hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE], 360) # mirror knockback angle horizontally if facing other way
+				knockback_dir = Globals.mirror_angle(hit_data[Em.hit.MOVE_DATA][Em.move.KB_ANGLE]) # mirror knockback angle horizontally if facing other way
 				
 			if knockback_type == Em.knockback_type.MIRRORED: # mirror it again if wrong way
 #				if KBOrigin:
@@ -1431,10 +1431,10 @@ func calculate_knockback_dir(hit_data) -> int:
 				match segment:
 					Em.compass.E:
 						if ref_vector.x < 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 					Em.compass.W:
 						if ref_vector.x > 0:
-							knockback_dir = posmod(180 - knockback_dir, 360)
+							knockback_dir = Globals.mirror_angle(knockback_dir)
 #				else: print("Error: No KBOrigin found for knockback_type.MIRRORED")
 				
 		Em.knockback_type.VELOCITY: # in direction of attacker's velocity

@@ -303,7 +303,7 @@ func kill(sound = true):
 func killsound():
 	Entity.play_audio("break2", {"vol" : -15})
 	
-func collision(): # collided with a platform
+func collision(_landed := false, _orig_vel_x := 0, _orig_vel_y := 0): # collided with a platform
 	kill()
 	
 func landed_a_hit(hit_data):

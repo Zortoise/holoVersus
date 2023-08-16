@@ -159,6 +159,26 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aHRec":
 			return Em.char_state.AIR_ATK_REC
 			
+		"aSP1Startup", "aSP1[ex]Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aSP1Active", "aSP1[d]Active", "aSP1[u]Active", "aSP1[ex]Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aSP1Rec", "aSP1[ex]Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aSP2Startup", "aSP2[ex]Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aSP2[c1]Active", "aSP2[c2]Active", "aSP2[c3]Active", "aSP2[ex]Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aSP2Rec", "aSP2[ex]Rec":
+			return Em.char_state.AIR_ATK_REC
+			
+		"aSP3Startup":
+			return Em.char_state.AIR_ATK_STARTUP
+		"aSP3Active":
+			return Em.char_state.AIR_ATK_ACTIVE
+		"aSP3Rec":
+			return Em.char_state.AIR_ATK_REC
 		
 	print("Error: " + anim + " not found.")
 	
@@ -255,6 +275,7 @@ func simulate():
 					if float_vec.y != 0:
 						Character.velocity.y = FMath.f_lerp(Character.velocity.y, float_vec.y, 10)
 						
+	# AIR STRAFE --------------------------------------------------------------------------------------------------
 						
 		Em.char_state.AIR_ATK_ACTIVE: # aH 8-way strafe
 			if Animator.query_current(["aHActive"]):
@@ -274,6 +295,57 @@ func simulate():
 				Character.velocity.x += strafe_vec.x
 				Character.velocity.y += strafe_vec.y
 				
+			elif Animator.query_current(["aSP2[c1]Active", "aSP2[c2]Active"]):
+				if !Character.button_fierce in Character.input_state.pressed:
+					match Animator.current_anim:
+						"aSP2[c1]Active":
+							tako_ring(3)
+						"aSP2[c2]Active":
+							tako_ring(4)
+					Character.animate("aSP2Rec") # releasing input
+				else:
+					var strafe_vec = FVector.new()
+					strafe_vec.set_vector(0, 0)
+						
+					if Character.dir != 0:
+						strafe_vec.x = Character.dir * FMath.percent(Character.get_stat("SPEED"), 5)
+						if Character.v_dir != 0:
+							strafe_vec.x = FMath.percent(strafe_vec.x, 71) # *0.707
+					
+					if Character.v_dir != 0:
+						strafe_vec.y = Character.v_dir * FMath.percent(Character.get_stat("SPEED"), 5)
+						if Character.dir != 0:
+							strafe_vec.y = FMath.percent(strafe_vec.y, 71) # *0.707
+							
+					Character.velocity.x += strafe_vec.x
+					Character.velocity.y += strafe_vec.y
+					
+	# TAKO COMMAND --------------------------------------------------------------------------------------------------
+			
+	match Character.state:
+		Em.char_state.AIR_ATK_STARTUP:
+			if Animator.time > 1 and Animator.query_current(["aSP3Startup"]):
+				if Character.button_light in Character.input_state.just_pressed:
+					Character.unique_data.combination.append(Character.button_light)
+					Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+				elif Character.button_fierce in Character.input_state.just_pressed:
+					Character.unique_data.combination.append(Character.button_fierce)
+					Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME) 
+				
+		Em.char_state.AIR_ATK_ACTIVE:	
+			if Animator.query_current(["aSP3Active"]):
+				if Character.button_light in Character.input_state.just_pressed:
+					Character.unique_data.combination.append(Character.button_light)
+					Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+				elif Character.button_fierce in Character.input_state.just_pressed:
+					Character.unique_data.combination.append(Character.button_fierce)
+					Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME) 
+								
+				if Character.unique_data.combination.size() >= 3:
+					Character.animate("aSP3Rec")
+					process_combination()
+					Character.unique_data.combination = []
+					
 
 	# EASIER BLINKS --------------------------------------------------------------------------------------------------
 
@@ -296,7 +368,46 @@ func simulate():
 		
 		_:
 			pass
+			
+	# PROJECTILE SPAWN --------------------------------------------------------------------------------------------------
+				
+	match Character.state:
+		Em.char_state.AIR_ATK_ACTIVE:
+			if Animator.time in [1, 7, 13] and Animator.query_current(["aSP1Active", "aSP1[d]Active", "aSP1[u]Active"]):
+				var aux_data := {"angle" : 0}
+				match Animator.current_anim:
+					"aSP1Active":
+						match Animator.time:
+							1:
+								aux_data.angle = -30
+							7:
+								aux_data.angle = 0
+							13:
+								aux_data.angle = 30
+					"aSP1[d]Active":
+						match Animator.time:
+							1:
+								aux_data.angle = 15
+							7:
+								aux_data.angle = 45
+							13:
+								aux_data.angle = 75
+					"aSP1[u]Active":
+						match Animator.time:
+							1:
+								aux_data.angle = -15
+							7:
+								aux_data.angle = -45
+							13:
+								aux_data.angle = -75
+				if Character.facing == -1:
+					aux_data.angle = Globals.mirror_angle(aux_data.angle)
 					
+				var spawn_point = Animator.query_point("entityspawn")
+				Globals.Game.spawn_entity(Character.player_ID, "Tako", spawn_point, aux_data, \
+						Character.palette_number, NAME)
+				Globals.Game.spawn_SFX("Blink", "Blink", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+				expire_extra_takos()
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
@@ -343,8 +454,7 @@ func capture_combinations():
 
 func capture_unique_combinations():
 	
-	pass
-#	Character.combination(Character.button_unique, Character.button_jump, "Float")
+	Character.combination(Character.button_unique, Character.button_light, "U.L")
 
 
 func rebuffer_actions(): # for when there are air and ground versions
@@ -354,10 +464,10 @@ func rebuffer_actions(): # for when there are air and ground versions
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
-#	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
-#	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
-#	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
-#	Character.rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
+	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
+	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
+	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	
 func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
@@ -367,7 +477,7 @@ func capture_instant_actions():
 	pass
 
 func process_instant_actions():
-	pass
+	Character.unique_data.instant_command = null
 
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
@@ -501,19 +611,11 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 		
 		Character.button_light:
 			if !has_acted[0]:
-				if Character.test_rekka("SP9Active"):
-					keep = !process_move(new_state, "SP9d", has_acted)
-				else:
-					keep = !process_move(new_state, "L1", has_acted)
+				keep = !process_move(new_state, "L1", has_acted)
 		
 		Character.button_fierce:
 			if !has_acted[0]:
-				if Character.test_rekka("SP9Active"):
-					keep = !process_move(new_state, "SP9a", has_acted)
-				elif Character.test_rekka("aSP9cRec"):
-					keep = !process_move(new_state, "SP9c[r]", has_acted)
-				else:
-					keep = !process_move(new_state, "F1", has_acted)
+				keep = !process_move(new_state, "F1", has_acted)
 					
 
 		# SPECIAL ACTIONS ---------------------------------------------------------------------------------
@@ -539,13 +641,17 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 			if !has_acted[0]:
 				keep = !process_move(new_state, "H", has_acted)
 				
-#		"Sp.L":
-#			if !has_acted[0]:
-#				keep = !process_move(new_state, "SP1", has_acted)
-#
-#		"Sp.F":
-#			if !has_acted[0]:
-#				keep = !process_move(new_state, "SP2", has_acted)
+		"Sp.L":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "aSP1", has_acted)
+
+		"Sp.F":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP2", has_acted)
+				
+		"U.L":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "aSP3", has_acted)
 						
 #		"Sp.uF":
 #			if !has_acted[0]:
@@ -555,17 +661,17 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 #			if !has_acted[0]:
 #				keep = !process_move(new_state, "SP5", has_acted)
 				
-#		"ExSp.L":
-#			if !has_acted[0]:
-#				keep = !process_move(new_state, "SP1[ex]", has_acted)
-#				if keep:
-#					keep = !process_move(new_state, "SP1", has_acted)
+		"ExSp.L":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "aSP1[ex]", has_acted)
+				if keep:
+					keep = !process_move(new_state, "aSP1", has_acted)
 
-#		"ExSp.F":
-#			if !has_acted[0]:
-#				keep = !process_move(new_state, "SP2[ex]", has_acted)
-#				if keep:
-#					keep = !process_move(new_state, "SP2", has_acted)
+		"ExSp.F":
+			if !has_acted[0]:
+				keep = !process_move(new_state, "SP2[ex]", has_acted)
+				if keep:
+					keep = !process_move(new_state, "SP2", has_acted)
 							
 #		"ExSp.uF":
 #			if !has_acted[0]:
@@ -608,6 +714,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 	if Character.grounded and Character.button_jump in Character.input_state.pressed:
 		return false # since this will trigger instant aerial
 	
+	var air_atk_ref := attack_ref
+	if !attack_ref.begins_with("a"): air_atk_ref = "a" + attack_ref
 	
 	match new_state:
 			
@@ -637,25 +745,25 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					
 		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
-				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
+				if (air_atk_ref) in STARTERS and Character.test_aerial_memory(air_atk_ref):
 					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
-							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr("a" + attack_ref):
+							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(air_atk_ref):
 						continue # certain moves cannot be performed during cancellable recovery
-					if !Character.test_dash_attack("a" + attack_ref):
+					if !Character.test_dash_attack(air_atk_ref):
 						continue # if dash attacking, cannot use attacks already used in the chain
-					if Character.is_ex_valid("a" + attack_ref):
-						Character.animate("a" + attack_ref + "Startup")
+					if Character.is_ex_valid(air_atk_ref):
+						Character.animate(air_atk_ref + "Startup")
 						has_acted[0] = true
 						return true
 						
 		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
-				if !Character.no_jumpsquat_cancel and ("a" + attack_ref) in UP_TILTS and Character.test_aerial_memory("a" + attack_ref) and \
+				if !Character.no_jumpsquat_cancel and (air_atk_ref) in UP_TILTS and Character.test_aerial_memory(air_atk_ref) and \
 						!Character.button_jump in Character.input_state.pressed and \
 						Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
-						Character.test_qc_chain_combo("a" + attack_ref):
-					if Character.is_ex_valid("a" + attack_ref):
-						Character.animate("a" + attack_ref + "Startup")
+						Character.test_qc_chain_combo(air_atk_ref):
+					if Character.is_ex_valid(air_atk_ref):
+						Character.animate(air_atk_ref + "Startup")
 						has_acted[0] = true
 						return true
 				
@@ -686,13 +794,13 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		# chain cancel
 		Em.char_state.AIR_ATK_REC, Em.char_state.AIR_ATK_ACTIVE:
 			if !Character.grounded:
-				if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-					if Character.test_chain_combo("a" + attack_ref):
-						if Character.is_ex_valid("a" + attack_ref):
+				if (air_atk_ref) in STARTERS and Character.test_aerial_memory(air_atk_ref):
+					if Character.test_chain_combo(air_atk_ref):
+						if Character.is_ex_valid(air_atk_ref):
 #							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 #								Character.get_node("ModulatePlayer").play("unflinch_flash")
 #								Character.perfect_chain = true
-							Character.animate("a" + attack_ref + "Startup")
+							Character.animate(air_atk_ref + "Startup")
 							has_acted[0] = true
 							return true
 							
@@ -711,11 +819,11 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		Em.char_state.AIR_ATK_STARTUP:
 			if Settings.input_assist[Character.player_ID]:
 				if !Character.grounded:
-					if ("a" + attack_ref) in STARTERS and Character.test_aerial_memory("a" + attack_ref):
-						if Character.check_quick_cancel("a" + attack_ref):
-							if Character.test_qc_chain_combo("a" + attack_ref):
-								if Character.is_ex_valid("a" + attack_ref, true):
-									Character.animate("a" + attack_ref + "Startup")
+					if (air_atk_ref) in STARTERS and Character.test_aerial_memory(air_atk_ref):
+						if Character.check_quick_cancel(air_atk_ref):
+							if Character.test_qc_chain_combo(air_atk_ref):
+								if Character.is_ex_valid(air_atk_ref, true):
+									Character.animate(air_atk_ref + "Startup")
 									has_acted[0] = true
 									return true
 				else:
@@ -812,6 +920,11 @@ func refine_move_name(move_name):
 			return "aF2"
 		"aF3[u]", "aF3[d]":
 			return "aF3"
+			
+		"aSP1[d]", "aSP1[u]":
+			return "aSP1"
+		"aSP2[c1]", "aSP2[c2]", "aSP2[c3]":
+			return "aSP2"
 			
 	return move_name
 			
@@ -1150,6 +1263,123 @@ func vortex():
 						node.velocity.y = int(min(force, node.velocity.y + force))
 				
 	
+func get_takos() -> Array:
+	var tako_array := []
+	var entity_array := []
+	if Globals.player_count > 2:
+		entity_array = get_tree().get_nodes_in_group("EntityNodes")
+	else:
+		entity_array = get_tree().get_nodes_in_group("P" + str(Character.player_ID + 1) + "EntityNodes")
+	for entity in entity_array:
+		if !entity.free and entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "tako" and \
+				entity.Animator.current_anim != "Kill":
+			tako_array.append(entity)
+	return tako_array
+	
+func get_closest_tako():
+	var target = Character.get_target()
+	if target == null: return null
+	
+	var tako_array := get_takos()
+	if tako_array.size() > 0:
+		return FMath.get_closest(tako_array, target.position)
+	else:
+		return null
+	
+func expire_extra_takos():
+	var tako_array = get_takos()
+	if tako_array.size() > 10:
+		var number_to_remove = tako_array.size() - 10
+		for x in number_to_remove:
+			var oldest_tako = null
+			var oldest_tako_age := 0
+			for tako in tako_array:
+				if oldest_tako == null: # 1st tako
+					oldest_tako = tako
+					oldest_tako_age = tako.birth_time
+				elif tako.birth_time < oldest_tako_age:
+					oldest_tako = tako
+					oldest_tako_age = tako.birth_time
+			if oldest_tako != null:
+				oldest_tako.UniqEntity.expire()
+				tako_array.erase(oldest_tako)
+				
+func process_combination():
+	match Character.unique_data.combination:
+		[Character.button_light, Character.button_light, Character.button_light]:
+			Character.unique_data.instant_command = "redirect"
+			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+					Character.palette_number, NAME)
+					
+		[Character.button_fierce, Character.button_fierce, Character.button_fierce]:
+			Character.unique_data.instant_command = "slow"
+			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+					Character.palette_number, NAME)
+					
+		[Character.button_fierce, Character.button_fierce, Character.button_light]:
+			Character.unique_data.instant_command = "chase"
+			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+					Character.palette_number, NAME)
+					
+		[Character.button_light, Character.button_light, Character.button_fierce]:
+			Character.unique_data.instant_command = "rally"
+			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+					Character.palette_number, NAME)
+					
+		[Character.button_fierce, Character.button_light, Character.button_fierce]:
+			var closest_tako = get_closest_tako()
+			if closest_tako != null:
+				closest_tako.UniqEntity.explode()
+			Character.unique_data.instant_command = "expire"
+			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+					Character.palette_number, NAME)
+					
+		[Character.button_light, Character.button_fierce, Character.button_light]:
+			Character.unique_data.instant_command = "invis"
+			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+					Character.palette_number, NAME)
+	
+	
+func tako_ring(count: int, repeatable := false):
+	var points := []
+	match count:
+		3:
+			points.append(Vector2(-32, -19))
+			points.append(Vector2(32, -19))
+			points.append(Vector2(0, 31))
+		4:
+			points.append(Vector2(-26, -26))
+			points.append(Vector2(26, -26))
+			points.append(Vector2(-26, 26))
+			points.append(Vector2(26, 26))
+		5:
+			points.append(Vector2(-24, -33))
+			points.append(Vector2(24, -33))
+			points.append(Vector2(-38, 12))
+			points.append(Vector2(38, 12))
+			points.append(Vector2(0, 40))
+	for point in points:
+		var spawn_point = Character.position + point
+		var aux_data = {"orbit": true}
+		if repeatable: aux_data["repeat"] = true
+		Globals.Game.spawn_entity(Character.player_ID, "Tako", spawn_point, aux_data, \
+				Character.palette_number, NAME)
+		Globals.Game.spawn_SFX("Blink", "Blink", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+		expire_extra_takos()
+	
+#func issue_command(in_command: String):
+#	var tako_array = get_takos()
+#
+#	var angle = null
+#	if in_command == "redirect": 
+#		angle = Globals.dir_to_angle(Character.dir, Character.v_dir, Character.facing)
+#
+#	for tako in tako_array:
+#		if angle == null:
+#			tako.UniqEntity.command(in_command)
+#		else:
+#			tako.UniqEntity.command(in_command, angle)
+		
 
 # ANIMATION AND AUDIO PROCESSING ---------------------------------------------------------------------------------------------------
 # these are ran by main character node when it gets the signals so that the order is easier to control
@@ -1357,6 +1587,64 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aHRec")
 		"aHRec":
 			Character.animate("FallTransit")
+			
+		"aSP1Startup":
+			match Character.v_dir:
+				0:
+					Character.animate("aSP1Active")
+				-1:
+					Character.animate("aSP1[u]Active")
+				1:
+					if Character.is_on_solid_ground():
+						Character.animate("aSP1Active")
+					else:
+						Character.animate("aSP1[d]Active")
+		"aSP1Active", "aSP1[d]Active", "aSP1[u]Active":
+			Character.animate("aSP1Rec")
+		"aSP1Rec", "aSP1[ex]Rec":
+			if Character.is_on_ground():
+				Character.animate("Idle")
+			else:
+				Character.animate("FallTransit")
+				
+		"aSP1[ex]Startup":
+			Character.animate("aSP1[ex]Active")
+		"aSP1[ex]Active":
+			Character.animate("aSP1[ex]Rec")
+			
+				
+		"aSP2Startup":
+			Character.animate("aSP2[c1]Active")
+		"aSP2[c1]Active":
+			Character.animate("aSP2[c2]Active")
+		"aSP2[c2]Active":
+			Character.animate("aSP2[c3]Active")
+		"aSP2[c3]Active":
+			Character.animate("aSP2Rec")
+			tako_ring(5)
+		"aSP2Rec", "aSP2[ex]Rec":
+			if Character.is_on_ground():
+				Character.animate("Idle")
+			else:
+				Character.animate("FallTransit")
+				
+		"aSP2[ex]Startup":
+			Character.animate("aSP2[ex]Active")
+		"aSP2[ex]Active":
+			Character.animate("aSP2[ex]Rec")
+			tako_ring(5, true)
+				
+				
+		"aSP3Startup":
+			Character.animate("aSP3Active")
+		"aSP3Active":
+			Character.animate("aSP3Rec")
+			Character.unique_data.combination = [] # reset combinations
+		"aSP3Rec":
+			if Character.is_on_ground():
+				Character.animate("Idle")
+			else:
+				Character.animate("FallTransit")
 				
 
 func _on_SpritePlayer_anim_started(anim_name):
@@ -1498,6 +1786,46 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x_slow = 5
 			Character.velocity_limiter.y_slow = 5
 			Character.anim_gravity_mod = 0
+			
+		"aSP1Startup", "aSP2Startup", "aSP1[ex]Startup", "aSP2[ex]Startup":
+			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
+		"aSP3Startup":
+			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
+			Character.velocity_limiter.y_slow = 20
+			Character.anim_gravity_mod = 0
+			Character.unique_data.combination = [] # reset combinations
+		"aSP1Active", "aSP1[u]Active", "aSP1[d]Active":
+			Character.velocity.x = 0
+			Character.velocity.y = 0
+			Character.velocity_limiter.x = 0
+			Character.velocity_limiter.down = 0
+			Character.velocity_limiter.up = 0
+			Character.anim_gravity_mod = 0
+		"aSP1[ex]Active":
+			var spawn_point = Animator.query_point("entityspawn")
+			Globals.Game.spawn_entity(Character.player_ID, "TakoSound", spawn_point, {}, Character.palette_number, NAME)
+			Globals.Game.spawn_SFX("Music1", "Music", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+			Character.velocity.x = 0
+			Character.velocity.y = 0
+			Character.velocity_limiter.x = 0
+			Character.velocity_limiter.down = 0
+			Character.velocity_limiter.up = 0
+			Character.anim_gravity_mod = 0
+		"aSP2[c1]Active", "aSP2[c2]Active", "aSP2[c3]Active", "aSP2[ex]Active":
+			Character.velocity_limiter.x = 20
+			Character.velocity_limiter.down = 20
+			Character.velocity_limiter.up = 20
+			Character.velocity_limiter.x_slow = 5
+			Character.velocity_limiter.y_slow = 5
+			Character.anim_gravity_mod = 0
+		"aSP3Active":
+			Character.velocity_limiter.down = 50
+			Character.anim_gravity_mod = 20
+		"aSP1Rec", "aSP2Rec", "aSP3Rec", "aSP1[ex]Rec", "aSP2[ex]Rec":
+			Character.velocity_limiter.x = 70
+			Character.velocity_limiter.down = 70
 
 	start_audio(anim_name)
 
