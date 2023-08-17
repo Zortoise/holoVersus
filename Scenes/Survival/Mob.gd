@@ -85,7 +85,7 @@ const LEARN_RATE = 20
 const LongFailTimer_TIME = 60 # if failed a long range zone roll, will not roll again while timer is running
 
 #const ResistTimer_TIME = 60 # if in Resisted Hitstun for a while, gain armor
-const ARMOR_TIME = 30 # frames of special armor after recovering from hitstun
+const BLUE_ARMOR_TIME = 30 # frames of special armor after recovering from hitstun
 const ARMOR_DMG_MOD = 50 # % of damage taken when attacked during special armor
 #const ARMOR_KNOCKBACK_MOD = 150 # % of knockback mob experience when attacked during special armor
 #const RESISTED_KB_MOD = 200 # % of knockback mob experience
@@ -223,7 +223,7 @@ func init(mob_name: String, level: int, variant: String, attr: Dictionary, start
 	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
 	
 	animate("Idle")
-	$ArmorTimer.time = get_stat("ARMOR_TIME")
+	$BlueArmorTimer.time = get_stat("BLUE_ARMOR_TIME")
 	
 	Globals.Game.spawn_SFX("Respawn", "Respawn", position, {"back":true, "facing":Globals.Game.rng_facing(), \
 			"v_mirror":Globals.Game.rng_bool()}, "white")
@@ -524,9 +524,9 @@ func simulate2(): # only ran if not in hitstop
 				reset_guard_gauge()
 				guardbroken = false
 #				if !proj_only_combo:
-				$ArmorTimer.time = get_stat("ARMOR_TIME")
+				$BlueArmorTimer.time = get_stat("BLUE_ARMOR_TIME")
 #				else:
-#					$ArmorTimer.time = FMath.percent(get_stat("ARMOR_TIME"), 400)
+#					$BlueArmorTimer.time = FMath.percent(get_stat("BLUE_ARMOR_TIME"), 400)
 #					proj_only_combo = false
 				play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 				Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
@@ -536,9 +536,9 @@ func simulate2(): # only ran if not in hitstop
 					$HitStunTimer.stop()
 					guardbroken = false
 #					if !proj_only_combo:
-					$ArmorTimer.time = get_stat("ARMOR_TIME")
+					$BlueArmorTimer.time = get_stat("BLUE_ARMOR_TIME")
 #					else:
-#						$ArmorTimer.time = FMath.percent(get_stat("ARMOR_TIME"), 200)
+#						$BlueArmorTimer.time = FMath.percent(get_stat("BLUE_ARMOR_TIME"), 200)
 #						proj_only_combo = false
 					play_audio("bling7", {"vol" : -2, "bus" : "LowPass"})
 					Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
@@ -556,9 +556,9 @@ func simulate2(): # only ran if not in hitstop
 		simulate_sequence()
 		return
 	
-	if $ArmorTimer.time == 1:
+	if $BlueArmorTimer.time == 1:
 		if !grounded: # only runs out of armor on ground
-			$ArmorTimer.time += 1
+			$BlueArmorTimer.time += 1
 	
 #	if !$ResistTimer.is_running(): # out of resist timer, recover automatically
 #		if state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] and \
@@ -567,7 +567,7 @@ func simulate2(): # only ran if not in hitstop
 #				animate("Idle")
 #			else:
 #				animate("FallTransit")
-#			$ArmorTimer.time = get_stat("ARMOR_TIME")
+#			$BlueArmorTimer.time = get_stat("BLUE_ARMOR_TIME")
 #	else: # if no longer in Resisted Hitstun, set the timer to zero
 #		if state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
@@ -892,7 +892,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		if !hitstop: # timers do not run on exact frame hitstop starts
 			$HitStunTimer.simulate()
 			$NoCollideTimer.simulate()
-			$ArmorTimer.simulate()
+			$BlueArmorTimer.simulate()
 #			$ResistTimer.simulate()
 
 #		if !$HitStunTimer.is_running():
@@ -1264,7 +1264,7 @@ func get_stat(stat):
 				to_return = FMath.percent(to_return, 70)
 #			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
 #				to_return = FMath.percent(to_return, 150)
-			"ARMOR_TIME":
+			"BLUE_ARMOR_TIME":
 				to_return = FMath.percent(to_return, 300)
 			"DAMAGE_VALUE_LIMIT":
 				to_return = FMath.percent(to_return, 130)
@@ -1277,7 +1277,7 @@ func get_stat(stat):
 				to_return = FMath.percent(to_return, 70)
 #			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
 #				to_return = FMath.percent(to_return, 150)
-			"ARMOR_TIME":
+			"BLUE_ARMOR_TIME":
 				to_return = FMath.percent(to_return, 300)
 			"DAMAGE_VALUE_LIMIT":
 				to_return = FMath.percent(to_return, 175)
@@ -1286,7 +1286,7 @@ func get_stat(stat):
 		match stat:
 			"GUARD_GAUGE_SWELL_RATE":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [50, 75, 115, 130, 145, 160])
-			"ARMOR_TIME":
+			"BLUE_ARMOR_TIME":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [50, 75, 125, 150, 175, 200])
 			"ARMOR_DMG_MOD":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [150, 125, 75, 50, 25, 1])
@@ -1840,8 +1840,8 @@ func particle(anim: String, sfx_ref: String, palette, interval, number, radius, 
 		
 		
 func flashes():
-	if $ArmorTimer.is_running():
-		modulate_play("mob_armor_time")
+	if $BlueArmorTimer.is_running():
+		modulate_play("blue_armor_time")
 
 	if Em.mob_attr.PASSIVE_ARMOR in mob_attr and get_guard_gauge_percent_below() >= 75:
 		modulate_play("passive_armor")
@@ -2729,7 +2729,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		pass # true hitstun
 	elif current_guard_gauge == GUARD_GAUGE_FLOOR:
 		pass # true hitstun
-	elif $ArmorTimer.is_running() or $HitStunTimer.is_running():
+	elif $BlueArmorTimer.is_running() or $HitStunTimer.is_running():
 		pass # mob_armored or already in hitstun
 	elif hit_data[Em.hit.PUNISH_HIT]:
 		pass # true hitstun
@@ -2742,7 +2742,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data and \
 #				state in [Em.char_state.GRD_REC, Em.char_state.AIR_REC] and \
 #				Animator.query_current(["ResistA", "ResistB", "aResistA", "aResistB"]):
-#			$ArmorTimer.time = ARMOR_TIME # gain armor if hit during Resisted Hitstun
+#			$BlueArmorTimer.time = BLUE_ARMOR_TIME # gain armor if hit during Resisted Hitstun
 ##				else:
 ##					$ResistTimer.time = ResistTimer_TIME
 		
@@ -2783,7 +2783,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if get_guard_gauge_percent_below() == 0:
 				hit_data[Em.hit.MOB_BREAK] = true
 				hit_data.erase(Em.hit.SUPERARMORED)
-				$ArmorTimer.time = 0
+				$BlueArmorTimer.time = 0
 				guardbroken = true
 #				repeat_memory = [] # reset move memory for getting a Break
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
@@ -2813,7 +2813,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	# FIRST REACTION ---------------------------------------------------------------------------------
 	
-	if has_trait(Em.trait.NO_LAUNCH) or $ArmorTimer.is_running() or (Em.hit.RESISTED in hit_data and !guardbroken):
+	if has_trait(Em.trait.NO_LAUNCH) or $BlueArmorTimer.is_running() or (Em.hit.RESISTED in hit_data and !guardbroken):
 		hit_data[Em.hit.TOUGH_MOB] = true
 	
 #	if !(Em.mob_attr.GDRAIN in mob_attr and mob_attr[Em.mob_attr.GDRAIN] == 0):
@@ -3266,6 +3266,9 @@ func calculate_damage(hit_data) -> int:
 
 func calculate_guard_gauge_change(hit_data) -> int:
 		
+	if $BlueArmorTimer.is_running():
+		return 0
+		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data: # for multi-hit, only first hit affect GG
 		return 0
 		
@@ -3292,8 +3295,8 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
 		return guard_drain
 		
-#	if Em.hit.SUPERARMORED in hit_data or ($ArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
-	if Em.hit.SUPERARMORED in hit_data or $ArmorTimer.is_running(): # halves GDrain on armored
+#	if Em.hit.SUPERARMORED in hit_data or ($BlueArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
+	if Em.hit.SUPERARMORED in hit_data: # halves GDrain on armored
 		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
 		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
@@ -3326,6 +3329,12 @@ func calculate_knockback_strength(hit_data) -> int:
 
 	var knockback_strength: int = hit_data[Em.hit.MOVE_DATA][Em.move.KB] # scaled by FMath.S
 	
+	if Em.hit.TOUGH_MOB in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+		return 0 # if resisted, no KB from lvl 1 projectiles
+		
+	if $BlueArmorTimer.is_running():
+		return 0
+	
 	if hit_data[Em.hit.SEMI_DISJOINT]:
 		return int(clamp(knockback_strength, 0, SD_KNOCKBACK_LIMIT))
 	
@@ -3352,7 +3361,7 @@ func calculate_knockback_strength(hit_data) -> int:
 #		knockback_strength = FMath.percent(knockback_strength, get_stat("RESISTED_KB_MOD"))
 ##		if grounded:
 ##			knockback_strength = FMath.percent(knockback_strength, 200)
-#	elif $ArmorTimer.is_running():
+#	elif $BlueArmorTimer.is_running():
 #		knockback_strength = FMath.percent(knockback_strength, get_stat("ARMOR_KNOCKBACK_MOD"))
 #		if grounded:
 #			knockback_strength = FMath.percent(knockback_strength, 200)
@@ -3519,6 +3528,12 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
+		
+	if Em.hit.TOUGH_MOB in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+		return 0 # if resisted, no hitstop from lvl 1 projectiles
+		
+	if $BlueArmorTimer.is_running():
+		return 0
 		
 	if Em.hit.SUPERARMORED in hit_data:
 		return 7
@@ -4180,7 +4195,7 @@ func save_state():
 		"HitStopTimer_time" : $HitStopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
 #		"RageTimer_time" : $RageTimer.time,
-		"ArmorTimer_time" : $ArmorTimer.time,
+		"BlueArmorTimer_time" : $BlueArmorTimer.time,
 		"LongFailTimer_time" : $LongFailTimer.time,
 #		"ResistTimer_time" : $ResistTimer.time,
 		
@@ -4274,7 +4289,7 @@ func load_state(state_data):
 	$HitStopTimer.time = state_data.HitStopTimer_time
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
 #	$RageTimer.time = state_data.RageTimer_time
-	$ArmorTimer.time = state_data.ArmorTimer_time
+	$BlueArmorTimer.time = state_data.BlueArmorTimer_time
 	$LongFailTimer.time = state_data.LongFailTimer_time
 #	$ResistTimer.time = state_data.ResistTimer_time
 

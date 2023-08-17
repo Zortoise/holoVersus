@@ -55,7 +55,7 @@ func init(aux_data: Dictionary):
 	match Animator.to_play_anim:
 		"[c1]Spawn", "[u][c1]Spawn":
 
-			var vel = 500
+			var vel = 400
 			if Em.mob_attr.PROJ_SPEED in Entity.mob_attr:
 				vel = Entity.modify_stat(vel, Em.mob_attr.PROJ_SPEED, [50, 75, 125, 150])
 			Entity.velocity.set_vector(vel * FMath.S, 0)
@@ -94,7 +94,7 @@ func turn_to_enemy():
 	Entity.life_point = 1
 	Entity.absorption_value = 1
 
-	var vel = 500
+	var vel = 400
 	if Em.mob_attr.PROJ_SPEED in Entity.mob_attr:
 		vel = Entity.modify_stat(vel, Em.mob_attr.PROJ_SPEED, [50, 75, 125, 150])
 	Entity.velocity.set_vector(vel * FMath.S, 0)

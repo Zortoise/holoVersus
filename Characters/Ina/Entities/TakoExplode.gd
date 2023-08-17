@@ -11,6 +11,7 @@ var sprite
 
 const MOVE_DATABASE = {
 	"Kill" : {
+		Em.move.ROOT: "TakoExplode",
 		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
 		Em.move.HITCOUNT : 1,
 		Em.move.DMG : 150,
@@ -28,8 +29,11 @@ const MOVE_DATABASE = {
 	},
 }
 
-func init(_aux_data: Dictionary):
+func init(aux_data: Dictionary):
 	Animator.play("Kill") # starting animation
+	if "less_dmg" in aux_data: # for command grab
+		Entity.unique_data["less_dmg"] = true
+		
 
 func simulate():
 	if posmod(Entity.lifetime, 3) == 0:
@@ -44,7 +48,11 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-
+	if "less_dmg" in Entity.unique_data: # for command grab
+		move_data[Em.move.DMG] = 50
+		move_data[Em.move.ROOT] = "TakoExplode2" 
+		move_data[Em.move.KB_ANGLE] = -75
+			
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 #		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	
 		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))

@@ -3,7 +3,7 @@ extends Node
 # NSAnims = Non-Sprite Animations, contain modulate animations and fade animations
 
 enum priority {
-	GRACE, FLASH, LETHAL, STUN, MOB_ARMOR, REPEAT, ACTION, VISUAL, HARMFUL, BUFF, UNIQUE, DARKEN
+	GRACE, FLASH, LETHAL, STUN, BLUE_ARMOR, REPEAT, ACTION, VISUAL, HARMFUL, BUFF, UNIQUE, DARKEN
 }
 
 var modulate_animations = {
@@ -340,8 +340,8 @@ var modulate_animations = {
 			},
 		}
 	},
-	"mob_armor_time" :{
-		"priority" : priority.MOB_ARMOR,
+	"blue_armor_time" :{
+		"priority" : priority.BLUE_ARMOR,
 		"duration": 6,
 		"loop" : true,
 		"timestamps" : {

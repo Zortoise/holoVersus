@@ -60,7 +60,7 @@ color = Color( 0.945098, 1, 0.282353, 1 )
 
 [node name="NoCollideTimer" parent="." instance=ExtResource( 2 )]
 
-[node name="ArmorTimer" parent="." instance=ExtResource( 2 )]
+[node name="BlueArmorTimer" parent="." instance=ExtResource( 2 )]
 
 [node name="LongFailTimer" parent="." instance=ExtResource( 2 )]
 

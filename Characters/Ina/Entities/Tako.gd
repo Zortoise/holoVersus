@@ -18,6 +18,7 @@ const MOVE_DATABASE = {
 		Em.move.KB : 300 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.VELOCITY,
 		Em.move.ATK_LVL : 2,
+		Em.move.FIXED_ATKER_HITSTOP : 0,
 		Em.move.KB_ANGLE : 0,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "dark_purple",
@@ -113,6 +114,8 @@ func query_atk_attr(move_name):
 		var atk_atr = MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 		if Entity.unique_data.repeat:
 			atk_atr.append(Em.atk_attr.REPEATABLE)
+#		elif Globals.survival_level != null: # non-EX
+#			atk_atr.append(Em.atk_attr.TOUGH_NO_KB)
 		return atk_atr
 		
 #	print("Error: Cannot retrieve atk_attr for " + move_name)

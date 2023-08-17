@@ -33,7 +33,7 @@ const EX_MOVE_COST = 10000
 
 const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blocking
 const AIRBLOCK_TERMINAL_MOD = 70 # multiply to get terminal velocity during air blocking
-const MAX_WALL_JUMP = 2
+const MAX_WALL_JUMP = 1
 const HITSTUN_TERMINAL_VELOCITY_MOD = 650 # multiply to GRAVITY to get terminal velocity during hitstun
 const PERFECT_IMPULSE_MOD = 140 # multiply by get_stat("SPEED") and get_stat("IMPULSE MOD") to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
@@ -292,6 +292,7 @@ var no_jumpsquat_cancel := false # set to true when jump cancelling an animation
 var assist_active := false # true if assist is not active
 var assist_rescue_protect := false # set to true if hit by assist rescue till you recover, reduce damage and hitstun of assist moves
 var assist_fever := false # true if an assist land an unblocked hit on a hitstunned opponent, last till targeted opponent recovers
+var sdash_points := 0 # set to duration of sdash when you begin a sdash, reduce per frame base on angle, stop sdash when hit 0
 
 # controls
 var button_up
@@ -967,6 +968,7 @@ func simulate2(): # only ran if not in hitstop
 							current_guard_gauge = int(max(target, current_guard_gauge - 200))
 						Globals.Game.guard_gauge_update(self)
 	
+#		current_guard_gauge = GUARD_GAUGE_CEIL # testing DI
 		
 	# regen EX Gauge
 	if !Globals.training_mode:
@@ -1715,6 +1717,24 @@ func simulate2(): # only ran if not in hitstop
 				else:
 						
 					var vel_angle = velocity.angle() # rotation and navigation
+					
+					if is_too_high():
+						match Globals.split_angle(vel_angle, Em.angle_split.EIGHT):
+							Em.compass.S, Em.compass.SE, Em.compass.SW:
+								sdash_points -= 1
+							Em.compass.E, Em.compass.W:
+								sdash_points -= 2
+							Em.compass.N, Em.compass.NE, Em.compass.NW:
+								sdash_points -= 3
+					else:
+						sdash_points -= 1
+
+					if sdash_points <= 0:
+						if !grounded:
+							animate("aDashBrake")
+						else:
+							animate("DashBrake")
+					
 					var rotated := false
 					
 					var rs_dir := Vector2(0, 0)
@@ -3873,9 +3893,24 @@ func reset_jumps_except_walljumps():
 	air_jump = get_stat("MAX_AIR_JUMP") # reset jump count on wall
 	air_dash = get_stat("MAX_AIR_DASH")
 	
-func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock) give you +1 air jump
+func gain_one_air_jump(): # hitting with an unblocked aerial give you +1 air jump
 	if air_jump < get_stat("MAX_AIR_JUMP"): # cannot go over
 		air_jump += 1
+		
+func is_too_high() -> bool:
+	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_HEIGHT_LIMIT):
+		return false
+	var mid_height = FMath.percent(floor_level - Globals.Game.stage_box.rect_global_position.y, 50) + \
+			Globals.Game.stage_box.rect_global_position.y
+	if position.y < mid_height:
+		return true
+	return false		
+
+func get_modded_jump_speed() -> int: # for air jumps and wall jumps
+	var modded_jump = get_stat("JUMP_SPEED")
+	if is_too_high():
+		modded_jump = FMath.percent(modded_jump, 50)
+	return modded_jump
 	
 func reset_cancels(): # done whenever you use an attack, after startup frames finish and before active frames begin
 	chain_combo = Em.chain_combo.WHIFF
@@ -3975,7 +4010,14 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			else:
 				vector_to_check = velocity_previous_frame
 			
-			if !vector_to_check.is_longer_than(TECHLAND_THRESHOLD):
+			if Globals.survival_level != null:
+				if !$HitStunTimer.is_running():
+					if !tech():
+						animate("HardLanding")
+						$HitStunTimer.stop()
+						velocity.y = 0 # stop bouncing
+						modulate_play("unflinch_flash")	
+			elif !vector_to_check.is_longer_than(TECHLAND_THRESHOLD):
 				if !tech():
 					animate("HardLanding")
 					$HitStunTimer.stop()
@@ -7284,7 +7326,8 @@ func calculate_knockback_strength(hit_data) -> int:
 			knockback_strength = int(max(knockback_strength, LAUNCH_THRESHOLD))
 	
 	if Globals.survival_level != null and !hit_data[Em.hit.WEAK_HIT]: # all attacks will Launch during Survival Mode
-		knockback_strength = int(max(knockback_strength, LAUNCH_THRESHOLD))
+		var min_KB = FMath.percent(LAUNCH_THRESHOLD, 150)
+		knockback_strength = int(max(knockback_strength, min_KB))
 		
 	
 	return knockback_strength
@@ -8259,11 +8302,11 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 						velocity.x = FMath.percent(velocity.x, get_stat("AIR_HORIZ_JUMP_SPEED_MOD"))
 						
 #						velocity.x = FMath.percent(velocity.x, 90) # air jump is slower horizontally since no friction
-					velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
+					velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("AIR_JUMP_HEIGHT_MOD"))
 					velocity.y = FMath.percent(velocity.y, get_stat("DIR_JUMP_HEIGHT_MOD"))
 				else: # neutral air jump
 					velocity.x = FMath.percent(velocity.x, 70)
-					velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
+					velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("AIR_JUMP_HEIGHT_MOD"))
 				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 				
@@ -8277,7 +8320,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 					velocity.x = 0 # walls on both side
 					wall_jump_dir = facing # for the dash dust effect
 #				velocity.y = -get_stat("JUMP_SPEED")
-				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("WALL_AIR_JUMP_VERT_MOD"))
+				velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("WALL_AIR_JUMP_VERT_MOD"))
 				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 				var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 					-wall_jump_dir)
@@ -8294,7 +8337,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				velocity.x = 0 # walls on both side
 				wall_jump_dir = facing # for the dash dust effect
 #			velocity.y = -get_stat("JUMP_SPEED")
-			velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("WALL_AIR_JUMP_VERT_MOD"))
+			velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("WALL_AIR_JUMP_VERT_MOD"))
 			$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 			var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 				-wall_jump_dir)
@@ -8403,6 +8446,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			afterimage_timer = 1 # sync afterimage trail
 		"SDash":
 #			remove_status_effect(Em.status_effect.POS_FLOW)
+			sdash_points = Animator.animations[Animator.current_anim].duration # refresh sdash_points
 			aerial_memory = []
 			if !grounded:
 				super_dash = int(max(0, super_dash - 1))
@@ -8610,6 +8654,7 @@ func save_state():
 		"no_jumpsquat_cancel" : no_jumpsquat_cancel,
 		"assist_rescue_protect" : assist_rescue_protect,
 		"assist_fever" : assist_fever,
+		"sdash_points" : sdash_points,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -8721,6 +8766,7 @@ func load_state(state_data, command_rewind := false):
 	no_jumpsquat_cancel = state_data.no_jumpsquat_cancel
 	assist_rescue_protect = state_data.assist_rescue_protect
 	assist_fever = state_data.assist_fever
+	sdash_points = state_data.sdash_points
 	
 	if Globals.survival_level != null and !command_rewind:
 		enhance_cooldowns = state_data.enhance_cooldowns

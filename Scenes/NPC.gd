@@ -14,7 +14,7 @@ const TAP_MEMORY_DURATION = 20
 
 const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blocking
 const AIRBLOCK_TERMINAL_MOD = 70 # multiply to get terminal velocity during air blocking
-const MAX_WALL_JUMP = 2
+const MAX_WALL_JUMP = 1
 const HITSTUN_TERMINAL_VELOCITY_MOD = 650 # multiply to GRAVITY to get terminal velocity during hitstun
 const PERFECT_IMPULSE_MOD = 140 # multiply by get_stat("SPEED") and get_stat("IMPULSE MOD") to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
@@ -132,6 +132,7 @@ var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
 var slowed := 0
 var gravity_frame_mod := 100 # modify gravity this frame
 var no_jumpsquat_cancel := false # set to true when jump cancelling an animation, prevent quick cancelling the jumpsquat
+var sdash_points := 0 # set to duration of sdash when you begin a sdash, reduce per frame base on angle, stop sdash when hit 0
 
 # controls
 var button_up
@@ -827,6 +828,24 @@ func simulate2(): # only ran if not in hitstop
 				else:
 						
 					var vel_angle = velocity.angle() # rotation and navigation
+					
+					if is_too_high():
+						match Globals.split_angle(vel_angle, Em.angle_split.EIGHT):
+							Em.compass.S, Em.compass.SE, Em.compass.SW:
+								sdash_points -= 1
+							Em.compass.E, Em.compass.W:
+								sdash_points -= 2
+							Em.compass.N, Em.compass.NE, Em.compass.NW:
+								sdash_points -= 3
+					else:
+						sdash_points -= 1
+
+					if sdash_points <= 0:
+						if !grounded:
+							animate("aDashBrake")
+						else:
+							animate("DashBrake")
+					
 					var rotated := false
 					if dir != 0 or v_dir != 0:
 						var target_angle = Globals.dir_to_angle(dir, v_dir, facing)
@@ -1745,6 +1764,19 @@ func reset_jumps_except_walljumps():
 func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock) give you +1 air jump
 	if air_jump < get_stat("MAX_AIR_JUMP"): # cannot go over
 		air_jump += 1
+		
+func is_too_high() -> bool:
+	var mid_height = FMath.percent(floor_level - Globals.Game.stage_box.rect_global_position.y, 50) + \
+			Globals.Game.stage_box.rect_global_position.y
+	if position.y < mid_height:
+		return true
+	return false		
+
+func get_modded_jump_speed() -> int: # for air jumps and wall jumps
+	var modded_jump = get_stat("JUMP_SPEED")
+	if is_too_high():
+		modded_jump = FMath.percent(modded_jump, 50)
+	return modded_jump
 	
 func reset_cancels(): # done whenever you use an attack, after startup frames finish and before active frames begin
 	chain_combo = Em.chain_combo.WHIFF
@@ -3672,11 +3704,11 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 						elif velocity.x < -get_stat("SPEED"):
 							velocity.x = FMath.f_lerp(velocity.x, -get_stat("SPEED"), 50)
 						velocity.x = FMath.percent(velocity.x, get_stat("AIR_HORIZ_JUMP_SPEED_MOD"))
-					velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
+					velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("AIR_JUMP_HEIGHT_MOD"))
 					velocity.y = FMath.percent(velocity.y, get_stat("DIR_JUMP_HEIGHT_MOD"))
 				else: # neutral air jump
 					velocity.x = FMath.percent(velocity.x, 70)
-					velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("AIR_JUMP_HEIGHT_MOD"))
+					velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("AIR_JUMP_HEIGHT_MOD"))
 				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
 					
@@ -3687,7 +3719,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 					velocity.x = 0 # walls on both side
 					wall_jump_dir = facing # for the dash dust effect
 #				velocity.y = -get_stat("JUMP_SPEED")
-				velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("WALL_AIR_JUMP_VERT_MOD"))
+				velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("WALL_AIR_JUMP_VERT_MOD"))
 				$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 				var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 					-wall_jump_dir)
@@ -3701,7 +3733,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			else:
 				velocity.x = 0 # walls on both side
 				wall_jump_dir = facing # for the dash dust effect
-			velocity.y = -FMath.percent(get_stat("JUMP_SPEED"), get_stat("WALL_AIR_JUMP_VERT_MOD"))
+			velocity.y = -FMath.percent(get_modded_jump_speed(), get_stat("WALL_AIR_JUMP_VERT_MOD"))
 			$VarJumpTimer.time = get_stat("VAR_JUMP_TIME")
 			var wall_point = Detection.wall_finder(position - (wall_jump_dir * Vector2($PlayerCollisionBox.rect_size.x / 2, 0)), \
 				-wall_jump_dir)
@@ -3752,6 +3784,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			velocity_limiter.y_slow = 10
 			afterimage_timer = 1 # sync afterimage trail
 		"SDash":
+			sdash_points = Animator.animations[Animator.current_anim].duration # refresh sdash_points
 			aerial_memory = []
 			if !grounded:
 				super_dash = int(max(0, super_dash - 1))
@@ -3940,6 +3973,7 @@ func save_state():
 		"slowed" : slowed,
 		"gravity_frame_mod" : gravity_frame_mod,
 		"no_jumpsquat_cancel" : no_jumpsquat_cancel,
+		"sdash_points" : sdash_points,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -4011,6 +4045,7 @@ func load_state(state_data):
 	slowed = state_data.slowed
 	gravity_frame_mod = state_data.gravity_frame_mod
 	no_jumpsquat_cancel = state_data.no_jumpsquat_cancel
+	sdash_points = state_data.sdash_points
 		
 	sprite_texture_ref = state_data.sprite_texture_ref
 	

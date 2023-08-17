@@ -495,6 +495,8 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 	var keep = true
 	match buffered_input[0]:
 		
+		
+		
 		Character.button_dash:
 			if !has_acted[0]:
 				if Character.button_light in Character.input_state.pressed or \
@@ -536,8 +538,9 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 				
 					Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 						if Animator.query_to_play(["BlinkRec", "aBlinkRec"]):
-							Character.animate("EBlinkTransit")
-							keep = false
+							if !Character.is_too_high():
+								Character.animate("EBlinkTransit")
+								keep = false
 							
 						elif new_state == Em.char_state.AIR_D_REC and \
 								Animator.query_to_play(["Float", "FFloat", "FFloatTransit", "FloatBrake"]): # from float
