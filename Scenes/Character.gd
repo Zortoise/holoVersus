@@ -33,7 +33,7 @@ const EX_MOVE_COST = 10000
 
 const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blocking
 const AIRBLOCK_TERMINAL_MOD = 70 # multiply to get terminal velocity during air blocking
-const MAX_WALL_JUMP = 1
+const MAX_WALL_JUMP = 2
 const HITSTUN_TERMINAL_VELOCITY_MOD = 650 # multiply to GRAVITY to get terminal velocity during hitstun
 const PERFECT_IMPULSE_MOD = 140 # multiply by get_stat("SPEED") and get_stat("IMPULSE MOD") to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
@@ -3889,9 +3889,9 @@ func reset_jumps():
 	aerial_memory = []
 	aerial_sp_memory = []
 	
-func reset_jumps_except_walljumps():
-	air_jump = get_stat("MAX_AIR_JUMP") # reset jump count on wall
-	air_dash = get_stat("MAX_AIR_DASH")
+#func reset_jumps_except_walljumps():
+#	air_jump = get_stat("MAX_AIR_JUMP") # reset jump count on wall
+#	air_dash = get_stat("MAX_AIR_DASH")
 	
 func gain_one_air_jump(): # hitting with an unblocked aerial give you +1 air jump
 	if air_jump < get_stat("MAX_AIR_JUMP"): # cannot go over
@@ -8328,7 +8328,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 					Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
 #				else:
 #					Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
-				reset_jumps_except_walljumps()
+#				reset_jumps_except_walljumps()
 		"WallJumpTransit2":
 			aerial_memory = []
 			if wall_jump_dir != 0:
@@ -8345,7 +8345,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", wall_point, {"facing":wall_jump_dir, "rot":PI/2})
 #			else:
 #				Globals.Game.spawn_SFX("AirJumpDust", "DustClouds", get_feet_pos(), {})
-			reset_jumps_except_walljumps()
+#			reset_jumps_except_walljumps()
 		"HardLanding":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 		"SoftLanding":
