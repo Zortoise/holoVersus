@@ -114,10 +114,9 @@ const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", 
 const UP_TILTS = ["L3", "F3", "SP3", "SP3[ex]", "aL3", "aF3", "aSP3", "aSP3[ex]", "SP9c"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
-const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1b[ex]", "aSP1b[ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", "aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", \
-	"SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB"]
+const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1[b][ex]", "aSP1[b][ex]", "SP1[u][ex]", "aSP1[d][ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", \
+		"aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB"]
 #const EX_FLASH_ANIM = ["H", "Hb"]
-
 # const DIRECTORY_NAME = "res://Characters/Gura/"
 
 # this contain move_data for each active animation this character has

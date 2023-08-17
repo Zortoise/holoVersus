@@ -29,7 +29,7 @@ const FRICTION = 7 # between 0 and 100
 const ACCELERATION = 7 # between 0 and 100
 const AIR_RESISTANCE = 3 # between 0 and 100
 const FALL_GRAV_MOD = 40 # reduced gravity when going down
-const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
+const EYE_LEVEL = 12 # number of pixels EX Flash appears above position
 
 const MAX_AIR_JUMP = 2
 const MAX_AIR_DASH = 1
@@ -110,7 +110,7 @@ const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", 
 const UP_TILTS = ["L3", "F3", "aL3", "aF3"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
-const EX_FLASH_ANIM = ["aSP1[ex]", "aSP2[ex]"]
+const EX_FLASH_ANIM = ["aSP1[ex]", "aSP1[ex][u]", "aSP1[ex][d]", "aSP2[ex]"]
 
 # this contain move_data for each active animation this character has
 # use trim_suffix("Active") on animation name to find move in the database

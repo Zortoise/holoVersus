@@ -161,7 +161,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			
 		"aSP1Startup", "aSP1[ex]Startup":
 			return Em.char_state.AIR_ATK_STARTUP
-		"aSP1Active", "aSP1[d]Active", "aSP1[u]Active", "aSP1[ex]Active":
+		"aSP1Active", "aSP1[d]Active", "aSP1[u]Active", "aSP1[ex]Active", "aSP1[ex][d]Active", "aSP1[ex][u]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
 		"aSP1Rec", "aSP1[ex]Rec":
 			return Em.char_state.AIR_ATK_REC
@@ -439,39 +439,47 @@ func capture_combinations():
 	Character.combination(Character.button_special, Character.button_light, "Sp.L")
 	Character.ex_combination(Character.button_special, Character.button_light, "ExSp.L")
 	
+	Character.combination_trio(Character.button_special, Character.button_down, Character.button_light, "Sp.dL")
+	
 	Character.combination(Character.button_special, Character.button_fierce, "Sp.F")
 	Character.ex_combination(Character.button_special, Character.button_fierce, "ExSp.F")
 	
 	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
 	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
 	
+	Character.combination_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
 	Character.ex_combination_trio(Character.button_special, Character.button_down, Character.button_fierce, "ExSp.dF")
 	
-	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
+#	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	Character.ex_combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
 	
 #	Character.doubletap_combination(Character.button_special, Character.button_fierce, "SpSp.F")
 
 func capture_unique_combinations():
 	
-	Character.combination(Character.button_unique, Character.button_light, "U.L")
+#	Character.combination(Character.button_unique, Character.button_light, "U.L")
+
+	pass
 
 
-func rebuffer_actions(): # for when there are air and ground versions
+func rebuffer_actions(): # for when there are different attacks for air vs ground
 	Character.rebuffer(Character.button_up, Character.button_light, "uL")
 	Character.rebuffer(Character.button_down, Character.button_light, "dL")
 	Character.rebuffer(Character.button_up, Character.button_fierce, "uF")
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
-	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
-	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
-	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
-	Character.rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
+#	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
+#	Character.rebuffer_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dL")
+#	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
+#	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
+#	Character.rebuffer_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
+#	Character.rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	
 func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
 	Character.ex_rebuffer(Character.button_special, Character.button_fierce, "ExSp.F")
+	
 	
 func capture_instant_actions():
 	pass
@@ -649,7 +657,7 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP2", has_acted)
 				
-		"U.L":
+		"Sp.dL":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "aSP3", has_acted)
 						
@@ -923,6 +931,8 @@ func refine_move_name(move_name):
 			
 		"aSP1[d]", "aSP1[u]":
 			return "aSP1"
+		"aSP1[ex][d]", "aSP1[ex][u]":
+			return "aSP1[ex]"
 		"aSP2[c1]", "aSP2[c2]", "aSP2[c3]":
 			return "aSP2"
 			
@@ -1608,8 +1618,17 @@ func _on_SpritePlayer_anim_finished(anim_name):
 				Character.animate("FallTransit")
 				
 		"aSP1[ex]Startup":
-			Character.animate("aSP1[ex]Active")
-		"aSP1[ex]Active":
+			match Character.v_dir:
+				0:
+					Character.animate("aSP1[ex]Active")
+				-1:
+					Character.animate("aSP1[ex][u]Active")
+				1:
+					if Character.is_on_solid_ground():
+						Character.animate("aSP1[ex]Active")
+					else:
+						Character.animate("aSP1[ex][d]Active")
+		"aSP1[ex]Active", "aSP1[ex][d]Active", "aSP1[ex][u]Active":
 			Character.animate("aSP1[ex]Rec")
 			
 				
@@ -1803,9 +1822,13 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 0
 			Character.velocity_limiter.up = 0
 			Character.anim_gravity_mod = 0
-		"aSP1[ex]Active":
+		"aSP1[ex]Active", "aSP1[ex][d]Active", "aSP1[ex][u]Active":
 			var spawn_point = Animator.query_point("entityspawn")
-			Globals.Game.spawn_entity(Character.player_ID, "TakoSound", spawn_point, {}, Character.palette_number, NAME)
+			var aux_data := {"aim" : 0}
+			match anim_name:
+				"aSP1[ex][d]Active": aux_data.aim = 1
+				"aSP1[ex][u]Active": aux_data.aim = -1
+			Globals.Game.spawn_entity(Character.player_ID, "TakoSound", spawn_point, aux_data, Character.palette_number, NAME)
 			Globals.Game.spawn_SFX("Music1", "Music", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 			Character.velocity.x = 0
 			Character.velocity.y = 0
@@ -1813,6 +1836,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 0
 			Character.velocity_limiter.up = 0
 			Character.anim_gravity_mod = 0
+			
 		"aSP2[c1]Active", "aSP2[c2]Active", "aSP2[c3]Active", "aSP2[ex]Active":
 			Character.velocity_limiter.x = 20
 			Character.velocity_limiter.down = 20

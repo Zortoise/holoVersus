@@ -15,21 +15,52 @@ const MOVE_DATABASE = {
 func _ready():
 	get_node("TestSprite").free() # test sprite is for sizing collision box
 
-func init(_aux_data: Dictionary):
+func init(aux_data: Dictionary):
 	Animator.play("Kill")
+	Entity.unique_data["aim"] = aux_data.aim
 
 func simulate():
 	match Animator.time:
-		7:
-			fire_tako(-40)
-		14:
-			fire_tako(0)
-		21:
-			fire_tako(40)
-		28:
-			fire_tako(20)
-		35:
-			fire_tako(-20)
+		20:
+			match Entity.unique_data.aim:
+				0:
+					fire_tako(-40)
+				1:
+					fire_tako(5)
+				-1:
+					fire_tako(-5)
+		27:
+			match Entity.unique_data.aim:
+				0:
+					fire_tako(0)
+				1:
+					fire_tako(45)
+				-1:
+					fire_tako(-45)
+		34:
+			match Entity.unique_data.aim:
+				0:
+					fire_tako(40)
+				1:
+					fire_tako(85)
+				-1:
+					fire_tako(-85)
+		41:
+			match Entity.unique_data.aim:
+				0:
+					fire_tako(20)
+				1:
+					fire_tako(65)
+				-1:
+					fire_tako(-65)
+		48:
+			match Entity.unique_data.aim:
+				0:
+					fire_tako(-20)
+				1:
+					fire_tako(25)
+				-1:
+					fire_tako(-25)
 	
 func fire_tako(angle: int):
 	if Entity.facing == -1:

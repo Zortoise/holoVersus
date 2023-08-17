@@ -6,7 +6,7 @@
 script = ExtResource( 1 )
 frame_data = {
 "Kill": {
-"duration": 42,
+"duration": 54,
 "hframes": 5,
 "loop": false,
 "spritesheet": "TakoSoundSprite",
@@ -14,43 +14,79 @@ frame_data = {
 0: {
 "frame": 0
 },
-3: {
+2: {
 "frame": 1
 },
-6: {
+4: {
 "frame": 0
 },
-9: {
+6: {
 "frame": 2
+},
+8: {
+"frame": 0
+},
+10: {
+"frame": 1
 },
 12: {
 "frame": 0
 },
-15: {
-"frame": 1
+14: {
+"frame": 2
 },
-18: {
+16: {
 "frame": 0
 },
-21: {
+18: {
+"frame": 1
+},
+20: {
+"frame": 0
+},
+22: {
 "frame": 2
 },
 24: {
 "frame": 0
 },
-27: {
+26: {
 "frame": 1
 },
-30: {
+28: {
 "frame": 0
 },
-33: {
+30: {
 "frame": 2
 },
+32: {
+"frame": 0
+},
+34: {
+"frame": 1
+},
 36: {
+"frame": 0
+},
+38: {
+"frame": 2
+},
+40: {
+"frame": 0
+},
+42: {
+"frame": 1
+},
+44: {
+"frame": 0
+},
+46: {
+"frame": 2
+},
+48: {
 "frame": 3
 },
-39: {
+51: {
 "frame": 4
 }
 },

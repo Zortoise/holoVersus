@@ -4449,8 +4449,8 @@ func check_quick_turn():
 			else:
 				can_turn =  true
 	match new_state:
-		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # for grounded attacks, can turn on 1st 6 startup frames
-			if new_state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
+		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # for attacks, can turn on 1st 6 startup frames
+#			if new_state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
 			if Animator.time <= 6 and Animator.time != 0:
 				var move_name = get_move_name()
 				if move_name == null or !move_name in UniqChar.STARTERS:
@@ -4461,15 +4461,15 @@ func check_quick_turn():
 #					if Animator.time > 3:
 #						return false
 				else: can_turn = true
-		Em.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st 3 frames
-			if Animator.time <= 3 and Animator.time != 0:
-#				 and !button_dash in input_state.pressed:
-				var move_name = get_move_name()
-				if move_name == null or !move_name in UniqChar.STARTERS:
-					can_turn = false
-				elif Em.atk_attr.NO_TURN in query_atk_attr(move_name):
-					can_turn = false
-				else: can_turn = true
+#		Em.char_state.AIR_ATK_STARTUP: # for aerials, can only turn on the 1st 3 frames
+#			if Animator.time <= 6 and Animator.time != 0:
+##				 and !button_dash in input_state.pressed:
+#				var move_name = get_move_name()
+#				if move_name == null or !move_name in UniqChar.STARTERS:
+#					can_turn = false
+#				elif Em.atk_attr.NO_TURN in query_atk_attr(move_name):
+#					can_turn = false
+#				else: can_turn = true
 		Em.char_state.GRD_BLOCK:
 			if Animator.query(["BlockStartup"]):
 				can_turn = true
