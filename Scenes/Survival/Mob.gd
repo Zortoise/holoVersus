@@ -2198,6 +2198,10 @@ func get_sprite_rect():
 	var sprite_rect = sprite.get_rect()
 	return Rect2(sprite_rect.position + position, sprite_rect.size)
 	
+func get_hitbox():
+	var hitbox = Animator.query_polygon("hitbox")
+	return hitbox
+	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	
 	if Animator.to_play_anim.ends_with("Active"):
@@ -2494,6 +2498,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		target_ID = attacker.player_ID # target opponent who last attacked you
 	
 	remove_status_effect(Em.status_effect.CRUSH)
+	
+	# if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
+	# also no Guard Drain and Guard Swell
+	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
+		hit_data[Em.hit.PROJ_ON_HITSTOP] = true
 	$HitStopTimer.stop() # cancel pre-existing hitstop
 #	$RageTimer.time = RageTimer_TIME
 	
@@ -2584,10 +2593,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEFENDER_ATTR] = query_atk_attr()
 	else:
 		hit_data[Em.hit.DEFENDER_ATTR] = []
-		
-	var proj_on_hitstop := false # if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
-	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
-		proj_on_hitstop = true
+
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -2745,6 +2751,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			$BlueArmorTimer.time = BLUE_ARMOR_TIME # gain armor if hit during Resisted Hitstun
 ##				else:
 ##					$ResistTimer.time = ResistTimer_TIME
+
+	# gain some Blue Armor when hit by Proj Level 1 entities
+	if Em.hit.RESISTED in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+		$BlueArmorTimer.time = 10
 		
 	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
 	
@@ -2873,7 +2883,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	var proj_on_hitstop_no_kb := false
 	var vel_length = velocity.length()
-	if proj_on_hitstop:
+	if Em.hit.PROJ_ON_HITSTOP in hit_data:
 		if hit_data[Em.hit.KB] < vel_length:
 			proj_on_hitstop_no_kb = true # when projectiles hit a hitstopped opponent, no knockback if knockback is less that their current K
 	
@@ -2962,7 +2972,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			var hitstun = calculate_hitstun(hit_data)
-			if $HitStunTimer.time > hitstun and proj_on_hitstop:
+			if $HitStunTimer.time > hitstun and Em.hit.PROJ_ON_HITSTOP in hit_data:
 				pass # projectiles on hitstopped player will not reduce hitstun for opponents during hitstop
 				# this allows projectile spreads to do less damage and still retain hitstun, while reducing hitstun for multiple spreads
 			else:
@@ -3063,7 +3073,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.KB] = vel_length # so that will not go from Launched to Flinch animation when projectile hit a hitstopped player
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
+		if Em.hit.MULTIHIT in hit_data or has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
 
 			var no_impact := false
 			
@@ -3260,13 +3270,18 @@ func calculate_damage(hit_data) -> int:
 			
 	if !guardbroken: # resisted or or mobarmored or superarmored
 		scaled_damage = FMath.percent(scaled_damage, get_stat("ARMOR_DMG_MOD"))
+		if Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			scaled_damage += hit_data[Em.hit.MOVE_DATA][Em.move.DMG] * FMath.S
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
 	
 
 func calculate_guard_gauge_change(hit_data) -> int:
 		
-	if $BlueArmorTimer.is_running():
+#	if $BlueArmorTimer.is_running():
+#		return 0
+
+	if Em.hit.PROJ_ON_HITSTOP in hit_data:
 		return 0
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data: # for multi-hit, only first hit affect GG
@@ -3296,7 +3311,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		return guard_drain
 		
 #	if Em.hit.SUPERARMORED in hit_data or ($BlueArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
-	if Em.hit.SUPERARMORED in hit_data: # halves GDrain on armored
+	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running(): # halves GDrain on armored
 		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
 		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
@@ -3326,14 +3341,18 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	
 	
 func calculate_knockback_strength(hit_data) -> int:
+	
+	if $BlueArmorTimer.is_running():
+		return 0
+	
+	if Em.hit.RESISTED in hit_data and !guardbroken and Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		return 0 # chipper on resist no KB
 
 	var knockback_strength: int = hit_data[Em.hit.MOVE_DATA][Em.move.KB] # scaled by FMath.S
 	
-	if Em.hit.TOUGH_MOB in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
-		return 0 # if resisted, no KB from lvl 1 projectiles
-		
-	if $BlueArmorTimer.is_running():
-		return 0
+#	if Em.hit.TOUGH_MOB in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+#		return 0 # if resisted, no KB from lvl 1 projectiles
+	
 	
 	if hit_data[Em.hit.SEMI_DISJOINT]:
 		return int(clamp(knockback_strength, 0, SD_KNOCKBACK_LIMIT))
@@ -3529,13 +3548,13 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
 		
-	if Em.hit.TOUGH_MOB in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
-		return 0 # if resisted, no hitstop from lvl 1 projectiles
+#	if Em.hit.TOUGH_MOB in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+#		return 0 # if resisted, no hitstop from lvl 1 projectiles
 		
-	if $BlueArmorTimer.is_running():
-		return 0
+#	if $BlueArmorTimer.is_running():
+#		return 0
 		
-	if Em.hit.SUPERARMORED in hit_data:
+	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running():
 		return 7
 		
 	if !guardbroken:

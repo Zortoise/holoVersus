@@ -35,7 +35,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "yellow",
 		Em.move.PROJ_LVL : 2,
-		Em.move.ATK_ATTR : [Em.atk_attr.INDESTRUCTIBLE_ENTITY],
+		Em.move.ATK_ATTR : [Em.atk_attr.INDESTRUCTIBLE_ENTITY, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "impact35", aux_data = {"vol" : -6} },
 	},
 	"FreezeKill" : {
@@ -51,7 +51,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "blue",
 		Em.move.PROJ_LVL : 2,
-		Em.move.ATK_ATTR : [Em.atk_attr.INDESTRUCTIBLE_ENTITY],
+		Em.move.ATK_ATTR : [Em.atk_attr.INDESTRUCTIBLE_ENTITY, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "freeze1", aux_data = {"vol" : -6} },
 	},
 	"PoisonKill" : {
@@ -67,7 +67,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "dark_purple",
 		Em.move.PROJ_LVL : 2,
-		Em.move.ATK_ATTR : [Em.atk_attr.INDESTRUCTIBLE_ENTITY],
+		Em.move.ATK_ATTR : [Em.atk_attr.INDESTRUCTIBLE_ENTITY, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "impact25", aux_data = {"vol" : -12} },
 	},
 }

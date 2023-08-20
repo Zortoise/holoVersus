@@ -22,7 +22,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_PALETTE : "dark_purple",
 		Em.move.KB_ANGLE : -90,
 		Em.move.PROJ_LVL : 3,
-		Em.move.ATK_ATTR : [Em.atk_attr.UNBLOCKABLE],
+		Em.move.ATK_ATTR : [Em.atk_attr.UNBLOCKABLE, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "impact39", aux_data = {"vol" : -10} },
 	}
 }

@@ -940,6 +940,10 @@ func get_sprite_rect():
 	var sprite_rect = sprite.get_rect()
 	return Rect2(sprite_rect.position + position, sprite_rect.size)
 	
+func get_hitbox():
+	var hitbox = Animator.query_polygon("hitbox")
+	return hitbox
+	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	
 	if Animator.to_play_anim.ends_with("Active"):

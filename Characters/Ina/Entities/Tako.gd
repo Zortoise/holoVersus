@@ -14,10 +14,11 @@ const MOVE_DATABASE = {
 		Em.move.ROOT : "Tako",
 		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 30,
+		Em.move.DMG : 40,
 		Em.move.KB : 300 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.VELOCITY,
 		Em.move.ATK_LVL : 2,
+		Em.move.FIXED_HITSTOP : 8,
 		Em.move.FIXED_ATKER_HITSTOP : 0,
 		Em.move.KB_ANGLE : 0,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
@@ -34,10 +35,10 @@ func _ready():
 func init(aux_data: Dictionary):
 	
 	Entity.unique_data = {"tako_state" : null, "orbit_pos_x" : 0, "orbit_pos_y" : 0, "orbit_vel_x": 0, "orbit_vel_y": 0, "invis" : false, \
-			"repeat" : false}
+			"ex" : false, "enhanced" : false}
 	
-	if "repeat" in aux_data:
-		Entity.unique_data.repeat = true
+	if "ex" in aux_data:
+		Entity.unique_data.ex = true
 	
 	if "orbit" in aux_data:
 		Entity.unique_data.tako_state = "orbit"
@@ -100,6 +101,14 @@ func query_move_data(move_name) -> Dictionary:
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
 	move_data[Em.move.ATK_ATTR] = query_atk_attr(move_name)
 	
+	if Entity.unique_data.ex:
+		move_data[Em.move.ROOT] = "TakoEX"
+		move_data[Em.move.ATK_TYPE] = Em.atk_type.EX_ENTITY
+		move_data[Em.move.DMG] = 50
+		
+	if Entity.unique_data.enhanced:
+		move_data[Em.move.PROJ_LVL] = 2
+	
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
 	
@@ -112,7 +121,7 @@ func query_atk_attr(move_name):
 
 	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
 		var atk_atr = MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
-		if Entity.unique_data.repeat:
+		if Entity.unique_data.enhanced:
 			atk_atr.append(Em.atk_attr.REPEATABLE)
 #		elif Globals.survival_level != null: # non-EX
 #			atk_atr.append(Em.atk_attr.TOUGH_NO_KB)
@@ -123,6 +132,10 @@ func query_atk_attr(move_name):
 	
 	
 func get_proj_level(move_name):
+	
+	if Entity.unique_data.enhanced:
+		return 2
+	
 	move_name = refine_move_name(move_name)
 
 	if move_name in MOVE_DATABASE and Em.move.PROJ_LVL in MOVE_DATABASE[move_name]:
@@ -166,7 +179,6 @@ func simulate():
 func check_command():
 	var master_node = Globals.Game.get_player_node(Entity.master_ID)
 	if "instant_command" in master_node.unique_data and master_node.unique_data.instant_command != null:
-		Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 		
 		match master_node.unique_data.instant_command:
 			"redirect":
@@ -177,12 +189,14 @@ func check_command():
 				Animator.play("Active3")
 				Entity.get_node("Sprite").rotation = 0
 				Entity.rotate_sprite(angle)
+				Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 			"slow":
 				Entity.unique_data.tako_state = "stop"
 				Entity.velocity.x = 0
 				Entity.velocity.y = 0
 				Animator.play("Active1")
 				Entity.get_node("Sprite").rotation = 0
+				Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 			"chase":
 				var vec = FVector.new()
 				vec.set_from_vec(master_node.get_target().position - Entity.position)
@@ -193,6 +207,7 @@ func check_command():
 				Entity.get_node("Sprite").rotation = 0
 				if Entity.velocity.x != 0:
 					Entity.face(sign(Entity.velocity.x))
+				Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 			"rally":
 				var vec = FVector.new()
 				vec.set_from_vec(master_node.position - Entity.position)
@@ -203,10 +218,24 @@ func check_command():
 				Entity.get_node("Sprite").rotation = 0
 				if Entity.velocity.x != 0:
 					Entity.face(sign(Entity.velocity.x))
+				Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 			"invis":
 				Entity.unique_data.invis = true
+				Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 			"expire":
 				expire()
+			"enhance":
+				Entity.unique_data.enhanced = true
+				Globals.Game.spawn_SFX("Blink", "Blink", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
+			"scatter":
+				var angle = Globals.Game.rng_generate(360)
+				Entity.unique_data.tako_state = "base"
+				Entity.velocity.set_vector(200 * FMath.S, 0)
+				Entity.velocity.rotate(angle)
+				Animator.play("Active3")
+				Entity.get_node("Sprite").rotation = 0
+				Entity.rotate_sprite(angle)
+				Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 			
 func explode():
 	Entity.free = true

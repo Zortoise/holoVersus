@@ -13,7 +13,7 @@ enum effect_ref {
 		LESS_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
-		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_ARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, NO_HEIGHT_LIMIT
+		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_WEAKARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, NO_HEIGHT_LIMIT
 		SUMMON_HORROR, PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND, TBLOCK_PROJ
 		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI, FUWA_SLASH, MOCO_SLASH, RAVEN_PROJ, SUMMON_MOAI
 }
@@ -268,9 +268,9 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"Improved Blocking",
 	},
-	effect_ref.PASSIVE_ARMOR: {
+	effect_ref.PASSIVE_WEAKARMOR: {
 		"type" : type.QUIRK,
-		"suffix" :"Superarmor at Full GG",
+		"suffix" :"Weakarmor at Full GG",
 	},
 	effect_ref.BLOCK_CANCEL: {
 		"type" : type.QUIRK,
@@ -479,9 +479,9 @@ const DATABASE = {
 	card_ref.NOEL : {
 		"name" : "Noel",
 		"price" : 100,
-		effect_ref.SPEED : -15,
+		effect_ref.SPEED : -10,
 		effect_ref.HEAVY_DMG_MOD : 50,
-		"quirks" : [effect_ref.PASSIVE_ARMOR],
+		"quirks" : [effect_ref.PASSIVE_WEAKARMOR],
 	},
 	card_ref.ROBOCO : {
 		"name" : "Roboco",
@@ -637,9 +637,9 @@ const DATABASE = {
 		"price" : 100,
 		"random" : [card_ref.HAATO, card_ref.HAATO_b],
 		"replace" : "Random Out of 2 Sets\nChanges Every Wave",
-		effect_ref.HP : 40,
+		effect_ref.HP : 50,
 		effect_ref.HITSTUN_TAKEN : -50,
-		"quirks" : [effect_ref.REDUCE_BURST_COST, effect_ref.PASSIVE_ARMOR, effect_ref.WILDCARD]
+		"quirks" : [effect_ref.REDUCE_BURST_COST, effect_ref.PASSIVE_WEAKARMOR, effect_ref.WILDCARD]
 	},
 	card_ref.HAATO_b : {
 		"name" : "Haachama",

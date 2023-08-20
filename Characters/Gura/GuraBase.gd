@@ -429,7 +429,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,
 		Em.move.KB_ANGLE : -45,
-		Em.move.ATK_ATTR : [Em.atk_attr.PROJ_ARMOR_ACTIVE],
+		Em.move.ATK_ATTR : [Em.atk_attr.PROJ_ARMOR_ACTIVE, Em.atk_attr.WHIFF_SDASH_CANCEL],
 		Em.move.MOVE_SOUND : [{ ref = "water4", aux_data = {"vol" : -15,} }, { ref = "blast3", aux_data = {"vol" : -10, "bus" : "LowPass"} }],
 		Em.move.HIT_SOUND : [{ ref = "impact11", aux_data = {"vol" : -20} }, { ref = "water1", aux_data = {"vol" : -8} }],
 	},

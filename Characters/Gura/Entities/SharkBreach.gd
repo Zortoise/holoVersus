@@ -20,7 +20,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 5,
 		Em.move.FIXED_HITSTOP : 10,
 		Em.move.KB_ANGLE : -60,
-		Em.move.ATK_ATTR : [Em.atk_attr.REPEATABLE],
+		Em.move.ATK_ATTR : [Em.atk_attr.REPEATABLE, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "water1", aux_data = {"vol" : -6} },
 	}
 }

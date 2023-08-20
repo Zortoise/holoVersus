@@ -87,7 +87,7 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # CAN_SDC_DURING_REC = can SDash Cancel during recovery
 # PUNISH_ENTITY = entity can land punish hit without being Proj Level 3, used for projectiles with special effects on landing punish hits
 # NO_HITCOUNT_RESET = attack does not reset hitcount on being active frames being animated, used for multi-part attacks sharing hitcount
-# CHIPPER = doubles chip damage
+# CHIPPER = on block/armored deals base damage + chip damage
 # LAST_HIT_WAVE = for multi-hit wave-type entities that have 999 ignore time and pass on their hitcount, last one will always do LAST_HIT
 
 enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED, INVERT_DIR
@@ -111,6 +111,7 @@ enum move {ROOT, ATK_TYPE, HITCOUNT, DMG, KB, KB_TYPE, KB_ANGLE, ATK_LVL, ATK_AT
 		FIXED_HITSTOP, FIXED_ATKER_HITSTOP, FIXED_SS_HITSTOP, FIXED_HITSTUN, FIXED_KB_MULTI, FIXED_KB_ANGLE_MULTI
 		PRIORITY_ADD, IGNORE_TIME, HITSPARK_TYPE, HITSPARK_PALETTE, SEQ, STARTER, SEQ_HITS, SEQ_LAUNCH
 		SEQ_HITSTOP, SEQ_WEAK, PROJ_LVL, BURSTLOCK, REKKA, MULTI_HIT_REFRESH, LAST_HIT_RANGE}
+# PROJ_LVL
 # REKKA = can only QC into another move with the same REKKA
 # MULTI_HIT_REFRESH = an array of Animator.time to refresh ignore time, also give 999 ignore time, after last entry hit become LAST_HIT
 # LAST_HIT_RANGE = for multi-hit moves, if Animator.time >= LAST_HIT_RANGE, become LAST_HIT
@@ -121,9 +122,9 @@ enum hit {RECT, POLYGON, OWNER_ID, FACING, MOVE_NAME, MOVE_DATA, MOB, HURTBOX, S
 		REPEAT, DOUBLE_REPEAT, ANTI_AIRED, PULL, SECONDARY_HIT, LAST_HIT, GUARD_DRAIN, SINGLE_REPEAT, SOUR_HIT
 		MULTIHIT, FIRST_HIT, AUTOCHAIN, FOLLOW_UP, NON_STRONG_PROJ, WEAKARMORABLE, CORNERED, WEAK_HIT, SUPERARMORED, HITSTOP, DEALT_DMG
 		ADJUSTED_ATK_LVL, KB, KB_ANGLE, SEMI_DISJOINT, SWEETSPOTTED, PULL, MOB_BREAK, RESISTED, SDASH_ARMORED, MOB_ARMORED, IGNORE_RESIST
-		DEFENDER_ATTR, NPC_DEFENDER_PATH}
+		DEFENDER_ATTR, NPC_DEFENDER_PATH, PROJ_ON_HITSTOP}
 
-enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE, PERMANENT}
+enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE, PERMANENT, BEAM}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
 enum moving_platform {MOVING, WARPING}
 enum dmg_num_col {WHITE, RED, GRAY, GREEN}

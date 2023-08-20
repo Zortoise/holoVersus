@@ -1141,7 +1141,7 @@ func buffer_actions():
 				if Animator.time <= 1 and Animator.time != 0:
 					rebuffer_actions()
 			Em.char_state.AIR_ATK_STARTUP:
-				if Animator.time <= 5 and Animator.time != 0:
+				if Animator.time <= 3 and Animator.time != 0:
 					rebuffer_actions()
 					
 	if button_rs_up in input_state.just_pressed or button_rs_down in input_state.just_pressed or button_rs_left in input_state.just_pressed or \
@@ -1291,7 +1291,7 @@ func process_input_buffer():
 	var input_to_add = [] # some actions add inputs to the buffer, adding array members while iterating through it can cause issues
 	
 	var has_acted := [false]
-	# any attack/instajump when processed when turn this to true causing all further jumps/attacks to be ignored and erased
+	# any attack/sdash when processed when turn this to true causing all further jumps/attacks to be ignored and erased
 	# used an array for this so I don't have to pass it back...
 	
 	
@@ -1446,7 +1446,11 @@ func process_input_buffer():
 								if Animator.time <= 1 and Animator.time != 0:
 									animate("JumpTransit")
 									rebuffer_actions() # this buffers the attack buttons currently being pressed
-
+									keep = false
+									
+				if keep and UniqNPC.has_method("unique_jump"):
+					keep = UniqNPC.unique_jump()
+					
 									
 			# FOR NON_JUMP ACTIONS --------------------------------------------------------------------------------------------------
 									
@@ -2494,6 +2498,10 @@ func query_polygons(): # requested by main game node when doing hit detection
 func get_sprite_rect():
 	var sprite_rect = sprite.get_rect()
 	return Rect2(sprite_rect.position + position, sprite_rect.size)
+	
+func get_hitbox():
+	var hitbox = Animator.query_polygon("hitbox")
+	return hitbox
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	

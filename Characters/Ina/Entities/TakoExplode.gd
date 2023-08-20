@@ -24,15 +24,15 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "dark_purple",
 		Em.move.PROJ_LVL : 3,
-		Em.move.ATK_ATTR : [],
+		Em.move.ATK_ATTR : [Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "impact39", aux_data = {"vol" : -15} },
 	},
 }
 
-func init(aux_data: Dictionary):
+func init(_aux_data: Dictionary):
 	Animator.play("Kill") # starting animation
-	if "less_dmg" in aux_data: # for command grab
-		Entity.unique_data["less_dmg"] = true
+#	if "less_dmg" in aux_data: # for command grab
+#		Entity.unique_data["less_dmg"] = true
 		
 
 func simulate():
@@ -48,10 +48,10 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-	if "less_dmg" in Entity.unique_data: # for command grab
-		move_data[Em.move.DMG] = 50
-		move_data[Em.move.ROOT] = "TakoExplode2" 
-		move_data[Em.move.KB_ANGLE] = -75
+#	if "less_dmg" in Entity.unique_data: # for command grab
+#		move_data[Em.move.DMG] = 50
+#		move_data[Em.move.ROOT] = "TakoExplode2" 
+#		move_data[Em.move.KB_ANGLE] = -75
 			
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 #		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	

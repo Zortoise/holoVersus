@@ -6,7 +6,7 @@ const NAME = "Ina'nis"
 const ORDER = 0
 
 # character movement stats, use to overwrite
-const SPEED = 300 * FMath.S # ground speed
+const SPEED = 280 * FMath.S # ground speed
 const AIR_STRAFE_SPEED_MOD = 16 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 700 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
@@ -26,7 +26,7 @@ const GRAVITY_MOD = 90 # make sure variable's a float
 const TERMINAL_VELOCITY_MOD = 600 # affect terminal velocity downward
 const FASTFALL_MOD = 115 # fastfall speed, mod of terminal velocity
 const FRICTION = 7 # between 0 and 100
-const ACCELERATION = 7 # between 0 and 100
+const ACCELERATION = 5 # between 0 and 100
 const AIR_RESISTANCE = 3 # between 0 and 100
 const FALL_GRAV_MOD = 40 # reduced gravity when going down
 const EYE_LEVEL = 12 # number of pixels EX Flash appears above position
@@ -102,15 +102,16 @@ const UNIQUE_DATA_REF = {
 	"blink_vec" : Vector2.ZERO,
 	"combination" : [],
 	"instant_command" : null,
+	"draw_lock" : false,
 }
 
 const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", "aF1", "aF2", "aF3", "aH", "aSP1", "aSP2", "aSP3", \
-		"aSP1[ex]", "aSP2[ex]"]
+		"aSP4", "aSP4[ex]", "aSP5", "aSP5[ex]", "aSP1[ex]", "aSP2[ex]"]
 
-const UP_TILTS = ["L3", "F3", "aL3", "aF3"] # to know which moves can be cancelled from jumpsquat
+const UP_TILTS = ["L3", "F3", "aL3", "aF3", "aSP4", "aSP4[ex]"] # to know which moves can be cancelled from jumpsquat
 
 # list of movenames that will emit EX flash
-const EX_FLASH_ANIM = ["aSP1[ex]", "aSP1[ex][u]", "aSP1[ex][d]", "aSP2[ex]"]
+const EX_FLASH_ANIM = ["aSP1[ex]", "aSP1[ex][u]", "aSP1[ex][d]", "aSP2[ex]", "aSP4[ex]", "aSP5[ex]"]
 
 # this contain move_data for each active animation this character has
 # use trim_suffix("Active") on animation name to find move in the database
@@ -321,6 +322,26 @@ const MOVE_DATABASE = {
 	
 	"aSP3": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.ATK_ATTR : [],
+	},
+	
+	"aSP4": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.ATK_ATTR : [],
+	},
+	
+	"aSP4[ex]": {
+		Em.move.ATK_TYPE : Em.atk_type.EX,
+		Em.move.ATK_ATTR : [],
+	},
+	
+	"aSP5": {
+		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
+		Em.move.ATK_ATTR : [],
+	},
+	
+	"aSP5[ex]": {
+		Em.move.ATK_TYPE : Em.atk_type.EX,
 		Em.move.ATK_ATTR : [],
 	},
 }

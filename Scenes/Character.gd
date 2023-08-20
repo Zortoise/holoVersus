@@ -2311,7 +2311,7 @@ func buffer_actions():
 					rebuffer_actions()
 					UniqChar.rebuffer_EX()
 			Em.char_state.AIR_ATK_STARTUP:
-				if Animator.time <= 5 and Animator.time != 0:
+				if Animator.time <= 3 and Animator.time != 0:
 					rebuffer_actions()
 					UniqChar.rebuffer_EX()
 					
@@ -2890,6 +2890,11 @@ func process_input_buffer():
 								if Animator.time <= 1 and Animator.time != 0:
 									animate("JumpTransit")
 									rebuffer_actions() # this buffers the attack buttons currently being pressed
+									keep = false
+									
+				if keep and UniqChar.has_method("unique_jump"):
+					keep = UniqChar.unique_jump()
+					
 
 									
 			# FOR NON_JUMP ACTIONS --------------------------------------------------------------------------------------------------
@@ -5156,7 +5161,7 @@ func test_sdash_cancel():
 				if !active_cancel:
 					return false
 					
-		Em.atk_type.SPECIAL:
+		Em.atk_type.SPECIAL, Em.atk_type.EX:
 			if !is_atk_active():
 				if is_atk_recovery() and Em.atk_attr.CAN_SDC_DURING_REC in move_data[Em.move.ATK_ATTR]:
 					pass
@@ -5460,6 +5465,10 @@ func query_polygons(): # requested by main game node when doing hit detection
 func get_sprite_rect():
 	var sprite_rect = sprite.get_rect()
 	return Rect2(sprite_rect.position + position, sprite_rect.size)
+	
+func get_hitbox():
+	var hitbox = Animator.query_polygon("hitbox")
+	return hitbox
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	
@@ -6186,6 +6195,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	remove_status_effect(Em.status_effect.STUN)
 	remove_status_effect(Em.status_effect.CRUSH)
+	
+	# if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
+	# also no Guard Drain and Guard Swell
+	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
+		hit_data[Em.hit.PROJ_ON_HITSTOP] = true
+		
 	$HitStopTimer.stop() # cancel pre-existing hitstop
 	
 	# get direction to attacker
@@ -6279,10 +6294,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEFENDER_ATTR] = query_atk_attr()
 	else:
 		hit_data[Em.hit.DEFENDER_ATTR] = []
-		
-	var proj_on_hitstop := false # if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
-	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
-		proj_on_hitstop = true
+
 	
 	# REPEAT PENALTY AND WEAK HITS ----------------------------------------------------------------------------------------------
 		
@@ -6394,8 +6406,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 		# passive armor
 		if !is_hitstunned_or_sequenced() and !is_blocking():
-			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR):
-				if current_guard_gauge >= 0:
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_WEAKARMOR):
+				if current_guard_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 			
@@ -6465,7 +6477,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 						
-					Em.atk_type.ENTITY, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER_ENTITY: # projectiles always cause Weakblock, but some projectiles are UNBLOCKABLE
+					Em.atk_type.ENTITY, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER_ENTITY:
 	#					if check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
 	#						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
@@ -6555,7 +6567,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# GUARD SWELL ---------------------------------------------------------------------------------
 					
 #	if Globals.survival_level == null:	
-	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data) or Em.hit.FOLLOW_UP in hit_data:
+	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data) or Em.hit.FOLLOW_UP in hit_data or \
+			Em.hit.PROJ_ON_HITSTOP in hit_data:
 		pass # multi-hit moves not the first hit and autochain follow-ups do not proc Guard Swell
 	else:
 		if GG_swell_flag == false: # start GG swell if not started yet and hit with most attacks
@@ -6689,14 +6702,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.LETHAL_HIT] = true
 			hit_data[Em.hit.KB] = lethal_knockback(hit_data, hit_data[Em.hit.KB])
 				
-	if !hit_data[Em.hit.LETHAL_HIT]:
-		lethal_flag = false
-	else:
-		lethal_flag = true
 		
 	var proj_on_hitstop_no_kb := false
 	var vel_length = velocity.length()
-	if proj_on_hitstop:
+	if Em.hit.PROJ_ON_HITSTOP in hit_data:
 		if hit_data[Em.hit.KB] < vel_length:
 			proj_on_hitstop_no_kb = true # when projectiles hit a hitstopped opponent, no knockback if knockback is less that their current KB
 		
@@ -6751,10 +6760,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	elif hit_data[Em.hit.LETHAL_HIT]:
 #		add_status_effect(Em.status_effect.LETHAL, 0)
-		status_effect_to_add.append([Em.status_effect.LETHAL, 0])
-		Globals.Game.set_screenshake()
-		modulate_play("lethal_flash")
-		play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+		if !lethal_flag:
+			status_effect_to_add.append([Em.status_effect.LETHAL, 0])
+			Globals.Game.set_screenshake()
+			modulate_play("lethal_flash")
+			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 #		if Globals.survival_level != null:
 ##			add_status_effect(Em.status_effect.SURVIVAL_GRACE, null)
 #			status_effect_to_add.append([Em.status_effect.SURVIVAL_GRACE, null])
@@ -6819,6 +6829,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
 #			status_effect_to_remove.append(Em.status_effect.POS_FLOW)
 		
+
 	$VarJumpTimer.stop()
 	
 	# HITSTUN -------------------------------------------------------------------------------------------
@@ -6830,7 +6841,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			var hitstun = calculate_hitstun(hit_data)
-			if $HitStunTimer.time > hitstun and proj_on_hitstop:
+			if $HitStunTimer.time > hitstun and Em.hit.PROJ_ON_HITSTOP in hit_data:
 				pass # projectiles on hitstopped player will not reduce hitstun for opponents during hitstop
 				# this allows projectile spreads to do less damage and still retain hitstun, while reducing hitstun for multiple spreads
 			else:
@@ -6839,11 +6850,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# HITSTOP ---------------------------------------------------------------------------------------------------
 	
-	if !hit_data[Em.hit.LETHAL_HIT]:
-		hitstop = calculate_hitstop(hit_data, hit_data[Em.hit.KB])
-	else:
+	if hit_data[Em.hit.LETHAL_HIT] and !lethal_flag:
 		hitstop = LETHAL_HITSTOP # set for defender, attacker has no hitstop during LETHAL_HITSTOP
 								# screenfreeze for everyone but the defender till their hitstop is over
+	else:
+		hitstop = calculate_hitstop(hit_data, hit_data[Em.hit.KB])
 		
 	hit_data[Em.hit.HITSTOP] = hitstop # send this to attacker as well
 	
@@ -6896,6 +6907,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if UniqChar.has_method("being_hit2"):	
 		UniqChar.being_hit2(hit_data) # reaction, can change hit_data from there
 	
+	# ---------------------------------------------------------------------------------------------------
+	
+	if !hit_data[Em.hit.LETHAL_HIT]: # put this after cosmetic hit effects and hitstop
+		lethal_flag = false
+	else:
+		lethal_flag = true
+	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
@@ -6937,7 +6955,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.KB] = vel_length # so that will not go from Launched to Flinch animation when projectile hit a hitstopped player
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if Globals.survival_level == null and (hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or adjusted_atk_level <= 1):
+		if Globals.survival_level == null and (Em.hit.MULTIHIT in hit_data or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or adjusted_atk_level <= 1):
 
 #			if !Em.hit.ENTITY_PATH in hit_data:
 #				face(dir_to_attacker) # turn towards attacker
@@ -7203,6 +7221,8 @@ func calculate_damage(hit_data) -> int:
 #				scaled_damage = FMath.percent(scaled_damage, SUPERARMOR_CHIP_DMG_MOD)
 #			else:
 			scaled_damage = FMath.percent(scaled_damage, get_stat("CHIP_DMG_MOD"))
+			if Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+				scaled_damage += hit_data[Em.hit.MOVE_DATA][Em.move.DMG] * FMath.S
 		else:
 			return 0
 
@@ -7221,6 +7241,9 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
 		return 0 # assist rescue no Guard Drain
+	
+	if Em.hit.PROJ_ON_HITSTOP in hit_data:
+		return 0
 	
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER]: # no Guard Drain for Supers
 		return 0
@@ -7307,7 +7330,10 @@ func calculate_knockback_strength(hit_data) -> int:
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		match hit_data[Em.hit.BLOCK_STATE]:
 			Em.block_state.BLOCKED:
-				knockback_strength = FMath.percent(knockback_strength, BLOCK_KNOCKBACK_MOD) # KB for weakblock
+				if Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+					return 0
+				else:
+					knockback_strength = FMath.percent(knockback_strength, BLOCK_KNOCKBACK_MOD) # KB for weakblock
 #				if  hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX, \
 #						Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
 #					knockback_strength = FMath.percent(knockback_strength, SPECIAL_BLOCK_KNOCKBACK_MOD)

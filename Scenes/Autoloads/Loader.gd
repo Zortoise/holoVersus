@@ -148,6 +148,12 @@ var item_data = {
 #	}
 }
 
+#var extra_modulate_anim = {
+#}
+#
+#var extra_fade_anim = {
+#}
+
 
 func _ready():
 	load_common_sfx() # preloading

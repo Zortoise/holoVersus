@@ -66,7 +66,7 @@ func fire_tako(angle: int):
 	if Entity.facing == -1:
 		angle = Globals.mirror_angle(angle)
 	Globals.Game.spawn_entity(Entity.master_ID, "Tako", Entity.position, \
-			{"facing" : Entity.facing, "angle" : angle, "repeat" : true}, Entity.palette_ref, Entity.master_ref)
+			{"facing" : Entity.facing, "angle" : angle, "ex": true}, Entity.palette_ref, Entity.master_ref)
 	Globals.Game.spawn_SFX("Blink", "Blink", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 
 	var master_node = Globals.Game.get_player_node(Entity.master_ID)

@@ -481,7 +481,7 @@ func P2_unpicked_character():
 	
 	
 func move_stage_picker(dir):
-	if phase == 2 and dir.y != 0:
+	if !battle_lock and phase == 2 and dir.y != 0:
 		shift_stage_list(dir.y)
 
 	

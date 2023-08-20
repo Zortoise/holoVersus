@@ -399,7 +399,8 @@ func capture_combinations():
 func capture_unique_combinations():
 	Character.combination(Character.button_unique, Character.button_dash, "U.Dash")
 
-func rebuffer_actions(): # for when there are air and ground versions
+func rebuffer_actions(): # for when there are air and ground versions, or up/down versions
+	# this is called when jumping/landing/dropping or releasing up/down during first few frames of attack startup
 	Character.rebuffer(Character.button_up, Character.button_light, "uL")
 	Character.rebuffer(Character.button_down, Character.button_light, "dL")
 	Character.rebuffer(Character.button_up, Character.button_fierce, "uF")

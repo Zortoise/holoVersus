@@ -35,6 +35,7 @@ var slowed := 0
 # not saved
 var hitstop = null
 var to_destroy := false
+var reflector_ID = null
 
 func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_data: Dictionary, in_palette_ref = null, in_master_ref = null):
 	
@@ -310,7 +311,7 @@ func moving_platform(position_change: Vector2, rider_boxes: Array):
 func interactions(): # not active in survival_mode due to performance issues
 	
 	if !to_destroy and UniqEntity.has_method("kill") and !Animator.to_play_anim.ends_with("Kill"):
-		var my_hitbox = Animator.query_polygon("hitbox")
+		var my_hitbox = get_hitbox()
 		if my_hitbox != null:
 			
 			var my_rect = get_sprite_rect()
@@ -401,7 +402,7 @@ func interactions(): # not active in survival_mode due to performance issues
 				
 			# check for reflector		
 			for reflector in reflector_array_char:
-				var second_hitbox = reflector.Animator.query_polygon("hitbox")
+				var second_hitbox = reflector.get_hitbox()
 				if second_hitbox != null:
 					var their_rect = reflector.get_sprite_rect()
 					
@@ -409,31 +410,33 @@ func interactions(): # not active in survival_mode due to performance issues
 						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
 						if intersect_polygons.size() > 0: # detected intersection
 							if "UniqChar" in reflector:
-								reflect(reflector.player_ID)
+#								reflect(reflector.player_ID)
+								reflector_ID = reflector.player_ID
 								if reflector.UniqChar.has_method("reflected_entity"):
 									reflector.UniqChar.reflected_entity()
 							elif "UniqNPC" in reflector:
-								reflect(reflector.master_ID)
+#								reflect(reflector.master_ID)
+								reflector_ID = reflector.player_ID
 								if reflector.UniqNPC.has_method("reflected_entity"):
 									reflector.UniqNPC.reflected_entity()
 							return
 							
 			for reflector in reflector_array_entity:
-				var second_hitbox = reflector.Animator.query_polygon("hitbox")
+				var second_hitbox = reflector.get_hitbox()
 				if second_hitbox != null:
 					var their_rect = reflector.get_sprite_rect()
 					
 					if my_rect.intersects(their_rect):
 						var intersect_polygons = Geometry.intersect_polygons_2d(second_hitbox, my_hitbox)
 						if intersect_polygons.size() > 0: # detected intersection	
-							reflect(reflector.master_ID)
+							reflector_ID = reflector.master_ID
 							if reflector.UniqEntity.has_method("reflected_entity"):
 								reflector.UniqEntity.reflected_entity()
 							return
 			
 			# check for entity destroyers
 			for destroyer in destroyer_array:
-				var second_hitbox = destroyer.Animator.query_polygon("hitbox")
+				var second_hitbox = destroyer.get_hitbox()
 				if second_hitbox != null:
 					var their_rect = destroyer.get_sprite_rect()
 					
@@ -454,7 +457,7 @@ func interactions(): # not active in survival_mode due to performance issues
 			if !to_destroy and can_clash:
 				var clash_array2 = []
 				for entity in clash_array:
-					var second_hitbox = entity.Animator.query_polygon("hitbox")
+					var second_hitbox = entity.get_hitbox()
 					if second_hitbox != null:
 						var their_rect = entity.get_sprite_rect()
 						
@@ -464,21 +467,32 @@ func interactions(): # not active in survival_mode due to performance issues
 								clash_array2.append(entity) 
 		
 				if clash_array2.size() > 0:
-					var lowest_AV = absorption_value # find lowest absorption_value
-					for x in clash_array2:
-						if x.absorption_value < lowest_AV:
-							lowest_AV = x.absorption_value
+#					var lowest_AV = absorption_value # find lowest absorption_value
+#					for x in clash_array2:
+#						if x.absorption_value < lowest_AV:
+#							lowest_AV = x.absorption_value
+#					absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
+#					if absorption_value <= 0:
+#						UniqEntity.kill()
+#						to_destroy = true
+#					for x in clash_array2:
+#						x.absorption_value -= lowest_AV
+#						if x.absorption_value <= 0:
+#							x.UniqEntity.kill()	
+#							x.to_destroy = true
+
+					for clasher in clash_array2:
+						var original = clasher.absorption_value
+						clasher.absorption_value -= original
+						if clasher.absorption_value <= 0:
+							clasher.UniqEntity.kill()	
+							clasher.to_destroy = true
 							
-					absorption_value -= lowest_AV # reduce AV of all entities detected, kill all with 0 AV
-					if absorption_value <= 0:
-						UniqEntity.kill()
-						to_destroy = true
-					for x in clash_array2:
-						x.absorption_value -= lowest_AV
-						if x.absorption_value <= 0:
-							x.UniqEntity.kill()	
-							x.to_destroy = true
-	
+						absorption_value -= original
+						if absorption_value <= 0:
+							UniqEntity.kill()
+							to_destroy = true
+							break
 	
 func simulate_after(): # do this after hit detection
 	if Globals.Game.is_stage_paused(): return
@@ -489,13 +503,28 @@ func simulate_after(): # do this after hit detection
 		return
 	slowed = 0
 	
+	if reflector_ID != null:
+		reflect()
+		reflector_ID = null
+	
 	if !$HitStopTimer.is_running():
 		$SpritePlayer.simulate()
 		
 		lifetime += 1
-		if !Em.entity_trait.PERMANENT in UniqEntity.TRAITS and lifetime >= Globals.ENTITY_AUTO_DESPAWN: free = true
-		elif lifespan != null and lifetime >= lifespan and UniqEntity.has_method("expire"):
-			UniqEntity.expire()
+		if !Em.entity_trait.PERMANENT in UniqEntity.TRAITS and lifetime >= Globals.ENTITY_AUTO_DESPAWN:
+			if UniqEntity.has_method("expire"):
+				UniqEntity.expire()
+			elif UniqEntity.has_method("kill"):
+				UniqEntity.kill()
+			else:
+				free = true
+		elif lifespan != null and lifetime >= lifespan:
+			if UniqEntity.has_method("expire"):
+				UniqEntity.expire()
+			elif UniqEntity.has_method("kill"):
+				UniqEntity.kill()
+			else:
+				free = true
 			
 		if !hitstop:
 			$NoCollideTimer.simulate()
@@ -526,7 +555,7 @@ func move_true_position(in_velocity: FVector):
 	
 # --------------------------------------------------------------------------------------------------
 		
-func reflect(reflector_id):
+func reflect():
 	if Globals.survival_level != null: # no reflection during survival mode
 		if UniqEntity.has_method("kill"):
 			UniqEntity.kill()
@@ -535,8 +564,8 @@ func reflect(reflector_id):
 		velocity.x = -velocity.x
 		if Globals.player_count <= 2:
 			remove_from_group("P" + str(master_ID + 1) + "EntityNodes")
-			add_to_group("P" + str(reflector_id + 1) + "EntityNodes")
-		master_ID = reflector_id
+			add_to_group("P" + str(reflector_ID + 1) + "EntityNodes")
+		master_ID = reflector_ID
 		if UniqEntity.has_method("reflect"): # unique code for reflection
 			UniqEntity.reflect()
 		if UniqEntity.has_method("killsound"):
@@ -583,8 +612,10 @@ func query_polygons(): # requested by main game node when doing hit detection
 	}
 
 	if !$HitStopTimer.is_running() and slowed >= 0: # no hitbox during hitstop
-		if !Em.atk_attr.HARMLESS_ENTITY in query_atk_attr():
-			polygons_queried[Em.hit.HITBOX] = Animator.query_polygon("hitbox")
+		var atk_attr = query_atk_attr()
+		if !Em.atk_attr.HARMLESS_ENTITY in atk_attr:
+			if reflector_ID == null:
+				polygons_queried[Em.hit.HITBOX] = get_hitbox()
 			polygons_queried[Em.hit.SWEETBOX] = Animator.query_polygon("sweetbox")
 			polygons_queried[Em.hit.KBORIGIN] = Animator.query_point("kborigin")
 			polygons_queried[Em.hit.VACPOINT] = Animator.query_point("vacpoint")
@@ -595,10 +626,62 @@ func query_polygons(): # requested by main game node when doing hit detection
 	return polygons_queried
 	
 func get_sprite_rect():
-	if UniqEntity.has_method("get_sprite_rect"): return UniqEntity.get_sprite_rect()
 	var sprite_rect = $Sprite.get_rect()
-	return Rect2(sprite_rect.position + position, sprite_rect.size)
+#	if UniqEntity.has_method("get_sprite_rect"): sprite_rect = UniqEntity.get_sprite_rect()
+	sprite_rect = Rect2(sprite_rect.position + position, sprite_rect.size)
+	
+	if Em.entity_trait.BEAM in UniqEntity.TRAITS:
+		var hitbox = Animator.query_polygon("hitbox") # test hitbox to see which end to extend sprite_rect
+		if hitbox != null:
+			var extend := {"left": false, "right": false, "up": false, "down": false}
+			for point in hitbox:
+				if point.x == sprite_rect.position.x: # extend left
+					extend.left = true
+				elif point.x == sprite_rect.end.x: # extend right
+					extend.right = true
+				if point.y == sprite_rect.position.y: # extend up
+					extend.up = true
+				elif point.y == sprite_rect.end.y: # extend down
+					extend.down = true
+			if extend.left:
+				var end = sprite_rect.end # temp holder
+				sprite_rect.position.x = Globals.Game.stage_box.rect_global_position.x
+				sprite_rect.end = end
+			if extend.right:
+				sprite_rect.end.x = Globals.Game.stage_box.rect_global_position.x + Globals.Game.stage_box.rect_size.x
+			if extend.up:
+				var end = sprite_rect.end # temp holder
+				sprite_rect.position.y = Globals.Game.stage_box.rect_global_position.y
+				sprite_rect.end = end
+			if extend.down:
+				sprite_rect.end.y = Globals.Game.stage_box.rect_global_position.y + Globals.Game.stage_box.rect_size.y
+	
+	return sprite_rect
 
+func get_hitbox():
+	var hitbox = Animator.query_polygon("hitbox")
+	if hitbox != null and Em.entity_trait.BEAM in UniqEntity.TRAITS:
+		var sprite_rect = $Sprite.get_rect()
+		sprite_rect = Rect2(sprite_rect.position + position, sprite_rect.size)
+#		print("hitbox:")
+#		print(hitbox)
+#		print("sprite_rect_pos:")
+#		print(sprite_rect.position)
+#		print("sprite_rect_end:")
+#		print(sprite_rect.end)
+		var hitbox2: PoolVector2Array = []
+		for point in hitbox:
+			if point.x == sprite_rect.position.x: # extend left
+				point.x = Globals.Game.stage_box.rect_global_position.x
+			elif point.x == sprite_rect.end.x: # extend right
+				point.x = Globals.Game.stage_box.rect_global_position.x + Globals.Game.stage_box.rect_size.x
+			if point.y == sprite_rect.position.y: # extend up
+				point.y = Globals.Game.stage_box.rect_global_position.y
+			elif point.y == sprite_rect.end.y: # extend down
+				point.y = Globals.Game.stage_box.rect_global_position.y + Globals.Game.stage_box.rect_size.y
+			hitbox2.append(point)
+		return hitbox2
+	return hitbox
 	
 func query_move_data_and_name(): # requested by main game node when doing hit detection
 	if UniqEntity.has_method("query_move_data"):

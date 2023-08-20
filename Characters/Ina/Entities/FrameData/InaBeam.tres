@@ -1,0 +1,278 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "InaBeamSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+3: {
+"frame": 1,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 2,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+9: {
+"frame": 7,
+"hitbox": [  ]
+},
+12: {
+"frame": 8,
+"hitbox": [  ]
+},
+15: {
+"frame": 9,
+"hitbox": [  ]
+},
+18: {
+"frame": 10,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+},
+"SecKill": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "InaBeamSprite",
+"timestamps": {
+0: {
+"frame": 11,
+"hitbox": [  ]
+},
+3: {
+"frame": 12,
+"hitbox": [  ]
+},
+6: {
+"frame": 13,
+"hitbox": [  ]
+},
+9: {
+"frame": 18,
+"hitbox": [  ]
+},
+12: {
+"frame": 19,
+"hitbox": [  ]
+},
+15: {
+"frame": 20,
+"hitbox": [  ]
+},
+18: {
+"frame": 21,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+},
+"[ex]Kill": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "InaBeamSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+3: {
+"frame": 1,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 2,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+9: {
+"frame": 7,
+"hitbox": [  ]
+},
+12: {
+"frame": 8,
+"hitbox": [  ]
+},
+15: {
+"frame": 9,
+"hitbox": [  ]
+},
+18: {
+"frame": 10,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+},
+"[ex]SecKill": {
+"duration": 21,
+"hframes": 6,
+"loop": false,
+"spritesheet": "InaBeamSprite",
+"timestamps": {
+0: {
+"frame": 11,
+"hitbox": [  ]
+},
+3: {
+"frame": 12,
+"hitbox": [  ]
+},
+6: {
+"frame": 13,
+"hitbox": [  ]
+},
+9: {
+"frame": 18,
+"hitbox": [  ]
+},
+12: {
+"frame": 19,
+"hitbox": [  ]
+},
+15: {
+"frame": 20,
+"hitbox": [  ]
+},
+18: {
+"frame": 21,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+},
+"[h]Kill": {
+"duration": 39,
+"hframes": 6,
+"loop": false,
+"spritesheet": "InaBeamSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+3: {
+"frame": 1,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+6: {
+"frame": 2,
+"hitbox": [ Vector2( -9, 9 ), Vector2( 75, 9 ), Vector2( 75, -9 ), Vector2( -9, -9 ) ]
+},
+9: {
+"frame": 3,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 75, 7 ), Vector2( 75, -7 ), Vector2( -7, -7 ) ]
+},
+12: {
+"frame": 4,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 75, 7 ), Vector2( 75, -7 ), Vector2( -7, -7 ) ]
+},
+15: {
+"frame": 5,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 75, 7 ), Vector2( 75, -7 ), Vector2( -7, -7 ) ]
+},
+18: {
+"frame": 6,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 75, 7 ), Vector2( 75, -7 ), Vector2( -7, -7 ) ]
+},
+21: {
+"frame": 4,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 75, 7 ), Vector2( 75, -7 ), Vector2( -7, -7 ) ]
+},
+24: {
+"frame": 5,
+"hitbox": [ Vector2( -7, 7 ), Vector2( 75, 7 ), Vector2( 75, -7 ), Vector2( -7, -7 ) ]
+},
+27: {
+"frame": 7,
+"hitbox": [  ]
+},
+30: {
+"frame": 8,
+"hitbox": [  ]
+},
+33: {
+"frame": 9,
+"hitbox": [  ]
+},
+36: {
+"frame": 10,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+},
+"[h]SecKill": {
+"duration": 39,
+"hframes": 6,
+"loop": false,
+"spritesheet": "InaBeamSprite",
+"timestamps": {
+0: {
+"frame": 11,
+"hitbox": [  ]
+},
+3: {
+"frame": 12,
+"hitbox": [  ]
+},
+6: {
+"frame": 13,
+"hitbox": [  ]
+},
+9: {
+"frame": 14,
+"hitbox": [  ]
+},
+12: {
+"frame": 15,
+"hitbox": [  ]
+},
+15: {
+"frame": 16,
+"hitbox": [  ]
+},
+18: {
+"frame": 17,
+"hitbox": [  ]
+},
+21: {
+"frame": 15,
+"hitbox": [  ]
+},
+24: {
+"frame": 16,
+"hitbox": [  ]
+},
+27: {
+"frame": 18,
+"hitbox": [  ]
+},
+30: {
+"frame": 19,
+"hitbox": [  ]
+},
+33: {
+"frame": 20,
+"hitbox": [  ]
+},
+36: {
+"frame": 21,
+"hitbox": [  ]
+}
+},
+"vframes": 4
+}
+}
