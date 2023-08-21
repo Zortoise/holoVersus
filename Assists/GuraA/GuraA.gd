@@ -62,7 +62,17 @@ func offset(aux_data: Dictionary, master_node, offset_vec: = Vector2.ZERO): # po
 		offset_vec.x *= aux_data.start_facing
 		aux_data.out_position += offset_vec
 	else:
+		# Assist Rescue offset
 		aux_data.out_position.x += master_node.dir * Globals.Game.ASSIST_RESCUE_OFFSET
+		
+#		if master_node.dir == 0 and master_node.v_dir == 0: return
+#		var v_dir = master_node.v_dir
+#
+#		var vec = FVector.new()
+#		vec.set_vector(Globals.Game.ASSIST_RESCUE_OFFSET * FMath.S, 0)
+#		vec.rotate(Globals.dir_to_angle(master_node.dir, master_node.v_dir, aux_data.start_facing))
+#		aux_data.out_position += vec.convert_to_vec()
+		
 
 func min_height(aux_data: Dictionary, height: int):
 	aux_data.out_position.y = min(aux_data.out_position.y, Globals.Game.middle_point.y - height)

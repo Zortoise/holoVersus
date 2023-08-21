@@ -4477,6 +4477,7 @@ func get_move_name():
 	
 	return move_name
 	
+	
 func check_quick_turn():
 	
 	if UniqChar.has_method("check_quick_turn"): # some unique character states cannot be quick turned
@@ -4533,7 +4534,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	var move_name = get_move_name()
 	if move_name == null: return false
 	
-	if !move_name in UniqChar.STARTERS or is_super(move_name): return false
+	var orig_move_name = Animator.to_play_anim.trim_suffix("Startup")
+	if !orig_move_name in UniqChar.STARTERS: return false
 	
 	var from_move_data = query_move_data(move_name)
 	if Em.atk_attr.NO_QUICK_CANCEL in from_move_data[Em.move.ATK_ATTR]:
@@ -4553,7 +4555,12 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling into another ex move
 			if Animator.time <= 2 and Animator.time != 0:
 				return true # EX and Supers have a wider window to quick cancel into
-	else: # cancelling from a non-ex move
+	elif from_move_data[Em.move.ATK_TYPE] == Em.atk_type.SUPER: # cancelling from super, only other supers are possible
+		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.SUPER: # cancelling into another super
+			if Animator.time <= 2 and Animator.time != 0:
+				return true # EX and Supers have a wider window to quick cancel into
+	
+	else: # cancelling from a non-ex non-super move
 		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling into an ex move from non-ex move has wider window
 			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
 			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed):
@@ -5569,14 +5576,12 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #					pass
 #				else:
 #					return false
-			else:
-#				pass
+			elif to_move_data[Em.move.ATK_TYPE] != Em.atk_type.SUPER:
 				return false
 		Em.atk_type.EX:
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.SPECIAL_CHAIN):
 				pass
-			else:
-#				pass
+			elif to_move_data[Em.move.ATK_TYPE] != Em.atk_type.SUPER:
 				return false
 		_:
 			return false
@@ -7331,6 +7336,10 @@ func calculate_knockback_strength(hit_data) -> int:
 	
 	# for certain multi-hit attacks (not autochain), can be fixed KB till the last hit
 	if Em.hit.MULTIHIT in hit_data:
+		
+		if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED and Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			return 0 # chipper multi-hit has 0 pushback on block
+		
 		if Em.move.FIXED_KB_MULTI in hit_data[Em.hit.MOVE_DATA]:
 			return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_KB_MULTI] # scaled by FMath.S
 		else:
@@ -7348,16 +7357,13 @@ func calculate_knockback_strength(hit_data) -> int:
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		match hit_data[Em.hit.BLOCK_STATE]:
 			Em.block_state.BLOCKED:
-				if Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-					return 0
-				else:
-					knockback_strength = FMath.percent(knockback_strength, BLOCK_KNOCKBACK_MOD) # KB for weakblock
+				knockback_strength = FMath.percent(knockback_strength, BLOCK_KNOCKBACK_MOD) # KB for block
 #				if  hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX, \
 #						Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
 #					knockback_strength = FMath.percent(knockback_strength, SPECIAL_BLOCK_KNOCKBACK_MOD)
 #					# increased KB when blocking heavy/special/ex/super
 			Em.block_state.PARRIED:
-				knockback_strength = FMath.percent(knockback_strength, PARRY_KNOCKBACK_MOD) # KB for strongblock
+				knockback_strength = FMath.percent(knockback_strength, PARRY_KNOCKBACK_MOD) # KB for parry
 #			Em.block_state.PARRY:
 #				knockback_strength = 0 # no KB for strongblock and parry
 

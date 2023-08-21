@@ -19,7 +19,6 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.VELOCITY,
 		Em.move.ATK_LVL : 2,
 		Em.move.FIXED_HITSTOP : 8,
-		Em.move.FIXED_ATKER_HITSTOP : 0,
 		Em.move.KB_ANGLE : 0,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "dark_purple",

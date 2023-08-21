@@ -2176,7 +2176,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	var move_name = get_move_name()
 	if move_name == null: return false
 	
-	if !move_name in UniqNPC.STARTERS or is_super(move_name): return false
+	var orig_move_name = Animator.to_play_anim.trim_suffix("Startup")
+	if !orig_move_name in UniqNPC.STARTERS: return false
 	
 	var from_move_data = query_move_data(move_name)
 	if Em.atk_attr.NO_QUICK_CANCEL in from_move_data[Em.move.ATK_ATTR]:
@@ -2588,14 +2589,14 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 			else:
 #				pass
 				return false
-		Em.atk_type.EX:
-			if Globals.survival_level != null and Inventory.has_quirk(master_ID, Cards.effect_ref.SPECIAL_CHAIN):
-				pass
-			else:
+#		Em.atk_type.EX:
+#			if Globals.survival_level != null and Inventory.has_quirk(master_ID, Cards.effect_ref.SPECIAL_CHAIN):
 #				pass
-				return false
-		_:
-			return false
+#			else:
+##				pass
+#				return false
+#		_:
+#			return false
 	
 	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL, Em.chain_combo.BLOCKED]:
 		if is_atk_active(): # cannot chain on active frames unless landed an unblocked/weakblocked hit

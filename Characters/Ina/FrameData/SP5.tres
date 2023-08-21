@@ -8,10 +8,10 @@ frame_data = {
 "aSP5Active": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
+"SfxUnder_vframes": 6,
 "duration": 12,
 "hframes": 6,
 "loop": false,
@@ -22,28 +22,32 @@ frame_data = {
 "SfxUnder_frame": 3,
 "entityspawn": Vector2( 31, 0 ),
 "frame": 5,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 3: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 4,
 "entityspawn": null,
 "frame": 6,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 6: {
 "SfxOver_frame": 5,
 "SfxUnder_frame": 5,
 "entityspawn": null,
 "frame": 7,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 9: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 6,
 "entityspawn": null,
 "frame": 8,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 }
 },
 "vframes": 6
@@ -51,10 +55,10 @@ frame_data = {
 "aSP5Rec": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
+"SfxUnder_vframes": 6,
 "duration": 24,
 "hframes": 6,
 "loop": false,
@@ -65,42 +69,48 @@ frame_data = {
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 9,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 3: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 10,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 6: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 11,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 9: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 12,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 12: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 13,
-"hurtbox": [ Vector2( -14, -4 ), Vector2( -20, -4 ), Vector2( -20, 5 ), Vector2( -9, 5 ), Vector2( -9, 26 ), Vector2( 6, 26 ), Vector2( 6, 5 ), Vector2( 12, 5 ), Vector2( 12, -4 ), Vector2( 6, -4 ), Vector2( 6, -24 ), Vector2( -14, -24 ) ]
+"hurtbox": [ Vector2( -14, -4 ), Vector2( -20, -4 ), Vector2( -20, 5 ), Vector2( -9, 5 ), Vector2( -9, 26 ), Vector2( 6, 26 ), Vector2( 6, 5 ), Vector2( 12, 5 ), Vector2( 12, -4 ), Vector2( 6, -4 ), Vector2( 6, -24 ), Vector2( -14, -24 ) ],
+"sdhurtbox": [  ]
 },
 18: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 0,
-"hurtbox": [ Vector2( -13, 25 ), Vector2( 3, 25 ), Vector2( 3, 18 ), Vector2( 9, 18 ), Vector2( 9, -21 ), Vector2( -13, -21 ) ]
+"hurtbox": [ Vector2( -13, 25 ), Vector2( 3, 25 ), Vector2( 3, 18 ), Vector2( 9, 18 ), Vector2( 9, -21 ), Vector2( -13, -21 ) ],
+"sdhurtbox": [  ]
 }
 },
 "vframes": 6
@@ -108,10 +118,10 @@ frame_data = {
 "aSP5Startup": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
+"SfxUnder_vframes": 6,
 "duration": 9,
 "hframes": 6,
 "loop": false,
@@ -122,14 +132,16 @@ frame_data = {
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 0,
-"hurtbox": [ Vector2( -13, 25 ), Vector2( 3, 25 ), Vector2( 3, 18 ), Vector2( 9, 18 ), Vector2( 9, -21 ), Vector2( -13, -21 ) ]
+"hurtbox": [ Vector2( -13, 25 ), Vector2( 3, 25 ), Vector2( 3, 18 ), Vector2( 9, 18 ), Vector2( 9, -21 ), Vector2( -13, -21 ) ],
+"sdhurtbox": [  ]
 },
 3: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 1,
-"hurtbox": [ Vector2( -8, -10 ), Vector2( -11, -10 ), Vector2( -11, 22 ), Vector2( 4, 22 ), Vector2( 4, 17 ), Vector2( 10, 17 ), Vector2( 10, -15 ), Vector2( -8, -15 ) ]
+"hurtbox": [ Vector2( -8, -10 ), Vector2( -11, -10 ), Vector2( -11, 22 ), Vector2( 4, 22 ), Vector2( 4, 17 ), Vector2( 10, 17 ), Vector2( 10, -15 ), Vector2( -8, -15 ) ],
+"sdhurtbox": [  ]
 }
 },
 "vframes": 6
@@ -137,84 +149,174 @@ frame_data = {
 "aSP5[ex]Active": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
-"duration": 40,
+"SfxUnder_vframes": 6,
+"duration": 43,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP5Sprite",
 "timestamps": {
 0: {
 "SfxOver_frame": 6,
-"SfxUnder_frame": 7,
+"SfxUnder_frame": 9,
+"entityspawn": Vector2( 47, -6 ),
+"frame": 17,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -33, 1 ), Vector2( 32, 1 ), Vector2( 32, -16 ), Vector2( -33, -16 ) ]
+},
+2: {
+"SfxOver_frame": 7,
+"SfxUnder_frame": 10,
 "entityspawn": null,
 "frame": 17,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -33, 0 ), Vector2( -44, 0 ), Vector2( -44, 33 ), Vector2( -7, 33 ), Vector2( -7, 1 ), Vector2( 32, 1 ), Vector2( 32, -16 ), Vector2( -33, -16 ) ]
 },
 4: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 8,
+"SfxOver_frame": 8,
+"SfxUnder_frame": 11,
 "entityspawn": null,
 "frame": 18,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -33, 1 ), Vector2( -40, 1 ), Vector2( -40, 31 ), Vector2( -4, 30 ), Vector2( 3, 30 ), Vector2( 3, 1 ), Vector2( 32, 1 ), Vector2( 32, -16 ), Vector2( -33, -16 ) ]
+},
+6: {
+"SfxOver_frame": 9,
+"SfxUnder_frame": 12,
+"entityspawn": Vector2( 37, 12 ),
+"frame": 18,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -41, -2 ), Vector2( -35, -2 ), Vector2( -35, 26 ), Vector2( 20, 26 ), Vector2( 20, 4 ), Vector2( 0, 4 ), Vector2( 0, -26 ), Vector2( -41, -26 ) ]
 },
 8: {
-"SfxOver_frame": 7,
-"SfxUnder_frame": 9,
+"SfxOver_frame": 10,
+"SfxUnder_frame": 13,
 "entityspawn": null,
 "frame": 19,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -42, 0 ), Vector2( -35, 0 ), Vector2( -35, 26 ), Vector2( 20, 26 ), Vector2( 20, 2 ), Vector2( -11, 2 ), Vector2( -11, -38 ), Vector2( -42, -38 ) ]
+},
+10: {
+"SfxOver_frame": 11,
+"SfxUnder_frame": 14,
+"entityspawn": null,
+"frame": 19,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -43, -1 ), Vector2( -35, -1 ), Vector2( -35, 26 ), Vector2( 20, 26 ), Vector2( 20, 7 ), Vector2( 8, 7 ), Vector2( 8, -36 ), Vector2( -43, -36 ) ]
 },
 12: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 10,
+"SfxOver_frame": 12,
+"SfxUnder_frame": 15,
+"entityspawn": Vector2( 42, -16 ),
+"frame": 20,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -45, 33 ), Vector2( -7, 33 ), Vector2( -7, -13 ), Vector2( 5, -13 ), Vector2( 5, -14 ), Vector2( 25, -14 ), Vector2( 25, -28 ), Vector2( -45, -28 ) ]
+},
+14: {
+"SfxOver_frame": 13,
+"SfxUnder_frame": 16,
 "entityspawn": null,
 "frame": 20,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -50, 33 ), Vector2( -10, 33 ), Vector2( -10, -3 ), Vector2( 25, -3 ), Vector2( 25, -28 ), Vector2( -50, -28 ) ]
 },
 16: {
-"SfxOver_frame": 8,
-"SfxUnder_frame": 7,
+"SfxOver_frame": 14,
+"SfxUnder_frame": 17,
 "entityspawn": null,
 "frame": 21,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -37, -5 ), Vector2( -47, -5 ), Vector2( -47, 38 ), Vector2( -17, 38 ), Vector2( -17, 10 ), Vector2( 9, 10 ), Vector2( 9, -3 ), Vector2( 25, -3 ), Vector2( 25, -28 ), Vector2( -37, -28 ) ]
+},
+18: {
+"SfxOver_frame": 15,
+"SfxUnder_frame": 18,
+"entityspawn": Vector2( 37, 3 ),
+"frame": 21,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -38, -5 ), Vector2( -46, -5 ), Vector2( -46, 30 ), Vector2( -14, 30 ), Vector2( -14, 8 ), Vector2( 22, 8 ), Vector2( 22, -5 ), Vector2( -9, -5 ), Vector2( -9, -37 ), Vector2( -38, -37 ) ]
 },
 20: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 8,
+"SfxOver_frame": 16,
+"SfxUnder_frame": 19,
 "entityspawn": null,
 "frame": 22,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -38, -5 ), Vector2( -43, -5 ), Vector2( -43, 36 ), Vector2( -15, 36 ), Vector2( -15, 8 ), Vector2( 22, 8 ), Vector2( 22, -5 ), Vector2( -9, -5 ), Vector2( -9, -37 ), Vector2( -38, -37 ) ]
+},
+22: {
+"SfxOver_frame": 17,
+"SfxUnder_frame": 20,
+"entityspawn": null,
+"frame": 22,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -42, 36 ), Vector2( -11, 36 ), Vector2( -11, 7 ), Vector2( 23, 7 ), Vector2( 23, -15 ), Vector2( -13, -15 ), Vector2( -13, -43 ), Vector2( -42, -43 ) ]
 },
 24: {
-"SfxOver_frame": 9,
-"SfxUnder_frame": 9,
+"SfxOver_frame": 18,
+"SfxUnder_frame": 21,
+"entityspawn": Vector2( 52, -11 ),
+"frame": 23,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -42, -5 ), Vector2( -51, -5 ), Vector2( -51, 22 ), Vector2( -28, 22 ), Vector2( -28, 34 ), Vector2( -6, 34 ), Vector2( -6, -7 ), Vector2( 37, -7 ), Vector2( 37, -19 ), Vector2( -9, -19 ), Vector2( -9, -38 ), Vector2( -42, -38 ) ]
+},
+26: {
+"SfxOver_frame": 19,
+"SfxUnder_frame": 22,
 "entityspawn": null,
 "frame": 23,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -39, -5 ), Vector2( -51, -5 ), Vector2( -51, 22 ), Vector2( -6, 22 ), Vector2( -6, -7 ), Vector2( 37, -7 ), Vector2( 37, -19 ), Vector2( -9, -19 ), Vector2( -9, -38 ), Vector2( -39, -38 ) ]
 },
 28: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 10,
+"SfxOver_frame": 20,
+"SfxUnder_frame": 23,
 "entityspawn": null,
 "frame": 24,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -31, -10 ), Vector2( -51, -10 ), Vector2( -51, 19 ), Vector2( -16, 19 ), Vector2( -16, 4 ), Vector2( -6, 3 ), Vector2( 37, 3 ), Vector2( 37, -19 ), Vector2( -6, -19 ), Vector2( -6, -38 ), Vector2( -31, -38 ) ]
+},
+30: {
+"SfxOver_frame": 21,
+"SfxUnder_frame": 24,
+"entityspawn": Vector2( 44, -2 ),
+"frame": 24,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -36, -2 ), Vector2( -54, -2 ), Vector2( -54, 19 ), Vector2( -27, 19 ), Vector2( -27, 7 ), Vector2( 29, 7 ), Vector2( 29, -6 ), Vector2( -3, -6 ), Vector2( -3, -33 ), Vector2( -36, -33 ) ]
 },
 32: {
-"SfxOver_frame": 8,
-"SfxUnder_frame": 7,
+"SfxOver_frame": 22,
+"SfxUnder_frame": 25,
 "entityspawn": null,
 "frame": 25,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -36, -2 ), Vector2( -51, -2 ), Vector2( -51, 19 ), Vector2( -27, 19 ), Vector2( -27, 7 ), Vector2( 29, 7 ), Vector2( 29, -6 ), Vector2( -3, -6 ), Vector2( -3, -33 ), Vector2( -36, -33 ) ]
 },
-36: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 8,
+35: {
+"SfxOver_frame": 23,
+"SfxUnder_frame": 26,
+"entityspawn": null,
+"frame": 25,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -36, -2 ), Vector2( -46, -2 ), Vector2( -46, 19 ), Vector2( -27, 19 ), Vector2( -27, 7 ), Vector2( 29, 7 ), Vector2( 29, -6 ), Vector2( -14, -6 ), Vector2( -14, -29 ), Vector2( -36, -29 ) ]
+},
+37: {
+"SfxOver_frame": 24,
+"SfxUnder_frame": 27,
 "entityspawn": null,
 "frame": 26,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -43, 15 ), Vector2( -17, 15 ), Vector2( -17, 2 ), Vector2( -3, 2 ), Vector2( -3, -9 ), Vector2( -17, -9 ), Vector2( -17, -27 ), Vector2( -43, -27 ) ]
+},
+40: {
+"SfxOver_frame": 25,
+"SfxUnder_frame": 28,
+"entityspawn": null,
+"frame": 26,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -35, -10 ), Vector2( -44, -10 ), Vector2( -44, 16 ), Vector2( -13, 16 ), Vector2( -13, -30 ), Vector2( -35, -30 ) ]
 }
 },
 "vframes": 6
@@ -222,56 +324,78 @@ frame_data = {
 "aSP5[ex]Rec": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
-"duration": 28,
+"SfxUnder_vframes": 6,
+"duration": 24,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP5Sprite",
 "timestamps": {
 0: {
-"SfxOver_frame": 0,
-"SfxUnder_frame": 0,
+"SfxOver_frame": 26,
+"SfxUnder_frame": 29,
 "entityspawn": null,
 "frame": 27,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -32, -9 ), Vector2( -45, -9 ), Vector2( -45, 13 ), Vector2( -21, 13 ), Vector2( -21, -9 ), Vector2( -14, -9 ), Vector2( -14, -29 ), Vector2( -32, -29 ) ]
 },
-4: {
-"SfxOver_frame": 0,
+3: {
+"SfxOver_frame": 27,
+"SfxUnder_frame": 30,
+"entityspawn": null,
+"frame": 27,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -22, -9 ), Vector2( -47, -9 ), Vector2( -47, 11 ), Vector2( -13, 11 ), Vector2( -13, -27 ), Vector2( -22, -27 ) ]
+},
+6: {
+"SfxOver_frame": 28,
+"SfxUnder_frame": 31,
+"entityspawn": null,
+"frame": 28,
+"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
+"sdhurtbox": [ Vector2( -44, 14 ), Vector2( -22, 14 ), Vector2( -22, -6 ), Vector2( -10, -6 ), Vector2( -10, -15 ), Vector2( -44, -15 ) ]
+},
+9: {
+"SfxOver_frame": 29,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 28,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -10, 4 ), Vector2( -14, 4 ), Vector2( -14, 10 ), Vector2( -10, 10 ), Vector2( -10, 25 ), Vector2( 9, 25 ), Vector2( 9, 4 ), Vector2( 18, 4 ), Vector2( 18, -3 ), Vector2( 9, -3 ), Vector2( 9, -21 ), Vector2( -10, -21 ) ],
+"sdhurtbox": [ Vector2( -40, 13 ), Vector2( -23, 13 ), Vector2( -23, -5 ), Vector2( -40, -5 ) ]
 },
-8: {
-"SfxOver_frame": 0,
+12: {
+"SfxOver_frame": 30,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 29,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"hurtbox": [ Vector2( -10, 4 ), Vector2( -14, 4 ), Vector2( -14, 10 ), Vector2( -10, 10 ), Vector2( -10, 25 ), Vector2( 9, 25 ), Vector2( 9, 4 ), Vector2( 18, 4 ), Vector2( 18, -3 ), Vector2( 9, -3 ), Vector2( 9, -21 ), Vector2( -10, -21 ) ],
+"sdhurtbox": [ Vector2( -30, 12 ), Vector2( -20, 12 ), Vector2( -20, -5 ), Vector2( -30, -5 ) ]
 },
-12: {
-"SfxOver_frame": 0,
+14: {
+"SfxOver_frame": 31,
 "SfxUnder_frame": 0,
 "entityspawn": null,
-"frame": 30,
-"hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ]
+"frame": 29,
+"hurtbox": [ Vector2( -10, 4 ), Vector2( -14, 4 ), Vector2( -14, 10 ), Vector2( -10, 10 ), Vector2( -10, 25 ), Vector2( 9, 25 ), Vector2( 9, 4 ), Vector2( 18, 4 ), Vector2( 18, -3 ), Vector2( 9, -3 ), Vector2( 9, -21 ), Vector2( -10, -21 ) ],
+"sdhurtbox": [ Vector2( -29, 2 ), Vector2( -19, 2 ), Vector2( -19, -5 ), Vector2( -29, -5 ) ]
 },
 16: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
-"frame": 31,
-"hurtbox": [ Vector2( -10, 4 ), Vector2( -14, 4 ), Vector2( -14, 10 ), Vector2( -10, 10 ), Vector2( -10, 25 ), Vector2( 9, 25 ), Vector2( 9, 4 ), Vector2( 18, 4 ), Vector2( 18, -3 ), Vector2( 9, -3 ), Vector2( 9, -21 ), Vector2( -10, -21 ) ]
+"frame": 29,
+"hurtbox": [ Vector2( -10, 4 ), Vector2( -14, 4 ), Vector2( -14, 10 ), Vector2( -10, 10 ), Vector2( -10, 25 ), Vector2( 9, 25 ), Vector2( 9, 4 ), Vector2( 18, 4 ), Vector2( 18, -3 ), Vector2( 9, -3 ), Vector2( 9, -21 ), Vector2( -10, -21 ) ],
+"sdhurtbox": [  ]
 },
-22: {
+18: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
-"frame": 32,
-"hurtbox": [ Vector2( -9, -6 ), Vector2( -16, -6 ), Vector2( -16, 3 ), Vector2( -9, 3 ), Vector2( -9, 23 ), Vector2( 8, 23 ), Vector2( 8, 3 ), Vector2( 11, 3 ), Vector2( 9, -6 ), Vector2( 9, -24 ), Vector2( -9, -24 ) ]
+"frame": 30,
+"hurtbox": [ Vector2( -9, -6 ), Vector2( -16, -6 ), Vector2( -16, 3 ), Vector2( -9, 3 ), Vector2( -9, 23 ), Vector2( 8, 23 ), Vector2( 8, 3 ), Vector2( 11, 3 ), Vector2( 9, -6 ), Vector2( 9, -24 ), Vector2( -9, -24 ) ],
+"sdhurtbox": [  ]
 }
 },
 "vframes": 6
@@ -279,11 +403,11 @@ frame_data = {
 "aSP5[ex]Startup": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
-"duration": 15,
+"SfxUnder_vframes": 6,
+"duration": 18,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP5Sprite",
@@ -293,21 +417,32 @@ frame_data = {
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 14,
-"hurtbox": [ Vector2( -12, 26 ), Vector2( 5, 26 ), Vector2( 5, 12 ), Vector2( 9, 12 ), Vector2( 9, -7 ), Vector2( 5, -7 ), Vector2( 5, -24 ), Vector2( -12, -24 ) ]
+"hurtbox": [ Vector2( -12, 26 ), Vector2( 5, 26 ), Vector2( 5, 12 ), Vector2( 9, 12 ), Vector2( 9, -7 ), Vector2( 5, -7 ), Vector2( 5, -24 ), Vector2( -12, -24 ) ],
+"sdhurtbox": [  ]
 },
-4: {
+6: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,
 "frame": 15,
-"hurtbox": [ Vector2( -12, 25 ), Vector2( 8, 25 ), Vector2( 8, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -12, 25 ), Vector2( 8, 25 ), Vector2( 8, -23 ), Vector2( -12, -23 ) ],
+"sdhurtbox": [  ]
 },
-9: {
+12: {
 "SfxOver_frame": 0,
-"SfxUnder_frame": 0,
+"SfxUnder_frame": 7,
 "entityspawn": null,
 "frame": 16,
-"hurtbox": [ Vector2( -12, 26 ), Vector2( 7, 26 ), Vector2( 7, -23 ), Vector2( -12, -23 ) ]
+"hurtbox": [ Vector2( -12, 26 ), Vector2( 7, 26 ), Vector2( 7, -23 ), Vector2( -12, -23 ) ],
+"sdhurtbox": [ Vector2( -41, 1 ), Vector2( 0, 1 ), Vector2( 0, -26 ), Vector2( -41, -26 ) ]
+},
+15: {
+"SfxOver_frame": 0,
+"SfxUnder_frame": 8,
+"entityspawn": null,
+"frame": 16,
+"hurtbox": [ Vector2( -12, 26 ), Vector2( 7, 26 ), Vector2( 7, -23 ), Vector2( -12, -23 ) ],
+"sdhurtbox": [ Vector2( -39, 1 ), Vector2( 19, 1 ), Vector2( 19, -21 ), Vector2( -39, -21 ) ]
 }
 },
 "vframes": 6
@@ -315,10 +450,10 @@ frame_data = {
 "aSP5[h]Active": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
+"SfxUnder_vframes": 6,
 "duration": 24,
 "hframes": 6,
 "loop": false,
@@ -329,56 +464,64 @@ frame_data = {
 "SfxUnder_frame": 3,
 "entityspawn": Vector2( 31, 0 ),
 "frame": 5,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 3: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 4,
 "entityspawn": null,
 "frame": 6,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 6: {
 "SfxOver_frame": 5,
 "SfxUnder_frame": 5,
 "entityspawn": null,
 "frame": 7,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 9: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 6,
 "entityspawn": null,
 "frame": 8,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 12: {
 "SfxOver_frame": 4,
 "SfxUnder_frame": 3,
 "entityspawn": null,
 "frame": 5,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 15: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 4,
 "entityspawn": null,
 "frame": 6,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 18: {
 "SfxOver_frame": 5,
 "SfxUnder_frame": 5,
 "entityspawn": null,
 "frame": 7,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 },
 21: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 6,
 "entityspawn": null,
 "frame": 8,
-"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ]
+"hurtbox": [ Vector2( -15, 6 ), Vector2( -8, 6 ), Vector2( -8, 25 ), Vector2( 4, 25 ), Vector2( 4, 14 ), Vector2( 11, 14 ), Vector2( 11, -9 ), Vector2( 6, -9 ), Vector2( 6, -20 ), Vector2( -15, -20 ) ],
+"sdhurtbox": [  ]
 }
 },
 "vframes": 6
@@ -386,10 +529,10 @@ frame_data = {
 "aSP5bStartup": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
+"SfxUnder_vframes": 6,
 "duration": 9,
 "hframes": 6,
 "loop": false,
@@ -400,21 +543,24 @@ frame_data = {
 "SfxUnder_frame": 1,
 "entityspawn": null,
 "frame": 2,
-"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ]
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ],
+"sdhurtbox": [  ]
 },
 3: {
 "SfxOver_frame": 2,
 "SfxUnder_frame": 2,
 "entityspawn": null,
 "frame": 3,
-"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ]
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ],
+"sdhurtbox": [  ]
 },
 6: {
 "SfxOver_frame": 3,
 "SfxUnder_frame": 1,
 "entityspawn": null,
 "frame": 4,
-"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ]
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ],
+"sdhurtbox": [  ]
 }
 },
 "vframes": 6
@@ -422,10 +568,10 @@ frame_data = {
 "aSP5b[h]Startup": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP5SfxOver",
-"SfxOver_vframes": 2,
+"SfxOver_vframes": 6,
 "SfxUnder_hframes": 6,
 "SfxUnder_spritesheet": "SP5SfxUnder",
-"SfxUnder_vframes": 2,
+"SfxUnder_vframes": 6,
 "duration": 12,
 "hframes": 6,
 "loop": false,
@@ -436,21 +582,24 @@ frame_data = {
 "SfxUnder_frame": 1,
 "entityspawn": null,
 "frame": 2,
-"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ]
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ],
+"sdhurtbox": [  ]
 },
 4: {
 "SfxOver_frame": 2,
 "SfxUnder_frame": 2,
 "entityspawn": null,
 "frame": 3,
-"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ]
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ],
+"sdhurtbox": [  ]
 },
 8: {
 "SfxOver_frame": 3,
 "SfxUnder_frame": 1,
 "entityspawn": null,
 "frame": 4,
-"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ]
+"hurtbox": [ Vector2( -11, 21 ), Vector2( 11, 21 ), Vector2( 11, 1 ), Vector2( 9, 1 ), Vector2( 9, -17 ), Vector2( -11, -17 ) ],
+"sdhurtbox": [  ]
 }
 },
 "vframes": 6

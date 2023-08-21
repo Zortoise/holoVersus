@@ -336,6 +336,7 @@ func simulate():
 							
 					Character.velocity.x += strafe_vec.x
 					Character.velocity.y += strafe_vec.y
+			
 					
 	# TAKO COMMAND --------------------------------------------------------------------------------------------------
 			
@@ -439,6 +440,15 @@ func simulate():
 						Character.palette_number, NAME)
 				Globals.Game.spawn_SFX("Blink", "Blink", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 				expire_extra_takos()
+				
+				
+			elif Animator.query_current(["aSP5[ex]Active"]):
+				
+				var spawn_point = Animator.query_point("entityspawn")
+				if spawn_point != null and Animator.time in Animator.animations[Animator.current_anim]["timestamps"]:
+					Globals.Game.spawn_entity(Character.player_ID, "InaBeam", spawn_point, {"back":true, "type":"ex"}, \
+							Character.palette_number, NAME)
+							
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
 			
@@ -1200,14 +1210,14 @@ func sequence_partner_passthrough(): # which step in sequence has partner ignore
 # CODE FOR CERTAIN MOVES ---------------------------------------------------------------------------------------------------
 
 	
-func unique_chaining_rules(_move_name, _attack_ref):
+func unique_chaining_rules(move_name, attack_ref):
 #	move_name = refine_move_name(move_name)
 #	var attack_name = refine_move_name(attack_ref)
 	
-#	match Character.new_state:
-#		Em.char_state.AIR_ATK_REC, Em.char_state.GRD_ATK_REC:
-#			if attack_ref == "aSP3":
-#				return true
+	match Character.new_state:
+		Em.char_state.AIR_ATK_REC:
+			if move_name == "aSP5" and attack_ref == "aSP5[ex]":
+				return true
 				
 	return false
 	
@@ -1997,7 +2007,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			stop_momentum()
 			special_dust()
 		"aSP5[ex]Active":
+			Globals.Game.spawn_entity(Character.player_ID, "InaBeam", Animator.query_point("entityspawn"), {"back":true, "type":"ex"}, \
+					Character.palette_number, NAME)
 			stop_momentum()
+			special_dust()
 			
 			
 		"aSP1Rec", "aSP2Rec", "aSP3Rec", "aSP1[ex]Rec", "aSP2[ex]Rec", "aSP4Rec", "aSP4[ex]Rec", "aSP5Rec", "aSP5[ex]Rec":
