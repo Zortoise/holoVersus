@@ -833,6 +833,8 @@ func get_move_name():
 	var move_name = Animator.to_play_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
+	move_name = UniqNPC.refine_move_name(move_name)
+	
 	return move_name
 	
 

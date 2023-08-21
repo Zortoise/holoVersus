@@ -4473,6 +4473,8 @@ func get_move_name():
 	var move_name = Animator.to_play_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
+	move_name = UniqChar.refine_move_name(move_name)
+	
 	return move_name
 	
 func check_quick_turn():
@@ -5077,17 +5079,33 @@ func test_dash_cancel():
 	
 	
 func test_dodge_cancel():
+		
+	match state: # need to be in attack active/recovery
+		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
+				Em.char_state.GRD_ATK_REC, Em.char_state.AIR_ATK_REC:
+			pass
+		_:
+			return false
+		
+	var move_data = query_move_data(get_move_name())
+
+	if Em.atk_attr.NO_REC_CANCEL in move_data[Em.move.ATK_ATTR] : return false # Normals with NO_REC_CANCEL cannot be dodge cancelled
 	
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.DODGE_CANCEL):
-		pass
-	elif !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
-		return false # can only dodge cancel on Normal/Heavy hit
-		
-	var move_name = get_move_name()
-	if Em.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be dash cancelled
+		afterimage_cancel()
+		return true
 	
-	afterimage_cancel()
-	return true
+	match move_data[Em.move.ATK_TYPE]:
+		Em.atk_type.LIGHT, Em.atk_type.FIERCE:
+			if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED]: # can only dodge cancel Normals on hit/block
+				afterimage_cancel()
+				return true
+		Em.atk_type.HEAVY:
+			if chain_combo in [Em.chain_combo.HEAVY]: # can only dodge cancel Heavies on hit
+				afterimage_cancel()
+				return true
+
+	return false
 	
 	
 func test_sdash_revoke():
@@ -5521,8 +5539,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	if !attack_ref in UniqChar.STARTERS:
 		return false
 	
-	var move_name = Animator.current_anim.trim_suffix("Active")
-	move_name = move_name.trim_suffix("Rec")
+	var move_name = get_move_name()
 	
 	if UniqChar.has_method("unique_chaining_rules") and UniqChar.unique_chaining_rules(move_name, attack_ref):
 		# will use Character.chain_combo, good for autocombos that triggers on hit/block and may/may not be on whiff
@@ -5535,8 +5552,9 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	match from_move_data[Em.move.ATK_TYPE]:
 		Em.atk_type.LIGHT: # Light Normals can chain cancel on whiff
 			pass
-		Em.atk_type.FIERCE: # Fierce Normals cannot chain into Lights on whiff
-			if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED] and \
+		Em.atk_type.FIERCE: # Fierce Normals cannot chain into Lights on whiff/block
+#			if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED] and \
+			if !chain_combo in [Em.chain_combo.NORMAL] and \
 					to_move_data[Em.move.ATK_TYPE] == Em.atk_type.LIGHT:
 				return false
 		Em.atk_type.HEAVY: # Heavy Normals can only chain cancel into non-normals

@@ -677,6 +677,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 #	match anim_name:
 #		_:
 #			pass
+
+	if anim_name.ends_with("Kill") or anim_name.ends_with("Expire"):
+		$HitStopTimer.stop()
+		hitstop = null
 			
 	UniqEntity._on_SpritePlayer_anim_started(anim_name)
 	

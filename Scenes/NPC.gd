@@ -2126,6 +2126,8 @@ func get_move_name():
 	var move_name = Animator.to_play_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
+	move_name = UniqNPC.refine_move_name(move_name)
+	
 	return move_name
 	
 func check_quick_turn():
@@ -2554,8 +2556,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	if !attack_ref in UniqNPC.STARTERS:
 		return false
 	
-	var move_name = Animator.current_anim.trim_suffix("Active")
-	move_name = move_name.trim_suffix("Rec")
+	var move_name = get_move_name()
 	
 	if UniqNPC.has_method("unique_chaining_rules") and UniqNPC.unique_chaining_rules(move_name, attack_ref):
 		# will use Character.chain_combo, good for autocombos that triggers on hit/block and may/may not be on whiff
@@ -2568,8 +2569,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	match from_move_data[Em.move.ATK_TYPE]:
 		Em.atk_type.LIGHT: # Light Normals can chain cancel on whiff
 			pass
-		Em.atk_type.FIERCE: # Fierce Normals cannot chain into Lights on whiff
-			if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.BLOCKED] and \
+		Em.atk_type.FIERCE: # Fierce Normals cannot chain into Lights on whiff/block
+			if !chain_combo in [Em.chain_combo.NORMAL] and \
 					to_move_data[Em.move.ATK_TYPE] == Em.atk_type.LIGHT:
 				return false
 		Em.atk_type.HEAVY: # Heavy Normals can only chain cancel into non-normals
