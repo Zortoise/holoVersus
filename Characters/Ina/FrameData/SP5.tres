@@ -180,7 +180,7 @@ frame_data = {
 "entityspawn": null,
 "frame": 18,
 "hurtbox": [ Vector2( -11, -1 ), Vector2( -18, -1 ), Vector2( -18, 7 ), Vector2( -11, 7 ), Vector2( -11, 25 ), Vector2( 8, 25 ), Vector2( 8, -2 ), Vector2( 20, -2 ), Vector2( 20, -10 ), Vector2( 8, -10 ), Vector2( 8, -23 ), Vector2( -11, -23 ) ],
-"sdhurtbox": [ Vector2( -33, 1 ), Vector2( -40, 1 ), Vector2( -40, 31 ), Vector2( -4, 30 ), Vector2( 3, 30 ), Vector2( 3, 1 ), Vector2( 32, 1 ), Vector2( 32, -16 ), Vector2( -33, -16 ) ]
+"sdhurtbox": [ Vector2( -33, 1 ), Vector2( -40, 1 ), Vector2( -40, 30 ), Vector2( 3, 30 ), Vector2( 3, 1 ), Vector2( 32, 1 ), Vector2( 32, -16 ), Vector2( -33, -16 ) ]
 },
 6: {
 "SfxOver_frame": 9,

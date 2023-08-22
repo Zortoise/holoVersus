@@ -33,7 +33,6 @@ func _ready():
 func init(_aux_data: Dictionary):
 	
 	Animator.play("Kill") # starting animation
-	Entity.play_audio("rock2", {"vol" : -10})
 
 func simulate():
 	pass

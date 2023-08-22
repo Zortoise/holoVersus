@@ -240,6 +240,8 @@ func explode():
 	Entity.free = true
 	Globals.Game.spawn_entity(Entity.master_ID, "TakoExplode", Entity.position, \
 			{"facing" : Entity.facing}, Entity.palette_ref, Entity.master_ref)	
+	Entity.play_audio("explosion3", {"vol" : -15, "bus":"PitchDown"})
+	Entity.play_audio("impact44", {"vol" : -10})
 	
 func kill(sound = true):
 	if Animator.to_play_anim != "Kill":

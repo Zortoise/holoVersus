@@ -184,6 +184,11 @@ var card_entity_data = {
 		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Moai.tres"),
 		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/MoaiSprite.png"),
 	},
+	"ScissorsE" : {
+		"scene" : load("res://Cards/ScissorsE.tscn"),
+		"frame_data" : ResourceLoader.load("res://Cards/FrameData/Scissors.tres"),
+		"spritesheet" : ResourceLoader.load("res://Cards/Spritesheets/ScissorsSprite.png"),
+	},
 }
 
 var card_sfx = {

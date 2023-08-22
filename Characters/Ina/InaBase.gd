@@ -342,7 +342,7 @@ const MOVE_DATABASE = {
 	
 	"aSP5[ex]": {
 		Em.move.ATK_TYPE : Em.atk_type.EX,
-		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS],
+		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS, Em.atk_attr.NO_SDASH_CANCEL],
 	},
 }
 

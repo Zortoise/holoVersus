@@ -340,35 +340,47 @@ func simulate():
 					
 	# TAKO COMMAND --------------------------------------------------------------------------------------------------
 			
-	match Character.state:
+	match Character.new_state:
 		Em.char_state.AIR_ATK_STARTUP:
-			if Animator.time > 1 and Animator.query_current(["aSP3Startup"]):
+			if Animator.time > 1 and Animator.query_to_play(["aSP3Startup"]):
 				if Character.button_light in Character.input_state.just_pressed:
 					Character.unique_data.combination.append(Character.button_light)
-					Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 					Character.input_buffer = []
+					if Character.unique_data.combination.size() < 3:
+						Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+						Character.play_audio("bling8", {"vol": -15, "bus":"PitchUp"})
 				elif Character.button_fierce in Character.input_state.just_pressed:
 					Character.unique_data.combination.append(Character.button_fierce)
-					Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME) 
 					Character.input_buffer = []
+					if Character.unique_data.combination.size() < 3:
+						Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+						Character.play_audio("bling8", {"vol": -15, "bus":"PitchDown"})
 				
 		Em.char_state.AIR_ATK_ACTIVE:	
-			if Animator.query_current(["aSP3Active"]):
+			if Animator.query_to_play(["aSP3Active"]):
 				if !Character.button_unique in Character.input_state.pressed:
 					Character.animate("aSP3Rec") # release held input
 				else:	
 					if Character.button_light in Character.input_state.just_pressed:
 						Character.unique_data.combination.append(Character.button_light)
-						Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 						Character.input_buffer = []
+						if Character.unique_data.combination.size() < 3:
+							Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+							Character.play_audio("bling8", {"vol": -15, "bus":"PitchUp"})
 					elif Character.button_fierce in Character.input_state.just_pressed:
 						Character.unique_data.combination.append(Character.button_fierce)
-						Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME) 
 						Character.input_buffer = []
+						if Character.unique_data.combination.size() < 3:
+							Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+							Character.play_audio("bling8", {"vol": -15, "bus":"PitchDown"})
 									
 					if Character.unique_data.combination.size() >= 3:
 						Character.animate("aSP3Rec")
 						process_combination()
+						Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+								Character.palette_number, NAME)
+						Character.play_audio("buff1", {"vol": -20})
+						Character.play_audio("bling8", {"vol": -10})
 						Character.unique_data.combination = []
 					
 		# triggering tako command
@@ -376,10 +388,21 @@ func simulate():
 				Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_ATK_REC, Em.char_state.GRD_ATK_REC:
 			if !Character.unique_data.draw_lock and Character.button_unique in Character.input_state.pressed and \
 					!"aSP3" in Character.aerial_sp_memory:
+						
+				if Character.new_state in [Em.char_state.AIR_ATK_REC, Em.char_state.GRD_ATK_REC]:
+					var move_data = query_move_data(Character.get_move_name())
+					if move_data[Em.move.ATK_TYPE] == Em.atk_type.SUPER:
+						continue # cannot chain from supers
+					else:
+						Character.afterimage_cancel()
+						
 				Character.animate("aSP3Startup")
+				Character.play_audio("buff1", {"vol": -22, "bus":"PitchDown"})
 				Character.unique_data.draw_lock = true # can only unlock by releasing Unique
 
 	# EASIER BLINKS --------------------------------------------------------------------------------------------------
+
+	match Character.state:
 
 		Em.char_state.AIR_STARTUP:
 			if Animator.time == 8 and Animator.query_current(["BlinkTransit"]):
@@ -441,6 +464,8 @@ func simulate():
 				Globals.Game.spawn_SFX("Blink", "Blink", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 				expire_extra_takos()
 				
+				Character.play_audio("energy8", {"vol": -21, "bus":"LowPass"})
+				Character.play_audio("bling8", {"vol": -16, "bus":"PitchUp"})
 				
 			elif Animator.query_current(["aSP5[ex]Active"]):
 				
@@ -448,6 +473,8 @@ func simulate():
 				if spawn_point != null and Animator.time in Animator.animations[Animator.current_anim]["timestamps"]:
 					Globals.Game.spawn_entity(Character.player_ID, "InaBeam", spawn_point, {"back":true, "type":"ex"}, \
 							Character.palette_number, NAME)
+							
+					Character.play_audio("energy2", {"vol": -7, "bus":"PitchDown2"})
 							
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
@@ -791,7 +818,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					
 		Em.char_state.GRD_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
-				if !Character.no_jumpsquat_cancel and Character.grounded and attack_ref in UP_TILTS and \
+				if Character.grounded and attack_ref in UP_TILTS and Character.test_jumpsquat_cancel(attack_ref) and \
 						Animator.query_to_play(["JumpTransit"]) and Character.test_qc_chain_combo(attack_ref):
 					if Character.is_ex_valid(attack_ref):
 						Character.animate(attack_ref + "Startup")
@@ -813,8 +840,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						
 		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
-				if !Character.no_jumpsquat_cancel and (air_atk_ref) in UP_TILTS and Character.test_aerial_memory(air_atk_ref) and \
-						!Character.button_jump in Character.input_state.pressed and \
+				if (air_atk_ref) in UP_TILTS and Character.test_aerial_memory(air_atk_ref) and \
+						!Character.button_jump in Character.input_state.pressed and Character.test_jumpsquat_cancel(attack_ref) and \
 						Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
 						Character.test_qc_chain_combo(air_atk_ref):
 					if Character.is_ex_valid(air_atk_ref):
@@ -1210,14 +1237,14 @@ func sequence_partner_passthrough(): # which step in sequence has partner ignore
 # CODE FOR CERTAIN MOVES ---------------------------------------------------------------------------------------------------
 
 	
-func unique_chaining_rules(move_name, attack_ref):
+func unique_chaining_rules(_move_name, _attack_ref):
 #	move_name = refine_move_name(move_name)
 #	var attack_name = refine_move_name(attack_ref)
 	
-	match Character.new_state:
-		Em.char_state.AIR_ATK_REC:
-			if move_name == "aSP5" and attack_ref == "aSP5[ex]":
-				return true
+#	match Character.new_state: # way too strong...
+#		Em.char_state.AIR_ATK_REC:
+#			if move_name == "aSP5" and attack_ref == "aSP5[ex]":
+#				return true
 				
 	return false
 	
@@ -1389,46 +1416,30 @@ func process_combination():
 	match Character.unique_data.combination:
 		[Character.button_light, Character.button_light, Character.button_light]:
 			Character.unique_data.instant_command = "redirect"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 					
 		[Character.button_fierce, Character.button_fierce, Character.button_fierce]:
 			Character.unique_data.instant_command = "slow"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 					
 		[Character.button_fierce, Character.button_fierce, Character.button_light]:
 			Character.unique_data.instant_command = "chase"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 					
 		[Character.button_light, Character.button_light, Character.button_fierce]:
 			Character.unique_data.instant_command = "rally"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 					
 		[Character.button_fierce, Character.button_light, Character.button_fierce]:
 			var closest_tako = get_closest_tako()
 			if closest_tako != null:
 				closest_tako.UniqEntity.explode()
 			Character.unique_data.instant_command = "expire"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 					
 		[Character.button_light, Character.button_fierce, Character.button_light]:
 			Character.unique_data.instant_command = "invis"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 					
 		[Character.button_light, Character.button_fierce, Character.button_fierce]:
 			Character.unique_data.instant_command = "enhance"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 					
 		[Character.button_fierce, Character.button_light, Character.button_light]:
 			Character.unique_data.instant_command = "scatter"
-			Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-					Character.palette_number, NAME)
 	
 	
 func tako_ring(count: int, ex: = false):
@@ -1457,6 +1468,10 @@ func tako_ring(count: int, ex: = false):
 				Character.palette_number, NAME)
 		Globals.Game.spawn_SFX("Blink", "Blink", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 		expire_extra_takos()
+		
+	Character.play_audio("energy8", {"vol": -16, "bus":"LowPass"})
+	Character.play_audio("bling8", {"vol": -16, "bus":"PitchUp"})
+	
 	
 func spawn_drill(held: = false, ex := false):
 	var spawn_point = Character.position
@@ -1964,6 +1979,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 				"aSP1[ex][u]Active": aux_data.aim = -1
 			Globals.Game.spawn_entity(Character.player_ID, "TakoSound", spawn_point, aux_data, Character.palette_number, NAME)
 			Globals.Game.spawn_SFX("Music1", "Music", spawn_point, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+			Character.play_audio("magic1", {"vol": -12})
+			Character.play_audio("bling8", {"vol": -10, "bus":"PitchUp"})
 			stop_momentum()
 			
 		"aSP2[c1]Active", "aSP2[c2]Active", "aSP2[c3]Active", "aSP2[ex]Active":
@@ -1973,6 +1990,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x_slow = 5
 			Character.velocity_limiter.y_slow = 5
 			Character.anim_gravity_mod = 0
+			Character.play_audio("magic1", {"vol": -18})
+			Character.play_audio("buff1", {"vol": -20})
 			
 		"aSP3Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
@@ -1992,23 +2011,30 @@ func _on_SpritePlayer_anim_started(anim_name):
 			stop_momentum()
 			special_dust()
 			spawn_drill(Character.held_version(Character.button_fierce))
+			Character.play_audio("magic3", {"vol": -10})
 		"aSP4[ex]Active":	
 			stop_momentum()
 			special_dust()
 			spawn_drill(Character.held_version(Character.button_fierce), true)
+			Character.play_audio("magic3", {"vol": -10})
+			
 		"aSP5Active":
 			Globals.Game.spawn_entity(Character.player_ID, "InaBeam", Animator.query_point("entityspawn"), {"back":true, "type":"base"}, \
 					Character.palette_number, NAME)
+			Character.play_audio("energy2", {"vol": -6, "bus":"PitchDown2"})
 			stop_momentum()
 			special_dust()
 		"aSP5[h]Active":
 			Globals.Game.spawn_entity(Character.player_ID, "InaBeam", Animator.query_point("entityspawn"), {"back":true, "type":"held"}, \
 					Character.palette_number, NAME)
+			Character.play_audio("energy2", {"vol": -6, "bus":"PitchDown2"})
+			Character.play_audio("magic1", {"vol": -13})
 			stop_momentum()
 			special_dust()
 		"aSP5[ex]Active":
 			Globals.Game.spawn_entity(Character.player_ID, "InaBeam", Animator.query_point("entityspawn"), {"back":true, "type":"ex"}, \
 					Character.palette_number, NAME)
+			Character.play_audio("energy2", {"vol": -9, "bus":"PitchDown2"})
 			stop_momentum()
 			special_dust()
 			

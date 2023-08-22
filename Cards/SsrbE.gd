@@ -7,7 +7,7 @@ const GRAVITY = 18 * FMath.S
 const TERMINAL_DOWN_VELOCITY = 300 * FMath.S
 const AIR_RESISTANCE = 2
 
-const TRAITS = [Em.entity_trait.GROUNDED]
+const TRAITS = [Em.entity_trait.GROUNDED, Em.entity_trait.BLAST_BARRIER_COLLIDE]
 
 # cleaner code
 onready var Entity = get_parent()

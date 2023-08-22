@@ -584,17 +584,19 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					continue # certain moves cannot be performed during cancellable recovery
 				if !Character.test_dash_attack(attack_ref):
 					continue # if dash attacking, cannot use attacks already used in the chain
-				Character.animate(attack_ref + "Startup")
-				has_acted[0] = true
-				return true
-					
-		Em.char_state.GRD_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
-			if Settings.input_assist[Character.master_ID]:
-				if !Character.no_jumpsquat_cancel and Character.grounded and attack_ref in UP_TILTS and \
-						Animator.query_to_play(["JumpTransit"]) and Character.test_qc_chain_combo(attack_ref):
+				if Character.is_ex_valid(attack_ref):
 					Character.animate(attack_ref + "Startup")
 					has_acted[0] = true
 					return true
+					
+		Em.char_state.GRD_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
+			if Settings.input_assist[Character.player_ID]:
+				if Character.grounded and attack_ref in UP_TILTS and Character.test_jumpsquat_cancel(attack_ref) and \
+						Animator.query_to_play(["JumpTransit"]) and Character.test_qc_chain_combo(attack_ref):
+					if Character.is_ex_valid(attack_ref):
+						Character.animate(attack_ref + "Startup")
+						has_acted[0] = true
+						return true
 					
 		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
@@ -604,19 +606,21 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						continue # certain moves cannot be performed during cancellable recovery
 					if !Character.test_dash_attack(air_atk_ref):
 						continue # if dash attacking, cannot use attacks already used in the chain
-					Character.animate(air_atk_ref + "Startup")
-					has_acted[0] = true
-					return true
+					if Character.is_ex_valid(air_atk_ref):
+						Character.animate(air_atk_ref + "Startup")
+						has_acted[0] = true
+						return true
 						
 		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
-			if Settings.input_assist[Character.master_ID]:
-				if !Character.no_jumpsquat_cancel and (air_atk_ref) in UP_TILTS and Character.test_aerial_memory(air_atk_ref) and \
-						!Character.button_jump in Character.input_state.pressed and \
+			if Settings.input_assist[Character.player_ID]:
+				if (air_atk_ref) in UP_TILTS and Character.test_aerial_memory(air_atk_ref) and \
+						!Character.button_jump in Character.input_state.pressed and Character.test_jumpsquat_cancel(attack_ref) and \
 						Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
 						Character.test_qc_chain_combo(air_atk_ref):
-					Character.animate(air_atk_ref + "Startup")
-					has_acted[0] = true
-					return true
+					if Character.is_ex_valid(air_atk_ref):
+						Character.animate(air_atk_ref + "Startup")
+						has_acted[0] = true
+						return true
 				
 		# chain cancel
 		Em.char_state.GRD_ATK_REC, Em.char_state.GRD_ATK_ACTIVE:

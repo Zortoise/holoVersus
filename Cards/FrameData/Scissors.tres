@@ -1,0 +1,78 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 29,
+"hframes": 6,
+"loop": false,
+"spritesheet": "ScissorsSprite",
+"timestamps": {
+0: {
+"frame": 4,
+"hitbox": [ Vector2( -37, 20 ), Vector2( 25, 20 ), Vector2( 25, -20 ), Vector2( -37, -20 ) ]
+},
+3: {
+"frame": 5,
+"hitbox": [ Vector2( -18, 20 ), Vector2( 38, 20 ), Vector2( 38, -20 ), Vector2( -18, -20 ) ]
+},
+6: {
+"frame": 6,
+"hitbox": [  ]
+},
+9: {
+"frame": 7,
+"hitbox": [  ]
+},
+11: {
+"frame": 8,
+"hitbox": [  ]
+},
+13: {
+"frame": 9,
+"hitbox": [  ]
+},
+20: {
+"frame": 10,
+"hitbox": [  ]
+},
+23: {
+"frame": 11,
+"hitbox": [  ]
+},
+26: {
+"frame": 12,
+"hitbox": [  ]
+}
+},
+"vframes": 3
+},
+"Spawn": {
+"duration": 15,
+"hframes": 6,
+"loop": false,
+"spritesheet": "ScissorsSprite",
+"timestamps": {
+0: {
+"frame": 0,
+"hitbox": [  ]
+},
+1: {
+"frame": 1,
+"hitbox": [  ]
+},
+4: {
+"frame": 2,
+"hitbox": [  ]
+},
+8: {
+"frame": 3,
+"hitbox": [  ]
+}
+},
+"vframes": 3
+}
+}

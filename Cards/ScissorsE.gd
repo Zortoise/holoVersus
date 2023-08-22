@@ -13,29 +13,32 @@ const MOVE_DATABASE = {
 	"Kill" : {
 		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 99,
-		Em.move.KB : 500 * FMath.S,
+		Em.move.DMG : 90,
+		Em.move.KB : 700 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 5,
-		Em.move.FIXED_HITSTOP : 10,
-		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
+		Em.move.HITSPARK_TYPE : Em.hitspark_type.SLASH,
 		Em.move.HITSPARK_PALETTE : "dark_purple",
-		Em.move.KB_ANGLE : -90,
-		Em.move.PROJ_LVL : 3,
-		Em.move.ATK_ATTR : [Em.atk_attr.UNBLOCKABLE, Em.atk_attr.DESTROY_ENTITIES],
-		Em.move.HIT_SOUND : { ref = "impact39", aux_data = {"vol" : -10} },
+		Em.move.KB_ANGLE : -20,
+		Em.move.PROJ_LVL : 1,
+		Em.move.ATK_ATTR : [Em.atk_attr.DESTROY_ENTITIES],
+		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -15} },
 	}
 }
 
 func _ready():
 	get_node("TestSprite").free() # test sprite is for sizing collision box
 
-func init(_aux_data: Dictionary):
-	
-	Animator.play("Kill") # starting animation
+func init(aux_data: Dictionary):
+	Animator.play("Spawn") # starting animation
+	Entity.unique_data["target_ID"] = aux_data.target_ID
+		
 
 func simulate():
-	pass
+	if Animator.current_anim == "Spawn":
+		var target = Globals.Game.get_player_node(Entity.unique_data.target_ID)
+		if target != null:
+			Entity.position = target.position
 	
 	
 func query_move_data(move_name) -> Dictionary:
@@ -62,11 +65,11 @@ func query_atk_attr(move_name):
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:
-		_:
-			pass
+		"Spawn":
+			Animator.play("Kill")
 			
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:
-		_:
-			pass
+		"Kill":
+			Entity.play_audio("cut6", {"vol" : -5})
 

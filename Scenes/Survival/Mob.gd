@@ -2753,10 +2753,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			$BlueArmorTimer.time = BLUE_ARMOR_TIME # gain armor if hit during Resisted Hitstun
 ##				else:
 ##					$ResistTimer.time = ResistTimer_TIME
-
-	# gain some Blue Armor when hit by Proj Level 1 entities
-	if Em.hit.RESISTED in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
-		$BlueArmorTimer.time = 10
 		
 	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
 	
@@ -2790,9 +2786,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		adjusted_atk_level = adjusted_atk_level(hit_data)
 		hit_data[Em.hit.ADJUSTED_ATK_LVL] = adjusted_atk_level
 		
-		if !guardbroken:
+		if !guardbroken: # not guardbroken, check for guardbreak
 			change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
-			if get_guard_gauge_percent_below() == 0:
+			if get_guard_gauge_percent_below() == 0: # guardbreak
 				hit_data[Em.hit.MOB_BREAK] = true
 				hit_data.erase(Em.hit.SUPERARMORED)
 				$BlueArmorTimer.time = 0
@@ -2801,6 +2797,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs
 				Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 						"v_mirror":Globals.Game.rng_bool()})
+						
+			# gain some Blue Armor when resisting Proj Level 1 entities
+			elif Em.hit.RESISTED in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+				$BlueArmorTimer.time = 10
+				
 		
 		var damage = calculate_damage(hit_data)
 		take_damage(damage) # do damage calculation

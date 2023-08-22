@@ -15,7 +15,7 @@ enum effect_ref {
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
 		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_WEAKARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, NO_HEIGHT_LIMIT
 		SUMMON_HORROR, PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND, TBLOCK_PROJ
-		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI, FUWA_SLASH, MOCO_SLASH, RAVEN_PROJ, SUMMON_MOAI
+		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI, FUWA_SLASH, MOCO_SLASH, RAVEN_PROJ, SUMMON_MOAI, SCISSORS
 }
 
 const DESCRIBE = {
@@ -360,7 +360,11 @@ const DESCRIBE = {
 	effect_ref.SUMMON_MOAI: {
 		"type" : type.QUIRK,
 		"suffix" :"Summon Moai on Block",	
-	}
+	},
+	effect_ref.SCISSORS: {
+		"type" : type.QUIRK,
+		"suffix" :"Call Scissors via Dodge",
+	},
 }
 
 const TRIP_CHANCE = 5
@@ -392,8 +396,9 @@ const REWIND_RANGE = 120
 const FLASK_COOLDOWN = 600
 const NOUSAGI_COOLDOWN = 600
 const SSRB_COOLDOWN = 1000
-const SLASH_COOLDOWN = 600
+const FWMC_COOLDOWN = 600
 const MOAI_COOLDOWN = 1000
+const SCISSORS_COOLDOWN = 600
 
 # CARDS ------------------------------------------------------------------------------------------------------------------------------------
 
@@ -971,10 +976,10 @@ const DATABASE = {
 	card_ref.SHIORI : {
 		"name" : "Shiori",
 		"price" : 100,
-		effect_ref.SPECIAL_DMG_MOD: 60,
-		effect_ref.PASSIVE_EX_REGEN : 15,
+		effect_ref.SPECIAL_DMG_MOD: 50,
+		effect_ref.PASSIVE_EX_REGEN : 10,
 		effect_ref.LIFESTEAL_RATE : 15,
-		"quirks" : [effect_ref.NO_CROSSUP],
+		"quirks" : [effect_ref.NO_CROSSUP, effect_ref.SCISSORS],
 	},
 	card_ref.BIJOU : {
 		"name" : "Bijou",

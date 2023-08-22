@@ -131,7 +131,7 @@ var last_dir := 0 # dir last frame
 var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
 var slowed := 0
 var gravity_frame_mod := 100 # modify gravity this frame
-var no_jumpsquat_cancel := false # set to true when jump cancelling an animation, prevent quick cancelling the jumpsquat
+var js_cancel_target = Em.js_cancel_target.ALL # set to certain enums when jump cancelling, decide which moves can be quick canceled from jumpsquat
 var sdash_points := 0 # set to duration of sdash when you begin a sdash, reduce per frame base on angle, stop sdash when hit 0
 
 # controls
@@ -380,16 +380,16 @@ func simulate2(): # only ran if not in hitstop
 	if grounded:
 		reset_jumps()
 		
-	if no_jumpsquat_cancel:
+	if js_cancel_target != Em.js_cancel_target.ALL:
 		match state: # do not use new_state!
 			Em.char_state.GRD_STARTUP:
 				if !Animator.query_current(["JumpTransit"]):
-					no_jumpsquat_cancel = false
+					js_cancel_target = Em.js_cancel_target.ALL
 			Em.char_state.AIR_STARTUP:
 				if !Animator.query_current(["aJumpTransit"]):
-					no_jumpsquat_cancel = false
+					js_cancel_target = Em.js_cancel_target.ALL
 			_:
-				no_jumpsquat_cancel = false
+				js_cancel_target = Em.js_cancel_target.ALL
 		
 	ignore_list_progress_timer()
 		
@@ -1216,7 +1216,7 @@ func is_button_pressed(button):
 			return true
 	elif button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
-		if is_button_tapped_in_last_X_frames(button, 7):
+		if is_button_tapped_in_last_X_frames(button, 3):
 			return true
 	else:
 		if button in input_state.pressed:
@@ -1392,19 +1392,17 @@ func process_input_buffer():
 								keep = false
 								
 						Em.char_state.AIR_ATK_ACTIVE: # some attacks can jump cancel on active frames
-							if active_cancel or test_jump_cancel_active():
+							if test_jump_cancel_active():
 								if !grounded:
 									if air_jump > 0:
 										afterimage_cancel()
 										animate("aJumpTransit")
 										keep = false
-										no_jumpsquat_cancel = true
 								else: # grounded
 									afterimage_cancel()
 									animate("JumpTransit")
 									keep = false
-									no_jumpsquat_cancel = true
-								
+	
 						# JUMP CANCELS ---------------------------------------------------------------------------------
 								
 						Em.char_state.GRD_ATK_REC:
@@ -1420,7 +1418,7 @@ func process_input_buffer():
 									keep = false
 						
 						Em.char_state.GRD_ATK_ACTIVE: # some attacks can jump cancel on active frames
-							if active_cancel or test_jump_cancel_active():
+							if test_jump_cancel_active():
 								afterimage_cancel()
 								if button_down in input_state.pressed and !button_dash in input_state.pressed \
 									and soft_grounded: # cannot be pressing dash
@@ -1428,11 +1426,10 @@ func process_input_buffer():
 									set_true_position()
 									animate("FallTransit")
 									keep = false
-									no_jumpsquat_cancel = true
 								else:
 									animate("JumpTransit")
 									keep = false
-									no_jumpsquat_cancel = true
+	
 								
 						Em.char_state.GRD_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
 							if buffered_input[0] != button_jump:
@@ -2335,7 +2332,20 @@ func can_air_strafe(move_data):
 	return true
 	
 
-func test_jump_cancel():
+func test_jumpsquat_cancel(attack_ref: String):
+	match js_cancel_target:
+		Em.js_cancel_target.ALL:
+			return true
+		Em.js_cancel_target.NONE:
+			return false
+		Em.js_cancel_target.SPECIALS:
+			var move_data = query_move_data(attack_ref)
+			match move_data[Em.move.ATK_TYPE]:
+				Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER:
+					return true
+	return false
+
+func test_jump_cancel(): # during recovery
 	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
 	
@@ -2343,16 +2353,23 @@ func test_jump_cancel():
 	var atk_attr = query_atk_attr(move_name)
 	if Em.atk_attr.NO_REC_CANCEL in atk_attr : return false # Normals with NO_REC_CANCEL cannot be jump cancelled
 	
-	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN]:
-		return false
-	if chain_combo in [Em.chain_combo.WHIFF]:
-		if !Em.atk_attr.JUMP_CANCEL_ON_WHIFF in atk_attr:
-			return false # some rare attacks can jump cancel on whiff
-	if chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
-		pass # can only dash cancel on Normal/Heavy hit
-	else:
-		if !Em.atk_attr.JUMP_CANCEL_ON_HIT in atk_attr:
-			return false # some rare Specials can jump cancel on hit
+	match chain_combo:
+		Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN:
+			return false
+		Em.chain_combo.WHIFF:
+			if !Em.atk_attr.JUMP_CANCEL_ON_WHIFF in atk_attr:
+				return false # some rare Specials can jump cancel on whiff
+			else:
+				js_cancel_target = Em.js_cancel_target.NONE
+		Em.chain_combo.NORMAL: # can only jump cancel on Normal/Heavy hit
+			js_cancel_target = Em.js_cancel_target.ALL
+		Em.chain_combo.HEAVY:
+			js_cancel_target = Em.js_cancel_target.SPECIALS
+		_:
+			if !Em.atk_attr.JUMP_CANCEL_ON_HIT in atk_attr:
+				return false # some rare Specials can jump cancel on hit
+			else:
+				js_cancel_target = Em.js_cancel_target.NONE
 	
 	afterimage_cancel()
 	return true
@@ -2362,10 +2379,17 @@ func test_jump_cancel_active():
 	
 	if !grounded and air_jump == 0: return false # if in air, need >1 air jump left
 	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN, Em.chain_combo.WHIFF]:
-		return false
+		return false # on hit only
 	
 	var move_name = get_move_name()
-	if Em.atk_attr.JUMP_CANCEL_ACTIVE in query_atk_attr(move_name):
+	if active_cancel or Em.atk_attr.JUMP_CANCEL_ACTIVE in query_atk_attr(move_name):
+		match chain_combo:
+			Em.chain_combo.NORMAL:
+				js_cancel_target = Em.js_cancel_target.ALL
+			Em.chain_combo.HEAVY:
+				js_cancel_target = Em.js_cancel_target.SPECIALS
+			_:
+				js_cancel_target = Em.js_cancel_target.NONE
 		return true
 		
 	return false
@@ -2637,9 +2661,9 @@ func test_qc_chain_combo(attack_ref): # called during attack startup
 #			return false
 
 	# cannot qc jumpsquat from Active Cancel
-	if state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
-		if active_cancel:
-			return false
+#	if state in [Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP]:
+#		if active_cancel:
+#			return false
 	
 	# if chaining, cannot QC into moves with CANNOT_CHAIN_INTO
 	var atk_attr = query_atk_attr(attack_ref)
@@ -2882,22 +2906,29 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			Em.block_state.UNBLOCKED:
 				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-						chain_combo = Em.chain_combo.NORMAL
 						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
+							chain_combo = Em.chain_combo.NORMAL
 							if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
 								if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 									active_cancel = true
 							if is_aerial():  # for unblocked aerial you regain 1 air jump
 								gain_one_air_jump()
+						else:
+							chain_combo = Em.chain_combo.NO_CHAIN
 					Em.atk_type.HEAVY:
-						chain_combo = Em.chain_combo.HEAVY
 						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
+							chain_combo = Em.chain_combo.HEAVY
 							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 								active_cancel = true
 							if is_aerial():  # for unblocked aerial you regain 1 air jump
 								gain_one_air_jump()
+						else:
+							chain_combo = Em.chain_combo.NO_CHAIN
 					Em.atk_type.SPECIAL, Em.atk_type.EX:
-						chain_combo = Em.chain_combo.SPECIAL
+						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
+							chain_combo = Em.chain_combo.SPECIAL
+						else:
+							chain_combo = Em.chain_combo.NO_CHAIN
 					Em.atk_type.SUPER:
 						chain_combo = Em.chain_combo.SUPER
 					
@@ -3982,7 +4013,7 @@ func save_state():
 		"from_move_rec" : from_move_rec,
 		"slowed" : slowed,
 		"gravity_frame_mod" : gravity_frame_mod,
-		"no_jumpsquat_cancel" : no_jumpsquat_cancel,
+		"js_cancel_target" : js_cancel_target,
 		"sdash_points" : sdash_points,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
@@ -4054,7 +4085,7 @@ func load_state(state_data):
 	from_move_rec = state_data.from_move_rec
 	slowed = state_data.slowed
 	gravity_frame_mod = state_data.gravity_frame_mod
-	no_jumpsquat_cancel = state_data.no_jumpsquat_cancel
+	js_cancel_target = state_data.js_cancel_target
 	sdash_points = state_data.sdash_points
 		
 	sprite_texture_ref = state_data.sprite_texture_ref

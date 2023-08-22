@@ -26,7 +26,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_PALETTE : "dark_purple",
 		Em.move.PROJ_LVL : 2,
 		Em.move.ATK_ATTR : [Em.atk_attr.CHIPPER, Em.atk_attr.INDESTRUCTIBLE_ENTITY, Em.atk_attr.NO_REFLECT_ENTITY, Em.atk_attr.DESTROY_ENTITIES],
-		Em.move.HIT_SOUND : [{ ref = "impact40", aux_data = {"vol" : -20} }, { ref = "impact34", aux_data = {"vol" : -20} }],
+		Em.move.HIT_SOUND : { ref = "impact42", aux_data = {"vol" : -18} },
 	},
 }
 
@@ -44,7 +44,6 @@ func init(aux_data: Dictionary):
 		
 
 func simulate():
-#	if posmod(Entity.lifetime, 3) == 0:
 #		Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), \
 #				Entity.palette_ref, Entity.master_ref, Color(0, 0, 0), 0.5, 10.0)
 
@@ -72,6 +71,9 @@ func simulate():
 			_: # drill trigger
 				if Entity.unique_data.timer == 0:
 					kill()
+					
+				if posmod(Entity.lifetime, 9) == 0:
+					Entity.play_audio("web1", {"vol": -10})
 
 
 func landed_a_hit(_hit_data):
@@ -172,6 +174,9 @@ func trigger():
 	else:
 		Entity.unique_data.timer = 60
 		
+	Entity.play_audio("magic1", {"vol": -10})
+	Entity.play_audio("magic3", {"vol": -10, "bus":"PitchDown"})
+	
 	
 func refine_move_name(move_name):
 		
