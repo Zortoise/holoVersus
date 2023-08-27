@@ -2,6 +2,7 @@ extends Node
 
 const ASSIST_BORROW = {
 	"GuraA": {
+		"icon": "res://Assists/GuraA/Icon.png",
 		"NPC_data": {
 			"scene" : "res://Assists/GuraA/GuraA.tscn",
 			"frame_data_array" : [
@@ -43,7 +44,56 @@ const ASSIST_BORROW = {
 			"water1": "res://Characters/Gura/UniqueAudio/water1.wav",
 			"water4": "res://Characters/Gura/UniqueAudio/water4.wav",
 		},
+	},
+	
+	"InaA": {
+		"icon": "res://Assists/InaA/Icon.png",
+		"NPC_data": {
+			"scene" : "res://Assists/InaA/InaA.tscn",
+			"frame_data_array" : [
+				"res://Characters/Ina/FrameData/Base.tres",
+				"res://Characters/Ina/FrameData/SP1.tres",
+				"res://Characters/Ina/FrameData/SP4.tres",
+			],
+			"spritesheet" : {
+				"BaseSprite" : "res://Characters/Ina/Spritesheets/BaseSprite.png",
+				"SP1Sprite" : "res://Characters/Ina/Spritesheets/SP1Sprite.png",
+				"SP1SfxOver" : "res://Characters/Ina/Spritesheets/SP1SfxOver.png",
+				"SP1SfxUnder" : "res://Characters/Ina/Spritesheets/SP1SfxUnder.png",
+				"SP4Sprite" : "res://Characters/Ina/Spritesheets/SP4Sprite.png",
+				"SP4SfxOver" : "res://Characters/Ina/Spritesheets/SP4SfxOver.png",
+			}
+		},
+		"entity_data": {
+			"TakoA" : {
+				"scene" : "res://Assists/InaA/Entities/TakoA.tscn",
+				"frame_data" : "res://Characters/Ina/Entities/FrameData/Tako.tres",
+				"spritesheet" : "res://Characters/Ina/Entities/Spritesheets/TakoSprite.png",
+			},
+			"InaDrillA" : {
+				"scene" : "res://Assists/InaA/Entities/InaDrillA.tscn",
+				"frame_data" : "res://Characters/Ina/Entities/FrameData/InaDrill.tres",
+				"spritesheet" : "res://Characters/Ina/Entities/Spritesheets/InaDrillSprite.png",
+			}
+		},
+		"sfx_data": {
+			"Blink": {
+				"frame_data" : "res://Characters/Ina/SFX/FrameData/Blink.tres",
+				"spritesheet" : "res://Characters/Ina/SFX/Spritesheets/BlinkSprite.png",
+			},
+			"TakoFlash": {
+				"frame_data" : "res://Characters/Ina/SFX/FrameData/TakoFlash.tres",
+				"spritesheet" : "res://Characters/Ina/SFX/Spritesheets/TakoFlashSprite.png",
+			},
+		},
+		"audio_data": {
+			"energy8": "res://Characters/Ina/UniqueAudio/energy8.wav",
+			"magic1": "res://Characters/Ina/UniqueAudio/magic1.wav",
+			"magic3": "res://Characters/Ina/UniqueAudio/magic3.wav",
+			"web1": "res://Characters/Ina/UniqueAudio/web1.wav",
+		},
 	}
+	
 }
 
 func load_assist(assist_ref: String):
@@ -52,6 +102,7 @@ func load_assist(assist_ref: String):
 	
 	if assist_ref in ASSIST_BORROW: # is an assist that borrows resources from a playable character
 		Loader.NPC_data[assist_ref] = {
+			"icon" : ResourceLoader.load(ASSIST_BORROW[assist_ref].icon),
 			"scene" : load(ASSIST_BORROW[assist_ref].NPC_data.scene),
 			"frame_data_array" : [],
 			"spritesheet" : {},

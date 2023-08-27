@@ -1,14 +1,8 @@
 extends "res://Scenes/Stage/MovingPlatform.gd"
 
-const TYPE = Em.moving_platform.WARPING
 const PERIOD = 300
 
 
-func _ready():
-	add_to_group("MovingPlatforms")
-	
-
-# convert current frametime into unit_offset
 func movement_pattern():
 	
 # warning-ignore:integer_division
@@ -19,9 +13,9 @@ func movement_pattern():
 	
 	match segment:
 		0:
-			return $Waypoints/A.position
+			return {"type":Em.mov_platform.ACTIVATE, "active":true}
 		1:
-			return $Waypoints/B.position
+			return {"type":Em.mov_platform.ACTIVATE, "active":false}
 	
 #
 #	var in_unit_offset = posmod(Globals.time_limit * 60 - Globals.Game.matchtime, PERIOD) / float(PERIOD) * 100 # 100 for easier setting of pattern

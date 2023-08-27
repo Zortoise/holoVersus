@@ -94,6 +94,7 @@ position = Vector2( -256, -32 )
 position = Vector2( 256, -32 )
 
 [node name="MPlatform2" type="Node2D" parent="."]
+position = Vector2( 0, -472 )
 script = ExtResource( 4 )
 
 [node name="MPlatform" type="Node2D" parent="MPlatform2"]
@@ -108,14 +109,6 @@ texture = ExtResource( 8 )
 margin_left = -64.0
 margin_right = 64.0
 margin_bottom = 8.0
-
-[node name="Waypoints" type="Node" parent="MPlatform2"]
-
-[node name="A" type="Position2D" parent="MPlatform2/Waypoints"]
-position = Vector2( 0, 40 )
-
-[node name="B" type="Position2D" parent="MPlatform2/Waypoints"]
-position = Vector2( 0, 512 )
 
 [node name="P1_Position" type="Position2D" parent="."]
 position = Vector2( -128, 128 )

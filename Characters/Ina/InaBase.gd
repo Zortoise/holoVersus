@@ -79,13 +79,15 @@ const DEFAULT_HITSPARK_PALETTE = "dark_purple"
 const SDHitspark_COLOR = "dark_purple"
 
 const PALETTE_TO_PORTRAIT = {
-	1: Color(0.84, 0.77, 1.00),
+	1: Color(0.70, 0.60, 0.95),
 	2: Color(0.86, 0.75, 0.67),
+	3: Color(0.97, 0.78, 1.00),
 }
 
 const PALETTE_TO_HITSPARK_PALETTE = {
 	1: "dark_purple",
 	2: "pink",
+	3: "purple",
 }
 
 const MUSIC = {

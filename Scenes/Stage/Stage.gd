@@ -35,8 +35,9 @@ func init(): # called by unique stage code when init() is called
 
 
 func simulate():
-	for moving_platform in get_tree().get_nodes_in_group("MovingPlatforms"):
-		moving_platform.move_platform()
+	if !Globals.Game.is_stage_paused():
+		for moving_platform in get_tree().get_nodes_in_group("MovingPlatforms"):
+			moving_platform.simulate()
 		
 	
 		

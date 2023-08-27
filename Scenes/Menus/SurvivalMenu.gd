@@ -81,6 +81,7 @@ func triggered(triggered_node):
 				Globals.player_count = survival_config.player_count + 1
 				Globals.difficulty = survival_config.difficulty
 				Globals.time_limit = 0
+				Globals.assists = -1
 			"Return":
 				play_audio("ui_back", {})
 				$Transition.play("transit_to_main")

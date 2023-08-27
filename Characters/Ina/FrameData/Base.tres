@@ -923,7 +923,7 @@ frame_data = {
 "hurtbox": [ Vector2( -12, 26 ), Vector2( 9, 26 ), Vector2( 9, -23 ), Vector2( -12, -23 ) ]
 },
 48: {
-"frame": 0,
+"frame": 8,
 "hurtbox": [ Vector2( -12, 26 ), Vector2( 9, 26 ), Vector2( 9, -23 ), Vector2( -12, -23 ) ]
 },
 54: {
@@ -939,7 +939,7 @@ frame_data = {
 "hurtbox": [ Vector2( -12, 26 ), Vector2( 9, 26 ), Vector2( 9, -23 ), Vector2( -12, -23 ) ]
 },
 72: {
-"frame": 8,
+"frame": 4,
 "hurtbox": [ Vector2( -12, 26 ), Vector2( 9, 26 ), Vector2( 9, -23 ), Vector2( -12, -23 ) ]
 },
 78: {

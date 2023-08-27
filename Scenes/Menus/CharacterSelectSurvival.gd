@@ -521,9 +521,11 @@ func start_battle():
 	
 	Globals.P1_char_ref = char_grid[P1_picker_pos]
 	Globals.P1_palette = P1_palette_picked
+	Globals.P1_assist = "" # start with no assist
 #	Globals.P1_input_style = P1_input_style
 	Globals.P2_char_ref = char_grid[P2_picker_pos]
 	Globals.P2_palette = P2_palette_picked
+	Globals.P2_assist = "" # start with no assist
 #	Globals.P2_input_style = P2_input_style
 	
 	
@@ -542,9 +544,11 @@ func start_battle():
 				"P1_character" : null,
 				"P1_palette" : null,
 				"P1_stage" : null,
+				"P1_assist" : "",
 				"P2_character" : null,
 				"P2_palette" : null,
 				"P2_stage" : null,
+				"P2_assist" : "",
 			}
 	last_picked["P1_character"] = P1_picker_pos
 	last_picked["P1_palette"] = P1_palette_picked

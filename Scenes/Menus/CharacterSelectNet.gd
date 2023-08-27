@@ -65,6 +65,7 @@ var my_payload = {
 	"palette" : null,
 #	"input_style" : null,
 	"stage" : null,
+	"assist" : "",
 }
 
 
@@ -412,7 +413,7 @@ func changed_character():
 		if "select_sprite" in character_data[char_name]:
 			var new_sprite = character_data[char_name]["select_sprite"].instance()
 			my_sprite.add_child(new_sprite)
-			my_sprite.position.y -= (my_sprite.get_node("Feet").position.y - 23)
+			my_sprite.position.y -= (new_sprite.get_node("Feet").position.y - 23)
 		my_name.text = character_data[char_name]["name"]
 	else: # blank panel
 		my_fullart.texture = null
@@ -501,6 +502,7 @@ func picked_stage():
 	my_payload.character = char_grid[my_picker_pos]
 	my_payload.palette = my_palette_picked
 	my_payload.stage = my_stageselect.get_node("StageList").get_child(3).stage_name
+	my_payload.assist = "" # WIP
 #	my_payload.input_style = my_input_style_picked
 	rpc("opponent_ready", my_payload)
 	save_last_picked()
@@ -514,10 +516,12 @@ func save_last_picked():
 			"P1_character" : my_picker_pos, # character is saved as their position!
 			"P1_palette" : my_payload.palette,
 			"P1_stage" : my_payload.stage,
+			"P1_assist" : my_payload.assist,
 #			"P1_input_style" : my_payload.input_style,
 			"P2_character" : null,
 			"P2_palette" : null,
 			"P2_stage" : null,
+			"P2_assist" : "",
 #			"P2_input_style" : null,
 		}
 	else:
@@ -525,10 +529,12 @@ func save_last_picked():
 			"P1_character" : my_picker_pos,
 			"P1_palette" : my_payload.palette,
 			"P1_stage" : my_payload.stage,
+			"P1_assist" : my_payload.assist,
 #			"P1_input_style" : my_payload.input_style,
 			"P2_character" : last_picked.P2_character,
 			"P2_palette" : last_picked.P2_palette,
 			"P2_stage" : last_picked.P2_stage,
+			"P2_assist" : last_picked.P2_assist,
 #			"P2_input_style" : last_picked.P2_input_style,
 		}
 	Settings.save_last_picked(new_last_picked)
@@ -549,16 +555,20 @@ func determine_char_and_stage():
 	if opponent == "P2":
 		Globals.P1_char_ref = my_payload.character
 		Globals.P1_palette = my_payload.palette
+		Globals.P1_assist = my_payload.assist
 #		Globals.P1_input_style = my_payload.input_style
 		Globals.P2_char_ref = opponent_payload.character
 		Globals.P2_palette = opponent_payload.palette
+		Globals.P2_assist = opponent_payload.assist
 #		Globals.P2_input_style = opponent_payload.input_style
 	else:
 		Globals.P1_char_ref = opponent_payload.character
 		Globals.P1_palette = opponent_payload.palette
+		Globals.P1_assist = opponent_payload.assist
 #		Globals.P1_input_style = opponent_payload.input_style
 		Globals.P2_char_ref = my_payload.character
 		Globals.P2_palette = my_payload.palette
+		Globals.P2_assist = my_payload.assist
 #		Globals.P2_input_style = my_payload.input_style
 		
 	# if both players picked the same character with the same palette, a random player will shift a palette
@@ -598,17 +608,19 @@ func determine_char_and_stage():
 		
 #	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_input_style, \
 #			Globals.P2_char_ref, Globals.P2_palette, Globals.P2_input_style)
-	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, \
-			Globals.P2_char_ref, Globals.P2_palette)
+	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_assist, \
+			Globals.P2_char_ref, Globals.P2_palette, Globals.P2_assist)
 
 		
-puppet func guest_receive_picks(stage_ref, P1_char_ref, P1_palette, P2_char_ref, P2_palette):
+puppet func guest_receive_picks(stage_ref, P1_char_ref, P1_palette, P1_assist, P2_char_ref, P2_palette, P2_assist):
 	Globals.stage_ref = stage_ref
 	Globals.P1_char_ref = P1_char_ref
 	Globals.P1_palette = P1_palette
+	Globals.P1_assist = P1_assist
 #	Globals.P1_input_style = P1_input_style
 	Globals.P2_char_ref = P2_char_ref
 	Globals.P2_palette = P2_palette
+	Globals.P2_assist = P2_assist
 #	Globals.P2_input_style = P2_input_style
 	
 	yield(get_tree().create_timer(0.5 - Netplay.ping/2.0), "timeout") # wait a short while before revealing

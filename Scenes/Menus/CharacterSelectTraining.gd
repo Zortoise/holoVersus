@@ -540,17 +540,21 @@ func start_battle():
 
 	Globals.P1_char_ref = char_grid[P1_picker_pos]
 	Globals.P1_palette = P1_palette_picked
+	Globals.P1_assist = "" # WIP 
 	Globals.P2_char_ref = char_grid[P2_picker_pos]
 	Globals.P2_palette = P2_palette_picked
+	Globals.P2_assist = "" # WIP 
 	
 	# saving last picked characters and stages
 	var last_picked = {
 		"P1_character" : P1_picker_pos,
 		"P1_palette" : P1_palette_picked,
 		"P1_stage" : $P1_StageSelect/StageList.get_child(3).stage_name,
+		"P1_assist" : Globals.P1_assist,
 		"P2_character" : P2_picker_pos,
 		"P2_palette" : P2_palette_picked,
 		"P2_stage" : $P1_StageSelect/StageList.get_child(3).stage_name,
+		"P2_assist" : Globals.P2_assist,
 	}
 	Settings.save_last_picked(last_picked)
 	

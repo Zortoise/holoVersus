@@ -1,14 +1,8 @@
 extends "res://Scenes/Stage/MovingPlatform.gd"
 
-const TYPE = Em.moving_platform.MOVING
 const PERIOD = 800
 
 
-func _ready():
-	add_to_group("MovingPlatforms")
-
-
-# convert current frametime into unit_offset
 func movement_pattern():
 	
 # warning-ignore:integer_division
@@ -22,26 +16,26 @@ func movement_pattern():
 			var target_pos := FVector.new()
 			target_pos.x = FMath.f_lerp($Waypoints/A.position.x * FMath.S, $Waypoints/B.position.x * FMath.S, sub_time)
 			target_pos.y = FMath.n_lerp($Waypoints/A.position.y * FMath.S, ($Waypoints/A.position.y - 32)* FMath.S, sub_time)
-			return target_pos.convert_to_vec()
+			return {"type":Em.mov_platform.MOVING, "pos":target_pos.convert_to_vec()}
 		1:
-			return $Waypoints/B.position
+			return {"type":Em.mov_platform.MOVING, "pos":$Waypoints/B.position}
 		2:
 			var target_pos := FVector.new()
 			target_pos.x = FMath.f_lerp($Waypoints/B.position.x * FMath.S, $Waypoints/A.position.x * FMath.S, sub_time)
 			target_pos.y = FMath.n_lerp($Waypoints/B.position.y * FMath.S, ($Waypoints/B.position.y + 32)* FMath.S, sub_time)
-			return target_pos.convert_to_vec()
+			return {"type":Em.mov_platform.MOVING, "pos":target_pos.convert_to_vec()}
 		3:
 			var target_pos := FVector.new()
 			target_pos.x = FMath.f_lerp($Waypoints/A.position.x * FMath.S, $Waypoints/C.position.x * FMath.S, sub_time)
 			target_pos.y = FMath.n_lerp($Waypoints/A.position.y * FMath.S, ($Waypoints/A.position.y - 32)* FMath.S, sub_time)
-			return target_pos.convert_to_vec()
+			return {"type":Em.mov_platform.MOVING, "pos":target_pos.convert_to_vec()}
 		4:
-			return $Waypoints/C.position
+			return {"type":Em.mov_platform.MOVING, "pos":$Waypoints/C.position}
 		5:
 			var target_pos := FVector.new()
 			target_pos.x = FMath.f_lerp($Waypoints/C.position.x * FMath.S, $Waypoints/A.position.x * FMath.S, sub_time)
 			target_pos.y = FMath.n_lerp($Waypoints/C.position.y * FMath.S, ($Waypoints/C.position.y + 32)* FMath.S, sub_time)
-			return target_pos.convert_to_vec()
+			return {"type":Em.mov_platform.MOVING, "pos":target_pos.convert_to_vec()}
 	
 	
 #

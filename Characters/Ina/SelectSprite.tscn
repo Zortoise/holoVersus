@@ -36,7 +36,7 @@ region = Rect2( 100, 100, 100, 100 )
 
 [sub_resource type="AtlasTexture" id=29]
 atlas = ExtResource( 1 )
-region = Rect2( 0, 0, 100, 100 )
+region = Rect2( 200, 100, 100, 100 )
 
 [sub_resource type="AtlasTexture" id=30]
 atlas = ExtResource( 1 )
@@ -52,7 +52,7 @@ region = Rect2( 300, 0, 100, 100 )
 
 [sub_resource type="AtlasTexture" id=33]
 atlas = ExtResource( 1 )
-region = Rect2( 200, 100, 100, 100 )
+region = Rect2( 400, 0, 100, 100 )
 
 [sub_resource type="AtlasTexture" id=34]
 atlas = ExtResource( 1 )
@@ -76,7 +76,7 @@ animations = [ {
 
 [node name="SelectSprite" type="AnimatedSprite"]
 frames = SubResource( 20 )
-frame = 14
+frame = 7
 playing = true
 
 [node name="Feet" type="Position2D" parent="."]

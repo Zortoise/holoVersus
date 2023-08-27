@@ -1,13 +1,8 @@
 extends "res://Scenes/Stage/MovingPlatform.gd"
 
-const TYPE = Em.moving_platform.MOVING
 const PERIOD = 800
 
 
-func _ready():
-	add_to_group("MovingPlatforms")
-
-# convert current frametime into unit_offset
 func movement_pattern():
 	
 # warning-ignore:integer_division
@@ -19,19 +14,19 @@ func movement_pattern():
 	
 	match segment:
 		0:
-			return $Waypoints/A.position
+			return {"type":Em.mov_platform.MOVING, "pos":$Waypoints/A.position}
 		1:
 			var target_pos := FVector.new()
 			target_pos.x = FMath.sin_lerp($Waypoints/A.position.x * FMath.S, $Waypoints/B.position.x * FMath.S, sub_time)
 			target_pos.y = $Waypoints/A.position.y * FMath.S
-			return target_pos.convert_to_vec()
+			return {"type":Em.mov_platform.MOVING, "pos":target_pos.convert_to_vec()}
 		2:
-			return $Waypoints/B.position
+			return {"type":Em.mov_platform.MOVING, "pos":$Waypoints/B.position}
 		3:
 			var target_pos := FVector.new()
 			target_pos.x = FMath.sin_lerp($Waypoints/B.position.x * FMath.S, $Waypoints/A.position.x * FMath.S, sub_time)
 			target_pos.y = $Waypoints/A.position.y * FMath.S
-			return target_pos.convert_to_vec()
+			return {"type":Em.mov_platform.MOVING, "pos":target_pos.convert_to_vec()}
 
 
 

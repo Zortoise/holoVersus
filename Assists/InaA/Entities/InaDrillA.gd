@@ -23,30 +23,22 @@ const MOVE_DATABASE = {
 		Em.move.FIXED_ATKER_HITSTOP : 0,
 		Em.move.KB_ANGLE : 0,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
-#		Em.move.HITSPARK_PALETTE : "dark_purple",
+		Em.move.HITSPARK_PALETTE : "dark_purple",
 		Em.move.PROJ_LVL : 2,
 		Em.move.ATK_ATTR : [Em.atk_attr.CHIPPER, Em.atk_attr.INDESTRUCTIBLE_ENTITY, Em.atk_attr.NO_REFLECT_ENTITY, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "impact42", aux_data = {"vol" : -18} },
 	},
 }
 
-func init(aux_data: Dictionary):
+func init(_aux_data: Dictionary):
 	
-	Entity.unique_data = {"timer" : 60, "ex": false, "new_facing" : null, "new_v_facing" : null,}
+	Entity.unique_data = {"timer" : 60, "new_facing" : null, "new_v_facing" : null,}
 	
 	Animator.play("CircleSpawn") # starting animation
-	if aux_data.ex:
-		Entity.unique_data["ex"] = true
-		Entity.unique_data.timer = 30
-		Entity.life_point = 8
-	else:
-		Entity.life_point = 5
+	Entity.life_point = 5
 		
 
 func simulate():
-#		Globals.Game.spawn_afterimage(Entity.entity_ID, Em.afterimage_type.ENTITY, Entity.entity_ref, sprite.get_path(), \
-#				Entity.palette_ref, Entity.master_ref, Color(0, 0, 0), 0.5, 10.0)
-
 
 	if !Animator.current_anim.ends_with("Kill"):
 		
@@ -76,11 +68,21 @@ func simulate():
 					Entity.play_audio("web1", {"vol": -10})
 
 
-func landed_a_hit(_hit_data):
+func landed_a_hit(hit_data):
 	Entity.life_point -= 1
 	if Entity.life_point <= 0:
 		kill()
 
+	fever(hit_data)
+
+func fever(hit_data):
+	if Globals.survival_level == null:
+		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
+			if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
+				return
+			if !hit_data[Em.hit.DEFENDER].assist_rescue_protect:
+				hit_data[Em.hit.ATKER].assist_fever = true
+	
 	
 func kill():
 	match Animator.current_anim:
@@ -169,10 +171,7 @@ func trigger():
 			
 	Entity.unique_data.new_facing = new_facing
 	Entity.unique_data.new_v_facing = new_v_facing
-	if Entity.unique_data.ex:
-		Entity.unique_data.timer = 90
-	else:
-		Entity.unique_data.timer = 60
+	Entity.unique_data.timer = 60
 		
 	Entity.play_audio("magic1", {"vol": -10})
 	Entity.play_audio("magic3", {"vol": -10, "bus":"PitchDown"})
@@ -196,10 +195,7 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
-	
-	if Entity.unique_data.ex:
-		move_data[Em.move.HITCOUNT] = 8
-		move_data[Em.move.PROJ_LVL] = 3
+
 
 	match orig_move_name:
 		"ESpawn", "EActive":
@@ -236,12 +232,14 @@ func query_atk_attr(move_name):
 	
 #	var orig_move_name = move_name
 	move_name = refine_move_name(move_name)
-	
+
+	var atk_attr := []
 	if move_name in MOVE_DATABASE and Em.move.ATK_ATTR in MOVE_DATABASE[move_name]:
-		return MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
+		atk_attr = MOVE_DATABASE[move_name][Em.move.ATK_ATTR].duplicate(true)
 		
-#	print("Error: Cannot retrieve atk_attr for " + move_name)
-	return []
+	atk_attr.append(Em.atk_attr.ASSIST) # add "Assist" to move name when added to Repeat Memory
+	
+	return atk_attr
 	
 	
 func get_proj_level(move_name):

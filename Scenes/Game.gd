@@ -26,9 +26,12 @@ const ASSIST_FEVER_CD_REDUCE = 70 # reduce CD during assist fever
 onready var stage_ref = Globals.stage_ref
 onready var P1_char_ref = Globals.P1_char_ref
 onready var P1_palette = Globals.P1_palette
+onready var P1_assist = Globals.P1_assist
 #onready var P1_input_style = Globals.P1_input_style
 onready var P2_char_ref = Globals.P2_char_ref
 onready var P2_palette = Globals.P2_palette
+onready var P2_assist = Globals.P2_assist
+
 #onready var P2_input_style = Globals.P2_input_style
 onready var starting_stock_pts = Globals.starting_stock_pts
 
@@ -188,14 +191,19 @@ func setup():
 		frame_viewer.queue_free()
 		frame_viewer = null
 			
-	Globals.assists = 1 # TESTING
+#	Globals.assists = 1 # TESTING
+	P1_assist = "GuraA" # TESTING
+	P2_assist = "InaA" # TESTING
 			
 	if Globals.assists == 0:
 		for player in Globals.player_count:
 			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").queue_free()
 	else:
 		for player in Globals.player_count:
-			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").show()
+			if get("P" + str(player + 1) + "_assist") != "":
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").show()
+			else:
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").hide() # WIP
 
 	# remove test stage node and add the real stage node
 #	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
@@ -213,7 +221,12 @@ func setup():
 	else:
 		HUD.get_node("MatchTime").show()
 		HUD.get_node("TimeFrame").show()
+		
 	
+## LOAD ASSISTS --------------------------------------------------------------------------------------------------
+#
+#	LoadAssist.load_assist("GuraA") # test
+#	LoadAssist.load_assist("InaA") # test
 	
 # ADD PLAYERS --------------------------------------------------------------------------------------------------
 	
@@ -226,7 +239,9 @@ func setup():
 	#		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + "C.tscn").instance()
 		var P2 = Loader.loaded_character_scene.instance() # main character node, not unique character node
 		$Players.add_child(P2)
-		P2.init(1, P2_char_ref, P2_character, P2_position, P2_facing, P2_palette)
+		if P2_assist != "":
+			LoadAssist.load_assist(P2_assist)
+		P2.init(1, P2_char_ref, P2_character, P2_position, P2_facing, P2_palette, P2_assist)
 		if frame_viewer != null:
 			frame_viewer.P2_node = P2
 		
@@ -242,7 +257,9 @@ func setup():
 #		P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + "C.tscn").instance()
 	var P1 = Loader.loaded_character_scene.instance()
 	$Players.add_child(P1)
-	P1.init(0, P1_char_ref, P1_character, P1_position, P1_facing, P1_palette)
+	if P1_assist != "":
+		LoadAssist.load_assist(P1_assist)
+	P1.init(0, P1_char_ref, P1_character, P1_position, P1_facing, P1_palette, P1_assist)
 	if frame_viewer != null:
 		frame_viewer.P1_node = P1
 	
@@ -281,8 +298,6 @@ func setup():
 			var chosen_music_dict = music_list[random].duplicate()
 			chosen_music_dict["audio"] = ResourceLoader.load(chosen_music_dict.audio_filename)
 			BGM.bgm(chosen_music_dict)
-			
-	LoadAssist.load_assist("GuraA") # test
 
 
 # --------------------------------------------------------------------------------------------------

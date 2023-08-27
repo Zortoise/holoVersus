@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/TakoSprite.png-8e79937b5e23f9dab51c594bdfd25d0a.stex"
+path="res://.import/Icon.png-c5d430b637805e22bf192856cd55ba80.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Cards/Spritesheets/TakoSprite.png"
-dest_files=[ "res://.import/TakoSprite.png-8e79937b5e23f9dab51c594bdfd25d0a.stex" ]
+source_file="res://Assists/InaA/Icon.png"
+dest_files=[ "res://.import/Icon.png-c5d430b637805e22bf192856cd55ba80.stex" ]
 
 [params]
 

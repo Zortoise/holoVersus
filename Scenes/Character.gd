@@ -207,6 +207,8 @@ var instant_actions_temp := [] # used to transfer instant actions captured this 
 
 var player_ID: int # player number controlling this character, 0 for P1, 1 for P2
 
+var assist := ""
+
 # character state, save these when saving and loading along with position, sprite frame and animation progress
 var air_jump := 0
 var wall_jump := 0
@@ -320,7 +322,7 @@ var test_num := 0
 # SETUP CHARACTER --------------------------------------------------------------------------------------------------
 
 # this is run after adding this node to the tree
-func init(in_player_ID, in_char_ref, in_character, start_position, start_facing, in_palette_number):
+func init(in_player_ID, in_char_ref, in_character, start_position, start_facing, in_palette_number, in_assist := ""):
 	add_to_group("PlayerNodes")
 	
 	set_player_id(in_player_ID)
@@ -409,6 +411,12 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 
 	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
 	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
+	
+	# load assist
+	if Globals.assists != 0 and in_assist != "":
+		assist = in_assist
+		var assist_icon = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistChar")
+		assist_icon.texture = Loader.NPC_data[assist].icon
 	
 	yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
 #	Globals.Game.damage_limit_update(self)
@@ -2629,7 +2637,7 @@ func capture_and_process_instant_actions(): # capture instant actions after dire
 		else:
 			UniqChar.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
 			
-	if Globals.assists != 0:
+	if Globals.assists != 0 and assist != "":
 		instant_action_assist("AssistN", "AssistD")
 		check_for_assist()
 		
@@ -4876,13 +4884,13 @@ func check_for_assist():
 		
 func call_assist(atk_ID: int):
 	
-	var assist_ref = "GuraA"
+#	var assist_ref = "InaA"
 		
 	assist_active = true
 	if is_hitstunned():
 		change_guard_gauge(-ASSIST_RESCUE_COST)
 		first_hit_flag = true # freeze Guard Swell till the next hit
-	Globals.Game.call_assist(player_ID, assist_ref, get_feet_pos(), "black_replace", atk_ID)
+	Globals.Game.call_assist(player_ID, assist, get_feet_pos(), "black_replace", atk_ID)
 	
 	
 func tech():
@@ -6812,7 +6820,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
 		modulate_play("repeat") # assist rescue
 		
-	elif (Em.hit.SINGLE_REPEAT in hit_data and !hit_data[Em.hit.LETHAL_HIT]) or hit_data[Em.hit.DOUBLE_REPEAT]:
+	elif (Em.hit.SINGLE_REPEAT in hit_data and !hit_data[Em.hit.LETHAL_HIT] and !hit_data[Em.hit.SWEETSPOTTED]) or hit_data[Em.hit.DOUBLE_REPEAT]:
 		modulate_play("repeat")
 #		add_status_effect(Em.status_effect.REPEAT, 10)
 
