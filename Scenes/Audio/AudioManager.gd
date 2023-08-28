@@ -3,11 +3,12 @@ extends AudioStreamPlayer
 var free := false
 
 var audio_ref: String
+var bus_ref: String = ""
 var volume_target := 0
 
 var decay := false
 
-var time = 0.0
+var time := 0
 
 var confirmed := false # rollback confirmed, will not remove
 
@@ -18,6 +19,7 @@ func init(in_audio_ref: String, aux_data: Dictionary):
 	
 	if "bus" in aux_data:
 		bus = aux_data.bus
+		bus_ref = aux_data.bus
 		
 	if audio_ref in Loader.audio:
 		stream = Loader.audio[audio_ref]
@@ -33,6 +35,13 @@ func init(in_audio_ref: String, aux_data: Dictionary):
 		
 	if "vol" in aux_data:
 		volume_target = aux_data.vol
+		
+	for audio in get_parent().get_children(): # if multiple of the same audio is played near the same time, reduce the volume
+		if audio != self and audio.time <= 3 and audio_ref == audio.audio_ref and bus_ref == audio.bus_ref:
+			if audio.time == 0:
+				volume_target -= 12
+			else:
+				volume_target -= 6
 	
 #	if "pitch" in aux_data: # only set in certain circumstances
 #		pitch_scale = aux_data.pitch

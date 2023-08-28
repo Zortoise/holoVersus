@@ -776,11 +776,19 @@ func simulate(new_input_state):
 
 #			call_assist(Em.assist.NEUTRAL)
 			
+#			play_audio("bling4", {})
+			
 			pass
 	
 		
 		if button_aux in input_state.just_pressed and button_unique in input_state.pressed:
-			BGM.unmuffle()
+			
+			pass
+			
+#			play_audio("bling4", {})
+#			play_audio("bling4", {})
+			
+#			BGM.unmuffle()
 #			Globals.Game.superfreeze(get_path())
 #			Globals.Game.set_screenstop()
 #			Globals.Game.set_screenshake()

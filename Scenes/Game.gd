@@ -2490,36 +2490,49 @@ func progress_audio_queue():
 		audio_queue.erase(x)
 		
 		
+func do_audio_match(audio_manager, queued_audio: Dictionary) -> bool:
+	if audio_manager.time != queued_audio.time:
+		return false
+	if audio_manager.audio_ref != queued_audio.audio_ref:
+		return false
+	var queued_audio_bus := ""
+	if "bus" in queued_audio.aux_data: queued_audio_bus = queued_audio.aux_data.bus
+	if audio_manager.bus_ref != queued_audio_bus:
+		return false
+	return true
+		
 func load_queued_audio():
 	
 	# first, look for AudioPlayers that do not have matching queued audio, these are to be removed since they no longer happened
-	# second, look for queued audios that do not have matching AudioPlayer, these are to be played since they are what actually happened
 	
 	var to_retain := []
 	for audio_manager in $AudioPlayers.get_children():
+#		audio_manager.confirmed = false # DO NOT DO THIS! rollback can confirm audio_managers as well
 #			print(frametime - rollback_start_frametime)
 		if audio_manager.time <= frametime - rollback_start_frametime - 1:
 			for queued_audio in audio_queue: # found a queued audio same as existing audio when rollbacking
 #				print("audio_time: " + str(audio_manager.time))
 #				print("queue_time: " + str(queued_audio.time))
-				if audio_manager.audio_ref == queued_audio.audio_ref and audio_manager.time == queued_audio.time:
+				if do_audio_match(audio_manager, queued_audio):
 					to_retain.append(audio_manager)
 					audio_manager.confirmed = true
 					break
-		else:
+		else: # audio old enough
 			audio_manager.confirmed = true
 				
+	# remove all audio that are too young and not in queued_audio
 	for audio_manager in $AudioPlayers.get_children():
-		if audio_manager.time <= frametime - rollback_start_frametime - 1:
-			if !audio_manager in to_retain and !audio_manager.confirmed:
-				audio_manager.kill()
+		if !audio_manager.confirmed:
+			audio_manager.kill()
 			
+			
+	# second, look for queued audios that do not have matching AudioPlayer, these are to be played since they are what actually happened
 			
 	var to_exclude := []
 	for queued_audio in audio_queue:
 		
 		for audio_manager in $AudioPlayers.get_children():
-			if audio_manager.audio_ref == queued_audio.audio_ref and audio_manager.time == queued_audio.time:
+			if do_audio_match(audio_manager, queued_audio):
 #				print("audio_time: " + str(audio_manager.time))
 #				print("queue_time: " + str(queued_audio.time))
 				to_exclude.append(queued_audio)
