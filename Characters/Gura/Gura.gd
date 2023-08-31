@@ -2048,8 +2048,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			Character.velocity_limiter.y_slow = 75
 		"Dash":
 			var speed_target = Character.get_stat("GRD_DASH_SPEED") * Character.facing
-			if Character.facing != Character.get_opponent_dir():
-				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+#			if Character.facing != Character.get_opponent_dir():
+#				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 			Character.velocity.x = speed_target
 			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
@@ -2062,8 +2062,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			consume_one_air_dash()
 			Character.aerial_memory = []
 			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
-			if Character.facing != Character.get_opponent_dir():
-				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+#			if Character.facing != Character.get_opponent_dir():
+#				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 			Character.velocity.set_vector(speed_target, 0)
 			Character.anim_gravity_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
@@ -2072,8 +2072,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			consume_one_air_dash()
 			Character.aerial_memory = []
 			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
-			if Character.facing != Character.get_opponent_dir():
-				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+#			if Character.facing != Character.get_opponent_dir():
+#				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 			Character.velocity.set_vector(speed_target, 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
@@ -2083,8 +2083,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			consume_one_air_dash()
 			Character.aerial_memory = []
 			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
-			if Character.facing != Character.get_opponent_dir():
-				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+#			if Character.facing != Character.get_opponent_dir():
+#				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 			Character.velocity.set_vector(speed_target, 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0

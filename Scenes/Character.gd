@@ -948,11 +948,25 @@ func simulate2(): # only ran if not in hitstop
 		
 		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.gganchor == 5):
 			if current_guard_gauge < 0 and !is_blocking(): # regen GG when GG is under 100%
+				
 				var guard_gauge_regen: int = 0
 				if query_status_effect(Em.status_effect.POS_FLOW):
 					guard_gauge_regen = POS_FLOW_REGEN # increased regen during positive flow
 				else:
 					guard_gauge_regen = get_stat("GG_REGEN_AMOUNT")
+					
+					if !grounded: # reduce GG Regen in air/soft platform
+						guard_gauge_regen = FMath.percent(guard_gauge_regen, 30)
+					elif soft_grounded:
+						guard_gauge_regen = FMath.percent(guard_gauge_regen, 60)
+							
+					# reduce passive EX Gain when far from center
+					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
+					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
+					var weight = FMath.get_fraction_percent(char_dist, max_dist)
+					guard_gauge_regen = FMath.f_lerp(guard_gauge_regen, 0, weight)
+					
+					
 				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen)) # don't use change_guard_gauge() since it stops at 0
 				Globals.Game.guard_gauge_update(self)
 				
@@ -1045,14 +1059,18 @@ func simulate2(): # only ran if not in hitstop
 			else:
 				
 				if ex_change == get_stat("BASE_EX_REGEN") * FMath.S:
-					if !grounded: # reduce passive EX Gain in air
-						ex_change = FMath.percent(ex_change, 50)
+					if !grounded: # reduce passive EX Gain in air/soft platform
+						ex_change = FMath.percent(ex_change, 30)
+					elif soft_grounded:
+						ex_change = FMath.percent(ex_change, 60)
+					else:
+						ex_change = FMath.percent(ex_change, 150) # increased on ground
 							
 					# reduce passive EX Gain when far from center
 					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
 					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
 					var weight = FMath.get_fraction_percent(char_dist, max_dist)
-					ex_change = FMath.f_lerp(ex_change, FMath.percent(ex_change, 0), weight)
+					ex_change = FMath.sin_lerp(ex_change, 0, weight)
 				
 				change_ex_gauge(FMath.round_and_descale(ex_change))
 
@@ -1197,9 +1215,9 @@ func simulate2(): # only ran if not in hitstop
 					animate("RunTransit")
 						
 				var speed_target = dir * get_stat("SPEED")
-				if "AWAY_SPEED_MOD" in UniqChar:
-					if dir != get_opponent_dir():
-						speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+#				if "AWAY_SPEED_MOD" in UniqChar:
+#					if dir != get_opponent_dir():
+#						speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 				velocity.x = FMath.f_lerp(velocity.x, speed_target, get_stat("ACCELERATION"))
 	
 	# AIR STRAFE --------------------------------------------------------------------------------------------------
@@ -3999,9 +4017,9 @@ func check_landing(): # called by physics.gd when character stopped by floor
 						Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})
 						if dir == facing:
 							var speed_target = get_stat("GRD_DASH_SPEED")
-							if "AWAY_SPEED_MOD" in UniqChar:
-								if facing != get_opponent_dir():
-									speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+#							if "AWAY_SPEED_MOD" in UniqChar:
+#								if facing != get_opponent_dir():
+#									speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 							velocity.x = facing * FMath.percent(speed_target, get_stat("WAVE_DASH_SPEED_MOD"))
 							
 				else: # landing during AirDashDD
@@ -4234,9 +4252,9 @@ func snap_up_wave_land_check():
 			animate("WaveDashBrake")
 			if dir == facing:
 				var speed_target = get_stat("GRD_DASH_SPEED")
-				if "AWAY_SPEED_MOD" in UniqChar:
-					if facing != get_opponent_dir():
-						speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
+#				if "AWAY_SPEED_MOD" in UniqChar:
+#					if facing != get_opponent_dir():
+#						speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 				velocity.x = facing * FMath.percent(speed_target, get_stat("WAVE_DASH_SPEED_MOD"))
 #			velocity.x = dir * get_stat("GRD_DASH_SPEED")
 			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":facing, "grounded":true})

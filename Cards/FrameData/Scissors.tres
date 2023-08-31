@@ -6,44 +6,44 @@
 script = ExtResource( 1 )
 frame_data = {
 "Kill": {
-"duration": 29,
+"duration": 30,
 "hframes": 6,
 "loop": false,
 "spritesheet": "ScissorsSprite",
 "timestamps": {
 0: {
 "frame": 4,
-"hitbox": [ Vector2( -37, 20 ), Vector2( 25, 20 ), Vector2( 25, -20 ), Vector2( -37, -20 ) ]
+"hitbox": [ Vector2( -37, 20 ), Vector2( 32, 20 ), Vector2( 32, -20 ), Vector2( -37, -20 ) ]
 },
-3: {
+4: {
 "frame": 5,
-"hitbox": [ Vector2( -18, 20 ), Vector2( 38, 20 ), Vector2( 38, -20 ), Vector2( -18, -20 ) ]
+"hitbox": [ Vector2( -18, 20 ), Vector2( 38, 20 ), Vector2( 38, 12 ), Vector2( 43, 12 ), Vector2( 43, -12 ), Vector2( 38, -12 ), Vector2( 38, -20 ), Vector2( -18, -20 ) ]
 },
-6: {
+7: {
 "frame": 6,
 "hitbox": [  ]
 },
-9: {
+10: {
 "frame": 7,
 "hitbox": [  ]
 },
-11: {
+12: {
 "frame": 8,
 "hitbox": [  ]
 },
-13: {
+14: {
 "frame": 9,
 "hitbox": [  ]
 },
-20: {
+21: {
 "frame": 10,
 "hitbox": [  ]
 },
-23: {
+24: {
 "frame": 11,
 "hitbox": [  ]
 },
-26: {
+27: {
 "frame": 12,
 "hitbox": [  ]
 }
@@ -68,7 +68,7 @@ frame_data = {
 "frame": 2,
 "hitbox": [  ]
 },
-8: {
+7: {
 "frame": 3,
 "hitbox": [  ]
 }

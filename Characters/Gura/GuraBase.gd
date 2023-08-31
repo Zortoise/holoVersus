@@ -7,8 +7,8 @@ const NAME = "Gura"
 const ORDER = 1
 
 # character movement stats, use to overwrite
-const SPEED = 360 * FMath.S # ground speed
-const AWAY_SPEED_MOD = 75 # % of ground speed when moving away from opponent, may not have this const
+const SPEED = 330 * FMath.S # ground speed
+#const AWAY_SPEED_MOD = 75 # % of ground speed when moving away from opponent, may not have this const
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 900 * FMath.S
@@ -53,7 +53,7 @@ const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD
 
 const DAMAGE_VALUE_LIMIT = 1100
 
-const GG_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
+const GG_REGEN_AMOUNT = 15 # exact GG regened per frame when GG < 100%
 const GRD_BLOCK_GG_COST = 35 # exact GG loss per frame when blocking on ground
 const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
 const CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
