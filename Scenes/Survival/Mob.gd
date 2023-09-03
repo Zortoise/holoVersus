@@ -930,7 +930,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		
 func process_command():
 	
-#	return
+	return
 # warning-ignore:unreachable_code
 
 	if get_damage_percent() >= 100 or get_target() == self: return
@@ -1949,7 +1949,7 @@ func get_move_name():
 	var move_name = Animator.to_play_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
-	move_name = UniqChar.refine_move_name(move_name)
+#	move_name = UniqChar.refine_move_name(move_name)
 	
 	return move_name
 	
@@ -2575,8 +2575,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data.erase(Em.hit.MULTIHIT)
 				hit_data[Em.hit.LAST_HIT] = true
 		
-	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.SUPER] or \
-			(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
+#	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.SUPER] or \
+#			(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
+#		hit_data[Em.hit.IGNORE_RESIST] = true
+		
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.SUPER:
 		hit_data[Em.hit.IGNORE_RESIST] = true
 		
 	if !Em.hit.SECONDARY_HIT in hit_data:
@@ -3292,7 +3295,7 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		
 	if Em.hit.FOLLOW_UP in hit_data:
 		if hit_data[Em.hit.ATKER_OR_ENTITY] != null and (("chain_combo" in hit_data[Em.hit.ATKER_OR_ENTITY] and \
-				hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.RESET) or \
+				hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.WHIFF) or \
 				("autochain_landed" in hit_data[Em.hit.ATKER_OR_ENTITY] and !hit_data[Em.hit.ATKER_OR_ENTITY].autochain_landed)):
 			# for autochain, followups only affect GG if first hit whiffs
 			pass
@@ -3333,6 +3336,11 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
 		if Em.hit.ANTI_AIRED in hit_data:
 			guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airborne resisting mob with an anti-air
+			
+		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
+				(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
+			guard_drain = FMath.percent(guard_drain, 150) # increase guard drain for special moves and strong projectiles
+			
 		return guard_drain
 		
 	return GUARD_GAUGE_FLOOR

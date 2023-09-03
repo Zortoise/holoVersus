@@ -96,10 +96,10 @@ enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, 
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
 
 enum block_state {UNBLOCKED, PARRIED, BLOCKED}
-enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_WEAKARMOR, NO_GRD_C_REC_BLOCK, NO_AIR_C_REC_BLOCK
+enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_WEAKARMOR, D_REC_BLOCK
 		DASH_IMPULSE, PERMA_SUPERARMOR, NO_LAUNCH, GRD_DASH_JUMP, AIR_DASH_JUMP}
 # PASSIVE_WEAKARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
-# NO_GRD/AIR_C_REC_BLOCK = cannot block out of grounded/airborne cancellable recovery frames
+# D_REC_BLOCK = can block out of dash recovery, for heavy characters only
 # DASH_IMPULSE = can impulse during D_REC, used for characters with certain unique dashes (like blinking)
 # GRD/AIR_DASH_JUMP = can jump while dashing
 

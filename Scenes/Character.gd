@@ -1465,9 +1465,9 @@ func simulate2(): # only ran if not in hitstop
 				Em.char_state.GRD_STANDBY:
 					animate("BlockStartup")
 				Em.char_state.GRD_C_REC:
-					if !has_trait(Em.trait.NO_GRD_C_REC_BLOCK):
+					if has_trait(Em.trait.D_REC_BLOCK):
 						animate("BlockStartup")
-					elif !Animator.query_to_play(["DashBrake", "WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
+					elif !Animator.query_to_play(["DashBrake", "WaveDashBrake"]): # cannot block out of ground dash unless you have the D_REC_BLOCK trait
 						animate("BlockStartup")
 ##					if Animator.query(["BurstCRec"]): # cannot block out of BurstRevoke
 ##						continue
@@ -1506,7 +1506,7 @@ func simulate2(): # only ran if not in hitstop
 					$VarJumpTimer.stop()
 					
 				Em.char_state.AIR_C_REC:
-					if !has_trait(Em.trait.NO_AIR_C_REC_BLOCK):
+					if has_trait(Em.trait.D_REC_BLOCK):
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 					elif !Animator.query_to_play(["aDashBrake"]):
@@ -4198,9 +4198,10 @@ func check_semi_invuln():
 	else:
 		match new_state:
 			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
-				if is_super(get_move_name()):
+				var move_name = get_move_name()
+				if is_super(move_name):
 					return true
-				elif Em.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr():
+				elif Em.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr(move_name):
 					return true
 			Em.char_state.AIR_STARTUP:
 				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup", "DodgeTransit"]):
@@ -4517,7 +4518,7 @@ func get_move_name():
 	var move_name = Animator.to_play_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
-	move_name = UniqChar.refine_move_name(move_name)
+#	move_name = UniqChar.refine_move_name(move_name)
 	
 	return move_name
 	

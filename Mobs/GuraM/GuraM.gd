@@ -32,7 +32,7 @@ var uniqueHUD
 const NAME = "Gura"
 
 # Character movement stats, use to overwrite
-const SPEED = 340 * FMath.S # ground speed
+const SPEED = 330 * FMath.S # ground speed
 const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
 const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const GRAVITY_MOD = 100 # make sure variable's a float
@@ -45,10 +45,10 @@ const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 
 const KB_BOOST_AT_MAX_GG = 200 # max increase of knockback when Character's Guard Gauge is at 100%, light Characters have higher
 
-const DAMAGE_VALUE_LIMIT = 700
+const DAMAGE_VALUE_LIMIT = 500
 
-const GUARD_DRAIN_MOD = 100
-const GG_REGEN_AMOUNT = 10 # exact GG regened per frame when GG < 100%
+const GUARD_DRAIN_MOD = 150
+const GG_REGEN_AMOUNT = 5 # exact GG regened per frame when GG < 100%
 const GUARD_GAUGE_SWELL_RATE = 50
 
 const LONG_RANGE_PASSIVE_CHANCE = 70 # if passive, chance of idling instead when using a long range move

@@ -590,9 +590,9 @@ func simulate2(): # only ran if not in hitstop
 				Em.char_state.GRD_STANDBY:
 					animate("BlockStartup")
 				Em.char_state.GRD_C_REC:
-					if !has_trait(Em.trait.NO_GRD_C_REC_BLOCK):
+					if has_trait(Em.trait.D_REC_BLOCK):
 						animate("BlockStartup")
-					elif !Animator.query_to_play(["DashBrake", "WaveDashBrake"]): # cannot block out of ground dash unless you have the DASH_BLOCK trait
+					elif !Animator.query_to_play(["DashBrake", "WaveDashBrake"]): # cannot block out of ground dash unless you have the D_REC_BLOCK trait
 						animate("BlockStartup")
 						
 				Em.char_state.GRD_ATK_REC: # block cancelling
@@ -614,7 +614,7 @@ func simulate2(): # only ran if not in hitstop
 					$VarJumpTimer.stop()
 					
 				Em.char_state.AIR_C_REC:
-					if !has_trait(Em.trait.NO_AIR_C_REC_BLOCK):
+					if has_trait(Em.trait.D_REC_BLOCK):
 						animate("aBlockStartup")
 						$VarJumpTimer.stop()
 					elif !Animator.query_to_play(["aDashBrake"]):
@@ -2123,7 +2123,7 @@ func get_move_name():
 	var move_name = Animator.to_play_anim.trim_suffix("Startup")
 	move_name = move_name.trim_suffix("Active")
 	move_name = move_name.trim_suffix("Rec")
-	move_name = UniqNPC.refine_move_name(move_name)
+#	move_name = UniqNPC.refine_move_name(move_name)
 	
 	return move_name
 	
