@@ -51,11 +51,11 @@ var RESOURCE_ADD = {
 # POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), COIN: X (add to loot pool, 40 limit)
 
 const WAVES2 = {
-	2 : { # wave ID
+	1 : { # wave ID
 		"timestamps" :
 			{ # wave time
 				0 : [
-					{"mob" : "GuraM", "level" : 1, "variant" : "base",
+					{"mob" : "GuraM", "level" : 1, "variant" : "zone",
 					"attr" : {
 #						Em.mob_attr.SPEED : 0,
 #						Em.mob_attr.HP : 4,

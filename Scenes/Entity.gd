@@ -482,13 +482,13 @@ func interactions(): # not active in survival_mode due to performance issues
 #							x.to_destroy = true
 
 					for clasher in clash_array2:
-						var original = clasher.absorption_value
-						clasher.absorption_value -= original
+						var decrease = min(clasher.absorption_value, absorption_value)
+						clasher.absorption_value -= decrease
 						if clasher.absorption_value <= 0:
 							clasher.UniqEntity.kill()	
 							clasher.to_destroy = true
 							
-						absorption_value -= original
+						absorption_value -= decrease
 						if absorption_value <= 0:
 							UniqEntity.kill()
 							to_destroy = true

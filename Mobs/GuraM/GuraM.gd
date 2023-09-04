@@ -1592,6 +1592,9 @@ func refine_move_name(move_name):
 		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
 			return "aSP6[ex]"
 			
+		"aSP3":
+			return "SP3"
+			
 		"SP9a":
 			return "aSP9a"
 		"SP9c":

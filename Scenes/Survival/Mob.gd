@@ -930,7 +930,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 		
 func process_command():
 	
-	return
+#	return
 # warning-ignore:unreachable_code
 
 	if get_damage_percent() >= 100 or get_target() == self: return
