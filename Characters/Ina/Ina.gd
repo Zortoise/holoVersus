@@ -471,7 +471,7 @@ func simulate():
 				
 				var spawn_point = Animator.query_point("entityspawn")
 				if spawn_point != null and Animator.time in Animator.animations[Animator.current_anim]["timestamps"]:
-					Globals.Game.spawn_entity(Character.player_ID, "InaBeam", spawn_point, {"back":true, "type":"ex"}, \
+					Globals.Game.spawn_entity(Character.player_ID, "InaBeam", spawn_point, {"back":true, "type":"ex", "EX_index":Animator.time}, \
 							Character.palette_number, NAME)
 							
 					Character.play_audio("energy2", {"vol": -7, "bus":"PitchDown2"})
@@ -935,6 +935,9 @@ func afterimage_trail():# process afterimage trail
 				Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
 		Em.char_state.AIR_STARTUP:
 			if Animator.query_to_play(["SDashTransit"]):
+				Character.afterimage_trail()
+		Em.char_state.AIR_STANDBY:
+			if Animator.query_to_play(["FastFall"]):
 				Character.afterimage_trail()
 		Em.char_state.AIR_REC:
 			if Animator.query_to_play(["SDash", "DodgeRec"]):

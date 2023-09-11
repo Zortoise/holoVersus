@@ -4,7 +4,7 @@ const NAME = "Grid"
 
 const MUSIC = {
 		"name" : "Survival1",
-		"audio_filename" : "res://Assets/Music/Survival1.ogg",
+		"audio" : "res://Assets/Music/Survival1.ogg",
 		"loop_end": 157.09,
 		"vol" : -4,
 	}

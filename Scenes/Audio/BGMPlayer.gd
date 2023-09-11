@@ -11,7 +11,7 @@ var decaying := false # used to fade out music during transitions
 func init(in_bgm_dictionary, loop = false):
 	
 	bgm_dictionary = in_bgm_dictionary
-	stream = bgm_dictionary.audio
+	stream = ResourceLoader.load(bgm_dictionary.audio)
 
 	if "vol" in bgm_dictionary:
 		volume_db = bgm_dictionary.vol

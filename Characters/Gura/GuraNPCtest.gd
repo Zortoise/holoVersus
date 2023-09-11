@@ -694,6 +694,9 @@ func afterimage_trail():# process afterimage trail
 		Em.char_state.AIR_STARTUP:
 			if Animator.query_to_play(["SDashTransit"]):
 				Character.afterimage_trail()
+		Em.char_state.AIR_STANDBY:
+			if Animator.query_to_play(["FastFall"]):
+				Character.afterimage_trail()
 		Em.char_state.AIR_REC:
 			if Animator.query_to_play(["SDash", "DodgeRec"]):
 				Character.afterimage_trail()

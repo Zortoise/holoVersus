@@ -89,7 +89,7 @@ const PALETTE_TO_HITSPARK_PALETTE = {
 
 const MUSIC = {
 		"name" : "GuraTheme", # to not play the same music as the one currently being played
-		"audio_filename" : "res://Characters/Gura/Music/GuraTheme.ogg",
+		"audio" : "res://Characters/Gura/Music/GuraTheme.ogg",
 #		"loop_start": 27.42,
 		"loop_end": 164.57,
 		"vol" : -7,

@@ -92,7 +92,7 @@ const PALETTE_TO_HITSPARK_PALETTE = {
 
 const MUSIC = {
 		"name" : "GuraTheme", # to not play the same music as the one currently being played
-		"audio_filename" : "res://Characters/Gura/Music/GuraTheme.ogg",
+		"audio" : "res://Characters/Gura/Music/GuraTheme.ogg",
 #		"loop_start": 27.42,
 		"loop_end": 164.57,
 		"vol" : -7,
@@ -344,7 +344,7 @@ const MOVE_DATABASE = {
 	
 	"aSP5[ex]": {
 		Em.move.ATK_TYPE : Em.atk_type.EX,
-		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS, Em.atk_attr.NO_SDASH_CANCEL],
+		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS],
 	},
 }
 

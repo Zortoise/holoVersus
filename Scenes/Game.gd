@@ -280,6 +280,8 @@ func setup():
 	point_btw_char.y -= get_viewport_rect().size.y / 10.0 # lower it by a little
 	$CameraRef.position = point_btw_char
 	
+# BGM --------------------------------------------------------------------------------------------------
+	
 	if Globals.survival_level == null:
 		var music_names := []
 		var music_list := []
@@ -296,7 +298,6 @@ func setup():
 		if music_list.size() > 0:
 			var random = rng_generate(music_list.size()) # pick a random music and load it
 			var chosen_music_dict = music_list[random].duplicate()
-			chosen_music_dict["audio"] = ResourceLoader.load(chosen_music_dict.audio_filename)
 			BGM.bgm(chosen_music_dict)
 
 

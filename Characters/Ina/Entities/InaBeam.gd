@@ -58,7 +58,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 #		Em.move.HITSPARK_PALETTE : "dark_purple",
 		Em.move.PROJ_LVL : 3,
-		Em.move.ATK_ATTR : [Em.atk_attr.REPEATABLE, Em.atk_attr.DESTROY_ENTITIES],
+		Em.move.ATK_ATTR : [Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "impact43", aux_data = {"vol" : -15} },
 	},
 }
@@ -83,6 +83,10 @@ func init(aux_data: Dictionary):
 		
 	Entity.unique_data["sticky_offset"] = Entity.position - Globals.Game.get_player_node(Entity.master_ID).position
 	
+	if "EX_index" in aux_data:
+		Entity.unique_data["EX_index"] = aux_data.EX_index
+	else: Entity.unique_data["EX_index"] = null
+		
 	# spawn next section
 	var spawn_dist = Entity.position.x + (Entity.facing * int(sprite.get_rect().size.x / 2))
 	if spawn_dist <= Globals.Game.stage_box.rect_global_position.x + Globals.Game.stage_box.rect_size.x + (2 * Globals.CORNER_SIZE) and \
@@ -131,6 +135,9 @@ func query_move_data(move_name) -> Dictionary:
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
+	
+	if Entity.unique_data.EX_index != null:
+		move_data[Em.move.ROOT] = "InaBeamEX" + str(Entity.unique_data.EX_index)
 			
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 #		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	

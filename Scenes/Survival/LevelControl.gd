@@ -114,7 +114,6 @@ func init():
 	Globals.Game.stage_ref = UniqLevel.STAGE
 	if "MUSIC" in UniqLevel:
 		var music_dict = UniqLevel.MUSIC.duplicate()
-		music_dict["audio"] = ResourceLoader.load(music_dict.audio_filename)
 		BGM.bgm(music_dict)
 	
 	load_cards()

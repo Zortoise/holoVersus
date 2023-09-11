@@ -4,7 +4,7 @@ const NAME = "Aurora"
 
 const MUSIC = {
 		"name" : "LamyTheme",
-		"audio_filename" : "res://Stages/Aurora/Resources/LamyTheme.ogg",
+		"audio" : "res://Stages/Aurora/Resources/LamyTheme.ogg",
 #		"loop_start": 1.6,
 		"loop_end": 179.2,
 		"vol" : -4,
