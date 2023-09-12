@@ -223,7 +223,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 3,
 		Em.move.PRIORITY_ADD : -1,
 		Em.move.KB_ANGLE : 0,
-		Em.move.ATK_ATTR : [Em.atk_attr.LATE_CHAIN],
+		Em.move.ATK_ATTR : [],
 		Em.move.MOVE_SOUND : { ref = "whoosh1", aux_data = {"vol" : -12,} },
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -15} },
 	},

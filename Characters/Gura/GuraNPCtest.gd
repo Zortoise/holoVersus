@@ -184,6 +184,16 @@ func check_collidable():  # some characters have move that can pass through othe
 	return false
 	
 func check_fallthrough():
+	match Character.new_state:
+		Em.char_state.AIR_ATK_STARTUP:
+			if Animator.query_to_play(["aL2Startup"]):
+				return true
+		Em.char_state.AIR_ATK_ACTIVE:
+			if Animator.query_to_play(["aL2Active", "aSP9c[r]Active"]):
+				return true
+		Em.char_state.AIR_ATK_REC:
+			if Animator.query_to_play(["aL2Rec"]):
+				return true
 	return false
 
 func check_semi_invuln():
@@ -444,8 +454,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							keep = false
 					
 					Em.char_state.GRD_ATK_ACTIVE:
-						if Character.active_cancel:
-							Character.afterimage_cancel() # need to do this manually for active cancel
+						if Character.test_dash_cancel_active():
 							Character.animate("DashTransit")
 							keep = false
 							
@@ -459,14 +468,12 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								keep = false
 					
 					Em.char_state.AIR_ATK_ACTIVE:
-						if Character.active_cancel:
+						if Character.test_dash_cancel_active():
 							if !Character.grounded:
 								if Character.air_dash > 0:
-									Character.afterimage_cancel() # need to do this manually for active cancel
 									Character.animate("aDashTransit")
 									keep = false
 							else: # grounded
-								Character.afterimage_cancel() # need to do this manually for active cancel
 								Character.animate("DashTransit")
 								keep = false
 							

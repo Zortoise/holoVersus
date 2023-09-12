@@ -629,8 +629,7 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 							keep = false
 					
 					Em.char_state.GRD_ATK_ACTIVE:
-						if Character.active_cancel:
-							Character.afterimage_cancel() # need to do this manually for active cancel
+						if Character.test_dash_cancel_active():
 							Character.animate("BlinkTransit")
 							keep = false
 							
@@ -640,14 +639,12 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 							keep = false
 					
 					Em.char_state.AIR_ATK_ACTIVE:
-						if Character.active_cancel:
+						if Character.test_dash_cancel_active():
 							if !Character.grounded:
 								if Character.air_dash > 0:
-									Character.afterimage_cancel() # need to do this manually for active cancel
 									Character.animate("BlinkTransit")
 									keep = false
 							else: # grounded
-								Character.afterimage_cancel() # need to do this manually for active cancel
 								Character.animate("BlinkTransit")
 								keep = false
 							

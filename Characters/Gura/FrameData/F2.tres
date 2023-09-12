@@ -133,11 +133,11 @@ frame_data = {
 },
 "vframes": 2
 },
-"F2[h]PRec": {
+"F2[h]PActive": {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "F2SfxOver",
 "SfxOver_vframes": 2,
-"duration": 18,
+"duration": 8,
 "hframes": 6,
 "loop": false,
 "spritesheet": "F2Sprite",
@@ -157,8 +157,20 @@ frame_data = {
 "hurtbox": [ Vector2( -8, -5 ), Vector2( -19, -5 ), Vector2( -19, 1 ), Vector2( -8, 1 ), Vector2( -8, 22 ), Vector2( 19, 22 ), Vector2( 19, -17 ), Vector2( -8, -17 ) ],
 "sdhurtbox": [ Vector2( -36, 10 ), Vector2( 42, 10 ), Vector2( 42, 6 ), Vector2( 62, 6 ), Vector2( 62, -1 ), Vector2( -36, -1 ) ],
 "sweetbox": [  ]
+}
 },
-8: {
+"vframes": 2
+},
+"F2[h]PRec": {
+"SfxOver_hframes": 6,
+"SfxOver_spritesheet": "F2SfxOver",
+"SfxOver_vframes": 2,
+"duration": 10,
+"hframes": 6,
+"loop": false,
+"spritesheet": "F2Sprite",
+"timestamps": {
+0: {
 "SfxOver_frame": 9,
 "frame": 10,
 "hitbox": [  ],
@@ -166,7 +178,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( -37, 10 ), Vector2( -8, 10 ), Vector2( -8, -1 ), Vector2( -37, -1 ) ],
 "sweetbox": [  ]
 },
-12: {
+4: {
 "SfxOver_frame": 0,
 "frame": 10,
 "hitbox": [  ],
@@ -174,7 +186,7 @@ frame_data = {
 "sdhurtbox": [ Vector2( -37, 10 ), Vector2( -8, 10 ), Vector2( -8, -1 ), Vector2( -37, -1 ) ],
 "sweetbox": [  ]
 },
-16: {
+8: {
 "SfxOver_frame": 0,
 "frame": 11,
 "hitbox": [  ],

@@ -512,7 +512,7 @@ func simulate2(): # only ran if not in hitstop
 			# quick impulse
 			match state:
 				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
-					if state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
+					if state == Em.char_state.AIR_ATK_STARTUP and (!grounded or check_fallthrough()): continue
 					
 					if !impulse_used and Animator.time <= 1:
 						var move_name = Animator.to_play_anim.trim_suffix("Startup")
@@ -1934,8 +1934,11 @@ func check_fallthrough(): # during aerials, can drop through platforms if down i
 		return UniqNPC.sequence_fallthrough()
 	elif new_state == Em.char_state.AIR_REC and Animator.query_to_play(["SDash"]):
 		return true
-	elif new_state in [Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE] and velocity.y > 0:
-		if button_down in input_state.pressed:
+#	elif new_state in [Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE] and velocity.y > 0:
+#		if button_down in input_state.pressed:
+#			return true
+	elif !grounded and velocity.y > 0:
+		if button_jump in input_state.pressed:
 			return true
 			
 	return UniqNPC.check_fallthrough()
@@ -2381,8 +2384,10 @@ func test_jump_cancel_active():
 	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN, Em.chain_combo.WHIFF]:
 		return false # on hit only
 	
-	var move_name = get_move_name()
-	if active_cancel or Em.atk_attr.JUMP_CANCEL_ACTIVE in query_atk_attr(move_name):
+	var atk_attr = query_atk_attr(get_move_name())
+	if Em.atk_attr.LATE_CHAIN in atk_attr:
+			return false  # some moves cannot be chained from during active frames
+	if active_cancel or Em.atk_attr.JUMP_CANCEL_ACTIVE in atk_attr:
 		match chain_combo:
 			Em.chain_combo.NORMAL:
 				js_cancel_target = Em.js_cancel_target.ALL
@@ -2407,6 +2412,17 @@ func test_dash_cancel():
 	return true
 	
 	
+func test_dash_cancel_active():
+	var atk_attr = query_atk_attr(get_move_name())
+	if !active_cancel:
+		return false
+	if is_atk_active() and Em.atk_attr.LATE_CHAIN in atk_attr:
+		return false
+		
+	afterimage_cancel()
+	return true
+	
+	
 func test_sdash_cancel():
 	
 	var move_name = get_move_name()
@@ -2425,6 +2441,8 @@ func test_sdash_cancel():
 				
 			if !grounded and super_dash == 0: return false
 			if is_atk_active():
+				if Em.atk_attr.LATE_CHAIN in move_data[Em.move.ATK_ATTR]:
+					return false
 				if !active_cancel:
 					return false
 
@@ -3667,7 +3685,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		if dir != 0: # impulse
 			match state:
 				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
-					if state == Em.char_state.AIR_ATK_STARTUP and !grounded: continue
+					if state == Em.char_state.AIR_ATK_STARTUP and (!grounded or check_fallthrough()): continue
 					
 					if !impulse_used and move_name in UniqNPC.STARTERS and !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
 						impulse_used = true

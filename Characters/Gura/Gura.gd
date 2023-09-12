@@ -64,8 +64,8 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1Startup", "L2Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "F3[b]Startup", "F3[h]Startup", \
 			"HStartup":
 			return Em.char_state.GRD_ATK_STARTUP
-		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "L3Active", "F1Active", "F2Active", "F2[h]Active", "F3Active", \
-				"F3[h]Active", "HActive", "HbActive":
+		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "L3Active", "F1Active", "F2Active", "F2[h]Active", "F2[h]PActive", \
+				"F3Active", "F3[h]Active", "HActive", "HbActive":
 			return Em.char_state.GRD_ATK_ACTIVE
 		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
 				"aL2LandRec":
@@ -202,6 +202,19 @@ func check_collidable():  # some characters have move that can pass through othe
 	return true
 	
 func check_fallthrough():
+	match Character.new_state:
+		Em.char_state.AIR_ATK_STARTUP:
+			if Animator.query_to_play(["aL2Startup"]):
+				return true
+		Em.char_state.AIR_ATK_ACTIVE:
+			if Animator.query_to_play(["aL2Active"]):
+				return true
+			elif Animator.query_to_play(["aSP9c[r]Active", "aSP9c[r]bActive"]):
+				if Character.button_down in Character.input_state.pressed:
+					return true
+		Em.char_state.AIR_ATK_REC:
+			if Animator.query_to_play(["aL2Rec"]):
+				return true
 	return false
 
 func check_semi_invuln():
@@ -551,8 +564,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							keep = false
 					
 					Em.char_state.GRD_ATK_ACTIVE:
-						if Character.active_cancel:
-							Character.afterimage_cancel() # need to do this manually for active cancel
+						if Character.test_dash_cancel_active():
 							Character.animate("DashTransit")
 							keep = false
 							
@@ -566,14 +578,12 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								keep = false
 					
 					Em.char_state.AIR_ATK_ACTIVE:
-						if Character.active_cancel:
+						if Character.test_dash_cancel_active():
 							if !Character.grounded:
 								if Character.air_dash > 0:
-									Character.afterimage_cancel() # need to do this manually for active cancel
 									Character.animate("aDashTransit")
 									keep = false
 							else: # grounded
-								Character.afterimage_cancel() # need to do this manually for active cancel
 								Character.animate("DashTransit")
 								keep = false
 							
@@ -1142,7 +1152,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 				hit_data[Em.hit.MOVE_DATA][Em.move.KB] = 200 * FMath.S
 				hit_data[Em.hit.PULL] = true
 				hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR].append(Em.atk_attr.DI_MANUAL_SEAL)
-				Character.animate("F2[h]PRec")
+				Character.animate("F2[h]PActive")
 				Character.chain_memory.append(get_root(hit_data[Em.hit.MOVE_NAME])) # add move to chain memory, have to do it here for sequences
 			
 		"aF2":
@@ -1614,6 +1624,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 		"F2[h]Rec":
 			Character.animate("Idle")
+		"F2[h]PActive":
+			Character.animate("F2[h]PRec")
 		"F2[h]PRec":
 			Character.animate("Idle")
 			
