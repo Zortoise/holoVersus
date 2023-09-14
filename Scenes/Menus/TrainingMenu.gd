@@ -3,7 +3,7 @@ extends Node2D
 #const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
 const ASSISTS_OPTIONS = ["off", "select"]
 const STATICSTAGE_OPTIONS = ["off", "on"]
-var custom_playlist_options = ["none"] # can be added to
+#var custom_playlist_options = ["none"] # can be added to
 
 
 func _ready():
@@ -13,7 +13,7 @@ func _ready():
 	# WIP, load custom playlists here
 	
 #	$LocalList/Assists.disable()
-	$LocalList/CustomPlaylist.disable()
+#	$LocalList/CustomPlaylist.disable()
 	
 	for node in $LocalList.get_children():
 		if node.is_in_group("has_focus"):
@@ -25,7 +25,7 @@ func _ready():
 	var training_config = Settings.load_training_config() # set up loaded values
 	$LocalList/Assists.load_button("Assists", ASSISTS_OPTIONS, training_config.assists)
 	$LocalList/StaticStage.load_button("Static Stage", STATICSTAGE_OPTIONS, training_config.static_stage)
-	$LocalList/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, training_config.custom_playlist)
+#	$LocalList/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, training_config.custom_playlist)
 
 
 func _process(_delta):
@@ -45,17 +45,17 @@ func triggered(triggered_node):
 				var training_config = {
 					"assists" : 0,
 					"static_stage" : 0,
-					"custom_playlist" : 0,
+#					"custom_playlist" : 0,
 				}
 				play_audio("ui_accept", {"vol":-8})
 				$LocalList/Assists.change_pointer(training_config.assists)
 				$LocalList/StaticStage.change_pointer(training_config.static_stage)
-				$LocalList/CustomPlaylist.change_pointer(training_config.custom_playlist)
+#				$LocalList/CustomPlaylist.change_pointer(training_config.custom_playlist)
 			"StartGame":
 				var training_config = {
 					"assists" : $LocalList/Assists.option_pointer,
 					"static_stage" : $LocalList/StaticStage.option_pointer,
-					"custom_playlist" : $LocalList/CustomPlaylist.option_pointer,
+#					"custom_playlist" : $LocalList/CustomPlaylist.option_pointer,
 				}
 				Settings.save_training_config(training_config)
 				play_audio("ui_accept2", {})

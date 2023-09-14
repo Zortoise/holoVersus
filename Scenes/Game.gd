@@ -282,7 +282,12 @@ func setup():
 	
 # BGM --------------------------------------------------------------------------------------------------
 	
-	if Globals.survival_level == null:
+	if BGM.custom_playlist.size() != 0:
+		var random = posmod(current_rng_seed, BGM.custom_playlist.size())
+		var chosen_music_dict = BGM.custom_playlist[random].duplicate()
+		BGM.bgm(chosen_music_dict)
+	
+	elif Globals.survival_level == null:
 		var music_names := []
 		var music_list := []
 		if "MUSIC" in stage: # append stage music
@@ -296,7 +301,8 @@ func setup():
 					music_names.append(new_music_dict.name)
 					music_list.append(new_music_dict)
 		if music_list.size() > 0:
-			var random = rng_generate(music_list.size()) # pick a random music and load it
+#			var random = rng_generate(music_list.size()) # pick a random music and load it
+			var random = posmod(current_rng_seed, music_list.size())
 			var chosen_music_dict = music_list[random].duplicate()
 			BGM.bgm(chosen_music_dict)
 

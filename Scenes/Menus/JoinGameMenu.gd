@@ -12,7 +12,7 @@ const TIMELIMIT_OPTIONS = ["none", 30, 60, 90, 120, 150, 180, 210, 240, 270, 300
 #const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
 const ASSISTS_OPTIONS = ["off", "select"]
 const STATICSTAGE_OPTIONS = ["off", "on"]
-var custom_playlist_options = ["none"] # can be added to
+#var custom_playlist_options = ["none"] # can be added to
 
 var host_net_game_config = {}
 
@@ -27,7 +27,7 @@ func _ready():
 	
 	# WIP, load custom playlists here
 	
-	$JoinList/CustomPlaylist.disable()
+#	$JoinList/CustomPlaylist.disable()
 	
 	for node in $JoinList.get_children():
 		if node.is_in_group("has_focus"):
@@ -36,7 +36,7 @@ func _ready():
 			node.connect("triggered", self, "triggered")
 	$JoinList/Ready.initial_focus()
 	
-	$JoinList/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, 0)
+#	$JoinList/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, 0)
 
 	# update match data from host
 	$MatchList2/HostSide.text = "-"

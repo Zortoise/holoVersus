@@ -12,7 +12,7 @@ const TIMELIMIT_OPTIONS = ["none", 30, 60, 90, 120, 150, 180, 210, 240, 270, 300
 #const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
 const ASSISTS_OPTIONS = ["off", "select"]
 const STATICSTAGE_OPTIONS = ["off", "on"]
-var custom_playlist_options = ["none"] # can be added to
+#var custom_playlist_options = ["none"] # can be added to
 
 var host_private_ip := ""
 var host_public_ip := ""
@@ -31,7 +31,7 @@ func _ready():
 	# WIP, load custom playlists here
 	
 #	$HostList2/Assists.disable()
-	$HostList2/CustomPlaylist.disable()
+#	$HostList2/CustomPlaylist.disable()
 	
 	for node in $HostList.get_children():
 		if node.is_in_group("has_focus"):
@@ -68,7 +68,7 @@ func _ready():
 	$HostList2/TimeLimit.load_button("Time Limit", TIMELIMIT_OPTIONS, net_game_config.time_limit)
 	$HostList2/Assists.load_button("Assists", ASSISTS_OPTIONS, net_game_config.assists)
 	$HostList2/StaticStage.load_button("Static Stage", STATICSTAGE_OPTIONS, net_game_config.static_stage)
-	$HostList2/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, 0)
+#	$HostList2/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, 0)
 	
 	$PlayerList/PlayersList/Player1/Name.text = " " + Netplay.profile_name
 	$Background/Grid/Port2.text = str(Netplay.port_number)
@@ -227,13 +227,13 @@ func triggered(triggered_node):
 					"time_limit" : 10,
 					"assists" : 0,
 					"static_stage" : 0,
-					"custom_playlist" : 0,
+#					"custom_playlist" : 0,
 				}
 				play_audio("ui_accept", {"vol":-8})
 				$HostList2/StockPoints.change_pointer(game_config.stock_points)
 				$HostList2/TimeLimit.change_pointer(game_config.time_limit)
 				$HostList2/Assists.change_pointer(game_config.assists)
-				$HostList2/CustomPlaylist.change_pointer(game_config.custom_playlist)
+#				$HostList2/CustomPlaylist.change_pointer(game_config.custom_playlist)
 				setup_settings_for_guest()
 			"Ready":
 				if Netplay.is_netplay():

@@ -8,7 +8,7 @@ const TIMELIMIT_OPTIONS = ["none", 30, 60, 90, 120, 150, 180, 210, 240, 270, 300
 #const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
 const ASSISTS_OPTIONS = ["off", "select"]
 const STATICSTAGE_OPTIONS = ["off", "on"]
-var custom_playlist_options = ["none"] # can be added to
+#var custom_playlist_options = ["none"] # can be added to
 
 
 func _ready():
@@ -19,7 +19,7 @@ func _ready():
 	
 	$LocalList/GameMode.disable() # HBoxContainer buttons have to be disabled in code
 #	$LocalList/Assists.disable()
-	$LocalList/CustomPlaylist.disable()
+#	$LocalList/CustomPlaylist.disable()
 	
 	for node in $LocalList.get_children():
 		if node.is_in_group("has_focus"):
@@ -34,7 +34,7 @@ func _ready():
 	$LocalList/TimeLimit.load_button("Time Limit", TIMELIMIT_OPTIONS, game_config.time_limit)
 	$LocalList/Assists.load_button("Assists", ASSISTS_OPTIONS, game_config.assists)
 	$LocalList/StaticStage.load_button("Static Stage", STATICSTAGE_OPTIONS, game_config.static_stage)
-	$LocalList/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, game_config.custom_playlist)
+#	$LocalList/CustomPlaylist.load_button("Custom Playlist", custom_playlist_options, game_config.custom_playlist)
 
 
 func _process(_delta):
@@ -57,7 +57,7 @@ func triggered(triggered_node):
 					"time_limit" : 10,
 					"assists" : 0,
 					"static_stage" : 0,
-					"custom_playlist" : 0,
+#					"custom_playlist" : 0,
 				}
 				play_audio("ui_accept", {"vol":-8})
 				$LocalList/GameMode.change_pointer(game_config.game_mode)
@@ -65,7 +65,7 @@ func triggered(triggered_node):
 				$LocalList/TimeLimit.change_pointer(game_config.time_limit)
 				$LocalList/Assists.change_pointer(game_config.assists)
 				$LocalList/StaticStage.change_pointer(game_config.static_stage)
-				$LocalList/CustomPlaylist.change_pointer(game_config.custom_playlist)
+#				$LocalList/CustomPlaylist.change_pointer(game_config.custom_playlist)
 			"StartGame":
 				var game_config = {
 					"game_mode" : $LocalList/GameMode.option_pointer,
@@ -73,7 +73,7 @@ func triggered(triggered_node):
 					"time_limit" : $LocalList/TimeLimit.option_pointer,
 					"assists" : $LocalList/Assists.option_pointer,
 					"static_stage" : $LocalList/StaticStage.option_pointer,
-					"custom_playlist" : $LocalList/CustomPlaylist.option_pointer,
+#					"custom_playlist" : $LocalList/CustomPlaylist.option_pointer,
 				}
 				Settings.save_game_config(game_config)
 				play_audio("ui_accept2", {})

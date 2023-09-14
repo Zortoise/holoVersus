@@ -8,10 +8,17 @@ var ended := false
 var decaying := false # used to fade out music during transitions
 
 
-func init(in_bgm_dictionary, loop = false):
+func init(in_bgm_dictionary, loaded_stream = null, loop = false):
 	
 	bgm_dictionary = in_bgm_dictionary
-	stream = ResourceLoader.load(bgm_dictionary.audio)
+	
+	if loaded_stream == null:
+		if "audio" in bgm_dictionary:
+			stream = ResourceLoader.load(bgm_dictionary.audio)
+		elif "stream" in bgm_dictionary:
+			stream = bgm_dictionary.stream
+	else:
+		stream = loaded_stream
 
 	if "vol" in bgm_dictionary:
 		volume_db = bgm_dictionary.vol
@@ -34,7 +41,7 @@ func _process(delta):
 			ended = true
 			var BGMPlayer = BGM.BGMPlayerScene.instance()
 			get_tree().get_root().add_child(BGMPlayer)
-			BGMPlayer.init(bgm_dictionary, true)
+			BGMPlayer.init(bgm_dictionary, stream, true)
 			
 			
 func _on_BGMPlayer_finished():

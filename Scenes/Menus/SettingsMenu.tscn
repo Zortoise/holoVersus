@@ -362,40 +362,32 @@ margin_right = 485.0
 margin_bottom = 954.0
 
 [node name="Change" parent="SettingsList2" instance=ExtResource( 6 )]
-margin_right = 312.0
+margin_right = 293.0
 focus_neighbour_top = NodePath("../Discard")
 text = "Change Settings"
 
-[node name="Playlists" parent="SettingsList2" instance=ExtResource( 6 )]
-margin_top = 60.0
-margin_right = 312.0
-margin_bottom = 116.0
-rect_pivot_offset = Vector2( -472, 308 )
-disabled = true
-text = "Manage Playlists"
-
 [node name="Replays" parent="SettingsList2" instance=ExtResource( 6 )]
-margin_top = 120.0
-margin_right = 312.0
-margin_bottom = 176.0
+margin_top = 60.0
+margin_right = 293.0
+margin_bottom = 116.0
 text = "Manage Replays"
 
 [node name="Blank4" type="Label" parent="SettingsList2"]
-margin_top = 180.0
-margin_right = 312.0
-margin_bottom = 209.0
+margin_top = 120.0
+margin_right = 293.0
+margin_bottom = 149.0
 custom_fonts/font = SubResource( 19 )
 text = " "
 
 [node name="Save" parent="SettingsList2" instance=ExtResource( 6 )]
-margin_top = 213.0
-margin_right = 312.0
-margin_bottom = 269.0
+margin_top = 153.0
+margin_right = 293.0
+margin_bottom = 209.0
 text = "Save and return"
 
 [node name="Discard" parent="SettingsList2" instance=ExtResource( 6 )]
-margin_top = 273.0
-margin_right = 312.0
-margin_bottom = 329.0
+margin_top = 213.0
+margin_right = 293.0
+margin_bottom = 269.0
 focus_neighbour_bottom = NodePath("../Change")
 text = "Discard Changes"

@@ -296,7 +296,7 @@ func load_game_config():
 		game_config = ResourceLoader.load("user://game_config.tres").game_config
 		
 		var valid := true # check if game_config has all needed keys, if not, use default game_config
-		for check in ["game_mode", "stock_points", "time_limit", "assists", "static_stage", "custom_playlist"]:
+		for check in ["game_mode", "stock_points", "time_limit", "assists", "static_stage"]:
 			if !check in game_config:
 				valid = false
 		if valid:
@@ -309,7 +309,7 @@ func load_game_config():
 			"time_limit" : 10,
 			"assists" : 0,
 			"static_stage" : 0,
-			"custom_playlist" : 0,
+#			"custom_playlist" : 0,
 		}		
 
 func save_survival_config(survival_config: Dictionary):
@@ -350,7 +350,7 @@ func load_training_config():
 		training_config = ResourceLoader.load("user://training_config.tres").game_config
 		
 		var valid := true # check if game_config has all needed keys, if not, use default game_config
-		for check in ["assists", "static_stage", "custom_playlist"]:
+		for check in ["assists", "static_stage"]:
 			if !check in training_config:
 				valid = false
 		if valid:
@@ -360,7 +360,7 @@ func load_training_config():
 	return {
 			"assists" : 0,
 			"static_stage" : 1,
-			"custom_playlist" : 0,
+#			"custom_playlist" : 0,
 		}	
 		
 func save_training_settings(training_settings: Dictionary):

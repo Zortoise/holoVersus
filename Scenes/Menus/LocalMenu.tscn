@@ -306,9 +306,8 @@ margin_right = 944.0
 margin_bottom = 954.0
 theme = SubResource( 29 )
 
-[node name="GameMode" parent="LocalList" instance=ExtResource( 5 )]
+[node name="GameMode" parent="LocalList" instance=ExtResource( 6 )]
 margin_right = 752.0
-focus_neighbour_top = NodePath("../Return")
 
 [node name="StockPoints" parent="LocalList" instance=ExtResource( 6 )]
 margin_top = 60.0
@@ -330,32 +329,24 @@ margin_top = 240.0
 margin_right = 752.0
 margin_bottom = 296.0
 
-[node name="CustomPlaylist" parent="LocalList" instance=ExtResource( 5 )]
+[node name="Blank2" type="Label" parent="LocalList"]
 margin_top = 300.0
 margin_right = 752.0
-margin_bottom = 356.0
-
-[node name="Blank2" type="Label" parent="LocalList"]
-margin_top = 360.0
-margin_right = 752.0
-margin_bottom = 410.0
+margin_bottom = 350.0
 
 [node name="Reset" parent="LocalList" instance=ExtResource( 8 )]
-margin_top = 414.0
-margin_bottom = 470.0
+margin_top = 354.0
+margin_bottom = 410.0
 text = "Reset to default"
 
 [node name="Blank4" type="Label" parent="LocalList"]
-margin_top = 474.0
+margin_top = 414.0
 margin_right = 752.0
-margin_bottom = 524.0
+margin_bottom = 464.0
 
 [node name="StartGame" parent="LocalList" instance=ExtResource( 4 )]
-margin_top = 528.0
-margin_bottom = 591.0
 
 [node name="Return" parent="LocalList" instance=ExtResource( 8 )]
-margin_top = 595.0
-margin_bottom = 651.0
-focus_neighbour_bottom = NodePath("../GameMode")
+margin_top = 535.0
+margin_bottom = 591.0
 text = "Return to Main Menu"

@@ -880,22 +880,17 @@ margin_top = 490.0
 margin_right = 640.0
 margin_bottom = 546.0
 
-[node name="CustomPlaylist" parent="HostList2" instance=ExtResource( 5 )]
+[node name="Blank3" type="Label" parent="HostList2"]
 margin_top = 550.0
 margin_right = 640.0
-margin_bottom = 606.0
-
-[node name="Blank3" type="Label" parent="HostList2"]
-margin_top = 610.0
-margin_right = 640.0
-margin_bottom = 639.0
+margin_bottom = 579.0
 custom_fonts/font = SubResource( 47 )
 text = " "
 
 [node name="Reset" parent="HostList2" instance=ExtResource( 2 )]
-margin_top = 643.0
+margin_top = 583.0
 margin_right = 640.0
-margin_bottom = 699.0
+margin_bottom = 639.0
 focus_neighbour_bottom = NodePath("../HostSide")
 text = "Reset to default"
 
