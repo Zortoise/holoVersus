@@ -478,7 +478,7 @@ func P1_buy():
 	if Cards.effect_ref.STOCK in Cards.DATABASE[to_add]: # gain stock
 		Globals.Game.get_player_node(0).change_stock_points(Cards.DATABASE[to_add][Cards.effect_ref.STOCK])
 
-	Inventory.pay_coin(0, P1_picker_pos[1])
+	Inventory.pay_prism(0, P1_picker_pos[1])
 		
 	
 func P2_buy():
@@ -500,7 +500,7 @@ func P2_buy():
 	if Cards.effect_ref.STOCK in Cards.DATABASE[to_add]: # gain stock
 		Globals.Game.get_player_node(1).change_stock_points(Cards.DATABASE[to_add][Cards.effect_ref.STOCK])
 		
-	Inventory.pay_coin(1, P2_picker_pos[1])
+	Inventory.pay_prism(1, P2_picker_pos[1])
 	
 # ------------------------------------------------------------------------------------------------------------
 

@@ -4,7 +4,7 @@ const LEVEL_NAME = "Test Level"
 
 const STAGE = "Grid" # filename
 const STARTING_STOCKS = 5
-const STARTING_COIN = 100
+const STARTING_PRISM = 100
 const PRICE_SCALING = 10
 
 const MUSIC = {
@@ -19,7 +19,7 @@ const MOB_LIST = [
 ]
 
 const ITEMS = [
-	"Coin"
+	"Prism"
 ]
 
 var RESOURCE_ADD = {
@@ -45,10 +45,10 @@ var RESOURCE_ADD = {
 
 
 #enum mob_attr {POWER, HP, TOUGH, SPEED, CHAIN, TRAIL, BLACK_TRAIL, WHITE_TRAIL, PROJ_SPEED,
-#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, COIN, PASSIVE_ARMOR}
+#		PROJ_TRAIL, WHITE_PROJ_TRAIL, BLACK_PROJ_TRAIL, RAGE, PRISM, PASSIVE_ARMOR}
 
 # CHAIN: X, TOUGH: 0-5 (0/1 are weaker), SPEED: 0-6 (0/1 are slow), HP: 0-5 (0/1 are lower, 0 is 1 hp)
-# POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), COIN: X (add to loot pool, 40 limit)
+# POWER: 0-5 (0/1 are lower), PROJ_SPEED: 0-3 (0/1 are slow), PRISM: X (add to loot pool, 40 limit)
 
 const WAVES2 = {
 	1 : { # wave ID

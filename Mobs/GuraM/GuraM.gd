@@ -1392,19 +1392,19 @@ func generate_loot() -> Array:
 #	else:	
 	match Character.mob_level:
 		0, 1:
-			loot.append_array(["Coin", "Coin", "Coin"])
+			loot.append_array(["Prism", "Prism", "Prism"])
 		2, 3:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin"])
+			loot.append_array(["Prism", "Prism", "Prism", "Prism"])
 		4, 5:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin"])
+			loot.append_array(["Prism", "Prism", "Prism", "Prism", "Prism"])
 		6, 7:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+			loot.append_array(["Prism", "Prism", "Prism", "Prism", "Prism", "Prism"])
 		8:
-			loot.append_array(["Coin", "Coin", "Coin", "Coin", "Coin", "Coin", "Coin"])
+			loot.append_array(["Prism", "Prism", "Prism", "Prism", "Prism", "Prism", "Prism"])
 	
 	var random = Globals.Game.rng_generate(3)
-	if random == 0: loot.append("Coin")
-	elif random == 1: loot.erase("Coin")
+	if random == 0: loot.append("Prism")
+	elif random == 1: loot.erase("Prism")
 	
 	return loot
 

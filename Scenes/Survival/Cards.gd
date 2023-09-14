@@ -9,7 +9,7 @@ enum effect_ref {
 		GUARD_DRAIN_MOD,
 		GRD_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
 		HEAVY_DMG_MOD, SPECIAL_DMG_MOD, PROJ_DMG_MOD, SUPER_DMG_MOD, ASSIST_DMG_MOD
-		COIN_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
+		PRISM_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
 		LESS_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
@@ -141,9 +141,9 @@ const DESCRIBE = {
 		"suffix" :"Assist Dmg",
 	},
 	
-	effect_ref.COIN_GAIN : {
+	effect_ref.PRISM_GAIN : {
 		"type" : type.LINEAR,
-		"suffix" :"Coin Gain",
+		"suffix" :"Prism Gain",
 	},
 	effect_ref.LIFESTEAL_RATE : {
 		"type" : type.PERCENT,
@@ -460,7 +460,7 @@ const DATABASE = {
 	card_ref.MARINE : {
 		"name" : "Marine",
 		"price" : 100,
-		effect_ref.COIN_GAIN : 2,
+		effect_ref.PRISM_GAIN : 2,
 		effect_ref.HITSTUN_TAKEN : -30,
 		effect_ref.HEAVY_DMG_MOD : 50,
 		effect_ref.HITSTUN_EX_REGEN: 150,
@@ -821,7 +821,7 @@ const DATABASE = {
 		"name" : "Luna",
 		"price" : 100,
 		effect_ref.HP : 35,
-		effect_ref.COIN_GAIN : 1,
+		effect_ref.PRISM_GAIN : 1,
 		"quirks" : [effect_ref.EX_RAISE_DMG, effect_ref.BETTER_BLOCK]
 	},
 	card_ref.CHLOE : {

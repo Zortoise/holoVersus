@@ -23,12 +23,13 @@ func picked_up(character):
 	Animator.play("Pickup")
 	Entity.stasis = true
 	character.get_node("ModulatePlayer").play("unlaunch_flash")
-	Entity.play_audio("bling1", {"vol" : -20})
-	if character.has_method("gain_coin"):
+	Entity.play_audio("bling1", {"vol" : -20, "bus" : "PitchUp"})
+	Entity.play_audio("bling2", {"vol" : -15})
+	if character.has_method("gain_prism"):
 		if Globals.player_count == 1:
-			character.gain_coin(10)
+			character.gain_prism(10)
 		else:
-			character.gain_coin(15)
+			character.gain_prism(15)
 	
 func bounce_sound(soften: bool = false):
 	if !soften:

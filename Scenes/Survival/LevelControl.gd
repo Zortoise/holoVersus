@@ -26,7 +26,7 @@ var mob_entity_ID_ref := -1
 var time_of_last_spawn = null
 var wave_standby_timer := 120
 
-var starting_coin := 0
+var starting_prism := 0
 
 var to_spawn = {
 #	0: {
@@ -36,10 +36,10 @@ var to_spawn = {
 }
 
 #var item_data = {
-#	"Coin": {
-#		"scene" : load("res://Items/Coin/Coin.tscn"),
-#		"frame_data" : ResourceLoader.load("res://Items/Coin/FrameData/Coin.tres"),
-#		"spritesheet" : ResourceLoader.load("res://Items/Coin/Spritesheets/CoinSprite.png"),
+#	"Prism": {
+#		"scene" : load("res://Items/Prism/Prism.tscn"),
+#		"frame_data" : ResourceLoader.load("res://Items/Prism/FrameData/Prism.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Items/Prism/Spritesheets/PrismSprite.png"),
 #		"palettes" : {}
 #	}
 #}
@@ -103,14 +103,14 @@ func init():
 	
 	if Globals.difficulty >= 2:
 		Globals.Game.starting_stock_pts = 1
-		starting_coin = 0
+		starting_prism = 0
 	else:
 		if Globals.player_count == 1:
 			Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
-			starting_coin = UniqLevel.STARTING_COIN
+			starting_prism = UniqLevel.STARTING_PRISM
 		else:
 			Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
-			starting_coin = FMath.percent(UniqLevel.STARTING_COIN, 50)
+			starting_prism = FMath.percent(UniqLevel.STARTING_PRISM, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
 	if "MUSIC" in UniqLevel:
 		var music_dict = UniqLevel.MUSIC.duplicate()

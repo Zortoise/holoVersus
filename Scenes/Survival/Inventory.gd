@@ -69,25 +69,25 @@ func close_shop(): # return unbought cards to pool
 
 
 func can_player_afford(player_ID: int, shop_index: int) -> bool:
-	if Globals.Game.get_player_node(player_ID).coin_count >= get_price(shop[shop_index]):
+	if Globals.Game.get_player_node(player_ID).prism_count >= get_price(shop[shop_index]):
 		return true
 	else: return false
 	
 func can_player_afford_ref(player_ID: int, in_card_ref: int) -> bool:
-	if Globals.Game.get_player_node(player_ID).coin_count >= get_price(in_card_ref):
+	if Globals.Game.get_player_node(player_ID).prism_count >= get_price(in_card_ref):
 		return true
 	else: return false
 	
-func pay_coin(player_ID: int, shop_index: int):
+func pay_prism(player_ID: int, shop_index: int):
 	var player = Globals.Game.get_player_node(player_ID)
-	player.coin_count -= get_price(shop[shop_index])
-	Globals.Game.coin_update(player)
+	player.prism_count -= get_price(shop[shop_index])
+	Globals.Game.prism_update(player)
 
 
 func sell_card(player_ID: int, index: int):
 	var player = Globals.Game.get_player_node(player_ID)
-	player.coin_count += FMath.percent(get_price(inventory[player_ID][index]), 50)
-	Globals.Game.coin_update(player)
+	player.prism_count += FMath.percent(get_price(inventory[player_ID][index]), 50)
+	Globals.Game.prism_update(player)
 	
 	inventory[0].remove(index)
 

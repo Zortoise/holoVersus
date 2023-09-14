@@ -244,7 +244,7 @@ onready var current_ex_lock: int = 0
 onready var install_time = null # initial install time
 onready var burst_token = Em.burst.AVAILABLE
 var stock_points_left: int
-var coin_count := 0
+var prism_count := 0
 
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
 var ignore_list = [] # some moves has ignore_time, after hitting will ignore that player for a number of frames, used for multi-hit specials
@@ -407,7 +407,7 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 		
 	if Globals.survival_level != null:
 		burst_token = Em.burst.CONSUMED
-		coin_count = Globals.Game.LevelControl.starting_coin
+		prism_count = Globals.Game.LevelControl.starting_prism
 
 	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
 	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
@@ -427,7 +427,7 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	Globals.Game.burst_update(self)
 	Globals.Game.install_update(self)
 	if Globals.survival_level != null:
-		Globals.Game.coin_update(self)
+		Globals.Game.prism_update(self)
 	
 	
 func set_player_id(in_player_ID): # can use this to change player you are controlling during training mode
@@ -5957,11 +5957,11 @@ func change_burst_token(new_burst_token: int):
 		burst_token = new_burst_token
 		Globals.Game.burst_update(self)
 		
-func gain_coin(to_gain: int):
+func gain_prism(to_gain: int):
 	if Globals.survival_level != null:
-#		to_gain = FMath.percent(to_gain, Inventory.modifier(player_ID, Cards.effect_ref.COIN_GAIN))
-		coin_count += to_gain
-		Globals.Game.coin_update(self)
+#		to_gain = FMath.percent(to_gain, Inventory.modifier(player_ID, Cards.effect_ref.PRISM_GAIN))
+		prism_count += to_gain
+		Globals.Game.prism_update(self)
 		change_ex_gauge(3000)
 	
 	
@@ -8817,7 +8817,7 @@ func save_state():
 		"current_ex_lock" : current_ex_lock,
 #		"super_ex_lock" : super_ex_lock,
 		"stock_points_left" : stock_points_left,
-		"coin_count" : coin_count,
+		"prism_count" : prism_count,
 		"install_time" : install_time,
 		
 		"unique_data" : unique_data,
@@ -8933,7 +8933,7 @@ func load_state(state_data, command_rewind := false):
 	current_ex_lock = state_data.current_ex_lock
 #	super_ex_lock = state_data.super_ex_lock
 	stock_points_left = state_data.stock_points_left
-	coin_count = state_data.coin_count
+	prism_count = state_data.prism_count
 	install_time = state_data.install_time
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
@@ -8942,7 +8942,7 @@ func load_state(state_data, command_rewind := false):
 	Globals.Game.burst_update(self)
 	
 	if Globals.survival_level != null:
-		Globals.Game.coin_update(self)
+		Globals.Game.prism_update(self)
 	else:
 		$FDITimer.time = state_data.FDITimer_time
 	

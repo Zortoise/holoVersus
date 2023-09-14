@@ -172,14 +172,14 @@ func setup():
 	
 	if Globals.survival_level == null:
 		for player in Globals.player_count:
-			HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Coin").queue_free()
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Prism").queue_free()
 		card_menu.queue_free()
 	else:
 		for player in Globals.player_count:
 			if Globals.difficulty >= 2:
-				HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Coin").hide()
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Prism").hide()
 			else:
-				HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Coin").show()
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Prism").show()
 		
 	if !Globals.watching_replay:
 		viewport.get_node("ReplayControls").queue_free()
@@ -2221,10 +2221,10 @@ func burst_update(character):
 	elif character.burst_token == Em.burst.EXHAUSTED:
 		burst_token.get_node("AnimationPlayer").play("gray")
 		
-func coin_update(character):
+func prism_update(character):
 	if Globals.survival_level != null:	
-		var coin_counter = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Coin/Amount")
-		coin_counter.text = str(character.coin_count)
+		var prism_counter = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Prism/Amount")
+		prism_counter.text = str(character.prism_count)
 		
 				
 func set_uniqueHUD(player_ID, uniqueHUD):

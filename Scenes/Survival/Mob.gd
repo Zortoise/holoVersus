@@ -1330,15 +1330,15 @@ func loot_drop():
 	
 	var loot_array = UniqChar.generate_loot()
 	
-	if Em.mob_attr.COIN in mob_attr:
-		for x in min(mob_attr[Em.mob_attr.COIN], Globals.Game.LevelControl.ITEM_LIMIT):
-			loot_array.append("Coin")
+	if Em.mob_attr.PRISM in mob_attr:
+		for x in min(mob_attr[Em.mob_attr.PRISM], Globals.Game.LevelControl.ITEM_LIMIT):
+			loot_array.append("Prism")
 	
 	if target_ID >= 0:
-		var coin_change = Inventory.modifier(target_ID, Cards.effect_ref.COIN_GAIN)
-		if coin_change > 0:
-			for x in coin_change:
-				loot_array.append("Coin")
+		var prism_change = Inventory.modifier(target_ID, Cards.effect_ref.PRISM_GAIN)
+		if prism_change > 0:
+			for x in prism_change:
+				loot_array.append("Prism")
 	
 	var angle_segment = int((LOOT_ANGLE_RANGE[1] - LOOT_ANGLE_RANGE[0]) / (loot_array.size() + 1))
 	var angle = LOOT_ANGLE_RANGE[0] + angle_segment

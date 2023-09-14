@@ -2,25 +2,25 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/CoinSprite.png-65251dce1d121d193550b564c1f1b948.stex"
+path="res://.import/prism.png-5edb181c97cbe1f1248caf045e2527c3.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Items/Coin/Spritesheets/CoinSprite.png"
-dest_files=[ "res://.import/CoinSprite.png-65251dce1d121d193550b564c1f1b948.stex" ]
+source_file="res://Assets/UI/prism.png"
+dest_files=[ "res://.import/prism.png-5edb181c97cbe1f1248caf045e2527c3.stex" ]
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/lossy_quality=0.7
 compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2

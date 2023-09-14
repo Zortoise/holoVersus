@@ -42,7 +42,7 @@
 [ext_resource path="res://Assets/UI/EX_lock.png" type="Texture" id=40]
 [ext_resource path="res://Assets/UI/EX_lock_under.png" type="Texture" id=41]
 [ext_resource path="res://Assets/UI/guard_label.png" type="Texture" id=42]
-[ext_resource path="res://Assets/UI/coin.png" type="Texture" id=43]
+[ext_resource path="res://Assets/UI/prism.png" type="Texture" id=43]
 [ext_resource path="res://Assets/UI/ring_back.png" type="Texture" id=44]
 [ext_resource path="res://Assets/UI/basic_bar.png" type="Texture" id=45]
 [ext_resource path="res://Assets/UI/basic_bar_back.png" type="Texture" id=46]
@@ -3657,20 +3657,19 @@ anims/empty = SubResource( 119 )
 anims/flash = SubResource( 104 )
 anims/gray = SubResource( 113 )
 
-[node name="Coin" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
-visible = false
+[node name="Prism" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
 position = Vector2( 0, 2 )
 
-[node name="Coin" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Coin"]
-position = Vector2( -33, 86 )
+[node name="Prism" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Prism"]
+position = Vector2( -33, 85 )
 texture = ExtResource( 43 )
 
-[node name="Amount" type="Label" parent="HUD/P1_HUDRect/Portrait/Coin"]
-margin_left = -10.0
+[node name="Amount" type="Label" parent="HUD/P1_HUDRect/Portrait/Prism"]
+margin_left = -8.0
 margin_top = 73.0
-margin_right = 247.0
+margin_right = 249.0
 margin_bottom = 101.0
-custom_colors/font_color = Color( 0.890196, 0.819608, 0.47451, 1 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 150 )
 text = "8888"
 
@@ -3970,23 +3969,6 @@ anims/empty = SubResource( 124 )
 anims/flash = SubResource( 125 )
 anims/gray = SubResource( 126 )
 
-[node name="Coin" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
-visible = false
-position = Vector2( 0, 2 )
-
-[node name="Coin" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Coin"]
-position = Vector2( -33, 86 )
-texture = ExtResource( 43 )
-
-[node name="Amount" type="Label" parent="HUD/P2_HUDRect/Portrait/Coin"]
-margin_left = -10.0
-margin_top = 73.0
-margin_right = 247.0
-margin_bottom = 101.0
-custom_colors/font_color = Color( 0.890196, 0.819608, 0.47451, 1 )
-custom_fonts/font = SubResource( 150 )
-text = "8888"
-
 [node name="InstallTime" type="TextureProgress" parent="HUD/P2_HUDRect/Portrait"]
 visible = false
 margin_left = -7.0
@@ -3998,6 +3980,22 @@ texture_under = ExtResource( 44 )
 texture_progress = ExtResource( 53 )
 fill_mode = 4
 tint_progress = Color( 0.945098, 0.470588, 1, 1 )
+
+[node name="Prism" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( 0, 2 )
+
+[node name="Prism" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Prism"]
+position = Vector2( -33, 85 )
+texture = ExtResource( 43 )
+
+[node name="Amount" type="Label" parent="HUD/P2_HUDRect/Portrait/Prism"]
+margin_left = -8.0
+margin_top = 73.0
+margin_right = 249.0
+margin_bottom = 101.0
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+custom_fonts/font = SubResource( 150 )
+text = "8888"
 
 [node name="GaugesUnder" type="Sprite" parent="HUD/P2_HUDRect"]
 position = Vector2( 240, 966 )

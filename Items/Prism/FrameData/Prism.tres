@@ -9,31 +9,25 @@ frame_data = {
 "duration": 28,
 "hframes": 6,
 "loop": true,
-"spritesheet": "CoinSprite",
+"spritesheet": "PrismSprite",
 "timestamps": {
 0: {
 "frame": 3
 },
-5: {
+6: {
 "frame": 4
 },
-9: {
+11: {
 "frame": 5
 },
-12: {
+15: {
 "frame": 6
 },
-15: {
+19: {
 "frame": 7
 },
-18: {
+23: {
 "frame": 8
-},
-21: {
-"frame": 9
-},
-24: {
-"frame": 10
 }
 },
 "vframes": 3
@@ -42,25 +36,25 @@ frame_data = {
 "duration": 12,
 "hframes": 6,
 "loop": false,
-"spritesheet": "CoinSprite",
+"spritesheet": "PrismSprite",
 "timestamps": {
 0: {
-"frame": 2
+"frame": 9
 },
 2: {
-"frame": 11
+"frame": 10
 },
 4: {
-"frame": 12
+"frame": 11
 },
 6: {
-"frame": 13
+"frame": 12
 },
 8: {
-"frame": 14
+"frame": 13
 },
 10: {
-"frame": 15
+"frame": 14
 }
 },
 "vframes": 3
@@ -69,7 +63,7 @@ frame_data = {
 "duration": 9,
 "hframes": 6,
 "loop": false,
-"spritesheet": "CoinSprite",
+"spritesheet": "PrismSprite",
 "timestamps": {
 0: {
 "frame": 0

@@ -140,10 +140,10 @@ var entity_data = {
 }
 
 var item_data = {
-#	"Coin": {
-#		"scene" : load("res://Items/Coin/Coin.tscn"),
-#		"frame_data" : ResourceLoader.load("res://Items/Coin/FrameData/Coin.tres"),
-#		"spritesheet" : ResourceLoader.load("res://Items/Coin/Spritesheets/CoinSprite.png"),
+#	"Prism": {
+#		"scene" : load("res://Items/Prism/Prism.tscn"),
+#		"frame_data" : ResourceLoader.load("res://Items/Prism/FrameData/Prism.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Items/Prism/Spritesheets/PrismSprite.png"),
 #		"palettes" : {}
 #	}
 }
