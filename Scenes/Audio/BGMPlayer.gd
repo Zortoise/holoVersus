@@ -31,7 +31,7 @@ func init(in_bgm_dictionary, loaded_stream = null, loop = false):
 
 func _process(delta):
 	if ended or decaying:
-		if "fade" in bgm_dictionary or decaying:
+		if ("fade" in bgm_dictionary and bgm_dictionary.fade == true) or decaying:
 			volume_db -= 60.0 * delta
 			if volume_db <= -80:
 				queue_free()

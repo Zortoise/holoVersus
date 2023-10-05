@@ -290,7 +290,7 @@ frame_data = {
 "vframes": 21
 },
 "BurstCounterStartup": {
-"duration": 22,
+"duration": 19,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -303,11 +303,11 @@ frame_data = {
 "frame": 115,
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 3, 22 ), Vector2( 3, 15 ), Vector2( 12, 15 ), Vector2( 12, -9 ), Vector2( -11, -9 ) ]
 },
-10: {
+9: {
 "frame": 116,
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 3, 22 ), Vector2( 3, 15 ), Vector2( 12, 15 ), Vector2( 12, -9 ), Vector2( -11, -9 ) ]
 },
-16: {
+14: {
 "frame": 117,
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 3, 22 ), Vector2( 3, 15 ), Vector2( 12, 15 ), Vector2( 12, -9 ), Vector2( -11, -9 ) ]
 }
@@ -360,7 +360,7 @@ frame_data = {
 "vframes": 21
 },
 "BurstEscapeStartup": {
-"duration": 22,
+"duration": 19,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -373,11 +373,11 @@ frame_data = {
 "frame": 115,
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 3, 22 ), Vector2( 3, 15 ), Vector2( 12, 15 ), Vector2( 12, -9 ), Vector2( -11, -9 ) ]
 },
-10: {
+9: {
 "frame": 116,
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 3, 22 ), Vector2( 3, 15 ), Vector2( 12, 15 ), Vector2( 12, -9 ), Vector2( -11, -9 ) ]
 },
-16: {
+14: {
 "frame": 117,
 "hurtbox": [ Vector2( -11, 22 ), Vector2( 3, 22 ), Vector2( 3, 15 ), Vector2( 12, 15 ), Vector2( 12, -9 ), Vector2( -11, -9 ) ]
 }

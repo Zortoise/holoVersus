@@ -2658,6 +2658,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 			return false
 		
 	if is_atk_active():
+		if Em.atk_attr.AUTOCHAIN in from_move_data[Em.move.ATK_ATTR]:
+			return false
 		if Em.atk_attr.LATE_CHAIN in from_move_data[Em.move.ATK_ATTR]:
 			return false  # some moves cannot be chained from during active frames
 		if Em.atk_attr.LATE_CHAIN_INTO in to_move_data[Em.move.ATK_ATTR]:

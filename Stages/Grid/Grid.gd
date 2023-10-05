@@ -15,3 +15,6 @@ func _ready():
 		$SoftPlatform2.free()
 		$MPlatform1.free()
 		$MPlatform2.free()
+		
+	elif Globals.static_stage != 0:
+		$MPlatform2.free()
