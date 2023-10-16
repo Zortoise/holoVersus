@@ -576,8 +576,6 @@ material = SubResource( 28 )
 frame = 7
 
 [node name="Grid" parent="." instance=ExtResource( 4 )]
-margin_left = 309.5
-margin_right = 1609.5
 
 [node name="P1_Picker" type="TextureRect" parent="."]
 modulate = Color( 0, 0, 0, 1 )

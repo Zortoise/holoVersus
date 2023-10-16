@@ -26,7 +26,7 @@ frame_data = {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP2SfxOver",
 "SfxOver_vframes": 2,
-"duration": 26,
+"duration": 19,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP2Sprite",
@@ -36,37 +36,37 @@ frame_data = {
 "frame": 0,
 "hurtbox": [ Vector2( -7, 2 ), Vector2( -11, 2 ), Vector2( -11, 12 ), Vector2( -7, 12 ), Vector2( -7, 25 ), Vector2( 4, 25 ), Vector2( 4, 15 ), Vector2( 11, 15 ), Vector2( 11, -21 ), Vector2( -7, -21 ) ]
 },
-3: {
+1: {
 "SfxOver_frame": 0,
 "frame": 1,
 "hurtbox": [ Vector2( -8, 23 ), Vector2( 5, 23 ), Vector2( 5, 12 ), Vector2( 8, 12 ), Vector2( 8, -22 ), Vector2( -8, -22 ) ]
 },
-8: {
+4: {
 "SfxOver_frame": 0,
 "frame": 2,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 8, 22 ), Vector2( 8, -19 ), Vector2( -9, -19 ) ]
 },
-10: {
+6: {
 "SfxOver_frame": 0,
 "frame": 3,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 8, 22 ), Vector2( 8, -19 ), Vector2( -9, -19 ) ]
 },
-12: {
+8: {
 "SfxOver_frame": 0,
 "frame": 4,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 8, 22 ), Vector2( 8, -19 ), Vector2( -9, -19 ) ]
 },
-14: {
+10: {
 "SfxOver_frame": 0,
 "frame": 5,
 "hurtbox": [ Vector2( -8, -13 ), Vector2( -19, -13 ), Vector2( -19, -6 ), Vector2( -7, -6 ), Vector2( -7, 26 ), Vector2( 6, 26 ), Vector2( 6, -6 ), Vector2( 19, -6 ), Vector2( 19, -13 ), Vector2( 8, -13 ), Vector2( 8, -26 ), Vector2( -8, -26 ) ]
 },
-20: {
+13: {
 "SfxOver_frame": 1,
 "frame": 6,
 "hurtbox": [ Vector2( -8, -13 ), Vector2( -19, -13 ), Vector2( -19, -6 ), Vector2( -7, -6 ), Vector2( -7, 26 ), Vector2( 6, 26 ), Vector2( 6, -6 ), Vector2( 19, -6 ), Vector2( 19, -13 ), Vector2( 8, -13 ), Vector2( 8, -26 ), Vector2( -8, -26 ) ]
 },
-23: {
+16: {
 "SfxOver_frame": 2,
 "frame": 7,
 "hurtbox": [ Vector2( -8, -13 ), Vector2( -19, -13 ), Vector2( -19, -6 ), Vector2( -7, -6 ), Vector2( -7, 26 ), Vector2( 6, 26 ), Vector2( 6, -6 ), Vector2( 19, -6 ), Vector2( 19, -13 ), Vector2( 8, -13 ), Vector2( 8, -26 ), Vector2( -8, -26 ) ]
@@ -208,7 +208,7 @@ frame_data = {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "SP2SfxOver",
 "SfxOver_vframes": 2,
-"duration": 14,
+"duration": 11,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP2Sprite",
@@ -218,27 +218,27 @@ frame_data = {
 "frame": 0,
 "hurtbox": [ Vector2( -7, 2 ), Vector2( -11, 2 ), Vector2( -11, 12 ), Vector2( -7, 12 ), Vector2( -7, 25 ), Vector2( 4, 25 ), Vector2( 4, 15 ), Vector2( 11, 15 ), Vector2( 11, -21 ), Vector2( -7, -21 ) ]
 },
-3: {
+1: {
 "SfxOver_frame": 0,
 "frame": 1,
 "hurtbox": [ Vector2( -8, 23 ), Vector2( 5, 23 ), Vector2( 5, 12 ), Vector2( 8, 12 ), Vector2( 8, -22 ), Vector2( -8, -22 ) ]
 },
-6: {
+3: {
 "SfxOver_frame": 0,
 "frame": 2,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 8, 22 ), Vector2( 8, -19 ), Vector2( -9, -19 ) ]
 },
-8: {
+5: {
 "SfxOver_frame": 0,
 "frame": 3,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 8, 22 ), Vector2( 8, -19 ), Vector2( -9, -19 ) ]
 },
-10: {
+7: {
 "SfxOver_frame": 0,
 "frame": 4,
 "hurtbox": [ Vector2( -9, 22 ), Vector2( 8, 22 ), Vector2( 8, -19 ), Vector2( -9, -19 ) ]
 },
-12: {
+9: {
 "SfxOver_frame": 7,
 "frame": 5,
 "hurtbox": [ Vector2( -8, -13 ), Vector2( -19, -13 ), Vector2( -19, -6 ), Vector2( -7, -6 ), Vector2( -7, 26 ), Vector2( 6, 26 ), Vector2( 6, -6 ), Vector2( 19, -6 ), Vector2( 19, -13 ), Vector2( 8, -13 ), Vector2( 8, -26 ), Vector2( -8, -26 ) ]

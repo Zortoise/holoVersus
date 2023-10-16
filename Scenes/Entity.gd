@@ -78,6 +78,8 @@ func init(in_master_ID: int, in_entity_ref: String, in_position: Vector2, aux_da
 		unique_data = UniqEntity.UNIQUE_DATA_REF.duplicate(true)
 		
 	UniqEntity.init(aux_data)
+	$NoCollideTimer.time = 2 # this is needed so that NoCollide mechanism will work on the first frame the projectile is created
+	
 	
 		
 func load_entity():
@@ -249,6 +251,12 @@ func simulate2(): # only ran if not in hitstop
 					velocity.y = orig_vel_y
 				else:	
 					UniqEntity.ledge_stop()
+					
+		if $NoCollideTimer.is_running() and is_in_blastwalls():
+			position = orig_pos # if go offstage during 1st frame of hitstop, will return to position before moving
+			set_true_position()
+			velocity.x = orig_vel_x
+			velocity.y = orig_vel_y
 
 	else: # no collision with platforms
 		move_no_collision()

@@ -777,6 +777,9 @@ func simulate(new_input_state):
 #			call_assist(Em.assist.NEUTRAL)
 			
 #			play_audio("bling4", {})
+
+			Globals.Game.superfreeze(get_path())
+			Globals.Game.set_screenstop()
 			
 			pass
 	

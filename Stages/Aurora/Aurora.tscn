@@ -62,7 +62,7 @@ texture = ExtResource( 5 )
 material = SubResource( 3 )
 position = Vector2( 95, -203 )
 frames = SubResource( 2 )
-frame = 21
+frame = 9
 playing = true
 
 [node name="ShootingStarSpawner" type="ColorRect" parent="ParallaxBackground/ParallaxLayer"]
@@ -119,7 +119,6 @@ position = Vector2( 0, 24 )
 texture = ExtResource( 33 )
 
 [node name="SoftPlatform" parent="MPlatform1/MPlatform" instance=ExtResource( 34 )]
-visible = false
 margin_left = -64.0
 margin_top = -8.0
 margin_right = 64.0

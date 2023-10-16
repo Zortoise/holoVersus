@@ -37,6 +37,6 @@ animations = [ {
 [node name="Wisp2" type="AnimatedSprite"]
 material = SubResource( 7 )
 frames = SubResource( 6 )
-frame = 5
+frame = 3
 playing = true
 script = ExtResource( 1 )

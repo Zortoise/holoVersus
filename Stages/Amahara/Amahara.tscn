@@ -1,0 +1,239 @@
+[gd_scene load_steps=19 format=2]
+
+[ext_resource path="res://Scenes/Stage/SolidPlatform.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Stages/Amahara/Amahara.gd" type="Script" id=2]
+[ext_resource path="res://Stages/Amahara/Resources/fubuki_midcloud.png" type="Texture" id=3]
+[ext_resource path="res://Stages/Amahara/Resources/fubuki_frontcloud2.png" type="Texture" id=4]
+[ext_resource path="res://Stages/Amahara/Resources/fubuki_sky.png" type="Texture" id=5]
+[ext_resource path="res://Stages/Amahara/Resources/fubuki_midcloud2.png" type="Texture" id=6]
+[ext_resource path="res://Stages/Amahara/Resources/fubuki_main.png" type="Texture" id=7]
+[ext_resource path="res://Stages/Amahara/Resources/fubuki_frontcloud.png" type="Texture" id=8]
+[ext_resource path="res://Stages/Amahara/Resources/fubuki_platform.png" type="Texture" id=9]
+[ext_resource path="res://Scenes/Stage/SoftPlatform.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Scenes/Shaders/Scrolling.gdshader" type="Shader" id=11]
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = ExtResource( 11 )
+shader_param/Direction = Vector2( -1, 0 )
+shader_param/Speed = 0.03
+shader_param/Start_Time = 0.0
+shader_param/time = 0.0
+
+[sub_resource type="Shader" id=9]
+code = "shader_type canvas_item;
+
+uniform vec2 Direction = vec2(1.0, 0.0);
+uniform float Speed = 0.08;
+uniform float Start_Time = 0.0;
+
+uniform float time = 0.0;
+
+void fragment()
+{
+	COLOR = texture(TEXTURE, UV + (Direction * time * Speed) + (Direction * Start_Time * Speed));
+}"
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = SubResource( 9 )
+shader_param/Direction = Vector2( -1, 0 )
+shader_param/Speed = 0.05
+shader_param/Start_Time = 5.0
+shader_param/time = 0.0
+
+[sub_resource type="Shader" id=10]
+code = "shader_type canvas_item;
+
+uniform vec2 Direction = vec2(1.0, 0.0);
+uniform float Speed = 0.08;
+uniform float Start_Time = 0.0;
+
+uniform float time = 0.0;
+
+void fragment()
+{
+	COLOR = texture(TEXTURE, UV + (Direction * time * Speed) + (Direction * Start_Time * Speed));
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 10 )
+shader_param/Direction = Vector2( -1, 0 )
+shader_param/Speed = 0.08
+shader_param/Start_Time = 0.0
+shader_param/time = 0.0
+
+[sub_resource type="Shader" id=11]
+code = "shader_type canvas_item;
+
+uniform vec2 Direction = vec2(1.0, 0.0);
+uniform float Speed = 0.08;
+uniform float Start_Time = 0.0;
+
+uniform float time = 0.0;
+
+void fragment()
+{
+	COLOR = texture(TEXTURE, UV + (Direction * time * Speed) + (Direction * Start_Time * Speed));
+}"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 11 )
+shader_param/Direction = Vector2( -1, 0 )
+shader_param/Speed = 0.12
+shader_param/Start_Time = 5.0
+shader_param/time = 0.0
+
+[node name="Amahara" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2( 0.3, 0.9 )
+
+[node name="Background" type="Sprite" parent="ParallaxBackground/ParallaxLayer"]
+position = Vector2( 0, -69 )
+texture = ExtResource( 5 )
+
+[node name="ParallaxLayer2" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2( 0.9, 0.9 )
+
+[node name="Midcloud" type="TextureRect" parent="ParallaxBackground/ParallaxLayer2"]
+modulate = Color( 1.3, 1.3, 1.3, 1 )
+material = SubResource( 6 )
+margin_left = -512.0
+margin_top = 32.0
+margin_right = 512.0
+margin_bottom = 289.0
+texture = ExtResource( 6 )
+stretch_mode = 2
+
+[node name="Midcloud2" type="TextureRect" parent="ParallaxBackground/ParallaxLayer2"]
+material = SubResource( 8 )
+margin_left = -512.0
+margin_top = 32.0
+margin_right = 512.0
+margin_bottom = 289.0
+texture = ExtResource( 3 )
+stretch_mode = 2
+
+[node name="SoftPlatform1" type="Sprite" parent="."]
+position = Vector2( -170, 84 )
+texture = ExtResource( 9 )
+
+[node name="SoftPlatform" parent="SoftPlatform1" instance=ExtResource( 10 )]
+margin_left = -78.0
+margin_top = -44.0
+margin_right = 82.0
+margin_bottom = -36.0
+rect_pivot_offset = Vector2( 38, 13 )
+
+[node name="SoftPlatform2" type="Sprite" parent="."]
+position = Vector2( 166, 84 )
+texture = ExtResource( 9 )
+
+[node name="SoftPlatform" parent="SoftPlatform2" instance=ExtResource( 10 )]
+margin_left = -78.0
+margin_top = -44.0
+margin_right = 82.0
+margin_bottom = -36.0
+rect_pivot_offset = Vector2( 38, 13 )
+
+[node name="MainPlatform" type="TextureRect" parent="."]
+margin_left = -384.0
+margin_top = 128.0
+margin_right = 384.0
+margin_bottom = 320.0
+texture = ExtResource( 7 )
+stretch_mode = 2
+
+[node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 1 )]
+visible = false
+margin_left = -64.0
+margin_right = 832.0
+margin_bottom = 192.0
+
+[node name="Frontcloud" type="TextureRect" parent="MainPlatform"]
+material = SubResource( 2 )
+margin_left = -128.0
+margin_top = -3.0
+margin_right = 896.0
+margin_bottom = 194.0
+texture = ExtResource( 4 )
+stretch_mode = 2
+
+[node name="Frontcloud2" type="TextureRect" parent="MainPlatform"]
+material = SubResource( 4 )
+margin_left = -128.0
+margin_top = -3.0
+margin_right = 896.0
+margin_bottom = 194.0
+texture = ExtResource( 8 )
+stretch_mode = 2
+
+[node name="P1_Position" type="Position2D" parent="."]
+position = Vector2( -128, 128 )
+
+[node name="P2_Position" type="Position2D" parent="."]
+position = Vector2( 128, 128 )
+
+[node name="MiddlePosition" type="Position2D" parent="."]
+position = Vector2( 0, 128 )
+
+[node name="StageBox" type="ReferenceRect" parent="."]
+modulate = Color( 1, 1, 1, 0.517647 )
+margin_left = -384.0
+margin_top = -384.0
+margin_right = 384.0
+margin_bottom = 256.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="BlastBarrierU" type="ColorRect" parent="StageBox"]
+margin_left = -128.0
+margin_top = -128.0
+margin_right = 768.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierL" type="ColorRect" parent="StageBox"]
+margin_left = -128.0
+margin_top = -128.0
+margin_bottom = 704.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierR" type="ColorRect" parent="StageBox"]
+margin_left = 768.0
+margin_top = -128.0
+margin_right = 896.0
+margin_bottom = 704.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="RespawnPoints" type="Node2D" parent="."]
+position = Vector2( 0, 32 )
+
+[node name="RespawnPoint1" type="Position2D" parent="RespawnPoints"]
+position = Vector2( -192, 40 )
+
+[node name="RespawnPoint2" type="Position2D" parent="RespawnPoints"]
+position = Vector2( -128, -128 )
+
+[node name="RespawnPoint3" type="Position2D" parent="RespawnPoints"]
+position = Vector2( -128, 40 )
+
+[node name="RespawnPoint4" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 0, -168 )
+
+[node name="RespawnPoint5" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 0, -96 )
+
+[node name="RespawnPoint6" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 0, 40 )
+
+[node name="RespawnPoint7" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 128, 40 )
+
+[node name="RespawnPoint8" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 128, -128 )
+
+[node name="RespawnPoint9" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 192, 40 )

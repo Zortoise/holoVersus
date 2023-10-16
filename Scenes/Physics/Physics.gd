@@ -426,6 +426,12 @@ func is_in_wall():
 	else:
 		return false
 		
+func is_in_blastwalls():
+	if Detection.detect_bool([get_collision_box()], ["BlastWalls", "BlastCeiling"]):
+		return true
+	else:
+		return false
+		
 		
 func is_tele_valid(target_position: Vector2): # to check if teleportation will go into walls
 	var move_vec = target_position - position
