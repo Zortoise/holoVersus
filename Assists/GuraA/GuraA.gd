@@ -1,5 +1,7 @@
 extends "res://Characters/Gura/GuraBase.gd"
 
+const ASSIST_NAME = "Ina'nis"
+
 # replace player_ID with master_ID or NPC_ID
 # replace palette_number with palette_ref
 # replace afterimage_type of CHAR with NPC

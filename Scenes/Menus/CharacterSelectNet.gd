@@ -29,18 +29,30 @@ var stage_data = { # to be filled at _ready()
 		"select" : ResourceLoader.load("res://Assets/UI/random_select.png"), 
 	}
 #	"Aurora" : {
+#		"name" : "Aurora",
 #		"select" : ResourceLoader.load("res://Stages/Aurora/Resources/select.png"), 
 #	}
 }
 var stage_array
 
+var assist_data = { # to be filled at _ready()
+	"Random" : {
+		"name" : "Random",
+		"select" : ResourceLoader.load("res://Assets/UI/assist_random.png"), 
+	}
+#	"GuraA" : {
+#		"name" : "Gura",
+#		"select" : ResourceLoader.load("res://Assists/GuraA/Select.png"), 
+#	}
+}
+var assist_array
+
 var sound := false
 var battle_lock := false
 
-var my_phase := 0 # 0 is picking characters, 1 is picking stage, 2 is finishing picking and waiting for opponent
+var my_phase := 0 # 0 is picking characters, 1 is picking stage, 2 is finishing picking and waiting for opponent, 3 is picking assist
 var my_picker_pos := 0
 var my_palette_picked := 1
-#var my_input_style_picked := 0
 
 onready var my_player_id = Netplay.my_player_id()
 #onready var my_player_id = 1 # this is for testing only
@@ -51,10 +63,10 @@ var last_picked # store it for setting later
 var my_stage
 var my_fullart
 var my_name
-#var my_input_style
 var my_sprite
 var my_picker
 var my_stageselect
+var my_assist
 var my_buttoncheck
 var my_waiting
 var my_ready
@@ -63,7 +75,6 @@ var opponent_payload = {}
 var my_payload = {
 	"character" : null,
 	"palette" : null,
-#	"input_style" : null,
 	"stage" : null,
 	"assist" : "",
 }
@@ -83,10 +94,10 @@ func _ready():
 	my_stage = get_node(player + "_Stage")
 	my_fullart = get_node(player + "_FullArt")
 	my_name = get_node(player + "_Name")
-#	my_input_style = get_node(player + "_InputStyle")
 	my_sprite = get_node(player + "_Sprite")
 	my_picker = get_node(player + "_Picker")
 	my_stageselect = get_node(player + "_StageSelect")
+	my_assist = get_node(player + "_Assist")
 	my_buttoncheck = get_node(player + "_ButtonCheck")
 	my_waiting = get_node(player + "_Waiting")
 	my_ready = get_node(player + "_Ready")
@@ -104,6 +115,10 @@ func _ready():
 	get_node(opponent + "_Sprite").hide()
 	get_node(opponent + "_Picker").free()
 	get_node(opponent + "_StageSelect").free()
+	if Globals.assists == 1:
+		get_node(opponent + "_Assist").hide()
+	else:
+		get_node(opponent + "_Assist").queue_free()
 	get_node(opponent + "_ButtonCheck").free()
 	get_node(opponent + "_Waiting").free()
 	get_node(opponent + "_Ready").free()
@@ -158,7 +173,25 @@ func _ready():
 	my_stageselect.hide()
 	
 	changed_character()
-#	change_input_style(my_input_style, 0)
+
+	if Globals.assists == 1:
+		if dir.change_dir("res://Assists/") == OK:
+			dir.list_dir_begin(true)
+			var assist_name = dir.get_next()
+			while assist_name != "":
+				if !assist_name.begins_with("."):
+					assist_data[assist_name] = {}
+					assist_data[assist_name]["name"] = load("res://Assists/" + assist_name + "/" + assist_name + ".tscn").instance().NAME
+					assist_data[assist_name]["select"] = ResourceLoader.load("res://Assists/" + assist_name + "/select.png")
+				assist_name = dir.get_next()
+		else: print("Error: Cannot open Assists folder from CharacterSelect.gd")
+		
+		assist_array = assist_data.keys()
+		populate_assist_lists()
+		my_assist.get_node("AssistSelect").hide()
+	else:
+		my_assist.queue_free()
+
 	
 	# load last picked characters and stages
 	last_picked = Settings.load_last_picked()
@@ -187,13 +220,19 @@ func load_last_picked():
 				my_sprite.get_child(0).material.set_shader_param("swap", \
 						character_data[char_grid[my_picker_pos]]["palettes"][str(my_palette_picked)])
 						
-#	if last_picked.P1_input_style != null:
-#		change_input_style(my_input_style, last_picked.P1_input_style)
 		
 	if last_picked.P1_stage != null:
 		if last_picked.P1_stage in stage_array:
 			while my_stageselect.get_node("StageList").get_child(3).stage_name != last_picked.P1_stage:
 				shift_stage_list(1)
+				
+	if Globals.assists == 1:
+		if last_picked.P1_assist != "":
+			if last_picked.P1_assist in assist_array:
+				while my_assist.get_node("AssistSelect/AssistList").get_child(3).stage_name != last_picked.P1_assist:
+					shift_assist_list(1)
+					
+	Globals.P1_assist = last_picked.P1_assist # temp
 			
 	
 func populate_char_grid():
@@ -276,13 +315,27 @@ func populate_stage_lists():
 		shift_stage_list(1)
 		
 	
-#func change_input_style(input_style_node, input_style):
-#	if input_style == 0:
-#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("flashing")
-#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("gray")
-#	else:
-#		input_style_node.get_node("HybridStyle/AnimationPlayer").play("gray")
-#		input_style_node.get_node("ClassicStyle/AnimationPlayer").play("flashing")
+func populate_assist_lists():
+	var assist_array_pointer := 0
+	
+	# remove test children
+	for x in my_assist.get_node("AssistSelect/AssistList").get_children():
+		x.free()
+	
+	for x in STAGE_LIST_SIZE:
+		# add new labels
+		var new_assistlabel = loaded_stagelabel.instance()
+		my_assist.get_node("AssistSelect/AssistList").add_child(new_assistlabel)
+		# change text
+		new_assistlabel.stage_name = assist_array[assist_array_pointer]
+		new_assistlabel.text = assist_data[assist_array[assist_array_pointer]].name
+		# next assist, wrap around
+		assist_array_pointer += 1
+		assist_array_pointer = wrapi(assist_array_pointer, 0, assist_array.size())
+	
+	# shift lists so that get_child(3) points to the first stage
+	for x in 3:
+		shift_assist_list(1)
 		
 		
 func load_buttoncheck():
@@ -330,6 +383,9 @@ func _physics_process(_delta):
 	
 	move_picker(dir)
 	move_stage_picker(dir)
+	
+	if Globals.assists == 1:
+		move_assist_picker(dir)
 
 	# change palette, in phase 0 only
 	var p_dir = 0
@@ -341,26 +397,28 @@ func _physics_process(_delta):
 	change_palette(p_dir)
 	
 	if Input.is_action_just_pressed("P1_light"): # select character/stage
-		if my_phase == 0:
-			picked_character()
-		if my_phase == 1:
-			picked_stage()
+		match my_phase:
+			0:
+				picked_character()
+			1:
+				picked_stage()
+			3:
+				picked_assist()
+
 		
 	if Input.is_action_just_pressed("P1_fierce"): # unselect character/stage
-		if my_phase == 1:
-			unpicked_character()
-		if my_phase == 2:
-			pass # cannot unselect stage in netplay
+		match my_phase:
+			1:
+				if Globals.assists == 1:
+					unpicked_assist()
+				else:
+					unpicked_character()
+			3:
+				unpicked_character()
+				
+#		if my_phase == 2:
+#			pass # cannot unselect stage in netplay
 	
-#	if Input.is_action_just_pressed("P1_dash"): # change input style
-#		if my_phase != 2:
-#			play_audio("ui_accept", {"vol":-8})
-#			if my_input_style_picked == 0:
-#				my_input_style_picked = 1
-#				change_input_style(my_input_style, 1)
-#			else:
-#				my_input_style_picked = 0
-#				change_input_style(my_input_style, 0)
 	
 	if !battle_lock:
 		if opponent_payload.size() > 0: # opponent is ready
@@ -442,22 +500,31 @@ func picked_character():
 		my_picker.get_node("AnimationPlayer").play("RESET")
 		my_fullart.get_node("AnimationPlayer").play("flash")
 		yield(get_tree(),"idle_frame")
-		my_phase = 1
-		my_stageselect.show()	
+		if Globals.assists == 1:
+			my_phase = 3
+			my_assist.get_node("AssistSelect").show()
+			my_assist.get_node("Label/AnimationPlayer").play("flashing")
+		else:
+			my_phase = 1
+			my_stageselect.show()
 		
 func unpicked_character():
 	play_audio("ui_back", {})
 	my_picker.get_node("AnimationPlayer").play("flashing")
 	yield(get_tree(),"idle_frame")
+	if Globals.assists == 1:
+		my_assist.get_node("AssistSelect").hide()
+		my_assist.get_node("Label/AnimationPlayer").play("gray")
+	else:
+		my_stageselect.hide()
 	my_phase = 0
-	my_stageselect.hide()
 
 	
 func move_stage_picker(dir):
 	if my_phase == 1 and dir.y != 0:
 		shift_stage_list(dir.y)
-
-	
+		
+		
 func shift_stage_list(v_dir):
 
 	var first_child = my_stageselect.get_node("StageList").get_child(0)
@@ -502,10 +569,71 @@ func picked_stage():
 	my_payload.character = char_grid[my_picker_pos]
 	my_payload.palette = my_palette_picked
 	my_payload.stage = my_stageselect.get_node("StageList").get_child(3).stage_name
-	my_payload.assist = "" # WIP
-#	my_payload.input_style = my_input_style_picked
+	if Globals.assists == 1:
+		my_payload.assist = my_assist.get_node("AssistSelect/AssistList").get_child(3).stage_name
+	else:
+		my_payload.assist = Globals.P1_assist # temp
+		
 	rpc("opponent_ready", my_payload)
 	save_last_picked()
+	
+# ------------------------------------------------------------------------------------------------------------------------
+		
+func move_assist_picker(dir):
+	if my_phase == 3 and dir.y != 0:
+		shift_assist_list(dir.y)
+
+func picked_assist():
+	play_audio("ui_accept2", {})
+	my_assist.get_node("Back/Sprite/AnimationPlayer").play("flash")
+	yield(get_tree(),"idle_frame")
+	my_phase = 1
+	my_stageselect.show()
+	my_assist.get_node("Label/AnimationPlayer").play("white")
+	my_assist.get_node("AssistSelect").hide()
+	
+func unpicked_assist():
+	play_audio("ui_back", {})
+	yield(get_tree(),"idle_frame")
+	my_phase = 3
+	my_stageselect.hide()
+	my_assist.get_node("Label/AnimationPlayer").play("flashing")
+	my_assist.get_node("AssistSelect").show()
+
+
+func shift_assist_list(v_dir):
+	var first_child = my_assist.get_node("AssistSelect/AssistList").get_child(0)
+	var last_child = my_assist.get_node("AssistSelect/AssistList").get_child(STAGE_LIST_SIZE - 1)
+	
+	if v_dir == 1: # move down, shift list upward
+		if sound:
+			play_audio("ui_move2", {"vol":-10})
+		first_child.free() # remove 1st child
+		var index = assist_array.find(last_child.stage_name) # find index of last child in assist_array
+		index = wrapi(index + 1, 0, assist_array.size()) # get index of next assist in assist_array, wraparound
+		var new_assistlabel = loaded_stagelabel.instance() # add new child
+		my_assist.get_node("AssistSelect/AssistList").add_child(new_assistlabel)
+		new_assistlabel.stage_name = assist_array[index]
+		new_assistlabel.text = assist_data[assist_array[index]].name
+	elif v_dir == -1: # move up, shift list downward
+		if sound:
+			play_audio("ui_move2", {"vol":-10})
+		last_child.free() # remove last child
+		var index = assist_array.find(first_child.stage_name) # find index of first child in assist_array
+		index = wrapi(index - 1, 0, assist_array.size()) # get index of previous assist in assist_array, wraparound
+		var new_assistlabel = loaded_stagelabel.instance() # add new child
+		my_assist.get_node("AssistSelect/AssistList").add_child(new_assistlabel)
+		my_assist.get_node("AssistSelect/AssistList").move_child(new_assistlabel, 0) # make child the new first child
+		new_assistlabel.stage_name = assist_array[index]
+		new_assistlabel.text = assist_data[assist_array[index]].name
+		
+	# update assist texture
+	my_assist.get_node("Back/Sprite").texture = assist_data[my_assist.get_node("AssistSelect/AssistList").get_child(3).stage_name].select
+	for x in my_assist.get_node("AssistSelect/AssistList").get_children(): # return color to normal
+		x.modulate = Color(1.0, 1.0, 1.0)
+	my_assist.get_node("AssistSelect/AssistList").get_child(3).modulate = Color(1.5, 1.5, 1.5) # brighten assist pointed at
+
+# ------------------------------------------------------------------------------------------------------------------------
 	
 	
 func save_last_picked():
@@ -517,12 +645,10 @@ func save_last_picked():
 			"P1_palette" : my_payload.palette,
 			"P1_stage" : my_payload.stage,
 			"P1_assist" : my_payload.assist,
-#			"P1_input_style" : my_payload.input_style,
 			"P2_character" : null,
 			"P2_palette" : null,
 			"P2_stage" : null,
 			"P2_assist" : "",
-#			"P2_input_style" : null,
 		}
 	else:
 		new_last_picked = {
@@ -530,12 +656,10 @@ func save_last_picked():
 			"P1_palette" : my_payload.palette,
 			"P1_stage" : my_payload.stage,
 			"P1_assist" : my_payload.assist,
-#			"P1_input_style" : my_payload.input_style,
 			"P2_character" : last_picked.P2_character,
 			"P2_palette" : last_picked.P2_palette,
 			"P2_stage" : last_picked.P2_stage,
 			"P2_assist" : last_picked.P2_assist,
-#			"P2_input_style" : last_picked.P2_input_style,
 		}
 	Settings.save_last_picked(new_last_picked)
 	
@@ -556,20 +680,16 @@ func determine_char_and_stage():
 		Globals.P1_char_ref = my_payload.character
 		Globals.P1_palette = my_payload.palette
 		Globals.P1_assist = my_payload.assist
-#		Globals.P1_input_style = my_payload.input_style
 		Globals.P2_char_ref = opponent_payload.character
 		Globals.P2_palette = opponent_payload.palette
 		Globals.P2_assist = opponent_payload.assist
-#		Globals.P2_input_style = opponent_payload.input_style
 	else:
 		Globals.P1_char_ref = opponent_payload.character
 		Globals.P1_palette = opponent_payload.palette
 		Globals.P1_assist = opponent_payload.assist
-#		Globals.P1_input_style = opponent_payload.input_style
 		Globals.P2_char_ref = my_payload.character
 		Globals.P2_palette = my_payload.palette
 		Globals.P2_assist = my_payload.assist
-#		Globals.P2_input_style = my_payload.input_style
 		
 	# if both players picked the same character with the same palette, a random player will shift a palette
 	if Globals.P1_char_ref != "Random" and Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
@@ -606,6 +726,21 @@ func determine_char_and_stage():
 		new_stage_array.shuffle()
 		Globals.stage_ref = new_stage_array[0]
 		
+	if Globals.assists == 1:
+		if Globals.P1_assist == "Random":
+			var new_assist_array = assist_data.keys()
+			new_assist_array.erase("Random")
+			new_assist_array.shuffle()
+			Globals.P1_assist = new_assist_array[0]
+		if Globals.P2_assist == "Random":
+			var new_assist_array = assist_data.keys()
+			new_assist_array.erase("Random")
+			new_assist_array.shuffle()
+			Globals.P2_assist = new_assist_array[0]
+	else:
+		Globals.P1_assist = ""
+		Globals.P2_assist = ""
+		
 #	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_input_style, \
 #			Globals.P2_char_ref, Globals.P2_palette, Globals.P2_input_style)
 	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_assist, \
@@ -617,11 +752,9 @@ puppet func guest_receive_picks(stage_ref, P1_char_ref, P1_palette, P1_assist, P
 	Globals.P1_char_ref = P1_char_ref
 	Globals.P1_palette = P1_palette
 	Globals.P1_assist = P1_assist
-#	Globals.P1_input_style = P1_input_style
 	Globals.P2_char_ref = P2_char_ref
 	Globals.P2_palette = P2_palette
 	Globals.P2_assist = P2_assist
-#	Globals.P2_input_style = P2_input_style
 	
 	yield(get_tree().create_timer(0.5 - Netplay.ping/2.0), "timeout") # wait a short while before revealing
 	start_battle()
@@ -632,10 +765,12 @@ func start_battle():
 #	my_payload.character
 #	my_payload.palette
 #	my_payload.stage
+#	my_payload.assist
 #
 #	opponent_payload.character
 #	opponent_payload.palette
 #	opponent_payload.stage
+#	opponent_payload.assist
 
 	my_ready.hide()
 
@@ -646,9 +781,13 @@ func start_battle():
 	get_node(opponent + "_Stage/AnimationPlayer").play("flash")
 	get_node(opponent + "_FullArt").show()
 	get_node(opponent + "_FullArt/AnimationPlayer").play("flash")
-#	get_node(opponent + "_InputStyle").show()
 	get_node(opponent + "_Name").show()
 	get_node(opponent + "_Sprite").show()
+	if Globals.assists == 1:
+		get_node(opponent + "_Assist").show()
+		get_node(opponent + "_Assist/AssistSelect").free()
+		get_node(opponent + "_Assist/Label/AnimationPlayer").play("white")
+		get_node(opponent + "_Assist/Back/Sprite/AnimationPlayer").play("flash")
 
 	if opponent_payload.character != "Random":
 		var char_name
@@ -669,7 +808,6 @@ func start_battle():
 			get_node(opponent + "_Sprite").get_child(0).free()
 		get_node(opponent + "_Name").text = "Random"
 		
-#	change_input_style(get_node(opponent + "_InputStyle"), opponent_payload.input_style)
 		
 	# re-set palettes
 	if $P1_Sprite.get_child_count() > 0:
@@ -694,6 +832,17 @@ func start_battle():
 #	else:
 #		get_node(opponent + "_Stage").texture = stage_data[opponent_payload.stage]["select_R"]
 
+	if Globals.assists == 1:
+		if opponent_payload.assist != "Random":
+			var assist_name
+			if opponent == "P1":
+				assist_name = Globals.P1_assist
+			else:
+				assist_name = Globals.P2_assist
+			get_node(opponent + "_Assist/Back/Sprite").texture = assist_data[assist_name]["select"]
+		else: # opponent pick random assist, hide their data
+			get_node(opponent + "_Assist/Back/Sprite").texture = assist_data["Random"]["select"]
+
 	BGM.fade()
 	$Transition.play("transit_to_battle")
 
@@ -706,8 +855,9 @@ func play_audio(audio_ref, aux_data):
 	new_audio.init(audio_ref, aux_data)
 	
 func change_scene(new_scene: String): # called by animation
+	Globals.next_scene = new_scene
 # warning-ignore:return_value_discarded
-	get_tree().change_scene(new_scene)
+	get_tree().change_scene("res://Scenes/LoadingScreen.tscn")
 	
 func _player_disconnected(_id): # opponent disconnected
 	play_audio("ui_deny", {"vol" : -9})

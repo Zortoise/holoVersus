@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=2]
+[gd_scene load_steps=71 format=2]
 
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/UI/character_picker_P1.png" type="Texture" id=2]
@@ -9,6 +9,8 @@
 [ext_resource path="res://Scenes/Menus/ButtonTypeE2.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Stages/Aurora/Resources/select.png" type="Texture" id=8]
 [ext_resource path="res://Assets/UI/character_picker_P2.png" type="Texture" id=9]
+[ext_resource path="res://Assists/InaA/select.png" type="Texture" id=10]
+[ext_resource path="res://Assets/UI/assist_random.png" type="Texture" id=11]
 [ext_resource path="res://Scenes/Shaders/Palette.gdshader" type="Shader" id=12]
 [ext_resource path="res://Characters/Gura/Palettes/2.png" type="Texture" id=13]
 [ext_resource path="res://Scenes/Menus/CharacterSelectTraining.gd" type="Script" id=14]
@@ -22,6 +24,7 @@
 [ext_resource path="res://Scenes/Menus/P1DirInputs.gd" type="Script" id=22]
 [ext_resource path="res://Assets/UI/character_select_tri.png" type="Texture" id=23]
 [ext_resource path="res://Assets/UI/stage_select.png" type="Texture" id=24]
+[ext_resource path="res://Assets/UI/assist_select_back.png" type="Texture" id=25]
 
 [sub_resource type="Animation" id=29]
 length = 0.001
@@ -307,6 +310,254 @@ tracks/0/keys = {
 "values": [ Color( 0, 0.211765, 0.65098, 1 ), Color( 0, 0.211765, 0.65098, 1 ), Color( 0.376471, 0.772549, 1, 1 ), Color( 0, 0.211765, 0.65098, 1 ) ]
 }
 
+[sub_resource type="Animation" id=78]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.584314, 0, 0, 1 ) ]
+}
+
+[sub_resource type="Animation" id=79]
+resource_name = "flashing"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.584314, 0, 0, 1 ), Color( 1, 0.5, 0.5, 1 ), Color( 0.584314, 0, 0, 1 ) ]
+}
+
+[sub_resource type="DynamicFont" id=77]
+size = 60
+outline_size = 5
+outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+use_filter = true
+font_data = ExtResource( 19 )
+
+[sub_resource type="Theme" id=80]
+default_font = SubResource( 77 )
+
+[sub_resource type="Animation" id=81]
+resource_name = "flashing"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1.2, 1.2, 1.2, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=82]
+resource_name = "gray"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.3, 0.3, 0.3, 1 ) ]
+}
+
+[sub_resource type="Animation" id=83]
+resource_name = "white"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=84]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=85]
+resource_name = "flash"
+length = 0.05
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.05 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ Color( 100, 100, 100, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=86]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0, 0.211765, 0.65098, 1 ) ]
+}
+
+[sub_resource type="Animation" id=87]
+resource_name = "flashing"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0, 0.211765, 0.65098, 1 ), Color( 0, 0.5, 1, 1 ), Color( 0, 0.211765, 0.65098, 1 ) ]
+}
+
+[sub_resource type="DynamicFont" id=88]
+size = 60
+outline_size = 5
+outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+use_filter = true
+font_data = ExtResource( 19 )
+
+[sub_resource type="Theme" id=89]
+default_font = SubResource( 88 )
+
+[sub_resource type="Animation" id=90]
+resource_name = "flashing"
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1.2, 1.2, 1.2, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=91]
+resource_name = "gray"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.3, 0.3, 0.3, 1 ) ]
+}
+
+[sub_resource type="Animation" id=92]
+resource_name = "white"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=93]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=94]
+resource_name = "flash"
+length = 0.05
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.05 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ Color( 100, 100, 100, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
 [sub_resource type="Animation" id=38]
 length = 0.001
 tracks/0/type = "value"
@@ -540,6 +791,189 @@ texture = ExtResource( 9 )
 autoplay = "flashing"
 anims/RESET = SubResource( 26 )
 anims/flashing = SubResource( 27 )
+
+[node name="P1_Assist" type="Node2D" parent="."]
+
+[node name="AssistSelect" type="ColorRect" parent="P1_Assist"]
+light_mask = 2
+margin_left = 400.0
+margin_top = 760.0
+margin_right = 624.0
+margin_bottom = 1080.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="Light2D" type="Light2D" parent="P1_Assist/AssistSelect"]
+position = Vector2( 112, 160 )
+scale = Vector2( 1.07177, 0.555556 )
+texture = ExtResource( 18 )
+mode = 3
+range_item_cull_mask = 2
+
+[node name="AssistList" type="VBoxContainer" parent="P1_Assist/AssistSelect"]
+margin_left = 16.0
+margin_top = 32.0
+margin_right = 224.0
+margin_bottom = 284.0
+custom_constants/separation = 7
+
+[node name="AssistLabel" parent="P1_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_bottom = 30.0
+
+[node name="AssistLabel2" parent="P1_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 37.0
+margin_bottom = 67.0
+
+[node name="AssistLabel3" parent="P1_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 74.0
+margin_bottom = 104.0
+
+[node name="AssistLabel4" parent="P1_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 111.0
+margin_bottom = 141.0
+
+[node name="AssistLabel5" parent="P1_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 148.0
+margin_bottom = 178.0
+
+[node name="AssistLabel6" parent="P1_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 185.0
+margin_bottom = 215.0
+
+[node name="AssistLabel7" parent="P1_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 222.0
+margin_bottom = 252.0
+
+[node name="Arrow" type="Sprite" parent="P1_Assist/AssistSelect"]
+modulate = Color( 0.584314, 0, 0, 1 )
+position = Vector2( 12, 159 )
+texture = ExtResource( 20 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="P1_Assist/AssistSelect/Arrow"]
+autoplay = "flashing"
+anims/RESET = SubResource( 78 )
+anims/flashing = SubResource( 79 )
+
+[node name="Label" type="Label" parent="P1_Assist"]
+margin_left = 112.0
+margin_top = 1019.0
+margin_right = 310.0
+margin_bottom = 1079.0
+rect_rotation = 270.0
+theme = SubResource( 80 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+text = "ASSIST"
+align = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="P1_Assist/Label"]
+autoplay = "gray"
+anims/flashing = SubResource( 81 )
+anims/gray = SubResource( 82 )
+anims/white = SubResource( 83 )
+
+[node name="Back" type="Sprite" parent="P1_Assist"]
+position = Vector2( 290, 920 )
+scale = Vector2( 3, 3 )
+texture = ExtResource( 25 )
+
+[node name="Sprite" type="Sprite" parent="P1_Assist/Back"]
+texture = ExtResource( 11 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="P1_Assist/Back/Sprite"]
+autoplay = "RESET"
+anims/RESET = SubResource( 84 )
+anims/flash = SubResource( 85 )
+
+[node name="P2_Assist" type="Node2D" parent="."]
+
+[node name="AssistSelect" type="ColorRect" parent="P2_Assist"]
+light_mask = 2
+margin_left = 1296.0
+margin_top = 760.0
+margin_right = 1520.0
+margin_bottom = 1080.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="Light2D" type="Light2D" parent="P2_Assist/AssistSelect"]
+position = Vector2( 112.25, 160 )
+scale = Vector2( 1.07416, 0.555556 )
+texture = ExtResource( 18 )
+mode = 3
+range_item_cull_mask = 2
+
+[node name="AssistList" type="VBoxContainer" parent="P2_Assist/AssistSelect"]
+margin_left = 0.249695
+margin_top = 32.0
+margin_right = 208.25
+margin_bottom = 284.0
+custom_constants/separation = 7
+
+[node name="AssistLabel" parent="P2_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_bottom = 30.0
+
+[node name="AssistLabel2" parent="P2_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 37.0
+margin_bottom = 67.0
+
+[node name="AssistLabel3" parent="P2_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 74.0
+margin_bottom = 104.0
+
+[node name="AssistLabel4" parent="P2_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 111.0
+margin_bottom = 141.0
+
+[node name="AssistLabel5" parent="P2_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 148.0
+margin_bottom = 178.0
+
+[node name="AssistLabel6" parent="P2_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 185.0
+margin_bottom = 215.0
+
+[node name="AssistLabel7" parent="P2_Assist/AssistSelect/AssistList" instance=ExtResource( 21 )]
+margin_top = 222.0
+margin_bottom = 252.0
+
+[node name="Arrow" type="Sprite" parent="P2_Assist/AssistSelect"]
+modulate = Color( 0, 0.211765, 0.65098, 1 )
+position = Vector2( 212.25, 159 )
+scale = Vector2( -1, 1 )
+texture = ExtResource( 20 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_Assist/AssistSelect/Arrow"]
+autoplay = "flashing"
+anims/RESET = SubResource( 86 )
+anims/flashing = SubResource( 87 )
+
+[node name="Label" type="Label" parent="P2_Assist"]
+margin_left = 1808.0
+margin_top = 824.0
+margin_right = 2006.0
+margin_bottom = 884.0
+rect_rotation = 90.0
+theme = SubResource( 89 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+text = "ASSIST"
+align = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_Assist/Label"]
+autoplay = "gray"
+anims/flashing = SubResource( 90 )
+anims/gray = SubResource( 91 )
+anims/white = SubResource( 92 )
+
+[node name="Back" type="Sprite" parent="P2_Assist"]
+position = Vector2( 1629, 920 )
+scale = Vector2( 3, 3 )
+texture = ExtResource( 25 )
+
+[node name="Sprite" type="Sprite" parent="P2_Assist/Back"]
+texture = ExtResource( 10 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="P2_Assist/Back/Sprite"]
+autoplay = "RESET"
+anims/RESET = SubResource( 93 )
+anims/flash = SubResource( 94 )
 
 [node name="P1_StageSelect" type="ColorRect" parent="."]
 light_mask = 2

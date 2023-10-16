@@ -38,6 +38,15 @@ func set_fade_sound(): # fade out sound when transiting to other scenes, called 
 	BGM.fade()
 	BGM.unmuffle()
 	
+func BGM_credits(music_dict: Dictionary):
+	if "name" in music_dict:
+		$BGMLabel/Node2D/Label.text = "BGM: " + music_dict.name
+		if "artist" in music_dict:
+			$BGMLabel/Node2D/Label2.text = music_dict.artist
+		else:
+			$BGMLabel/Node2D/Label2.text = ""
+		$BGMLabel/AnimationPlayer.play("Load")
+	
 
 func _physics_process(_delta):
 	
@@ -202,7 +211,9 @@ func change_scene(new_scene: String): # called by animation
 	Globals.training_mode = false
 	Loader.reset()
 		
-	get_tree().change_scene(new_scene)
+	Globals.next_scene = new_scene
+# warning-ignore:return_value_discarded
+	get_tree().change_scene("res://Scenes/LoadingScreen.tscn")
 	
 	
 # NETPLAY ------------------------------------------------------------------------------------------------------------

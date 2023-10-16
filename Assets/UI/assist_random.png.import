@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/icon.png-10a87a0287fc5e1b0db04bc5baca3beb.stex"
+path="res://.import/assist_random.png-598c2bf1f34eded1f11719d3b6e29e98.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assists/InaA/icon.png"
-dest_files=[ "res://.import/icon.png-10a87a0287fc5e1b0db04bc5baca3beb.stex" ]
+source_file="res://Assets/UI/assist_random.png"
+dest_files=[ "res://.import/assist_random.png-598c2bf1f34eded1f11719d3b6e29e98.stex" ]
 
 [params]
 

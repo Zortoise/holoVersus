@@ -86,8 +86,9 @@ func _on_Entry_text_changed(_new_text): # stop searching if text is changed
 # ----------------------------------------------------------------------------------------------------------------------------------------
 
 func change_scene(new_scene: String): # called by animation
+	Globals.next_scene = new_scene
 # warning-ignore:return_value_discarded
-	get_tree().change_scene(new_scene)
+	get_tree().change_scene("res://Scenes/LoadingScreen.tscn")
 	
 func play_audio(audio_ref, aux_data):
 	var new_audio = Loader.loaded_ui_audio_scene.instance()

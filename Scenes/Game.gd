@@ -192,8 +192,8 @@ func setup():
 		frame_viewer = null
 			
 #	Globals.assists = 1 # TESTING
-	P1_assist = "GuraA" # TESTING
-	P2_assist = "InaA" # TESTING
+#	P1_assist = "GuraA" # TESTING
+#	P2_assist = "InaA" # TESTING
 			
 	if Globals.assists == 0:
 		for player in Globals.player_count:
@@ -286,6 +286,7 @@ func setup():
 		var random = posmod(current_rng_seed, BGM.custom_playlist.size())
 		var chosen_music_dict = BGM.custom_playlist[random].duplicate()
 		BGM.bgm(chosen_music_dict)
+		viewport.BGM_credits(chosen_music_dict)
 	
 	elif Globals.survival_level == null:
 		var music_names := []
@@ -305,6 +306,7 @@ func setup():
 			var random = posmod(current_rng_seed, music_list.size())
 			var chosen_music_dict = music_list[random].duplicate()
 			BGM.bgm(chosen_music_dict)
+			viewport.BGM_credits(chosen_music_dict)
 
 
 # --------------------------------------------------------------------------------------------------

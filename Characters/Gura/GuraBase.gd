@@ -88,7 +88,8 @@ const PALETTE_TO_HITSPARK_PALETTE = {
 }
 
 const MUSIC = {
-		"name" : "GuraTheme", # to not play the same music as the one currently being played
+		"name" : "Gura's Theme", # to not play the same music as the one currently being played
+		"artist" : "Zortoise",
 		"audio" : "res://Characters/Gura/Music/GuraTheme.ogg",
 #		"loop_start": 27.42,
 		"loop_end": 164.57,

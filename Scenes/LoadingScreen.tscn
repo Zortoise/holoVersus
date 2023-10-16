@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Scenes/LoadingScreen.gd" type="Script" id=2]
+
+[sub_resource type="DynamicFont" id=7]
+size = 70
+outline_size = 5
+outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+use_filter = true
+extra_spacing_top = 7
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxEmpty" id=6]
+
+[sub_resource type="DynamicFont" id=9]
+size = 70
+outline_size = 5
+outline_color = Color( 0.121569, 0.121569, 0.121569, 1 )
+use_filter = true
+extra_spacing_top = 7
+font_data = ExtResource( 1 )
+
+[sub_resource type="Theme" id=8]
+default_font = SubResource( 9 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 7 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 6 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[node name="LoadingScreen" type="Node"]
+script = ExtResource( 2 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="Label" type="Label" parent="."]
+margin_left = 1016.0
+margin_top = 944.0
+margin_right = 1784.0
+margin_bottom = 1022.0
+theme = SubResource( 8 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+text = "Loading..."
+align = 2
+valign = 2

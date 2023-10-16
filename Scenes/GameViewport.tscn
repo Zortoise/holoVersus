@@ -1,4 +1,4 @@
-[gd_scene load_steps=189 format=2]
+[gd_scene load_steps=197 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -55,7 +55,7 @@
 [ext_resource path="res://Assets/UI/ring_front.png" type="Texture" id=53]
 [ext_resource path="res://Assets/UI/assist_frame.png" type="Texture" id=54]
 [ext_resource path="res://Assets/UI/assist_back.png" type="Texture" id=55]
-[ext_resource path="res://Assists/GuraA/Icon.png" type="Texture" id=56]
+[ext_resource path="res://Assists/GuraA/icon.png" type="Texture" id=56]
 [ext_resource path="res://Characters/Ina/UI/portrait.png" type="Texture" id=57]
 
 [sub_resource type="Animation" id=5]
@@ -3543,6 +3543,118 @@ tracks/0/keys = {
 "values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0.5 ), Color( 1, 1, 1, 1 ) ]
 }
 
+[sub_resource type="DynamicFont" id=195]
+size = 45
+use_filter = true
+extra_spacing_top = 8
+extra_spacing_bottom = -2
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxEmpty" id=196]
+
+[sub_resource type="DynamicFont" id=201]
+size = 30
+outline_size = 5
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+extra_spacing_top = 8
+extra_spacing_bottom = -2
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=202]
+default_font = SubResource( 201 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 195 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 196 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="DynamicFont" id=197]
+size = 20
+outline_size = 4
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+extra_spacing_top = 8
+extra_spacing_bottom = -2
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=198]
+default_font = SubResource( 197 )
+Button/colors/font_color = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_hover = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/colors/font_color_pressed = Color( 0.588235, 0.588235, 0.588235, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 195 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 196 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
+[sub_resource type="Animation" id=199]
+resource_name = "Load"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:position:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 0.297302, 1 ),
+"update": 0,
+"values": [ -150.0, 20.0 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.5, 1.7, 2 ),
+"transitions": PoolRealArray( 0.267943, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=200]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:position:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ -150.0 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+
 [node name="GameViewport" type="Node2D"]
 script = ExtResource( 4 )
 
@@ -5180,6 +5292,42 @@ root_node = NodePath("../Label")
 autoplay = "flashing"
 anims/RESET = SubResource( 68 )
 anims/flashing = SubResource( 69 )
+
+[node name="BGMLabel" type="CanvasLayer" parent="."]
+
+[node name="Node2D" type="Node2D" parent="BGMLabel"]
+modulate = Color( 1, 1, 1, 0 )
+position = Vector2( -150, 768 )
+
+[node name="Label" type="Label" parent="BGMLabel/Node2D"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -8.0
+margin_right = 148.0
+margin_bottom = 29.0
+theme = SubResource( 202 )
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+text = "BGM: Test"
+
+[node name="Label2" type="Label" parent="BGMLabel/Node2D"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 29.0
+margin_right = 130.0
+margin_bottom = 53.0
+theme = SubResource( 198 )
+custom_colors/font_color = Color( 0.784314, 0.784314, 0.784314, 1 )
+text = "Zortoise"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BGMLabel"]
+root_node = NodePath("../Node2D")
+anims/Load = SubResource( 199 )
+anims/RESET = SubResource( 200 )
 
 [connection signal="game_set" from="ViewportContainer/Viewport/Game" to="." method="_on_Game_game_set"]
 [connection signal="loaded_state" from="ViewportContainer/Viewport/Game" to="." method="_on_Game_loaded_state"]

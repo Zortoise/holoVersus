@@ -69,6 +69,8 @@ var survival_level = null
 var difficulty := 0
 var survival_time := 0
 
+var next_scene: String = "" # for loading screen
+
 #onready var debugger = load("res://Scenes/Debugger.gd").new()
 
 

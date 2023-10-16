@@ -2,7 +2,7 @@ extends Node
 
 const ASSIST_BORROW = {
 	"GuraA": {
-		"icon": "res://Assists/GuraA/Icon.png",
+		"icon": "res://Assists/GuraA/icon.png",
 		"NPC_data": {
 			"scene" : "res://Assists/GuraA/GuraA.tscn",
 			"frame_data_array" : [
@@ -47,7 +47,7 @@ const ASSIST_BORROW = {
 	},
 	
 	"InaA": {
-		"icon": "res://Assists/InaA/Icon.png",
+		"icon": "res://Assists/InaA/icon.png",
 		"NPC_data": {
 			"scene" : "res://Assists/InaA/InaA.tscn",
 			"frame_data_array" : [

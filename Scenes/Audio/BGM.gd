@@ -5,21 +5,24 @@ var BGMPlayerScene = load("res://Scenes/Audio/BGMPlayer.tscn")
 
 var common_music = {
 	"title_theme" : {
-		"name" : "TitleTheme", # to not play the same music as the one currently being played
+		"name" : "Title Theme", # to not play the same music as the one currently being played
+		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/TitleTheme.ogg",
 #		"loop_start": 0.0,
 		"loop_end": 206.76,
 		"vol" : 4,
 		},
 	"char_select" : {
-		"name" : "CharSelect",
+		"name" : "Character Select",
+		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/CharSelect.ogg",
 #		"loop_start": 0.1,
 		"loop_end": 125.15,
 		"vol" : 0,
 		},
 	"victory" : {
-		"name" : "VictoryScreen",
+		"name" : "Victory Screen",
+		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/VictoryScreen.ogg",
 		"loop_start": 0.71,
 		"loop_end": 94.18,

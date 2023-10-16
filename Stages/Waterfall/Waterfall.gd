@@ -3,7 +3,8 @@ extends "res://Scenes/Stage/Stage.gd"
 const NAME = "Waterfall"
 
 const MUSIC = {
-		"name" : "Survival1",
+		"name" : "Survival Theme",
+		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/Survival1.ogg",
 		"loop_end": 157.09,
 		"vol" : -4,

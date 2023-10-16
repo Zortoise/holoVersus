@@ -305,8 +305,9 @@ func _setting_shifted(_shifted):
 
 func change_scene(new_scene: String): # called by animation
 	Netplay.lobby = null
+	Globals.next_scene = new_scene
 # warning-ignore:return_value_discarded
-	get_tree().change_scene(new_scene)
+	get_tree().change_scene("res://Scenes/LoadingScreen.tscn")
 	
 func force_start_game():
 	if !$Transition.is_playing():

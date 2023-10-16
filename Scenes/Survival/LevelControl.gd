@@ -115,6 +115,7 @@ func init():
 	if "MUSIC" in UniqLevel and BGM.custom_playlist.size() == 0:
 		var music_dict = UniqLevel.MUSIC.duplicate()
 		BGM.bgm(music_dict)
+		Globals.Game.viewport.BGM_credits(music_dict)
 	
 	load_cards()
 	load_items()
