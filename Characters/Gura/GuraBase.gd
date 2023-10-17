@@ -87,14 +87,14 @@ const PALETTE_TO_HITSPARK_PALETTE = {
 	5: "pink"
 }
 
-const MUSIC = {
+const MUSIC = [{
 		"name" : "Gura's Theme", # to not play the same music as the one currently being played
 		"artist" : "Zortoise",
 		"audio" : "res://Characters/Gura/Music/GuraTheme.ogg",
 #		"loop_start": 27.42,
 		"loop_end": 164.57,
 		"vol" : -7,
-	}
+	}]
 
 const UNIQUE_DATA_REF = {
 #	"groundfin_count" : 0,
@@ -262,7 +262,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 6,
 		Em.move.KB_ANGLE : -75,
-		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN, Em.atk_attr.NO_CHAIN],
+		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN],
 		Em.move.MOVE_SOUND : [{ ref = "water8", aux_data = {"vol" : -13,} }, { ref = "water5", aux_data = {"vol" : -20} }],
 		Em.move.HIT_SOUND : { ref = "water7", aux_data = {"vol" : -9} },
 	},

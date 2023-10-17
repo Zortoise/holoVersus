@@ -2,13 +2,13 @@ extends "res://Scenes/Stage/Stage.gd"
 
 const NAME = "Amahara"
 
-const MUSIC = {
+const MUSIC = [{
 		"name" : "Survival Theme",
 		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/Survival1.ogg",
 		"loop_end": 157.09,
 		"vol" : -4,
-	}
+	}]
 	
 var time = 0.0 # for scrolling clouds
 

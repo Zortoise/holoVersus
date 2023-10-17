@@ -283,28 +283,38 @@ func setup():
 # BGM --------------------------------------------------------------------------------------------------
 	
 	if BGM.custom_playlist.size() != 0:
-		var random = posmod(current_rng_seed, BGM.custom_playlist.size())
+#		var random = posmod(current_rng_seed, BGM.custom_playlist.size())
+		var random = Globals.random.randi_range(0, BGM.custom_playlist.size())
 		var chosen_music_dict = BGM.custom_playlist[random].duplicate()
 		BGM.bgm(chosen_music_dict)
 		viewport.BGM_credits(chosen_music_dict)
 	
 	elif Globals.survival_level == null:
-		var music_names := []
-		var music_list := []
-		if "MUSIC" in stage: # append stage music
-			var new_music_dict = stage.MUSIC
-			music_names.append(new_music_dict.name)
-			music_list.append(new_music_dict)
+#		each character (no repeat) and the stage has an equal chance of its music set being picked
+#		afterwards, a random music is picked from the selected music set
+
+		var music_sets := [] # array of arrays
+		
+		if "MUSIC" in stage and stage.MUSIC.size() > 0: # append stage music
+			var music_set: = []
+			for music_dict in stage.MUSIC:
+				music_set.append(music_dict)
+			music_sets.append(music_set)
+			
+		var character_names := [] # to avoid mirror match having double the chance
 		for player in $Players.get_children(): # append character music
-			if "MUSIC" in player.UniqChar:
-				var new_music_dict = player.UniqChar.MUSIC
-				if !new_music_dict.name in music_names: # only append if the music is not already appended
-					music_names.append(new_music_dict.name)
-					music_list.append(new_music_dict)
-		if music_list.size() > 0:
-#			var random = rng_generate(music_list.size()) # pick a random music and load it
-			var random = posmod(current_rng_seed, music_list.size())
-			var chosen_music_dict = music_list[random].duplicate()
+			if !player.UniqChar.NAME in character_names:
+				if "MUSIC" in player.UniqChar and player.UniqChar.MUSIC.size() > 0:
+					var music_set: = []
+					for music_dict in player.UniqChar.MUSIC:
+						music_set.append(music_dict)
+					music_sets.append(music_set)	
+				character_names.append(player.UniqChar.NAME)
+				
+		if music_sets.size() > 0:
+			var chosen_music_set = music_sets[Globals.random.randi_range(0, music_sets.size() - 1)]
+			var random = Globals.random.randi_range(0, chosen_music_set.size() - 1)
+			var chosen_music_dict = chosen_music_set[random].duplicate()
 			BGM.bgm(chosen_music_dict)
 			viewport.BGM_credits(chosen_music_dict)
 

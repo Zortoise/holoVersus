@@ -67,7 +67,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"L1Active", "L1bActive", "L1b[h]Active", "L1cActive", "L2Active", "L3Active", "F1Active", "F2Active", "F2[h]Active", "F2[h]PActive", \
 				"F3Active", "F3[h]Active", "HActive", "HbActive":
 			return Em.char_state.GRD_ATK_ACTIVE
-		"L1Rec", "L1bRec", "L1b[h]Rec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
+		"L1bRec", "L1cRec", "L2bRec", "L3Rec", "F1Rec", "F2Rec", "F2[h]Rec", "F2[h]PRec", "F3Rec", "HbRec", \
 				"aL2LandRec":
 			return Em.char_state.GRD_ATK_REC
 			
@@ -1564,8 +1564,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1Startup":
 			Character.animate("L1Active")
 		"L1Active":
-			Character.animate("L1Rec")
-		"L1Rec":
 			if Character.held_version(Character.button_light):
 				Character.animate("L1b[h]Active")
 			else:
@@ -1575,8 +1573,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1bRec":
 			Character.animate("Idle")
 		"L1b[h]Active":
-			Character.animate("L1b[h]Rec")
-		"L1b[h]Rec":
 			Character.animate("L1cActive")
 		"L1cActive":
 			Character.animate("L1cRec")

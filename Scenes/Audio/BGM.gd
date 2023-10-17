@@ -110,7 +110,7 @@ func fade():
 	for x in old_bgm:
 		x.decaying = true
 
-func bgm(bgm_dictionary):
+func bgm(bgm_dictionary: Dictionary):
 	
 	if current_music != bgm_dictionary.name:
 		fade() # just in case

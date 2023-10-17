@@ -1430,7 +1430,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			
 		"L1Startup", "L3Startup", "F1Startup", "F2Startup", "F3Startup", "HStartup":
 			return Em.char_state.GRD_ATK_STARTUP
-		"L1Active", "L1Rec", "L1bActive", "L3Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive":
+		"L1Active", "L1bActive", "L3Active", "F1Active", "F2Active", "F3Active", "HActive", "HbActive":
 			return Em.char_state.GRD_ATK_ACTIVE
 		"L1bRec", "L3Rec", "F1Rec", "F2Rec", "F3Rec", "HbRec":
 			return Em.char_state.GRD_ATK_REC
@@ -1933,8 +1933,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"L1Startup":
 			Character.animate("L1Active")
 		"L1Active":
-			Character.animate("L1Rec")
-		"L1Rec":
 			Character.animate("L1bActive")
 		"L1bActive":
 			Character.animate("L1bRec")

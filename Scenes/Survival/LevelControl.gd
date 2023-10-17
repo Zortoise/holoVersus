@@ -113,9 +113,10 @@ func init():
 			starting_prism = FMath.percent(UniqLevel.STARTING_PRISM, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
 	if "MUSIC" in UniqLevel and BGM.custom_playlist.size() == 0:
-		var music_dict = UniqLevel.MUSIC.duplicate()
-		BGM.bgm(music_dict)
-		Globals.Game.viewport.BGM_credits(music_dict)
+		var random = Globals.random.randi_range(0, UniqLevel.MUSIC.size() - 1)
+		var chosen_music_dict = UniqLevel.MUSIC[random].duplicate()
+		BGM.bgm(chosen_music_dict)
+		Globals.Game.viewport.BGM_credits(chosen_music_dict)
 	
 	load_cards()
 	load_items()

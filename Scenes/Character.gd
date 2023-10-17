@@ -5691,7 +5691,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	var root_attack_ref = UniqChar.get_root(attack_ref)
 	if root_attack_ref in chain_memory: return false # cannot chain into moves already done
 
-	if Em.atk_attr.NO_CHAIN in from_move_data[Em.move.ATK_ATTR] or Em.atk_attr.CANNOT_CHAIN_INTO in to_move_data[Em.move.ATK_ATTR]:
+	if Em.atk_attr.NO_CHAIN in from_move_data[Em.move.ATK_ATTR] or Em.atk_attr.CANNOT_CHAIN_INTO in to_move_data[Em.move.ATK_ATTR] or \
+			Em.atk_attr.AUTOCHAIN in from_move_data[Em.move.ATK_ATTR]:
 		return false # some moves cannnot be chained from, some moves cannot be chained into
 
 	if Em.atk_attr.ONLY_CHAIN_ON_HIT in from_move_data[Em.move.ATK_ATTR] or Em.atk_attr.ONLY_CHAIN_INTO_ON_HIT in to_move_data[Em.move.ATK_ATTR]:
@@ -5700,8 +5701,8 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 			return false
 		
 	if is_atk_active():
-		if Em.atk_attr.AUTOCHAIN in from_move_data[Em.move.ATK_ATTR]:
-			return false
+#		if Em.atk_attr.AUTOCHAIN in from_move_data[Em.move.ATK_ATTR]:
+#			return false
 		if Em.atk_attr.LATE_CHAIN in from_move_data[Em.move.ATK_ATTR]:
 			return false  # some moves cannot be chained from during active frames
 		if Em.atk_attr.LATE_CHAIN_INTO in to_move_data[Em.move.ATK_ATTR]:
@@ -6117,7 +6118,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	if Em.hit.NPC_DEFENDER_PATH in hit_data:
 		chain_combo = Em.chain_combo.RESET # no chain on NPC hits
 		
-	elif hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SOUR_HIT in hit_data:
+	elif hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SOUR_HIT in hit_data or Em.hit.MULTIHIT in hit_data or Em.hit.AUTOCHAIN in hit_data:
 		chain_combo = Em.chain_combo.NO_CHAIN
 	
 	else:
@@ -6126,29 +6127,20 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 			Em.block_state.UNBLOCKED:
 				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
-							chain_combo = Em.chain_combo.NORMAL
-							if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
-								if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-									active_cancel = true
-							if is_aerial():  # for unblocked aerial you regain 1 air jump
-								gain_one_air_jump()
-						else:
-							chain_combo = Em.chain_combo.NO_CHAIN
-					Em.atk_type.HEAVY:
-						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
-							chain_combo = Em.chain_combo.HEAVY
+						chain_combo = Em.chain_combo.NORMAL
+						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
 							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 								active_cancel = true
-							if is_aerial():  # for unblocked aerial you regain 1 air jump
-								gain_one_air_jump()
-						else:
-							chain_combo = Em.chain_combo.NO_CHAIN
+						if is_aerial():  # for unblocked aerial you regain 1 air jump
+							gain_one_air_jump()
+					Em.atk_type.HEAVY:
+						chain_combo = Em.chain_combo.HEAVY
+						if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+							active_cancel = true
+						if is_aerial():  # for unblocked aerial you regain 1 air jump
+							gain_one_air_jump()
 					Em.atk_type.SPECIAL, Em.atk_type.EX:
-						if !Em.hit.MULTIHIT in hit_data and !Em.hit.AUTOCHAIN in hit_data:
-							chain_combo = Em.chain_combo.SPECIAL
-						else:
-							chain_combo = Em.chain_combo.NO_CHAIN
+						chain_combo = Em.chain_combo.SPECIAL
 					Em.atk_type.SUPER:
 						chain_combo = Em.chain_combo.SUPER
 						

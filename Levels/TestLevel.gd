@@ -7,13 +7,13 @@ const STARTING_STOCKS = 5
 const STARTING_PRISM = 100
 const PRICE_SCALING = 10
 
-const MUSIC = {
+const MUSIC = [{
 		"name" : "Survival Theme", # to not play the same music as the one currently being played
 		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/Survival1.ogg",
 		"loop_end": 157.09,
 		"vol" : -4,
-	}
+	}]
 
 const MOB_LIST = [
 	["GuraM", "Gura"],
