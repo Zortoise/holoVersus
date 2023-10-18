@@ -8,10 +8,11 @@ const STARTING_PRISM = 100
 const PRICE_SCALING = 10
 
 const MUSIC = [{
-		"name" : "Survival Theme", # to not play the same music as the one currently being played
+		"name" : "Survival Theme",
 		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/Survival1.ogg",
-		"loop_end": 157.09,
+		"loop_start": 0.098,
+		"loop_end": 157.206,
 		"vol" : -4,
 	}]
 

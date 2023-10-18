@@ -9,23 +9,23 @@ var common_music = {
 		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/TitleTheme.ogg",
 #		"loop_start": 0.0,
-		"loop_end": 206.76,
+		"loop_end": 206.8,
 		"vol" : 4,
 		},
 	"char_select" : {
 		"name" : "Character Select",
 		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/CharSelect.ogg",
-#		"loop_start": 0.1,
-		"loop_end": 125.15,
+		"loop_start": 0.164,
+		"loop_end": 125.332,
 		"vol" : 0,
 		},
 	"victory" : {
 		"name" : "Victory Screen",
 		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/VictoryScreen.ogg",
-		"loop_start": 0.71,
-		"loop_end": 94.18,
+		"loop_start": 0.809,
+		"loop_end": 94.286,
 		"fade" : true, # use code to fade song after loop_end
 		"vol" : 1,
 		}

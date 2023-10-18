@@ -6,7 +6,8 @@ const MUSIC = [{
 		"name" : "Survival Theme",
 		"artist" : "Zortoise",
 		"audio" : "res://Assets/Music/Survival1.ogg",
-		"loop_end": 157.09,
+		"loop_start": 0.098,
+		"loop_end": 157.206,
 		"vol" : -4,
 	}]
 	

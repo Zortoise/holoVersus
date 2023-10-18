@@ -402,6 +402,10 @@ P2_rs_down={
 2d_physics/layer_15="soft_platform"
 2d_physics/layer_16="solid_platform"
 
+[mono]
+
+project/assembly_name="holoVersus"
+
 [physics]
 
 common/physics_jitter_fix=0.0
