@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/GuraTheme.ogg-4ef7ce85eeb7e982ac22b0f53e9d9283.oggstr"
+
+[deps]
+
+source_file="res://Characters/Gura/Music/GuraTheme.ogg"
+dest_files=[ "res://.import/GuraTheme.ogg-4ef7ce85eeb7e982ac22b0f53e9d9283.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

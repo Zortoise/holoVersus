@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/water8.wav-9d79f776fadbaffa51a935f642868874.sample"
+
+[deps]
+
+source_file="res://Characters/Gura/UniqueAudio/water8.wav"
+dest_files=[ "res://.import/water8.wav-9d79f776fadbaffa51a935f642868874.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

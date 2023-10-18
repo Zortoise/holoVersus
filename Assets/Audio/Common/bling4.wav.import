@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/bling4.wav-a248766fe5aeb78a58e4d99532e1bb2e.sample"
+
+[deps]
+
+source_file="res://Assets/Audio/Common/bling4.wav"
+dest_files=[ "res://.import/bling4.wav-a248766fe5aeb78a58e4d99532e1bb2e.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0
