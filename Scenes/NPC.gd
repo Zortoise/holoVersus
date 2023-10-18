@@ -580,7 +580,8 @@ func simulate2(): # only ran if not in hitstop
 # BLOCK BUTTON --------------------------------------------------------------------------------------------------	
 	
 			
-	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
+	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed and \
+			!button_special in input_state.pressed and !button_unique in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
 
@@ -1211,10 +1212,10 @@ func combination_trio(button1, button2, button3, action, back = false):
 			
 		
 func is_button_pressed(button):
-	if button in [button_dash]: # dash command needs to be at most 2 frames apart
-		if is_button_tapped_in_last_X_frames(button, 2):
-			return true
-	elif button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
+#	if button in [button_dash]: # dash command needs to be at most 2 frames apart
+#		if is_button_tapped_in_last_X_frames(button, 2):
+#			return true
+	if button in [button_light, button_fierce, button_aux, button_dash, button_block]: # for attack buttons, only considered "pressed" a few frame after being tapped
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
 		if is_button_tapped_in_last_X_frames(button, 3):
 			return true

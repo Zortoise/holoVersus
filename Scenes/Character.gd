@@ -1453,7 +1453,8 @@ func simulate2(): # only ran if not in hitstop
 #		if button_dash in input_state.just_pressed and button_aux in input_state.pressed:
 #			input_buffer.append(["Burst", buffer_time()])
 			
-	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed:
+	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed and \
+			!button_special in input_state.pressed and !button_unique in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
 #		elif $ShorthopTimer.is_running():
@@ -2307,6 +2308,9 @@ func buffer_actions():
 		tap_memory.append([button_dash, TAP_MEMORY_DURATION])
 		if !button_unique in input_state.pressed:
 			input_buffer.append([button_dash, buffer_time()])
+			
+	if button_block in input_state.just_pressed:
+		tap_memory.append([button_block, TAP_MEMORY_DURATION])
 		
 	if button_special in input_state.just_pressed:
 		tap_memory.append([button_special, TAP_MEMORY_DURATION])
@@ -2541,10 +2545,10 @@ func is_button_pressed(button):
 #			return true
 #		else:
 #			return false
-	if button in [button_dash]: # dash command needs to be at most 2 frames apart
-		if is_button_tapped_in_last_X_frames(button, 2):
-			return true
-	elif button in [button_light, button_fierce, button_aux]: # for attack buttons, only considered "pressed" a few frame after being tapped
+#	if button in [button_dash]: # dash command needs to be at most 2 frames apart
+#		if is_button_tapped_in_last_X_frames(button, 2):
+#			return true
+	if button in [button_light, button_fierce, button_aux, button_dash, button_block]: # for attack buttons, only considered "pressed" a few frame after being tapped
 		# so you cannot hold attack and press down to do down-tilts, for instance. Have to hold down and press attack
 		if is_button_tapped_in_last_X_frames(button, 3):
 			return true
@@ -2634,7 +2638,7 @@ func are_inputs_too_close():
 			break
 		if tap[0] in [button_special, button_unique]:
 			time_of_last_special_or_unique_tap = tap[1]
-		elif tap[0] in [button_light, button_fierce, button_aux]:
+		elif tap[0] in [button_light, button_fierce, button_aux, button_dash, button_block]:
 			time_of_last_attack_tap = tap[1]
 			
 	if time_of_last_special_or_unique_tap == null or time_of_last_attack_tap == null:
@@ -4614,7 +4618,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	else: # cancelling from a non-ex non-super move
 		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling into an ex move from non-ex move has wider window
 			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
-			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed):
+			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed or \
+					button_dash in input_state.pressed or button_block in input_state.pressed):
 				if !are_inputs_too_close():
 					if Animator.time <= 5 and Animator.time != 0:
 						return true
@@ -8264,7 +8269,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Block")
 			
 		"BurstCounterStartup":
-			if held_version(button_aux) and held_version(button_block) and burst_token == Em.burst.AVAILABLE:
+			if held_version(button_dash) and held_version(button_block) and burst_token == Em.burst.AVAILABLE:
 				animate("BurstAwakening")
 			else:
 				animate("BurstCounter")

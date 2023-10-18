@@ -138,9 +138,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.AIR_ATK_STARTUP
 		"aSP5Active", "aSP5[h]Active", "aSP5[ex]Active", "aSP5b[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
-		"aSP5Rec", "aSP5bRec", "aSP5[ex]Rec", "aSP5b[ex]Rec", "aSP5c[ex]Rec":
+		"aSP5Rec", "aSP5bRec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
 			return Em.char_state.AIR_ATK_REC
-		"SP5bRec", "SP5c[ex]Rec":
+		"SP5bRec", "SP5b[ex]Rec":
 			return Em.char_state.GRD_ATK_REC
 			
 		"SP6[ex]Startup":
@@ -384,6 +384,7 @@ func simulate():
 func capture_combinations():
 	
 	Character.combination(Character.button_special, Character.button_dash, "Sp.Dash")
+	Character.ex_combination(Character.button_special, Character.button_dash, "ExSp.Dash")
 	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
@@ -402,9 +403,9 @@ func capture_combinations():
 	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
 	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
 	
+	Character.combination_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
 	Character.ex_combination_trio(Character.button_special, Character.button_down, Character.button_fierce, "ExSp.dF")
 	
-	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 	Character.ex_combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
 	
 #	Character.doubletap_combination(Character.button_special, Character.button_fierce, "SpSp.F")
@@ -420,10 +421,11 @@ func rebuffer_actions(): # for when there are air and ground versions, or up/dow
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
+	Character.rebuffer(Character.button_special, Character.button_dash, "Sp.Dash")
 	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
 	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
 	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
-	Character.rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
+	Character.rebuffer_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
 	
 func rebuffer_EX(): # only rebuffer EX moves on release of up/down
 	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
@@ -639,6 +641,8 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				if Character.grounded:
 					keep = !process_move(new_state, "SP9", has_acted)
+				else:
+					keep = !process_move(new_state, "SP2", has_acted)
 				
 		"Sp.L":
 			if !has_acted[0]:
@@ -646,27 +650,20 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					keep = !process_move(new_state, "SP7", has_acted)
 				else:
 					keep = !process_move(new_state, "SP1", has_acted)
-				
-#		"Sp.dL":
-#			if !has_acted[0]:
-#				if test_instinct():
-#					keep = !process_move(new_state, "SP7", has_acted)
-	
+
 		"Sp.F":
 			if !has_acted[0]:
-				if !Character.grounded:
-					keep = !process_move(new_state, "SP2", has_acted)
-				else:
-					if get_ground_fins().size() == 0:
-						keep = !process_move(new_state, "SP4", has_acted)
+				keep = !process_move(new_state, "SP5", has_acted)
 						
 		"Sp.uF":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP3", has_acted)
 				
-		"Sp.H":
+		"Sp.dF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP5", has_acted)
+				if Character.grounded:
+					if get_ground_fins().size() == 0:
+						keep = !process_move(new_state, "SP4", has_acted)
 				
 		"U.Dash":
 			if !has_acted[0]:
@@ -686,32 +683,34 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 
 		"ExSp.F":
 			if !has_acted[0]:
+				keep = !process_move(new_state, "SP5[ex]", has_acted)
+				if keep:
+					keep = !process_move(new_state, "SP5", has_acted)
+					
+		"ExSp.Dash":
+			if !has_acted[0]:
 				if !Character.grounded:
 					keep = !process_move(new_state, "SP2[ex]", has_acted)
 					if keep:
-						keep = !process_move(new_state, "SP2", has_acted)
-				else:
-					if get_ground_fins().size() <= 1:
-						keep = !process_move(new_state, "SP4[ex]", has_acted)	
-						if keep:
-							keep = !process_move(new_state, "SP4", has_acted)
+						keep = !process_move(new_state, "SP2", has_acted)	
 							
 		"ExSp.uF":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP3[ex]", has_acted)
 				if keep:
 					keep = !process_move(new_state, "SP3", has_acted)
-			
+					
 		"ExSp.dF":
 			if !has_acted[0]:
-#				if !Character.impulse_used:
-				keep = !process_move(new_state, "SP6[ex]", has_acted)
+				if Character.grounded:
+					if get_ground_fins().size() <= 1:
+						keep = !process_move(new_state, "SP4[ex]", has_acted)	
+						if keep:
+							keep = !process_move(new_state, "SP4", has_acted)	
 				
 		"ExSp.H":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP5[ex]", has_acted)
-				if keep:
-					keep = !process_move(new_state, "SP5", has_acted)
+				keep = !process_move(new_state, "SP6[ex]", has_acted)
 						
 		# ---------------------------------------------------------------------------------
 		
@@ -782,6 +781,7 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 			if Settings.input_assist[Character.player_ID]:
 				if Character.grounded and attack_ref in UP_TILTS and Character.test_jumpsquat_cancel(attack_ref) and \
 						Animator.query_to_play(["JumpTransit"]) and Character.test_qc_chain_combo(attack_ref):
+						# the test_qc_chain_combo() is needed so you cannot up-tilt > jump cancel > up-tilt
 					if Character.is_ex_valid(attack_ref):
 						Character.animate(attack_ref + "Startup")
 						has_acted[0] = true
@@ -810,6 +810,23 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						Character.animate(air_atk_ref + "Startup")
 						has_acted[0] = true
 						return true
+						
+#		Em.char_state.GRD_BLOCK: # for Specials using button_block
+#			if Settings.input_assist[Character.player_ID]:
+#				if attack_ref in BLOCK_COMMAND and Animator.query_to_play(["BlockStartup"]) and Animator.time == 1:
+#					if Character.is_ex_valid(attack_ref):
+#						Character.animate(attack_ref + "Startup")
+#						has_acted[0] = true
+#						return true
+#
+#		Em.char_state.AIR_BLOCK: # for Specials using button_block
+#			if Settings.input_assist[Character.player_ID]:
+#				if air_atk_ref in BLOCK_COMMAND and Animator.query_to_play(["aBlockStartup"]) and Animator.time == 1:
+#					if Character.test_aerial_memory(air_atk_ref):
+#						if Character.is_ex_valid(air_atk_ref):
+#							Character.animate(air_atk_ref + "Startup")
+#							has_acted[0] = true
+#							return true
 				
 		# chain cancel
 		Em.char_state.GRD_ATK_REC, Em.char_state.GRD_ATK_ACTIVE:
@@ -1060,8 +1077,10 @@ func refine_move_name(move_name):
 			return "aSP5"
 		"SP5[h]":
 			return "aSP5[h]"
-		"SP5[ex]", "SP5c[ex]", "aSP5c[ex]":
+		"SP5[ex]":
 			return "aSP5[ex]"
+		"SP5b[ex]":
+			return "aSP5b[ex]"
 		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
 			return "aSP6[ex]"
 		"aSP7":
@@ -1832,7 +1851,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP1[ex]Rec")
 			
 		"aSP2Startup":
-			if Character.held_version(Character.button_fierce):
+			if Character.held_version(Character.button_dash):
 				Character.animate("aSP2[h]Active")
 			else:
 				Character.animate("aSP2Active")
@@ -1925,7 +1944,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"SP5Startup", "aSP5Startup":
-			if Character.held_version(Character.button_light) and Character.held_version(Character.button_fierce):
+			if Character.held_version(Character.button_fierce):
 				Character.animate("aSP5[h]Active")
 			else:
 				Character.animate("aSP5Active")
@@ -1941,17 +1960,17 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP5[ex]Startup", "aSP5[ex]Startup":
 			Character.animate("aSP5[ex]Active")
 		"aSP5[ex]Active":
-			Character.animate("aSP5[ex]Rec")
-		"aSP5[ex]Rec":
 			Character.animate("aSP5b[ex]Active")
 		"aSP5b[ex]Active":
+			Character.animate("aSP5[ex]Rec")
+		"aSP5[ex]Rec":
 			if Character.is_on_ground():
-				Character.animate("SP5c[ex]Rec")
+				Character.animate("SP5b[ex]Rec")
 			else:
-				Character.animate("aSP5c[ex]Rec")
-		"SP5bRec", "SP5c[ex]Rec":
+				Character.animate("aSP5b[ex]Rec")
+		"SP5bRec", "SP5b[ex]Rec":
 			Character.animate("Idle")
-		"aSP5bRec", "aSP5c[ex]Rec":
+		"aSP5bRec", "aSP5b[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"SP6[ex]Startup", "aSP6[ex]Startup":
@@ -2354,11 +2373,11 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_friction_mod = 0
 			if Character.grounded:
 				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
-		"aSP5[ex]Rec", "aSP5b[ex]Active":
+		"aSP5b[ex]Active":
 #			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-		"aSP5Rec", "aSP5c[ex]Rec":
+		"aSP5Rec", "aSP5[ex]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25

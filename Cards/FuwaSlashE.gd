@@ -22,7 +22,7 @@ const MOVE_DATABASE = {
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.SLASH,
 		Em.move.HITSPARK_PALETTE : "blue",
 		Em.move.KB_ANGLE : -45,
-		Em.move.PROJ_LVL : 1,
+		Em.move.PROJ_LVL : 2,
 		Em.move.ATK_ATTR : [Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -13} },
 	}

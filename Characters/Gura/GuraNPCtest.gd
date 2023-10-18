@@ -355,6 +355,8 @@ func capture_combinations():
 	
 	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
 	
+	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.dF")
+	
 	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
 
 
@@ -368,11 +370,11 @@ func rebuffer_actions(): # for when there are air and ground versions
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
+	Character.rebuffer(Character.button_special, Character.button_dash, "Sp.Dash")
 	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
 	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
 	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
-	Character.rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
-	
+	Character.rebuffer_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
 
@@ -529,6 +531,8 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			if !has_acted[0]:
 				if Character.grounded:
 					keep = !process_move(new_state, "SP9", has_acted)
+				else:
+					keep = !process_move(new_state, "SP2", has_acted)
 				
 		"Sp.L":
 			if !has_acted[0]:
@@ -539,19 +543,17 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 	
 		"Sp.F":
 			if !has_acted[0]:
-				if !Character.grounded:
-					keep = !process_move(new_state, "SP2", has_acted)
-				else:
-					if get_ground_fins().size() == 0:
-						keep = !process_move(new_state, "SP4", has_acted)
+				keep = !process_move(new_state, "SP5", has_acted)
 						
 		"Sp.uF":
 			if !has_acted[0]:
 				keep = !process_move(new_state, "SP3", has_acted)
 				
-		"Sp.H":
+		"Sp.dF":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP5", has_acted)
+				if Character.grounded:
+					if get_ground_fins().size() == 0:
+						keep = !process_move(new_state, "SP4", has_acted)
 				
 						
 		# ---------------------------------------------------------------------------------
@@ -1458,7 +1460,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("aSP1Rec")
 			
 		"aSP2Startup":
-			if Character.held_version(Character.button_fierce):
+			if Character.held_version(Character.button_dash):
 				Character.animate("aSP2[h]Active")
 			else:
 				Character.animate("aSP2Active")
@@ -1521,7 +1523,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"SP5Startup", "aSP5Startup":
-			if Character.held_version(Character.button_light) and Character.held_version(Character.button_fierce):
+			if Character.held_version(Character.button_fierce):
 				Character.animate("aSP5[h]Active")
 			else:
 				Character.animate("aSP5Active")

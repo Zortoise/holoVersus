@@ -845,6 +845,23 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						Character.animate(air_atk_ref + "Startup")
 						has_acted[0] = true
 						return true
+						
+#		Em.char_state.GRD_BLOCK: # for Specials using button_block
+#			if Settings.input_assist[Character.player_ID]:
+#				if attack_ref in BLOCK_COMMAND and Animator.query_to_play(["BlockStartup"]) and Animator.time == 1:
+#					if Character.is_ex_valid(attack_ref):
+#						Character.animate(attack_ref + "Startup")
+#						has_acted[0] = true
+#						return true
+#
+#		Em.char_state.AIR_BLOCK: # for Specials using button_block
+#			if Settings.input_assist[Character.player_ID]:
+#				if air_atk_ref in BLOCK_COMMAND and Animator.query_to_play(["aBlockStartup"]) and Animator.time == 1:
+#					if Character.test_aerial_memory(air_atk_ref):
+#						if Character.is_ex_valid(air_atk_ref):
+#							Character.animate(air_atk_ref + "Startup")
+#							has_acted[0] = true
+#							return true
 				
 		# chain cancel
 		Em.char_state.GRD_ATK_REC, Em.char_state.GRD_ATK_ACTIVE:
