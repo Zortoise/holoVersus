@@ -209,7 +209,7 @@ func setup():
 #	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
 #	test_stage.free()
 
-	stage = load("res://Stages/" + stage_ref + "/" + stage_ref + ".tscn").instance()
+	stage = load("res://Stages/" + stage_ref + "/UniqStage.tscn").instance()
 	$Stage.add_child(stage)
 	stage.init()
 
@@ -234,7 +234,7 @@ func setup():
 		# add players, players added later overlap players added eariler
 		var P2_character
 	#	if P2_input_style == 0:
-		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + ".tscn").instance()
+		P2_character = load("res://Characters/" + P2_char_ref + "/UniqChar.tscn").instance()
 	#	else:
 	#		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + "C.tscn").instance()
 		var P2 = Loader.loaded_character_scene.instance() # main character node, not unique character node
@@ -252,7 +252,7 @@ func setup():
 	
 	var P1_character
 #	if P1_input_style == 0:
-	P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + ".tscn").instance()
+	P1_character = load("res://Characters/" + P1_char_ref + "/UniqChar.tscn").instance()
 #	else:
 #		P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + "C.tscn").instance()
 	var P1 = Loader.loaded_character_scene.instance()
@@ -284,9 +284,9 @@ func setup():
 	
 	if BGM.custom_playlist.size() != 0:
 #		var random = posmod(current_rng_seed, BGM.custom_playlist.size())
-		var random = Globals.random.randi_range(0, BGM.custom_playlist.size())
+		var random = Globals.random.randi_range(0, BGM.custom_playlist.size() - 1)
 		var chosen_music_dict = BGM.custom_playlist[random].duplicate()
-		BGM.bgm(chosen_music_dict)
+		BGM.play_uncommon(chosen_music_dict)
 		viewport.BGM_credits(chosen_music_dict)
 	
 	elif Globals.survival_level == null:
@@ -295,18 +295,18 @@ func setup():
 
 		var music_sets := [] # array of arrays
 		
-		if "MUSIC" in stage and stage.MUSIC.size() > 0: # append stage music
+		if "music" in stage and stage.music.size() > 0: # append stage music
 			var music_set: = []
-			for music_dict in stage.MUSIC:
+			for music_dict in stage.music:
 				music_set.append(music_dict)
 			music_sets.append(music_set)
 			
 		var character_names := [] # to avoid mirror match having double the chance
 		for player in $Players.get_children(): # append character music
 			if !player.UniqChar.NAME in character_names:
-				if "MUSIC" in player.UniqChar and player.UniqChar.MUSIC.size() > 0:
+				if "music" in player and player.music.size() > 0:
 					var music_set: = []
-					for music_dict in player.UniqChar.MUSIC:
+					for music_dict in player.music:
 						music_set.append(music_dict)
 					music_sets.append(music_set)	
 				character_names.append(player.UniqChar.NAME)
@@ -315,7 +315,7 @@ func setup():
 			var chosen_music_set = music_sets[Globals.random.randi_range(0, music_sets.size() - 1)]
 			var random = Globals.random.randi_range(0, chosen_music_set.size() - 1)
 			var chosen_music_dict = chosen_music_set[random].duplicate()
-			BGM.bgm(chosen_music_dict)
+			BGM.play_uncommon(chosen_music_dict)
 			viewport.BGM_credits(chosen_music_dict)
 
 

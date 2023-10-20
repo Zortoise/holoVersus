@@ -8,7 +8,7 @@ var replay
 
 func _ready():
 	
-	BGM.bgm(BGM.common_music["victory"])
+	BGM.play_common("VictoryThemes")
 	
 	$ReplayMenu.hide()
 	

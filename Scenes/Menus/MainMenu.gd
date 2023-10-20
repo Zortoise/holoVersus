@@ -1,7 +1,7 @@
 extends Node2D
 
 func _ready():
-	BGM.bgm(BGM.common_music["title_theme"])
+	BGM.play_common("TitleThemes")
 	
 	$Background/Title/Version.text = Globals.VERSION
 	

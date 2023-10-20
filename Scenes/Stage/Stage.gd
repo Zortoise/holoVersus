@@ -1,5 +1,6 @@
 extends Node
 
+var music := []
 
 func init(): # called by unique stage code when init() is called
 	Globals.Game.stage_box = $StageBox
@@ -32,7 +33,35 @@ func init(): # called by unique stage code when init() is called
 		for child in $ParallaxBackground.get_children():
 			child.add_to_group("StageDarken")
 			child.add_to_group("StagePause")
+			
+	load_music()
+	
 
+func load_music():
+	var dir = Directory.new()
+	var dir_name = "res://Stages/" + Globals.stage_ref + "/Music/"
+	if dir.dir_exists(dir_name): # if Music folder exist
+		if dir.open(dir_name) == OK:
+			dir.list_dir_begin(true)
+			var file_name = dir.get_next()
+			while file_name != "":
+				if file_name.ends_with(".ogg"):
+					var dictionary = {
+						"name" : file_name,
+						"vol" : 0,
+					}
+					dictionary["audio"] = dir_name + file_name
+					
+					var tres_name = dir_name + file_name.trim_suffix(".ogg") + ".tres"
+					if ResourceLoader.exists(tres_name):
+						var track_data = ResourceLoader.load(tres_name).data
+						for key in track_data.keys():
+							dictionary[key] = track_data[key]
+							
+					music.append(dictionary)
+					
+				file_name = dir.get_next()
+		else: print("Error: Cannot open Stage's Music folder")
 
 func simulate():
 	if !Globals.Game.is_stage_paused():

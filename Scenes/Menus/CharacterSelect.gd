@@ -64,7 +64,7 @@ var P2_palette_picked := 1
 func _ready():
 	Globals.pausing = false
 	
-	BGM.bgm(BGM.common_music["char_select"])
+	BGM.play_common("CharSelectThemes")
 	
 	# load characters
 	var dir = Directory.new()
@@ -77,7 +77,7 @@ func _ready():
 				character_data[character_name]["portrait"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/portrait.png")
 				character_data[character_name]["art"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/full_art.png")
 				character_data[character_name]["select_sprite"] = load("res://Characters/" + character_name + "/SelectSprite.tscn")
-				var character_file = load("res://Characters/" + character_name + "/" + character_name + ".tscn").instance()
+				var character_file = load("res://Characters/" + character_name + "/UniqChar.tscn").instance()
 				character_data[character_name]["name"] = character_file.NAME
 				if "ORDER" in character_file: character_data[character_name]["order"] = character_file.ORDER
 				
@@ -106,7 +106,7 @@ func _ready():
 		while stage_name != "":
 			if !stage_name.begins_with("."):
 				stage_data[stage_name] = {}
-				stage_data[stage_name]["name"] = load("res://Stages/" + stage_name + "/" + stage_name + ".tscn").instance().NAME
+				stage_data[stage_name]["name"] = load("res://Stages/" + stage_name + "/UniqStage.tscn").instance().NAME
 				stage_data[stage_name]["select"] = ResourceLoader.load("res://Stages/" + stage_name + "/Resources/select.png")
 			stage_name = dir.get_next()
 	else: print("Error: Cannot open Stages folder from CharacterSelect.gd")
@@ -126,7 +126,7 @@ func _ready():
 			while assist_name != "":
 				if !assist_name.begins_with("."):
 					assist_data[assist_name] = {}
-					assist_data[assist_name]["name"] = load("res://Assists/" + assist_name + "/" + assist_name + ".tscn").instance().NAME
+					assist_data[assist_name]["name"] = load("res://Assists/" + assist_name + "/UniqNPC.tscn").instance().ASSIST_NAME
 					assist_data[assist_name]["select"] = ResourceLoader.load("res://Assists/" + assist_name + "/select.png")
 				assist_name = dir.get_next()
 		else: print("Error: Cannot open Assists folder from CharacterSelect.gd")

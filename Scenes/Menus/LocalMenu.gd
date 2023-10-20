@@ -13,7 +13,7 @@ const STATICSTAGE_OPTIONS = ["off", "on"]
 
 func _ready():
 	
-	BGM.bgm(BGM.common_music["title_theme"])
+	BGM.play_common("TitleThemes")
 	
 	# WIP, load custom playlists here
 	

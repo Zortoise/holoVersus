@@ -4,32 +4,36 @@ extends Node
 var BGMPlayerScene = load("res://Scenes/Audio/BGMPlayer.tscn")
 
 var common_music = {
-	"title_theme" : {
-		"name" : "Title Theme", # to not play the same music as the one currently being played
-		"artist" : "Zortoise",
-		"audio" : "res://Assets/Music/TitleTheme.ogg",
-#		"loop_start": 0.0,
-		"loop_end": 206.76,
-		"vol" : 4,
-		},
-	"char_select" : {
-		"name" : "Character Select",
-		"artist" : "Zortoise",
-		"audio" : "res://Assets/Music/CharSelect.ogg",
-#		"loop_start": 0.1,
-		"loop_end": 125.15,
-		"vol" : 0,
-		},
-	"victory" : {
-		"name" : "Victory Screen",
-		"artist" : "Zortoise",
-		"audio" : "res://Assets/Music/VictoryScreen.ogg",
-		"loop_start": 0.71,
-		"loop_end": 94.18,
-		"fade" : true, # use code to fade song after loop_end
-		"vol" : 1,
-		}
+	"TitleThemes" : [],
+	"CharSelectThemes" : [],
+	"VictoryThemes" : [],
 }
+	
+#	"title_theme" : {
+#		"name" : "Title Theme", # to not play the same music as the one currently being played
+#		"artist" : "Zortoise",
+#		"audio" : "res://Assets/Music/TitleTheme.ogg",
+##		"loop_start": 0.0,
+#		"loop_end": 206.76,
+#		"vol" : 4,
+#		},
+#	"char_select" : {
+#		"name" : "Character Select",
+#		"artist" : "Zortoise",
+#		"audio" : "res://Assets/Music/CharSelect.ogg",
+##		"loop_start": 0.1,
+#		"loop_end": 125.15,
+#		"vol" : 0,
+#		},
+#	"victory" : {
+#		"name" : "Victory Screen",
+#		"artist" : "Zortoise",
+#		"audio" : "res://Assets/Music/VictoryScreen.ogg",
+#		"loop_start": 0.71,
+#		"loop_end": 94.18,
+#		"fade" : true, # use code to fade song after loop_end
+#		"vol" : 1,
+#		}
 
 var custom_playlist = [
 #	{
@@ -43,6 +47,7 @@ var custom_playlist = [
 ]
 
 var current_music := ""
+var current_song_type := ""
 var muffle_status := 0 # 1 = muffling, -1 = unmuffling
 var muffle_speed := 160000
 
@@ -50,9 +55,38 @@ func _ready():
 	self.set_pause_mode(2)
 	AudioServer.set_bus_effect_enabled(AudioServer.get_bus_index("Music"), 0, false)
 	
+	load_common()
 	load_custom()
 #	construct_track_data()
 	
+	
+func load_common():
+	var dir = Directory.new()
+	
+	for folder_name in ["TitleThemes", "CharSelectThemes", "VictoryThemes"]:
+		if dir.dir_exists("res://Assets/Music/" + folder_name): # if Music folder exist
+			if dir.open("res://Assets/Music/" + folder_name) == OK:
+				dir.list_dir_begin(true)
+				var file_name = dir.get_next()
+				while file_name != "":
+					if file_name.ends_with(".ogg"):
+						var dictionary = {
+							"name" : file_name,
+							"vol" : 0,
+						}
+						dictionary["audio"] = "res://Assets/Music/" + folder_name + "/" + file_name
+						
+						var tres_name = "res://Assets/Music/" + folder_name + "/" + file_name.trim_suffix(".ogg") + ".tres"
+						if ResourceLoader.exists(tres_name):
+							var track_data = ResourceLoader.load(tres_name).data
+							for key in track_data.keys():
+								dictionary[key] = track_data[key]
+								
+						common_music[folder_name].append(dictionary)
+						
+					file_name = dir.get_next()
+			else: print("Error: Cannot open Music/" + folder_name + " folder")
+		
 	
 func load_custom():
 	var dir_name = OS.get_executable_path().get_base_dir() + "/CustomPlaylist/"
@@ -65,7 +99,7 @@ func load_custom():
 			while file_name != "":
 				# load all needed files and add them to the dictionary
 				if file_name.ends_with(".ogg"):
-					var directionary = {
+					var dictionary = {
 						"name" : file_name,
 						"vol" : 0,
 					}
@@ -76,15 +110,15 @@ func load_custom():
 	
 					var new_stream = AudioStreamOGGVorbis.new()
 					new_stream.data = buffer
-					directionary["stream"] = new_stream
+					dictionary["stream"] = new_stream
 					
-					custom_playlist.append(directionary)
+					custom_playlist.append(dictionary)
 					
 					var tres_name = dir_name + file_name.trim_suffix(".ogg") + ".tres"
 					if ResourceLoader.exists(tres_name):
 						var track_data = ResourceLoader.load(tres_name).data
 						for key in track_data.keys():
-							directionary[key] = track_data[key]
+							dictionary[key] = track_data[key]
 					
 				file_name = dir.get_next()
 		else: print("Error: Cannot open CustomPlaylist folder")
@@ -110,6 +144,24 @@ func fade():
 	for x in old_bgm:
 		x.decaying = true
 
+
+func play_common(song_type: String):
+	
+	if current_song_type == song_type:
+		return
+	else: current_song_type = song_type
+				
+	if song_type in common_music and common_music[song_type].size() > 0:
+		
+		var random = Globals.random.randi_range(0, common_music[song_type].size() - 1)
+		bgm(common_music[song_type][random].duplicate())
+
+
+func play_uncommon(bgm_dictionary: Dictionary):
+	current_song_type = ""
+	bgm(bgm_dictionary)
+	
+
 func bgm(bgm_dictionary: Dictionary):
 	
 	if current_music != bgm_dictionary.name:
@@ -122,6 +174,17 @@ func bgm(bgm_dictionary: Dictionary):
 		get_tree().get_root().add_child(BGMPlayer)
 		BGMPlayer.init(bgm_dictionary)
 		
+		
+func bgm_select(bgm_dict_array:Array):
+	
+	for bgm_dict in bgm_dict_array: # first, if current music is part of array, do not play music
+		if current_music == bgm_dict.name:
+			return
+			
+	var random = Globals.random.randi_range(0, bgm_dict_array.size() - 1)
+	var chosen_music_dict = bgm_dict_array[random].duplicate()
+	bgm(chosen_music_dict)
+	
 		
 func _process(delta):
 	if muffle_status != 0:

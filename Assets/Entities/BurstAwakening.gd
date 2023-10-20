@@ -2,7 +2,7 @@ extends Node2D
 
 #const START_SPEED = 0.0
 #const START_ROTATION = 0.0
-const PALETTE = "white"
+const PALETTE = "pink"
 #const LIFESPAN = null
 
 const TRAITS = []
@@ -26,7 +26,7 @@ const MOVE_DATABASE = {
 		Em.move.FIXED_HITSTOP : 15,
 		Em.move.FIXED_HITSTUN : 32,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
-		Em.move.HITSPARK_PALETTE : "white",
+		Em.move.HITSPARK_PALETTE : "pink",
 		Em.move.PROJ_LVL : 3,
 		Em.move.KB_ANGLE : 0,
 		Em.move.ATK_ATTR : [Em.atk_attr.UNBLOCKABLE, Em.atk_attr.SCREEN_SHAKE, Em.atk_attr.DESTROY_ENTITIES],

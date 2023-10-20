@@ -4,7 +4,7 @@ const ASSIST_BORROW = {
 	"GuraA": {
 		"icon": "res://Assists/GuraA/icon.png",
 		"NPC_data": {
-			"scene" : "res://Assists/GuraA/GuraA.tscn",
+			"scene" : "res://Assists/GuraA/UniqNPC.tscn",
 			"frame_data_array" : [
 				"res://Characters/Gura/FrameData/Base.tres",
 				"res://Characters/Gura/FrameData/SP1.tres",
@@ -49,7 +49,7 @@ const ASSIST_BORROW = {
 	"InaA": {
 		"icon": "res://Assists/InaA/icon.png",
 		"NPC_data": {
-			"scene" : "res://Assists/InaA/InaA.tscn",
+			"scene" : "res://Assists/InaA/UniqNPC.tscn",
 			"frame_data_array" : [
 				"res://Characters/Ina/FrameData/Base.tres",
 				"res://Characters/Ina/FrameData/SP1.tres",

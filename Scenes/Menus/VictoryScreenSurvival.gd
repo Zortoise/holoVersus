@@ -3,7 +3,7 @@ extends Node2D
 
 func _ready():
 	
-	BGM.bgm(BGM.common_music["victory"])
+	BGM.play_common("VictoryThemes")
 	
 	$AltInputs.active = false
 	

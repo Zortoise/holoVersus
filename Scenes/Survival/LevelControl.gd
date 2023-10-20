@@ -15,6 +15,7 @@ onready var loaded_pickup_scene := load("res://Scenes/Survival/PickUp.tscn")
 onready var loaded_card_scene := load("res://Scenes/Survival/Card.tscn")
 
 var UniqLevel
+var music := []
 
 # to save
 var level_active := true
@@ -97,7 +98,7 @@ func init():
 	var test_level = get_child(0) # test character node should be directly under this node
 	test_level.free()
 	
-	UniqLevel = load("res://Levels/" + Globals.survival_level + ".tscn").instance()
+	UniqLevel = load("res://Levels/" + Globals.survival_level + "/UniqLevel.tscn").instance()
 	add_child(UniqLevel)
 	move_child(UniqLevel, 0)
 	
@@ -112,10 +113,13 @@ func init():
 			Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
 			starting_prism = FMath.percent(UniqLevel.STARTING_PRISM, 50)
 	Globals.Game.stage_ref = UniqLevel.STAGE
-	if "MUSIC" in UniqLevel and BGM.custom_playlist.size() == 0:
-		var random = Globals.random.randi_range(0, UniqLevel.MUSIC.size() - 1)
-		var chosen_music_dict = UniqLevel.MUSIC[random].duplicate()
-		BGM.bgm(chosen_music_dict)
+	
+	load_music()
+	
+	if music.size() > 0 and BGM.custom_playlist.size() == 0:
+		var random = Globals.random.randi_range(0, music.size() - 1)
+		var chosen_music_dict = music[random].duplicate()
+		BGM.play_uncommon(chosen_music_dict)
 		Globals.Game.viewport.BGM_credits(chosen_music_dict)
 	
 	load_cards()
@@ -127,7 +131,7 @@ func init():
 		var borrow_directory = "res://Characters/" + mob[1] + "/"
 
 		Loader.char_data[mob[0]] = {
-			"scene" : load(directory + mob[0] + ".tscn"),
+			"scene" : load(directory + "UniqChar.tscn"),
 			"palettes" : {},
 			"frame_data_array" : [],
 			"spritesheet" : {},
@@ -162,6 +166,31 @@ func init():
 	
 	Inventory.stock_pool()
 
+func load_music():
+	var dir = Directory.new()
+	var dir_name = "res://Levels/" + Globals.survival_level + "/Music/"
+	if dir.dir_exists(dir_name): # if Music folder exist
+		if dir.open(dir_name) == OK:
+			dir.list_dir_begin(true)
+			var file_name = dir.get_next()
+			while file_name != "":
+				if file_name.ends_with(".ogg"):
+					var dictionary = {
+						"name" : file_name,
+						"vol" : 0,
+					}
+					dictionary["audio"] = dir_name + file_name
+					
+					var tres_name = dir_name + file_name.trim_suffix(".ogg") + ".tres"
+					if ResourceLoader.exists(tres_name):
+						var track_data = ResourceLoader.load(tres_name).data
+						for key in track_data.keys():
+							dictionary[key] = track_data[key]
+							
+					music.append(dictionary)
+					
+				file_name = dir.get_next()
+		else: print("Error: Cannot open Stage's Music folder")
 		
 # ------------------------------------------------------------------------------------------------------------------------------------
 	

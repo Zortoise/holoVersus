@@ -1,8 +1,8 @@
 [gd_scene load_steps=43 format=2]
 
 [ext_resource path="res://Scenes/Menus/AltInputs.tscn" type="PackedScene" id=1]
-[ext_resource path="res://Scenes/Menus/ButtonTypeB.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Scenes/Menus/ButtonTypeF.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/Menus/Buttons/ButtonTypeB.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/Menus/Buttons/ButtonTypeF.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/Menus/JoinGameMenu.gd" type="Script" id=4]
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=5]
 [ext_resource path="res://Assets/Fonts/roboto.black.ttf" type="DynamicFontData" id=6]

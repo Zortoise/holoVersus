@@ -1,4 +1,4 @@
-extends "res://Characters/Gura/GuraBase.gd"
+extends "res://Characters/Gura/CharBase.gd"
 
 # replace player_ID with master_ID or NPC_ID
 # replace palette_number with palette_ref

@@ -155,6 +155,8 @@ const ASSIST_PASSIVE_REGEN = 5 # reduce assist CD by 1 frame every X frames
 const ASSIST_RESCUE_COST = 5000
 #const ASSIST_RESCUE_HITSTUN = 10 # fixed
 
+var music := []
+
 # variables used, don't touch these
 #var loaded_palette = null
 onready var Animator = $SpritePlayer # clean code
@@ -352,6 +354,8 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 		set_up_unique_audio() # scan all .wav files within Audio folder and add them to "Loader.audio" dictionary
 		set_up_entities() # scan all .tscn files within Entities folder and add them to "entities_data" dictionary
 		set_up_sfx() # scan all .tres files within SFX/FrameData folder and add them to "sfx_data" dictionary
+		
+	load_music()
 	
 	UniqChar.sprite = sprite
 #	sprite.texture = spritesheet["BaseSprite"]
@@ -616,6 +620,33 @@ func set_up_sfx(): # scan all .tres files within SFX/FrameData folder and add th
 			file_name = directory.get_next()
 	else: print("Error: Cannot open SFX folder for character")
 	
+	
+func load_music():
+	var directory = Directory.new()
+	var dir_name = directory_name + "/Music/"
+	if directory.dir_exists(dir_name): # if Music folder exist
+		if directory.open(dir_name) == OK:
+			directory.list_dir_begin(true)
+			var file_name = directory.get_next()
+			while file_name != "":
+				if file_name.ends_with(".ogg"):
+					var dictionary = {
+						"name" : file_name,
+						"vol" : 0,
+					}
+					dictionary["audio"] = dir_name + file_name
+					
+					var tres_name = dir_name + file_name.trim_suffix(".ogg") + ".tres"
+					if ResourceLoader.exists(tres_name):
+						var track_data = ResourceLoader.load(tres_name).data
+						for key in track_data.keys():
+							dictionary[key] = track_data[key]
+							
+					music.append(dictionary)
+					
+				file_name = directory.get_next()
+		else: print("Error: Cannot open Character's Music folder")
+		
 	
 func initial_targeting(): # target random players at start, cannot do in init() since need all players to be added first
 	# target a random opponent

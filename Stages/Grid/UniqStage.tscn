@@ -1,0 +1,178 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Scenes/Stage/SoftPlatform.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/Stage/SolidPlatform.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Stages/Grid/UniqStage.gd" type="Script" id=3]
+[ext_resource path="res://Stages/Grid/Resources/tile.png" type="Texture" id=4]
+[ext_resource path="res://Stages/Grid/Resources/platform.png" type="Texture" id=5]
+[ext_resource path="res://Stages/Grid/MPlatform1.gd" type="Script" id=6]
+[ext_resource path="res://Stages/Grid/MPlatform2.gd" type="Script" id=7]
+
+[node name="Grid" type="Node2D"]
+script = ExtResource( 3 )
+
+[node name="BlastZoneRect2" type="TextureRect" parent="."]
+modulate = Color( 1, 0.631373, 0.631373, 1 )
+margin_left = -448.0
+margin_top = -448.0
+margin_right = 448.0
+margin_bottom = 320.0
+texture = ExtResource( 4 )
+stretch_mode = 2
+
+[node name="BlastZoneRect" type="TextureRect" parent="."]
+margin_left = -320.0
+margin_top = -320.0
+margin_right = 320.0
+margin_bottom = 320.0
+texture = ExtResource( 4 )
+stretch_mode = 2
+
+[node name="SoftPlatform1" type="Sprite" parent="."]
+modulate = Color( 0.819608, 0.819608, 0.819608, 1 )
+position = Vector2( -128, 44 )
+texture = ExtResource( 5 )
+
+[node name="SoftPlatform" parent="SoftPlatform1" instance=ExtResource( 1 )]
+margin_left = -64.0
+margin_top = -4.0
+margin_right = 64.0
+margin_bottom = 4.0
+rect_pivot_offset = Vector2( 38, 13 )
+
+[node name="SoftPlatform2" type="Sprite" parent="."]
+modulate = Color( 0.819608, 0.819608, 0.819608, 1 )
+position = Vector2( 128, 44 )
+texture = ExtResource( 5 )
+
+[node name="SoftPlatform" parent="SoftPlatform2" instance=ExtResource( 1 )]
+margin_left = -64.0
+margin_top = -4.0
+margin_right = 64.0
+margin_bottom = 4.0
+rect_pivot_offset = Vector2( 38, 13 )
+
+[node name="MainPlatform" type="TextureRect" parent="."]
+modulate = Color( 1.5, 1.5, 1.5, 1 )
+margin_left = -384.0
+margin_top = 128.0
+margin_right = 384.0
+margin_bottom = 320.0
+texture = ExtResource( 4 )
+stretch_mode = 2
+
+[node name="SolidPlatform" parent="MainPlatform" instance=ExtResource( 2 )]
+margin_left = -64.0
+margin_right = 832.0
+margin_bottom = 192.0
+
+[node name="MPlatform1" type="Node2D" parent="."]
+script = ExtResource( 6 )
+
+[node name="MPlatform" type="Node2D" parent="MPlatform1"]
+position = Vector2( 0, -32 )
+
+[node name="Sprite" type="Sprite" parent="MPlatform1/MPlatform"]
+modulate = Color( 0.819608, 0.819608, 0.819608, 1 )
+position = Vector2( 0, 4 )
+texture = ExtResource( 5 )
+
+[node name="SoftPlatform" parent="MPlatform1/MPlatform" instance=ExtResource( 1 )]
+margin_left = -64.0
+margin_right = 64.0
+margin_bottom = 8.00001
+
+[node name="Waypoints" type="Node" parent="MPlatform1"]
+
+[node name="A" type="Position2D" parent="MPlatform1/Waypoints"]
+position = Vector2( 0, -32 )
+
+[node name="B" type="Position2D" parent="MPlatform1/Waypoints"]
+position = Vector2( -256, -32 )
+
+[node name="C" type="Position2D" parent="MPlatform1/Waypoints"]
+position = Vector2( 256, -32 )
+
+[node name="MPlatform2" type="Node2D" parent="."]
+position = Vector2( 0, -472 )
+script = ExtResource( 7 )
+
+[node name="MPlatform" type="Node2D" parent="MPlatform2"]
+position = Vector2( 0, 512 )
+
+[node name="Sprite" type="Sprite" parent="MPlatform2/MPlatform"]
+modulate = Color( 0.819608, 0.819608, 0.819608, 1 )
+position = Vector2( 0, 4 )
+texture = ExtResource( 5 )
+
+[node name="SoftPlatform" parent="MPlatform2/MPlatform" instance=ExtResource( 1 )]
+margin_left = -64.0
+margin_right = 64.0
+margin_bottom = 8.0
+
+[node name="P1_Position" type="Position2D" parent="."]
+position = Vector2( -128, 128 )
+
+[node name="P2_Position" type="Position2D" parent="."]
+position = Vector2( 128, 128 )
+
+[node name="MiddlePosition" type="Position2D" parent="."]
+position = Vector2( 0, 128 )
+
+[node name="StageBox" type="ReferenceRect" parent="."]
+margin_left = -384.0
+margin_top = -384.0
+margin_right = 384.0
+margin_bottom = 256.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="BlastBarrierU" type="ColorRect" parent="StageBox"]
+margin_left = -128.0
+margin_top = -128.0
+margin_right = 768.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierL" type="ColorRect" parent="StageBox"]
+margin_left = -128.0
+margin_top = -128.0
+margin_bottom = 704.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="BlastBarrierR" type="ColorRect" parent="StageBox"]
+margin_left = 768.0
+margin_top = -128.0
+margin_right = 896.0
+margin_bottom = 704.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="RespawnPoints" type="Node2D" parent="."]
+position = Vector2( 0, 32 )
+
+[node name="RespawnPoint1" type="Position2D" parent="RespawnPoints"]
+position = Vector2( -192, 40 )
+
+[node name="RespawnPoint2" type="Position2D" parent="RespawnPoints"]
+position = Vector2( -128, -128 )
+
+[node name="RespawnPoint3" type="Position2D" parent="RespawnPoints"]
+position = Vector2( -128, 40 )
+
+[node name="RespawnPoint4" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 0, -168 )
+
+[node name="RespawnPoint5" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 0, -96 )
+
+[node name="RespawnPoint6" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 0, 40 )
+
+[node name="RespawnPoint7" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 128, 40 )
+
+[node name="RespawnPoint8" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 128, -128 )
+
+[node name="RespawnPoint9" type="Position2D" parent="RespawnPoints"]
+position = Vector2( 192, 40 )

@@ -7,7 +7,7 @@ const DIFFICULTY_OPTIONS = ["Normal", "Hard", "Challenge", "Must Die"]
 
 func _ready():
 	
-	BGM.bgm(BGM.common_music["title_theme"])
+	BGM.play_common("TitleThemes")
 	
 	# load LEVEL_SELECT_OPTIONS
 	var directory = Directory.new()
@@ -15,12 +15,14 @@ func _ready():
 		directory.list_dir_begin(true)
 		var file_name = directory.get_next()
 		while file_name != "":
-			if file_name.ends_with(".tscn"):
-				var level_name = load("res://Levels/" + file_name).instance().LEVEL_NAME
-				LEVEL_SELECT_OPTIONS.append(level_name)
-				level_select_filenames.append(file_name.get_file().trim_suffix(".tscn"))
+			if directory.current_is_dir():
+				var tscn_path = "res://Levels/" + file_name + "/UniqLevel.tscn"
+				if directory.file_exists(tscn_path):
+					var level_name = load(tscn_path).instance().LEVEL_NAME
+					LEVEL_SELECT_OPTIONS.append(level_name)
+					level_select_filenames.append(file_name)
 			file_name = directory.get_next()
-	else: print("Error: Cannot open FrameData folder for mob")
+	else: print("Error: Cannot open Levels folder")
 
 	for node in $SurvivalList.get_children():
 		if node.is_in_group("has_focus"):
