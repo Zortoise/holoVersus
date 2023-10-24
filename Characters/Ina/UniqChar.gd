@@ -1346,6 +1346,12 @@ func vortex():
 					break
 			if repeated: break
 			
+			if node.Animator.query_polygon("hurtbox") == null:
+				break # no hurtbox, will not vortex in
+				
+			if node.check_semi_invuln():
+				break # no vortex if semi_invuln
+			
 			var fvec = FVector.new()
 			fvec.set_from_vec(vortex_point - node.position)
 			if !fvec.is_longer_than(120 * FMath.S): # radius of suction

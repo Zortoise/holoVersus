@@ -564,7 +564,8 @@ func simulate2(): # only ran if not in hitstop
 							velocity.x = FMath.f_lerp(velocity.x, ff_speed_limit, 50)
 								
 				Em.char_state.AIR_STARTUP: # can cancel air jump startup to fastfall if dj_fastfall is on
-					if Settings.dj_fastfall[master_ID] == 1 and button_jump in input_state.pressed:
+#					if Settings.dj_fastfall[master_ID] == 1 and button_jump in input_state.pressed:
+					if button_jump in input_state.pressed:
 							
 						if Animator.query_to_play(["aJumpTransit"]):
 							animate("FastFallTransit")
@@ -1358,7 +1359,9 @@ func process_input_buffer():
 								elif !has_trait(Em.trait.AIR_DASH_JUMP):
 									continue # some characters can jump while dashing
 							
-							if Settings.dj_fastfall[master_ID] == 1 and button_down in input_state.pressed:
+#							if Settings.dj_fastfall[master_ID] == 1 and button_down in input_state.pressed:
+#								continue
+							if button_down in input_state.pressed:
 								continue
 								
 							if check_wall_jump():
@@ -1385,7 +1388,9 @@ func process_input_buffer():
 						# AERIAL AIR JUMP CANCEL ---------------------------------------------------------------------------------
 							
 						Em.char_state.AIR_ATK_REC:
-							if Settings.dj_fastfall[master_ID] == 1 and button_down in input_state.pressed:
+#							if Settings.dj_fastfall[master_ID] == 1 and button_down in input_state.pressed:
+#								continue
+							if button_down in input_state.pressed:
 								continue
 								
 							if test_jump_cancel():
@@ -1393,6 +1398,9 @@ func process_input_buffer():
 								keep = false
 								
 						Em.char_state.AIR_ATK_ACTIVE: # some attacks can jump cancel on active frames
+							if button_down in input_state.pressed:
+								continue
+								
 							if test_jump_cancel_active():
 								if !grounded:
 									if air_jump > 0:
