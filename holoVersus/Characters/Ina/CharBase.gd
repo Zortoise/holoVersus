@@ -52,7 +52,7 @@ const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD
 #const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower?
 #const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher?
 
-const DAMAGE_VALUE_LIMIT = 1300
+const DAMAGE_VALUE_LIMIT = 1200
 
 const GG_REGEN_AMOUNT = 20 # exact GG regened per frame when GG < 100%
 const GRD_BLOCK_GG_COST = 30 # exact GG loss per frame when blocking on ground
@@ -152,7 +152,7 @@ const MOVE_DATABASE = {
 	"F1" : {
 		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 70,
+		Em.move.DMG : 65,
 		Em.move.KB : 450 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
@@ -164,7 +164,7 @@ const MOVE_DATABASE = {
 	"F2" : {
 		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 70,
+		Em.move.DMG : 65,
 		Em.move.KB : 450 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
@@ -176,7 +176,7 @@ const MOVE_DATABASE = {
 	"F3" : {
 		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 70,
+		Em.move.DMG : 65,
 		Em.move.KB : 450 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
@@ -242,7 +242,7 @@ const MOVE_DATABASE = {
 	"aF1" : {
 		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 70,
+		Em.move.DMG : 65,
 		Em.move.KB : 450 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
@@ -254,7 +254,7 @@ const MOVE_DATABASE = {
 	"aF2" : {
 		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 70,
+		Em.move.DMG : 65,
 		Em.move.KB : 450 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
@@ -266,7 +266,7 @@ const MOVE_DATABASE = {
 	"aF3" : {
 		Em.move.ATK_TYPE : Em.atk_type.FIERCE,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 70,
+		Em.move.DMG : 65,
 		Em.move.KB : 450 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,

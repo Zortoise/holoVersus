@@ -70,7 +70,7 @@ frame_data = {
 "vframes": 16
 },
 "BlockStartup": {
-"duration": 5,
+"duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1181,7 +1181,7 @@ frame_data = {
 "vframes": 16
 },
 "TBlockStartup": {
-"duration": 5,
+"duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1305,7 +1305,7 @@ frame_data = {
 "vframes": 16
 },
 "aBlockStartup": {
-"duration": 5,
+"duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1680,7 +1680,7 @@ frame_data = {
 "vframes": 16
 },
 "aTBlockStartup": {
-"duration": 5,
+"duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",

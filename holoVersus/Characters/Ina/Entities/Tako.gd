@@ -103,10 +103,12 @@ func query_move_data(move_name) -> Dictionary:
 	if Entity.unique_data.ex:
 		move_data[Em.move.ROOT] = "TakoEX"
 		move_data[Em.move.ATK_TYPE] = Em.atk_type.EX_ENTITY
+		move_data[Em.move.PROJ_LVL] = 2
 		move_data[Em.move.DMG] = 50
 		
 	if Entity.unique_data.enhanced:
-		move_data[Em.move.PROJ_LVL] = 2
+		move_data[Em.move.PROJ_LVL] = 3
+		move_data[Em.move.DMG] += 10
 	
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
@@ -133,6 +135,8 @@ func query_atk_attr(move_name):
 func get_proj_level(move_name):
 	
 	if Entity.unique_data.enhanced:
+		return 3
+	if Entity.unique_data.ex:
 		return 2
 	
 	move_name = refine_move_name(move_name)

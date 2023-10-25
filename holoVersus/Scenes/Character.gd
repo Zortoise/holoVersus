@@ -106,6 +106,8 @@ const PARRY_KNOCKBACK_MOD = 0 # % of knockback defender experience when parried
 #const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 const RESIST_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
+const INIT_BLOCK_MOD = 30 # mod to GG cost of starting a block
+
 const SPECIAL_GDRAIN_MOD = 125 # extra GDrain when blocking heavy/special/ex moves
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
 const SDASH_ARMOR_GDRAIN_MOD = 125 # extra GDrain when SDashing through projectiles
@@ -4125,7 +4127,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 			if Animator.query_to_play(["aBlockStartup", "aTBlockStartup"]): # if dropping during block startup
-				change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * 10)
+				change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MOD)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
 #				remove_status_effect(Em.status_effect.POS_FLOW)
@@ -4177,7 +4179,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			
 		Em.char_state.GRD_BLOCK:
 			if Animator.query_to_play(["BlockStartup", "TBlockStartup"]):
-				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * 10)
+				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MOD)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
 #				remove_status_effect(Em.status_effect.POS_FLOW)
@@ -8286,21 +8288,27 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"LaunchTransit":
 			animate("Launch")
 			
-		"BlockStartup", "TBlockStartup":
-			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * 10)
+		"BlockStartup":
+			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MOD)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
+			animate("Block")
+		"TBlockStartup":
+			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 			animate("Block")
 		"BlockRec":
 			animate("Idle")
 		"BlockCRec":
 			animate("Idle")
-		"aBlockStartup", "aTBlockStartup":
-			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * 10)
+		"aBlockStartup":
+			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MOD)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW)
+			animate("aBlock")
+		"aTBlockStartup":
+			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 			animate("aBlock")
 		"aBlockRec":
 			animate("FallTransit")
@@ -8549,6 +8557,13 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #			$SBlockTimer.stop()
 			if Globals.survival_level != null:
 				block_enhance()
+			
+		"BlockRec", "BlockCRec": # refund GG cost if blocked an attack
+			if success_block != Em.success_block.NONE:
+				change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MOD)
+		"aBlockRec", "aBlockCRec":
+			if success_block != Em.success_block.NONE:
+				change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MOD)
 			
 		"DodgeTransit":
 			aerial_memory = []
