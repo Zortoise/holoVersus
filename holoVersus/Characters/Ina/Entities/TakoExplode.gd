@@ -14,7 +14,7 @@ const MOVE_DATABASE = {
 		Em.move.ROOT: "TakoExplode",
 		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 100,
+		Em.move.DMG : 90,
 		Em.move.KB : 600 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 5,
@@ -68,6 +68,11 @@ func query_atk_attr(move_name):
 #	print("Error: Cannot retrieve atk_attr for " + move_name)
 	return []
 	
+	
+func landed_a_hit(hit_data):
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and !hit_data[Em.hit.REPEAT]:
+		hit_data[Em.hit.CRUSH] = true
+		
 	
 func get_proj_level(move_name):
 

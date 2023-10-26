@@ -595,13 +595,13 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 							Character.animate("BlinkTransit")
 							keep = false
 							
-						if Character.air_dash > 0:
+						if Character.check_enough_air_dashes():
 							Character.animate("BlinkTransit")
 							keep = false
 							
 					Em.char_state.AIR_STARTUP: # cancel start of air jump into blink, used for up-blinks
 						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
-							if Character.air_dash > 0:
+							if Character.check_enough_air_dashes():
 								Character.animate("BlinkTransit")
 								keep = false
 
@@ -615,7 +615,7 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 							
 						elif new_state == Em.char_state.AIR_D_REC and \
 								Animator.query_to_play(["Float", "FFloat", "FFloatTransit", "FloatBrake"]): # from float
-							if Character.air_dash > 0:
+							if Character.check_enough_air_dashes():
 								Character.animate("BlinkTransit")
 								keep = false
 						
@@ -641,7 +641,7 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 					Em.char_state.AIR_ATK_ACTIVE:
 						if Character.test_dash_cancel_active():
 							if !Character.grounded:
-								if Character.air_dash > 0:
+								if Character.check_enough_air_dashes():
 									Character.animate("BlinkTransit")
 									keep = false
 							else: # grounded
@@ -940,8 +940,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						
 			
 						
-func consume_one_air_dash(): # different characters can have different types of air_dash consumption
-	Character.air_dash = max(Character.air_dash - 1, 0)
+#func consume_one_air_dash(): # different characters can have different types of air_dash consumption
+#	Character.air_dash = max(Character.air_dash - 1, 0)
 	
 #func gain_one_air_dash(): # different characters can have different types of air_dash consumption
 #	if Character.air_dash < Character.get_stat("MAX_AIR_DASH"): # cannot go over
@@ -1871,7 +1871,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x_slow = 15
 			Character.velocity_limiter.y_slow = 15
 		"Blink", "EBlink":
-			consume_one_air_dash()
+			Character.lose_one_air_dash()
 			Character.afterimage_cancel()
 			Character.aerial_memory = []
 			Character.anim_gravity_mod = 0
@@ -2010,6 +2010,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.play_audio("magic1", {"vol": -12})
 			Character.play_audio("bling8", {"vol": -10, "bus":"PitchUp"})
 			stop_momentum()
+			special_dust()
 			
 		"aSP2[c1]Active", "aSP2[c2]Active", "aSP2[c3]Active", "aSP2[ex]Active":
 			Character.velocity_limiter.x = 20

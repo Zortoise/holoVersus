@@ -792,7 +792,7 @@ func simulate2(): # only ran if not in hitstop
 			if stopped:
 				animate("aDashBrake")
 				if Animator.current_anim == "aDashTransit": # to fix a bug when touching a wall during aDashTransit > aDash
-					UniqNPC.consume_one_air_dash() # reduce air_dash count by 1
+					lose_one_air_dash() # reduce air_dash count by 1
 					
 	
 		Em.char_state.AIR_STARTUP, Em.char_state.AIR_REC:
@@ -1771,9 +1771,43 @@ func reset_jumps():
 #	air_jump = get_stat("MAX_AIR_JUMP") # reset jump count on wall
 #	air_dash = get_stat("MAX_AIR_DASH")
 	
-func gain_one_air_jump(): # hitting with an aerial (not block unless wrongblock) give you +1 air jump
+func gain_one_air_jump(): # hitting with an unblocked aerial give you +1 air jump
+	if UniqNPC.has_method("gain_one_air_jump"):
+		UniqNPC.gain_one_air_jump() # overwrite
 	if air_jump < get_stat("MAX_AIR_JUMP"): # cannot go over
 		air_jump += 1
+		
+func lose_one_air_jump():
+	if UniqNPC.has_method("lose_one_air_jump"):
+		UniqNPC.lose_one_air_jump() # overwrite
+	elif air_jump > 0: # cannot go under
+		air_jump -= 1	
+		
+func check_enough_air_jumps() -> bool:
+	if UniqNPC.has_method("check_enough_air_jumps"):
+		return UniqNPC.check_enough_air_jumps() # overwrite
+	elif air_jump > 0:
+		return true
+	return false
+	
+func gain_one_air_dash(): # hitting with an unblocked aerial give you +1 air jump
+	if UniqNPC.has_method("gain_one_air_dash"):
+		UniqNPC.gain_one_air_dash() # overwrite
+	if air_dash < get_stat("MAX_AIR_DASH"): # cannot go over
+		air_dash += 1
+		
+func lose_one_air_dash():
+	if UniqNPC.has_method("lose_one_air_dash"):
+		UniqNPC.lose_one_air_dash() # overwrite
+	elif air_dash > 0: # cannot go under
+		air_dash -= 1	
+		
+func check_enough_air_dashes() -> bool:
+	if UniqNPC.has_method("check_enough_air_dashes"):
+		return UniqNPC.check_enough_air_dashes() # overwrite
+	elif air_dash > 0:
+		return true
+	return false
 		
 func is_too_high() -> bool:
 	var mid_height = FMath.percent(floor_level - Globals.Game.stage_box.rect_global_position.y, 50) + \
@@ -2942,13 +2976,13 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
 							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 								active_cancel = true
-						if is_aerial():  # for unblocked aerial you regain 1 air jump
+						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.HEAVY:
 						chain_combo = Em.chain_combo.HEAVY
 						if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 							active_cancel = true
-						if is_aerial():  # for unblocked aerial you regain 1 air jump
+						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.SPECIAL, Em.atk_type.EX:
 						chain_combo = Em.chain_combo.SPECIAL
@@ -3154,8 +3188,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif Em.hit.NPC_PATH in hit_data:
 		if attacker_or_entity.UniqNPC.has_method("landed_a_hit0"):
 			attacker_or_entity.UniqNPC.landed_a_hit0(hit_data) # reaction, can change hit_data from there
-	elif attacker != null and attacker.UniqChar.has_method("landed_a_hit0"):
-		attacker.UniqChar.landed_a_hit0(hit_data) # reaction, can change hit_data from there
+	elif attacker != null and attacker.UniqNPC.has_method("landed_a_hit0"):
+		attacker.UniqNPC.landed_a_hit0(hit_data) # reaction, can change hit_data from there
 	
 	if UniqNPC.has_method("being_hit0"):	
 		UniqNPC.being_hit0(hit_data) # reaction, can change hit_data from there
@@ -3173,8 +3207,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif Em.hit.NPC_PATH in hit_data:
 		if attacker_or_entity.UniqNPC.has_method("landed_a_hit"):
 			attacker_or_entity.UniqNPC.landed_a_hit(hit_data) # reaction, can change hit_data from there
-	elif attacker != null and attacker.UniqChar.has_method("landed_a_hit"):
-		attacker.UniqChar.landed_a_hit(hit_data) # reaction, can change hit_data from there
+	elif attacker != null and attacker.UniqNPC.has_method("landed_a_hit"):
+		attacker.UniqNPC.landed_a_hit(hit_data) # reaction, can change hit_data from there
 		# good for moves that have special effects on Sweetspot/Punish Hits
 	
 	if UniqNPC.has_method("being_hit"):	
@@ -3240,8 +3274,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif Em.hit.NPC_PATH in hit_data:
 		if attacker_or_entity.UniqNPC.has_method("landed_a_hit2"):
 			attacker_or_entity.UniqNPC.landed_a_hit2(hit_data) # reaction, can change hit_data from there
-	elif attacker != null and attacker.UniqChar.has_method("landed_a_hit2"):
-		attacker.UniqChar.landed_a_hit2(hit_data) # reaction, can change hit_data from there
+	elif attacker != null and attacker.UniqNPC.has_method("landed_a_hit2"):
+		attacker.UniqNPC.landed_a_hit2(hit_data) # reaction, can change hit_data from there
 	
 	if UniqNPC.has_method("being_hit2"):	
 		UniqNPC.being_hit2(hit_data) # reaction, can change hit_data from there

@@ -106,9 +106,9 @@ const PARRY_KNOCKBACK_MOD = 0 # % of knockback defender experience when parried
 #const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 const RESIST_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
-const INIT_BLOCK_MOD = 30 # mod to GG cost of starting a block
+const INIT_BLOCK_MUL = 30 # multiplier to GG cost of starting a block, not a mod!
 
-const SPECIAL_GDRAIN_MOD = 125 # extra GDrain when blocking heavy/special/ex moves
+const SPECIAL_GDRAIN_MOD = 50 # extra GDrain when blocking heavy/special/ex moves
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
 const SDASH_ARMOR_GDRAIN_MOD = 125 # extra GDrain when SDashing through projectiles
 const SDASH_ARMOR_GDRAIN_MOD2 = 160 # extra GDrain when SDashing through level 2 projectiles
@@ -1493,7 +1493,9 @@ func simulate2(): # only ran if not in hitstop
 			pass
 #		elif $ShorthopTimer.is_running():
 #			pass # no blocking after shorthopping for a while
-		elif current_guard_gauge >= FMath.percent(GUARD_GAUGE_FLOOR, 75): # need at least 25% left to block
+		elif (grounded and current_guard_gauge > GUARD_GAUGE_FLOOR + get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL) or \
+					(!grounded and current_guard_gauge > GUARD_GAUGE_FLOOR + get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL):
+
 			match state: # don't use new_state or will be able to block Supers after screenfreeze
 				
 			# ground blocking
@@ -1748,7 +1750,7 @@ func simulate2(): # only ran if not in hitstop
 			if stopped:
 				animate("aDashBrake")
 				if Animator.current_anim == "aDashTransit": # to fix a bug when touching a wall during aDashTransit > aDash
-					UniqChar.consume_one_air_dash() # reduce air_dash count by 1
+					lose_one_air_dash() # reduce air_dash count by 1
 					
 	
 		Em.char_state.AIR_STARTUP, Em.char_state.AIR_REC:
@@ -1853,11 +1855,15 @@ func simulate2(): # only ran if not in hitstop
 					animate("BlockCRec")
 				else:
 					animate("BlockRec")
+				if success_block != Em.success_block.NONE: # refund cost
+					change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 #			elif !success_block:
 #			if !$SBlockTimer.is_running():
 			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 				animate("BlockRec")
+				if success_block != Em.success_block.NONE: # refund cost
+					change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 			
 #		Em.char_state.GRD_BLOCKSTUN:
 #			if !$BlockStunTimer.is_running():
@@ -1869,11 +1875,15 @@ func simulate2(): # only ran if not in hitstop
 					animate("aBlockCRec")
 				else:
 					animate("aBlockRec")
+				if success_block != Em.success_block.NONE: # refund cost
+					change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 #			elif !success_block:
 #			if !$SBlockTimer.is_running():
 			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST"))
 			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
 				animate("aBlockRec")
+				if success_block != Em.success_block.NONE: # refund cost
+					change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 					
 			air_res_this_frame = 5
 			
@@ -2898,7 +2908,7 @@ func process_input_buffer():
 								
 						# AIR JUMPS  --------------------------------------------------------------------------------------------------
 								
-							elif air_jump > 0 and !button_dash in input_state.pressed: # no dash for easier wavedashing
+							elif check_enough_air_jumps() and !button_dash in input_state.pressed: # no dash for easier wavedashing
 								animate("aJumpTransit")
 								keep = false
 								
@@ -2920,7 +2930,7 @@ func process_input_buffer():
 								
 							if test_jump_cancel_active():
 								if !grounded:
-									if air_jump > 0:
+									if check_enough_air_jumps():
 										afterimage_cancel()
 										animate("aJumpTransit")
 										keep = false
@@ -3991,8 +4001,42 @@ func reset_jumps():
 #	air_dash = get_stat("MAX_AIR_DASH")
 	
 func gain_one_air_jump(): # hitting with an unblocked aerial give you +1 air jump
+	if UniqChar.has_method("gain_one_air_jump"):
+		UniqChar.gain_one_air_jump() # overwrite
 	if air_jump < get_stat("MAX_AIR_JUMP"): # cannot go over
 		air_jump += 1
+		
+func lose_one_air_jump():
+	if UniqChar.has_method("lose_one_air_jump"):
+		UniqChar.lose_one_air_jump() # overwrite
+	elif air_jump > 0: # cannot go under
+		air_jump -= 1	
+		
+func check_enough_air_jumps() -> bool:
+	if UniqChar.has_method("check_enough_air_jumps"):
+		return UniqChar.check_enough_air_jumps() # overwrite
+	elif air_jump > 0:
+		return true
+	return false
+	
+func gain_one_air_dash(): # hitting with an unblocked aerial give you +1 air jump
+	if UniqChar.has_method("gain_one_air_dash"):
+		UniqChar.gain_one_air_dash() # overwrite
+	if air_dash < get_stat("MAX_AIR_DASH"): # cannot go over
+		air_dash += 1
+		
+func lose_one_air_dash():
+	if UniqChar.has_method("lose_one_air_dash"):
+		UniqChar.lose_one_air_dash() # overwrite
+	elif air_dash > 0: # cannot go under
+		air_dash -= 1	
+		
+func check_enough_air_dashes() -> bool:
+	if UniqChar.has_method("check_enough_air_dashes"):
+		return UniqChar.check_enough_air_dashes() # overwrite
+	elif air_dash > 0:
+		return true
+	return false
 		
 func is_too_high() -> bool:
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_HEIGHT_LIMIT):
@@ -4127,7 +4171,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 			if Animator.query_to_play(["aBlockStartup", "aTBlockStartup"]): # if dropping during block startup
-				change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MOD)
+				change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
 #				remove_status_effect(Em.status_effect.POS_FLOW)
@@ -4179,7 +4223,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			
 		Em.char_state.GRD_BLOCK:
 			if Animator.query_to_play(["BlockStartup", "TBlockStartup"]):
-				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MOD)
+				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
 #				remove_status_effect(Em.status_effect.POS_FLOW)
@@ -6179,13 +6223,13 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
 							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 								active_cancel = true
-						if is_aerial():  # for unblocked aerial you regain 1 air jump
+						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.HEAVY:
 						chain_combo = Em.chain_combo.HEAVY
 						if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 							active_cancel = true
-						if is_aerial():  # for unblocked aerial you regain 1 air jump
+						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.SPECIAL, Em.atk_type.EX:
 						chain_combo = Em.chain_combo.SPECIAL
@@ -6916,16 +6960,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif hit_data[Em.hit.SEMI_DISJOINT] and !Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]: # SD Hit sound
 		play_audio("bling3", {"bus" : "LowPass"})
 		
-	elif hit_data[Em.hit.STUN] and !query_status_effect(Em.status_effect.LETHAL):
-#		add_status_effect(Em.status_effect.STUN, 0)
-		status_effect_to_add.append([Em.status_effect.STUN, 0])
-		status_effect_to_add.append([Em.status_effect.STUN_RECOVER, null])
-#		add_status_effect(Em.status_effect.STUN_RECOVER, null) # null means no duration
-		repeat_memory = [] # reset move memory for getting a Break
-		Globals.Game.set_screenshake() # screenshake
-		modulate_play("stun_flash")
-		play_audio("break1", {"vol" : -18})
-		
 	elif hit_data[Em.hit.LETHAL_HIT]:
 #		add_status_effect(Em.status_effect.LETHAL, 0)
 		if !lethal_flag:
@@ -6936,12 +6970,22 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		if Globals.survival_level != null:
 ##			add_status_effect(Em.status_effect.SURVIVAL_GRACE, null)
 #			status_effect_to_add.append([Em.status_effect.SURVIVAL_GRACE, null])
+
+	elif hit_data[Em.hit.STUN] and !query_status_effect(Em.status_effect.LETHAL):
+#		add_status_effect(Em.status_effect.STUN, 0)
+		status_effect_to_add.append([Em.status_effect.STUN, 0])
+		status_effect_to_add.append([Em.status_effect.STUN_RECOVER, null])
+#		add_status_effect(Em.status_effect.STUN_RECOVER, null) # null means no duration
+		repeat_memory = [] # reset move memory for getting a Break
+		Globals.Game.set_screenshake() # screenshake
+		modulate_play("stun_flash")
+		play_audio("break1", {"vol" : -18})
 		
-	elif hit_data[Em.hit.CRUSH]:
+	elif hit_data[Em.hit.CRUSH] and !query_status_effect(Em.status_effect.LETHAL):
 #		add_status_effect(Em.status_effect.CRUSH, 0)
 		status_effect_to_add.append([Em.status_effect.CRUSH, 0])
 		modulate_play("stun_flash")
-		play_audio("rock2", {"vol" : -7})
+		play_audio("rock2", {"vol" : -5})
 		
 	elif hit_data[Em.hit.PUNISH_HIT] and hit_data[Em.hit.SWEETSPOTTED]:
 		modulate_play("punish_sweet_flash")
@@ -7031,10 +7075,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #			Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
 #		hitstop += 10 # extra hitstop when blocking heavy/special/ex/super
 
-	if hit_data[Em.hit.STUN]:
-		hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
-	elif hit_data[Em.hit.CRUSH]:
-		hitstop = CRUSH_TIME
+	if !hit_data[Em.hit.LETHAL_HIT]:
+		if hit_data[Em.hit.STUN]:
+			hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
+		elif hit_data[Em.hit.CRUSH]:
+			hitstop = CRUSH_TIME
 		
 	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
 		if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
@@ -8289,7 +8334,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Launch")
 			
 		"BlockStartup":
-			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MOD)
+			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
@@ -8302,7 +8347,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"BlockCRec":
 			animate("Idle")
 		"aBlockStartup":
-			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MOD)
+			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW)
@@ -8490,7 +8535,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		"aJumpTransit2":
 			aerial_memory = []
 			if !check_wall_jump():
-				air_jump -= 1
+				lose_one_air_jump()
 				# air jump directional boost
 				if dir != 0:
 					if dir * velocity.x < 0: # air jump change direction (no change in velocity if same direction)
@@ -8558,12 +8603,12 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			if Globals.survival_level != null:
 				block_enhance()
 			
-		"BlockRec", "BlockCRec": # refund GG cost if blocked an attack
-			if success_block != Em.success_block.NONE:
-				change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MOD)
-		"aBlockRec", "aBlockCRec":
-			if success_block != Em.success_block.NONE:
-				change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MOD)
+#		"BlockRec", "BlockCRec": # refund GG cost if blocked an attack
+#			if success_block != Em.success_block.NONE:
+#				change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+#		"aBlockRec", "aBlockCRec":
+#			if success_block != Em.success_block.NONE:
+#				change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)]
 			
 		"DodgeTransit":
 			aerial_memory = []

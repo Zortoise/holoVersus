@@ -423,7 +423,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 						if Animator.query_to_play(["aDashBrake"]) and !Character.has_trait(Em.trait.AIR_CHAIN_DASH):
 							continue
 						
-						if Character.air_dash > 0:
+						if Character.check_enough_air_dashes():
 							
 							if Character.v_dir > 0 and Character.button_jump in Character.input_state.pressed and \
 									Character.is_button_tapped_in_last_X_frames(Character.button_jump, 1) and \
@@ -442,7 +442,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 							
 					Em.char_state.AIR_STARTUP: # cancel start of air jump into air dash, used for up-dashes
 						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
-							if Character.air_dash > 0:
+							if Character.check_enough_air_dashes():
 								Character.animate("aDashTransit")
 								keep = false
 
@@ -472,7 +472,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 					Em.char_state.AIR_ATK_ACTIVE:
 						if Character.test_dash_cancel_active():
 							if !Character.grounded:
-								if Character.air_dash > 0:
+								if Character.check_enough_air_dashes():
 									Character.animate("aDashTransit")
 									keep = false
 							else: # grounded
@@ -692,8 +692,8 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 	return false
 						
 
-func consume_one_air_dash(): # different characters can have different types of air_dash consumption
-	Character.air_dash = max(Character.air_dash - 1, 0)
+#func consume_one_air_dash(): # different characters can have different types of air_dash consumption
+#	Character.air_dash = max(Character.air_dash - 1, 0)
 
 func afterimage_trail():# process afterimage trail
 	match Character.new_state:
@@ -1659,7 +1659,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_friction_mod = 0
 			Character.afterimage_timer = 1 # sync afterimage trail
 		"aDash":
-			consume_one_air_dash()
+			Character.lose_one_air_dash()
 			Character.aerial_memory = []
 			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
 			if Character.facing != Character.get_opponent_dir():
@@ -1669,7 +1669,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 		"aDashD":
-			consume_one_air_dash()
+			Character.lose_one_air_dash()
 			Character.aerial_memory = []
 			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
 			if Character.facing != Character.get_opponent_dir():
@@ -1680,7 +1680,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 		"aDashU":
-			consume_one_air_dash()
+			Character.lose_one_air_dash()
 			Character.aerial_memory = []
 			var speed_target = Character.get_stat("AIR_DASH_SPEED") * Character.facing
 			if Character.facing != Character.get_opponent_dir():
