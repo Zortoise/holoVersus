@@ -690,7 +690,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str($InstallTimer.time)
+			str(input_buffer) + "\n" + str(input_state) + " " + str($BurstLockTimer.time)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -939,7 +939,7 @@ func simulate2(): # only ran if not in hitstop
 		repeat_memory = []
 		first_hit_flag = false
 		GG_swell_flag = false
-		if !is_blocking():
+		if !is_blocking() and !Animator.query_to_play(["BlockRec", "aBlockRec"]):
 			$BurstLockTimer.stop()
 		DI_seal = false
 		lethal_flag = false
@@ -3152,12 +3152,12 @@ func process_input_buffer():
 							
 					# guard cancel dodge, can only be done when releasing block after blocking an attack
 					Em.char_state.GRD_REC:
-						if $SBlockTimer.is_running() and !$BurstLockTimer.is_running() and Animator.query_to_play(["BlockRec"]) and dodge_check():
+						if $SBlockTimer.is_running() and !$BurstLockTimer.is_running() and Animator.query_to_play(["BlockRec"]) and dodge_check(true):
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
 					Em.char_state.AIR_REC:
-						if $SBlockTimer.is_running() and !$BurstLockTimer.is_running() and Animator.query_to_play(["aBlockRec"]) and dodge_check():
+						if $SBlockTimer.is_running() and !$BurstLockTimer.is_running() and Animator.query_to_play(["aBlockRec"]) and dodge_check(true):
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
@@ -4057,12 +4057,13 @@ func reset_cancels(): # done whenever you use an attack, after startup frames fi
 	chain_combo = Em.chain_combo.WHIFF
 	active_cancel = false
 	
-func check_wall_jump():
+func check_wall_jump(teching := false):
 	var left_wall = Detection.detect_bool([$WallJumpLeftDBox], ["SolidPlatforms", "CSolidPlatforms", "SemiSolidWalls", "BlastWalls"])
 	var right_wall = Detection.detect_bool([$WallJumpRightDBox], ["SolidPlatforms", "CSolidPlatforms", "SemiSolidWalls", "BlastWalls"])
-	if (left_wall or right_wall) and wall_jump > 0:
+	if (left_wall or right_wall) and (wall_jump > 0 or teching):
 		
-		wall_jump -= 1
+		if wall_jump > 0:
+			wall_jump -= 1
 		
 		wall_jump_dir = 0 # 1 is right -1 is left
 		if left_wall:
@@ -5039,17 +5040,21 @@ func tech():
 #			reset_guard_gauge()
 		return true
 		
+	if !grounded and button_jump in input_state.pressed: # don't use Up (DI)
+		if check_wall_jump():
+			animate("WallJumpTransit")
+		
 	return false
 	
-func dodge_check():
-	if current_guard_gauge + GUARD_GAUGE_CEIL < get_stat("DODGE_GG_COST"):
+func dodge_check(from_block_rec := false):
+	if !from_block_rec and current_guard_gauge + GUARD_GAUGE_CEIL < get_stat("DODGE_GG_COST"):
 		return false
 	if !grounded and air_dodge <= 0:
 		return false
 		
 	if current_guard_gauge > 0:
 		reset_guard_gauge()
-	else:
+	elif !from_block_rec:
 		change_guard_gauge(-get_stat("DODGE_GG_COST"))
 		
 	if Globals.survival_level != null:
@@ -5332,7 +5337,7 @@ func test_sdash_revoke():
 		return false
 		
 	change_ex_gauge(-cost)
-	play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+	play_audio("bling7", {"vol" : -14, "bus" : "PitchUp"})
 	Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 			"v_mirror":Globals.Game.rng_bool(), "sticky_ID":player_ID}, "pink")
 	modulate_play("pink_reset")
@@ -5408,7 +5413,7 @@ func test_sdash_cancel():
 			if current_ex_gauge < cost:
 				return false
 			change_ex_gauge(-cost)
-			play_audio("bling7", {"vol" : -10, "bus" : "PitchUp"})
+			play_audio("bling7", {"vol" : -14, "bus" : "PitchUp"})
 			Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool(), "sticky_ID":player_ID}, "blue")
 			modulate_play("blue_reset")
@@ -7097,14 +7102,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		else:
 			$BurstLockTimer.time = BurstLockTimer_TIME
 			
-	if Em.hit.AUTOCHAIN in hit_data or Em.hit.MULTIHIT in hit_data:
-		DI_seal = true
-	else:
-		DI_seal = false
-		
-	if Em.atk_attr.DI_MANUAL_SEAL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-		$BurstLockTimer.time = 9999
-		DI_seal = true
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
+			
+		if Em.hit.AUTOCHAIN in hit_data or Em.hit.MULTIHIT in hit_data:
+			DI_seal = true
+		else:
+			DI_seal = false
+			
+		if Em.atk_attr.DI_MANUAL_SEAL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			$BurstLockTimer.time = 9999
+			DI_seal = true
 	
 #	# SECOND REACTION (after knockback) ---------------------------------------------------------------------------------
 

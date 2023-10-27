@@ -1649,10 +1649,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			Character.animate("Idle")
 			
 		"F3Startup":
-			if Globals.survival_level == null and Character.held_version(Character.button_fierce):
-				Character.animate("F3[h]Startup")
-			else:
-				Character.animate("F3[b]Startup")
+#			if Globals.survival_level == null and Character.held_version(Character.button_fierce): # TESTING
+#				Character.animate("F3[h]Startup")
+#			else:
+#				Character.animate("F3[b]Startup")
+			Character.animate("F3[b]Startup")
 		"F3[b]Startup":
 			Character.animate("F3Active")
 		"F3[h]Startup":
