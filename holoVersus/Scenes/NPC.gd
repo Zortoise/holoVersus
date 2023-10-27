@@ -34,9 +34,9 @@ const NPC_BLOCK_KB_STR = 300 * FMath.S # knockback strength is fixed
 const NPC_HITSTOP = 10 # fixed hitstop, for NPC defender only, attacker take no hitstop
 const NPC_BLOCK_HITSTOP = 5
 
-const BLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when blocked, fixed
+const BLOCK_ATKER_PUSHBACK = 450 * FMath.S # how much the attacker is pushed away when blocked, fixed
 const BLOCK_KNOCKBACK_MOD = 200 # % of knockback defender experience when blocked
-const PARRY_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when parried, fixed
+const PARRY_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is pushed away when parried, fixed
 const RESIST_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
 const LAUNCH_ROT_SPEED = 5*PI # speed of sprite rotation when launched, don't need fixed-point as sprite rotation is only visuals
@@ -2632,7 +2632,7 @@ func test_dash_attack(attack_ref):
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
 	
 	if chain_combo == Em.chain_combo.PARRIED or chain_combo == Em.chain_combo.NO_CHAIN: return false
-	# cannot cancel into anything but Burst Counter if strongblocked
+	# cannot cancel into anything but Burst Counter if parried
 	
 	match state: # need to be in attack active/recovery
 		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
@@ -2686,7 +2686,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 #			return false
 	
 	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL, Em.chain_combo.BLOCKED]:
-		if is_atk_active(): # cannot chain on active frames unless landed an unblocked/weakblocked hit
+		if is_atk_active(): # cannot chain on active frames unless landed a hit
 			return false
 #		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
 #			return false

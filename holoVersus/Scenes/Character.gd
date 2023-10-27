@@ -98,15 +98,15 @@ const STUN_HITSTOP_ATTACKER = 15 # hitstop for attacker when causing Stun
 const CRUSH_TIME = 40 # number of frames stun time last for Crush
 
 const BLOCK_HITSTOP = 5
-const BLOCK_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when blocked, fixed
+const BLOCK_ATKER_PUSHBACK = 450 * FMath.S # how much the attacker is pushed away when blocked, fixed
 const BLOCK_KNOCKBACK_MOD = 200 # % of knockback defender experience when blocked
 const PARRY_HITSTOP = 7
-const PARRY_ATKER_PUSHBACK = 800 * FMath.S # how much the attacker is pushed away when parried, fixed
+const PARRY_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is pushed away when parried, fixed
 const PARRY_KNOCKBACK_MOD = 0 # % of knockback defender experience when parried
 #const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 const RESIST_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
-const INIT_BLOCK_MUL = 30 # multiplier to GG cost of starting a block, not a mod!
+const INIT_BLOCK_MUL = 80 # multiplier to GG cost of starting a block, not a mod!
 
 const SPECIAL_GDRAIN_MOD = 50 # extra GDrain when blocking heavy/special/ex moves
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
@@ -5727,7 +5727,7 @@ func test_dash_attack(attack_ref):
 func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain to
 	
 	if chain_combo == Em.chain_combo.PARRIED or chain_combo == Em.chain_combo.NO_CHAIN: return false
-	# cannot cancel into anything but Burst Counter if strongblocked
+	# cannot cancel into anything but Burst Counter if parried
 	
 	match state: # need to be in attack active/recovery
 		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE, \
@@ -5780,7 +5780,7 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 			return false
 	
 	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL, Em.chain_combo.BLOCKED]:
-		if is_atk_active(): # cannot chain on active frames unless landed an unblocked/weakblocked hit
+		if is_atk_active(): # cannot chain on active frames unless landed a hit
 			return false
 #		if !is_normal_attack(attack_ref): # cannot chain into non-Normals unless landed an unblocked/weakblocked hit
 #			return false
@@ -6673,7 +6673,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 								if Em.hit.ANTI_AIRED in hit_data:
 									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED # anti-air normals cannot be parried by airblockers
 								else:
-									# if perfect blocked or blocking attacker close enough, a Strongblock occurs
+									# if perfect blocked or blocking attacker close enough, a Parry occurs
 									# attacker is pushed back, and cannot chain into anything except Burst Counter
 									hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 							elif success_block == Em.success_block.PARRIED and $SBlockTimer.is_running():
@@ -6681,14 +6681,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 							else:
 								hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 
-					Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX: # can weakblock heavy/special/EX at high GG cost
+					Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX:
 						if crossed_up:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
-							hit_data[Em.hit.GUARD_DRAIN] = true
+#							hit_data[Em.hit.GUARD_DRAIN] = true
 						
-					Em.atk_type.SUPER: # can weakblock super
+					Em.atk_type.SUPER:
 						if crossed_up:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						else:
@@ -6699,7 +6699,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	#						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 						if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
-							hit_data[Em.hit.GUARD_DRAIN] = true
+#							hit_data[Em.hit.GUARD_DRAIN] = true
 						elif hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED):
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 						elif !crossed_up:
@@ -6715,6 +6715,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
+		
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.BLOCKED and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.HEAVY:
+		if can_guardcrash(hit_data):
+			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+			hit_data[Em.hit.GUARDCRASH] = true
+			hit_data.erase(Em.hit.SUPERARMORED)
 			
 	# CHECK PUNISH HIT ----------------------------------------------------------------------------------------------
 	
@@ -6951,7 +6957,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
-	# gain POS_FLOW on strongblock
+	# gain POS_FLOW on parry
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.PARRIED and current_guard_gauge < 0:
 		status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 
@@ -6992,6 +6998,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		modulate_play("stun_flash")
 		play_audio("rock2", {"vol" : -5})
 		
+	elif Em.hit.GUARDCRASH in hit_data:
+		modulate_play("stun_flash")
+		play_audio("break1", {"vol" : -18})
+		
 	elif hit_data[Em.hit.PUNISH_HIT] and hit_data[Em.hit.SWEETSPOTTED]:
 		modulate_play("punish_sweet_flash")
 		play_audio("break2", {"vol" : -15})
@@ -7011,8 +7021,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if Em.hit.SUPERARMORED in hit_data:
 					modulate_play("armor_flash")
 					play_audio("block3", {"vol" : -15})
-				elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
-					(Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
+				elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+#					 or (Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
 					modulate_play("weakblock_flash")
 					play_audio("block3", {"vol" : -15})
 				else:
@@ -7085,6 +7095,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hitstop = STUN_TIME # overwrite fixed hitstop for stun time when Stunned
 		elif hit_data[Em.hit.CRUSH]:
 			hitstop = CRUSH_TIME
+#		elif Em.hit.GUARDCRASH in hit_data:
+#			hitstop += 5
+#			hit_data[Em.hit.HITSTOP] += 5
 		
 	if hitstop > 0: # will freeze in place if colliding 1 frame after hitstop, more if has ignore_time, to make multi-hit projectiles more consistent
 		if Em.hit.MULTIHIT in hit_data and Em.move.IGNORE_TIME in hit_data[Em.hit.MOVE_DATA]:
@@ -7147,6 +7160,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif hit_data[Em.hit.CRUSH]:
 		Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()})
+	elif Em.hit.GUARDCRASH in hit_data:
+		Globals.Game.spawn_SFX("Crushspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
+				"v_mirror":Globals.Game.rng_bool()})	
 	
 	# ---------------------------------------------------------------------------------------------------
 			
@@ -7359,7 +7375,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 # HIT CALCULATION ---------------------------------------------------------------------------------------------------
 	
-func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but all moves except non-strong proj can Punish Hit)
+func can_lethal(hit_data) -> bool: # only strong hits can Guardbreak and Lethal Hit (but all moves except non-strong proj can Punish Hit)
 	if get_damage_percent() < 100:
 		return false
 	if Em.hit.NPC_PATH in hit_data:
@@ -7381,7 +7397,7 @@ func can_lethal(hit_data): # only strong hits can Guardbreak and Lethal Hit (but
 	return true
 	# at 150% damage, any non-strong hits with high enough knockback will lethal, and any attack can Guardbreak on unblock/Base Block
 	
-func can_stun(hit_data):
+func can_stun(hit_data) -> bool:
 	if get_guard_gauge_percent_below() > 1:
 		return false # setting to 0.01 instead of 0 allow multi-hit moves to cause Stun on the last attack
 	if query_status_effect(Em.status_effect.STUN_RECOVER):
@@ -7397,6 +7413,28 @@ func can_stun(hit_data):
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.SUPER]:# Lights cannot Stun, but Fierce can
 		return false # supers cannot stun
 	return true
+		
+		
+func can_guardcrash(hit_data) -> bool: # check if collision boxes are close enough
+	if !hit_data[Em.hit.ATKER].has_node("PlayerCollisionBox"): return false
+	
+	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data: return false
+	if Em.hit.FOLLOW_UP in hit_data: return false
+	
+	if $SBlockTimer.is_running(): return false
+	
+	if hit_data[Em.hit.ATKER].has_method("query_status_effect") and \
+			(hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.NO_CROSSUP) or \
+			hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED)):
+		return false
+	
+	var opponent_box := Rect2(hit_data[Em.hit.ATKER].get_node("PlayerCollisionBox").rect_global_position, \
+			hit_data[Em.hit.ATKER].get_node("PlayerCollisionBox").rect_size)
+	opponent_box = opponent_box.grow(5)
+	if Detection.detect_duo($PlayerCollisionBox, opponent_box):
+		return true
+	return false
+		
 		
 func calculate_damage(hit_data) -> int:
 	
@@ -7493,26 +7531,29 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 	else:
 		guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
+		
+	if Em.hit.GUARDCRASH in hit_data: # halves GDrain on Guardcrash
+		guard_drain = FMath.percent(guard_drain, 50)
 	
 	match hit_data[Em.hit.BLOCK_STATE]:
 		Em.block_state.PARRIED:
 			return 0
 		
 		Em.block_state.BLOCKED: # no Guard Drain on blocking normals
-			if Em.hit.NPC_PATH in hit_data:
+#			if Em.hit.NPC_PATH in hit_data:
+#				return 0
+#			if Em.hit.GUARD_DRAIN in hit_data:
+#				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # increase guard drain when blocking heavy/special/ex
+#				if Em.hit.ANTI_AIRED in hit_data:
+#					guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airblocking opponent with an anti-air
+#			else:
+			if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
 				return 0
-			if Em.hit.GUARD_DRAIN in hit_data:
-				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # increase guard drain when blocking heavy/special/ex
-				if Em.hit.ANTI_AIRED in hit_data:
-					guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airblocking opponent with an anti-air
-			else:
-				if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
-					return 0
-				elif Em.hit.SDASH_ARMORED in hit_data: # super dashing through projectiles drain GG
-					guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD)
-					if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
-						guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD2) # super dashing through level 2 projectiles drain more
-					
+			elif Em.hit.SDASH_ARMORED in hit_data: # super dashing through projectiles drain GG
+				guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD)
+				if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
+					guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD2) # super dashing through level 2 projectiles drain more
+				
 		Em.block_state.UNBLOCKED:
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_GUARD_DRAIN):
 				guard_drain = FMath.percent(guard_drain, 10)
@@ -7965,8 +8006,8 @@ func generate_blockspark(hit_data):
 		Em.block_state.BLOCKED:
 			if Em.hit.SUPERARMORED in hit_data:
 				blockspark = "Superarmorspark"
-			elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
-					(Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
+			elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+#					or (Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
 				blockspark = "WBlockspark2"
 			else:
 				blockspark = "WBlockspark"

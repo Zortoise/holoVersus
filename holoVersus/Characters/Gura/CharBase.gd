@@ -54,8 +54,8 @@ const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD
 const DAMAGE_VALUE_LIMIT = 1100
 
 const GG_REGEN_AMOUNT = 15 # exact GG regened per frame when GG < 100%
-const GRD_BLOCK_GG_COST = 35 # exact GG loss per frame when blocking on ground
-const AIR_BLOCK_GG_COST = 50 # exact GG loss per frame when blocking in air
+const GRD_BLOCK_GG_COST = 17 # exact GG loss per frame when blocking on ground
+const AIR_BLOCK_GG_COST = 25 # exact GG loss per frame when blocking in air
 const CHIP_DMG_MOD = 30 # % of damage taken as chip damage when blocking
 
 const BASE_EX_REGEN = 20

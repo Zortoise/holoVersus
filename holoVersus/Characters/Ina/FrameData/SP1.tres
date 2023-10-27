@@ -55,7 +55,7 @@ frame_data = {
 "SfxUnder_hframes": 1,
 "SfxUnder_spritesheet": "SP1SfxUnder",
 "SfxUnder_vframes": 1,
-"duration": 8,
+"duration": 10,
 "hframes": 6,
 "loop": false,
 "spritesheet": "SP1Sprite",
@@ -67,7 +67,7 @@ frame_data = {
 "frame": 16,
 "hurtbox": [ Vector2( -11, 3 ), Vector2( -14, 3 ), Vector2( -14, 10 ), Vector2( -11, 10 ), Vector2( -11, 25 ), Vector2( 9, 25 ), Vector2( 9, 4 ), Vector2( 18, 4 ), Vector2( 18, -4 ), Vector2( 9, -4 ), Vector2( 9, -22 ), Vector2( -11, -22 ) ]
 },
-4: {
+5: {
 "SfxOver_frame": 0,
 "SfxUnder_frame": 0,
 "entityspawn": null,

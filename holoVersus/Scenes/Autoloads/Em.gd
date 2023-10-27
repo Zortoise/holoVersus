@@ -42,15 +42,15 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # UNBLOCKABLE = certain attacks that are not physical specials are unblockable
 # SCREEN_SHAKE = cause screen to shake on hit
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
-# SUPERARMOR_STARTUP = weakblock all attacks during startup frames
-# SUPERARMOR_ACTIVE = weakblock all attacks during active frames
-# P_SUPERARMOR_STARTUP = weakblock all attacks during startup frames if GG is >= 0
-# P_SUPERARMOR_ACTIVE = weakblock all attacks during active frames if GG is >= 0
-# PROJ_ARMOR_ACTIVE = weakblock all projectiles during active frames
-# WEAKARMOR_STARTUP = weakblock all Normals/non-strong projectiles during startup frames
-# WEAKARMOR_ACTIVE = weakblock all Normals/non-strong projectiles during active frames
-# P_WEAKARMOR_STARTUP = weakblock all Normals/non-strong projectiles during startup frames if GG is >= 0
-# P_WEAKARMOR_ACTIVE = weakblock all Normals/non-strong projectiles during active frames if GG is >= 0
+# SUPERARMOR_STARTUP = armor all attacks during startup frames
+# SUPERARMOR_ACTIVE = armor all attacks during active frames
+# P_SUPERARMOR_STARTUP = armor all attacks during startup frames if GG is >= 0
+# P_SUPERARMOR_ACTIVE = armor all attacks during active frames if GG is >= 0
+# PROJ_ARMOR_ACTIVE = armor all projectiles during active frames
+# WEAKARMOR_STARTUP = armor all Normals/non-strong projectiles during startup frames
+# WEAKARMOR_ACTIVE = armor all Normals/non-strong projectiles during active frames
+# P_WEAKARMOR_STARTUP = armor all Normals/non-strong projectiles during startup frames if GG is >= 0
+# P_WEAKARMOR_ACTIVE = armor all Normals/non-strong projectiles during active frames if GG is >= 0
 # BI_DIR_ARMOR = for moves with weakarmor/superarmor, allow armoring from both directions
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
 # NO_STRAFE_NORMAL = for certain aerial normals, prevent air strafing during active frames
@@ -120,10 +120,11 @@ enum move {ROOT, ATK_TYPE, HITCOUNT, DMG, KB, KB_TYPE, KB_ANGLE, ATK_LVL, ATK_AT
 enum hit {RECT, POLYGON, OWNER_ID, FACING, MOVE_NAME, MOVE_DATA, MOB, HURTBOX, SDHURTBOX, HITBOX, SWEETBOX, KBORIGIN, VACPOINT
 		ATKER_ID, DEFENDER_ID, HIT_CENTER, ATK_FACING, DEFEND_FACING, TOUGH_MOB, NO_HIT_SOUND_MOB
 		CANCELLED, ENTITY_PATH, NPC_PATH, ATKER, ATKER_OR_ENTITY, DEFENDER, ANGLE_TO_ATKER, LETHAL_HIT, PUNISH_HIT, CRUSH, STUN, BLOCK_STATE
-		REPEAT, DOUBLE_REPEAT, ANTI_AIRED, PULL, SECONDARY_HIT, LAST_HIT, GUARD_DRAIN, SINGLE_REPEAT, SOUR_HIT
+		REPEAT, DOUBLE_REPEAT, ANTI_AIRED, PULL, SECONDARY_HIT, LAST_HIT, SINGLE_REPEAT, SOUR_HIT, GUARDCRASH
 		MULTIHIT, FIRST_HIT, AUTOCHAIN, FOLLOW_UP, NON_STRONG_PROJ, WEAKARMORABLE, CORNERED, WEAK_HIT, SUPERARMORED, HITSTOP, DEALT_DMG
 		ADJUSTED_ATK_LVL, KB, KB_ANGLE, SEMI_DISJOINT, SWEETSPOTTED, PULL, MOB_BREAK, RESISTED, SDASH_ARMORED, MOB_ARMORED, IGNORE_RESIST
 		DEFENDER_ATTR, NPC_DEFENDER_PATH, PROJ_ON_HITSTOP}
+#// GUARD_DRAIN
 
 enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE, PERMANENT, BEAM}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}

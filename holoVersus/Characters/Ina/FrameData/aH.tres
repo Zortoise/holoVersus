@@ -113,7 +113,7 @@ frame_data = {
 "SfxOver_hframes": 6,
 "SfxOver_spritesheet": "aHSfxOver",
 "SfxOver_vframes": 3,
-"duration": 14,
+"duration": 16,
 "hframes": 6,
 "loop": false,
 "spritesheet": "aHSprite",
@@ -134,7 +134,7 @@ frame_data = {
 "kborigin": null,
 "sdhurtbox": [ Vector2( -2, -9 ), Vector2( -30, -9 ), Vector2( -30, 19 ), Vector2( -2, 19 ), Vector2( -2, 6 ), Vector2( 28, 6 ), Vector2( 28, -22 ), Vector2( -2, -22 ) ]
 },
-10: {
+11: {
 "SfxOver_frame": 2,
 "frame": 2,
 "hitbox": [  ],
