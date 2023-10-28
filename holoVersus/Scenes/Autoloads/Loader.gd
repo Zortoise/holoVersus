@@ -18,6 +18,7 @@ onready var black_replace_shader = load("res://Scenes/Shaders/BlackReplace.gdsha
 onready var loaded_guard_gauge = ResourceLoader.load("res://Assets/UI/guard_gauge1.png")
 onready var loaded_guard_gauge_pos = load("res://Assets/UI/guard_gauge_pos.tres")
 onready var loaded_dmg_num_scene = load("res://Scenes/DamageNumber.tscn")
+onready var loaded_pickup_scene := load("res://Scenes/PickUp.tscn")
 
 onready var loaded_ui_audio_scene := load("res://Scenes/Menus/UIAudio.tscn")
 

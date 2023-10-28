@@ -1,0 +1,155 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Active": {
+"duration": 30,
+"hframes": 6,
+"loop": true,
+"spritesheet": "CardSprite",
+"timestamps": {
+0: {
+"frame": 8
+},
+5: {
+"frame": 9
+},
+9: {
+"frame": 10
+},
+12: {
+"frame": 11
+},
+14: {
+"frame": 12
+},
+16: {
+"frame": 13
+},
+19: {
+"frame": 14
+},
+23: {
+"frame": 8
+},
+28: {
+"frame": 15
+}
+},
+"vframes": 5
+},
+"Marker": {
+"duration": 48,
+"hframes": 6,
+"loop": false,
+"spritesheet": "CardSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+4: {
+"frame": 1
+},
+8: {
+"frame": 0
+},
+12: {
+"frame": 1
+},
+16: {
+"frame": 0
+},
+20: {
+"frame": 1
+},
+24: {
+"frame": 0
+},
+28: {
+"frame": 1
+},
+32: {
+"frame": 0
+},
+36: {
+"frame": 1
+},
+40: {
+"frame": 0
+},
+44: {
+"frame": 1
+}
+},
+"vframes": 5
+},
+"Pickup": {
+"duration": 28,
+"hframes": 6,
+"loop": false,
+"spritesheet": "CardSprite",
+"timestamps": {
+0: {
+"frame": 16
+},
+1: {
+"frame": 17
+},
+2: {
+"frame": 18
+},
+3: {
+"frame": 19
+},
+4: {
+"frame": 20
+},
+5: {
+"frame": 21
+},
+6: {
+"frame": 22
+},
+16: {
+"frame": 23
+},
+20: {
+"frame": 24
+},
+24: {
+"frame": 25
+}
+},
+"vframes": 5
+},
+"Spawn": {
+"duration": 6,
+"hframes": 6,
+"loop": false,
+"spritesheet": "CardSprite",
+"timestamps": {
+0: {
+"frame": 2
+},
+1: {
+"frame": 3
+},
+2: {
+"frame": 4
+},
+3: {
+"frame": 5
+},
+4: {
+"frame": 6
+},
+5: {
+"frame": 7
+}
+},
+"vframes": 5
+}
+}

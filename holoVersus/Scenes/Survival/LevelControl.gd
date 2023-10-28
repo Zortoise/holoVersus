@@ -11,7 +11,6 @@ const ITEM_LIMIT = 40
 
 onready var loaded_mob_scene := load("res://Scenes/Survival/Mob.tscn")
 onready var loaded_mob_entity_scene := load("res://Scenes/Survival/MobEntity.tscn")
-onready var loaded_pickup_scene := load("res://Scenes/Survival/PickUp.tscn")
 onready var loaded_card_scene := load("res://Scenes/Survival/Card.tscn")
 
 var UniqLevel
@@ -398,14 +397,14 @@ func simulate():
 					
 					if "offset" in spawn:
 						var out_position = Globals.Game.middle_point + spawn.offset
-						out_position.y -= 25
+						out_position.y -= 25 # warning symbol height
 						Globals.Game.spawn_SFX("Warning", "Warning", out_position, {})
 						to_spawn[wave_timer + 48].append({"offset": spawn.offset, "mob_data": spawn,})
 						
 					else: # if no listed offset, random spot
 						var new_spawn_point := Vector2(Globals.Game.rng_range(Globals.Game.left_corner, Globals.Game.right_corner + 1), 0)
 						var out_position = Globals.Game.middle_point + new_spawn_point
-						out_position.y -= 25
+						out_position.y -= 25 # warning symbol height
 						Globals.Game.spawn_SFX("Warning", "Warning", out_position, {})
 						to_spawn[wave_timer + 48].append({"offset": new_spawn_point, "mob_data": spawn,})
 					
@@ -508,7 +507,7 @@ func spawn_mob_entity(master_ID: int, entity_ref: String, out_position, aux_data
 # in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan: int = BASE_LIFESPAN, in_palette_ref = null
 func spawn_item(item_ref: String, out_position: Vector2, aux_data: Dictionary, lifespan = null, palette_ref = null):
 	if Globals.Game.get_node("PickUps").get_child_count() <= ITEM_LIMIT:
-		var pickup = loaded_pickup_scene.instance()
+		var pickup = Loader.loaded_pickup_scene.instance()
 		Globals.Game.get_node("PickUps").add_child(pickup)
 		pickup.init(item_ref, out_position, aux_data, lifespan, palette_ref)
 		return pickup

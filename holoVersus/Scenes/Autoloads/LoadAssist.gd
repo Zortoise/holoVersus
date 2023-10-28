@@ -138,6 +138,10 @@ func load_assist(assist_ref: String):
 		pass # WIP
 
 
+func load_all():
+	for assist_ref in ASSIST_BORROW:
+		load_assist(assist_ref) # WIP
+
 #	Loader.NPC_data["GuraA"] = {
 #		"scene" : load("res://Assists/GuraA/GuraA.tscn"),
 #		"frame_data_array" : Loader.char_data[NAME].frame_data_array,

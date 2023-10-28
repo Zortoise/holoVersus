@@ -36,7 +36,7 @@ func select():
 	set("custom_colors/font_color_focus", Color(0.94, 0.94, 0.94))
 	set("custom_colors/font_color_hover", Color(0.94, 0.94, 0.94))
 	set("custom_colors/font_color_pressed", Color(0.94, 0.94, 0.94))
-	set("custom_fonts/font", load("res://Scenes/Menus/ButtonTypeHSelectB.tres"))
+	set("custom_fonts/font", load("res://Scenes/Menus/Buttons/ButtonTypeHSelectB.tres"))
 	selected = true
 	modulate.a = 1.0
 
@@ -45,7 +45,7 @@ func unselect():
 	set("custom_colors/font_color_focus", Color(0.12, 0.12, 0.12))
 	set("custom_colors/font_color_hover", Color(0.12, 0.12, 0.12))
 	set("custom_colors/font_color_pressed", Color(0.12, 0.12, 0.12))
-	set("custom_fonts/font", load("res://Scenes/Menus/ButtonTypeHSelectA.tres"))
+	set("custom_fonts/font", load("res://Scenes/Menus/Buttons/ButtonTypeHSelectA.tres"))
 	selected = false
 	modulate.a = 0.7
 

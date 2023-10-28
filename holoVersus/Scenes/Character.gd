@@ -300,6 +300,8 @@ var assist_rescue_protect := false # set to true if hit by assist rescue till yo
 var assist_fever := false # true if an assist land an unblocked hit on a hitstunned opponent, last till targeted opponent recovers
 var sdash_points := 0 # set to duration of sdash when you begin a sdash, reduce per frame base on angle, stop sdash when hit 0
 
+var assist_items := [] # up to 3
+
 # controls
 var button_up
 var button_down
@@ -419,9 +421,9 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
 	
 	# load assist
-	if Globals.assists != 0 and in_assist != "":
+	if Globals.assists == 1 and in_assist != "":
 		assist = in_assist
-		var assist_icon = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistChar")
+		var assist_icon = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistNode/AssistChar")
 		assist_icon.texture = Loader.NPC_data[assist].icon
 	
 	yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
@@ -811,8 +813,10 @@ func simulate(new_input_state):
 			
 #			play_audio("bling4", {})
 
-			Globals.Game.superfreeze(get_path())
-			Globals.Game.set_screenstop()
+#			Globals.Game.superfreeze(get_path())
+#			Globals.Game.set_screenstop()
+
+			Globals.Game.spawn_assist_card()
 			
 			pass
 	
@@ -2723,9 +2727,13 @@ func capture_and_process_instant_actions(): # capture instant actions after dire
 		else:
 			UniqChar.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
 			
-	if Globals.assists != 0 and assist != "":
+	if Globals.assists == 1 and assist != "":
 		instant_action_assist("AssistN", "AssistD")
 		check_for_assist()
+	elif Globals.assists > 1 and assist_items.size() > 0:
+		if button_aux in input_state.just_pressed:
+			instant_actions_temp.append("AssistI")
+		check_for_item_use()
 		
 	UniqChar.process_instant_actions() # process stored instant actions in instant_actions array last frame
 	instant_actions = [] # stored instant_actions last frame are removed
@@ -5027,6 +5035,19 @@ func call_assist(atk_ID: int):
 		first_hit_flag = true # freeze Guard Swell till the next hit
 	Globals.Game.call_assist(player_ID, assist, get_feet_pos(), "black_replace", atk_ID)
 	
+	
+func get_random_item():
+	if assist_items.size() >= 3:
+		assist_items.remove(0)
+	var keys = Loader.NPC_data.keys()
+	assist_items.append(Globals.Game.rng_array(keys))
+	
+func check_for_item_use():
+	if state in [Em.char_state.DEAD, Em.char_state.SEQ_TARGET]:
+		return # cannot use item if dead or being grabbed, can use during hitstun
+	if "AssistI" in instant_actions:
+		assist_items.erase(Globals.Game.smart_selection(player_ID))
+		
 	
 func tech():
 	if button_dash in input_state.pressed:
@@ -9032,9 +9053,11 @@ func save_state():
 	else:
 		state_data["FDITimer_time"] = $FDITimer.time
 		
-	if Globals.assists != 0:
+	if Globals.assists == 1:
 		state_data["assist_active"] = assist_active
 		state_data["AssistCDTimer_time"] = $AssistCDTimer.time
+	elif Globals.assists > 1:
+		state_data["assist_items"] = assist_items
 
 	return state_data
 	
@@ -9158,9 +9181,12 @@ func load_state(state_data, command_rewind := false):
 	$InstallTimer.time = state_data.InstallTimer_time
 	Globals.Game.install_update(self)
 	
-	if Globals.assists != 0:
+	if Globals.assists == 1:
 		assist_active = state_data.assist_active
 		$AssistCDTimer.time = state_data.AssistCDTimer_time
+		Globals.Game.assist_update(self)
+	elif Globals.assists > 1:
+		assist_items = state_data.assist_items
 		Globals.Game.assist_update(self)
 	
 	if Globals.training_mode:

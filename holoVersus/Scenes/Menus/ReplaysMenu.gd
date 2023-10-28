@@ -3,7 +3,7 @@ extends Node2D
 const INITIAL_HELD_FRAMES = 10
 const HELD_INTERVAL = 2
 
-var loaded_replay_button = load("res://Scenes/Menus/ButtonTypeH.tscn")
+var loaded_replay_button = load("res://Scenes/Menus/Buttons/ButtonTypeH.tscn")
 var selected_replay := 0
 
 

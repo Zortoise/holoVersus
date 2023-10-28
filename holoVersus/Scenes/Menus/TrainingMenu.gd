@@ -1,7 +1,7 @@
 extends Node2D
 
 #const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
-const ASSISTS_OPTIONS = ["off", "select"]
+const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
 const STATICSTAGE_OPTIONS = ["off", "on"]
 #var custom_playlist_options = ["none"] # can be added to
 

@@ -35,6 +35,7 @@ onready var P2_assist = Globals.P2_assist
 #onready var P2_input_style = Globals.P2_input_style
 onready var starting_stock_pts = Globals.starting_stock_pts
 
+
 # variables for stage box and starting positions/facings, these are set by the stage's node
 var stage
 var stage_box
@@ -174,6 +175,7 @@ func setup():
 		for player in Globals.player_count:
 			HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Prism").queue_free()
 		card_menu.queue_free()
+		
 	else:
 		for player in Globals.player_count:
 			if Globals.difficulty >= 2:
@@ -198,12 +200,18 @@ func setup():
 	if Globals.assists == 0:
 		for player in Globals.player_count:
 			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").queue_free()
-	else:
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/AssistList").queue_free()
+	elif Globals.assists == 1:
 		for player in Globals.player_count:
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/AssistList").queue_free()
 			if get("P" + str(player + 1) + "_assist") != "":
 				HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").show()
 			else:
-				HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").hide() # WIP
+				HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").hide()
+	elif Globals.assists > 1:
+		for player in Globals.player_count:
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").queue_free()
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/AssistList").show()
 
 	# remove test stage node and add the real stage node
 #	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
@@ -222,6 +230,9 @@ func setup():
 		HUD.get_node("MatchTime").show()
 		HUD.get_node("TimeFrame").show()
 		
+		
+	if Globals.survival_level == null and Globals.assists > 1:
+		load_items()
 	
 ## LOAD ASSISTS --------------------------------------------------------------------------------------------------
 #
@@ -333,6 +344,28 @@ func setup():
 #			BGM.play_uncommon(chosen_music_dict)
 #			viewport.BGM_credits(chosen_music_dict)
 
+func load_items():
+	
+	var item := "Card"
+	Loader.item_data[item] = {}
+	Loader.item_data[item]["scene"] = load("res://Items/" + item + "/" + item + ".tscn")
+	Loader.item_data[item]["frame_data"] = ResourceLoader.load("res://Items/" + item + "/FrameData/" + item + ".tres")
+	Loader.item_data[item]["spritesheet"] = ResourceLoader.load("res://Items/" + item + "/Spritesheets/" + item + "Sprite.png")
+	Loader.item_data[item]["palettes"] = {}
+	
+	var directory = Directory.new()
+	if directory.open("res://Items/" + item + "/Palettes/") == OK:
+		directory.list_dir_begin(true)
+		var file_name = directory.get_next()
+		while file_name != "":
+			# load all palettes and add them to the dictionary
+			if file_name.ends_with(".png.import"):
+				var file_name2 = file_name.get_file().trim_suffix(".png.import")
+				Loader.item_data[item].palettes[file_name2] = ResourceLoader.load("res://Items/" + item + "/Palettes/" + file_name2 + ".png")
+			file_name = directory.get_next()
+	else: print("No Palettes folder for item: " + item)
+	
+	LoadAssist.load_all()
 
 # --------------------------------------------------------------------------------------------------
 
@@ -936,6 +969,20 @@ func simulate(rendering = true):
 	if Globals.static_stage == 0:
 		stage.simulate()
 		
+	match Globals.assists:
+		2: # low
+			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
+					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 600) == 0:
+				spawn_assist_card()
+		3: # medium
+			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
+					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 300) == 0:
+				spawn_assist_card()
+		4: # high
+			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
+					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 150) == 0:
+				spawn_assist_card()
+		
 	check_superfreeze() # only freeze after players/entites/sfx have simulated
 	check_lethalfreeze()
 	process_screenstop()
@@ -1190,7 +1237,7 @@ func load_state(game_state, loading_autosave = true):
 		new_SFX.load_state(state_data)
 		
 	for state_data in loaded_game_state.pickups_data:
-		var new_pickup = LevelControl.loaded_pickup_scene.instance()
+		var new_pickup = Loader.loaded_pickup_scene.instance()
 		$PickUps.add_child(new_pickup)
 		new_pickup.load_state(state_data)
 		
@@ -2201,9 +2248,9 @@ func stock_points_update(character):
 				
 				
 func assist_update(character):
-	if Globals.assists != 0:	
+	if Globals.assists == 1:	
 		var assist_text = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/Assist/Text")
-		var assist_icon = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistChar")
+		var assist_icon = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistNode/AssistChar")
 		
 		if character.get_node("AssistCDTimer").is_running():
 			if !character.assist_active:
@@ -2242,7 +2289,34 @@ func assist_update(character):
 				if assist_icon.material != null:
 					assist_icon.material = null
 					assist_icon.modulate = Color(1,1,1)
-	
+					
+	elif Globals.assists >= 0:
+		var assist_list = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/AssistList")
+		match character.assist_items.size():
+			0:
+				for assist_node in assist_list.get_children():
+					assist_node.hide()
+			1:
+				var assist_nodes: Array = assist_list.get_children()
+				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
+				assist_nodes[0].show()
+				assist_nodes[1].hide()
+				assist_nodes[2].hide()
+			2:
+				var assist_nodes: Array = assist_list.get_children()
+				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
+				assist_nodes[1].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[1]].icon
+				assist_nodes[0].show()
+				assist_nodes[1].show()
+				assist_nodes[2].hide()
+			3:
+				var assist_nodes: Array = assist_list.get_children()
+				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
+				assist_nodes[1].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[1]].icon
+				assist_nodes[2].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[2]].icon
+				assist_nodes[0].show()
+				assist_nodes[1].show()
+				assist_nodes[2].show()
 
 				
 func burst_update(character):
@@ -2436,6 +2510,45 @@ func spawn_NPC(master_ID: int, NPC_ref: String, out_position, start_facing, pale
 	npc.init(master_ID, NPC_ref, out_position, start_facing, palette_ref)
 	return npc
 	
+	
+func smart_selection(master_ID: int):
+	var selection_array := []
+	var chosen_assist: String = ""
+	var chosen_atk_ID: int
+	
+	var master_node = get_player_node(master_ID)
+	var target = master_node.get_target()
+	
+	for NPC_ref in master_node.assist_items:
+		if NPC_ref in Loader.NPC_data:
+			var data_reader = Loader.NPC_data[NPC_ref].scene.instance()
+			selection_array.append_array(data_reader.get_smart_selection(target, master_node.position))
+			
+	if selection_array.size() > 0:
+		var total_weight := 0
+		for selection in selection_array:
+			total_weight += selection.weight
+		var random_weight = rng_range(0, total_weight + 1)
+		
+		for selection in selection_array:
+			random_weight -= selection.weight
+			if random_weight <= 0:
+				chosen_assist = selection.name
+				chosen_atk_ID = selection.atk_ID
+				break
+		
+	if selection_array.size() == 0 or chosen_assist == "": # failsafe
+		chosen_assist = rng_array(master_node.assist_items)
+		if rng_bool():
+			chosen_atk_ID = Em.assist.NEUTRAL
+		else:
+			chosen_atk_ID = Em.assist.DOWN
+
+		
+	call_assist(master_ID, chosen_assist, master_node.get_feet_pos(), "black_replace", chosen_atk_ID)
+	return chosen_assist
+		
+	
 func call_assist(master_ID: int, NPC_ref: String, out_position, palette_ref = null, atk_ID: int = 0):
 	var aux_data = {
 		"NPC_ref" : NPC_ref,
@@ -2485,6 +2598,19 @@ func spawn_SFX(anim: String, loaded_sfx_ref, out_position, aux_data: Dictionary,
 	sfx.init(anim, loaded_sfx_ref, out_position, aux_data, palette_ref, master_ref)
 	return sfx
 	
+func spawn_item(item_ref: String, out_position: Vector2, aux_data: Dictionary, lifespan = null, palette_ref = null):
+	var pickup = Loader.loaded_pickup_scene.instance()
+	$PickUps.add_child(pickup)
+	pickup.init(item_ref, out_position, aux_data, lifespan, palette_ref)
+	return pickup
+	
+func spawn_assist_card():
+	var mid_height = FMath.percent(middle_point.y - stage_box.rect_global_position.y, 50) + stage_box.rect_global_position.y
+	var spawn_pos := Vector2(rng_range(left_corner, right_corner + 1), rng_range(mid_height, middle_point.y))
+	var ground_found = Detection.ground_finder(spawn_pos, 1, Vector2(0, 315), Vector2(10, 650), 1)
+	if ground_found:
+		spawn_pos = ground_found
+	spawn_item("Card", spawn_pos, {})
 
 # master_ID is passed in to freeze afterimages during hitstop
 # master_ref is used to locate spritesheet_ref for character afterimages and locate palettes as well

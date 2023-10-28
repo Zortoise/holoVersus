@@ -26,6 +26,29 @@ func _ready():
 	
 # PROCESSING --------------------------------------------------------------------------------------------------
 	
+	
+func get_smart_selection(target, origin_point: Vector2) -> Array:
+	var selection_array := []
+	
+	# NEUTRAL
+	selection_array.append({
+		"name" : "GuraA", 
+		"atk_ID" : Em.assist.NEUTRAL,
+		"weight" : 10,
+	})
+	
+	# DOWN
+	var ground_found = Detection.ground_finder(origin_point, 1, Vector2(0, 315), Vector2(10, 650), 1)
+	if abs(ground_found.y - target.get_feet_pos().y) <= 32:
+		selection_array.append({
+			"name" : "GuraA", 
+			"atk_ID" : Em.assist.DOWN,
+			"weight" : 200,
+		})
+		
+	return selection_array
+	
+	
 func preprocess(master_ID: int, aux_data: Dictionary): # modify aux_data based on move used
 #	var aux_data = {
 #		"NPC_ref" : NPC_ref,
@@ -112,26 +135,28 @@ func start_attack(atk_ID: int):
 func unsummon(assist_attacked := false): # can be different if custom assist
 	if Character.master_node.assist_active:
 		Character.master_node.assist_active = false
-		if assist_attacked:
+		
+	if assist_attacked:
+		if Globals.assists == 1:
 			Character.master_node.get_node("AssistCDTimer").time = FMath.percent(Character.master_node.get_node("AssistCDTimer").time, \
 					Globals.Game.ASSIST_CD_PENALTY)
-			Character.play_audio("bling8", {"vol" : -18})
-		else:
-			Character.play_audio("bling3", {"vol" : -18})
-			Character.play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
-		shine()
+		Character.play_audio("bling8", {"vol" : -18})
+	else:
+		Character.play_audio("bling3", {"vol" : -18})
+		Character.play_audio("bling7", {"vol" : -25, "bus" : "HighPass"})
+	shine()
 
-				
-		if Character.sfx_under.visible:
-			Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sfx_under, \
-					Character.sfx_under.get_path(), Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
-				
-		Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sprite, sprite.get_path(), \
-				Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
-		
-		if Character.sfx_over.visible:
-			Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sfx_over, \
-					Character.sfx_over.get_path(), Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+			
+	if Character.sfx_under.visible:
+		Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sfx_under, \
+				Character.sfx_under.get_path(), Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+			
+	Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sprite, sprite.get_path(), \
+			Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
+	
+	if Character.sfx_over.visible:
+		Globals.Game.spawn_afterimage(Character.NPC_ID, Em.afterimage_type.NPC, Character.sprite_texture_ref.sfx_over, \
+				Character.sfx_over.get_path(), Character.palette_ref, Character.NPC_ref, null, 0.8, 15, Em.afterimage_shader.WHITE)
 					
 				
 func shine():

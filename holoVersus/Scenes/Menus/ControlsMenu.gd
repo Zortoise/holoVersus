@@ -12,7 +12,7 @@ const DJ_FASTFALL_OPTIONS = ["off", "on"]
 # for preset loader
 const INITIAL_HELD_FRAMES = 10
 const HELD_INTERVAL = 2
-var loaded_preset_button = load("res://Scenes/Menus/ButtonTypeH.tscn")
+var loaded_preset_button = load("res://Scenes/Menus/Buttons/ButtonTypeH.tscn")
 var selected_preset := 0
 
 
@@ -26,7 +26,7 @@ var input_lock_time = 0
 var fixed_deadzone := 0.2 # for joystick
 
 var action_for_extra_button
-var loaded_extra_button = load("res://Scenes/Menus/ButtonTypeE3.tscn")
+var loaded_extra_button = load("res://Scenes/Menus/Buttons/ButtonTypeE3.tscn")
 const MAX_EXTRA_BUTTON_NUMBER = 18
 
 

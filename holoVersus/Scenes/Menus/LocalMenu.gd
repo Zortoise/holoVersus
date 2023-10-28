@@ -6,7 +6,7 @@ const STOCKPOINTS_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, \
 const TIMELIMIT_OPTIONS = ["none", 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 445, 480, 510, \
 		540, 570, 600, 630, 660, 690, 710, 750, 780, 810, 840, 870, 900, 930, 960, 999]
 #const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
-const ASSISTS_OPTIONS = ["off", "select"]
+const ASSISTS_OPTIONS = ["off", "select", "item - low", "item - medium", "item - high"]
 const STATICSTAGE_OPTIONS = ["off", "on"]
 #var custom_playlist_options = ["none"] # can be added to
 
