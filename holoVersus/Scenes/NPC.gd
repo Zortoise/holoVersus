@@ -16,7 +16,7 @@ const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blo
 const AIRBLOCK_TERMINAL_MOD = 70 # multiply to get terminal velocity during air blocking
 const MAX_WALL_JUMP = 2
 const HITSTUN_TERMINAL_VELOCITY_MOD = 650 # multiply to GRAVITY to get terminal velocity during hitstun
-const PERFECT_IMPULSE_MOD = 140 # multiply by get_stat("SPEED") and get_stat("IMPULSE MOD") to get perfect impulse velocity
+#const PERFECT_IMPULSE_MOD = 140 # multiply by get_stat("SPEED") and get_stat("IMPULSE MOD") to get perfect impulse velocity
 const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during aerials (non-active frames) and air cancellable recovery
 const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can land cancel their startup and auto-buffer pressed attacks
 
@@ -527,6 +527,14 @@ func simulate2(): # only ran if not in hitstop
 								velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
 								Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
 				
+				Em.char_state.GRD_BLOCK:
+					if !impulse_used and Animator.time <= 1 and Animator.to_play_anim == "BlockStartup":
+						impulse_used = true
+						var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))
+						impulse = FMath.percent(impulse, 70)
+						velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
+						Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+				
 			# quick strafe-lock
 				Em.char_state.AIR_ATK_STARTUP:
 					if strafe_lock_dir == 0 and Animator.time <= 1:
@@ -742,7 +750,7 @@ func simulate2(): # only ran if not in hitstop
 	var friction_this_frame: int # 15
 	var air_res_this_frame: int
 		
-	if is_hitstunned() or is_blocking():
+	if is_hitstunned() or is_blocking() or Animator.query_to_play(["BlockRec", "aBlockRec"]):
 		friction_this_frame = HITSTUN_FRICTION # 15
 		air_res_this_frame = HITSTUN_AIR_RES # 3
 	else:
@@ -3729,8 +3737,8 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 					if !impulse_used and move_name in UniqNPC.STARTERS and !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
 						impulse_used = true
 						var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))
-						if instant_dir != 0: # perfect impulse
-							impulse = FMath.percent(impulse, PERFECT_IMPULSE_MOD)
+#						if instant_dir != 0: # perfect impulse
+#							impulse = FMath.percent(impulse, PERFECT_IMPULSE_MOD)
 	#					if move_name in UniqNPC.MOVE_DATABASE and "impulse_mod" in UniqNPC.MOVE_DATABASE[move_name]:
 	#						var impulse_mod: int = UniqNPC.query_move_data(move_name).impulse_mod
 	#						impulse = FMath.percent(impulse, impulse_mod)
@@ -3746,7 +3754,17 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			modulate_play("armor_flash")
 						
 	else:
-		if new_state in [Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC] and !has_trait(Em.trait.DASH_IMPULSE):
+		# Block Impulse
+		if dir != 0 and !impulse_used and new_state == Em.char_state.GRD_BLOCK and anim_name == "BlockStartup":
+			impulse_used = true
+			var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))
+			impulse = FMath.percent(impulse, 70) # reduce impulse for Block Impulse
+#			if instant_dir != 0: # perfect impulse
+#				impulse = FMath.percent(impulse, PERFECT_IMPULSE_MOD)
+			velocity.x = int(clamp(velocity.x + impulse, -abs(impulse), abs(impulse)))
+			Globals.Game.spawn_SFX("GroundDashDust", "DustClouds", get_feet_pos(), {"facing":dir, "grounded":true})
+			
+		elif new_state in [Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC] and !has_trait(Em.trait.DASH_IMPULSE):
 			impulse_used = true  # no impulse if cancelling from dash
 		else:
 			impulse_used = false
