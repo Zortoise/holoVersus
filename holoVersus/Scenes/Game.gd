@@ -976,11 +976,11 @@ func simulate(rendering = true):
 				spawn_assist_card()
 		3: # medium
 			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
-					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 300) == 0:
+					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 400) == 0:
 				spawn_assist_card()
 		4: # high
 			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
-					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 150) == 0:
+					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 200) == 0:
 				spawn_assist_card()
 		
 	check_superfreeze() # only freeze after players/entites/sfx have simulated
@@ -1579,9 +1579,9 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 #			if defender_command_grab_dodge(hitbox, hurtbox):
 #				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
 			if !Em.hit.ENTITY_PATH in hitbox:
-				if !test_priority(hitbox, attacker, hurtbox, defender):
+				if !test_priority(hitbox, attacker_or_entity, hurtbox, defender):
 					continue # attacker must pass the priority test
-				if defender_anti_airing(hitbox, attacker, hurtbox, defender):
+				if defender_anti_airing(hitbox, attacker_or_entity, hurtbox, defender):
 					continue # attacker must not be using an aerial against an anti-airing defender
 #				if defender_backdash(hitbox, hurtbox):
 #					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/ANTI_GUARD attack
@@ -1590,7 +1590,7 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 #				if attacker.is_player_in_ignore_list(defender.player_ID):
 #					continue # defender must not be in attacker's ignore list
 			else:
-				if first_active_frame_miss(defender):
+				if first_active_frame_miss(defender): # projectiles cannot hit targets on 1st frame of defender's active frame
 					continue
 				if mob_projectile_miss(attacker_or_entity, defender):
 					continue # mob projectiles cannot hit hitstunned players

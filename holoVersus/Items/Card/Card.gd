@@ -48,7 +48,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:
 		"Marker":
 			Animator.play("Spawn")
-			Entity.play_audio("bling5", {"vol" : -10, "bus" : "PitchUp"})
+#			Entity.play_audio("bling5", {"vol" : -10, "bus" : "PitchUp"})
 		"Spawn":
 			Animator.play("Active")
 		

@@ -1983,16 +1983,21 @@ func check_sdash_crash():
 func check_fallthrough(): # during aerials, can drop through platforms if down is held
 	if state == Em.char_state.SEQ_USER:
 		return UniqNPC.sequence_fallthrough()
-	elif new_state == Em.char_state.AIR_REC and Animator.query_to_play(["SDash"]):
+		
+	if UniqNPC.check_fallthrough():
 		return true
-#	elif new_state in [Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE] and velocity.y > 0:
-#		if button_down in input_state.pressed:
-#			return true
-	elif !grounded and velocity.y > 0:
-		if button_jump in input_state.pressed:
+	else:
+		if new_state == Em.char_state.AIR_D_REC:
+			return false
+		if new_state == Em.char_state.AIR_REC and Animator.query_to_play(["Dodge", "SDash"]):
 			return true
 			
-	return UniqNPC.check_fallthrough()
+		if !grounded and velocity.y > 0:
+			if button_jump in input_state.pressed:
+				return true
+				
+	return false
+			
 	
 func check_semi_invuln():
 	if UniqNPC.check_semi_invuln():

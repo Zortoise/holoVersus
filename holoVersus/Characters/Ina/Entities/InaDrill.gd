@@ -192,7 +192,7 @@ func query_move_data(move_name) -> Dictionary:
 	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
-		print("Error: Cannot retrieve move_data for " + move_name)
+		print("Error: Cannot retrieve move_data for " + move_name + " in " + filename)
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)

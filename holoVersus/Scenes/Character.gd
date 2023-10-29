@@ -4294,16 +4294,26 @@ func check_fallthrough(): # during aerials, can drop through platforms if jump i
 	elif state == Em.char_state.SEQ_TARGET:
 		return true # when being grabbed, always fall through soft platforms
 #		return get_node(targeted_opponent_path).check_fallthrough() # copy fallthrough state of the one grabbing you
-	elif new_state == Em.char_state.AIR_REC and Animator.query_to_play(["Dodge", "SDash"]):
+
+	if UniqChar.check_fallthrough():
 		return true
+	else:
+		if new_state == Em.char_state.AIR_D_REC:
+			return false
+		if new_state == Em.char_state.AIR_REC and Animator.query_to_play(["Dodge", "SDash"]):
+			return true
+			
+		if !grounded and velocity.y > 0:
+			if button_jump in input_state.pressed:
+				return true
+			
+	return false
+			
 #	elif new_state in [Em.char_state.AIR_ATK_STARTUP, Em.char_state.AIR_ATK_ACTIVE] and velocity.y > 0:
 #		if button_down in input_state.pressed:
 #			return true
-	elif !grounded and velocity.y > 0:
-		if button_jump in input_state.pressed:
-			return true
 			
-	return UniqChar.check_fallthrough()
+#	return UniqChar.check_fallthrough()
 	
 func check_semi_invuln():
 	if UniqChar.check_semi_invuln():
@@ -6834,7 +6844,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	
 #	print(hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR])
 	
-	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+	if Globals.assists == 1 and Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		if hit_data[Em.hit.ATKER].is_hitstunned():
 			assist_rescue_protect = true
 			current_guard_gauge = GUARD_GAUGE_CEIL

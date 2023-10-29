@@ -52,7 +52,7 @@ func simulate():
 func query_move_data(move_name) -> Dictionary:
 	
 	if !move_name in MOVE_DATABASE:
-		print("Error: Cannot retrieve move_data for " + move_name)
+		print("Error: Cannot retrieve move_data for " + move_name + " in " + filename)
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)

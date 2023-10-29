@@ -43,7 +43,7 @@ func get_smart_selection(target, origin_point: Vector2) -> Array:
 		selection_array.append({
 			"name" : "GuraA", 
 			"atk_ID" : Em.assist.DOWN,
-			"weight" : 200,
+			"weight" : 20,
 		})
 		
 	return selection_array
@@ -288,7 +288,7 @@ func query_move_data(move_name) -> Dictionary: # can change under conditions
 	move_name = refine_move_name(move_name)
 	
 	if !move_name in MOVE_DATABASE:
-		print("Error: Cannot retrieve move_data for " + move_name)
+		print("Error: Cannot retrieve move_data for " + move_name + " in " + filename)
 		return {}
 	
 	var move_data = MOVE_DATABASE[move_name].duplicate(true)
@@ -333,7 +333,7 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	fever(hit_data)
 
 func fever(hit_data):
-	if Globals.survival_level == null:
+	if Globals.survival_level == null and Globals.assists == 1:
 		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and "assist_fever" in hit_data[Em.hit.ATKER]:
 			if !"assist_rescue_protect" in hit_data[Em.hit.DEFENDER]:
 				return
