@@ -5,8 +5,10 @@
 [resource]
 script = ExtResource( 1 )
 data = {
-"name": "Gura's Theme",
-"artist": "Zortoise",
-"loop_end": 164.57,
-"vol": -7
+    "name" : "Our Bright Parade Remix (Title Screen Ver.)",
+    "artist" : "potatoTeto",
+    "loop_start": 22.87,
+    "loop_end": 99.46,
+    "fade" : true,
+    "vol" : -8,
 }

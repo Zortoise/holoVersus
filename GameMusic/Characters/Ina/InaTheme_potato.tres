@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/Audio/CustomData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+data = {
+    "name" : "Violet Remix (Ninomae Ina'nis' Theme)",
+    "artist" : "potatoTeto",
+    "loop_start": 0.22,
+    "loop_end": 67.42,
+    "fade" : false,
+    "vol" : -4,
+}

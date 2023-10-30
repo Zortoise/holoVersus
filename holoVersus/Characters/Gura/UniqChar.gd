@@ -542,7 +542,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 								# cannot snap up if jump is pressed more than 1 frame ago, to allow easier down dash after fallthrough
 								
 								Character.animate("JumpTransit") # if snapping up while falling downward, instantly wavedash
-								input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
+								input_to_add.append([Character.button_dash, Character.buffer_time()])
 										
 							else: # not in snap range
 								Character.animate("aDashTransit")
@@ -718,7 +718,7 @@ func process_buffered_input(new_state, buffered_input, input_to_add, has_acted: 
 			match new_state:
 				Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC:
 					Character.animate("JumpTransit")
-					input_to_add.append([Character.button_dash, Settings.input_buffer_time[Character.player_ID]])
+					input_to_add.append([Character.button_dash, Character.buffer_time()])
 					has_acted[0] = true
 					keep = false
 

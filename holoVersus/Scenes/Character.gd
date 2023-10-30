@@ -2810,8 +2810,9 @@ func cancel_action(button_ex = null): # called from UniqChar for character-uniqu
 	
 func process_input_buffer():
 
-	var input_to_erase = [] # need this as cannot erase array members while iterating through it
-	var input_to_add = [] # some actions add inputs to the buffer, adding array members while iterating through it can cause issues
+#	var input_to_erase = [] # need this as cannot erase array members while iterating through it
+	var clear_buffer := false
+	var input_to_add := [] # some actions add inputs to the buffer, adding array members while iterating through it can cause issues
 	
 	var has_acted := [false]
 	# any attack/instajump when processed when turn this to true causing all further jumps/attacks to be ignored and erased
@@ -2858,7 +2859,7 @@ func process_input_buffer():
 #								if !grounded or !has_trait(Em.trait.AIR_DASH_JUMP):
 #									continue # some characters can ground jump while airdashing grounded
 							
-							if button_down in input_state.pressed and soft_grounded:
+							if button_down in input_state.pressed and !button_dash in input_state.pressed and soft_grounded:
 			#							!Character.button_left in Character.input_state.pressed and \f
 			#							!Character.button_right in Character.input_state.pressed: # don't use dir
 								
@@ -2873,10 +2874,10 @@ func process_input_buffer():
 									
 							if keep:
 								
-								if button_dash in input_state.pressed and new_state != Em.char_state.GRD_D_REC and \
-										new_state != Em.char_state.AIR_D_REC: # for wavedash alternate input
-									input_buffer.append([button_dash, buffer_time()])
-								
+								if button_dash in input_state.pressed: # for wavedash alternate input
+#									input_buffer.append([button_dash, buffer_time()])
+									input_to_add.append([button_dash, buffer_time()])
+									
 								animate("JumpTransit") # ground jump
 								keep = false
 								
@@ -3096,18 +3097,28 @@ func process_input_buffer():
 								Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
 									if !Settings.input_assist[player_ID]:
 										flag = false
+										continue
+									if Animator.time > 1 or Animator.time == 0: # can only cancel from jump/dash on the first frame
+										flag = false
+										continue
 									var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
 									if "TRANSIT_SDASH" in UniqChar:
 										transits.append_array(UniqChar.TRANSIT_SDASH) # for special types of dashes
 									if !Animator.query_to_play(transits):
 										flag = false # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
+								Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC:
+									if Animator.time < 2:
+										flag = false # cannot cancel from 1st frame of dash
 								Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 									if !Settings.input_assist[player_ID]:
 										flag = false
+										continue
 									if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
 										flag = false
+										continue
 									if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining/whiffing
 										flag = false
+										continue
 									if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
 										flag = false
 								Em.char_state.AIR_REC:
@@ -3124,31 +3135,39 @@ func process_input_buffer():
 					Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
 							Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, \
 							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, \
-							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC, \
-							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP, \
+							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 							
 						var flag := true
 						match new_state:
 							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
 								if !Settings.input_assist[player_ID]:
 									flag = false
+									continue
+								if Animator.time > 1 or Animator.time == 0: # can only cancel from jump/dash on the first frame
+									flag = false
+									continue
 								var transits := ["JumpTransit", "aJumpTransit", "DashTransit", "aDashTransit"]
 								if "TRANSIT_DODGE" in UniqChar:
 									transits.append_array(UniqChar.TRANSIT_DODGE) # for special types of dashes
 								if !Animator.query_to_play(transits):
 									flag = false # can only cancel from Transits for GRD_STARTUP/AIR_STARTUP
 							Em.char_state.AIR_D_REC, Em.char_state.GRD_D_REC:
-								if !Settings.input_assist[player_ID]:
-									flag = false
-								if Animator.time > 1 or Animator.time == 0:
-									flag = false # can cancel from 1st frame of dash
+#								if !Settings.input_assist[player_ID]:
+#									flag = false
+#									continue
+								if Animator.time < 2:
+									flag = false # cannot cancel from 1st frame of dash
 							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 								if !Settings.input_assist[player_ID]:
 									flag = false
+									continue
 								if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
 									flag = false
+									continue
 								if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining/whiffing
 									flag = false
+									continue
 								if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
 									flag = false
 #						if new_state in [Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK]:
@@ -3211,10 +3230,14 @@ func process_input_buffer():
 			keep = false
 			
 		if !keep or has_acted[0]:
-			input_to_erase.append(buffered_input)
+			clear_buffer = true
+#			input_to_erase.append(buffered_input)
 	
-	for input in input_to_erase:
-		input_buffer.erase(input)
+#	for input in input_to_erase:
+#		input_buffer.erase(input)
+	if clear_buffer:
+		input_buffer = []
+		
 	input_buffer.append_array(input_to_add) # add the inputs added by special actions
 
 # STATE DETECT ---------------------------------------------------------------------------------------------------

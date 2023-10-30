@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/Audio/CustomData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+data = {
+    "name": "Kirameki Rider Remix (Victory Theme 2)",
+    "artist": "potatoTeto",
+    "fade": false,
+    "loop_start": 7.85,
+    "loop_end": 46.25,
+    "vol": -4
+}

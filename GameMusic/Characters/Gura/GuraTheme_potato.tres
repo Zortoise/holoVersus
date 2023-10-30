@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/Audio/CustomData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+data = {
+    "name" : "Reflect Remix (Gawr Gura's Theme)",
+    "artist" : "potatoTeto",
+    "loop_start": 10.66,
+    "loop_end": 74.66,
+    "fade" : true,
+    "vol" : -8,
+}
