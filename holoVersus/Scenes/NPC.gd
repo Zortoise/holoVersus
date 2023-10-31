@@ -1433,6 +1433,9 @@ func process_input_buffer():
 								else:
 									animate("JumpTransit")
 									keep = false
+
+									if button_dash in input_state.pressed: # for wavedash
+										input_to_add.append([button_dash, buffer_time()])
 						
 						Em.char_state.GRD_ATK_ACTIVE: # some attacks can jump cancel on active frames
 							if test_jump_cancel_active():
@@ -1446,7 +1449,9 @@ func process_input_buffer():
 								else:
 									animate("JumpTransit")
 									keep = false
-	
+										
+									if button_dash in input_state.pressed: # for wavedash
+										input_to_add.append([button_dash, buffer_time()])
 								
 						Em.char_state.GRD_ATK_STARTUP: # can quick jump cancel the 1st few frame of ground attacks, helps with instant aerials
 							if buffered_input[0] != button_jump:
