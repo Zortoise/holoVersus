@@ -691,7 +691,7 @@ func test2():
 		$TestNode2D/TestLabel.text = $TestNode2D/TestLabel.text + "new state: " + Globals.char_state_to_string(state) + \
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
-			"\ntap_memory: " + str(tap_memory) + " " + str(chain_combo) + "\n" + \
+			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
 			str(input_buffer) + "\n" + str(input_state) + " " + str($BurstLockTimer.time)
 	else:
 		$TestNode2D/TestLabel.text = ""
@@ -8418,12 +8418,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"FallTransit":
 			animate("Fall")
 		"FastFallTransit":
-			if !button_jump in input_state.pressed and is_button_tapped_in_last_X_frames(button_jump, 1) and \
-					check_snap_up(): # do this here instead of _on_SpritePlayer_anim_started()
-				snap_up()
-				animate("SoftLanding")
-			else:
-				animate("FastFall")
+			if button_down in input_state.pressed:
+				if !button_jump in input_state.pressed and is_button_tapped_in_last_X_frames(button_jump, 1) and \
+						check_snap_up(): # do this here instead of _on_SpritePlayer_anim_started()
+					snap_up()
+					animate("SoftLanding")
+				else:
+					animate("FastFall")
 		"DodgeTransit":
 			animate("Dodge")
 		"Dodge":
@@ -8609,6 +8610,19 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 					
 			if Globals.survival_level != null and move_name in UniqChar.STARTERS:
 				attack_enhance(query_move_data()[Em.move.ATK_TYPE])
+		
+		elif is_atk_recovery(): # for special case where the move hit on frame 1 and manually animate into recovery animation
+			var move_name = UniqChar.get_root(anim_name.trim_suffix("Rec"))
+			
+			if !move_name in chain_memory:
+				chain_memory.append(move_name)
+				
+			if !grounded:
+				if !move_name in aerial_memory:
+					aerial_memory.append(move_name)
+				if !move_name in aerial_sp_memory:
+					if is_special_move(move_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(move_name):
+						aerial_sp_memory.append(move_name)
 					
 #		else:
 #			perfect_chain = false # change to false if neither startup nor active

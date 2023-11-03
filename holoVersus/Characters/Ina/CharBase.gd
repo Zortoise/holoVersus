@@ -119,8 +119,8 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 2,
 		Em.move.KB_ANGLE : 50,
 		Em.move.ATK_ATTR : [],
-		Em.move.MOVE_SOUND : { ref = "whoosh15", aux_data = {"vol" : -5} },
-		Em.move.HIT_SOUND : [{ ref = "book1", aux_data = {} }, { ref = "impact9", aux_data = {"vol" : -10} }],
+		Em.move.MOVE_SOUND : { ref = "whoosh15", aux_data = {"vol" : -6} },
+		Em.move.HIT_SOUND : [{ ref = "book1", aux_data = {"vol" : -5} }, { ref = "impact9", aux_data = {"vol" : -15} }],
 	},
 
 	"L2" : {
@@ -212,7 +212,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 3,
 		Em.move.KB_ANGLE : -60,
 		Em.move.ATK_ATTR : [],
-		Em.move.MOVE_SOUND : { ref = "whoosh13", aux_data = {"vol" : -10} },
+		Em.move.MOVE_SOUND : { ref = "whoosh13", aux_data = {"vol" : -15} },
 		Em.move.HIT_SOUND : [{ ref = "book2", aux_data = {"vol" : -5} }, { ref = "book1", aux_data = {"vol" : 5} } ],
 	},
 	"aL2" : {

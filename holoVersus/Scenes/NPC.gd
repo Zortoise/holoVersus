@@ -3673,12 +3673,13 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"FallTransit":
 			animate("Fall")
 		"FastFallTransit":
-			if !button_jump in input_state.pressed and is_button_tapped_in_last_X_frames(button_jump, 1) and \
-					check_snap_up(): # do this here instead of _on_SpritePlayer_anim_started()
-				snap_up()
-				animate("SoftLanding")
-			else:
-				animate("FastFall")
+			if button_down in input_state.pressed:
+				if !button_jump in input_state.pressed and is_button_tapped_in_last_X_frames(button_jump, 1) and \
+						check_snap_up(): # do this here instead of _on_SpritePlayer_anim_started()
+					snap_up()
+					animate("SoftLanding")
+				else:
+					animate("FastFall")
 				
 		"DodgeTransit":
 			animate("Dodge")
@@ -3805,6 +3806,19 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				aerial_memory.append(move_name)
 				if is_special_move(move_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(move_name):
 					aerial_sp_memory.append(move_name)
+					
+		elif is_atk_recovery(): # for special case where the move hit on frame 1 and manually animate into recovery animation
+			var move_name = UniqNPC.get_root(anim_name.trim_suffix("Rec"))
+			
+			if !move_name in chain_memory:
+				chain_memory.append(move_name)
+				
+			if !grounded:
+				if !move_name in aerial_memory:
+					aerial_memory.append(move_name)
+				if !move_name in aerial_sp_memory:
+					if is_special_move(move_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(move_name):
+						aerial_sp_memory.append(move_name)
 	
 	anim_friction_mod = 100
 	anim_gravity_mod = 100

@@ -142,6 +142,70 @@ func ease_in_lerp(start: int, end: int, weight_percent: int) -> int: # starts sl
 	return f_lerp(start, end , weight2)
 	
 	
+# PERMYRIAD ---------------------------------------------------------------------------------------------------
+	
+func permyriad(in_int: int, permyriad: int) -> int:
+	var out_int: int
+# warning-ignore:integer_division
+	out_int = (in_int * permyriad) / 10000
+	return out_int
+	
+func f_lerp_m(start: int, end: int, weight_permyriad: int) -> int:
+	if weight_permyriad <= 0: return start
+	if weight_permyriad >= 10000: return end
+	
+	var diff: int = end - start
+	diff = permyriad(diff, weight_permyriad)
+	return start + diff
+	
+	
+func sin_lerp_m(start: int, end: int, weight_permyriad: int) -> int: # starts and ends slow
+	if weight_permyriad <= 0: return start
+	if weight_permyriad >= 10000: return end
+	
+# warning-ignore:integer_division
+	var weight2: int = permyriad(f_sin(permyriad(180, weight_permyriad) - 90) + 10000, 5000)
+	return f_lerp_m(start, end , weight2)
+	
+	
+func harmonic_lerp_m(start: int, end: int, weight_permyriad: int) -> int:
+	if weight_permyriad <= 0: return start
+	if weight_permyriad >= 10000: return start
+	
+# warning-ignore:integer_division
+	var weight2: int = f_sin(permyriad(360, weight_permyriad))
+	return f_lerp_m(start, end , weight2)
+	
+	
+func n_lerp_m(start: int, end: int, weight_permyriad: int) -> int: # moves in a n-shape
+	if weight_permyriad <= 0: return start
+	if weight_permyriad >= 10000: return start
+	
+# warning-ignore:integer_division
+	var weight2: int = f_sin(permyriad(180, weight_permyriad))
+	return f_lerp_m(start, end , weight2)
+	
+	
+func ease_out_lerp_m(start: int, end: int, weight_permyriad: int) -> int: # starts fast and ends slow
+	if weight_permyriad <= 0: return start
+	if weight_permyriad >= 10000: return end
+
+# warning-ignore:integer_division
+	var weight2: int = f_sin(permyriad(permyriad(180, weight_permyriad), 5000))
+	return f_lerp_m(start, end , weight2)
+
+
+func ease_in_lerp_m(start: int, end: int, weight_permyriad: int) -> int: # starts slow and ends fast
+	if weight_permyriad <= 0: return start
+	if weight_permyriad >= 10000: return end
+
+# warning-ignore:integer_division
+	var weight2: int = (f_sin(permyriad(permyriad(180, weight_permyriad), 5000) - 90) + 10000)
+	return f_lerp_m(start, end , weight2)
+	
+# ---------------------------------------------------------------------------------------------------
+
+	
 func find_center(array: Array, bias: int) -> Vector2:
 	var total_x := 0
 	var total_y := 0

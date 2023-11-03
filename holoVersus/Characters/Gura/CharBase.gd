@@ -125,7 +125,7 @@ const MOVE_DATABASE = {
 		Em.move.FIXED_ATKER_HITSTOP : 1,
 		Em.move.KB_ANGLE : -36,
 		Em.move.ATK_ATTR : [Em.atk_attr.AUTOCHAIN],
-		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
+		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -15} },
 		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
 	"L1b" : {
@@ -137,7 +137,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 2,
 		Em.move.KB_ANGLE : -36,
 		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.NO_IMPULSE],
-		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
+		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -15} },
 		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
 	"L1b[h]" : {
@@ -151,7 +151,7 @@ const MOVE_DATABASE = {
 		Em.move.FIXED_ATKER_HITSTOP : 1,
 		Em.move.KB_ANGLE : -36,
 		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.NO_IMPULSE, Em.atk_attr.AUTOCHAIN],
-		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
+		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -15} },
 		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
 	"L1c" : {
@@ -164,7 +164,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_LVL : 2,
 		Em.move.KB_ANGLE : -36,
 		Em.move.ATK_ATTR : [Em.atk_attr.FOLLOW_UP, Em.atk_attr.NO_IMPULSE],
-		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -12} },
+		Em.move.MOVE_SOUND : { ref = "whoosh2", aux_data = {"vol" : -15} },
 		Em.move.HIT_SOUND : { ref = "cut1", aux_data = {"vol" : -15} },
 	},
 	"L2" : {
