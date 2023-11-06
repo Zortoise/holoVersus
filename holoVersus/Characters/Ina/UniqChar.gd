@@ -1108,8 +1108,9 @@ func query_atk_attr(move_name) -> Array: # can change under conditions
 func landed_a_hit(hit_data): # reaction, can change hit_data from here
 	
 	match hit_data[Em.hit.MOVE_NAME]:
-		_:
-			pass
+		"H":
+			if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
+				hit_data[Em.hit.MOVE_DATA][Em.move.KB] = 100 * FMath.S
 			
 
 func being_hit(hit_data):

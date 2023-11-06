@@ -661,8 +661,8 @@ const MOVE_DATABASE = {
 		Em.move.IGNORE_TIME : 4,
 		Em.move.DMG : 20,
 #		Em.move.FIXED_KB_MULTI : 100 * FMath.S,
-		Em.move.FIXED_HITSTOP: 7,
-		Em.move.FIXED_ATKER_HITSTOP: 3,
+		Em.move.FIXED_HITSTOP: 7, # not using FIXED_HITSTOP_MULTI to ensure g.uL sweetspots
+		Em.move.FIXED_ATKER_HITSTOP: 3, # not using FIXED_ATKER_HITSTOP_MULTI to ensure g.uL sweetspots
 		Em.move.KB : 449 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,

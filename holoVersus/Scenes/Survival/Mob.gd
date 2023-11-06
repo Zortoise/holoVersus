@@ -2006,7 +2006,7 @@ func is_special_move(move_name):
 	return false
 
 func can_air_strafe(move_data):
-	if move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY]: # Normal
+	if move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE]: # Normal
 		if Em.atk_attr.NO_STRAFE_NORMAL in move_data[Em.move.ATK_ATTR]:
 			return false # cannot strafe during some aerial normals
 	else: # non-Normal
@@ -2420,7 +2420,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 	
-	if Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+	if Em.hit.MULTIHIT in hit_data and Em.move.FIXED_ATKER_HITSTOP_MULTI in hit_data[Em.hit.MOVE_DATA]:
+		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP_MULTI]
+	
+	elif Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
 		# multi-hit special/super moves are done by having lower atker hitstop then defender hitstop, and high Em.move.HITCOUNT and ignore_time
 		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP]
 		
@@ -3576,6 +3579,9 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 				return 10
 		else:
 			return 5
+
+	if Em.hit.MULTIHIT in hit_data and Em.move.FIXED_HITSTOP_MULTI in hit_data[Em.hit.MOVE_DATA]:
+		return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTOP_MULTI]
 
 	# some moves have predetermined hitstop
 	if Em.move.FIXED_HITSTOP in hit_data[Em.hit.MOVE_DATA]:

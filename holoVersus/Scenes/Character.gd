@@ -4168,9 +4168,12 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			
 		Em.char_state.AIR_REC:
 			if Animator.query_to_play(["aBlockRec"]): # aBlockRecovery to BlockCRecovery
-				Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
-				animate("BlockRec")
-				UniqChar.landing_sound()
+				if $SBlockTimer.is_running(): # to make punishing unsafe moves easier
+					animate("SoftLanding")
+				else:
+					Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
+					animate("BlockRec") # so that you can't spam shorthop blocks
+					UniqChar.landing_sound()
 				
 			elif Animator.query_to_play(["Dodge", "DodgeRec", "SDash"]) or \
 					Animator.to_play_anim.begins_with("Burst"): # no landing
@@ -4951,7 +4954,7 @@ func is_super(move_name):
 	return false
 
 func can_air_strafe(move_data):
-	if move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY]: # Normal
+	if move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE]: # Normal
 		if Em.atk_attr.NO_STRAFE_NORMAL in move_data[Em.move.ATK_ATTR]:
 			return false # cannot strafe during some aerial normals
 	else: # non-Normal
@@ -6261,7 +6264,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 	
-	if Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+	if Em.hit.MULTIHIT in hit_data and Em.move.FIXED_ATKER_HITSTOP_MULTI in hit_data[Em.hit.MOVE_DATA]:
+		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP_MULTI]
+	
+	elif Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
 		# multi-hit special/super moves are done by having lower atker hitstop then defender hitstop, and high Em.move.HITCOUNT and ignore_time
 		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP]
 		
@@ -6680,11 +6686,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 						
-			Em.char_state.AIR_STARTUP:
-				if Animator.query_to_play(["SDashTransit"]) and Em.hit.NON_STRONG_PROJ in hit_data:
-					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
-					hit_data[Em.hit.SUPERARMORED] = true
-					hit_data[Em.hit.SDASH_ARMORED] = true
+#			Em.char_state.AIR_STARTUP:
+#				if Animator.query_to_play(["SDashTransit"]) and Em.hit.NON_STRONG_PROJ in hit_data:
+#					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
+#					hit_data[Em.hit.SUPERARMORED] = true
+#					hit_data[Em.hit.SDASH_ARMORED] = true
 			Em.char_state.AIR_REC:
 				 # air superdash has projectile superarmor against non-strong projectiles
 				if Animator.query_to_play(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
@@ -7421,6 +7427,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED and grounded:
 			velocity.y = 0 # set to horizontal pushback on blocking defender
 			
+			if !hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE]:
+				velocity.x = int(clamp(velocity.x, -300 * FMath.S, 300 * FMath.S)) # limit pushback on unsafe moves
+			
 			
 	if Globals.survival_level != null and get_tree().get_nodes_in_group("MobNodes").size() > 0:
 		match hit_data[Em.hit.BLOCK_STATE]:
@@ -7727,6 +7736,8 @@ func calculate_knockback_dir(hit_data) -> int:
 		elif Em.hit.VACPOINT in hit_data: # or vacuum towards VacPoint
 			var vac_vector := FVector.new()
 			vac_vector.set_from_vec(hit_data[Em.hit.VACPOINT] - hit_data[Em.hit.HIT_CENTER])
+			if sign(vac_vector.x) != sign(position.x - hit_data[Em.hit.ATKER_OR_ENTITY].position.x):
+				hit_data[Em.hit.PULL] = true
 			return vac_vector.angle()
 			
 		elif Em.move.FIXED_KB_ANGLE_MULTI in hit_data[Em.hit.MOVE_DATA]: # or fixed angle till the last hit
@@ -7933,6 +7944,9 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 				return PARRY_HITSTOP
 #			Em.block_state.PARRY:
 #				return PARRY_HITSTOP
+
+	if Em.hit.MULTIHIT in hit_data and Em.move.FIXED_HITSTOP_MULTI in hit_data[Em.hit.MOVE_DATA]:
+		return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTOP_MULTI]
 
 	# some moves have predetermined hitstop
 	if Em.move.FIXED_HITSTOP in hit_data[Em.hit.MOVE_DATA]:

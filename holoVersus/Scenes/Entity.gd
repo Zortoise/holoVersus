@@ -757,7 +757,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	# ENTITY HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame
 
-	if Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
+	if Em.hit.MULTIHIT in hit_data and Em.move.FIXED_ATKER_HITSTOP_MULTI in hit_data[Em.hit.MOVE_DATA]:
+		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP_MULTI]
+	
+	elif Em.move.FIXED_ATKER_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
 		hitstop = hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_ATKER_HITSTOP]
 		
 	elif hit_data[Em.hit.LETHAL_HIT]:
