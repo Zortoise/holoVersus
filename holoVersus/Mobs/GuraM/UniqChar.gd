@@ -2258,7 +2258,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			
 		"aL1Startup", "aL3Startup":
-			Character.velocity_limiter.x = 85
+#			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
 		"aL1Active", "aL3Active":
 			Character.velocity_limiter.x = 85
@@ -2267,7 +2267,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 85
 			
 		"aF2Startup":
-			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.x_slow = 10
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
 		"aF2Active":
@@ -2286,7 +2286,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 50
 			
 		"aF3Startup":
-			Character.velocity_limiter.x = 85
+#			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 0
 			Character.velocity_limiter.up = 100
 			Character.anim_gravity_mod = 0
@@ -2299,9 +2299,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 100
 			
 		"aHStartup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
-			Character.anim_gravity_mod = 0
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
+			Character.anim_gravity_mod = 20
 		"aHActive":
 			Character.velocity.set_vector(0, 0)
 			Character.velocity_limiter.x = 0
@@ -2341,8 +2341,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 70
 			
 		"aSP2Startup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 		"aSP2Active":
 			Character.velocity.set_vector(Character.facing * 500 * FMath.S, 0) # don't make multi-hit moves like this go fast

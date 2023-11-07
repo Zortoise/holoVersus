@@ -197,7 +197,11 @@ func setup():
 #	P1_assist = "GuraA" # TESTING
 #	P2_assist = "InaA" # TESTING
 			
-	if Globals.assists == 0:
+	if Globals.survival_level != null or Globals.assists > 1:
+		for player in Globals.player_count:
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").queue_free()
+			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/AssistList").show()
+	elif Globals.assists == 0:
 		for player in Globals.player_count:
 			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").queue_free()
 			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/AssistList").queue_free()
@@ -208,10 +212,6 @@ func setup():
 				HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").show()
 			else:
 				HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").hide()
-	elif Globals.assists > 1:
-		for player in Globals.player_count:
-			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/Assist").queue_free()
-			HUD.get_node("P" + str(player + 1) + "_HUDRect/GaugesUnder/AssistList").show()
 
 	# remove test stage node and add the real stage node
 #	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
@@ -2248,7 +2248,35 @@ func stock_points_update(character):
 				
 				
 func assist_update(character):
-	if Globals.assists == 1:	
+	if Globals.survival_level != null or Globals.assists > 1:
+		var assist_list = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/AssistList")
+		match character.assist_items.size():
+			0:
+				for assist_node in assist_list.get_children():
+					assist_node.hide()
+			1:
+				var assist_nodes: Array = assist_list.get_children()
+				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
+				assist_nodes[0].show()
+				assist_nodes[1].hide()
+				assist_nodes[2].hide()
+			2:
+				var assist_nodes: Array = assist_list.get_children()
+				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
+				assist_nodes[1].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[1]].icon
+				assist_nodes[0].show()
+				assist_nodes[1].show()
+				assist_nodes[2].hide()
+			3:
+				var assist_nodes: Array = assist_list.get_children()
+				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
+				assist_nodes[1].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[1]].icon
+				assist_nodes[2].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[2]].icon
+				assist_nodes[0].show()
+				assist_nodes[1].show()
+				assist_nodes[2].show()
+				
+	elif Globals.assists == 1:	
 		var assist_text = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/Assist/Text")
 		var assist_icon = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistNode/AssistChar")
 		
@@ -2290,33 +2318,6 @@ func assist_update(character):
 					assist_icon.material = null
 					assist_icon.modulate = Color(1,1,1)
 					
-	elif Globals.assists >= 0:
-		var assist_list = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/AssistList")
-		match character.assist_items.size():
-			0:
-				for assist_node in assist_list.get_children():
-					assist_node.hide()
-			1:
-				var assist_nodes: Array = assist_list.get_children()
-				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
-				assist_nodes[0].show()
-				assist_nodes[1].hide()
-				assist_nodes[2].hide()
-			2:
-				var assist_nodes: Array = assist_list.get_children()
-				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
-				assist_nodes[1].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[1]].icon
-				assist_nodes[0].show()
-				assist_nodes[1].show()
-				assist_nodes[2].hide()
-			3:
-				var assist_nodes: Array = assist_list.get_children()
-				assist_nodes[0].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[0]].icon
-				assist_nodes[1].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[1]].icon
-				assist_nodes[2].get_node("AssistChar").texture = Loader.NPC_data[character.assist_items[2]].icon
-				assist_nodes[0].show()
-				assist_nodes[1].show()
-				assist_nodes[2].show()
 
 				
 func burst_update(character):

@@ -2151,7 +2151,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_friction_mod = 150
 			
 		"aL1Startup", "aL3Startup":
-			Character.velocity_limiter.x = 85
+#			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
 		"aL1Active", "aL3Active":
 			Character.velocity_limiter.x = 85
@@ -2169,10 +2169,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"aL2LandRec":
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
 		"aF1Startup":
-			Character.velocity_limiter.x = 85
+#			Character.velocity_limiter.x = 85
 			Character.anim_gravity_mod = 75
-		"aF1[h]Startup":
-			Character.velocity_limiter.x = 85
+#		"aF1[h]Startup":
+#			Character.velocity_limiter.x = 85
 		"aF1Active":
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 100
@@ -2181,7 +2181,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 100
 		"aF2Startup":
-			Character.velocity_limiter.x_slow = 20
+			Character.velocity_limiter.x_slow = 10
 			Character.velocity_limiter.y_slow = 20
 			Character.anim_gravity_mod = 0
 		"aF2Active":
@@ -2200,7 +2200,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 50
 			
 		"aF3Startup":
-			Character.velocity_limiter.x = 85
+#			Character.velocity_limiter.x = 85
 			Character.velocity_limiter.down = 0
 			Character.velocity_limiter.up = 100
 			Character.anim_gravity_mod = 0
@@ -2212,9 +2212,9 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 75
 			Character.velocity_limiter.down = 100
 		"aHStartup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
-			Character.anim_gravity_mod = 0
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
+			Character.anim_gravity_mod = 20
 		"aHActive":
 			Character.velocity.set_vector(0, 0)
 			Character.velocity_limiter.x = 0
@@ -2305,8 +2305,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.down = 70
 			
 		"aSP2Startup", "aSP2[ex]Startup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 		"aSP2Active":
 			Character.velocity.set_vector(Character.facing * 400 * FMath.S, 0)
@@ -2341,7 +2341,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"aSP3Startup", "aSP3[h]Startup", "aSP3[ex]Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 		"aSP3Active", "SP3Active":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
@@ -2368,8 +2368,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_entity(Character.player_ID, "GroundFin", spawn_point, {"held" : true, "ex" : true}, Character.palette_number, NAME)
 			
 		"SP5Startup", "aSP5Startup", "SP5[ex]Startup", "aSP5[ex]Startup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 		"aSP5Active", "aSP5[h]Active", "aSP5[ex]Active":
@@ -2418,8 +2418,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.get_node("ModulatePlayer").play("unflinch_flash")
 		"aSP7Startup":
 			Character.face_opponent()
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 			Character.get_node("ModulatePlayer").play("unflinch_flash")
 		"aSP7Active":
@@ -2433,8 +2433,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.down = 10
 			
-		"SP8Startup":
-			Character.velocity_limiter.y_slow = 20
+#		"SP8Startup":
+#			Character.velocity_limiter.y_slow = 10
 		"SP8Active":
 			Character.velocity.set_vector(0, 0)
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \

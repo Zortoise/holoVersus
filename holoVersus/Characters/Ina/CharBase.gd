@@ -316,7 +316,7 @@ const MOVE_DATABASE = {
 	
 	"aSP3": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL,
-		Em.move.ATK_ATTR : [],
+		Em.move.ATK_ATTR : [Em.atk_attr.STRAFE_NON_NORMAL],
 	},
 	
 	"aSP4": {

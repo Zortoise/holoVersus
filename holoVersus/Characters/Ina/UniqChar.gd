@@ -293,6 +293,16 @@ func simulate():
 						Character.velocity.y = FMath.f_lerp(Character.velocity.y, float_vec.y, 10)
 						
 	# AIR STRAFE --------------------------------------------------------------------------------------------------
+				
+		Em.char_state.AIR_ATK_STARTUP:
+			if Animator.query_current(["aSP1Startup", "aSP1[ex]Startup", "aSP2Startup", "aSP2[ex]Startup", \
+					"aSP5Startup", "aSP5bStartup", "aSP5b[h]Startup", "aSP5[ex]Startup"]):
+#				if Character.dir != 0:
+#					Character.velocity.x += Character.dir * 50 * FMath.S
+				if Character.grounded and Character.v_dir > 0:
+					pass
+				elif Character.v_dir != 0:
+					Character.velocity.y += Character.v_dir * 20 * FMath.S
 						
 		Em.char_state.AIR_ATK_ACTIVE: # aH 8-way strafe
 			if Animator.query_current(["aHActive"]):
@@ -1974,8 +1984,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity_limiter.x = 0
 
 		"aL1Startup", "aL1Active", "aL2Startup", "aL2Active", "aL3Startup", "aL3Active", "aF1Startup", "aF2Startup", "aF3Startup", "aHStartup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 		"aL1Rec", "aL2Rec", "aL3Rec", "aF1Rec", "aF2Rec", "aF3Rec", "aHRec":
 			Character.velocity_limiter.x = 70
@@ -1994,8 +2004,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			
 		"aSP1Startup", "aSP1[ex]Startup", "aSP2Startup", "aSP2[ex]Startup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 		"aSP1Active", "aSP1[u]Active", "aSP1[d]Active":
 			stop_momentum()
@@ -2025,7 +2035,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"aSP3Startup":
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 			Character.unique_data.combination = [] # reset combinations
 		"aSP3Active":
@@ -2034,8 +2044,8 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 
 		"aSP4Startup", "aSP4[ex]Startup", "aSP5Startup", "aSP5bStartup", "aSP5b[h]Startup", "aSP5[ex]Startup":
-			Character.velocity_limiter.x_slow = 20
-			Character.velocity_limiter.y_slow = 20
+			Character.velocity_limiter.x_slow = 10
+			Character.velocity_limiter.y_slow = 10
 			Character.anim_gravity_mod = 0
 		"aSP4Active":
 			stop_momentum()

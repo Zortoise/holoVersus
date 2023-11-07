@@ -883,7 +883,7 @@ func simulate(new_input_state):
 	$HitStopTimer.simulate() # advancing the hitstop timer at start of frame allow for one frame of knockback before hitstop
 	# will be needed for multi-hit moves
 	
-	if Globals.assists != 0:
+	if Globals.assists != 0 or Globals.survival_level != null:
 		Globals.Game.assist_update(self) # update outside hitstun as well
 	
 	if stock_points_left > 0:
@@ -2727,13 +2727,13 @@ func capture_and_process_instant_actions(): # capture instant actions after dire
 		else:
 			UniqChar.capture_instant_actions() # scan for instant actions and add to instant_actions_temp
 			
-	if Globals.assists == 1 and assist != "":
-		instant_action_assist("AssistN", "AssistD")
-		check_for_assist()
-	elif Globals.assists > 1 and assist_items.size() > 0:
+	if (Globals.survival_level != null or Globals.assists > 1) and assist_items.size() > 0:
 		if button_aux in input_state.just_pressed:
 			instant_actions_temp.append("AssistI")
 		check_for_item_use()
+	elif Globals.assists == 1 and assist != "":
+		instant_action_assist("AssistN", "AssistD")
+		check_for_assist()
 		
 	UniqChar.process_instant_actions() # process stored instant actions in instant_actions array last frame
 	instant_actions = [] # stored instant_actions last frame are removed
@@ -8854,6 +8854,8 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		"SDashTransit":
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
+#			velocity.x = FMath.percent(velocity.x, 150)
+#			velocity.y = FMath.percent(velocity.y, 150)
 			velocity_limiter.x_slow = 10
 			velocity_limiter.y_slow = 10
 			afterimage_timer = 1 # sync afterimage trail
@@ -9122,11 +9124,11 @@ func save_state():
 	else:
 		state_data["FDITimer_time"] = $FDITimer.time
 		
-	if Globals.assists == 1:
+	if Globals.survival_level != null or Globals.assists > 1:
+		state_data["assist_items"] = assist_items
+	elif Globals.assists == 1:
 		state_data["assist_active"] = assist_active
 		state_data["AssistCDTimer_time"] = $AssistCDTimer.time
-	elif Globals.assists > 1:
-		state_data["assist_items"] = assist_items
 
 	return state_data
 	
@@ -9250,12 +9252,12 @@ func load_state(state_data, command_rewind := false):
 	$InstallTimer.time = state_data.InstallTimer_time
 	Globals.Game.install_update(self)
 	
-	if Globals.assists == 1:
+	if Globals.survival_level != null or Globals.assists > 1:
+		assist_items = state_data.assist_items
+		Globals.Game.assist_update(self)
+	elif Globals.assists == 1:
 		assist_active = state_data.assist_active
 		$AssistCDTimer.time = state_data.AssistCDTimer_time
-		Globals.Game.assist_update(self)
-	elif Globals.assists > 1:
-		assist_items = state_data.assist_items
 		Globals.Game.assist_update(self)
 	
 	if Globals.training_mode:
