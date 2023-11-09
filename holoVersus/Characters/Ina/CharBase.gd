@@ -181,7 +181,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
 		Em.move.KB_ANGLE : -90,
-		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS],
+		Em.move.ATK_ATTR : [Em.atk_attr.VULN_LIMBS, Em.atk_attr.ANTI_AIR],
 		Em.move.MOVE_SOUND : [{ ref = "blast4", aux_data = {"vol" : -15} }, { ref = "web1", aux_data = {"vol" : -12} }],
 		Em.move.HIT_SOUND : { ref = "impact42", aux_data = {"vol" : -15} },
 	},

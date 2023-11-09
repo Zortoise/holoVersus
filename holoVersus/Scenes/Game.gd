@@ -1609,7 +1609,7 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox[Em.hit.POLYGON], hurtbox[Em.hit.POLYGON])
 			if intersect_polygons.size() > 0: # detected a hit
 				
-				if defender_semi_invul(hitbox, attacker_or_entity, hurtbox, defender):
+				if defender_semi_invul(hitbox, attacker_or_entity, hurtbox, defender, defender_ID2):
 					pass # attacker must not be attacking a semi-invul defender unless with certain moves
 				else:
 					create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox)
@@ -1721,11 +1721,19 @@ func mob_projectile_miss(entity, defender):
 func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 
 #	if Globals.survival_level != null: return false # anti-air is not a thing in Survival
-
-	if attacker.grounded:
-		return false
-	elif attacker.get_feet_pos().y > defender.get_feet_pos().y:
-		return false # if attacker is airborne, they must be above defender
+		
+	match hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
+		Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY:
+			if attacker.new_state != Em.char_state.AIR_ATK_ACTIVE:
+				return false # attacker is using an ground normal/heavy, fail to anti-air
+		Em.atk_type.SPECIAL, Em.atk_type.EX:
+			if attacker.grounded: # attacker is grounded while using an air/ground special, fail to anti-air
+				return false
+		_:
+			return false # super cannot be anti-aired
+			
+	if attacker.get_feet_pos().y > defender.get_feet_pos().y:
+		return false # attacker is below defender, fail to anti-air
 		
 	if defender.is_atk_startup() or defender.is_atk_active():
 		
@@ -1766,12 +1774,18 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 #		return false
 	
 	
-func defender_semi_invul(hitbox, attacker, _hurtbox, defender):
-	var attacker_or_entity
-	if !Em.hit.ENTITY_PATH in hitbox: # not entity
-		attacker_or_entity = attacker
-	else:
-		attacker_or_entity = get_node(hitbox[Em.hit.ENTITY_PATH])
+func defender_semi_invul(hitbox, attacker_or_entity, _hurtbox, defender, defender_ID2):
+	
+#	var attacker_or_entity
+#	if !Em.hit.ENTITY_PATH in hitbox: # not entity
+#		attacker_or_entity = attacker
+#	else:
+#		attacker_or_entity = get_node(hitbox[Em.hit.ENTITY_PATH])
+		
+	if attacker_or_entity.is_hitcount_maxed(defender_ID2, hitbox[Em.hit.MOVE_DATA]):
+		return false
+	if !defender.has_method("perfect_dodge"):
+		return false
 		
 #	if Em.atk_attr.UNBLOCKABLE in hitbox.move_data[Em.move.ATK_ATTR] or \
 #			hitbox.move_data[Em.move.ATK_TYPE] in [Em.atk_type.SUPER]:

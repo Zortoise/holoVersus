@@ -2472,28 +2472,48 @@ func test_jump_cancel_active():
 				js_cancel_target = Em.js_cancel_target.SPECIALS
 			_:
 				js_cancel_target = Em.js_cancel_target.NONE
+				
+		afterimage_cancel()
 		return true
 		
 	return false
 	
 func test_dash_cancel():
-	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
-		return false # can only dash cancel on Normal/Heavy hit
+#	if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
+#		return false # can only dash cancel on Normal/Heavy hit
 		
 	if !grounded and air_dash == 0: return false # if in air, need >1 air dash left
 	
 	var move_name = get_move_name()
-	if Em.atk_attr.NO_REC_CANCEL in query_atk_attr(move_name) : return false # Normals with NO_REC_CANCEL cannot be dash cancelled
+	var atk_attr = query_atk_attr(move_name)
+	if Em.atk_attr.NO_REC_CANCEL in atk_attr : return false # Normals with NO_REC_CANCEL cannot be dash cancelled
+	
+	match chain_combo:
+		Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN:
+			return false
+		Em.chain_combo.NORMAL, Em.chain_combo.HEAVY:
+			pass
+		Em.chain_combo.WHIFF:
+			if !Em.atk_attr.DASH_CANCEL_ON_WHIFF in atk_attr:
+				return false
+		_:
+			if !Em.atk_attr.DASH_CANCEL_ON_HIT in atk_attr:
+				return false # some rare Specials can dash cancel on hit
 	
 	afterimage_cancel()
 	return true
 	
 	
 func test_dash_cancel_active():
+	
+	if !grounded and air_dash == 0: return false # if in air, need >1 air dash left
+	if chain_combo in [Em.chain_combo.RESET, Em.chain_combo.NO_CHAIN, Em.chain_combo.WHIFF]:
+		return false # on hit only
+		
 	var atk_attr = query_atk_attr(get_move_name())
-	if !active_cancel:
+	if !active_cancel and !Em.atk_attr.DASH_CANCEL_ACTIVE in atk_attr:
 		return false
-	if is_atk_active() and Em.atk_attr.LATE_CHAIN in atk_attr:
+	if Em.atk_attr.LATE_CHAIN in atk_attr:
 		return false
 		
 	afterimage_cancel()
