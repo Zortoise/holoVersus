@@ -269,7 +269,7 @@ func get_volume(bus_name: String):
 	if volume_db >= -6.0:
 		volume_ref = lerp(100, 70, volume_db / -6.0)
 	else:
-		volume_ref = lerp(70, 0, (volume_db + 6.0) / -54.0)
+		volume_ref = lerp(70, 0, (volume_db + 6.0) / -64.0)
 	
 	return volume_ref
 	
@@ -278,7 +278,7 @@ func set_volume(bus_name: String, volume_ref):
 	if volume_ref >= 70.0:
 		volume_db = lerp(-6.0, 0.0, (volume_ref - 70)/30.0)
 	else:
-		volume_db = lerp(-60.0, 6.0, volume_ref/70.0)
+		volume_db = lerp(-70.0, 6.0, volume_ref/70.0)
 		
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(bus_name), volume_db)
 	

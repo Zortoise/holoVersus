@@ -122,7 +122,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		"aSP3Active", "aSP3[h]Active", "aSP3[ex]Active", "aSP3bActive", "aSP3b[h]Active", "aSP3b[ex]Active", \
 				"SP3Active", "SP3[h]Active", "SP3[ex]Active", "SP3bActive", "SP3b[h]Active", "SP3b[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
-		"aSP3Rec", "aSP3[ex]Rec", "SP3Rec":
+		"aSP3bRec", "aSP3b[ex]Rec", "SP3bRec":
 			return Em.char_state.AIR_ATK_REC
 			
 		"SP4Startup", "SP4[ex]Startup":
@@ -138,9 +138,9 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.AIR_ATK_STARTUP
 		"aSP5Active", "aSP5[h]Active", "aSP5[ex]Active", "aSP5b[ex]Active":
 			return Em.char_state.AIR_ATK_ACTIVE
-		"aSP5Rec", "aSP5bRec", "aSP5[ex]Rec", "aSP5b[ex]Rec":
+		"aSP5Rec", "aSP5bRec", "aSP5b[ex]Rec", "aSP5c[ex]Rec":
 			return Em.char_state.AIR_ATK_REC
-		"SP5bRec", "SP5b[ex]Rec":
+		"SP5bRec", "SP5c[ex]Rec":
 			return Em.char_state.GRD_ATK_REC
 			
 		"SP6[ex]Startup":
@@ -273,9 +273,9 @@ func simulate():
 					Character.animate("aL2LandRec")
 					landing_sound()
 					
-			elif Animator.query_current(["aSP3Rec", "aSP3[ex]Rec"]):
+			elif Animator.query_current(["aSP3bRec", "aSP3b[ex]Rec"]):
 				if Character.grounded:
-					Character.animate("SP3Rec")
+					Character.animate("SP3bRec")
 					landing_sound()
 					Globals.Game.spawn_SFX("LandDust", "DustClouds", Character.get_feet_pos(), \
 								{"facing":Character.facing})
@@ -937,7 +937,7 @@ func update_uniqueHUD():
 func afterimage_trail():# process afterimage trail
 	match Character.new_state:
 		Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.AIR_FLINCH_HITSTUN, Em.char_state.LAUNCHED_HITSTUN:
-			if Character.get_node("FDITimer").is_running():
+			if Character.get_node("FDITimer").is_running() and Character.can_DI():
 				Character.afterimage_trail(null, 0.6, 10, Em.afterimage_shader.WHITE)
 		Em.char_state.GRD_D_REC:
 			if Animator.query_to_play(["Dash", "Dash[h]"]):
@@ -1083,7 +1083,7 @@ func refine_move_name(move_name):
 			return "aSP5[h]"
 		"SP5[ex]":
 			return "aSP5[ex]"
-		"SP5b[ex]":
+		"SP5b[ex]", "SP5c[ex]", "aSP5c[ex]":
 			return "aSP5b[ex]"
 		"SP6[ex]", "SP6[ex]Grab", "aSP6[ex]Grab":
 			return "aSP6[ex]"
@@ -1909,10 +1909,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP3[h]Active":
 			Character.animate("SP3b[h]Active")
 		"aSP3bActive", "aSP3b[h]Active", "SP3bActive", "SP3b[h]Active":
-			Character.animate("aSP3Rec")
-		"aSP3Rec":
+			Character.animate("aSP3bRec")
+		"aSP3bRec":
 			Character.animate("FallTransit")
-		"SP3Rec":
+		"SP3bRec":
 			Character.animate("Idle")
 			
 		"SP3[ex]Startup":
@@ -1926,12 +1926,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP3[ex]Active":
 			Character.animate("aSP3b[ex]Active")
 		"aSP3b[ex]Active":
-			Character.animate("aSP3[ex]Rec")
+			Character.animate("aSP3b[ex]Rec")
 		"SP3[ex]Active":
 			Character.animate("SP3b[ex]Active")
 		"SP3b[ex]Active":
-			Character.animate("aSP3[ex]Rec")
-		"aSP3[ex]Rec":
+			Character.animate("aSP3b[ex]Rec")
+		"aSP3b[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"SP4Startup":
@@ -1967,15 +1967,15 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"aSP5[ex]Active":
 			Character.animate("aSP5b[ex]Active")
 		"aSP5b[ex]Active":
-			Character.animate("aSP5[ex]Rec")
-		"aSP5[ex]Rec":
+			Character.animate("aSP5b[ex]Rec")
+		"aSP5b[ex]Rec":
 			if Character.is_on_ground():
-				Character.animate("SP5b[ex]Rec")
+				Character.animate("SP5c[ex]Rec")
 			else:
-				Character.animate("aSP5b[ex]Rec")
-		"SP5bRec", "SP5b[ex]Rec":
+				Character.animate("aSP5c[ex]Rec")
+		"SP5bRec", "SP5c[ex]Rec":
 			Character.animate("Idle")
-		"aSP5bRec", "aSP5b[ex]Rec":
+		"aSP5bRec", "aSP5c[ex]Rec":
 			Character.animate("FallTransit")
 			
 		"SP6[ex]Startup", "aSP6[ex]Startup":
@@ -2351,7 +2351,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.velocity.y = -700 * FMath.S
 			Character.anim_gravity_mod = 0
-		"aSP3Rec", "aSP3[ex]Rec":
+		"aSP3bRec", "aSP3b[ex]Rec":
 			Character.velocity_limiter.x = 70
 			
 		"SP4Active":
@@ -2382,7 +2382,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
-		"aSP5Rec", "aSP5[ex]Rec":
+		"aSP5Rec", "aSP5b[ex]Rec":
 			Character.velocity_limiter.down = 20
 			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 25

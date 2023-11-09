@@ -36,7 +36,7 @@ func _ready():
 func set_fade_sound(): # fade out sound when transiting to other scenes, called by animation
 	fade_sound = true
 	BGM.fade()
-	BGM.unmuffle()
+#	BGM.unmuffle()
 	
 func BGM_credits(music_dict: Dictionary):
 	if "name" in music_dict:
@@ -123,13 +123,15 @@ func start_battle_sound(): # play from animation player when BEGIN appears
 	
 func _on_Game_game_set():
 	$HUD/Announcer/AnimationPlayer.play("game_set")
-	play_audio("game_set", {"vol": -5, "bus" : "PitchUp"})
-	BGM.muffle()
+	play_audio("game_set", {"vol": -5})
+	BGM.fade()
+#	BGM.muffle()
 	
 func _on_Game_time_over():
 	$HUD/Announcer/AnimationPlayer.play("time_over")
 	play_audio("time_over", {})
-	BGM.muffle()
+	BGM.fade()
+#	BGM.muffle()
 
 func _on_Game_loaded_state():
 	$Test/SaveLoad.show()
@@ -167,14 +169,14 @@ func _on_level_cleared():
 	$HUD/Announcer2/Cleared.text = "CLEARED!"
 	$HUD/Announcer2/AnimationPlayer.play("all_wave_cleared")
 	Globals.survival_time = Globals.Game.frametime
-	play_audio("game_set", {"bus" : "PitchUp"})
-	BGM.muffle()
+	play_audio("game_set", {"vol": -5})
+	BGM.fade()
 	
 func _on_level_failed(wave_ID):
 	$HUD/Announcer2/Survival.text = "DEFEATED"
 	$HUD/Announcer2/Survival2.text = "SURVIVED TILL WAVE " + str(wave_ID)
 	$HUD/Announcer2/AnimationPlayer.play("defeated")
-	BGM.muffle()
+	BGM.fade()
 	play_audio("defeated", {})
 
 # ------------------------------------------------------------------------------------------------------------

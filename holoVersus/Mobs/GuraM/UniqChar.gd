@@ -1473,7 +1473,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 			return Em.char_state.GRD_ATK_STARTUP
 		"SP3Active", "SP3bActive":
 			return Em.char_state.AIR_ATK_ACTIVE
-		"aSP3Rec":
+		"aSP3bRec":
 			return Em.char_state.AIR_ATK_REC
 			
 		"SP6[ex]Startup":
@@ -2107,8 +2107,8 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP3Active":
 			Character.animate("SP3bActive")
 		"SP3bActive":
-			Character.animate("aSP3Rec")
-		"aSP3Rec":
+			Character.animate("aSP3bRec")
+		"aSP3bRec":
 			Character.animate("FallTransit")
 			
 		"SP6[ex]Startup":
@@ -2363,7 +2363,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 				Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.velocity.y = -700 * FMath.S
 			Character.anim_gravity_mod = 0
-		"aSP3Rec":
+		"aSP3bRec":
 			Character.velocity_limiter.x = 70
 			
 #		"SP6[ex]Startup":

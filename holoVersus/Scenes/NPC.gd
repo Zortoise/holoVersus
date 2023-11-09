@@ -3388,11 +3388,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
 	velocity.rotate(hit_data[Em.hit.KB_ANGLE])
 		
-	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED and grounded:
-		velocity.y = 0 # set to horizontal pushback on blocking defender
-		
-		if !hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE]:
-			velocity.x = int(clamp(velocity.x, -300 * FMath.S, 300 * FMath.S)) # limit pushback on unsafe moves
+#	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED and grounded:
+#		velocity.y = 0 # set to horizontal pushback on blocking defender
+#
+#		if !hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE]:
+#			velocity.x = int(clamp(velocity.x, -300 * FMath.S, 300 * FMath.S)) # limit pushback on unsafe moves
 
 		
 # HIT CALCULATION ---------------------------------------------------------------------------------------------------

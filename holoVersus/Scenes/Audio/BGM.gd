@@ -216,7 +216,6 @@ func check_custom():
 
 func fade():
 #	current_music = ""
-	
 	var old_bgm = get_tree().get_nodes_in_group("BGMPlayers")
 	for x in old_bgm:
 		x.decaying = true
