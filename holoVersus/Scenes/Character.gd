@@ -1180,10 +1180,8 @@ func simulate2(): # only ran if not in hitstop
 # FORCE DI --------------------------------------------------------------------------------------------------
 
 	if Globals.survival_level == null:
-		if is_hitstunned() and current_ex_gauge != 0:
-			if current_guard_gauge <= 0:
-				$FDITimer.stop()
-			elif can_DI():
+		if state == Em.char_state.LAUNCHED_HITSTUN and $HitStunTimer.is_running() and current_ex_gauge != 0 and current_guard_gauge > 0:
+			if can_DI():
 				if !$FDITimer.is_running():
 					if button_special in input_state.pressed:
 						$FDITimer.time = FDITimer_TIME
@@ -1320,12 +1318,15 @@ func simulate2(): # only ran if not in hitstop
 					var DDI_speed_limit: int
 					
 					var weight: = 100
-					if Globals.survival_level == null:
+					if !$HitStunTimer.is_running():
+						pass
+					elif Globals.survival_level == null:
 						if $FDITimer.is_running():
 	#						weight = FMath.percent(100 + weight, FDI_MOD)
 							weight = FDI_MOD
 						else:
 							weight = get_guard_gauge_percent_above()
+							
 					DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, weight)
 					DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, weight)
 					
@@ -1635,12 +1636,15 @@ func simulate2(): # only ran if not in hitstop
 		if is_hitstunned():
 			if can_DI(): # up/down DI, depends on Guard Gauge
 				var weight: = 100
-				if Globals.survival_level == null:
+				if !$HitStunTimer.is_running():
+					pass
+				elif Globals.survival_level == null:
 					if $FDITimer.is_running():
 #						weight = FMath.percent(100 + weight, FDI_MOD)
 						weight = FDI_MOD
 					else:
 						weight = get_guard_gauge_percent_above()
+						
 				if v_dir == -1: # DIing upward
 					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), weight)
 				elif v_dir == 1: # DIing downward
@@ -4437,7 +4441,9 @@ func get_pos_from_feet(feet_pos: Vector2):
 #		return Globals.Game.rng_generate(upper_limit)
 #	else: return null
 	
-func can_DI(): # already checked for HitStunTimer
+func can_DI():
+	if !$HitStunTimer.is_running(): # techable hitstun max out DI
+		return true
 	if Globals.survival_level == null:
 		if current_guard_gauge <= 0:
 			return false
@@ -6322,9 +6328,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
 						chain_combo = Em.chain_combo.NORMAL
-						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
-							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-								active_cancel = true
+#						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
+#							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+#								active_cancel = true
 						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.HEAVY:
@@ -6647,6 +6653,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.SINGLE_REPEAT] = true
+		
+		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX]:
+			hit_data[Em.hit.DOUBLE_REPEAT] = true # specials and EX cannot repeat
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
 	

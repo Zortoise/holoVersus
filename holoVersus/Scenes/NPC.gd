@@ -3028,9 +3028,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 					Em.atk_type.LIGHT, Em.atk_type.FIERCE:
 						chain_combo = Em.chain_combo.NORMAL
-						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
-							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-								active_cancel = true
+#						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
+#							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+#								active_cancel = true
 						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.HEAVY:
