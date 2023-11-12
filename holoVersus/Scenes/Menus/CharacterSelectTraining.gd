@@ -433,11 +433,11 @@ func move_pickers(dir):
 			P1_changed_character()
 		if dir.y == 1:
 			P1_picker_pos += $Grid.columns
-			if P1_picker_pos >= $Grid.columns * 3: P1_picker_pos -= $Grid.columns * 3
+			if P1_picker_pos >= $Grid.columns * max_rows: P1_picker_pos -= $Grid.columns * max_rows
 			P1_changed_character()
 		elif dir.y == -1:
 			P1_picker_pos -= $Grid.columns
-			if P1_picker_pos < 0: P1_picker_pos += $Grid.columns * 3
+			if P1_picker_pos < 0: P1_picker_pos += $Grid.columns * max_rows
 			P1_changed_character()
 		
 	if phase == 1:
@@ -455,7 +455,7 @@ func move_pickers(dir):
 			P2_changed_character()
 		if dir.y == 1:
 			P2_picker_pos += $Grid.columns
-			if P2_picker_pos >= $Grid.columns * 3: P2_picker_pos -= $Grid.columns * max_rows
+			if P2_picker_pos >= $Grid.columns * max_rows: P2_picker_pos -= $Grid.columns * max_rows
 			P2_changed_character()
 		elif dir.y == -1:
 			P2_picker_pos -= $Grid.columns
