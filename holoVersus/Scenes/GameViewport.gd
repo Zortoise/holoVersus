@@ -32,6 +32,10 @@ func _ready():
 		$HUD/P2_HUDRect/Portrait/ProfileName.show()
 		$HUD/P2_HUDRect/Portrait/ProfileName.text = Globals.replay_profiles[1]
 		
+	else:
+		$HUD/P1_HUDRect/Portrait/ProfileName.hide()
+		$HUD/P2_HUDRect/Portrait/ProfileName.hide()
+		
 	
 func set_fade_sound(): # fade out sound when transiting to other scenes, called by animation
 	fade_sound = true

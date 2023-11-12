@@ -1,14 +1,14 @@
 [gd_scene load_steps=78 format=2]
 
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=1]
-[ext_resource path="res://Assets/UI/character_picker_P1.png" type="Texture" id=2]
+[ext_resource path="res://Assets/UI/character_picker2_P1.png" type="Texture" id=2]
 [ext_resource path="res://Assets/UI/character_select.png" type="Texture" id=3]
 [ext_resource path="res://Scenes/Menus/CharacterGrid.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Characters/Gura/UI/full_art.png" type="Texture" id=5]
 [ext_resource path="res://Scenes/Shaders/White.gdshader" type="Shader" id=6]
 [ext_resource path="res://Scenes/Menus/Buttons/ButtonTypeE2.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Stages/Aurora/Resources/select.png" type="Texture" id=8]
-[ext_resource path="res://Assets/UI/character_picker_P2.png" type="Texture" id=9]
+[ext_resource path="res://Assets/UI/character_picker2_P2.png" type="Texture" id=9]
 [ext_resource path="res://Characters/Ina/UI/full_art.png" type="Texture" id=10]
 [ext_resource path="res://Assets/UI/assist_select_back.png" type="Texture" id=11]
 [ext_resource path="res://Scenes/Shaders/Palette.gdshader" type="Shader" id=12]
@@ -260,7 +260,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Color( 0, 0, 0, 1 ) ]
+"values": [ Color( 1, 1, 1, 1 ) ]
 }
 
 [sub_resource type="Animation" id=25]
@@ -292,7 +292,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Color( 0, 0, 0, 1 ) ]
+"values": [ Color( 1, 1, 1, 1 ) ]
 }
 
 [sub_resource type="Animation" id=27]
@@ -870,28 +870,31 @@ align = 1
 valign = 2
 
 [node name="P1_Sprite" type="Node2D" parent="."]
-position = Vector2( 640, 576 )
+position = Vector2( 640, 546 )
 scale = Vector2( 3, 3 )
 
 [node name="SelectSprite" parent="P1_Sprite" instance=ExtResource( 17 )]
-frame = 4
+frame = 6
 
 [node name="P2_Sprite" type="Node2D" parent="."]
-position = Vector2( 1280, 576 )
+position = Vector2( 1280, 546 )
 scale = Vector2( -3, 3 )
 
 [node name="SelectSprite" parent="P2_Sprite" instance=ExtResource( 17 )]
 material = SubResource( 28 )
-frame = 3
+frame = 5
 
 [node name="Grid" parent="." instance=ExtResource( 4 )]
+margin_left = 612.5
+margin_top = 625.0
+margin_right = 1306.5
+margin_bottom = 1055.0
 
 [node name="P1_Picker" type="TextureRect" parent="."]
-modulate = Color( 0, 0, 0, 1 )
 margin_left = 899.0
 margin_top = 652.0
-margin_right = 1020.0
-margin_bottom = 773.0
+margin_right = 977.0
+margin_bottom = 856.0
 texture = ExtResource( 2 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="P1_Picker"]
@@ -900,11 +903,10 @@ anims/RESET = SubResource( 24 )
 anims/flashing = SubResource( 25 )
 
 [node name="P2_Picker" type="TextureRect" parent="."]
-modulate = Color( 0, 0, 0, 1 )
 margin_left = 899.0
 margin_top = 652.0
-margin_right = 1020.0
-margin_bottom = 773.0
+margin_right = 977.0
+margin_bottom = 856.0
 texture = ExtResource( 9 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="P2_Picker"]

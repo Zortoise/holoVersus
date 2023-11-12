@@ -11,12 +11,12 @@ onready var loaded_stagelabel = load("res://Scenes/Menus/StageLabel.tscn")
 
 var character_data = { # to be filled at _ready()
 	"Random" : {
-		"portrait" : ResourceLoader.load("res://Assets/UI/portrait_question.png"),
+		"portrait" : load("res://Assets/UI/PortraitRandom.tscn"),
 		"art" : ResourceLoader.load("res://Assets/UI/random.png"),
 		"name" : "Random"
 	}
 #	"Gura" : {
-#		"portrait" : ResourceLoader.load("res://Characters/Gura/UI/portrait.png"), 
+#		"portrait" : load("res://Characters/Gura/Portrait.tscn"), 
 #		"art" : ResourceLoader.load("res://Characters/Gura/UI/full_art.png"),
 #		"select_sprite" : load("res://Characters/Gura/SelectSprite.tscn"),
 #		"palettes" : { 
@@ -74,7 +74,7 @@ func _ready():
 		while character_name != "":
 			if !character_name.begins_with("."):
 				character_data[character_name] = {}
-				character_data[character_name]["portrait"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/portrait.png")
+				character_data[character_name]["portrait"] = load("res://Characters/" + character_name + "/Portrait.tscn")
 				character_data[character_name]["art"] = ResourceLoader.load("res://Characters/" + character_name + "/UI/full_art.png")
 				character_data[character_name]["select_sprite"] = load("res://Characters/" + character_name + "/SelectSprite.tscn")
 				var character_file = load("res://Characters/" + character_name + "/UniqChar.tscn").instance()
@@ -224,13 +224,13 @@ func load_last_picked(last_picked):
 func populate_char_grid():
 	
 	var total = $Grid.get_child_count()
-	grid_dimensions[0] = $Grid.columns # 10
-	grid_dimensions[1] = int(ceil(total/grid_dimensions[0])) # 3
+	grid_dimensions[0] = $Grid.columns # 8
+	grid_dimensions[1] = int(ceil(total/grid_dimensions[0])) # 2
 	
-	var center_indexes = [] # 5, 15, 25
-	var left_indexes = [] # 0, 10, 20
-	var right_indexes = [] # 9, 19, 29
-	var center_point = int(ceil((grid_dimensions[0] + 1) / 2.0)) - 1 # 5
+	var center_indexes = [] # 4, 12
+	var left_indexes = [] # 0, 8
+	var right_indexes = [] # 7, 15
+	var center_point = int(ceil((grid_dimensions[0] + 1) / 2.0)) - 1 # 4
 	
 	for y in grid_dimensions[1]:
 		center_indexes.append(center_point + (y * grid_dimensions[0]))
@@ -239,7 +239,7 @@ func populate_char_grid():
 		
 	var index_array = []
 	for level in center_indexes.size():
-		var current_coord = center_indexes[level]
+		var current_coord = center_indexes[level] # 4, 12
 		var changer := -1
 		while current_coord >= left_indexes[level] and current_coord <= right_indexes[level]:
 			index_array.append(current_coord)
@@ -268,7 +268,8 @@ func populate_char_grid():
 		char_grid[index_array[char_pos]] = char_names[char_pos]
 
 	for character_number in char_grid.keys():
-		$Grid.get_child(character_number).texture = character_data[char_grid[character_number]]["portrait"]
+		var new_sprite = character_data[char_grid[character_number]]["portrait"].instance()
+		$Grid.get_child(character_number).add_child(new_sprite)
 		$Grid.get_child(character_number).modulate = Color(1.0, 1.0, 1.0, 1.0)
 		
 	P1_picker_pos = center_point - (1 - posmod(grid_dimensions[0], 2))
@@ -486,26 +487,28 @@ func _physics_process(_delta):
 	
 func move_pickers(P1_dir, P2_dir):
 	
+	var max_rows := int(ceil($Grid.get_child_count()/$Grid.columns))
+	
 	if P1_phase == 0:
 		if P1_dir.x == 1:
 			P1_picker_pos += 1
 			if P1_picker_pos == $Grid.columns: P1_picker_pos = 0
 			elif P1_picker_pos == $Grid.columns * 2: P1_picker_pos = $Grid.columns
-			elif P1_picker_pos == $Grid.columns * 3: P1_picker_pos = $Grid.columns * 2
+#			elif P1_picker_pos == $Grid.columns * 3: P1_picker_pos = $Grid.columns * 2
 			P1_changed_character()
 		elif P1_dir.x == -1:
 			P1_picker_pos -= 1
 			if P1_picker_pos == -1: P1_picker_pos = $Grid.columns - 1
 			elif P1_picker_pos == $Grid.columns - 1: P1_picker_pos = ($Grid.columns * 2) - 1
-			elif P1_picker_pos == ($Grid.columns * 2) - 1: P1_picker_pos = ($Grid.columns * 3) - 1
+#			elif P1_picker_pos == ($Grid.columns * 2) - 1: P1_picker_pos = ($Grid.columns * 3) - 1
 			P1_changed_character()
 		if P1_dir.y == 1:
 			P1_picker_pos += $Grid.columns
-			if P1_picker_pos >= $Grid.columns * 3: P1_picker_pos -= $Grid.columns * 3
+			if P1_picker_pos >= $Grid.columns * max_rows: P1_picker_pos -= $Grid.columns * max_rows
 			P1_changed_character()
 		elif P1_dir.y == -1:
 			P1_picker_pos -= $Grid.columns
-			if P1_picker_pos < 0: P1_picker_pos += $Grid.columns * 3
+			if P1_picker_pos < 0: P1_picker_pos += $Grid.columns * max_rows
 			P1_changed_character()
 		
 	if P2_phase == 0:
@@ -513,21 +516,21 @@ func move_pickers(P1_dir, P2_dir):
 			P2_picker_pos += 1
 			if P2_picker_pos == $Grid.columns: P2_picker_pos = 0
 			elif P2_picker_pos == $Grid.columns * 2: P2_picker_pos = $Grid.columns
-			elif P2_picker_pos == $Grid.columns * 3: P2_picker_pos = $Grid.columns * 2
+#			elif P2_picker_pos == $Grid.columns * 3: P2_picker_pos = $Grid.columns * 2
 			P2_changed_character()
 		elif P2_dir.x == -1:
 			P2_picker_pos -= 1
 			if P2_picker_pos == -1: P2_picker_pos = $Grid.columns - 1
 			elif P2_picker_pos == $Grid.columns - 1: P2_picker_pos = ($Grid.columns * 2) - 1
-			elif P2_picker_pos == ($Grid.columns * 2) - 1: P2_picker_pos = ($Grid.columns * 3) - 1
+#			elif P2_picker_pos == ($Grid.columns * 2) - 1: P2_picker_pos = ($Grid.columns * 3) - 1
 			P2_changed_character()
 		if P2_dir.y == 1:
 			P2_picker_pos += $Grid.columns
-			if P2_picker_pos >= $Grid.columns * 3: P2_picker_pos -= $Grid.columns * 3
+			if P2_picker_pos >= $Grid.columns * max_rows: P2_picker_pos -= $Grid.columns * max_rows
 			P2_changed_character()
 		elif P2_dir.y == -1:
 			P2_picker_pos -= $Grid.columns
-			if P2_picker_pos < 0: P2_picker_pos += $Grid.columns * 3
+			if P2_picker_pos < 0: P2_picker_pos += $Grid.columns * max_rows
 			P2_changed_character()		
 	
 func P1_changed_character():

@@ -1,16 +1,14 @@
-[gd_scene load_steps=195 format=2]
+[gd_scene load_steps=194 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://Scenes/GameViewport.gd" type="Script" id=4]
-[ext_resource path="res://Assets/UI/portrait_frame.png" type="Texture" id=5]
 [ext_resource path="res://Scenes/FrameViewer.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Assets/UI/gauges_under.png" type="Texture" id=7]
 [ext_resource path="res://Assets/UI/guard_gauge2.png" type="Texture" id=8]
 [ext_resource path="res://Assets/UI/EX_gauge.png" type="Texture" id=9]
 [ext_resource path="res://Assets/UI/guard_gauge1.png" type="Texture" id=10]
-[ext_resource path="res://Characters/Gura/UI/portrait.png" type="Texture" id=11]
 [ext_resource path="res://Assets/UI/gauges_frame.png" type="Texture" id=12]
 [ext_resource path="res://Assets/Fonts/BLKCHCRY.TTF" type="DynamicFontData" id=13]
 [ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=14]
@@ -54,7 +52,8 @@
 [ext_resource path="res://Scenes/Menus/P1DirInputs.gd" type="Script" id=52]
 [ext_resource path="res://Assets/UI/ring_front.png" type="Texture" id=53]
 [ext_resource path="res://Scenes/AssistNode.tscn" type="PackedScene" id=54]
-[ext_resource path="res://Characters/Ina/UI/portrait.png" type="Texture" id=57]
+[ext_resource path="res://Assets/UI/portrait_frame.png" type="Texture" id=55]
+[ext_resource path="res://Assets/UI/portrait_game_back.png" type="Texture" id=56]
 
 [sub_resource type="Animation" id=5]
 length = 0.001
@@ -3698,13 +3697,15 @@ margin_bottom = 1080.0
 self_modulate = Color( 0.701961, 0.501961, 0.909804, 1 )
 material = SubResource( 106 )
 position = Vector2( 153, 106 )
-texture = ExtResource( 57 )
+texture = ExtResource( 56 )
+
+[node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
 
 [node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
-texture = ExtResource( 5 )
+texture = ExtResource( 55 )
 
 [node name="DamageNode" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
-position = Vector2( 87, -10 )
+position = Vector2( 53, -10 )
 
 [node name="DamageValue" type="Label" parent="HUD/P1_HUDRect/Portrait/DamageNode"]
 margin_right = 232.0
@@ -3727,13 +3728,13 @@ anims/RESET = SubResource( 70 )
 anims/flashing = SubResource( 87 )
 
 [node name="Stock" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
-position = Vector2( 104, -36 )
+position = Vector2( 70, -36 )
 texture = ExtResource( 38 )
 
 [node name="StockPoints" type="Label" parent="HUD/P1_HUDRect/Portrait"]
-margin_left = 133.0
+margin_left = 99.0
 margin_top = -60.0
-margin_right = 233.0
+margin_right = 199.0
 margin_bottom = -13.0
 custom_colors/font_color = Color( 0.890196, 0.219608, 0.219608, 1 )
 custom_fonts/font = SubResource( 3 )
@@ -3741,7 +3742,6 @@ text = "9"
 valign = 2
 
 [node name="ProfileName" type="Label" parent="HUD/P1_HUDRect/Portrait"]
-visible = false
 margin_left = -153.0
 margin_top = -98.0
 margin_right = 327.0
@@ -3771,24 +3771,23 @@ anims/gray = SubResource( 113 )
 position = Vector2( 0, 2 )
 
 [node name="Prism" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Prism"]
-position = Vector2( -33, 85 )
+position = Vector2( -14, 85 )
 texture = ExtResource( 43 )
 
 [node name="Amount" type="Label" parent="HUD/P1_HUDRect/Portrait/Prism"]
-margin_left = -8.0
+margin_left = 11.0
 margin_top = 73.0
-margin_right = 249.0
+margin_right = 268.0
 margin_bottom = 101.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 150 )
 text = "8888"
 
 [node name="InstallTime" type="TextureProgress" parent="HUD/P1_HUDRect/Portrait"]
-visible = false
-margin_left = -7.0
-margin_top = -5.0
-margin_right = 70.0
-margin_bottom = 72.0
+margin_left = -97.0
+margin_top = -66.0
+margin_right = -20.0
+margin_bottom = 11.0
 value = 50.0
 texture_under = ExtResource( 44 )
 texture_progress = ExtResource( 53 )
@@ -4010,13 +4009,15 @@ margin_bottom = 1080.0
 [node name="Portrait" type="Sprite" parent="HUD/P2_HUDRect"]
 material = SubResource( 107 )
 position = Vector2( 153, 106 )
-texture = ExtResource( 11 )
+texture = ExtResource( 56 )
+
+[node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
 
 [node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
-texture = ExtResource( 5 )
+texture = ExtResource( 55 )
 
 [node name="DamageNode" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
-position = Vector2( 87, -10 )
+position = Vector2( 53, -10 )
 
 [node name="DamageValue" type="Label" parent="HUD/P2_HUDRect/Portrait/DamageNode"]
 margin_right = 232.0
@@ -4039,13 +4040,13 @@ anims/RESET = SubResource( 88 )
 anims/flashing = SubResource( 89 )
 
 [node name="Stock" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
-position = Vector2( 104, -36 )
+position = Vector2( 70, -36 )
 texture = ExtResource( 38 )
 
 [node name="StockPoints" type="Label" parent="HUD/P2_HUDRect/Portrait"]
-margin_left = 133.0
+margin_left = 99.0
 margin_top = -60.0
-margin_right = 233.0
+margin_right = 199.0
 margin_bottom = -13.0
 custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
 custom_fonts/font = SubResource( 3 )
@@ -4053,7 +4054,6 @@ text = "9"
 valign = 2
 
 [node name="ProfileName" type="Label" parent="HUD/P2_HUDRect/Portrait"]
-visible = false
 margin_left = -153.0
 margin_top = -98.0
 margin_right = 327.0
@@ -4080,11 +4080,10 @@ anims/flash = SubResource( 125 )
 anims/gray = SubResource( 126 )
 
 [node name="InstallTime" type="TextureProgress" parent="HUD/P2_HUDRect/Portrait"]
-visible = false
-margin_left = -7.0
-margin_top = -5.0
-margin_right = 70.0
-margin_bottom = 72.0
+margin_left = -97.0
+margin_top = -66.0
+margin_right = -20.0
+margin_bottom = 11.0
 value = 50.0
 texture_under = ExtResource( 44 )
 texture_progress = ExtResource( 53 )
@@ -4095,13 +4094,13 @@ tint_progress = Color( 0.945098, 0.470588, 1, 1 )
 position = Vector2( 0, 2 )
 
 [node name="Prism" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Prism"]
-position = Vector2( -33, 85 )
+position = Vector2( -14, 85 )
 texture = ExtResource( 43 )
 
 [node name="Amount" type="Label" parent="HUD/P2_HUDRect/Portrait/Prism"]
-margin_left = -8.0
+margin_left = 11.0
 margin_top = 73.0
-margin_right = 249.0
+margin_right = 268.0
 margin_bottom = 101.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 150 )

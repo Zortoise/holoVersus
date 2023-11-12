@@ -73,13 +73,13 @@ const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "blue"
 const SDHitspark_COLOR = "blue"
 
-const PALETTE_TO_PORTRAIT = {
-	1: Color(0.75, 0.93, 1.25),
-	2: Color(1.20, 0.70, 0.70),
-	3: Color(0.75, 0.90, 0.70),
-	4: Color(1.00, 1.00, 1.10),
-	5: Color(0.50, 0.90, 1.00),
-}
+#const PALETTE_TO_PORTRAIT = {
+#	1: Color(0.75, 0.93, 1.25),
+#	2: Color(1.20, 0.70, 0.70),
+#	3: Color(0.75, 0.90, 0.70),
+#	4: Color(1.00, 1.00, 1.10),
+#	5: Color(0.50, 0.90, 1.00),
+#}
 
 const PALETTE_TO_HITSPARK_PALETTE = {
 	3: "green",

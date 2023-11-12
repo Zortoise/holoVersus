@@ -400,12 +400,19 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	sfx_under.hide()
 	sfx_over.hide()
 	
-	Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").texture = \
-			ResourceLoader.load("res://Characters/" + Globals.get("P" + str(player_ID + 1) + "_char_ref") + "/UI/portrait.png")
+	var new_portrait = load("res://Characters/" + Globals.get("P" + str(player_ID + 1) + "_char_ref") + "/PortraitGame.tscn").instance()
+	Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait/CharPortrait").add_child(new_portrait)
 
-	if palette_number in UniqChar.PALETTE_TO_PORTRAIT:
-		Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").self_modulate = \
-			UniqChar.PALETTE_TO_PORTRAIT[palette_number]
+	if palette_number <= 1:
+		new_portrait.get_node("Base").material = null
+	else:
+		new_portrait.get_node("Base").material = ShaderMaterial.new()
+		new_portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
+		new_portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
+		
+#	if palette_number in UniqChar.PALETTE_TO_PORTRAIT:
+#		Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").self_modulate = \
+#			UniqChar.PALETTE_TO_PORTRAIT[palette_number]
 	
 	if Globals.training_mode:
 		stock_points_left = 10000
