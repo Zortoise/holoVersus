@@ -6707,7 +6707,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 					(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
-					(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
+					(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+					(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
 				
@@ -7700,6 +7701,9 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	
 func calculate_knockback_strength(hit_data) -> int:
 
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] == 1: # not adjusted, for weak projectiles
+		return 0
+
 	var knockback_strength: int = hit_data[Em.hit.MOVE_DATA][Em.move.KB] # scaled by FMath.S
 	
 	if hit_data[Em.hit.SEMI_DISJOINT]:
@@ -7987,6 +7991,9 @@ func check_if_crossed_up(attacker_or_entity, angle_to_atker, atker_move_data):
 
 
 func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop determined by knockback power
+		
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] == 1: # for weak projectiles
+		return 0
 		
 	if Em.hit.SUPERARMORED in hit_data:
 		return PARRY_HITSTOP

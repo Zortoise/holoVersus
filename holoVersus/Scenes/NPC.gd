@@ -3193,7 +3193,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if hit_data[Em.hit.CROSSED_UP]:
 					continue # armored moves only armor from front unless has BI_DIR_ARMOR
 				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
-						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
+						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+						(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					

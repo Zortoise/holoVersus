@@ -372,7 +372,7 @@ const MOVE_DATABASE = {
 	"SP1": {
 		Em.move.ATK_TYPE : Em.atk_type.SPECIAL, # used for chaining
 #		"reset_type" : Globals.reset_type.ACTIVE_RESET,
-		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT],
+		Em.move.ATK_ATTR : [Em.atk_attr.AIR_REPEAT, Em.atk_attr.DASH_CANCEL_ON_WHIFF],
 	},
 	"SP1[ex]": {
 		Em.move.ATK_TYPE : Em.atk_type.EX,

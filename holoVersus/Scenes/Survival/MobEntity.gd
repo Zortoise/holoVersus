@@ -182,10 +182,10 @@ func simulate2(): # only ran if not in hitstop
 		return
 	
 	
-	if abs(velocity.x) < 5 * FMath.S:
-		velocity.x = 0
-	if abs(velocity.y) < 5 * FMath.S:
-		velocity.y = 0
+#	if abs(velocity.x) < 5 * FMath.S:
+#		velocity.x = 0
+#	if abs(velocity.y) < 5 * FMath.S:
+#		velocity.y = 0
 	
 	# movement
 	if has_node("EntityCollisionBox"):

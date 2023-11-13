@@ -383,15 +383,25 @@ func simulate():
 						if Character.unique_data.combination.size() < 3:
 							Globals.Game.spawn_SFX("Music1", "Music", Character.position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
 							Character.play_audio("bling8", {"vol": -15, "bus":"PitchDown"})
-									
-					if Character.unique_data.combination.size() >= 3:
-						Character.animate("aSP3Rec")
-						process_combination()
-						Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
-								Character.palette_number, NAME)
-						Character.play_audio("buff1", {"vol": -20})
-						Character.play_audio("bling8", {"vol": -10})
-						Character.unique_data.combination = []
+						
+					if has_tako():			
+						if Character.unique_data.combination.size() >= 3:
+							Character.animate("aSP3Rec")
+							process_combination()
+							Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+									Character.palette_number, NAME)
+							Character.play_audio("buff1", {"vol": -20})
+							Character.play_audio("bling8", {"vol": -10})
+							Character.unique_data.combination = []
+					else:
+						if Character.unique_data.combination.size() >= 2:
+							Character.animate("aSP3Rec")
+							process_combination(true)
+							Globals.Game.spawn_SFX("Music2", "Music", Character.position, {"facing": Character.facing, "spin_speed":1, "back":true}, \
+									Character.palette_number, NAME)
+							Character.play_audio("buff1", {"vol": -20})
+							Character.play_audio("bling8", {"vol": -10})
+							Character.unique_data.combination = []	
 					
 		# triggering tako command
 		Em.char_state.AIR_STANDBY, Em.char_state.GRD_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.GRD_C_REC, \
@@ -1410,7 +1420,18 @@ func has_drill() -> bool:
 				!entity.Animator.current_anim.ends_with("Kill"):
 			return true # found a drill
 	return false # no drill
-	
+
+func has_tako() -> bool:
+	var entity_array := []
+	if Globals.player_count > 2:
+		entity_array = get_tree().get_nodes_in_group("EntityNodes")
+	else:
+		entity_array = get_tree().get_nodes_in_group("P" + str(Character.player_ID + 1) + "EntityNodes")
+	for entity in entity_array:
+		if !entity.free and entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "tako" and \
+				entity.Animator.current_anim != "Kill":
+			return true
+	return false
 	
 func get_takos() -> Array:
 	var tako_array := []
@@ -1453,34 +1474,82 @@ func expire_extra_takos():
 				oldest_tako.UniqEntity.expire()
 				tako_array.erase(oldest_tako)
 				
-func process_combination():
-	match Character.unique_data.combination:
-		[Character.button_light, Character.button_light, Character.button_light]:
-			Character.unique_data.instant_command = "redirect"
-					
-		[Character.button_fierce, Character.button_fierce, Character.button_fierce]:
-			Character.unique_data.instant_command = "slow"
-					
-		[Character.button_fierce, Character.button_fierce, Character.button_light]:
-			Character.unique_data.instant_command = "chase"
-					
-		[Character.button_light, Character.button_light, Character.button_fierce]:
-			Character.unique_data.instant_command = "rally"
-					
-		[Character.button_fierce, Character.button_light, Character.button_fierce]:
-			var closest_tako = get_closest_tako()
-			if closest_tako != null:
-				closest_tako.UniqEntity.explode()
-			Character.unique_data.instant_command = "expire"
-					
-		[Character.button_light, Character.button_fierce, Character.button_light]:
-			Character.unique_data.instant_command = "invis"
-					
-		[Character.button_light, Character.button_fierce, Character.button_fierce]:
-			Character.unique_data.instant_command = "enhance"
-					
-		[Character.button_fierce, Character.button_light, Character.button_light]:
-			Character.unique_data.instant_command = "scatter"
+func process_combination(no_tako := false):
+	if !no_tako:
+		match Character.unique_data.combination:
+			[Character.button_light, Character.button_light, Character.button_light]:
+				Character.unique_data.instant_command = "redirect"
+						
+			[Character.button_fierce, Character.button_fierce, Character.button_fierce]:
+				Character.unique_data.instant_command = "slow"
+						
+			[Character.button_fierce, Character.button_fierce, Character.button_light]:
+				Character.unique_data.instant_command = "chase"
+						
+			[Character.button_light, Character.button_light, Character.button_fierce]:
+				Character.unique_data.instant_command = "rally"
+						
+			[Character.button_fierce, Character.button_light, Character.button_fierce]:
+				var closest_tako = get_closest_tako()
+				if closest_tako != null:
+					closest_tako.UniqEntity.explode()
+				Character.unique_data.instant_command = "expire"
+						
+			[Character.button_light, Character.button_fierce, Character.button_light]:
+				Character.unique_data.instant_command = "invis"
+						
+			[Character.button_light, Character.button_fierce, Character.button_fierce]:
+				Character.unique_data.instant_command = "enhance"
+						
+			[Character.button_fierce, Character.button_light, Character.button_light]:
+				Character.unique_data.instant_command = "scatter"
+	else:
+		var orig_position: Vector2 = Character.get_target().position
+		var spawn_position: Vector2 = orig_position
+		var style := ""
+		var combo := [Character.unique_data.combination[0], Character.unique_data.combination[1]]
+		match combo:
+			[Character.button_light, Character.button_light]:
+				style = "sine_down"
+				spawn_position += Vector2(0, -120)
+			[Character.button_light, Character.button_fierce], [Character.button_fierce, Character.button_light]:
+				style = "curve_front"
+				spawn_position += Vector2(130 * -Character.facing, -70)
+#			[Character.button_fierce, Character.button_light]:
+#				style = "curve_back"
+#				spawn_position += Vector2(130 * Character.facing, -70)
+			[Character.button_fierce, Character.button_fierce]:
+				style = "sine_up"
+				spawn_position += Vector2(0, 120)
+			_:
+				print("Error: cannot determine style for empty command (Ina)")
+				return
+				
+		# boundaries
+		if spawn_position.x < Globals.Game.left_corner or spawn_position.x > Globals.Game.right_corner:
+			match style:
+				"curve_front":
+					spawn_position.x -= 2 * (spawn_position.x - orig_position.x)
+					style = "curve_back"
+				"sine_up", "sine_down":
+					spawn_position.x = clamp(spawn_position.x, Globals.Game.left_corner, Globals.Game.right_corner)
+		match style:
+			"curve_front", "curve_back":
+				if spawn_position.y < Globals.Game.stage_box.rect_global_position.y + 10:
+					spawn_position.y = Globals.Game.stage_box.rect_global_position.y + 10
+			_:	
+				if spawn_position.y < Globals.Game.stage_box.rect_global_position.y + 10:
+					spawn_position.y -= 2 * (spawn_position.y - orig_position.y)
+					style = "sine_up"
+				elif spawn_position.y > Globals.Game.middle_point.y - 10:
+					spawn_position.y -= 2 * (spawn_position.y - orig_position.y)
+					style = "sine_down"
+			
+		Globals.Game.spawn_entity(Character.player_ID, "Tako", spawn_position, {"style" : style}, \
+				Character.palette_number, NAME)
+		Globals.Game.spawn_SFX("Blink", "Blink", spawn_position, {"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+		expire_extra_takos()
+			
 	
 	
 func tako_ring(count: int, ex: = false):
@@ -1503,7 +1572,7 @@ func tako_ring(count: int, ex: = false):
 			points.append(Vector2(0, 40))
 	for point in points:
 		var spawn_point = Character.position + point
-		var aux_data = {"orbit": true}
+		var aux_data = {"style" : "orbit"}
 		if ex: aux_data["ex"] = true
 		Globals.Game.spawn_entity(Character.player_ID, "Tako", spawn_point, aux_data, \
 				Character.palette_number, NAME)

@@ -39,32 +39,57 @@ func init(aux_data: Dictionary):
 	if "ex" in aux_data:
 		Entity.unique_data.ex = true
 	
-	if "orbit" in aux_data:
-		Entity.unique_data.tako_state = "orbit"
-		var master_node = Globals.Game.get_player_node(Entity.master_ID)
-		Entity.unique_data.orbit_pos_x = int(master_node.position.x * FMath.S)
-		Entity.unique_data.orbit_pos_y = int(master_node.position.y * FMath.S)
-		if master_node.dir == 0 and master_node.v_dir == 0:
-			Entity.unique_data.orbit_vel_x = 0
-			Entity.unique_data.orbit_vel_y = 0
-		else:
-			var vector = FVector.new()
-			vector.set_vector(100 * FMath.S, 0)
-			vector.rotate(Globals.dir_to_angle(master_node.dir, master_node.v_dir, master_node.facing))
-			Entity.unique_data.orbit_vel_x = vector.x
-			Entity.unique_data.orbit_vel_y = vector.y
-			if master_node.dir != 0:
-				Entity.face(master_node.dir)
+	if "style" in aux_data:
+		match aux_data.style:
+			"orbit":
+				Animator.play("Active2")
+				Entity.unique_data.tako_state = "orbit"
+				var master_node = Globals.Game.get_player_node(Entity.master_ID)
+				Entity.unique_data.orbit_pos_x = int(master_node.position.x * FMath.S)
+				Entity.unique_data.orbit_pos_y = int(master_node.position.y * FMath.S)
+				if master_node.dir == 0 and master_node.v_dir == 0:
+					Entity.unique_data.orbit_vel_x = 0
+					Entity.unique_data.orbit_vel_y = 0
+				else:
+					var vector = FVector.new()
+					vector.set_vector(100 * FMath.S, 0)
+					vector.rotate(Globals.dir_to_angle(master_node.dir, master_node.v_dir, master_node.facing))
+					Entity.unique_data.orbit_vel_x = vector.x
+					Entity.unique_data.orbit_vel_y = vector.y
+					if master_node.dir != 0:
+						Entity.face(master_node.dir)
+			"curve_front":
+				Animator.play("Active2")
+				Entity.unique_data.tako_state = "curve"
+				Entity.velocity.set_vector(90 * FMath.S * Entity.facing, 130 * FMath.S)
+			"curve_back":
+				Animator.play("Active2")
+				Entity.unique_data.tako_state = "curve"
+				Entity.face(-Entity.facing)
+				Entity.velocity.set_vector(90 * FMath.S * Entity.facing, 130 * FMath.S)
+			"sine_down":
+				Animator.play("Active1")
+				Entity.unique_data.tako_state = "sine"
+				Entity.velocity.set_vector(0, 50 * FMath.S)
+			"sine_up":
+				Animator.play("Active1")
+				Entity.unique_data.tako_state = "sine"
+				Entity.velocity.set_vector(0, -50 * FMath.S)
+			_:
+				print("Error: " + aux_data.style + " not found.")
 	else:
+		Animator.play("Active2")
 		Entity.unique_data.tako_state = "base"
+		Entity.velocity.set_vector(100 * FMath.S, 0)
+		Entity.velocity.rotate(aux_data.angle)
 		
-	match Entity.unique_data.tako_state:
-		"orbit":
-			Animator.play("Active2")
-		"base":
-			Animator.play("Active2")
-			Entity.velocity.set_vector(100 * FMath.S, 0)
-			Entity.velocity.rotate(aux_data.angle)
+#	match Entity.unique_data.tako_state:
+#		"orbit":
+#			Animator.play("Active2")
+#		"base":
+#			Animator.play("Active2")
+#			Entity.velocity.set_vector(100 * FMath.S, 0)
+#			Entity.velocity.rotate(aux_data.angle)
 #		"slow":
 #			Animator.play("Active2")
 #			Entity.velocity.set_vector(50 * FMath.S * Entity.facing, 0)
@@ -154,29 +179,35 @@ func simulate():
 		if Entity.unique_data.invis and sprite.modulate.a > 0:
 			sprite.modulate.a -= 0.1
 			
-		if Entity.unique_data.tako_state == "orbit":
-			
-			Entity.unique_data.orbit_pos_x += int(Entity.unique_data.orbit_vel_x / 60) # move orbit point
-			Entity.unique_data.orbit_pos_y += int(Entity.unique_data.orbit_vel_y / 60)
-			Entity.true_position.x += int(Entity.unique_data.orbit_vel_x / 60)
-			Entity.true_position.y += int(Entity.unique_data.orbit_vel_y / 60)
-			
-			var vec = FVector.new()
-			vec.set_vector(Entity.true_position.x - Entity.unique_data.orbit_pos_x, Entity.true_position.y - Entity.unique_data.orbit_pos_y)
-			vec.rotate(2 * Entity.facing) # orbit speed
-			Entity.true_position.x = Entity.unique_data.orbit_pos_x + vec.x
-			Entity.true_position.y = Entity.unique_data.orbit_pos_y + vec.y
-			var old_pos = Entity.position
-			Entity.position = Entity.get_rounded_position()
-			
-			if Globals.Game.detect_offstage(Entity.get_node("EntitySpriteBox")):
-				on_offstage()
-			elif Entity.is_in_wall(): # if collided with surface
-				Entity.unique_data.tako_state = "base"
-				Animator.play("Active1")
-				Entity.position = old_pos
-				Entity.set_true_position()
-				Entity.velocity.set_vector(0, -100 * FMath.S)
+		match Entity.unique_data.tako_state:
+			"orbit":
+				Entity.unique_data.orbit_pos_x += int(Entity.unique_data.orbit_vel_x / 60) # move orbit point
+				Entity.unique_data.orbit_pos_y += int(Entity.unique_data.orbit_vel_y / 60)
+				Entity.true_position.x += int(Entity.unique_data.orbit_vel_x / 60)
+				Entity.true_position.y += int(Entity.unique_data.orbit_vel_y / 60)
+				
+				var vec = FVector.new()
+				vec.set_vector(Entity.true_position.x - Entity.unique_data.orbit_pos_x, Entity.true_position.y - Entity.unique_data.orbit_pos_y)
+				vec.rotate(2 * Entity.facing) # orbit speed
+				Entity.true_position.x = Entity.unique_data.orbit_pos_x + vec.x
+				Entity.true_position.y = Entity.unique_data.orbit_pos_y + vec.y
+				var old_pos = Entity.position
+				Entity.position = Entity.get_rounded_position()
+				
+				if Globals.Game.detect_offstage(Entity.get_node("EntitySpriteBox")):
+					on_offstage()
+				elif Entity.is_in_wall(): # if collided with surface
+					Entity.unique_data.tako_state = "base"
+					Animator.play("Active1")
+					Entity.position = old_pos
+					Entity.set_true_position()
+					Entity.velocity.set_vector(0, -100 * FMath.S)
+			"curve":
+				if Entity.velocity.y >= -90 * FMath.S:
+					Entity.velocity.y -= 2 * FMath.S
+					
+			"sine":
+				Entity.velocity.x = FMath.harmonic_motion_vel(50, 4, Entity.lifetime) * Entity.facing
 
 		
 func check_command():
@@ -271,6 +302,11 @@ func collision(landed := false, _orig_vel_x := 0, orig_vel_y := 0): # collided w
 					if Animator.to_play_anim == "Active3":
 						Entity.get_node("Sprite").rotation = 0
 						Entity.rotate_sprite(Entity.velocity.angle())
+				"curve", "sine":
+					Entity.unique_data.tako_state = "base"
+					Animator.play("Active1")
+					Entity.velocity.set_vector(0, -100 * FMath.S)
+					
 		else:
 			kill()
 

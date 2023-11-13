@@ -162,6 +162,13 @@ func query_current(query_animations: Array): # return true if to_play_anim is of
 	
 # request for a certain polygon, return null if no such polygon
 func query_polygon(target = "hurtbox"):
+	if !to_play_anim in animations: # failsafe
+		if to_play_anim == "":
+			print("Error: No to_play_anim, query_polygon() is ran without running Animator.play()")
+		else:
+			print("Error: to_play_anim not found in animations")
+		return null
+	
 	var owner_pos = get_parent().position
 	
 	# first, find the latest frame
@@ -191,6 +198,13 @@ func query_polygon(target = "hurtbox"):
 		
 # request for a certain point, return null if no such point
 func query_point(target = "kborigin"):
+	if !to_play_anim in animations: # failsafe
+		if to_play_anim == "":
+			print("Error: No to_play_anim, query_point() is ran without running Animator.play()")
+		else:
+			print("Error: to_play_anim not found in animations")
+		return null
+		
 	var owner_pos = get_parent().position
 	
 	# first, find the latest frame

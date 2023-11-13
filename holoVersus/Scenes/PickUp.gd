@@ -160,12 +160,11 @@ func simulate():
 				velocity.x = FMath.f_lerp(velocity.x, 0, AIR_RESISTANCE)
 			else:
 				velocity.x = FMath.f_lerp(velocity.x, 0, FRICTION)
-		
-		
-		if abs(velocity.x) < 5 * FMath.S:
-			velocity.x = 0
-		if abs(velocity.y) < 5 * FMath.S:
-			velocity.y = 0
+				if abs(velocity.x) < 5 * FMath.S:
+					velocity.x = 0
+					
+#		if abs(velocity.y) < 5 * FMath.S:
+#			velocity.y = 0
 		
 		
 		# movement

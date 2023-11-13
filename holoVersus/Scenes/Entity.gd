@@ -204,10 +204,12 @@ func simulate2(): # only ran if not in hitstop
 #	velocity.x = round(velocity.x) # makes it more consistent, may reduce rounding errors across platforms hopefully?
 #	velocity.y = round(velocity.y)
 	
-	if abs(velocity.x) < 5 * FMath.S:
-		velocity.x = 0
-	if abs(velocity.y) < 5 * FMath.S:
-		velocity.y = 0
+#	if UniqEntity.has_trait(Em.entity_trait.GROUNDED) and !is_on_ground($EntityCollisionBox):
+#		if abs(velocity.x) < 5 * FMath.S:
+#			velocity.x = 0
+			
+#	if abs(velocity.y) < 5 * FMath.S:
+#		velocity.y = 0
 	
 	# movement
 	if has_node("EntityCollisionBox"):

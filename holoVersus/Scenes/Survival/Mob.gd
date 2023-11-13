@@ -2678,7 +2678,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
 				var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
 				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
-						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
+						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+						(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
@@ -3356,6 +3357,9 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	
 func calculate_knockback_strength(hit_data) -> int:
 	
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] == 1: # not adjusted, for weak projectiles
+		return 0
+	
 	if $BlueArmorTimer.is_running():
 		return 0
 	
@@ -3567,6 +3571,9 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 		
 #	if $BlueArmorTimer.is_running():
 #		return 0
+		
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] == 1: # for weak projectiles
+		return 0
 		
 	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running():
 		return 7
