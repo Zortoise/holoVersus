@@ -26,6 +26,8 @@ const GUARD_GAUGE_CEIL = 10000
 const GUARD_GAUGE_SWELL_RATE = 100 # exact GG gain per frame during hitstun
 const GUARD_GAUGE_DEGEN_AMOUNT = 150 # exact GG degened per frame when GG > 100% out of hitstun
 
+const MAX_ULT_GAUGE = 1000000
+
 const SDC_EX_COST = 5000
 const BURSTCOUNTER_EX_COST = 10000
 #const BURSTESCAPE_GG_COST = 5000
@@ -243,10 +245,11 @@ var sprite_texture_ref = { # used for afterimages, each contain spritesheet_file
 onready var current_damage_value: int = 0
 onready var current_guard_gauge: int = 0
 onready var current_ex_gauge: int = 10000
-onready var current_ex_lock: int = 0
+onready var current_ult_gauge: int = 0
+#onready var current_ex_lock: int = 0
 #onready var super_ex_lock = null # starting EXSealTimer time
-onready var install_time = null # initial install time
-onready var burst_token = Em.burst.AVAILABLE
+#onready var install_time = null # initial install time
+#onready var burst_token = Em.burst.AVAILABLE
 var stock_points_left: int
 var prism_count := 0
 
@@ -416,12 +419,12 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	
 	if Globals.training_mode:
 		stock_points_left = 10000
-		burst_token = Em.burst.AVAILABLE
+#		burst_token = Em.burst.AVAILABLE
 	else:
 		stock_points_left = Globals.Game.starting_stock_pts
 		
 	if Globals.survival_level != null:
-		burst_token = Em.burst.CONSUMED
+#		burst_token = Em.burst.CONSUMED
 		prism_count = Globals.Game.LevelControl.starting_prism
 
 	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
@@ -438,9 +441,10 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
+	Globals.Game.ult_gauge_update(self)
 	Globals.Game.stock_points_update(self)
-	Globals.Game.burst_update(self)
-	Globals.Game.install_update(self)
+#	Globals.Game.burst_update(self)
+#	Globals.Game.install_update(self)
 	if Globals.survival_level != null:
 		Globals.Game.prism_update(self)
 	
@@ -980,6 +984,21 @@ func simulate2(): # only ran if not in hitstop
 	if success_dodge and (new_state != Em.char_state.AIR_REC or !Animator.query_to_play(["DodgeTransit", "Dodge"])):
 		success_dodge = false # reset success_dodge outside dodge
 		
+		
+	var stage_control_mod := 100
+	stage_control_mod *= FMath.S
+	if !grounded: # reduce Regen in air/soft platform
+		stage_control_mod = FMath.percent(stage_control_mod, 30)
+	elif soft_grounded:
+		stage_control_mod = FMath.percent(stage_control_mod, 60)
+	# reduce Gain when far from center
+	var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
+	var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
+	var stage_control_weight = FMath.get_fraction_percent(char_dist, max_dist)
+	stage_control_mod = FMath.f_lerp(stage_control_mod, 0, stage_control_weight)
+	stage_control_mod = FMath.round_and_descale(stage_control_mod)
+	
+		
 	# GG Swell during hitstun
 	if !$HitStopTimer.is_running() and is_hitstunned() and GG_swell_flag and !first_hit_flag and \
 			!state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER] and \
@@ -1000,18 +1019,18 @@ func simulate2(): # only ran if not in hitstop
 				if query_status_effect(Em.status_effect.POS_FLOW):
 					guard_gauge_regen = POS_FLOW_REGEN # increased regen during positive flow
 				else:
-					guard_gauge_regen = get_stat("GG_REGEN_AMOUNT")
+					guard_gauge_regen = FMath.percent(get_stat("GG_REGEN_AMOUNT"), stage_control_mod)
 					
-					if !grounded: # reduce GG Regen in air/soft platform
-						guard_gauge_regen = FMath.percent(guard_gauge_regen, 30)
-					elif soft_grounded:
-						guard_gauge_regen = FMath.percent(guard_gauge_regen, 60)
-							
-					# reduce passive EX Gain when far from center
-					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
-					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
-					var weight = FMath.get_fraction_percent(char_dist, max_dist)
-					guard_gauge_regen = FMath.f_lerp(guard_gauge_regen, 0, weight)
+#					if !grounded: # reduce GG Regen in air/soft platform
+#						guard_gauge_regen = FMath.percent(guard_gauge_regen, 30)
+#					elif soft_grounded:
+#						guard_gauge_regen = FMath.percent(guard_gauge_regen, 60)
+#
+#					# reduce passive EX Gain when far from center
+#					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
+#					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
+#					var weight = FMath.get_fraction_percent(char_dist, max_dist)
+#					guard_gauge_regen = FMath.f_lerp(guard_gauge_regen, 0, weight)
 					
 					
 				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen)) # don't use change_guard_gauge() since it stops at 0
@@ -1106,22 +1125,36 @@ func simulate2(): # only ran if not in hitstop
 			else:
 				
 				if ex_change == get_stat("BASE_EX_REGEN") * FMath.S:
-					if !grounded: # reduce passive EX Gain in air/soft platform
-						ex_change = FMath.percent(ex_change, 30)
-					elif soft_grounded:
-						ex_change = FMath.percent(ex_change, 60)
-					else:
-						ex_change = FMath.percent(ex_change, 150) # increased on ground
-							
-					# reduce passive EX Gain when far from center
-					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
-					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
-					var weight = FMath.get_fraction_percent(char_dist, max_dist)
-					ex_change = FMath.sin_lerp(ex_change, 0, weight)
+#					if !grounded: # reduce passive EX Gain in air/soft platform
+#						ex_change = FMath.percent(ex_change, 30)
+#					elif soft_grounded:
+#						ex_change = FMath.percent(ex_change, 60)
+#					else:
+#						ex_change = FMath.percent(ex_change, 150) # increased on ground
+#
+#					# reduce passive EX Gain when far from center
+#					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
+#					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
+#					var weight = FMath.get_fraction_percent(char_dist, max_dist)
+#					ex_change = FMath.sin_lerp(ex_change, 0, weight)
 				
+					ex_change = FMath.percent(ex_change, stage_control_mod)
+					
 				change_ex_gauge(FMath.round_and_descale(ex_change))
 
-			
+			# ultimate gain, WIP TESTING
+#			if current_ex_gauge == MAX_EX_GAUGE:
+#				var ult_gain = get_stat("ULT_GEN")
+#				if is_attacking():
+#					match chain_combo:
+#						Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL: # landed an attack on opponent
+#							pass # gain full ult_gain
+#						_:
+#							ult_gain = FMath.percent(ult_gain, stage_control_mod)
+#				else:
+#					ult_gain = FMath.percent(ult_gain, stage_control_mod)
+#				change_ult_gauge(ult_gain)
+				
 			
 	else: # training mode regen EX Gauge
 		if current_ex_gauge < MAX_EX_GAUGE:
@@ -1130,22 +1163,22 @@ func simulate2(): # only ran if not in hitstop
 			take_damage(-30) # regen damage
 
 	# EX lock degen	
-	if current_ex_lock > 0 and !$EXSealTimer.is_running() and !$InstallTimer.is_running():
-		if Globals.training_mode:
-			current_ex_lock -= 600
-			Globals.Game.ex_gauge_update(self)
-		elif !Globals.Game.input_lock and state != Em.char_state.DEAD:
-			current_ex_lock -= EX_LOCK_DEGEN
-			Globals.Game.ex_gauge_update(self)
+#	if current_ex_lock > 0 and !$EXSealTimer.is_running() and !$InstallTimer.is_running():
+#		if Globals.training_mode:
+#			current_ex_lock -= 600
+#			Globals.Game.ex_gauge_update(self)
+#		elif !Globals.Game.input_lock and state != Em.char_state.DEAD:
+#			current_ex_lock -= EX_LOCK_DEGEN
+#			Globals.Game.ex_gauge_update(self)
 		
-	if !$InstallTimer.is_running():
-		if install_time != null:
-			install_time = null
-			if UniqChar.has_method("install_over"): UniqChar.install_over()
-			Globals.Game.install_update(self)
-#
-	elif install_time != null:
-		Globals.Game.install_update(self)
+#	if !$InstallTimer.is_running():
+#		if install_time != null:
+#			install_time = null
+#			if UniqChar.has_method("install_over"): UniqChar.install_over()
+#			Globals.Game.install_update(self)
+##
+#	elif install_time != null:
+#		Globals.Game.install_update(self)
 		
 	
 	# drain EX Gauge when air blocking
@@ -2124,7 +2157,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$HitStunTimer.simulate()
 				$BurstLockTimer.simulate()
 				$NoCollideTimer.simulate()
-				$InstallTimer.simulate()
+#				$InstallTimer.simulate()
 				$SBlockTimer.simulate()
 				if Globals.survival_level == null and ($FDITimer.time != 1 or !button_special in input_state.pressed):
 					$FDITimer.simulate()
@@ -3359,7 +3392,7 @@ func state_detect(anim) -> int:
 			
 		"BurstCounterStartup", "BurstEscapeStartup":
 			return Em.char_state.AIR_STARTUP
-		"BurstCounter", "BurstEscape", "BurstAwakening":
+		"BurstCounter", "BurstEscape":
 			return Em.char_state.AIR_REC
 		"BurstRec":
 			return Em.char_state.AIR_REC
@@ -3923,11 +3956,11 @@ func on_kill():
 		
 #		super_ex_lock = null
 		$EXSealTimer.stop()
-		if install_time != null:
-			$InstallTimer.stop()
-			install_time = null
-			if UniqChar.has_method("install_over"): UniqChar.install_over()
-			Globals.Game.install_update(self)
+#		if install_time != null:
+#			$InstallTimer.stop()
+#			install_time = null
+#			if UniqChar.has_method("install_over"): UniqChar.install_over()
+#			Globals.Game.install_update(self)
 		
 		$Sprites.hide()
 		state = Em.char_state.DEAD
@@ -3945,8 +3978,8 @@ func on_kill():
 			var opponent = get_target()
 			if opponent.state != Em.char_state.DEAD:
 				
-				if opponent.burst_token == Em.burst.EXHAUSTED:
-					opponent.change_burst_token(Em.burst.AVAILABLE) # your targeted opponent gain burst token if exhausted
+#				if opponent.burst_token == Em.burst.EXHAUSTED:
+#					opponent.change_burst_token(Em.burst.AVAILABLE) # your targeted opponent gain burst token if exhausted
 				
 				if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
 					opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
@@ -4003,15 +4036,16 @@ func respawn():
 			
 	current_damage_value = 0
 	current_guard_gauge = 0
-	if Globals.survival_level == null:
-		change_burst_token(Em.burst.AVAILABLE) # gain Burst on death
-	else:
+	if Globals.survival_level != null:
+#		change_burst_token(Em.burst.AVAILABLE) # gain Burst on death
+#	else:
 		if Inventory.has_quirk(player_ID, Cards.effect_ref.RESPAWN_POWER):
 			current_ex_gauge = MAX_EX_GAUGE
 		
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
-	Globals.Game.ex_gauge_update(self)
+#	Globals.Game.ex_gauge_update(self)
+#	Globals.Game.ult_gauge_update(self)
 	Globals.Game.stock_points_update(self)
 	
 	$Sprites.show()
@@ -5015,21 +5049,21 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 #	return true
 	
 		
-func super_cost(ex_bar_cost: int, forced = false) -> bool: # ex_bar_cost is the number of bars costed, not the EX amount!
-# if forced is true, can use even with current_ex_lock > 0, used for follow-up supers
-	
-#	if current_ex_gauge < ex_cost: return false # not enough meter
-# warning-ignore:integer_division
-	var current_bars := int(current_ex_gauge / EX_LEVEL)
-	if current_bars + (3 - current_ex_lock) < ex_bar_cost: return false # not enough meter
-	if !forced and current_ex_lock > 0: return false # cannot use super if has EX Lock unless forced
-	
-	if current_bars >= ex_bar_cost:
-		change_ex_gauge(-EX_LEVEL * ex_bar_cost)
-	else:
-		ex_bar_cost -= current_bars
-		current_ex_lock = ex_bar_cost * EX_LEVEL
-		change_ex_gauge(-EX_LEVEL * current_bars)
+#func super_cost(ex_bar_cost: int, forced = false) -> bool: # ex_bar_cost is the number of bars costed, not the EX amount!
+## if forced is true, can use even with current_ex_lock > 0, used for follow-up supers
+#
+##	if current_ex_gauge < ex_cost: return false # not enough meter
+## warning-ignore:integer_division
+#	var current_bars := int(current_ex_gauge / EX_LEVEL)
+#	if current_bars + (3 - current_ex_lock) < ex_bar_cost: return false # not enough meter
+#	if !forced and current_ex_lock > 0: return false # cannot use super if has EX Lock unless forced
+#
+#	if current_bars >= ex_bar_cost:
+#		change_ex_gauge(-EX_LEVEL * ex_bar_cost)
+#	else:
+#		ex_bar_cost -= current_bars
+#		current_ex_lock = ex_bar_cost * EX_LEVEL
+#		change_ex_gauge(-EX_LEVEL * current_bars)
 	
 #	if ex_lock == null:
 #		current_ex_lock = ex_cost
@@ -5037,7 +5071,7 @@ func super_cost(ex_bar_cost: int, forced = false) -> bool: # ex_bar_cost is the 
 #		current_ex_lock = ex_lock
 #	change_ex_gauge(-ex_cost)
 	
-	return true
+#	return true
 	
 #	var total_lock_time: int = lock_time_per_lvl * (3 - get_ex_level()) + base_lock_time
 #
@@ -5051,9 +5085,9 @@ func super_cost(ex_bar_cost: int, forced = false) -> bool: # ex_bar_cost is the 
 #	if cost_burst:
 #		change_burst_token(Em.burst.CONSUMED)
 
-func install(in_time: int):
-	install_time = in_time
-	$InstallTimer.time = in_time
+#func install(in_time: int):
+#	install_time = in_time
+#	$InstallTimer.time = in_time
 	
 	
 func check_for_assist():
@@ -5187,35 +5221,44 @@ func burst_counter_check(): # check if have resources to do it, then take away t
 	return true
 	
 	
-func burst_escape_check(): # check if have resources to do it, then take away those resources and return a bool
+func burst_escape_check() -> bool: # check if have resources to do it, then take away those resources and return a bool
 	if $BurstLockTimer.is_running():
 		return false
 	if lethal_flag: # cannot Burst Escape lethal hits
 		return false
 		
-	if Globals.survival_level == null:
-		
-		if current_guard_gauge >= GUARD_GAUGE_CEIL:
-			change_guard_gauge(-10000) # higher cost if GG is full, but cost no Burst Token
-			return true
-		if burst_token != Em.burst.AVAILABLE:
-#			if current_guard_gauge <= 0:
-			return false # not enough resouces to use it
-		
-#		change_guard_gauge(-BURSTESCAPE_GG_COST)
-		change_burst_token(Em.burst.EXHAUSTED)
-		return true
+	var gg_cost := GUARD_GAUGE_CEIL
+	var ex_cost := BURSTCOUNTER_EX_COST
 	
-	else: # during Survival Burst Escape cost 1 bar of EX Gauge
-		var cost = BURSTCOUNTER_EX_COST
+	if Globals.survival_level != null:
 		if Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
-			cost = FMath.percent(cost, 50)
-			
-		if current_ex_gauge < cost:
-			return false # not enough EX Gauge to use it
-			
-		change_ex_gauge(-cost)
+			gg_cost = FMath.percent(gg_cost, 50)
+			ex_cost = FMath.percent(ex_cost, 50)
+	
+	if current_guard_gauge >= GUARD_GAUGE_FLOOR + gg_cost and current_ex_gauge >= ex_cost:
+		change_guard_gauge(-gg_cost)
+		change_ex_gauge(-ex_cost)
 		return true
+	else:
+		return false
+#		if burst_token != Em.burst.AVAILABLE:
+##			if current_guard_gauge <= 0:
+#			return false # not enough resouces to use it
+#
+##		change_guard_gauge(-BURSTESCAPE_GG_COST)
+#		change_burst_token(Em.burst.EXHAUSTED)
+#		return true
+	
+#	else: # during Survival Burst Escape cost 1 bar of EX Gauge
+#		var cost = BURSTCOUNTER_EX_COST
+#		if Inventory.has_quirk(player_ID, Cards.effect_ref.REDUCE_BURST_COST):
+#			cost = FMath.percent(cost, 50)
+#
+#		if current_ex_gauge < cost:
+#			return false # not enough EX Gauge to use it
+#
+#		change_ex_gauge(-cost)
+#		return true
 	
 #func burst_extend_check(move_name): # check if have resources to do it, then take away those resources and return a bool
 #	if !is_atk_active(): # active frames only
@@ -6136,19 +6179,37 @@ func get_ex_level():
 	else:
 		return 3
 	
+func change_ult_gauge(ult_gauge_change: int):
+	if ult_gauge_change > 0 and UniqChar.has_method("can_gain_ult"):
+		if !UniqChar.can_gain_ult(): return
+		
+	current_ult_gauge += ult_gauge_change
+	current_ult_gauge = int(clamp(current_ult_gauge, 0, MAX_ULT_GAUGE))
+	Globals.Game.ult_gauge_update(self)
+	
+	
 func change_ex_gauge(ex_gauge_change: int, forced := false):
 #	current_ex_gauge += ex_gauge_change * 3 # boosted for testing
-	if !forced and ($EXSealTimer.is_running() or $InstallTimer.is_running()) and ex_gauge_change > 0: # no gain in EX Gauge when sealed
+	if !forced and ($EXSealTimer.is_running()) and ex_gauge_change > 0: # no gain in EX Gauge when sealed
 		return
+		
+	if !Globals.training_mode:
+		if is_hitstunned() or $SBlockTimer.is_running(): # hitstun/block EX Gain is maxed out at lvl 2
+			if current_ex_gauge + ex_gauge_change > 20000:
+				if current_ex_gauge >= 20000: ex_gauge_change = 0
+				else:
+					var max_change := 20000 - current_ex_gauge
+					ex_gauge_change = int(min(ex_gauge_change, max_change))
+		
 	current_ex_gauge += ex_gauge_change
 	
-	var ex_lock_bar_count: int = 0
-	if current_ex_lock > 0:
-# warning-ignore:integer_division
-		ex_lock_bar_count = int(current_ex_lock / 10000)
-		if current_ex_lock > ex_lock_bar_count * 10000: ex_lock_bar_count += 1
+#	var ex_lock_bar_count: int = 0
+#	if current_ex_lock > 0:
+## warning-ignore:integer_division
+#		ex_lock_bar_count = int(current_ex_lock / 10000)
+#		if current_ex_lock > ex_lock_bar_count * 10000: ex_lock_bar_count += 1
 	
-	current_ex_gauge = int(clamp(current_ex_gauge, 0, MAX_EX_GAUGE - (ex_lock_bar_count * 10000)))
+	current_ex_gauge = int(clamp(current_ex_gauge, 0, MAX_EX_GAUGE))
 	Globals.Game.ex_gauge_update(self)
 	if ex_gauge_change < 0: # any usage of EX gauge seals it
 		if $EXSealTimer.time < BASE_EX_SEAL_TIME:
@@ -6160,10 +6221,10 @@ func change_stock_points(stock_points_change: int):
 		stock_points_left = int(max(stock_points_left, 0))
 	Globals.Game.stock_points_update(self)
 	
-func change_burst_token(new_burst_token: int):
-	if !Globals.training_mode:
-		burst_token = new_burst_token
-		Globals.Game.burst_update(self)
+#func change_burst_token(new_burst_token: int):
+#	if !Globals.training_mode:
+#		burst_token = new_burst_token
+#		Globals.Game.burst_update(self)
 		
 func gain_prism(to_gain: int):
 	if Globals.survival_level != null:
@@ -6686,6 +6747,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
+	# this is for special effects that trigger by hitting airborne opponent with anti-air moves (no parry and punish hit on startup)
 	if Em.atk_attr.ANTI_AIR in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !grounded:
 		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_feet_pos") and hit_data[Em.hit.ATKER_OR_ENTITY].get_feet_pos() < get_feet_pos():
 			hit_data[Em.hit.ANTI_AIRED] = true
@@ -6918,6 +6980,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if GG_swell_flag == false: # start GG swell if not started yet and hit with most attacks
 			GG_swell_flag = true
 			first_hit_flag = true
+			
+#			if current_ex_gauge == MAX_EX_GAUGE: # cannot hold on to full meter, WIP TESTING
+#				change_ex_gauge(-10000)
+				
 		else: # hit after GG swell started, turn off first_hit_flag to start gaining GG
 			first_hit_flag = false
 	
@@ -7064,6 +7130,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 		elif hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstEscape":
 			attacker.reset_jumps()
+			
 			
 #		elif hit_data[Em.hit.MOVE_DATA].burst == "BurstExtend":
 #			if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
@@ -7636,6 +7703,9 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
 		return 0 # assist rescue no Guard Drain
+	
+	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstEscape":
+		return 0
 	
 	if Em.hit.PROJ_ON_HITSTOP in hit_data:
 		return 0
@@ -8567,14 +8637,14 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Block")
 			
 		"BurstCounterStartup":
-			if held_version(button_dash) and held_version(button_block) and burst_token == Em.burst.AVAILABLE:
-				animate("BurstAwakening")
-			else:
-				animate("BurstCounter")
+#			if held_version(button_dash) and held_version(button_block) and burst_token == Em.burst.AVAILABLE:
+#				animate("BurstAwakening")
+#			else:
+			animate("BurstCounter")
 		"BurstCounter":
 			animate("BurstRec")
-		"BurstAwakening":
-			animate("BurstRec")
+#		"BurstAwakening":
+#			animate("BurstRec")
 		"BurstEscapeStartup":
 			animate("BurstEscape")
 		"BurstEscape":
@@ -8881,7 +8951,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			else:
 				modulate_play("blue_burst")
 			play_audio("faller1", {"vol" : -10, "bus" : "PitchUp"})
-		"BurstCounter", "BurstEscape", "BurstAwakening":
+		"BurstCounter", "BurstEscape":
 #			chain_combo = 0
 			velocity.set_vector(0, 0)
 			velocity_limiter.x = 0
@@ -8891,19 +8961,19 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #				burst_facing = -1
 			if anim_name == "BurstCounter":
 				Globals.Game.spawn_entity(player_ID, "BurstCounter", position, {})
-			elif anim_name == "BurstEscape":
+			else:
 				Globals.Game.spawn_entity(player_ID, "BurstEscape", position, {})
 				$HitStunTimer.stop()
-			else:
-				Globals.Game.spawn_entity(player_ID, "BurstAwakening", position, {})
-				modulate_play("white_burst")
-				play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"})
-				$EXSealTimer.stop()
-				change_ex_gauge(MAX_EX_GAUGE)
-				reset_jumps()
-				if current_guard_gauge < 0: # gain positive flow
-					status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
-				change_burst_token(Em.burst.CONSUMED)
+#			else:
+#				Globals.Game.spawn_entity(player_ID, "BurstAwakening", position, {})
+#				modulate_play("white_burst")
+#				play_audio("bling7", {"vol" : -10, "bus" : "PitchUp2"})
+#				$EXSealTimer.stop()
+#				change_ex_gauge(MAX_EX_GAUGE)
+#				reset_jumps()
+#				if current_guard_gauge < 0: # gain positive flow
+#					status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
+#				change_burst_token(Em.burst.CONSUMED)
 			play_audio("blast1", {"vol" : -18,})
 		"BurstCRec":
 			anim_gravity_mod = 0
@@ -9117,7 +9187,7 @@ func save_state():
 		"target_ID" : target_ID,
 		"seq_partner_ID" : seq_partner_ID,
 		"seq_partner_type" : seq_partner_type,
-		"burst_token": burst_token,
+#		"burst_token": burst_token,
 		"impulse_used" : impulse_used,
 		"quick_turn_used" : quick_turn_used,
 		"strafe_lock_dir" : strafe_lock_dir,
@@ -9143,11 +9213,12 @@ func save_state():
 		"current_damage_value" : current_damage_value,
 		"current_guard_gauge" : current_guard_gauge,
 		"current_ex_gauge" : current_ex_gauge,
-		"current_ex_lock" : current_ex_lock,
+		"current_ult_gauge" : current_ult_gauge,
+#		"current_ex_lock" : current_ex_lock,
 #		"super_ex_lock" : super_ex_lock,
 		"stock_points_left" : stock_points_left,
 		"prism_count" : prism_count,
-		"install_time" : install_time,
+#		"install_time" : install_time,
 		
 		"unique_data" : unique_data,
 		"repeat_memory" : repeat_memory,
@@ -9179,7 +9250,7 @@ func save_state():
 #		"ShorthopTimer_time" : $ShorthopTimer.time,
 		"NoCollideTimer_time" : $NoCollideTimer.time,
 		"SBlockTimer_time": $SBlockTimer.time,
-		"InstallTimer_time": $InstallTimer.time,
+#		"InstallTimer_time": $InstallTimer.time,
 	}
 	
 	if Globals.training_mode:
@@ -9231,7 +9302,7 @@ func load_state(state_data, command_rewind := false):
 	target_ID = state_data.target_ID
 	seq_partner_ID = state_data.seq_partner_ID
 	seq_partner_type = state_data.seq_partner_type
-	burst_token = state_data.burst_token
+#	burst_token = state_data.burst_token
 	impulse_used = state_data.impulse_used
 	quick_turn_used = state_data.quick_turn_used
 	strafe_lock_dir = state_data.strafe_lock_dir
@@ -9261,16 +9332,18 @@ func load_state(state_data, command_rewind := false):
 	current_damage_value = state_data.current_damage_value
 	current_guard_gauge = state_data.current_guard_gauge
 	current_ex_gauge = state_data.current_ex_gauge
-	current_ex_lock = state_data.current_ex_lock
+	current_ult_gauge = state_data.current_ult_gauge
+#	current_ex_lock = state_data.current_ex_lock
 #	super_ex_lock = state_data.super_ex_lock
 	stock_points_left = state_data.stock_points_left
 	prism_count = state_data.prism_count
-	install_time = state_data.install_time
+#	install_time = state_data.install_time
 	Globals.Game.damage_update(self)
 	Globals.Game.guard_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
+	Globals.Game.ult_gauge_update(self)
 	Globals.Game.stock_points_update(self)
-	Globals.Game.burst_update(self)
+#	Globals.Game.burst_update(self)
 	
 	if Globals.survival_level != null:
 		Globals.Game.prism_update(self)
@@ -9316,8 +9389,8 @@ func load_state(state_data, command_rewind := false):
 	$NoCollideTimer.time = state_data.NoCollideTimer_time
 	$SBlockTimer.time = state_data.SBlockTimer_time
 	
-	$InstallTimer.time = state_data.InstallTimer_time
-	Globals.Game.install_update(self)
+#	$InstallTimer.time = state_data.InstallTimer_time
+#	Globals.Game.install_update(self)
 	
 	if Globals.survival_level != null or Globals.assists > 1:
 		assist_items = state_data.assist_items

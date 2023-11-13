@@ -67,6 +67,8 @@ const PARRYING_EX_REGEN_MOD = 600 # increase EX Regen when parrying attack
 #const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
 #const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 
+const ULT_GEN = 1000 # amount of Ulimate Gauge gain per frame
+
 const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH, Em.trait.GRD_DASH_JUMP]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT

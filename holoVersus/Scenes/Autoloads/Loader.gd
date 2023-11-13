@@ -34,11 +34,11 @@ onready var common_entity_data = {
 		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
 		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
 	},
-	"BurstAwakening" : {
-		"scene" : load("res://Assets/Entities/BurstAwakening.tscn"),
-		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
-		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
-	},
+#	"BurstAwakening" : {
+#		"scene" : load("res://Assets/Entities/BurstAwakening.tscn"),
+#		"frame_data" : load("res://Assets/Entities/FrameData/Burst.tres"),
+#		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/BurstSprite.png")
+#	},
 	"AssistSpawner" : {
 		"scene" : load("res://Assets/Entities/AssistSpawner.tscn"),
 		"frame_data" : load("res://Assets/Entities/FrameData/AssistSpawner.tres"),

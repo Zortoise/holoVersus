@@ -2115,15 +2115,20 @@ func damage_update(character, damage: int = 0):
 		dmg_val_indicator.get_node("../AnimationPlayer").play("damage") # shake label
 		
 				
-func install_update(character):
+func ult_gauge_update(character):
 	
-	var install_timer = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/InstallTime")
+	var gauge = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/UltimateGauge")
+	gauge.value = int((character.current_ult_gauge * 1000) / character.MAX_ULT_GAUGE)
 	
-	if character.install_time != null and character.get_node("InstallTimer").is_running():
-		install_timer.show()
-		install_timer.value = int((character.get_node("InstallTimer").time * 100) / character.install_time)
+	if character.current_ult_gauge > 0:
+		gauge.show()
 	else:
-		install_timer.hide()
+		gauge.hide()
+#	if character.install_time != null and character.get_node("InstallTimer").is_running():
+#		install_timer.show()
+#		install_timer.value = int((character.get_node("InstallTimer").time * 100) / character.install_time)
+#	else:
+#		install_timer.hide()
 		
 				
 func guard_gauge_update(character):
@@ -2196,50 +2201,50 @@ func ex_gauge_update(character):
 			ex_gauge_bars.get_node("EXGauge2").value = 100
 			ex_gauge_bars.get_node("EXGauge3").value = 100
 	
-	if character.current_ex_lock > 0:
-		var current_ex_lock_lvl: int = int(character.current_ex_lock / 10000)
-		var leftover_ex_lock: int = FMath.get_fraction_percent(character.current_ex_lock - (current_ex_lock_lvl * 10000), 10000)
-		
-		match current_ex_lock_lvl:
-			0:
-				ex_gauge_bars.get_node("EXLock").hide()
-				ex_gauge_bars.get_node("EXLock2").hide()
-				if leftover_ex_lock > 0:
-					ex_gauge_bars.get_node("EXLock3").show()
-					ex_gauge_bars.get_node("EXLock3").value = leftover_ex_lock
-				else:
-					ex_gauge_bars.get_node("EXLock3").hide()
-			1:
-				ex_gauge_bars.get_node("EXLock").hide()
-				if leftover_ex_lock > 0:
-					ex_gauge_bars.get_node("EXLock2").show()
-					ex_gauge_bars.get_node("EXLock2").value = leftover_ex_lock
-				else:
-					ex_gauge_bars.get_node("EXLock2").hide()
-				ex_gauge_bars.get_node("EXLock3").show()
-				ex_gauge_bars.get_node("EXLock3").value = 100
-			2:
-				if leftover_ex_lock > 0:
-					ex_gauge_bars.get_node("EXLock").show()
-					ex_gauge_bars.get_node("EXLock").value = leftover_ex_lock
-				else:
-					ex_gauge_bars.get_node("EXLock").hide()
-				ex_gauge_bars.get_node("EXLock2").show()
-				ex_gauge_bars.get_node("EXLock3").show()
-				ex_gauge_bars.get_node("EXLock2").value = 100
-				ex_gauge_bars.get_node("EXLock3").value = 100
-			3:
-				ex_gauge_bars.get_node("EXLock").show()
-				ex_gauge_bars.get_node("EXLock2").show()
-				ex_gauge_bars.get_node("EXLock3").show()
-				ex_gauge_bars.get_node("EXLock").value = 100
-				ex_gauge_bars.get_node("EXLock2").value = 100
-				ex_gauge_bars.get_node("EXLock3").value = 100
-			
-	else:
-		ex_gauge_bars.get_node("EXLock").hide()
-		ex_gauge_bars.get_node("EXLock2").hide()
-		ex_gauge_bars.get_node("EXLock3").hide()
+#	if character.current_ex_lock > 0:
+#		var current_ex_lock_lvl: int = int(character.current_ex_lock / 10000)
+#		var leftover_ex_lock: int = FMath.get_fraction_percent(character.current_ex_lock - (current_ex_lock_lvl * 10000), 10000)
+#
+#		match current_ex_lock_lvl:
+#			0:
+#				ex_gauge_bars.get_node("EXLock").hide()
+#				ex_gauge_bars.get_node("EXLock2").hide()
+#				if leftover_ex_lock > 0:
+#					ex_gauge_bars.get_node("EXLock3").show()
+#					ex_gauge_bars.get_node("EXLock3").value = leftover_ex_lock
+#				else:
+#					ex_gauge_bars.get_node("EXLock3").hide()
+#			1:
+#				ex_gauge_bars.get_node("EXLock").hide()
+#				if leftover_ex_lock > 0:
+#					ex_gauge_bars.get_node("EXLock2").show()
+#					ex_gauge_bars.get_node("EXLock2").value = leftover_ex_lock
+#				else:
+#					ex_gauge_bars.get_node("EXLock2").hide()
+#				ex_gauge_bars.get_node("EXLock3").show()
+#				ex_gauge_bars.get_node("EXLock3").value = 100
+#			2:
+#				if leftover_ex_lock > 0:
+#					ex_gauge_bars.get_node("EXLock").show()
+#					ex_gauge_bars.get_node("EXLock").value = leftover_ex_lock
+#				else:
+#					ex_gauge_bars.get_node("EXLock").hide()
+#				ex_gauge_bars.get_node("EXLock2").show()
+#				ex_gauge_bars.get_node("EXLock3").show()
+#				ex_gauge_bars.get_node("EXLock2").value = 100
+#				ex_gauge_bars.get_node("EXLock3").value = 100
+#			3:
+#				ex_gauge_bars.get_node("EXLock").show()
+#				ex_gauge_bars.get_node("EXLock2").show()
+#				ex_gauge_bars.get_node("EXLock3").show()
+#				ex_gauge_bars.get_node("EXLock").value = 100
+#				ex_gauge_bars.get_node("EXLock2").value = 100
+#				ex_gauge_bars.get_node("EXLock3").value = 100
+#
+#	else:
+#		ex_gauge_bars.get_node("EXLock").hide()
+#		ex_gauge_bars.get_node("EXLock2").hide()
+#		ex_gauge_bars.get_node("EXLock3").hide()
 		
 	
 func stock_points_update(character):
@@ -2349,14 +2354,14 @@ func assist_update(character):
 					
 
 				
-func burst_update(character):
-	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/BurstToken")
-	if character.burst_token == Em.burst.AVAILABLE:
-		burst_token.get_node("AnimationPlayer").play("flash")
-	elif character.burst_token == Em.burst.CONSUMED:
-		burst_token.get_node("AnimationPlayer").play("empty")
-	elif character.burst_token == Em.burst.EXHAUSTED:
-		burst_token.get_node("AnimationPlayer").play("gray")
+#func burst_update(character):
+#	var burst_token = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/BurstToken")
+#	if character.burst_token == Em.burst.AVAILABLE:
+#		burst_token.get_node("AnimationPlayer").play("flash")
+#	elif character.burst_token == Em.burst.CONSUMED:
+#		burst_token.get_node("AnimationPlayer").play("empty")
+#	elif character.burst_token == Em.burst.EXHAUSTED:
+#		burst_token.get_node("AnimationPlayer").play("gray")
 		
 func prism_update(character):
 	if Globals.survival_level != null:	

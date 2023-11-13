@@ -199,51 +199,6 @@ frame_data = {
 },
 "vframes": 21
 },
-"BurstAwakening": {
-"duration": 40,
-"hframes": 6,
-"loop": false,
-"spritesheet": "BaseSprite",
-"timestamps": {
-0: {
-"frame": 118,
-"hurtbox": [  ]
-},
-2: {
-"frame": 118,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-},
-5: {
-"frame": 119,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-},
-10: {
-"frame": 120,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-},
-15: {
-"frame": 121,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-},
-20: {
-"frame": 118,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-},
-25: {
-"frame": 119,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-},
-30: {
-"frame": 120,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-},
-35: {
-"frame": 121,
-"hurtbox": [ Vector2( -12, -5 ), Vector2( -19, -5 ), Vector2( -19, 6 ), Vector2( -8, 6 ), Vector2( -8, 26 ), Vector2( 7, 26 ), Vector2( 7, 8 ), Vector2( 14, 8 ), Vector2( 14, -5 ), Vector2( 7, -5 ), Vector2( 7, -25 ), Vector2( -12, -25 ) ]
-}
-},
-"vframes": 21
-},
 "BurstCounter": {
 "duration": 40,
 "hframes": 6,

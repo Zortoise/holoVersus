@@ -92,8 +92,6 @@ margin_bottom = 22.0
 
 [node name="SBlockTimer" parent="." instance=ExtResource( 4 )]
 
-[node name="InstallTimer" parent="." instance=ExtResource( 4 )]
-
 [node name="AssistCDTimer" parent="." instance=ExtResource( 4 )]
 
 [node name="FDITimer" parent="." instance=ExtResource( 4 )]
