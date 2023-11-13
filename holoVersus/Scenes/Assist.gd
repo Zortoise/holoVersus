@@ -1171,10 +1171,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		vec_to_attacker.x = -attacker_or_entity.facing
 	var dir_to_attacker := int(sign(vec_to_attacker.x)) # for setting facing on defender
 		
-	var attacker_vec := FVector.new()
-	attacker_vec.set_from_vec(vec_to_attacker)
-	
-	hit_data[Em.hit.ANGLE_TO_ATKER] = attacker_vec.angle()
+#	var attacker_vec := FVector.new()
+#	attacker_vec.set_from_vec(vec_to_attacker)
+#
+#	hit_data[Em.hit.ANGLE_TO_ATKER] = attacker_vec.angle()
 	hit_data[Em.hit.LETHAL_HIT] = false
 	hit_data[Em.hit.PUNISH_HIT] = false
 	hit_data[Em.hit.STUN] = false
@@ -1199,7 +1199,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	# CHECK BLOCK STATE ----------------------------------------------------------------------------------------------
 
-	var crossed_up: bool = check_if_crossed_up(hit_data)
+#	var crossed_up: bool = check_if_crossed_up(hit_data)
 
 	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		match new_state:
@@ -1211,7 +1211,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
 				var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
-				if crossed_up and !Em.atk_attr.BI_DIR_ARMOR in defender_attr:
+				if hit_data[Em.hit.CROSSED_UP]:
 					continue # armored moves only armor from front unless has BI_DIR_ARMOR
 				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
@@ -1220,7 +1220,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 			Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 				var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
-				if crossed_up and !Em.atk_attr.BI_DIR_ARMOR in defender_attr:
+				if hit_data[Em.hit.CROSSED_UP]:
 					continue # armored moves only armor from front unless has BI_DIR_ARMOR
 				if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
 						(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
@@ -1475,18 +1475,25 @@ func calculate_knockback_dir(hit_data) -> int:
 
 	
 	
-func check_if_crossed_up(hit_data):
+func check_if_crossed_up(attacker_or_entity, angle_to_atker, atker_move_data):
 	
-	if Em.atk_attr.NO_CROSSUP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+	if Em.atk_attr.NO_CROSSUP in atker_move_data[Em.move.ATK_ATTR]:
+		return false
+	
+	if attacker_or_entity.has_method("query_status_effect") and \
+			(attacker_or_entity.query_status_effect(Em.status_effect.NO_CROSSUP) or attacker_or_entity.query_status_effect(Em.status_effect.SCANNED)):
 		return false
 		
-	var attacker = hit_data[Em.hit.ATKER_OR_ENTITY]
+	if is_atk_startup() or is_atk_active():
+		var defender_move_data = query_move_data()
+		if Em.atk_attr.CROSSUP_PROTECTION in defender_move_data[Em.move.ATK_ATTR]:
+			return false
 	
 # warning-ignore:narrowing_conversion
-	var x_dist: int = abs(attacker.position.x - position.x)
+	var x_dist: int = abs(attacker_or_entity.position.x - position.x)
 	if x_dist <= CROSS_UP_MIN_DIST: return false
 	
-	var segment = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.EIGHT)
+	var segment = Globals.split_angle(angle_to_atker, Em.angle_split.EIGHT)
 	if segment == Em.compass.N or segment == Em.compass.S:
 		return false
 	match segment:

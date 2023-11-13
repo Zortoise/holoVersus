@@ -7,6 +7,7 @@ signal playback_started
 signal game_set
 signal time_over
 
+const RNG_MAX = 1000000000000
 
 #const CAMERA_MARGIN = 55 # camera limit distance from blast zone
 const MARGIN_TO_TILT_KILLBLAST = 100
@@ -165,7 +166,7 @@ func _ready():
 func setup():
 
 	if !Netplay.is_netplay() and !Globals.watching_replay: # for netgame, rng seed is generated at init() of NetgameSetup
-		orig_rng_seed = Globals.random.randi_range(1, 9999)
+		orig_rng_seed = Globals.random.randi_range(1, RNG_MAX - 1)
 		current_rng_seed = orig_rng_seed
 		Globals.orig_rng_seed = orig_rng_seed
 		
@@ -1576,12 +1577,23 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 
 			if attacker_or_entity == null or defender == null: continue # invalid attack
 			
+			# get direction to attacker
+			var attacker_vec := FVector.new()
+			attacker_vec.set_from_vec(attacker_or_entity.position - defender.position)
+			var angle_to_atker = attacker_vec.angle()
+			
+			var crossed_up := false
+			if !Em.hit.ENTITY_PATH in hitbox and !Em.hit.NPC_PATH in hitbox:
+				if defender.has_method("check_if_crossed_up"):
+					if defender.check_if_crossed_up(attacker_or_entity, angle_to_atker, hitbox[Em.hit.MOVE_DATA]):
+						crossed_up = true
+			
 #			if defender_command_grab_dodge(hitbox, hurtbox):
 #				continue # attacker must not be command grabbing a defender in ground/air movement startup or in blockstun
 			if !Em.hit.ENTITY_PATH in hitbox:
-				if !test_priority(hitbox, attacker_or_entity, hurtbox, defender):
+				if !crossed_up and !test_priority(hitbox, attacker_or_entity, hurtbox, defender):
 					continue # attacker must pass the priority test
-				if defender_anti_airing(hitbox, attacker_or_entity, hurtbox, defender):
+				if !crossed_up and defender_anti_airing(hitbox, attacker_or_entity, hurtbox, defender):
 					continue # attacker must not be using an aerial against an anti-airing defender
 #				if defender_backdash(hitbox, hurtbox):
 #					continue # defender must not be backdashing away from attacker's UNBLOCKABLE/ANTI_GUARD attack
@@ -1609,19 +1621,20 @@ func scan_for_hits(hit_data_array, hitboxes, hurtboxes):
 			var intersect_polygons = Geometry.intersect_polygons_2d(hitbox[Em.hit.POLYGON], hurtbox[Em.hit.POLYGON])
 			if intersect_polygons.size() > 0: # detected a hit
 				
-				if defender_semi_invul(hitbox, attacker_or_entity, hurtbox, defender, defender_ID2):
+				if defender_semi_invul(hitbox, attacker_or_entity, hurtbox, defender, defender_ID2, crossed_up):
 					pass # attacker must not be attacking a semi-invul defender unless with certain moves
+					# place this here as successful iframe after hitboxes intersect give success_dodge state
 				else:
-					create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox)
+					create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox, angle_to_atker, false, crossed_up)
 				
 			elif Em.hit.SDHURTBOX in hurtbox: # detecting a semi-disjoint hit
 				var intersect_polygons_sd = Geometry.intersect_polygons_2d(hitbox[Em.hit.POLYGON], hurtbox[Em.hit.SDHURTBOX])
 				if intersect_polygons_sd.size() > 0:
 					
-					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, attacker_or_entity, hurtbox, true)
+					create_hit_data(hit_data_array, intersect_polygons_sd, hitbox, attacker_or_entity, hurtbox, angle_to_atker, true, crossed_up)
 					
 						
-func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox, semi_disjoint = false):
+func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_entity, hurtbox, angle_to_atker, semi_disjoint := false, crossed_up := false):
 	
 	# calculate hit_center (used for emitting hitspark and sweetspotting)
 	var point_array := []
@@ -1651,6 +1664,8 @@ func create_hit_data(hit_data_array, intersect_polygons, hitbox, attacker_or_ent
 		Em.hit.HIT_CENTER : hit_center,
 		Em.hit.SEMI_DISJOINT: semi_disjoint,
 		Em.hit.SWEETSPOTTED : sweetspotted,
+		Em.hit.CROSSED_UP : crossed_up,
+		Em.hit.ANGLE_TO_ATKER : angle_to_atker,
 		Em.hit.ATK_FACING : hitbox[Em.hit.FACING],
 		Em.hit.DEFEND_FACING : hurtbox[Em.hit.FACING],
 		Em.hit.MOVE_NAME : hitbox[Em.hit.MOVE_NAME],
@@ -1774,7 +1789,7 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 #		return false
 	
 	
-func defender_semi_invul(hitbox, attacker_or_entity, _hurtbox, defender, defender_ID2):
+func defender_semi_invul(hitbox, attacker_or_entity, _hurtbox, defender, defender_ID2, crossed_up := false):
 	
 #	var attacker_or_entity
 #	if !Em.hit.ENTITY_PATH in hitbox: # not entity
@@ -1794,7 +1809,7 @@ func defender_semi_invul(hitbox, attacker_or_entity, _hurtbox, defender, defende
 	if hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER]:
 		return false # defender's semi-invul failed
 				
-	if defender.check_semi_invuln():
+	if defender.check_semi_invuln(crossed_up):
 		if "chain_combo" in attacker_or_entity: # prevent chaining on iframed attack
 			attacker_or_entity.chain_combo = Em.chain_combo.NO_CHAIN
 		defender.perfect_dodge()
@@ -2493,8 +2508,9 @@ func HUD_fade():
 func rng_generate(upper_limit: int) -> int: # will return a number from 0 to (upper_limit - 1)
 	var result: int = posmod(current_rng_seed, upper_limit)
 	var new_seed: int = current_rng_seed * Globals.PI_NUMBERS[posmod(current_rng_seed + frametime + upper_limit, 100)] + \
-			Globals.PI_NUMBERS[posmod(current_rng_seed, 100)] + posmod(frametime + upper_limit, 10000)
-	current_rng_seed = wrapi(new_seed, 1, 10000) # each call to generate a number changes the current seed
+			Globals.PI_NUMBERS[posmod(current_rng_seed, 100)] + posmod(frametime + upper_limit, RNG_MAX)
+	current_rng_seed = wrapi(new_seed, 1, RNG_MAX) # each call to generate a number changes the current seed
+#	print(current_rng_seed)
 	return result
 			
 func rng_range(lower_limit: int, upper_limit: int) -> int: # will return a number from lower_limit to (upper_limit - 1)

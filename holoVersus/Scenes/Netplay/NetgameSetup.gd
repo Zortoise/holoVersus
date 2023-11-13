@@ -27,7 +27,7 @@ func init():
 	Netcode.lag_freeze = false
 	
 	if get_tree().is_network_server():
-		Game.orig_rng_seed = Globals.random.randi_range(1, 9999)
+		Game.orig_rng_seed = Globals.random.randi_range(1, Globals.Game.RNG_MAX)
 		Game.current_rng_seed = Game.orig_rng_seed
 		Globals.orig_rng_seed = Game.orig_rng_seed
 	

@@ -1503,7 +1503,7 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 func check_collidable():  # some Characters have move that can pass through other Characters
 	return true
 	
-func check_semi_invuln():
+func check_semi_invuln(_crossed_up := false):
 	return false
 
 # --------------------------------------------------------------------------------------------------

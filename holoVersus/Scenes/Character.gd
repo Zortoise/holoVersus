@@ -4079,7 +4079,7 @@ func check_enough_air_jumps() -> bool:
 		return true
 	return false
 	
-func gain_one_air_dash(): # hitting with an unblocked aerial give you +1 air jump
+func gain_one_air_dash():
 	if UniqChar.has_method("gain_one_air_dash"):
 		UniqChar.gain_one_air_dash() # overwrite
 	if air_dash < get_stat("MAX_AIR_DASH"): # cannot go over
@@ -4361,8 +4361,8 @@ func check_fallthrough(): # during aerials, can drop through platforms if jump i
 			
 #	return UniqChar.check_fallthrough()
 	
-func check_semi_invuln():
-	if UniqChar.check_semi_invuln():
+func check_semi_invuln(crossed_up := false):
+	if UniqChar.check_semi_invuln(crossed_up):
 		return true
 	else:
 		match new_state:
@@ -4370,7 +4370,7 @@ func check_semi_invuln():
 				var move_name = get_move_name()
 				if is_super(move_name):
 					return true
-				elif Em.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr(move_name):
+				elif !crossed_up and Em.atk_attr.SEMI_INVUL_STARTUP in query_atk_attr(move_name):
 					return true
 			Em.char_state.AIR_STARTUP:
 				if Animator.query_to_play(["BurstCounterStartup", "BurstEscapeStartup", "DodgeTransit"]):
@@ -4379,6 +4379,7 @@ func check_semi_invuln():
 				if Animator.query_to_play(["Dodge"]):
 #					and Animator.time <= DODGE_SEMI_IFRAMES:
 					return true
+					
 				if Globals.survival_level != null:
 					if Animator.query_to_play(["SDash"]):
 						if Inventory.has_quirk(player_ID, Cards.effect_ref.SDASH_IFRAME):
@@ -6536,10 +6537,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		vec_to_attacker.x = -attacker_or_entity.facing
 	var dir_to_attacker := int(sign(vec_to_attacker.x)) # for setting facing on defender
 		
-	var attacker_vec := FVector.new()
-	attacker_vec.set_from_vec(vec_to_attacker)
+#	var attacker_vec := FVector.new()
+#	attacker_vec.set_from_vec(vec_to_attacker)
 	
-	hit_data[Em.hit.ANGLE_TO_ATKER] = attacker_vec.angle()
+#	hit_data[Em.hit.ANGLE_TO_ATKER] = attacker_vec.angle()
 	hit_data[Em.hit.LETHAL_HIT] = false
 	hit_data[Em.hit.PUNISH_HIT] = false
 	hit_data[Em.hit.CRUSH] = false
@@ -6689,7 +6690,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if hit_data[Em.hit.ATKER_OR_ENTITY].has_method("get_feet_pos") and hit_data[Em.hit.ATKER_OR_ENTITY].get_feet_pos() < get_feet_pos():
 			hit_data[Em.hit.ANTI_AIRED] = true
 
-	var crossed_up: bool = check_if_crossed_up(hit_data)
+#	var crossed_up: bool = hit_data[Em.hit.CROSSED_UP]
 
 #	if !Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or $SBlockTimer.is_running():
 	match new_state:
@@ -6701,7 +6702,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
 			var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
-			if crossed_up and !Em.atk_attr.BI_DIR_ARMOR in defender_attr:
+			if hit_data[Em.hit.CROSSED_UP]:
 				continue # armored moves only armor from front unless has BI_DIR_ARMOR
 			if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 					(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
@@ -6712,7 +6713,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 		Em.char_state.GRD_ATK_ACTIVE, Em.char_state.AIR_ATK_ACTIVE:
 			var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
-			if crossed_up and !Em.atk_attr.BI_DIR_ARMOR in defender_attr:
+			if hit_data[Em.hit.CROSSED_UP]:
 				continue # armored moves only armor from front unless has BI_DIR_ARMOR
 			if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
 					(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_ACTIVE in defender_attr) or \
@@ -6768,7 +6769,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			match hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE]:
 				
 				Em.atk_type.LIGHT, Em.atk_type.FIERCE:
-					if crossed_up:
+					if hit_data[Em.hit.CROSSED_UP]:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
 						# to strongblock a physical attack, you need to either perfect block them or
@@ -6795,14 +6796,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 
 				Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX:
-					if crossed_up:
+					if hit_data[Em.hit.CROSSED_UP]:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 #							hit_data[Em.hit.GUARD_DRAIN] = true
 					
 				Em.atk_type.SUPER:
-					if crossed_up:
+					if hit_data[Em.hit.CROSSED_UP]:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
@@ -6815,7 +6816,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #							hit_data[Em.hit.GUARD_DRAIN] = true
 					elif hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED):
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
-					elif !crossed_up:
+					elif !hit_data[Em.hit.CROSSED_UP]:
 						if (success_block == Em.success_block.PARRIED and $SBlockTimer.is_running()) or \
 								Animator.query_current(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]): # can perfect block projectiles
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
@@ -7942,31 +7943,37 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 
 	
 	
-func check_if_crossed_up(hit_data):
+func check_if_crossed_up(attacker_or_entity, angle_to_atker, atker_move_data):
 	
 	if $SBlockTimer.is_running():
 		return false
 		
-	if Em.hit.NPC_PATH in hit_data: # NPCs cannot cross-up
-		return false
+#	if Em.hit.NPC_PATH in hit_data: # NPCs cannot cross-up
+#		return false
+#
+#	if Em.hit.ENTITY_PATH in hit_data: # entities cannot cross-up
+#		return false
 	
-	if Em.atk_attr.NO_CROSSUP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+	if Em.atk_attr.NO_CROSSUP in atker_move_data[Em.move.ATK_ATTR]:
 		return false
 	
 	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_CROSSUP):
 		return false
-		
-	var attacker = hit_data[Em.hit.ATKER_OR_ENTITY]
 	
-	if attacker.has_method("query_status_effect") and \
-			(attacker.query_status_effect(Em.status_effect.NO_CROSSUP) or attacker.query_status_effect(Em.status_effect.SCANNED)):
+	if attacker_or_entity.has_method("query_status_effect") and \
+			(attacker_or_entity.query_status_effect(Em.status_effect.NO_CROSSUP) or attacker_or_entity.query_status_effect(Em.status_effect.SCANNED)):
 		return false
+		
+	if is_atk_startup() or is_atk_active():
+		var defender_move_data = query_move_data()
+		if Em.atk_attr.CROSSUP_PROTECTION in defender_move_data[Em.move.ATK_ATTR]:
+			return false
 	
 # warning-ignore:narrowing_conversion
-	var x_dist: int = abs(attacker.position.x - position.x)
+	var x_dist: int = abs(attacker_or_entity.position.x - position.x)
 	if x_dist <= CROSS_UP_MIN_DIST: return false
 	
-	var segment = Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.EIGHT)
+	var segment = Globals.split_angle(angle_to_atker, Em.angle_split.EIGHT)
 	if segment == Em.compass.N or segment == Em.compass.S:
 		return false
 	match segment:

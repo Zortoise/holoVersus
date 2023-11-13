@@ -213,7 +213,7 @@ func check_fallthrough():
 			return true
 	return false
 
-func check_semi_invuln():
+func check_semi_invuln(_crossed_up := false):
 	return false
 
 # UNIQUE INPUT CAPTURE --------------------------------------------------------------------------------------------------

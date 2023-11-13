@@ -148,7 +148,7 @@ func get_proj_level(move_name):
 			
 			
 func simulate():
-	if Animator.to_play_anim != "Kill":
+	if Animator.to_play_anim != "Kill" and Animator.to_play_anim != "Exploding":
 		check_command()
 		
 		if Entity.unique_data.invis and sprite.modulate.a > 0:
@@ -241,11 +241,17 @@ func check_command():
 				Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
 			
 func explode():
-	Entity.free = true
-	Globals.Game.spawn_entity(Entity.master_ID, "TakoExplode", Entity.position, \
-			{"facing" : Entity.facing}, Entity.palette_ref, Entity.master_ref)	
-	Entity.play_audio("explosion3", {"vol" : -15, "bus":"PitchDown"})
-	Entity.play_audio("impact44", {"vol" : -10})
+	Entity.unique_data.tako_state = "exploding"
+	Entity.velocity.x = 0
+	Entity.velocity.y = 0
+	Entity.get_node("Sprite").rotation = 0
+	Globals.Game.spawn_SFX("Music1", "Music", Entity.position, {"facing":Globals.Game.rng_facing()}, Entity.palette_ref, Entity.master_ref)
+	Animator.play("Exploding")
+#	Entity.free = true
+#	Globals.Game.spawn_entity(Entity.master_ID, "TakoExplode", Entity.position, \
+#			{"facing" : Entity.facing}, Entity.palette_ref, Entity.master_ref)	
+#	Entity.play_audio("explosion3", {"vol" : -15, "bus":"PitchDown"})
+#	Entity.play_audio("impact44", {"vol" : -10})
 	
 func kill(sound = true):
 	if Animator.to_play_anim != "Kill":
@@ -276,8 +282,12 @@ func on_offstage():
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:
-		_:
-			pass
+		"Exploding":
+			Entity.free = true
+			Globals.Game.spawn_entity(Entity.master_ID, "TakoExplode", Entity.position, \
+					{"facing" : Entity.facing}, Entity.palette_ref, Entity.master_ref)	
+			Entity.play_audio("explosion3", {"vol" : -15, "bus":"PitchDown"})
+			Entity.play_audio("impact44", {"vol" : -10})
 			
 func _on_SpritePlayer_anim_started(anim_name):
 	match anim_name:

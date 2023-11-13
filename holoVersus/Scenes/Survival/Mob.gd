@@ -1744,7 +1744,7 @@ func check_collidable(): # called by Physics.gd
 func check_fallthrough(): # during aerials, can drop through platforms if down is held
 	return false
 	
-func check_semi_invuln():
+func check_semi_invuln(_crossed_up := false):
 	return false	
 	
 func check_passthrough():
@@ -2517,10 +2517,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		vec_to_attacker.x = -attacker_or_entity.facing
 	var dir_to_attacker := int(sign(vec_to_attacker.x)) # for setting facing on defender
 		
-	var attacker_vec := FVector.new()
-	attacker_vec.set_from_vec(vec_to_attacker)
-	
-	hit_data[Em.hit.ANGLE_TO_ATKER] = attacker_vec.angle()
+#	var attacker_vec := FVector.new()
+#	attacker_vec.set_from_vec(vec_to_attacker)
+#
+#	hit_data[Em.hit.ANGLE_TO_ATKER] = attacker_vec.angle()
 	hit_data[Em.hit.LETHAL_HIT] = false
 	hit_data[Em.hit.PUNISH_HIT] = false
 	hit_data[Em.hit.STUN] = false
