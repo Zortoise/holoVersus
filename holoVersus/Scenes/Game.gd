@@ -1733,7 +1733,7 @@ func mob_projectile_miss(entity, defender):
 	return false
 	
 	
-func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
+func defender_anti_airing(hitbox, attacker, _hurtbox, defender) -> bool:
 
 #	if Globals.survival_level != null: return false # anti-air is not a thing in Survival
 		
@@ -1750,26 +1750,56 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender):
 	if attacker.get_feet_pos().y > defender.get_feet_pos().y:
 		return false # attacker is below defender, fail to anti-air
 		
-	if defender.is_atk_startup() or defender.is_atk_active():
+	var flag := false
+	
+	if !defender.is_atk_startup() and !defender.is_atk_active(): # cheap checking to avoid query_move_data()
+		return false # defender not in startup/active, fail to anti-air
+	
+	if defender.is_atk_startup():
+		if defender.grounded:
+			flag = true # defender in grounded attack startup, no need ANTI_AIR attribute, proceed to tier testing
+		else:
+			return false # defender in non-grounded attack startup, fail to anti-air
 		
-		var defender_move_data = defender.query_move_data()
-		
+	var defender_move_data = defender.query_move_data()
+	
+	if defender.is_atk_active():
 		if Em.atk_attr.ANTI_AIR in defender_move_data[Em.move.ATK_ATTR]:
+			flag = true # defender in attack active frames with ANTI_AIR attribute, proceed to tier testing
+		else:
+			return false # defender in attack active frames without ANTI_AIR attribute, fail to anti-air
+			
+	if flag: # test attack tiers
+		var defender_tier = Globals.atk_type_to_tier(defender_move_data[Em.move.ATK_TYPE])
+		var attacker_tier = Globals.atk_type_to_tier(hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE])
+		
+		if attacker_tier == 0: return true # attacker using air normal, defender succeed in anti-airing
+		elif attacker_tier > defender_tier: return false # attacker using air special with higher tier than defender's move, fail to anti-air
+
+		return true # defender successfully anti-aired
+		
+	return false
+		
+#	if defender.is_atk_startup() or defender.is_atk_active():
+#
+#		var defender_move_data = defender.query_move_data()
+#
+#		if Em.atk_attr.ANTI_AIR in defender_move_data[Em.move.ATK_ATTR]:
 
 			# for defender to successfully anti-air, they must be attacking, must be using an ANTI-AIR move, 
 			# and the attacker must be airborne and above defender
-			var defender_tier = Globals.atk_type_to_tier(defender_move_data[Em.move.ATK_TYPE])
-			var attacker_tier = Globals.atk_type_to_tier(hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE])
-			
-			if attacker_tier == 0: return true # air normals can be anti-aired by anything
-			elif attacker_tier > defender_tier: return false # cannot anti-air attacks of higher tier
-#			elif attacker_tier == defender_tier:
-#				if attacker.query_priority(hitbox.move_name) >= defender.query_priority():
-#					return false # if same tier, cannot anti-air attacks of equal or higher priority
-			else:
-				return true # defender successfully anti-aired
-					
-	return false
+#			var defender_tier = Globals.atk_type_to_tier(defender_move_data[Em.move.ATK_TYPE])
+#			var attacker_tier = Globals.atk_type_to_tier(hitbox[Em.hit.MOVE_DATA][Em.move.ATK_TYPE])
+#
+#			if attacker_tier == 0: return true # air normals can be anti-aired by anything
+#			elif attacker_tier > defender_tier: return false # cannot anti-air attacks of higher tier
+##			elif attacker_tier == defender_tier:
+##				if attacker.query_priority(hitbox.move_name) >= defender.query_priority():
+##					return false # if same tier, cannot anti-air attacks of equal or higher priority
+#			else:
+#				return true # defender successfully anti-aired
+#
+#	return false
 	
 #func defender_mob_grace(hitbox, attacker, hurtbox, defender):
 #

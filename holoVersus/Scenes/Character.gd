@@ -1628,7 +1628,7 @@ func simulate2(): # only ran if not in hitstop
 	
 	if !grounded:
 		match new_state:
-			Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, \
+			Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC, \
 				Em.char_state.GRD_STARTUP, Em.char_state.GRD_ACTIVE, Em.char_state.GRD_REC, \
 				Em.char_state.GRD_ATK_STARTUP, Em.char_state.GRD_ATK_ACTIVE, Em.char_state.GRD_ATK_REC, \
 				Em.char_state.GRD_FLINCH_HITSTUN, Em.char_state.GRD_BLOCK:
@@ -1636,7 +1636,7 @@ func simulate2(): # only ran if not in hitstop
 				
 	elif velocity.y >= 0: # just in case, normally called when physics.gd runs into a floor
 		match new_state:
-			Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_STARTUP, \
+			Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC, Em.char_state.AIR_STARTUP, \
 				Em.char_state.AIR_ACTIVE, Em.char_state.AIR_REC, Em.char_state.AIR_ATK_STARTUP, \
 				Em.char_state.AIR_ATK_ACTIVE, Em.char_state.AIR_ATK_REC, Em.char_state.AIR_FLINCH_HITSTUN, \
 				Em.char_state.LAUNCHED_HITSTUN, Em.char_state.AIR_BLOCK:
@@ -2474,10 +2474,17 @@ func buffer_actions():
 		
 # SPECIAL ACTIONS --------------------------------------------------------------------------------------------------
 		
+#func instant_airdash():
+#	if (button_jump in input_state.pressed and button_dash in input_state.just_pressed) or \
+#			(button_jump in input_state.just_pressed and is_button_tapped_in_last_X_frames(button_dash, 1)):
+#		input_buffer.push_front(["InstaAirDash", buffer_time()])
+
+		
 func capture_combinations():
 	
-	# instant air dash, place at back
+	# instant air dash
 	if Settings.input_assist[player_ID]:
+#		instant_airdash()
 		combination(button_jump, button_dash, "InstaAirDash")
 	
 #	if !button_unique in input_state.pressed: # this allows you to use Unique + Aux command when blocking without doing a Burst
@@ -2892,13 +2899,19 @@ func process_input_buffer():
 						
 						# JUMPING ON GROUND --------------------------------------------------------------------------------------------------
 						
-						Em.char_state.GRD_STANDBY, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC:
+						Em.char_state.GRD_STANDBY, Em.char_state.GRD_STARTUP, Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC:
 							
 							if new_state == Em.char_state.GRD_D_REC:
-								if UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
+								if Animator.time == 0: # cannot jump cancel first frame of dash, must be moving
+									continue
+								elif UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
 									pass # some characters has certain jump cancellable d_rec
 								elif !has_trait(Em.trait.GRD_DASH_JUMP):
 									continue # some characters can jump while dashing
+									
+							elif new_state == Em.char_state.GRD_STARTUP:
+								if Animator.time > 1: # can only jump cancel first frame of dash startup
+									continue
 								
 #							if new_state == Em.char_state.AIR_D_REC:
 #								if !grounded or !has_trait(Em.trait.AIR_DASH_JUMP):
@@ -2919,7 +2932,7 @@ func process_input_buffer():
 									
 							if keep:
 								
-								if button_dash in input_state.pressed: # for wavedash alternate input
+								if is_button_tapped_in_last_X_frames(button_dash, 1): # for wavedash alternate input
 #									input_buffer.append([button_dash, buffer_time()])
 									input_to_add.append([button_dash, buffer_time()])
 									
@@ -2944,6 +2957,8 @@ func process_input_buffer():
 #								continue
 
 							if new_state == Em.char_state.AIR_D_REC:
+								if Animator.time == 0: # cannot jump cancel first frame of dash, must be moving
+									continue
 								if UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
 									pass # some characters has certain jump cancellable d_rec
 								elif !has_trait(Em.trait.AIR_DASH_JUMP):
