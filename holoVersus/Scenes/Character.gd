@@ -435,18 +435,24 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 		assist = in_assist
 		var assist_icon = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistNode/AssistChar")
 		assist_icon.texture = Loader.NPC_data[assist].icon
+		
+	# for non-point characters, add them to InactivePlayers and init() them
+	if get_parent() == Globals.Game.get_node("InactivePlayers"):
+		state = Em.char_state.INACTIVE
+		new_state = Em.char_state.INACTIVE
+	else:
 	
-	yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
-#	Globals.Game.damage_limit_update(self)
-	Globals.Game.damage_update(self)
-	Globals.Game.res_gauge_update(self)
-	Globals.Game.ex_gauge_update(self)
-	Globals.Game.ult_gauge_update(self)
-	Globals.Game.stock_points_update(self)
-#	Globals.Game.burst_update(self)
-#	Globals.Game.install_update(self)
-	if Globals.survival_level != null:
-		Globals.Game.prism_update(self)
+		yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
+	#	Globals.Game.damage_limit_update(self)
+		Globals.Game.damage_update(self)
+		Globals.Game.res_gauge_update(self)
+		Globals.Game.ex_gauge_update(self)
+		Globals.Game.ult_gauge_update(self)
+		Globals.Game.stock_points_update(self)
+	#	Globals.Game.burst_update(self)
+	#	Globals.Game.install_update(self)
+		if Globals.survival_level != null:
+			Globals.Game.prism_update(self)
 	
 	
 func set_player_id(in_player_ID): # can use this to change player you are controlling during training mode
@@ -743,7 +749,7 @@ func _process(_delta):
 			$TestNode2D.hide()
 			
 			
-func simulate(new_input_state):
+func simulate(new_input_state = {"pressed" : [], "just_pressed" : [], "just_released" : []}):
 		
 	input_state = new_input_state # so that I can use it in other functions
 			
@@ -846,10 +852,11 @@ func simulate(new_input_state):
 	
 # PAUSING --------------------------------------------------------------------------------------------------
 		
-	if button_pause in input_state.just_pressed:
-		Globals.pausing = true
-	elif button_pause in input_state.just_released:
-		Globals.pausing = false
+	if state != Em.char_state.INACTIVE:
+		if button_pause in input_state.just_pressed:
+			Globals.pausing = true
+		elif button_pause in input_state.just_released:
+			Globals.pausing = false
 
 
 # SET NON-SAVEABLE DATA --------------------------------------------------------------------------------------------------
@@ -881,6 +888,9 @@ func simulate(new_input_state):
 # FRAMESKIP DURING HITSTOP --------------------------------------------------------------------------------------------------
 	# while buffering all inputs
 	
+	
+	if state == Em.char_state.INACTIVE:
+		return
 	
 	if Globals.Game.is_stage_paused() and Globals.Game.screenfreeze != player_ID: # screenfrozen
 		return
@@ -7053,8 +7063,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 			hit_data.erase(Em.hit.SUPERARMORED)
 		elif get_res_gauge_percent_below() == 0:
-			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-			hit_data.erase(Em.hit.SUPERARMORED)
+			if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
+				if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
+					pass # can armor through lvl 1 projectiles even with no RES Gauge
+				else:
+					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+					hit_data.erase(Em.hit.SUPERARMORED)
 		
 		var damage = calculate_damage(hit_data)
 		take_damage(damage) # do damage calculation
@@ -9167,11 +9181,75 @@ func hide_SfxUnder():
 	sfx_under.hide()
 
 
+# TAGGING IN/OUT --------------------------------------------------------------------------------------------------
+
+func tag(teammate_name: String):
+	var teammate_node = Globals.Game.get_player_node_inactive(player_ID, teammate_name)
+	var data_to_pass = switch_to_inactive()
+	teammate_node.switch_to_active(data_to_pass)
+
+
+func switch_to_inactive() -> Dictionary:
+	state = Em.char_state.INACTIVE
+	new_state = Em.char_state.INACTIVE
+	
+	var data_to_pass = {
+		"input_buffer" : input_buffer,
+		"facing" : facing,
+		"position" : position,
+		"velocity_x" : velocity.x,
+		"velocity_y" : velocity.y,
+		
+		"current_damage_value" : current_damage_value,
+		"current_res_gauge" : current_res_gauge,
+		"current_ex_gauge" : current_ex_gauge,
+		"current_ult_gauge" : current_ult_gauge,
+	}
+	
+	Globals.Game.get_node("Players").remove_child(self)
+	Globals.Game.get_node("InactivePlayers").add_child(self)
+	
+	return data_to_pass
+	
+	
+func switch_to_active(data_to_pass: Dictionary):
+	
+	Globals.Game.get_node("InactivePlayers").remove_child(self)
+	Globals.Game.get_node("Players").add_child(self)
+	
+	input_buffer = data_to_pass.input_buffer
+	
+	position = data_to_pass.position
+	set_true_position()
+	face(data_to_pass.facing)
+	velocity.x = data_to_pass.velocity_x
+	velocity.y = data_to_pass.velocity_y
+	
+	Globals.Game.damage_update(self)
+	current_res_gauge = data_to_pass.current_res_gauge
+	current_ex_gauge = data_to_pass.current_ex_gauge
+	current_ult_gauge = data_to_pass.current_ult_gauge
+	
+	if is_on_ground(get_soft_dbox(get_collision_box())):
+		state = Em.char_state.GRD_STANDBY
+		animate("Idle")
+	else:
+		state = Em.char_state.AIR_STANDBY
+		animate("FallTransit")
+		
+	reset_jumps()
+	
+	if Globals.Game.frame_viewer != null:
+		Globals.Game.frame_viewer.set("P" + str(player_ID + 1) + "_node", self)
+	
+	
+
 # SAVE/LOAD STATE --------------------------------------------------------------------------------------------------
 
 func save_state():
 	var state_data = {
-			
+		"name" : UniqChar.NAME,
+		
 		"position" : position,
 		"air_jump" : air_jump,
 		"wall_jump" : wall_jump,

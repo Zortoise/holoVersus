@@ -418,7 +418,7 @@ func _process(_delta):
 		$TestNode2D.hide()
 			
 			
-func simulate(_new_input_state):
+func simulate(_new_input_state = {"pressed" : [], "just_pressed" : [], "just_released" : []}):
 	
 # INDICATORS --------------------------------------------------------------------------------------------------
 

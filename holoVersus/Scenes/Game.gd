@@ -873,6 +873,12 @@ func simulate(rendering = true):
 		else:
 			player.simulate(player_input_state)
 			
+	for inactive_player in $InactivePlayers.get_children():
+		if "free" in inactive_player and inactive_player.free:
+			inactive_player.free() # remove killed mobs
+		else:
+			inactive_player.simulate()
+			
 	for npc in $NPCs.get_children():
 		if "free" in npc and npc.free:
 			npc.free() # remove freed NPCs
@@ -916,6 +922,8 @@ func simulate(rendering = true):
 	# activate player's simulate_after()
 	for player in $Players.get_children():
 		player.simulate_after()
+		
+	# no simulate_after for inactive characters
 		
 	for npc in $NPCs.get_children():
 		npc.simulate_after()
@@ -1069,6 +1077,14 @@ func save_state(timestamp):
 	for player in $Players.get_children():
 		game_state.player_data[player.player_ID] = player.save_state()
 		
+	for inactive_player in $InactivePlayers.get_children():
+		if inactive_player.player_ID in game_state.player_data:
+			if !"teammates" in game_state.player_data[inactive_player.player_ID]:
+				game_state.player_data[inactive_player.player_ID]["teammates"] = []
+			game_state.player_data[inactive_player.player_ID]["teammates"].append(inactive_player.save_state())
+		else:
+			print("Error: Player ID " + str(inactive_player.player_ID) + " not found in game_state.player_data when loading teammates.")
+		
 	for npc in $NPCs.get_children():
 		game_state.npc_data.append(npc.save_state())
 		
@@ -1156,11 +1172,32 @@ func load_state(game_state, loading_autosave = true):
 	if Globals.static_stage == 0:
 		stage.load_state(loaded_game_state.stage_data)
 
-	for mob in get_tree().get_nodes_in_group("MobNodes"):
+	for mob in get_tree().get_nodes_in_group("MobNodes"): # free all mobs
 		mob.free()
+		
+		
+	for player in $Players.get_children(): # send all players to inactive first
+		if player.player_ID >= 0:
+			$Players.remove_child(player)
+			$InactivePlayers.add_child(player)
+			
 	for load_player_id in loaded_game_state.player_data.keys(): # get all nodes in saved Players
-		if load_player_id >= 0: # positive player_ID is player, just load their state
-			get_player_node(load_player_id).load_state(loaded_game_state.player_data[load_player_id])
+		if load_player_id >= 0: # positive player_ID is player, just load state
+#			get_player_node(load_player_id).load_state(loaded_game_state.player_data[load_player_id])
+			
+			# first, get the point character in $InactivePlayers and move them to active players and load them
+			var point_char = get_player_node_inactive(load_player_id, loaded_game_state.player_data[load_player_id].name)
+			$InactivePlayers.remove_child(point_char)
+			$Players.add_child(point_char)
+			point_char.load_state(loaded_game_state.player_data[load_player_id])
+			
+			# find their teammates in $InactivePlayers and load them
+			if "teammates" in loaded_game_state.player_data[load_player_id]:
+				for teammate_dict in loaded_game_state.player_data[load_player_id].teammates:
+					var teammate_node = get_player_node_inactive(load_player_id, teammate_dict.name)
+					teammate_node.load_state(teammate_dict)
+			
+			
 		else: # negative player_ID is mob, must create new mob
 			var new_mob = LevelControl.loaded_mob_scene.instance()
 			$Players.add_child(new_mob)
@@ -2416,6 +2453,10 @@ func get_player_node(player_ID):
 				return player
 	return null
 	
+func get_player_node_inactive(player_ID: int, character_name: String):
+	for player in $InactivePlayers.get_children():
+		if player.player_ID == player_ID and player.UniqChar.NAME == character_name:
+			return player
 	
 func get_NPC_node(NPC_ID):
 	if NPC_ID == null: return null

@@ -574,6 +574,8 @@ func get_nodes_in_box_move(detect_box: Rect2, platform_boxes: Array) -> Array:
 func get_players_in_box_move(detect_box: Rect2, player_boxes: Array, direction: int) -> Array:
 	var to_return := []
 	for x in player_boxes:
+		if x.get_parent().state == Em.char_state.INACTIVE:
+			continue # tagged out characters cannot collide
 		if x.get_parent() == self or x.get_parent().position.x == position.x:
 			continue # cannot collide with self
 		if sign(x.get_parent().position.x - position.x) != direction:

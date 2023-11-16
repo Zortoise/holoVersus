@@ -3556,7 +3556,7 @@ position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
 [node name="RESLabel" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
-position = Vector2( -107, 20 )
+position = Vector2( -107, 19 )
 texture = ExtResource( 5 )
 
 [node name="Unique" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
@@ -3762,7 +3762,7 @@ position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
 [node name="RESLabel" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
-position = Vector2( -107, 20 )
+position = Vector2( -107, 19 )
 texture = ExtResource( 5 )
 
 [node name="Unique" type="Node2D" parent="HUD/P2_HUDRect/GaugesUnder"]

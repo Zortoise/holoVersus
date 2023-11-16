@@ -285,7 +285,10 @@ func get_riders():
 	# get collision boxes of all grounded entities
 	var collision_boxes = get_tree().get_nodes_in_group("Grounded")
 	for collision_box in collision_boxes:
-		if Detection.is_riding($EntityCollisionBox, collision_box): # check if riding
+		if "state" in collision_boxes.get_parent() and \
+				collision_boxes.get_parent().state in [Em.char_state.INACTIVE, Em.char_state.SEQ_TARGET]:
+			pass
+		elif Detection.is_riding($EntityCollisionBox, collision_box): # check if riding
 			rider_boxes.append(collision_box)
 			
 	return rider_boxes

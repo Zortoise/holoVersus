@@ -56,6 +56,8 @@ func process_results(results: Dictionary):
 					var rider = rider_box.get_parent()
 					if "stasis" in rider and rider.stasis:
 						pass
+					if "state" in rider and rider.state in [Em.char_state.INACTIVE, Em.char_state.SEQ_TARGET]:
+						pass
 					else:
 						rider.move_amount(position_change)
 						if rider.has_method("set_true_position"):
