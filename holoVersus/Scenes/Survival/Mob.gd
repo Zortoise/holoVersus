@@ -11,7 +11,7 @@ const PEAK_DAMPER_MOD = 60 # used to reduce gravity at jump peak
 const PEAK_DAMPER_LIMIT = 400 * FMath.S # min velocity.y where jump peak gravity reduction kicks in
 const TERMINAL_THRESHOLD = 150 # if velocity.y is over this during hitstun, no terminal velocity slowdown
 
-const GUARD_GAUGE_FLOOR = -10000
+const RES_GAUGE_FLOOR = -10000
 
 const HITSTUN_TERMINAL_VELOCITY_MOD = 650
 const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during aerials
@@ -21,12 +21,12 @@ const MIN_HITSTOP = 5
 const MAX_HITSTOP = 13
 const REPEAT_DMG_MOD = 30 # damage modifier on double_repeat
 const PARTIAL_REPEAT_DMG_MOD = 80
-const HITSTUN_REDUCTION_AT_MAX_GG = 50 # reduction in hitstun when defender's Guard Gauge is at 100%
+const HITSTUN_REDUCTION_AT_MAX_RES = 50 # reduction in hitstun when defender's RES Gauge is at 100%
 
 # old hitstun
 #const ATK_LEVEL_TO_F_HITSTUN = [35, 40, 45, 50, 55, 60, 65, 70]
 #const ATK_LEVEL_TO_L_HITSTUN = [55, 60, 65, 70, 75, 80, 85, 90]
-#const ATK_LEVEL_TO_GDRAIN = [0, 1500, 1750, 2000, 2250, 2500, 2750, 3000]
+#const ATK_LEVEL_TO_RES_DRAIN = [0, 1500, 1750, 2000, 2250, 2500, 2750, 3000]
 
 # original character hitstun
 #const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
@@ -38,10 +38,10 @@ const ATK_LEVEL_TO_F_HITSTUN = [33, 36, 39, 42, 45, 48, 51, 54]
 const ATK_LEVEL_TO_L_HITSTUN = [48, 51, 54, 57, 60, 63, 66, 69]
 const ATK_LEVEL_TO_F_HITSTUN_H = [15, 20, 25, 30, 35, 40, 45, 50] # for hard difficulty
 const ATK_LEVEL_TO_L_HITSTUN_H = [25, 30, 35, 40, 45, 50, 55, 60]
-const COMBO_LEVEL_TO_GUARD_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
+const COMBO_LEVEL_TO_RES_SWELL_MOD = [300, 250, 200, 150, 100, 80, 60, 40]
 const MULTIHIT_HITSTUN = 15
 
-const ATK_LEVEL_TO_GDRAIN = [0, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
+const ATK_LEVEL_TO_RES_DRAIN = [0, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
 
 const MOB_LEVEL_TO_HP = [100, 125, 150, 200, 250, 300, 350, 400, 450]
 const IDLE_CHANCE = [45, 40, 35, 22, 10, 0, 0, 0, 0]
@@ -53,7 +53,7 @@ const HITSTUN_FRICTION = 15  # friction during hitstun
 const HITSTUN_AIR_RES = 3 # air resistance during hitstun
 
 const SD_KNOCKBACK_LIMIT = 300 * FMath.S # knockback strength limit of a semi-disjoint hit
-#const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
+#const SD_HIT_RES_DRAIN_MOD = 150 # RES drain on semi-disjoint hits
 
 #const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
@@ -150,7 +150,7 @@ var sprite_texture_ref = { # used for afterimages
 }
 
 onready var current_damage_value: int = 0
-onready var current_guard_gauge: int = 0
+onready var current_res_gauge: int = 0
 
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
 var ignore_list = [] # some moves has ignore_time, after hitting will ignore that player for a number of frames, used for multi-hit specials
@@ -172,14 +172,14 @@ var command_timer := 0 # timer that counts up
 var command_style : String # to mark some command variants
 var strafe_style := 0 # 1 is towards opponent, -1 is away
 var command_array_num := 0 # some commands have an array of animations to go through
-var guardbroken := false # when GG is depleted, mob enters a guardbroken state where they no longer has superarmor till GG refills
+var guardbroken := false # when RES is depleted, mob enters a guardbroken state where they no longer has superarmor till RES refills
 var chaining := false
 var air_dashed := false
 var rand_time = null
 var peak_flag = Em.peak_flag.GROUNDED
 var chain_memory := []
 var rand_max_chain_size := 0
-var combo_level := 0 # set when mob_break according to atk_level, determine Guard Swell Rate
+var combo_level := 0 # set when mob_break according to atk_level, determine RES Swell Rate
 #var proj_only_combo := false # set to true when mob_break via projectile, false if hit with physical attack during combo, increase armor time
 var no_jump_chance := 0 # chance of removing all jumps from decision, increased if hit in air, decreased when hit on ground
 var can_impulse := true # set to false when starting a MOVEMENT RECOVERY, set to true otherwise
@@ -218,7 +218,7 @@ func init(mob_name: String, level: int, variant: String, attr: Dictionary, start
 		face(start_facing)
 	
 #	Globals.Game.damage_update(self)
-#	Globals.Game.guard_gauge_update(self)
+#	Globals.Game.res_gauge_update(self)
 	
 	unique_data = UniqChar.UNIQUE_DATA_REF.duplicate(true)
 	
@@ -273,7 +273,7 @@ func load_mob():
 #	$MobStats/Level.text = "Lvl " + str(mob_level + 1)
 	
 #	damage_update()
-#	guard_gauge_update()
+#	res_gauge_update()
 	
 	
 func setup_boxes(ref_rect): # set up detection boxes
@@ -364,10 +364,10 @@ func get_target():
 	else:
 		return target_node
 
-func guard_gauge_update():
+func res_gauge_update():
 # warning-ignore:integer_division
-	var value = clamp(round((current_guard_gauge - GUARD_GAUGE_FLOOR)/500.0), 0, 20)
-	$MobStats/GG.frame = value
+	var value = clamp(round((current_res_gauge - RES_GAUGE_FLOOR)/500.0), 0, 20)
+	$MobStats/RES.frame = value
 	
 func damage_update():
 	var value = max(0, get_stat("DAMAGE_VALUE_LIMIT") - current_damage_value)
@@ -441,23 +441,23 @@ func simulate(_new_input_state):
 		else:
 			$MobStats/HP.hide()
 			
-		if current_guard_gauge == 0:
-			$MobStats/GG.hide()
+		if current_res_gauge == 0:
+			$MobStats/RES.hide()
 		else:
-			$MobStats/GG.show()
+			$MobStats/RES.show()
 		
 #	if !guardbroken:
-#		$MobStats/GG.modulate = Color(1.0, 0.5, 0.0)
+#		$MobStats/RES.modulate = Color(1.0, 0.5, 0.0)
 	if guardbroken:
 		var value = posmod(Globals.Game.frametime, 10)
 		if value < 5:
-			$MobStats/GG.modulate = Color(0.9, 0.0, 0.0)
+			$MobStats/RES.modulate = Color(0.9, 0.0, 0.0)
 		elif value < 6:
-			$MobStats/GG.modulate = Color(1.5, 1.5, 1.5)
+			$MobStats/RES.modulate = Color(1.5, 1.5, 1.5)
 		else:
-			$MobStats/GG.modulate = Color(1.2, 0.65, 0.0)
+			$MobStats/RES.modulate = Color(1.2, 0.65, 0.0)
 	else:
-		$MobStats/GG.modulate = Color(1.2, 0.65, 0.0)
+		$MobStats/RES.modulate = Color(1.2, 0.65, 0.0)
 			
 # RESET NON-SAVEABLE VARIABLES --------------------------------------------------------------------------------------------------
 
@@ -516,12 +516,12 @@ func simulate2(): # only ran if not in hitstop
 			if Animator.time in UniqChar.MOVE_DATABASE[refined_move][Em.move.MULTI_HIT_REFRESH]:
 				ignore_list = []
 		
-	# GG Swell during guardbroken state
+	# RES Swell during guardbroken state
 	if !$HitStopTimer.is_running() and !state in [Em.char_state.SEQ_TARGET] and get_damage_percent() < 100:
 		if guardbroken:
-			current_guard_gauge = int(min(0, current_guard_gauge + get_stat("GUARD_GAUGE_SWELL_RATE")))
-			if !$HitStunTimer.is_running(): # guardbroken and out of hitstun, instantly gain back all Guard Gauge
-				reset_guard_gauge()
+			current_res_gauge = int(min(0, current_res_gauge + get_stat("RES_GAUGE_SWELL_RATE")))
+			if !$HitStunTimer.is_running(): # guardbroken and out of hitstun, instantly gain back all RES Gauge
+				reset_res_gauge()
 				guardbroken = false
 #				if !proj_only_combo:
 				$BlueArmorTimer.time = get_stat("BLUE_ARMOR_TIME")
@@ -532,7 +532,7 @@ func simulate2(): # only ran if not in hitstop
 				Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 					"v_mirror":Globals.Game.rng_bool()}, "white")
 			else:
-				if current_guard_gauge == 0: # instantly recover from hitstun if GG swell back to max
+				if current_res_gauge == 0: # instantly recover from hitstun if RES swell back to max
 					$HitStunTimer.stop()
 					guardbroken = false
 #					if !proj_only_combo:
@@ -544,12 +544,12 @@ func simulate2(): # only ran if not in hitstop
 					Globals.Game.spawn_SFX("Reset", "Shines", position, {"facing":Globals.Game.rng_facing(), \
 						"v_mirror":Globals.Game.rng_bool()}, "white")
 				
-			guard_gauge_update()
+			res_gauge_update()
 		else:
-			if current_guard_gauge < 0:
-				var guard_gauge_regen: int = get_stat("GG_REGEN_AMOUNT")
-				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen))
-				guard_gauge_update()
+			if current_res_gauge < 0:
+				var res_gauge_regen: int = get_stat("RES_REGEN_AMOUNT")
+				current_res_gauge = int(min(0, current_res_gauge + res_gauge_regen))
+				res_gauge_update()
 		
 		
 	if new_state in [Em.char_state.SEQ_USER, Em.char_state.SEQ_TARGET]:
@@ -1239,19 +1239,19 @@ func get_stat(stat):
 				to_return = FMath.percent(to_return, MOB_LEVEL_TO_SPEED[mob_level])
 		"DAMAGE_VALUE_LIMIT":
 			to_return = FMath.percent(to_return, MOB_LEVEL_TO_HP[mob_level])
-		"GUARD_GAUGE_SWELL_RATE":
+		"RES_GAUGE_SWELL_RATE":
 			if Globals.difficulty == 3:
 				to_return = FMath.percent(to_return, 175)
 			else:
 				var mob_level_values = [100, 125, 150]
 				to_return = FMath.percent(to_return, mob_level_values[mob_level_to_tier()])
 			
-			var hp_left_values = [125, 100, 75, 50] # remaining HP affects Guard Swell
+			var hp_left_values = [125, 100, 75, 50] # remaining HP affects RES Swell
 			to_return = FMath.percent(to_return, hp_left_values[hp_left_to_tier()])
 			
-			# combo level affects Guard Swell
-			to_return = FMath.percent(to_return, COMBO_LEVEL_TO_GUARD_SWELL_MOD[combo_level])
-		"GUARD_DRAIN_MOD":
+			# combo level affects RES Swell
+			to_return = FMath.percent(to_return, COMBO_LEVEL_TO_RES_SWELL_MOD[combo_level])
+		"RES_DRAIN_MOD":
 			if Globals.difficulty == 3:
 				to_return = FMath.percent(to_return, 50)
 			else:		
@@ -1260,22 +1260,22 @@ func get_stat(stat):
 		
 	if Globals.difficulty == 3: # increased stats for hardest mode
 		match stat:
-			"GUARD_DRAIN_MOD":
+			"RES_DRAIN_MOD":
 				to_return = FMath.percent(to_return, 70)
-#			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
+#			"DAMAGE_VALUE_LIMIT", "RES_GAUGE_SWELL_RATE":
 #				to_return = FMath.percent(to_return, 150)
 			"BLUE_ARMOR_TIME":
 				to_return = FMath.percent(to_return, 300)
 			"DAMAGE_VALUE_LIMIT":
 				to_return = FMath.percent(to_return, 130)
-			"GG_REGEN_AMOUNT":
+			"RES_REGEN_AMOUNT":
 				to_return = FMath.percent(to_return, 125)
 			
 	if Globals.player_count > 1: # increased stats for 2 players
 		match stat:
-			"GUARD_DRAIN_MOD":
+			"RES_DRAIN_MOD":
 				to_return = FMath.percent(to_return, 70)
-#			"DAMAGE_VALUE_LIMIT", "GUARD_GAUGE_SWELL_RATE":
+#			"DAMAGE_VALUE_LIMIT", "RES_GAUGE_SWELL_RATE":
 #				to_return = FMath.percent(to_return, 150)
 			"BLUE_ARMOR_TIME":
 				to_return = FMath.percent(to_return, 300)
@@ -1284,15 +1284,15 @@ func get_stat(stat):
 	
 	if Em.mob_attr.TOUGH in mob_attr:
 		match stat:
-			"GUARD_GAUGE_SWELL_RATE":
+			"RES_GAUGE_SWELL_RATE":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [50, 75, 115, 130, 145, 160])
 			"BLUE_ARMOR_TIME":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [50, 75, 125, 150, 175, 200])
 			"ARMOR_DMG_MOD":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [150, 125, 75, 50, 25, 1])
-			"GUARD_DRAIN_MOD":
+			"RES_DRAIN_MOD":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [140, 120, 90, 80, 70, 60])
-			"GG_REGEN_AMOUNT":
+			"RES_REGEN_AMOUNT":
 				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [0, 50, 110, 120, 130, 140])
 #			"ARMOR_KNOCKBACK_MOD":
 #				to_return = modify_stat(to_return, Em.mob_attr.TOUGH, [75, 50, 25, 1])
@@ -1306,10 +1306,10 @@ func get_stat(stat):
 				if mob_attr[Em.mob_attr.HP] == 0:
 					return 1
 				to_return = modify_stat(to_return, Em.mob_attr.HP, [1, 50, 150, 200, 250, 300])
-#	if Em.mob_attr.GDRAIN in mob_attr:
+#	if Em.mob_attr.RES_DRAIN in mob_attr:
 #		match stat:
-#			"GUARD_DRAIN_MOD":
-#				to_return = modify_stat(to_return, Em.mob_attr.GDRAIN, [999, 130, 120, 110, 90, 80, 70])
+#			"RES_DRAIN_MOD":
+#				to_return = modify_stat(to_return, Em.mob_attr.RES_DRAIN, [999, 130, 120, 110, 90, 80, 70])
 #
 #	match stat: # limits
 #		"SPEED_MOD":
@@ -1362,7 +1362,7 @@ func bounce(against_ground: bool):
 		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
 		if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
-			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			# if bounce off hard enough, take damage scaled to velocity and RES Gauge
 			if wall_slammed == Em.wall_slam.CAN_SLAM and \
 					abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
@@ -1380,13 +1380,13 @@ func bounce(against_ground: bool):
 							slam_level = 1
 							play_audio("break3", {"vol" : -16,})
 							modulate_play("punish_sweet_flash")
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 25))
 						else:
 							hitstop = 15
 							slam_level = 2
 							play_audio("break3", {"vol" : -14,})
 							modulate_play("punish_sweet_flash")
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 50))
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
@@ -1408,7 +1408,7 @@ func bounce(against_ground: bool):
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
-			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			# if bounce off hard enough, take damage scaled to velocity and RES Gauge
 			if wall_slammed == Em.wall_slam.CAN_SLAM and \
 					abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x) and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
@@ -1426,13 +1426,13 @@ func bounce(against_ground: bool):
 							slam_level = 1
 							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 25))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 25))
 						else: # lvl 3 slam
 							hitstop = 15
 							slam_level = 2
 							play_audio("break3", {"vol" : -12,})
 							modulate_play("punish_sweet_flash")
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 50))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 50))
 					else: # lvl 1 slam
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
@@ -1843,7 +1843,7 @@ func flashes():
 	if $BlueArmorTimer.is_running():
 		modulate_play("blue_armor_time")
 
-	if Em.mob_attr.PASSIVE_ARMOR in mob_attr and get_guard_gauge_percent_below() >= 75:
+	if Em.mob_attr.PASSIVE_ARMOR in mob_attr and get_res_gauge_percent_below() >= 75:
 		modulate_play("passive_armor")
 
 	UniqChar.unique_flash()
@@ -2252,7 +2252,7 @@ func is_hitcount_last_hit(in_ID, move_data):
 	else: return false
 	
 	
-func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Guard Gauge
+func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect RES Gauge
 	var recorded_hitcount = get_hitcount(in_ID)
 	if recorded_hitcount == 0: return true
 	else: return false
@@ -2290,11 +2290,11 @@ func atk_startup_resets():# ran whenever an attack starts
 func get_damage_percent() -> int:
 	return FMath.get_fraction_percent(current_damage_value, get_stat("DAMAGE_VALUE_LIMIT"))
 	
-func get_guard_gauge_percent_below() -> int:
-	if current_guard_gauge <= GUARD_GAUGE_FLOOR:
+func get_res_gauge_percent_below() -> int:
+	if current_res_gauge <= RES_GAUGE_FLOOR:
 		return 0
-	elif current_guard_gauge < 0:
-		return 100 - FMath.get_fraction_percent(current_guard_gauge, GUARD_GAUGE_FLOOR)
+	elif current_res_gauge < 0:
+		return 100 - FMath.get_fraction_percent(current_res_gauge, RES_GAUGE_FLOOR)
 	else: return 100
 		
 func take_damage(damage: int, non_lethal := false): # called by attacker
@@ -2305,14 +2305,14 @@ func take_damage(damage: int, non_lethal := false): # called by attacker
 #	current_damage_value = int(clamp(current_damage_value, 0, 9999)) # cannot go under zero (take_damage is also used for healing)
 	damage_update()
 	
-func change_guard_gauge(guard_gauge_change: int): # called by attacker
-	current_guard_gauge += guard_gauge_change
-	current_guard_gauge = int(clamp(current_guard_gauge, GUARD_GAUGE_FLOOR, 0))
-	guard_gauge_update()
+func change_res_gauge(res_gauge_change: int): # called by attacker
+	current_res_gauge += res_gauge_change
+	current_res_gauge = int(clamp(current_res_gauge, RES_GAUGE_FLOOR, 0))
+	res_gauge_update()
 	
-func reset_guard_gauge():
-	current_guard_gauge = 0
-	guard_gauge_update()
+func reset_res_gauge():
+	current_res_gauge = 0
+	res_gauge_update()
 	
 
 # QUERY UNIQUE CHARACTER DATA ---------------------------------------------------------------------------------------------- 
@@ -2505,7 +2505,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	remove_status_effect(Em.status_effect.CRUSH)
 	
 	# if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
-	# also no Guard Drain and Guard Swell
+	# also no RES drain and RES Swell
 	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
 		hit_data[Em.hit.PROJ_ON_HITSTOP] = true
 	$HitStopTimer.stop() # cancel pre-existing hitstop
@@ -2622,7 +2622,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
 		
 			for array in repeat_memory:
-				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
+				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name and array[2] == attacker.UniqChar.NAME:
 					if !hit_data[Em.hit.REPEAT]:
 						hit_data[Em.hit.REPEAT] = true # found a repeat
 	#						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
@@ -2638,7 +2638,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 			# add to repeat memory
 			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-				repeat_memory.append([attacker.player_ID, root_move_name])
+				repeat_memory.append([attacker.player_ID, root_move_name, attacker.UniqChar.NAME])
 	
 			if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 				hit_data[Em.hit.SINGLE_REPEAT] = true
@@ -2700,7 +2700,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 		if !is_hitstunned_or_sequenced():
 			if Em.mob_attr.PASSIVE_ARMOR in mob_attr:
-				if current_guard_gauge >= 0:
+				if current_res_gauge >= 0:
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
@@ -2742,7 +2742,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.RESISTED] = true
 	elif Em.hit.IGNORE_RESIST in hit_data:
 		pass # true hitstun
-	elif current_guard_gauge == GUARD_GAUGE_FLOOR:
+	elif current_res_gauge == RES_GAUGE_FLOOR:
 		pass # true hitstun
 	elif $BlueArmorTimer.is_running() or $HitStunTimer.is_running():
 		pass # mob_armored or already in hitstun
@@ -2779,7 +2779,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.hit.CANCELLED in hit_data:
 		return
 			
-	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
+	# DAMAGE AND RES DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
 	# attack level
 	var adjusted_atk_level: int = 1
@@ -2794,8 +2794,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.ADJUSTED_ATK_LVL] = adjusted_atk_level
 		
 		if !guardbroken: # not guardbroken, check for guardbreak
-			change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
-			if get_guard_gauge_percent_below() == 0: # guardbreak
+			change_res_gauge(calculate_res_gauge_change(hit_data)) # do RES calculation
+			if get_res_gauge_percent_below() == 0: # guardbreak
 				hit_data[Em.hit.MOB_BREAK] = true
 				hit_data.erase(Em.hit.SUPERARMORED)
 				$BlueArmorTimer.time = 0
@@ -2836,11 +2836,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if has_trait(Em.trait.NO_LAUNCH) or $BlueArmorTimer.is_running() or (Em.hit.RESISTED in hit_data and !guardbroken):
 		hit_data[Em.hit.TOUGH_MOB] = true
 	
-#	if !(Em.mob_attr.GDRAIN in mob_attr and mob_attr[Em.mob_attr.GDRAIN] == 0):
+#	if !(Em.mob_attr.RES_DRAIN in mob_attr and mob_attr[Em.mob_attr.RES_DRAIN] == 0):
 #		if !guardbroken: # not guardbroken mobs, hitgrabs can still connect if the hit guardbreaks them
 #			if !Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]:
 #				hit_data[Em.hit.TOUGH_MOB] = true
-#			elif get_guard_gauge_percent_below() >= 50: # natural command grabs can still grab them if they have below 50% GG
+#			elif get_res_gauge_percent_below() >= 50: # natural command grabs can still grab them if they have below 50% RES
 #				hit_data[Em.hit.TOUGH_MOB] = true
 
 	# unique reactions
@@ -2902,7 +2902,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker.reset_jumps()
 			attacker.change_ex_gauge(FMath.percent(attacker.get("BURSTCOUNTER_EX_COST"), 50), true)
 			# Burst Counter grants attacker Positive Flow
-			if attacker.current_guard_gauge < 0:
+			if attacker.current_res_gauge < 0:
 #				attacker.add_status_effect(Em.status_effect.POS_FLOW, null)
 				attacker.status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 				
@@ -3286,7 +3286,7 @@ func calculate_damage(hit_data) -> int:
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
 	
 
-func calculate_guard_gauge_change(hit_data) -> int:
+func calculate_res_gauge_change(hit_data) -> int:
 		
 #	if $BlueArmorTimer.is_running():
 #		return 0
@@ -3294,18 +3294,18 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if Em.hit.PROJ_ON_HITSTOP in hit_data:
 		return 0
 		
-	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data: # for multi-hit, only first hit affect GG
+	if hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data: # for multi-hit, only first hit affect RES
 		return 0
 		
 	if Em.hit.FOLLOW_UP in hit_data:
 		if hit_data[Em.hit.ATKER_OR_ENTITY] != null and (("chain_combo" in hit_data[Em.hit.ATKER_OR_ENTITY] and \
 				hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.WHIFF) or \
 				("autochain_landed" in hit_data[Em.hit.ATKER_OR_ENTITY] and !hit_data[Em.hit.ATKER_OR_ENTITY].autochain_landed)):
-			# for autochain, followups only affect GG if first hit whiffs
+			# for autochain, followups only affect RES if first hit whiffs
 			pass
 		else: return 0
 
-	if guardbroken: # if guardbroken, no Guard Drain
+	if guardbroken: # if guardbroken, no RES drain
 		return 0
 		
 	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
@@ -3315,18 +3315,18 @@ func calculate_guard_gauge_change(hit_data) -> int:
 #		return 0
 
 	if hit_data[Em.hit.SEMI_DISJOINT]:
-		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
-		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
-		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
-		return guard_drain
+		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
+		RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
+		RES_DRAIN = FMath.percent(RES_DRAIN, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
+		return RES_DRAIN
 		
-#	if Em.hit.SUPERARMORED in hit_data or ($BlueArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves GDrain on armored
-	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running(): # halves GDrain on armored
-		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
-		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
-		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
-		guard_drain = FMath.percent(guard_drain, 50)
-		return guard_drain
+#	if Em.hit.SUPERARMORED in hit_data or ($BlueArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves RES_Drain on armored
+	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running(): # halves RES_Drain on armored
+		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+		RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
+		RES_DRAIN = FMath.percent(RES_DRAIN, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
+		RES_DRAIN = FMath.percent(RES_DRAIN, 50)
+		return RES_DRAIN
 		
 #	if state in [Em.char_state.GRD_STANDBY, Em.char_state.AIR_STANDBY, 
 #			Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, 
@@ -3335,24 +3335,24 @@ func calculate_guard_gauge_change(hit_data) -> int:
 #		return 0
 
 	if Em.hit.RESISTED in hit_data:
-		var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
-		guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
-		guard_drain = FMath.percent(guard_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.GUARD_DRAIN_MOD))
+		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+		RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
+		RES_DRAIN = FMath.percent(RES_DRAIN, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
 		if Em.hit.ANTI_AIRED in hit_data:
-			guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airborne resisting mob with an anti-air
+			RES_DRAIN = FMath.percent(RES_DRAIN, 150) # increase RES drain if hitting an airborne resisting mob with an anti-air
 			
 		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
 				(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
-			guard_drain = FMath.percent(guard_drain, 150) # increase guard drain for special moves and strong projectiles
+			RES_DRAIN = FMath.percent(RES_DRAIN, 150) # increase RES drain for special moves and strong projectiles
 			
-		return guard_drain
+		return RES_DRAIN
 		
-	return GUARD_GAUGE_FLOOR
+	return RES_GAUGE_FLOOR
 
-#	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
-#	guard_drain = FMath.percent(guard_drain, get_stat("GUARD_DRAIN_MOD"))
+#	var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+#	RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
 #
-#	return guard_drain # Guard Drain on 1st hit of the combo depends on Attack Level
+#	return RES_DRAIN # RES drain on 1st hit of the combo depends on Attack Level
 	
 	
 func calculate_knockback_strength(hit_data) -> int:
@@ -3404,11 +3404,11 @@ func calculate_knockback_strength(hit_data) -> int:
 #			knockback_strength = FMath.percent(knockback_strength, 200)
 
 
-	if guardbroken and !hit_data[Em.hit.WEAK_HIT]:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
-		var weight = get_guard_gauge_percent_below()
+	if guardbroken and !hit_data[Em.hit.WEAK_HIT]:  # no RES KB boost for multi-hit attacks (weak hits) till the last hit
+		var weight = get_res_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
-			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, get_stat("KB_BOOST_AT_MAX_GG")), \
+			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, get_stat("KB_BOOST_AT_MAX_RES")), \
 					weight)
 
 	if "MOB_WEIGHT_KB_MOD" in UniqChar: # mobs can have different weights
@@ -3524,7 +3524,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	return atk_level
 	
 	
-func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's Guard Gauge
+func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's RES Gauge
 	
 	if !hit_data[Em.hit.SEMI_DISJOINT]:
 	
@@ -3552,11 +3552,11 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
 		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1] * FMath.S
 		
-	if guardbroken: # start scaling down when over 50% guard gauge
-		var weight = get_guard_gauge_percent_below()
+	if guardbroken: # start scaling down when over 50% RES Gauge
+		var weight = get_res_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
-			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), weight)
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_RES), weight)
 
 #	if Em.hit.MOB_BREAK in hit_data and Em.hit.ENTITY_PATH in hit_data: # reduce hitstun of projectile starters
 #		scaled_hitstun = FMath.percent(scaled_hitstun, 70)
@@ -3849,7 +3849,7 @@ func sequence_launch():
 #		Em.move.SEQ_LAUNCH : { # for final hit of sequence
 #			Em.move.DMG : 0,
 #			Em.move.SEQ_HITSTOP : 0,
-#			"guard_gain" : 3500,
+#			"RES_gain" : 3500,
 #			Em.move.KB : 700 * FMath.S,
 #			Em.move.KB_ANGLE : -82,
 #			Em.move.ATK_LVL : 6,
@@ -3869,9 +3869,9 @@ func sequence_launch():
 		
 	if !guardbroken and !Em.move.SEQ_WEAK in seq_data:
 		
-		change_guard_gauge(GUARD_GAUGE_FLOOR)
+		change_res_gauge(RES_GAUGE_FLOOR)
 		
-		if get_guard_gauge_percent_below() == 0:
+		if get_res_gauge_percent_below() == 0:
 			guardbroken = true
 #			repeat_memory = [] # reset move memory for getting a Break
 			modulate_play("punish_sweet_flash")
@@ -3896,18 +3896,18 @@ func sequence_launch():
 		if Globals.difficulty == 3:
 			scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN_H[seq_data[Em.move.ATK_LVL] - 1] * FMath.S
 		else: scaled_hitstun = ATK_LEVEL_TO_L_HITSTUN[seq_data[Em.move.ATK_LVL] - 1] * FMath.S
-		var weight = get_guard_gauge_percent_below()
+		var weight = get_res_gauge_percent_below()
 		if weight > 50:
 			weight = FMath.get_fraction_percent((weight - 50), 50)
-			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_GG), weight)
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, HITSTUN_REDUCTION_AT_MAX_RES), weight)
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
 	launchstun_rotate = 0 # used to calculation sprite rotation during launched state
 		
 	# LAUNCH POWER
 	var launch_power = seq_data[Em.move.KB] # scaled
-	launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, get_stat("KB_BOOST_AT_MAX_GG")), \
-			get_guard_gauge_percent_below())
+	launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, get_stat("KB_BOOST_AT_MAX_RES")), \
+			get_res_gauge_percent_below())
 		
 	# LAUNCH ANGLE
 	var launch_angle: int
@@ -4216,7 +4216,7 @@ func save_state():
 		"sprite_texture_ref" : sprite_texture_ref,
 		
 		"current_damage_value" : current_damage_value,
-		"current_guard_gauge" : current_guard_gauge,
+		"current_res_gauge" : current_res_gauge,
 		
 		"unique_data" : unique_data,
 		"repeat_memory" : repeat_memory,
@@ -4301,9 +4301,9 @@ func load_state(state_data):
 	sprite_texture_ref = state_data.sprite_texture_ref
 	
 	current_damage_value = state_data.current_damage_value
-	current_guard_gauge = state_data.current_guard_gauge
+	current_res_gauge = state_data.current_res_gauge
 	damage_update()
-	guard_gauge_update()
+	res_gauge_update()
 	
 	unique_data = state_data.unique_data
 #	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()

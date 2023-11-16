@@ -6,11 +6,11 @@ const MAX_REPLAY_SAVE_STATES = 181
 var test_state # a single save state
 var freeze_frame := false
 var show_hitbox := false
-var input_indicators := false
+#var input_indicators := false
 
 var controls_panel # point to it in GameViewport
 
-const SHOW_CONTROLS = "P1_special"
+const SHOW_CONTROLS = "P1_modifier"
 const SPEED_UP = "P1_up"
 const SPEED_DOWN = "P1_down"
 const NORMAL_SPEED = "P1_jump"
@@ -20,7 +20,7 @@ const LOAD_STATE = "P1_dash"
 const FRAME_ADVANCE = "P1_right"
 const FRAME_REVERSE = "P1_left"
 const TOGGLE_VIEWER = "P1_block"
-const TOGGLE_INPUTS = "P1_aux"
+#const TOGGLE_INPUTS = "P1_aux"
 const STOP_WATCHING = "P1_pause"
 
 
@@ -86,8 +86,8 @@ func replay_control():
 	if Input.is_action_just_pressed(TOGGLE_VIEWER):
 		show_hitbox = !show_hitbox
 		
-	if Input.is_action_just_pressed(TOGGLE_INPUTS):
-		input_indicators = !input_indicators
+#	if Input.is_action_just_pressed(TOGGLE_INPUTS):
+#		input_indicators = !input_indicators
 
 	if Input.is_action_just_pressed(STOP_WATCHING):
 		get_node("../../../../Transition").play("transit_to_replays")

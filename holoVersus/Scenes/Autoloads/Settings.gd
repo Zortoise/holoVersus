@@ -19,7 +19,7 @@ const DEFAULT_PRESETS = {
 			"dash" : KEY_BRACKETRIGHT,
 			"aux" : KEY_APOSTROPHE,
 			"block" : KEY_SEMICOLON,
-			"special" : KEY_ALT,
+			"modifier" : KEY_ALT,
 			"unique" : KEY_SHIFT,
 			"pause" : KEY_ESCAPE,
 			"rs_up" : null,
@@ -44,7 +44,7 @@ const DEFAULT_PRESETS = {
 			"dash" : KEY_PAGEDOWN,
 			"aux" : KEY_INSERT,
 			"block" : KEY_HOME,
-			"special" : KEY_CONTROL,
+			"modifier" : KEY_CONTROL,
 			"unique" : KEY_SHIFT,
 			"pause" : KEY_ESCAPE,
 			"rs_up" : null,
@@ -69,7 +69,7 @@ const DEFAULT_PRESETS = {
 			"dash" : KEY_KP_6,
 			"aux" : KEY_KP_7,
 			"block" : KEY_KP_8,
-			"special" : KEY_KP_0,
+			"modifier" : KEY_KP_0,
 			"unique" : KEY_KP_ADD,
 			"pause" : KEY_KP_SUBTRACT,
 			"rs_up" : null,
@@ -94,7 +94,7 @@ const DEFAULT_PRESETS = {
 			"dash" : [0, JOY_XBOX_A],
 			"aux" : [0, JOY_R2],
 			"block" : [0, JOY_XBOX_X],
-			"special" : [0, JOY_R],
+			"modifier" : [0, JOY_R],
 			"unique" : [0, JOY_L2],
 			"pause" : [0, JOY_START],
 			"rs_up" : [0, JOY_ANALOG_RY, -1.0],
@@ -119,7 +119,7 @@ const DEFAULT_PRESETS = {
 			"dash" : [1, JOY_XBOX_A],
 			"aux" : [1, JOY_R2],
 			"block" : [1, JOY_XBOX_X],
-			"special" : [1, JOY_R],
+			"modifier" : [1, JOY_R],
 			"unique" : [1, JOY_L2],
 			"pause" : [1, JOY_START],
 			"rs_up" : [1, JOY_ANALOG_RY, -1.0],
@@ -375,7 +375,7 @@ func load_training_settings():
 		training_settings = ResourceLoader.load("user://training_settings.tres").game_config
 		
 		var valid := true # check if game_config has all needed keys, if not, use default game_config
-		for check in ["gganchor", "regen", "input_viewer", "hitbox_viewer", "frame_viewer"]:
+		for check in ["res_anchor", "regen", "hitbox_viewer", "frame_viewer"]:
 			if !check in training_settings:
 				valid = false
 		if valid:
@@ -383,9 +383,9 @@ func load_training_settings():
 		
 	# default training_settings
 	return {
-			"gganchor" : 0,
+			"res_anchor" : 0,
 			"regen" : 1,
-			"input_viewer" : 0,
+#			"input_viewer" : 0,
 			"hitbox_viewer" : 0,
 			"frame_viewer" : 0,
 		}	

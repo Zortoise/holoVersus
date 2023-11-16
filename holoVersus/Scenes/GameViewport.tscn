@@ -1,14 +1,15 @@
-[gd_scene load_steps=180 format=2]
+[gd_scene load_steps=167 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Assets/Fonts/AppleTea-z8R1a.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://Scenes/GameViewport.gd" type="Script" id=4]
+[ext_resource path="res://Assets/UI/res_label.png" type="Texture" id=5]
 [ext_resource path="res://Scenes/FrameViewer.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Assets/UI/gauges_under.png" type="Texture" id=7]
-[ext_resource path="res://Assets/UI/guard_gauge2.png" type="Texture" id=8]
+[ext_resource path="res://Assets/UI/res_gauge2.png" type="Texture" id=8]
 [ext_resource path="res://Assets/UI/EX_gauge.png" type="Texture" id=9]
-[ext_resource path="res://Assets/UI/guard_gauge1.png" type="Texture" id=10]
+[ext_resource path="res://Assets/UI/res_gauge1.png" type="Texture" id=10]
 [ext_resource path="res://Assets/UI/gauges_frame.png" type="Texture" id=12]
 [ext_resource path="res://Assets/Fonts/BLKCHCRY.TTF" type="DynamicFontData" id=13]
 [ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=14]
@@ -20,24 +21,10 @@
 [ext_resource path="res://Assets/UI/timeframe.png" type="Texture" id=20]
 [ext_resource path="res://Assets/UI/kronii_hands.png" type="Texture" id=21]
 [ext_resource path="res://Assets/Fonts/roboto.black.ttf" type="DynamicFontData" id=22]
-[ext_resource path="res://Assets/UI/inputs/input_right.png" type="Texture" id=23]
-[ext_resource path="res://Assets/UI/inputs/input_fierce.png" type="Texture" id=24]
-[ext_resource path="res://Assets/UI/inputs/input_frame.png" type="Texture" id=25]
-[ext_resource path="res://Assets/UI/inputs/input_up.png" type="Texture" id=26]
-[ext_resource path="res://Assets/UI/inputs/input_light.png" type="Texture" id=27]
-[ext_resource path="res://Assets/UI/inputs/input_dash.png" type="Texture" id=28]
-[ext_resource path="res://Assets/UI/inputs/input_jump.png" type="Texture" id=29]
-[ext_resource path="res://Assets/UI/inputs/input_unique.png" type="Texture" id=30]
-[ext_resource path="res://Assets/UI/inputs/input_block.png" type="Texture" id=31]
-[ext_resource path="res://Assets/UI/inputs/input_aux.png" type="Texture" id=32]
-[ext_resource path="res://Assets/UI/inputs/input_special.png" type="Texture" id=33]
-[ext_resource path="res://Assets/UI/inputs/input_down.png" type="Texture" id=34]
-[ext_resource path="res://Assets/UI/inputs/input_left.png" type="Texture" id=35]
 [ext_resource path="res://Scenes/Menus/Buttons/ButtonTypeC4.tscn" type="PackedScene" id=36]
 [ext_resource path="res://Scenes/Shaders/Monochrome.gdshader" type="Shader" id=37]
 [ext_resource path="res://Assets/UI/stock.png" type="Texture" id=38]
 [ext_resource path="res://Assets/UI/EX_label.png" type="Texture" id=39]
-[ext_resource path="res://Assets/UI/guard_label.png" type="Texture" id=42]
 [ext_resource path="res://Assets/UI/prism.png" type="Texture" id=43]
 [ext_resource path="res://Assets/UI/ring_back.png" type="Texture" id=44]
 [ext_resource path="res://Assets/UI/basic_bar.png" type="Texture" id=45]
@@ -3541,21 +3528,22 @@ anims/level1 = SubResource( 117 )
 anims/level2 = SubResource( 118 )
 anims/level3 = SubResource( 73 )
 
-[node name="GuardGauge1" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
-margin_left = -54.0
+[node name="RESGauge1" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
+margin_left = -79.0
 margin_top = 10.0
-margin_right = 131.0
+margin_right = 132.0
 margin_bottom = 28.0
 step = 0.1
 value = 100.0
 texture_progress = ExtResource( 10 )
 
-[node name="GuardGauge2" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
-margin_left = -54.0
+[node name="RESGauge2" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
+margin_left = -79.0
 margin_top = 10.0
-margin_right = 131.0
-margin_bottom = 50.0
+margin_right = 132.0
+margin_bottom = 28.0
 step = 0.1
+value = 50.0
 texture_progress = ExtResource( 8 )
 
 [node name="GaugesFrame" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
@@ -3567,11 +3555,12 @@ modulate = Color( 0.784314, 0.784314, 0.784314, 1 )
 position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
-[node name="GuardLabel" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
-position = Vector2( -96, 19 )
-texture = ExtResource( 42 )
+[node name="RESLabel" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
+position = Vector2( -107, 20 )
+texture = ExtResource( 5 )
 
 [node name="Unique" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
+visible = false
 position = Vector2( 0, -78 )
 
 [node name="Assist" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
@@ -3608,62 +3597,6 @@ position = Vector2( 49, 86 )
 
 [node name="AssistNode3" parent="HUD/P1_HUDRect/GaugesUnder/AssistList" instance=ExtResource( 54 )]
 position = Vector2( 131, 86 )
-
-[node name="Inputs" type="Node2D" parent="HUD/P1_HUDRect"]
-visible = false
-position = Vector2( -8, 976 )
-
-[node name="InputFrame" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-modulate = Color( 1, 1, 1, 0.5 )
-texture = ExtResource( 25 )
-
-[node name="InputUp" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( -63, -11 )
-texture = ExtResource( 26 )
-
-[node name="InputDown" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( -63, 11 )
-texture = ExtResource( 34 )
-
-[node name="InputLeft" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( -85, 11 )
-texture = ExtResource( 35 )
-
-[node name="InputRight" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( -41, 11 )
-texture = ExtResource( 23 )
-
-[node name="InputJump" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( 0, 11 )
-texture = ExtResource( 29 )
-
-[node name="InputUnique" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( -15, -11 )
-texture = ExtResource( 30 )
-
-[node name="InputSpecial" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( 15, -11 )
-texture = ExtResource( 33 )
-
-[node name="InputLight" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( 41, 11 )
-texture = ExtResource( 27 )
-
-[node name="InputFierce" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( 63, 11 )
-texture = ExtResource( 24 )
-
-[node name="InputDash" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( 85, 11 )
-texture = ExtResource( 28 )
-
-[node name="InputAux" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( 41, -11 )
-texture = ExtResource( 32 )
-
-[node name="InputBlock" type="Sprite" parent="HUD/P1_HUDRect/Inputs"]
-position = Vector2( 63, -11 )
-texture = ExtResource( 31 )
 
 [node name="P2_HUDRect" type="ReferenceRect" parent="HUD"]
 margin_left = 1200.0
@@ -3801,21 +3734,22 @@ anims/level1 = SubResource( 180 )
 anims/level2 = SubResource( 181 )
 anims/level3 = SubResource( 182 )
 
-[node name="GuardGauge1" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
-margin_left = -54.0
+[node name="RESGauge1" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
+margin_left = -79.0
 margin_top = 10.0
-margin_right = 131.0
+margin_right = 132.0
 margin_bottom = 28.0
 step = 0.1
 value = 100.0
 texture_progress = ExtResource( 10 )
 
-[node name="GuardGauge2" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
-margin_left = -54.0
+[node name="RESGauge2" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
+margin_left = -79.0
 margin_top = 10.0
-margin_right = 131.0
-margin_bottom = 50.0
+margin_right = 132.0
+margin_bottom = 28.0
 step = 0.1
+value = 50.0
 texture_progress = ExtResource( 8 )
 
 [node name="GaugesFrame" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
@@ -3827,9 +3761,9 @@ modulate = Color( 0.784314, 0.784314, 0.784314, 1 )
 position = Vector2( -109, -20 )
 texture = ExtResource( 39 )
 
-[node name="GuardLabel" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
-position = Vector2( -96, 19 )
-texture = ExtResource( 42 )
+[node name="RESLabel" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
+position = Vector2( -107, 20 )
+texture = ExtResource( 5 )
 
 [node name="Unique" type="Node2D" parent="HUD/P2_HUDRect/GaugesUnder"]
 position = Vector2( 0, -78 )
@@ -3869,62 +3803,6 @@ position = Vector2( 49, 86 )
 
 [node name="AssistNode3" parent="HUD/P2_HUDRect/GaugesUnder/AssistList" instance=ExtResource( 54 )]
 position = Vector2( 131, 86 )
-
-[node name="Inputs" type="Node2D" parent="HUD/P2_HUDRect"]
-visible = false
-position = Vector2( 488, 976 )
-
-[node name="InputFrame" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-modulate = Color( 1, 1, 1, 0.5 )
-texture = ExtResource( 25 )
-
-[node name="InputUp" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( -63, -11 )
-texture = ExtResource( 26 )
-
-[node name="InputDown" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( -63, 11 )
-texture = ExtResource( 34 )
-
-[node name="InputLeft" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( -85, 11 )
-texture = ExtResource( 35 )
-
-[node name="InputRight" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( -41, 11 )
-texture = ExtResource( 23 )
-
-[node name="InputJump" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( 0, 11 )
-texture = ExtResource( 29 )
-
-[node name="InputUnique" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( -15, -11 )
-texture = ExtResource( 30 )
-
-[node name="InputSpecial" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( 15, -11 )
-texture = ExtResource( 33 )
-
-[node name="InputLight" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( 41, 11 )
-texture = ExtResource( 27 )
-
-[node name="InputFierce" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( 63, 11 )
-texture = ExtResource( 24 )
-
-[node name="InputDash" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( 85, 11 )
-texture = ExtResource( 28 )
-
-[node name="InputAux" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( 41, -11 )
-texture = ExtResource( 32 )
-
-[node name="InputBlock" type="Sprite" parent="HUD/P2_HUDRect/Inputs"]
-position = Vector2( 63, -11 )
-texture = ExtResource( 31 )
 
 [node name="P3_HUDRect" type="ReferenceRect" parent="HUD"]
 visible = false
@@ -4617,7 +4495,6 @@ focus_neighbour_bottom = NodePath("../Resume")
 text = "return to main menu"
 
 [node name="TrainingControl" type="Control" parent="PauseMenu/CanvasLayer"]
-visible = false
 margin_left = 632.0
 margin_top = 248.0
 margin_right = 632.0
@@ -4655,6 +4532,7 @@ margin_bottom = 88.0
 color = Color( 0.941176, 0.941176, 0.941176, 1 )
 
 [node name="TrainingList" type="VBoxContainer" parent="PauseMenu/CanvasLayer/TrainingControl"]
+visible = false
 margin_left = -56.0
 margin_top = 128.0
 margin_right = 442.0
@@ -4703,13 +4581,12 @@ focus_neighbour_bottom = NodePath("../Resume")
 text = "return to main menu"
 
 [node name="TrainingSettings" type="VBoxContainer" parent="PauseMenu/CanvasLayer/TrainingControl"]
-visible = false
 margin_left = -56.0
 margin_top = 128.0
 margin_right = 712.0
 margin_bottom = 544.0
 
-[node name="GuardGaugeAnchor" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+[node name="RESGaugeAnchor" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
 margin_right = 768.0
 focus_neighbour_top = NodePath("../Return")
 
@@ -4718,26 +4595,21 @@ margin_top = 60.0
 margin_right = 768.0
 margin_bottom = 116.0
 
-[node name="InputViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+[node name="HitboxViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
 margin_top = 120.0
 margin_right = 768.0
 margin_bottom = 176.0
 
-[node name="HitboxViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+[node name="FrameDataViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
 margin_top = 180.0
 margin_right = 768.0
 margin_bottom = 236.0
 
-[node name="FrameDataViewer" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 36 )]
+[node name="Return" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 17 )]
 margin_top = 240.0
 margin_right = 768.0
 margin_bottom = 296.0
-
-[node name="Return" parent="PauseMenu/CanvasLayer/TrainingControl/TrainingSettings" instance=ExtResource( 17 )]
-margin_top = 300.0
-margin_right = 768.0
-margin_bottom = 356.0
-focus_neighbour_bottom = NodePath("../GuardGaugeAnchor")
+focus_neighbour_bottom = NodePath("../RESGaugeAnchor")
 text = "Return"
 
 [node name="Cursor" type="Sprite" parent="PauseMenu/CanvasLayer"]
@@ -4850,7 +4722,7 @@ Frame Reverse:
 Save State:
 Load State:
 View Hitboxes:
-View Inputs:
+
 
 Stop watching:
 "
@@ -4874,7 +4746,7 @@ Left
 Fierce
 Dash
 Block
-Aux
+
 
 Pause
 "

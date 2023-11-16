@@ -42,20 +42,20 @@ const GRD_DASH_SPEED = 500 * FMath.S # duration in animation data
 const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
 const SDASH_SPEED = 450 * FMath.S # super dash
 const SDASH_TURN_RATE = 5 # exact navigate speed when sdashing
-const DODGE_GG_COST = 3000
+const DODGE_RES_COST = 3000
 const DODGE_SPEED = 1000 * FMath.S
 
 const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
 
-#const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower
-#const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher
+#const HITSTUN_REDUCTION_AT_MAX_RES = 70 # max reduction in hitstun when defender's RES Gauge is at 200%, heavy characters have lower
+#const KB_BOOST_AT_MAX_RES = 400 # max increase of knockback when defender's RES Gauge is at 200%, light characters have higher
 
 const DAMAGE_VALUE_LIMIT = 1100
 
-const GG_REGEN_AMOUNT = 15 # exact GG regened per frame when GG < 100%
-const GRD_BLOCK_GG_COST = 17 # exact GG loss per frame when blocking on ground
-const AIR_BLOCK_GG_COST = 25 # exact GG loss per frame when blocking in air
+const RES_REGEN_AMOUNT = 15 # exact RES regened per frame when RES < 100%
+const GRD_BLOCK_RES_COST = 17 # exact RES loss per frame when blocking on ground
+const AIR_BLOCK_RES_COST = 25 # exact RES loss per frame when blocking in air
 const CHIP_DMG_MOD = 50 # % of damage taken as chip damage when blocking
 
 const BASE_EX_REGEN = 20
@@ -599,7 +599,7 @@ const MOVE_DATABASE = {
 		Em.move.SEQ_LAUNCH : { # for final hit of sequence
 			Em.move.DMG : 0,
 			Em.move.SEQ_HITSTOP : 0,
-#			"guard_gain" : 3500,
+#			"RES_gain" : 3500,
 #			"EX_gain": 0,
 			Em.move.KB : 900 * FMath.S,
 			Em.move.KB_ANGLE : -103, # launch backwards
@@ -613,7 +613,7 @@ const MOVE_DATABASE = {
 		Em.move.SEQ_LAUNCH : {
 			Em.move.DMG : 0,
 			Em.move.SEQ_HITSTOP : 0,
-#			"guard_gain" : 3500,
+#			"RES_gain" : 3500,
 #			"EX_gain": 0,
 			Em.move.KB : 900 * FMath.S,
 			Em.move.KB_ANGLE : -103,

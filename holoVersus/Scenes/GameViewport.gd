@@ -9,8 +9,8 @@ func _ready():
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("GameFade"), 0.0)
 	$Test.show()
 	$HUD/FrameViewer.hide()
-	$HUD/P1_HUDRect/Inputs.hide()
-	$HUD/P2_HUDRect/Inputs.hide()
+#	$HUD/P1_HUDRect/Inputs.hide()
+#	$HUD/P2_HUDRect/Inputs.hide()
 	
 	if Globals.survival_level == null:
 		$HUD/Announcer2.hide()

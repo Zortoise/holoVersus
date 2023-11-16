@@ -13,7 +13,7 @@ export var preset := {
 		"dash" : null,
 		"aux" : null,
 		"block" : null,
-		"special" : null,
+		"modifier" : null,
 		"unique" : null,
 		"pause" : null,
 		"tapjump" : null,

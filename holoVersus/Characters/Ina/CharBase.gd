@@ -41,7 +41,7 @@ const SDASH_SPEED = 385 * FMath.S # super dash
 const SDASH_TURN_RATE = 6 # exact navigate speed when sdashing
 
 # fixed?
-const DODGE_GG_COST = 3000
+const DODGE_RES_COST = 3000
 const DODGE_SPEED = 1000 * FMath.S
 
 # fixed?
@@ -49,14 +49,14 @@ const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
 const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
 
 # fixed?
-#const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%, heavy characters have lower?
-#const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%, light characters have higher?
+#const HITSTUN_REDUCTION_AT_MAX_RES = 70 # max reduction in hitstun when defender's RES Gauge is at 200%, heavy characters have lower?
+#const KB_BOOST_AT_MAX_RES = 400 # max increase of knockback when defender's RES Gauge is at 200%, light characters have higher?
 
 const DAMAGE_VALUE_LIMIT = 1200
 
-const GG_REGEN_AMOUNT = 20 # exact GG regened per frame when GG < 100%
-const GRD_BLOCK_GG_COST = 15 # exact GG loss per frame when blocking on ground
-const AIR_BLOCK_GG_COST = 20 # exact GG loss per frame when blocking in air
+const RES_REGEN_AMOUNT = 20 # exact RES regened per frame when RES < 100%
+const GRD_BLOCK_RES_COST = 15 # exact RES loss per frame when blocking on ground
+const AIR_BLOCK_RES_COST = 20 # exact RES loss per frame when blocking in air
 const CHIP_DMG_MOD = 50 # % of damage taken as chip damage when blocking
 
 # fixed?

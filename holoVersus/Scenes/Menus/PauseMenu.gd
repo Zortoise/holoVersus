@@ -1,6 +1,6 @@
 extends CanvasModulate
 
-const GGANCHOR_OPTIONS = ["100%", "75%", "50%", "25%", "0%", "Off"]
+const RES_ANCHOR_OPTIONS = ["100%", "75%", "50%", "25%", "0%", "Off"]
 const REGEN_OPTIONS = ["Off", "On"]
 const INPUT_VIEWER_OPTIONS = ["Off", "On"]
 const HITBOX_VIEWER_OPTIONS = ["Off", "On"]
@@ -44,12 +44,12 @@ func _ready():
 				node.connect("triggered", self, "triggered")
 		
 		var training_settings = Settings.load_training_settings() # set up loaded values
-		$CanvasLayer/TrainingControl/TrainingSettings/GuardGaugeAnchor.load_button("Guard Gauge Anchor", \
-				GGANCHOR_OPTIONS, training_settings.gganchor)
+		$CanvasLayer/TrainingControl/TrainingSettings/RESGaugeAnchor.load_button("RES Gauge Anchor", \
+				RES_ANCHOR_OPTIONS, training_settings.res_anchor)
 		$CanvasLayer/TrainingControl/TrainingSettings/Regeneration.load_button("Regeneration", \
 				REGEN_OPTIONS, training_settings.regen)
-		$CanvasLayer/TrainingControl/TrainingSettings/InputViewer.load_button("Input Viewer", \
-				INPUT_VIEWER_OPTIONS, training_settings.input_viewer)
+#		$CanvasLayer/TrainingControl/TrainingSettings/InputViewer.load_button("Input Viewer", \
+#				INPUT_VIEWER_OPTIONS, training_settings.input_viewer)
 		$CanvasLayer/TrainingControl/TrainingSettings/HitboxViewer.load_button("Hitbox Viewer", \
 				HITBOX_VIEWER_OPTIONS, training_settings.hitbox_viewer)
 		$CanvasLayer/TrainingControl/TrainingSettings/FrameDataViewer.load_button("Frame Data Viewer", \
@@ -57,9 +57,9 @@ func _ready():
 		set_training_settings()
 
 func set_training_settings():
-	Globals.training_settings.gganchor = $CanvasLayer/TrainingControl/TrainingSettings/GuardGaugeAnchor.option_pointer
+	Globals.training_settings.res_anchor = $CanvasLayer/TrainingControl/TrainingSettings/RESGaugeAnchor.option_pointer
 	Globals.training_settings.regen = $CanvasLayer/TrainingControl/TrainingSettings/Regeneration.option_pointer
-	Globals.training_settings.input_viewer = $CanvasLayer/TrainingControl/TrainingSettings/InputViewer.option_pointer
+#	Globals.training_settings.input_viewer = $CanvasLayer/TrainingControl/TrainingSettings/InputViewer.option_pointer
 	Globals.training_settings.hitbox_viewer = $CanvasLayer/TrainingControl/TrainingSettings/HitboxViewer.option_pointer
 	Globals.training_settings.frame_viewer = $CanvasLayer/TrainingControl/TrainingSettings/FrameDataViewer.option_pointer
 
@@ -169,7 +169,7 @@ func triggered(triggered_node):
 			get_parent().play_audio("ui_accept", {"vol":-8})
 			$CanvasLayer/TrainingControl/TrainingList.hide()
 			$CanvasLayer/TrainingControl/TrainingSettings.show()
-			$CanvasLayer/TrainingControl/TrainingSettings/GuardGaugeAnchor.initial_focus()
+			$CanvasLayer/TrainingControl/TrainingSettings/RESGaugeAnchor.initial_focus()
 		"Return":
 			get_parent().play_audio("ui_accept", {"vol":-8})
 			$CanvasLayer/TrainingControl/TrainingList.show()

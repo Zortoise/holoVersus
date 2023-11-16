@@ -32,7 +32,7 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # NO_CHAIN = mostly for autochain moves, some can chain but some cannot
 # ANTI_AIR = startup and active are immune to non-grounded moves above you on the same tier
 # AUTOCHAIN = for rekkas and supers with more than one strike for non-finishers, will have fixed KB and hitstun, considered weak hits
-# FOLLOW_UP = follow-ups for autochain moves, deal no Guard Drain, does not proc Guard Swell
+# FOLLOW_UP = follow-ups for autochain moves, deal no RES drain, does not proc RES Swell
 # NO_REC_CANCEL = cannot jump/dash/fdash/fastfall cancel recovery frames, but still can chain
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
@@ -44,13 +44,13 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # NO_IMPULSE = cannot do impulse, for secondary hits of autochained moves
 # SUPERARMOR_STARTUP = armor all attacks during startup frames
 # SUPERARMOR_ACTIVE = armor all attacks during active frames
-# P_SUPERARMOR_STARTUP = armor all attacks during startup frames if GG is >= 0
-# P_SUPERARMOR_ACTIVE = armor all attacks during active frames if GG is >= 0
+# P_SUPERARMOR_STARTUP = armor all attacks during startup frames if RES is >= 0
+# P_SUPERARMOR_ACTIVE = armor all attacks during active frames if RES is >= 0
 # PROJ_ARMOR_ACTIVE = armor all projectiles during active frames
 # WEAKARMOR_STARTUP = armor all Normals/non-strong projectiles during startup frames
 # WEAKARMOR_ACTIVE = armor all Normals/non-strong projectiles during active frames
-# P_WEAKARMOR_STARTUP = armor all Normals/non-strong projectiles during startup frames if GG is >= 0
-# P_WEAKARMOR_ACTIVE = armor all Normals/non-strong projectiles during active frames if GG is >= 0
+# P_WEAKARMOR_STARTUP = armor all Normals/non-strong projectiles during startup frames if RES is >= 0
+# P_WEAKARMOR_ACTIVE = armor all Normals/non-strong projectiles during active frames if RES is >= 0
 # DRAG_KB = for multi-hit moves, unless it is the last one, knockback = velocity of the attacker/entity
 # NO_STRAFE_NORMAL = for certain aerial normals, prevent air strafing during active frames
 # STRAFE_NON_NORMAL = for certain aerial non-normals, allow air strafing during active frames
@@ -97,12 +97,12 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 
 enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED, INVERT_DIR
 		NO_CROSSUP, SCANNED}
-# STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some Guard Gauge
+# STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some RES Gauge
 
 enum block_state {UNBLOCKED, PARRIED, BLOCKED}
 enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_WEAKARMOR, D_REC_BLOCK
 		DASH_IMPULSE, PERMA_SUPERARMOR, NO_LAUNCH, GRD_DASH_JUMP, AIR_DASH_JUMP}
-# PASSIVE_WEAKARMOR = when GG is full, gain superarmor to Light/Fierce/non-strong projectiles
+# PASSIVE_WEAKARMOR = when RES is full, gain superarmor to Light/Fierce/non-strong projectiles
 # D_REC_BLOCK = can block out of dash recovery, for heavy characters only
 # DASH_IMPULSE = can impulse during D_REC, used for characters with certain unique dashes (like blinking)
 # GRD/AIR_DASH_JUMP = can jump while dashing
@@ -129,7 +129,7 @@ enum hit {RECT, POLYGON, OWNER_ID, FACING, MOVE_NAME, MOVE_DATA, MOB, HURTBOX, S
 		MULTIHIT, FIRST_HIT, AUTOCHAIN, FOLLOW_UP, NON_STRONG_PROJ, WEAKARMORABLE, CORNERED, WEAK_HIT, SUPERARMORED, HITSTOP, DEALT_DMG
 		ADJUSTED_ATK_LVL, KB, KB_ANGLE, SEMI_DISJOINT, SWEETSPOTTED, PULL, MOB_BREAK, RESISTED, SDASH_ARMORED, MOB_ARMORED, IGNORE_RESIST
 		DEFENDER_ATTR, NPC_DEFENDER_PATH, PROJ_ON_HITSTOP, CROSSED_UP}
-#// GUARD_DRAIN
+#// RES_DRAIN
 
 enum entity_trait {GROUNDED, LEDGE_STOP, BLAST_BARRIER_COLLIDE, PERMANENT, BEAM, NO_BOUNCE, FLOATY_ITEM, SPAWN_OFFSET}
 enum afterimage_shader {NONE, MASTER, MONOCHROME, WHITE}
@@ -148,8 +148,8 @@ enum sticky_sfx_type {CHAR, ENTITY, NPC}
 enum seq_partner {CHAR, ENTITY, NPC, ASSIST}
 enum assist {NEUTRAL, DOWN, UP}
 
-enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_SPECIAL, 
+enum button {P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT, P1_JUMP, P1_LIGHT, P1_FIERCE, P1_DASH, P1_BLOCK, P1_AUX, P1_MODIFIER, 
 		P1_UNIQUE, P1_PAUSE, P1_RS_LEFT, P1_RS_RIGHT, P1_RS_UP, P1_RS_DOWN
-		P2_UP, P2_DOWN, P2_LEFT, P2_RIGHT, P2_JUMP, P2_LIGHT, P2_FIERCE, P2_DASH, P2_BLOCK, P2_AUX, P2_SPECIAL, P2_UNIQUE,
+		P2_UP, P2_DOWN, P2_LEFT, P2_RIGHT, P2_JUMP, P2_LIGHT, P2_FIERCE, P2_DASH, P2_BLOCK, P2_AUX, P2_MODIFIER, P2_UNIQUE,
 		P2_PAUSE, P2_RS_LEFT, P2_RS_RIGHT, P2_RS_UP, P2_RS_DOWN}
 

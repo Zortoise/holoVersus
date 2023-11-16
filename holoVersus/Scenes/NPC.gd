@@ -145,7 +145,7 @@ var button_fierce
 var button_dash
 var button_block
 var button_aux
-var button_special
+var button_modifier
 var button_unique
 var button_pause
 var button_rs_up
@@ -229,7 +229,7 @@ func set_master_id(in_master_ID):
 	button_dash = Globals.INPUTS[master_ID].dash[1]
 	button_block = Globals.INPUTS[master_ID].block[1]
 	button_aux = Globals.INPUTS[master_ID].aux[1]
-	button_special = Globals.INPUTS[master_ID].special[1]
+	button_modifier = Globals.INPUTS[master_ID].modifier[1]
 	button_unique = Globals.INPUTS[master_ID].unique[1]
 	button_pause = Globals.INPUTS[master_ID].pause[1]
 	button_rs_up = Globals.INPUTS[master_ID].rs_up[1]
@@ -590,7 +590,7 @@ func simulate2(): # only ran if not in hitstop
 	
 			
 	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed and \
-			!button_special in input_state.pressed and !button_unique in input_state.pressed:
+			!button_modifier in input_state.pressed and !button_unique in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
 
@@ -1112,13 +1112,13 @@ func buffer_actions():
 		if !button_unique in input_state.pressed:
 			input_buffer.append([button_dash, buffer_time()])
 		
-	if button_special in input_state.just_pressed:
-		tap_memory.append([button_special, TAP_MEMORY_DURATION])
+	if button_modifier in input_state.just_pressed:
+		tap_memory.append([button_modifier, TAP_MEMORY_DURATION])
 	if button_unique in input_state.just_pressed:
 		tap_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
-	if button_special in input_state.just_released:
-		release_memory.append([button_special, TAP_MEMORY_DURATION])
+	if button_modifier in input_state.just_released:
+		release_memory.append([button_modifier, TAP_MEMORY_DURATION])
 	if button_unique in input_state.just_released:
 		release_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
@@ -2276,8 +2276,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	if !grounded and (button_up in input_state.just_released or button_down in input_state.just_released):
 		if Animator.time <= 5 and Animator.time != 0: # release up/down rebuffer has wider window if in the air
 			return true
-	elif (button_special in input_state.just_pressed or button_unique in input_state.just_pressed):
-		# cancelling into special moves via button_special/button_unique presses have wider window
+	elif (button_modifier in input_state.just_pressed or button_unique in input_state.just_pressed):
+		# cancelling into special moves via button_modifier/button_unique presses have wider window
 		if Animator.time <= 2 and Animator.time != 0:
 			return true
 	elif Animator.time <= 1 and Animator.time != 0:
@@ -2862,7 +2862,7 @@ func is_hitcount_last_hit(in_ID, move_data):
 	else: return false
 	
 	
-func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Guard Gauge
+func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect RES Gauge
 	var recorded_hitcount = get_hitcount(in_ID)
 	if recorded_hitcount == 0: return true
 	else: return false
@@ -3072,12 +3072,12 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						velocity.set_vector(pushback_strength, 0)
 						velocity.rotate(pushback_dir)
 							
-				# if attacking at the corner unblocked, pushback depending on defender's Guard Gauge
+				# if attacking at the corner unblocked, pushback depending on defender's RES Gauge
 				elif Em.hit.CORNERED in hit_data:
 					var pushback_strength: int = CORNER_PUSHBACK
-					if defender.current_guard_gauge > 0:
+					if defender.current_res_gauge > 0:
 						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
-								defender.get_guard_gauge_percent_above())
+								defender.get_res_gauge_percent_above())
 					match Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.TWO, facing):
 						Em.compass.E:
 							if defender.position.x < Globals.Game.left_corner:

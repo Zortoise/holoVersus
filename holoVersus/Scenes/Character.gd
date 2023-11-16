@@ -21,16 +21,16 @@ const EX_LEVEL = 10000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
 const EX_LOCK_DEGEN = 15 # amount of EX Lock lost per frame
 
-const GUARD_GAUGE_FLOOR = -10000
-const GUARD_GAUGE_CEIL = 10000
-const GUARD_GAUGE_SWELL_RATE = 100 # exact GG gain per frame during hitstun
-const GUARD_GAUGE_DEGEN_AMOUNT = 150 # exact GG degened per frame when GG > 100% out of hitstun
+const RES_GAUGE_FLOOR = -10000
+const RES_GAUGE_CEIL = 10000
+const RES_GAUGE_SWELL_RATE = 100 # exact RES gain per frame during hitstun
+const RES_GAUGE_DEGEN_AMOUNT = 150 # exact RES degened per frame when RES > 100% out of hitstun
 
 const MAX_ULT_GAUGE = 1000000
 
 const SDC_EX_COST = 5000
 const BURSTCOUNTER_EX_COST = 10000
-#const BURSTESCAPE_GG_COST = 5000
+#const BURSTESCAPE_RES_COST = 5000
 const EX_MOVE_COST = 10000
 
 const AIRBLOCK_GRAV_MOD = 50 # multiply to GRAVITY to get gravity during air blocking
@@ -49,10 +49,10 @@ const AERIAL_STARTUP_LAND_CANCEL_TIME = 3 # number of frames when aerials can la
 const BurstLockTimer_TIME = 3 # number of frames you cannot use Burst Escape after being hit
 const AC_BurstLockTimer_TIME = 15 # number of frames you cannot use Burst Escape after being hit with an autochain move
 #const PosFlowSealTimer_TIME = 30 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
-const TrainingRegenTimer_TIME = 50 # number of frames before GG/Damage Value start regening
+const TrainingRegenTimer_TIME = 50 # number of frames before RES/Damage Value start regening
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
 const CORNER_PUSHBACK = 200 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
-#const CORNER_GUARD_DRAIN_MOD = 150 # blocker take extra Guard Drain when blocking at the corners
+#const CORNER_RES_DRAIN_MOD = 150 # blocker take extra RES drain when blocking at the corners
 #const DODGE_SEMI_IFRAMES = 10 # frames of semi-invuln while dodging
 
 const MIN_HITSTOP = 5
@@ -61,18 +61,18 @@ const REPEAT_DMG_MOD = 30 # damage modifier on double_repeat
 const PARTIAL_REPEAT_DMG_MOD = 80
 const DMG_VAL_KB_LIMIT = 300 # max damage percent before knockback stop increasing
 const KB_BOOST_AT_DMG_VAL_LIMIT = 150 # knockback power when damage percent is at 100%, goes pass it when damage percent goes >100%
-#const L_HITSTUN_REDUCTION_AT_MAX_GG = 80 # max reduction in launch hitstun when defender's Guard Gauge is at 200%
-#const KB_BOOST_AT_MAX_GG = 300 # max increase of knockback when defender's Guard Gauge is at 200%
+#const L_HITSTUN_REDUCTION_AT_MAX_RES = 80 # max reduction in launch hitstun when defender's RES Gauge is at 200%
+#const KB_BOOST_AT_MAX_RES = 300 # max increase of knockback when defender's RES Gauge is at 200%
 
-const DMG_REDUCTION_AT_MAX_GG = 20 # max reduction in damage when defender's Guard Gauge is at 200%
-const HITSTUN_REDUCTION_AT_MAX_GG = 70 # max reduction in hitstun when defender's Guard Gauge is at 200%
-const KB_BOOST_AT_MAX_GG = 400 # max increase of knockback when defender's Guard Gauge is at 200%
+const DMG_REDUCTION_AT_MAX_RES = 20 # max reduction in damage when defender's RES Gauge is at 200%
+const HITSTUN_REDUCTION_AT_MAX_RES = 70 # max reduction in hitstun when defender's RES Gauge is at 200%
+const KB_BOOST_AT_MAX_RES = 400 # max increase of knockback when defender's RES Gauge is at 200%
 
-#const FIRST_HIT_GUARD_DRAIN_MOD = 150 # % of listed Guard Drain on 1st hit of combo or stray hits
-const POS_FLOW_REGEN = 140 #  # exact GG gain per frame during Positive Flow
+#const FIRST_HIT_RES_DRAIN_MOD = 150 # % of listed RES drain on 1st hit of combo or stray hits
+const POS_FLOW_REGEN = 140 #  # exact RES gain per frame during Positive Flow
 const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
 const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
-const ATK_LEVEL_TO_GDRAIN = [0, 1500, 2250, 3000, 3750, 4500, 5250, 6000]
+const ATK_LEVEL_TO_RES_DRAIN = [0, 1500, 2250, 3000, 3750, 4500, 5250, 6000]
 const MULTIHIT_HITSTUN = 15 # if you failed to connect all hits
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
@@ -84,7 +84,7 @@ const LETHAL_HITSTOP = 25
 const LETHAL_HITSTUN_MOD = 150 # multiply hitstun when defender is at Damage Value Limit
 
 const SD_KNOCKBACK_LIMIT = 300 * FMath.S # knockback strength limit of a semi-disjoint hit
-#const SD_HIT_GUARD_DRAIN_MOD = 150 # Guard Drain on semi-disjoint hits
+#const SD_HIT_RES_DRAIN_MOD = 150 # RES drain on semi-disjoint hits
 
 #const SWEETSPOT_KB_MOD = 115
 const SWEETSPOT_DMG_MOD = 150 # damage modifier on sweetspotted hit
@@ -108,20 +108,20 @@ const PARRY_KNOCKBACK_MOD = 0 # % of knockback defender experience when parried
 #const STRONGBLOCK_RANGE = 50 * FMath.S # radius that a physical Light/Fierce can be strongblocked
 const RESIST_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed away when resisted by mobs, fixed
 
-const INIT_BLOCK_MUL = 80 # multiplier to GG cost of starting a block, not a mod!
+const INIT_BLOCK_MUL = 80 # multiplier to RES cost of starting a block, not a mod!
 
-const SPECIAL_GDRAIN_MOD = 50 # extra GDrain when blocking heavy/special/ex moves
+const SPECIAL_RES_DRAIN_MOD = 50 # extra RES_Drain when blocking heavy/special/ex moves, for Survival Mode!
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
-const SDASH_ARMOR_GDRAIN_MOD = 125 # extra GDrain when SDashing through projectiles
-const SDASH_ARMOR_GDRAIN_MOD2 = 160 # extra GDrain when SDashing through level 2 projectiles
+const SDASH_ARMOR_RES_DRAIN_MOD = 125 # extra RES_Drain when SDashing through projectiles
+const SDASH_ARMOR_RES_DRAIN_MOD2 = 160 # extra RES_Drain when SDashing through level 2 projectiles
 
-const SBlockTimer_TIME = 30 # time after blocking an attack when you are immune to cross-ups and blocking will not cost GG
+const SBlockTimer_TIME = 30 # time after blocking an attack when you are immune to cross-ups and blocking will not cost RES
 
 const AUTOCHAIN_HITSTOP = 7
 const WEAK_HIT_HITSTOP = 6
 
 #const SUPERARMOR_CHIP_DMG_MOD = 50
-#const SUPERARMOR_GUARD_DRAIN_MOD = 150
+#const SUPERARMOR_RES_DRAIN_MOD = 150
 
 
 const LAUNCH_THRESHOLD = 450 * FMath.S # max knockback strength before a flinch becomes a launch, also added knockback during a Break
@@ -141,12 +141,12 @@ const KILL_VEL_THRESHOLD = 900 * FMath.S
 
 const LAUNCH_DUST_THRESHOLD = 1400 * FMath.S # velocity where launch dust increase in frequency
 
-const DDI_SIDE_MAX = 30 * FMath.S # horizontal Drift DI speed at 200% Guard Gauge
+const DDI_SIDE_MAX = 30 * FMath.S # horizontal Drift DI speed at 200% RES Gauge
 const MAX_DDI_SIDE_SPEED = 300 * FMath.S # max horizontal Drift DI speed
-const GDI_UP_MAX = 80 # gravity decrease upward Gravity DI at 200% Guard Gauge
-const GDI_DOWN_MAX = 130 # gravity increase downward Gravity DI at 200% Guard Gauge
-const VDI_MAX = 30 # change in knockback vector when using Vector DI at 200% Guard Gauge
-#const DI_MIN_MOD = 0 # percent of max DI at 100% Guard Gauge
+const GDI_UP_MAX = 80 # gravity decrease upward Gravity DI at 200% RES Gauge
+const GDI_DOWN_MAX = 130 # gravity increase downward Gravity DI at 200% RES Gauge
+const VDI_MAX = 30 # change in knockback vector when using Vector DI at 200% RES Gauge
+#const DI_MIN_MOD = 0 # percent of max DI at 100% RES Gauge
 const FDITimer_TIME = 30 # min duration of Force DI
 const FDI_EX_DEGEN = -200 * FMath.S # amount of EX lost per frame while FDIing
 const FDI_MOD = 75 # mod to DI weight when FDIing
@@ -243,7 +243,7 @@ var sprite_texture_ref = { # used for afterimages, each contain spritesheet_file
 }
 
 onready var current_damage_value: int = 0
-onready var current_guard_gauge: int = 0
+onready var current_res_gauge: int = 0
 onready var current_ex_gauge: int = 10000
 onready var current_ult_gauge: int = 0
 #onready var current_ex_lock: int = 0
@@ -280,20 +280,20 @@ var release_memory = []
 var impulse_used := false
 var quick_turn_used := false # can only quick turn once per attack
 var strafe_lock_dir := 0 # when pressing left/right when doing an aerial, lock the air strafe direction during startup
-var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout the duration of BurstLockTimer, also lock GG Swell
+var DI_seal := false # some moves (multi-hit, autochain) will lock DI throughout the duration of BurstLockTimer, also lock RES Swell
 var instant_actions := [] # when an instant action is inputed it is stored here for 1 frame, only process next frame
 						 # this allows for quick cancels and triggering entities
 #var ex_seal := false # usage of EX Gauge locks EX Gain till targeted opponent's HitStunGraceTimer is over
 var last_dir := 0 # dir last frame
-var GG_swell_flag := false # set to true after 1st attack taken during a combo
-var first_hit_flag := false # will not swell GG during hitstun of 1st attack taken during combo
+var RES_swell_flag := false # set to true after 1st attack taken during a combo
+var first_hit_flag := false # will not swell RES during hitstun of 1st attack taken during combo
 var lethal_flag := false # flag the hitstun as a lethal hit, can only kill during lethal hitstun
 var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
 var enhance_cooldowns := {} # each key contain the cooldown
 var enhance_data := {} # like unique_data
 var slowed := 0
 var spent_special := false # used a move that requires Special to be held, releasing Special will not trigger EX moves
-var spent_unique := false # used a move that requires Unique to be held, releasing Special will not trigger EX moves
+var spent_unique := false # used a move that requires Unique to be held, releasing Unique will not trigger EX moves
 var wall_slammed = Em.wall_slam.CANNOT_SLAM
 var delayed_hit_effect := [] # store things like Em.hit.SWEETSPOTTED and Em.hit.PUNISH_HIT for autochain and multi-hit moves
 var gravity_frame_mod := 100 # modify gravity this frame
@@ -316,7 +316,7 @@ var button_fierce
 var button_dash
 var button_block
 var button_aux
-var button_special
+var button_modifier
 var button_unique
 var button_pause
 var button_rs_up
@@ -439,7 +439,7 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
 #	Globals.Game.damage_limit_update(self)
 	Globals.Game.damage_update(self)
-	Globals.Game.guard_gauge_update(self)
+	Globals.Game.res_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.ult_gauge_update(self)
 	Globals.Game.stock_points_update(self)
@@ -462,7 +462,7 @@ func set_player_id(in_player_ID): # can use this to change player you are contro
 	button_dash = Globals.INPUTS[player_ID].dash[1]
 	button_block = Globals.INPUTS[player_ID].block[1]
 	button_aux = Globals.INPUTS[player_ID].aux[1]
-	button_special = Globals.INPUTS[player_ID].special[1]
+	button_modifier = Globals.INPUTS[player_ID].modifier[1]
 	button_unique = Globals.INPUTS[player_ID].unique[1]
 	button_pause = Globals.INPUTS[player_ID].pause[1]
 	button_rs_up = Globals.INPUTS[player_ID].rs_up[1]
@@ -703,7 +703,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(GG_swell_flag) + " " + str(first_hit_flag)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(RES_swell_flag) + " " + str(first_hit_flag)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -769,7 +769,7 @@ func simulate(new_input_state):
 #			change_burst_token(1)
 #			if super_test(true):
 #				super_cost(120, true)
-#			Globals.Game.get_player_node(target_ID).change_guard_gauge(-8000)
+#			Globals.Game.get_player_node(target_ID).change_res_gauge(-8000)
 #			unique_data.nibbler_count = 3
 #			UniqChar.update_uniqueHUD()
 			
@@ -953,7 +953,7 @@ func simulate2(): # only ran if not in hitstop
 	if !is_hitstunned_or_sequenced():
 		repeat_memory = []
 		first_hit_flag = false
-		GG_swell_flag = false
+		RES_swell_flag = false
 		if !is_blocking() and !Animator.query_to_play(["BlockRec", "aBlockRec"]):
 			$BurstLockTimer.stop()
 		DI_seal = false
@@ -967,7 +967,7 @@ func simulate2(): # only ran if not in hitstop
 		
 	if assist_fever:
 		var target = get_target()
-		if !target.get_node("HitStunTimer").is_running() or target.current_guard_gauge >= GUARD_GAUGE_CEIL:
+		if !target.get_node("HitStunTimer").is_running() or target.current_res_gauge >= RES_GAUGE_CEIL:
 			assist_fever = false
 		
 	if Globals.survival_level != null and Globals.difficulty != 3:
@@ -999,72 +999,72 @@ func simulate2(): # only ran if not in hitstop
 	stage_control_mod = FMath.round_and_descale(stage_control_mod)
 	
 		
-	# GG Swell during hitstun
-	if !$HitStopTimer.is_running() and is_hitstunned() and GG_swell_flag and !first_hit_flag and \
+	# RES Swell during hitstun
+	if !$HitStopTimer.is_running() and is_hitstunned() and RES_swell_flag and !first_hit_flag and \
 			!state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER] and \
-			!(DI_seal and $BurstLockTimer.is_running()) and !$FDITimer.is_running(): # no Guard Swell while FDIing:
+			!(DI_seal and $BurstLockTimer.is_running()) and !$FDITimer.is_running(): # no RES Swell while FDIing:
 		if $HitStunTimer.is_running():
-			current_guard_gauge = int(min(GUARD_GAUGE_CEIL, current_guard_gauge + GUARD_GAUGE_SWELL_RATE))
-		else: # in techable state or, lose GG slowly
-			current_guard_gauge = int(max(0, current_guard_gauge - FMath.percent(GUARD_GAUGE_DEGEN_AMOUNT, 25)))
-		Globals.Game.guard_gauge_update(self)
+			current_res_gauge = int(min(RES_GAUGE_CEIL, current_res_gauge + RES_GAUGE_SWELL_RATE))
+		else: # in techable state or, lose RES slowly
+			current_res_gauge = int(max(0, current_res_gauge - FMath.percent(RES_GAUGE_DEGEN_AMOUNT, 25)))
+		Globals.Game.res_gauge_update(self)
 
-	# regen/degen GG
+	# regen/degen RES
 	elif !is_hitstunned_or_sequenced():
 		
-		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.gganchor == 5):
-			if current_guard_gauge < 0 and !is_blocking(): # regen GG when GG is under 100%
+		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.res_anchor == 5):
+			if current_res_gauge < 0 and !is_blocking(): # regen RES when RES is under 100%
 				
-				var guard_gauge_regen: int = 0
+				var res_gauge_regen: int = 0
 				if query_status_effect(Em.status_effect.POS_FLOW):
-					guard_gauge_regen = POS_FLOW_REGEN # increased regen during positive flow
+					res_gauge_regen = POS_FLOW_REGEN # increased regen during positive flow
 				else:
-					guard_gauge_regen = FMath.percent(get_stat("GG_REGEN_AMOUNT"), stage_control_mod)
+					res_gauge_regen = FMath.percent(get_stat("RES_REGEN_AMOUNT"), stage_control_mod)
 					
-#					if !grounded: # reduce GG Regen in air/soft platform
-#						guard_gauge_regen = FMath.percent(guard_gauge_regen, 30)
+#					if !grounded: # reduce RES Regen in air/soft platform
+#						res_gauge_regen = FMath.percent(res_gauge_regen, 30)
 #					elif soft_grounded:
-#						guard_gauge_regen = FMath.percent(guard_gauge_regen, 60)
+#						res_gauge_regen = FMath.percent(res_gauge_regen, 60)
 #
 #					# reduce passive EX Gain when far from center
 #					var max_dist: int = Globals.Game.right_corner - Globals.Game.middle_point.x
 #					var char_dist: int = int(min(abs(position.x - Globals.Game.middle_point.x), max_dist))
 #					var weight = FMath.get_fraction_percent(char_dist, max_dist)
-#					guard_gauge_regen = FMath.f_lerp(guard_gauge_regen, 0, weight)
+#					res_gauge_regen = FMath.f_lerp(res_gauge_regen, 0, weight)
 					
 					
-				current_guard_gauge = int(min(0, current_guard_gauge + guard_gauge_regen)) # don't use change_guard_gauge() since it stops at 0
-				Globals.Game.guard_gauge_update(self)
+				current_res_gauge = int(min(0, current_res_gauge + res_gauge_regen)) # don't use change_res_gauge() since it stops at 0
+				Globals.Game.res_gauge_update(self)
 				
-			elif current_guard_gauge > 0: # degen GG when GG is over 100%
-				current_guard_gauge = int(max(0, current_guard_gauge - GUARD_GAUGE_DEGEN_AMOUNT))
-				Globals.Game.guard_gauge_update(self)
+			elif current_res_gauge > 0: # degen RES when RES is over 100%
+				current_res_gauge = int(max(0, current_res_gauge - RES_GAUGE_DEGEN_AMOUNT))
+				Globals.Game.res_gauge_update(self)
 		
 		else: # training mode
-			if current_guard_gauge > 0:
-				current_guard_gauge = int(max(0, current_guard_gauge - GUARD_GAUGE_DEGEN_AMOUNT))
-				Globals.Game.guard_gauge_update(self)
+			if current_res_gauge > 0:
+				current_res_gauge = int(max(0, current_res_gauge - RES_GAUGE_DEGEN_AMOUNT))
+				Globals.Game.res_gauge_update(self)
 			else:
-				if player_ID == 0: # player 1 rapidly regen GG when GG < 0 during training mode
-					if current_guard_gauge < 0 and !is_blocking():
-						current_guard_gauge = int(min(0, current_guard_gauge + 200))
-						Globals.Game.guard_gauge_update(self)
+				if player_ID == 0: # player 1 rapidly regen RES when RES < 0 during training mode
+					if current_res_gauge < 0 and !is_blocking():
+						current_res_gauge = int(min(0, current_res_gauge + 200))
+						Globals.Game.res_gauge_update(self)
 				if player_ID == 1:
-					if !$TrainingRegenTimer.is_running(): # training mode regen GG for player 2 only after a while of not being hit
+					if !$TrainingRegenTimer.is_running(): # training mode regen RES for player 2 only after a while of not being hit
 						var target: int = 0
-						match Globals.training_settings.gganchor:
+						match Globals.training_settings.res_anchor:
 							0: pass
 							1: target = -2500
 							2: target = -5000
 							3: target = -7500
 							4: target = -10000
-						if current_guard_gauge < target:
-							current_guard_gauge = int(min(target, current_guard_gauge + 200))
-						elif current_guard_gauge > target:
-							current_guard_gauge = int(max(target, current_guard_gauge - 200))
-						Globals.Game.guard_gauge_update(self)
+						if current_res_gauge < target:
+							current_res_gauge = int(min(target, current_res_gauge + 200))
+						elif current_res_gauge > target:
+							current_res_gauge = int(max(target, current_res_gauge - 200))
+						Globals.Game.res_gauge_update(self)
 	
-#		current_guard_gauge = GUARD_GAUGE_CEIL # testing DI
+#		current_res_gauge = RES_GAUGE_CEIL # testing DI
 		
 	# regen EX Gauge
 	if !Globals.training_mode:
@@ -1220,14 +1220,14 @@ func simulate2(): # only ran if not in hitstop
 # FORCE DI --------------------------------------------------------------------------------------------------
 
 	if Globals.survival_level == null:
-		if state == Em.char_state.LAUNCHED_HITSTUN and $HitStunTimer.is_running() and current_ex_gauge != 0 and current_guard_gauge > 0:
+		if state == Em.char_state.LAUNCHED_HITSTUN and $HitStunTimer.is_running() and current_ex_gauge != 0 and current_res_gauge > 0:
 			if can_DI():
 				if !$FDITimer.is_running():
-					if button_special in input_state.pressed:
+					if button_modifier in input_state.pressed:
 						$FDITimer.time = FDITimer_TIME
 #						modulate_play("unflinch_flash")
-						current_guard_gauge = 1
-						Globals.Game.guard_gauge_update(self)
+						current_res_gauge = 1
+						Globals.Game.res_gauge_update(self)
 		else:
 			$FDITimer.stop()
 
@@ -1353,7 +1353,7 @@ func simulate2(): # only ran if not in hitstop
 			_:
 				if is_hitstunned() and can_DI():# no changing facing
 					
-					# DDI speed and speed limit depends on guard gauge
+					# DDI speed and speed limit depends on RES Gauge
 					var DDI_speed: int
 					var DDI_speed_limit: int
 					
@@ -1365,13 +1365,13 @@ func simulate2(): # only ran if not in hitstop
 	#						weight = FMath.percent(100 + weight, FDI_MOD)
 							weight = FDI_MOD
 						else:
-							weight = get_guard_gauge_percent_above()
+							weight = get_res_gauge_percent_above()
 							
 					DDI_speed = FMath.f_lerp(0, DDI_SIDE_MAX, weight)
 					DDI_speed_limit = FMath.f_lerp(0, MAX_DDI_SIDE_SPEED, weight)
 					
 					if abs(velocity.x + (dir * DDI_speed)) > abs(velocity.x): # if speeding up
-						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit (can scale speed limit to guard gauge?)
+						if abs(velocity.x) < DDI_speed_limit: # only allow DIing if below speed limit (can scale speed limit to RES Gauge?)
 							velocity.x = int(clamp(velocity.x + dir * DDI_speed, -DDI_speed_limit, DDI_speed_limit))
 					else: # slowing down
 						velocity.x += dir * DDI_speed
@@ -1481,9 +1481,9 @@ func simulate2(): # only ran if not in hitstop
 			# FASTFALL --------------------------------------------------------------------------------------------------
 				# cannot fastfall right after jumping
 				
-	#		if Settings.dj_fastfall[player_ID] == 0 and (button_special in input_state.pressed or button_unique in input_state.pressed):
+	#		if Settings.dj_fastfall[player_ID] == 0 and (button_modifier in input_state.pressed or button_unique in input_state.pressed):
 	#
-	#			# if normal fastfall, cannot fastfall when button_special/button_unique are held down
+	#			# if normal fastfall, cannot fastfall when button_modifier/button_unique are held down
 	#			# this makes aerial EX move down-tilts not fastfall too easily
 	#
 	#			pass
@@ -1542,13 +1542,13 @@ func simulate2(): # only ran if not in hitstop
 #			input_buffer.append(["Burst", buffer_time()])
 			
 	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed and \
-			!button_special in input_state.pressed and !button_unique in input_state.pressed:
+			!button_modifier in input_state.pressed and !button_unique in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
 #		elif $ShorthopTimer.is_running():
 #			pass # no blocking after shorthopping for a while
-		elif (grounded and current_guard_gauge > GUARD_GAUGE_FLOOR + get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL) or \
-					(!grounded and current_guard_gauge > GUARD_GAUGE_FLOOR + get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL):
+		elif (grounded and current_res_gauge > RES_GAUGE_FLOOR + get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL) or \
+					(!grounded and current_res_gauge > RES_GAUGE_FLOOR + get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL):
 
 			match state: # don't use new_state or will be able to block Supers after screenfreeze
 				
@@ -1588,7 +1588,7 @@ func simulate2(): # only ran if not in hitstop
 						animate("TBlockStartup")
 						
 			# air blocking
-	#		if current_guard_gauge + GUARD_GAUGE_CEIL >= -get_stat("AIR_BLOCK_GG_COST"):
+	#		if current_res_gauge + RES_GAUGE_CEIL >= -get_stat("AIR_BLOCK_RES_COST"):
 
 	#			Em.char_state.AIR_STARTUP: # can air block on 1st frame of air dash
 	#				if Animator.query_current(["aDashTransit"]):
@@ -1674,7 +1674,7 @@ func simulate2(): # only ran if not in hitstop
 	if !grounded: # gravity only pulls you if you are in the air
 		
 		if is_hitstunned():
-			if can_DI(): # up/down DI, depends on Guard Gauge
+			if can_DI(): # up/down DI, depends on RES Gauge
 				var weight: = 100
 				if !$HitStunTimer.is_running():
 					pass
@@ -1683,7 +1683,7 @@ func simulate2(): # only ran if not in hitstop
 #						weight = FMath.percent(100 + weight, FDI_MOD)
 						weight = FDI_MOD
 					else:
-						weight = get_guard_gauge_percent_above()
+						weight = get_res_gauge_percent_above()
 						
 				if v_dir == -1: # DIing upward
 					gravity_temp = FMath.f_lerp(gravity_temp, FMath.percent(gravity_temp, GDI_UP_MAX), weight)
@@ -1914,14 +1914,14 @@ func simulate2(): # only ran if not in hitstop
 				else:
 					animate("BlockRec")
 				if success_block != Em.success_block.NONE: # refund cost
-					change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+					change_res_gauge(get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 #			elif !success_block:
 #			if !$SBlockTimer.is_running():
-			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST"))
-			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
+			change_res_gauge(-get_stat("GRD_BLOCK_RES_COST"))
+			if current_res_gauge <= RES_GAUGE_FLOOR:
 				animate("BlockRec")
 				if success_block != Em.success_block.NONE: # refund cost
-					change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+					change_res_gauge(get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 			
 #		Em.char_state.GRD_BLOCKSTUN:
 #			if !$BlockStunTimer.is_running():
@@ -1934,14 +1934,14 @@ func simulate2(): # only ran if not in hitstop
 				else:
 					animate("aBlockRec")
 				if success_block != Em.success_block.NONE: # refund cost
-					change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+					change_res_gauge(get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 #			elif !success_block:
 #			if !$SBlockTimer.is_running():
-			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST"))
-			if current_guard_gauge <= GUARD_GAUGE_FLOOR:
+			change_res_gauge(-get_stat("AIR_BLOCK_RES_COST"))
+			if current_res_gauge <= RES_GAUGE_FLOOR:
 				animate("aBlockRec")
 				if success_block != Em.success_block.NONE: # refund cost
-					change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+					change_res_gauge(get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 					
 			air_res_this_frame = 5
 			
@@ -1978,7 +1978,7 @@ func simulate2(): # only ran if not in hitstop
 					elif Animator.query_to_play(["FlinchB"]):
 						animate("FlinchBReturn")
 					modulate_play("unflinch_flash")
-					$SBlockTimer.time = SBlockTimer_TIME # no unblockable/guard drain immediately after recovering from flinch
+					$SBlockTimer.time = SBlockTimer_TIME # no unblockable/RES drain immediately after recovering from flinch
 			else:
 				friction_this_frame = FMath.percent(friction_this_frame, 50) # lower friction during flinch hitstun
 					
@@ -1993,7 +1993,7 @@ func simulate2(): # only ran if not in hitstop
 					elif Animator.query_to_play(["aFlinchB"]):
 						animate("aFlinchBReturn")
 					modulate_play("unflinch_flash")
-					$SBlockTimer.time = SBlockTimer_TIME  # no unblockable/guard drain immediately after recovering from flinch
+					$SBlockTimer.time = SBlockTimer_TIME  # no unblockable/RES drain immediately after recovering from flinch
 		
 		Em.char_state.LAUNCHED_HITSTUN:
 			# when out of hitstun, recover
@@ -2159,7 +2159,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$NoCollideTimer.simulate()
 #				$InstallTimer.simulate()
 				$SBlockTimer.simulate()
-				if Globals.survival_level == null and ($FDITimer.time != 1 or !button_special in input_state.pressed):
+				if Globals.survival_level == null and ($FDITimer.time != 1 or !button_modifier in input_state.pressed):
 					$FDITimer.simulate()
 #				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
 				if !get_target().is_hitstunned_or_sequenced():
@@ -2230,9 +2230,9 @@ func bounce(against_ground: bool):
 		velocity.x = -FMath.percent(velocity_previous_frame.x, 75)
 		if abs(velocity.x) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
-			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			# if bounce off hard enough, take damage scaled to velocity and RES Gauge
 #			abs(velocity_previous_frame.x) > abs(velocity_previous_frame.y) 
-			if !lethal_flag and wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
+			if !lethal_flag and wall_slammed == Em.wall_slam.CAN_SLAM and current_res_gauge > 0 and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastWalls"], Vector2(sign(velocity_previous_frame.x), 0)):
 				var scaled_value = wall_slam(velocity_previous_frame.x)
 				
@@ -2251,7 +2251,7 @@ func bounce(against_ground: bool):
 							play_audio("break3", {"vol" : -16,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 40))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 40))
 							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 180)
 							first_hit_flag = true
 						else: # lvl 3 slam
@@ -2259,14 +2259,14 @@ func bounce(against_ground: bool):
 							slam_level = 2
 							play_audio("break3", {"vol" : -14,})
 							modulate_play("punish_sweet_flash")
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 60))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 60))
 							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 220)
 							first_hit_flag = true
 					else: # lvl 1 slam
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
-						change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 20))
+						change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 20))
 						$HitStunTimer.time = FMath.percent($HitStunTimer.time, 140)
 						first_hit_flag = true
 						
@@ -2291,9 +2291,9 @@ func bounce(against_ground: bool):
 		velocity.y = -FMath.percent(velocity_previous_frame.y, 50)
 		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough
 			
-			# if bounce off hard enough, take damage scaled to velocity and guard gauge
+			# if bounce off hard enough, take damage scaled to velocity and RES Gauge
 #			abs(velocity_previous_frame.y) > abs(velocity_previous_frame.x)
-			if !lethal_flag and wall_slammed == Em.wall_slam.CAN_SLAM and current_guard_gauge > 0 and \
+			if !lethal_flag and wall_slammed == Em.wall_slam.CAN_SLAM and current_res_gauge > 0 and \
 					Detection.detect_bool([$PlayerCollisionBox], ["BlastCeiling"], Vector2.UP):
 				var scaled_value = wall_slam(velocity_previous_frame.y)
 				
@@ -2312,7 +2312,7 @@ func bounce(against_ground: bool):
 							play_audio("break3", {"vol" : -15,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 40))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 40))
 							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 180)
 							first_hit_flag = true
 						else:
@@ -2321,14 +2321,14 @@ func bounce(against_ground: bool):
 							play_audio("break3", {"vol" : -12,})
 							modulate_play("punish_sweet_flash")
 							Globals.Game.set_screenshake()
-							change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 60))
+							change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 60))
 							$HitStunTimer.time = FMath.percent($HitStunTimer.time, 220)
 							first_hit_flag = true
 					else:
 						hitstop = 9
 						play_audio("break3", {"vol" : -18,})
 						modulate_play("punish_flash")
-						change_guard_gauge(FMath.percent(GUARD_GAUGE_FLOOR, 20))
+						change_res_gauge(FMath.percent(RES_GAUGE_FLOOR, 20))
 						$HitStunTimer.time = FMath.percent($HitStunTimer.time, 140)
 						first_hit_flag = true
 
@@ -2414,13 +2414,13 @@ func buffer_actions():
 	if button_block in input_state.just_pressed:
 		tap_memory.append([button_block, TAP_MEMORY_DURATION])
 		
-	if button_special in input_state.just_pressed:
-		tap_memory.append([button_special, TAP_MEMORY_DURATION])
+	if button_modifier in input_state.just_pressed:
+		tap_memory.append([button_modifier, TAP_MEMORY_DURATION])
 	if button_unique in input_state.just_pressed:
 		tap_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
-	if button_special in input_state.just_released:
-		release_memory.append([button_special, TAP_MEMORY_DURATION])
+	if button_modifier in input_state.just_released:
+		release_memory.append([button_modifier, TAP_MEMORY_DURATION])
 	if button_unique in input_state.just_released:
 		release_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
@@ -2463,8 +2463,8 @@ func buffer_actions():
 		input_buffer.append(["SDash", buffer_time()])
 		
 	if spent_special:
-		if button_special in input_state.just_pressed or (!button_special in input_state.pressed and \
-				!is_button_released_in_last_X_frames(button_special, 7)):
+		if button_modifier in input_state.just_pressed or (!button_modifier in input_state.pressed and \
+				!is_button_released_in_last_X_frames(button_modifier, 7)):
 			spent_special = false
 	if spent_unique:
 		if button_unique in input_state.just_pressed or (!button_unique in input_state.pressed and \
@@ -2494,7 +2494,7 @@ func capture_combinations():
 			
 #		combination(button_dash, button_aux, "Tech")
 		
-#	combination(button_block, button_special, "Burst") # place this here since button_special is never buffered
+#	combination(button_block, button_modifier, "Burst") # place this here since button_modifier is never buffered
 		
 	if !button_unique in input_state.pressed:
 		UniqChar.capture_combinations()
@@ -2549,7 +2549,7 @@ func ex_rebuffer(button_ex, button1, action, back = false):
 			
 #func spend_button(button):
 #	match button:
-#		button_special:
+#		button_modifier:
 #			spent_special = true
 #		button_unique:
 #			spent_unique = true
@@ -2596,7 +2596,7 @@ func doubletap_combination_trio(button_ex, button1, button2, action, back = fals
 func ex_combination(button_ex, button1, action, back = false, instant = false):
 
 	match button_ex:
-		button_special:
+		button_modifier:
 			if spent_special: return
 		button_unique:
 			if spent_unique: return
@@ -2629,7 +2629,7 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 func ex_combination_trio(button_ex, button1, button2, action, back = false, instant = false):
 	
 	match button_ex:
-		button_special:
+		button_modifier:
 			if spent_special: return
 		button_unique:
 			if spent_unique: return
@@ -2745,7 +2745,7 @@ func are_inputs_too_close():
 		var tap = tap_memory[-x-1]
 		if tap[1] < TAP_MEMORY_DURATION - 7:
 			break
-		if tap[0] in [button_special, button_unique]:
+		if tap[0] in [button_modifier, button_unique]:
 			time_of_last_special_or_unique_tap = tap[1]
 		elif tap[0] in [button_light, button_fierce, button_aux, button_dash, button_block]:
 			time_of_last_attack_tap = tap[1]
@@ -2846,7 +2846,7 @@ func instant_action_tilt_combination(attack_button, neutral_action, down_tilt_ac
 func cancel_action(button_ex = null): # called from UniqChar for character-unique action cancelling
 	if button_ex != null:
 		match button_ex: # prevent special/unique from triggering EX moves
-			button_special:
+			button_modifier:
 				spent_special = true
 			button_unique:
 				spent_unique = true
@@ -3501,8 +3501,8 @@ func get_stat(stat: String) -> int:
 		
 	if Globals.survival_level != null:
 		match stat:
-			"SPECIAL_GDRAIN_MOD":
-				to_return = FMath.percent(to_return, 150) # increased GDrain on specials during Survival
+			"SPECIAL_RES_DRAIN_MOD":
+				to_return = FMath.percent(to_return, 150) # increased RES_Drain on specials during Survival
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
 					to_return = FMath.percent(to_return, 50)
 			"DAMAGE_VALUE_LIMIT":
@@ -3560,9 +3560,9 @@ func get_stat(stat: String) -> int:
 #			"SDASH_TURN_RATE":
 #				if Globals.survival_level != null: to_return = int(max(to_return - 4, 1))
 #				to_return += Inventory.modifier(player_ID, Cards.effect_ref.SDASH_TURN_RATE)
-			"DODGE_GG_COST":
+			"DODGE_RES_COST":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_GG_COST))
+#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_RES_COST))
 #				to_return = int(max(to_return, 0))
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_DODGE_COST):
 					to_return = 0
@@ -3571,14 +3571,14 @@ func get_stat(stat: String) -> int:
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_SPEED))
 				to_return = int(max(to_return, 10))
 	
-#			"GG_REGEN_AMOUNT":
+#			"RES_REGEN_AMOUNT":
 ##				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
 #				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
 #					to_return = FMath.percent(to_return, 200)
 				
-			"GRD_BLOCK_GG_COST", "AIR_BLOCK_GG_COST":
+			"GRD_BLOCK_RES_COST", "AIR_BLOCK_RES_COST":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 120)
-#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.BLOCK_GG_COST))
+#				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.BLOCK_RES_COST))
 #				to_return = int(max(to_return, 0))
 				if Inventory.has_quirk(player_ID, Cards.effect_ref.NO_BLOCK_COST):
 					to_return = 0
@@ -4050,7 +4050,7 @@ func respawn():
 	set_true_position()
 			
 	current_damage_value = 0
-	current_guard_gauge = 0
+	current_res_gauge = 0
 	if Globals.survival_level != null:
 #		change_burst_token(Em.burst.AVAILABLE) # gain Burst on death
 #	else:
@@ -4058,7 +4058,7 @@ func respawn():
 			current_ex_gauge = MAX_EX_GAUGE
 		
 	Globals.Game.damage_update(self)
-	Globals.Game.guard_gauge_update(self)
+	Globals.Game.res_gauge_update(self)
 #	Globals.Game.ex_gauge_update(self)
 #	Globals.Game.ult_gauge_update(self)
 	Globals.Game.stock_points_update(self)
@@ -4284,7 +4284,7 @@ func check_landing(): # called by physics.gd when character stopped by floor
 			Globals.Game.spawn_SFX("LandDust", "DustClouds", get_feet_pos(), {"grounded":true})
 			
 			if Animator.query_to_play(["aBlockStartup", "aTBlockStartup"]): # if dropping during block startup
-				change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+				change_res_gauge(-get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
 #				remove_status_effect(Em.status_effect.POS_FLOW)
@@ -4336,7 +4336,7 @@ func check_drop(): # called when character becomes airborne while in a grounded 
 			
 		Em.char_state.GRD_BLOCK:
 			if Animator.query_to_play(["BlockStartup", "TBlockStartup"]):
-				change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+				change_res_gauge(-get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 				play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #				if Globals.survival_level == null:
 #				remove_status_effect(Em.status_effect.POS_FLOW)
@@ -4502,7 +4502,7 @@ func can_DI():
 	if !$HitStunTimer.is_running(): # techable hitstun max out DI
 		return true
 	if Globals.survival_level == null:
-		if current_guard_gauge <= 0:
+		if current_res_gauge <= 0:
 			return false
 #	if get_damage_percent() >= 100:
 	if lethal_flag:
@@ -4515,7 +4515,7 @@ func process_VDI():
 	# to be able to DI, must be entering knockback animation and has a directional key pressed
 
 	if Globals.survival_level == null:
-		if current_guard_gauge <= 0: return
+		if current_res_gauge <= 0: return
 	
 	if (dir != 0 or v_dir != 0) and !DI_seal and get_damage_percent() < 100 and \
 		((state == Em.char_state.LAUNCHED_HITSTUN and Animator.query_to_play(["LaunchTransit"]) and \
@@ -4534,8 +4534,8 @@ func process_VDI():
 #				weight = FMath.percent(100 + weight, FDI_MOD)
 				weight = FDI_MOD
 			else:
-				weight = get_guard_gauge_percent_above()
-		VDI_amount = FMath.f_lerp(0, VDI_amount_max, weight) # adjust according to Guard Gauge
+				weight = get_res_gauge_percent_above()
+		VDI_amount = FMath.f_lerp(0, VDI_amount_max, weight) # adjust according to RES Gauge
 		
 		if dir != 0 and v_dir != 0: # diagonal, multiply by 0.71
 			VDI_amount = FMath.percent(VDI_amount, 71)
@@ -4641,7 +4641,7 @@ func flashes():
 	if is_blocking():
 		modulate_play("block")
 		
-#	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR) and current_guard_gauge == 0:
+#	if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_ARMOR) and current_res_gauge == 0:
 #		modulate_play("passive_armor")
 		
 	UniqChar.unique_flash()
@@ -4828,7 +4828,7 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	
 	else: # cancelling from a non-ex non-super move
 		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling into an ex move from non-ex move has wider window
-			# attack buttons must be pressed as well so tapping special + attack together too fast will not quick cancel into EX move
+			# attack buttons must be pressed as well so tapping modifier + attack together too fast will not quick cancel into EX move
 			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed or \
 					button_dash in input_state.pressed or button_block in input_state.pressed):
 				if !are_inputs_too_close():
@@ -4843,8 +4843,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 			if !grounded and (button_up in input_state.just_released or button_down in input_state.just_released):
 				if Animator.time <= 5 and Animator.time != 0: # release up/down rebuffer has wider window if in the air
 					return true
-			elif (button_special in input_state.just_pressed or button_unique in input_state.just_pressed):
-				# cancelling into special moves via button_special/button_unique presses have wider window
+			elif (button_modifier in input_state.just_pressed or button_unique in input_state.just_pressed):
+				# cancelling into special moves via button_modifier/button_unique presses have wider window
 				if Animator.time <= 2 and Animator.time != 0:
 					return true
 			elif Animator.time <= 1 and Animator.time != 0:
@@ -5122,8 +5122,8 @@ func check_for_assist():
 #			return false
 		if $BurstLockTimer.is_running():
 			return false # cannot call while being multi-hitted or just after a hit
-		if current_guard_gauge <= 0:
-			return false # cannot call if GG is below 100%
+		if current_res_gauge <= 0:
+			return false # cannot call if RES is below 100%
 		
 	if "AssistN" in instant_actions:
 		call_assist(Em.assist.NEUTRAL)
@@ -5139,8 +5139,8 @@ func call_assist(atk_ID: int):
 		
 	assist_active = true
 	if is_hitstunned():
-		change_guard_gauge(-ASSIST_RESCUE_COST)
-		first_hit_flag = true # freeze Guard Swell till the next hit
+		change_res_gauge(-ASSIST_RESCUE_COST)
+		first_hit_flag = true # freeze RES Swell till the next hit
 	Globals.Game.call_assist(player_ID, assist, get_feet_pos(), "black_replace", atk_ID)
 	
 	
@@ -5167,15 +5167,15 @@ func tech():
 				return true
 			elif button_light in input_state.pressed:
 				animate("DodgeTransit")
-				if current_guard_gauge > 0:
-					reset_guard_gauge()
+				if current_res_gauge > 0:
+					reset_res_gauge()
 				return true
 				
 	if button_rs_up in input_state.pressed or button_rs_down in input_state.pressed or button_rs_left in input_state.pressed or \
 		button_rs_right in input_state.pressed:
 		animate("SDashTransit")
-#		if current_guard_gauge > 0:
-#			reset_guard_gauge()
+#		if current_res_gauge > 0:
+#			reset_res_gauge()
 		return true
 		
 	if !grounded and button_jump in input_state.pressed: # don't use Up (DI)
@@ -5185,15 +5185,15 @@ func tech():
 	return false
 	
 func dodge_check(from_block_rec := false):
-	if !from_block_rec and current_guard_gauge + GUARD_GAUGE_CEIL < get_stat("DODGE_GG_COST"):
+	if !from_block_rec and current_res_gauge + RES_GAUGE_CEIL < get_stat("DODGE_RES_COST"):
 		return false
 	if !grounded and air_dodge <= 0:
 		return false
 		
-	if current_guard_gauge > 0:
-		reset_guard_gauge()
+	if current_res_gauge > 0:
+		reset_res_gauge()
 	elif !from_block_rec:
-		change_guard_gauge(-get_stat("DODGE_GG_COST"))
+		change_res_gauge(-get_stat("DODGE_RES_COST"))
 		
 	if Globals.survival_level != null:
 		dodge_enhance()
@@ -5242,7 +5242,7 @@ func burst_escape_check() -> bool: # check if have resources to do it, then take
 	if lethal_flag: # cannot Burst Escape lethal hits
 		return false
 		
-	var gg_cost := GUARD_GAUGE_CEIL
+	var gg_cost := RES_GAUGE_CEIL
 	var ex_cost := BURSTCOUNTER_EX_COST
 	
 	if Globals.survival_level != null:
@@ -5250,17 +5250,17 @@ func burst_escape_check() -> bool: # check if have resources to do it, then take
 			gg_cost = FMath.percent(gg_cost, 50)
 			ex_cost = FMath.percent(ex_cost, 50)
 	
-	if current_guard_gauge >= GUARD_GAUGE_FLOOR + gg_cost and current_ex_gauge >= ex_cost:
-		change_guard_gauge(-gg_cost)
+	if current_res_gauge >= RES_GAUGE_FLOOR + gg_cost and current_ex_gauge >= ex_cost:
+		change_res_gauge(-gg_cost)
 		change_ex_gauge(-ex_cost)
 		return true
 	else:
 		return false
 #		if burst_token != Em.burst.AVAILABLE:
-##			if current_guard_gauge <= 0:
+##			if current_res_gauge <= 0:
 #			return false # not enough resouces to use it
 #
-##		change_guard_gauge(-BURSTESCAPE_GG_COST)
+##		change_res_gauge(-BURSTESCAPE_RES_COST)
 #		change_burst_token(Em.burst.EXHAUSTED)
 #		return true
 	
@@ -5704,22 +5704,22 @@ func process_status_effects_timer(): # reduce lifetime and remove expired status
 				status_effect_to_remove.append(status_effect[0])
 				
 		match status_effect[0]:
-			Em.status_effect.STUN_RECOVER: # when recovering from a combo where a Stun occur, restore Guard Gauge to 0%
+			Em.status_effect.STUN_RECOVER: # when recovering from a combo where a Stun occur, restore RES Gauge to 0%
 				if !is_hitstunned_or_sequenced():
 					status_effect_to_remove.append(status_effect[0])
-					if current_guard_gauge < 0:
-						current_guard_gauge = 0
-						Globals.Game.guard_gauge_update(self)
-			Em.status_effect.POS_FLOW: # positive flow ends if guard gauge returns to 0
-				if current_guard_gauge >= 0:
+					if current_res_gauge < 0:
+						current_res_gauge = 0
+						Globals.Game.res_gauge_update(self)
+			Em.status_effect.POS_FLOW: # positive flow ends if RES Gauge returns to 0
+				if current_res_gauge >= 0:
 					status_effect_to_remove.append(status_effect[0])
 
 		
 func new_status_effect(effect): # run on frame the status effect is inflicted/state is loaded, for visual effects
 	match effect:
 		Em.status_effect.POS_FLOW:
-			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
-				Loader.loaded_guard_gauge_pos
+			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/RESGauge1").texture_progress = \
+				Loader.loaded_res_gauge_pos
 		Em.status_effect.LETHAL:
 			Globals.Game.lethalfreeze(get_path())
 	
@@ -5774,8 +5774,8 @@ func clear_visual_effect_of_status(effect): # must run this when removing status
 		Em.status_effect.LETHAL, Em.status_effect.STUN, Em.status_effect.CRUSH:
 			sprite.position = Vector2.ZERO
 		Em.status_effect.POS_FLOW:
-			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1").texture_progress = \
-				Loader.loaded_guard_gauge
+			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/RESGauge1").texture_progress = \
+				Loader.loaded_res_gauge
 
 	
 func sprite_shake(): # used for Break and lethal blows
@@ -6070,7 +6070,7 @@ func is_hitcount_last_hit(in_ID, move_data):
 	else: return false
 	
 	
-func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Guard Gauge
+func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect RES Gauge
 	var recorded_hitcount = get_hitcount(in_ID)
 	if recorded_hitcount == 0: return true
 	else: return false
@@ -6108,23 +6108,23 @@ func atk_startup_resets():# ran whenever an attack starts
 func get_damage_percent() -> int:
 	return FMath.get_fraction_percent(current_damage_value, get_stat("DAMAGE_VALUE_LIMIT"))
 	
-func get_guard_gauge_percent_below() -> int:
-	if current_guard_gauge <= GUARD_GAUGE_FLOOR:
+func get_res_gauge_percent_below() -> int:
+	if current_res_gauge <= RES_GAUGE_FLOOR:
 		return 0
-	elif current_guard_gauge < 0:
-		return 100 - FMath.get_fraction_percent(current_guard_gauge, GUARD_GAUGE_FLOOR)
+	elif current_res_gauge < 0:
+		return 100 - FMath.get_fraction_percent(current_res_gauge, RES_GAUGE_FLOOR)
 	else: return 100
 	
-func get_guard_gauge_percent_above() -> int:
-	if current_guard_gauge >= GUARD_GAUGE_CEIL:
+func get_res_gauge_percent_above() -> int:
+	if current_res_gauge >= RES_GAUGE_CEIL:
 		return 100
-	elif current_guard_gauge > 0:
-		return FMath.get_fraction_percent(current_guard_gauge, GUARD_GAUGE_CEIL)
+	elif current_res_gauge > 0:
+		return FMath.get_fraction_percent(current_res_gauge, RES_GAUGE_CEIL)
 	else: return 0
 	
-func get_guard_gauge_percent_true(): # from 0 to 100
-	var value = current_guard_gauge - GUARD_GAUGE_FLOOR
-	return FMath.get_fraction_percent(value, GUARD_GAUGE_CEIL - GUARD_GAUGE_FLOOR)
+func get_res_gauge_percent_true(): # from 0 to 100
+	var value = current_res_gauge - RES_GAUGE_FLOOR
+	return FMath.get_fraction_percent(value, RES_GAUGE_CEIL - RES_GAUGE_FLOOR)
 		
 func take_damage(damage: int): # called by attacker
 	var orig_damage_value = current_damage_value
@@ -6136,53 +6136,53 @@ func take_damage(damage: int): # called by attacker
 	if damage < 0: # for healing
 		return orig_damage_value - current_damage_value
 	
-func change_guard_gauge(guard_gauge_change: int): # called by attacker
-	current_guard_gauge += guard_gauge_change
-	current_guard_gauge = int(clamp(current_guard_gauge, GUARD_GAUGE_FLOOR, GUARD_GAUGE_CEIL))
-	Globals.Game.guard_gauge_update(self)
+func change_res_gauge(res_gauge_change: int): # called by attacker
+	current_res_gauge += res_gauge_change
+	current_res_gauge = int(clamp(current_res_gauge, RES_GAUGE_FLOOR, RES_GAUGE_CEIL))
+	Globals.Game.res_gauge_update(self)
 	
-func reset_guard_gauge():
-	current_guard_gauge = 0
-	Globals.Game.guard_gauge_update(self)
+func reset_res_gauge():
+	current_res_gauge = 0
+	Globals.Game.res_gauge_update(self)
 	
-#func change_guard_gauge_percent(guard_gauge_change_percent):
-#	var guard_gauge_change = GUARD_GAUGE_CEIL * guard_gauge_change_percent
-#	change_guard_gauge(guard_gauge_change)
+#func change_res_gauge_percent(res_gauge_change_percent):
+#	var res_gauge_change = RES_GAUGE_CEIL * res_gauge_change_percent
+#	change_res_gauge(res_gauge_change)
 	
-#func change_guard_gauge_percent(guard_gauge_change_percent):
-#	var guard_gauge_change := 0.0
+#func change_res_gauge_percent(res_gauge_change_percent):
+#	var res_gauge_change := 0.0
 #
-#	if guard_gauge_change_percent < 0: # reduce GG
-#		if current_guard_gauge > 0:
+#	if res_gauge_change_percent < 0: # reduce RES
+#		if current_res_gauge > 0:
 #
-#			var GG_above_percent = get_guard_gauge_percent_above()
-#			if GG_above_percent >= abs(guard_gauge_change_percent): # if enough, substract normally
-#				guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_CEIL)
+#			var RES_above_percent = get_res_gauge_percent_above()
+#			if RES_above_percent >= abs(res_gauge_change_percent): # if enough, substract normally
+#				res_gauge_change = res_gauge_change_percent * abs(RES_GAUGE_CEIL)
 #
 #			else: # not enough, must go under 0
-#				guard_gauge_change_percent += GG_above_percent # get leftovers
-#				guard_gauge_change = -current_guard_gauge # lower to 0 1st
-#				guard_gauge_change += guard_gauge_change_percent * abs(GUARD_GAUGE_FLOOR) # reduce below 0
+#				res_gauge_change_percent += RES_above_percent # get leftovers
+#				res_gauge_change = -current_res_gauge # lower to 0 1st
+#				res_gauge_change += res_gauge_change_percent * abs(RES_GAUGE_FLOOR) # reduce below 0
 #
-#		else: # GG below 0, substract normally
-#			guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_FLOOR)
+#		else: # RES below 0, substract normally
+#			res_gauge_change = res_gauge_change_percent * abs(RES_GAUGE_FLOOR)
 #
-#	elif guard_gauge_change_percent > 0: # increase GG
-#		if current_guard_gauge < 0:
+#	elif res_gauge_change_percent > 0: # increase RES
+#		if current_res_gauge < 0:
 #
-#			var GG_below_percent = get_guard_gauge_percent_below()
-#			if GG_below_percent <= abs(guard_gauge_change_percent): # if low enough, increase normally
-#				guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_FLOOR)
+#			var RES_below_percent = get_res_gauge_percent_below()
+#			if RES_below_percent <= abs(res_gauge_change_percent): # if low enough, increase normally
+#				res_gauge_change = res_gauge_change_percent * abs(RES_GAUGE_FLOOR)
 #
 #			else: # will go above 0
-#				guard_gauge_change_percent -= 1.0 - GG_below_percent # get leftovers
-#				guard_gauge_change = -current_guard_gauge # raise to 0 1st
-#				guard_gauge_change += guard_gauge_change_percent * abs(GUARD_GAUGE_CEIL) # raise above 0
+#				res_gauge_change_percent -= 1.0 - RES_below_percent # get leftovers
+#				res_gauge_change = -current_res_gauge # raise to 0 1st
+#				res_gauge_change += res_gauge_change_percent * abs(RES_GAUGE_CEIL) # raise above 0
 #
 #		else: # over 0, increase normally
-#			guard_gauge_change = guard_gauge_change_percent * abs(GUARD_GAUGE_CEIL)
+#			res_gauge_change = res_gauge_change_percent * abs(RES_GAUGE_CEIL)
 #
-#	change_guard_gauge(guard_gauge_change)
+#	change_res_gauge(res_gauge_change)
 	
 func get_ex_level():
 	if current_ex_gauge < EX_LEVEL:
@@ -6351,9 +6351,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	increment_hitcount(defender_ID2) # for measuring hitcount of attacks
 #	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
 	
-	match hit_data[Em.hit.BLOCK_STATE]: # gain Positive Flow if unblocked, GG is under 100%, atk_level > 1, or semi-disjoint hit
+	match hit_data[Em.hit.BLOCK_STATE]: # gain Positive Flow if unblocked, RES is under 100%, atk_level > 1, or semi-disjoint hit
 		Em.block_state.UNBLOCKED:
-			if current_guard_gauge < 0 and (Em.hit.NPC_DEFENDER_PATH in hit_data or \
+			if current_res_gauge < 0 and (Em.hit.NPC_DEFENDER_PATH in hit_data or \
 					((!hit_data[Em.hit.WEAK_HIT] and hit_data[Em.hit.ADJUSTED_ATK_LVL] > 1) or hit_data[Em.hit.SEMI_DISJOINT])):
 				status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 
@@ -6480,12 +6480,12 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						velocity.set_vector(pushback_strength, 0)
 						velocity.rotate(pushback_dir)
 							
-				# if attacking at the corner unblocked, pushback depending on defender's Guard Gauge
+				# if attacking at the corner unblocked, pushback depending on defender's RES Gauge
 				elif Em.hit.CORNERED in hit_data:
 					var pushback_strength: int = CORNER_PUSHBACK
-					if defender.current_guard_gauge > 0:
+					if defender.current_res_gauge > 0:
 						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
-								defender.get_guard_gauge_percent_above())
+								defender.get_res_gauge_percent_above())
 					match Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.TWO, facing):
 						Em.compass.E:
 							if defender.position.x < Globals.Game.left_corner:
@@ -6601,7 +6601,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	remove_status_effect(Em.status_effect.CRUSH)
 	
 	# if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
-	# also no Guard Drain and Guard Swell
+	# also no RES drain and RES Swell
 	if ((hitstop != null and hitstop > 0) or $HitStopTimer.time > 0) and Em.hit.ENTITY_PATH in hit_data:
 		hit_data[Em.hit.PROJ_ON_HITSTOP] = true
 		
@@ -6629,7 +6629,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if !attacker_or_entity.is_hitcount_last_hit(player_ID, hit_data[Em.hit.MOVE_DATA]):
 			hit_data[Em.hit.MULTIHIT] = true
 			if attacker_or_entity.is_hitcount_first_hit(player_ID):
-				hit_data[Em.hit.FIRST_HIT] = true # for guard drain and guard swell
+				hit_data[Em.hit.FIRST_HIT] = true # for RES drain and RES swell
 		else:
 			hit_data[Em.hit.LAST_HIT] = true # for triggering delayed_hit_effect
 		if !Em.hit.FIRST_HIT in hit_data:
@@ -6637,7 +6637,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.atk_attr.AUTOCHAIN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.AUTOCHAIN] = true
 	if Em.atk_attr.FOLLOW_UP in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-		hit_data[Em.hit.FOLLOW_UP] = true # for guard drain and guard swell
+		hit_data[Em.hit.FOLLOW_UP] = true # for RES drain and RES swell
 		hit_data[Em.hit.SECONDARY_HIT] = true # for clearing delayed_hit_effect
 		if !Em.hit.AUTOCHAIN in hit_data:
 			hit_data[Em.hit.LAST_HIT] = true # for triggering delayed_hit_effect
@@ -6717,7 +6717,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		if !Em.atk_attr.REPEATABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 			for array in repeat_memory:
-				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name:
+				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name and array[2] == attacker.UniqChar.NAME:
 					if !hit_data[Em.hit.REPEAT]:
 						hit_data[Em.hit.REPEAT] = true # found a repeat
 #						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
@@ -6733,7 +6733,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					
 			# add to repeat memory
 			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-				repeat_memory.append([attacker.player_ID, root_move_name])
+				repeat_memory.append([attacker.player_ID, root_move_name, attacker.UniqChar.NAME])
 		
 	if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.SINGLE_REPEAT] = true
@@ -6782,9 +6782,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if hit_data[Em.hit.CROSSED_UP]:
 				continue # armored moves only armor from front unless has BI_DIR_ARMOR
 			if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
-					(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
+					(current_res_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
-					(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+					(current_res_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 					(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
@@ -6794,9 +6794,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if hit_data[Em.hit.CROSSED_UP]:
 				continue # armored moves only armor from front unless has BI_DIR_ARMOR
 			if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
-					(current_guard_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_ACTIVE in defender_attr) or \
+					(current_res_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_ACTIVE in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
-					(current_guard_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
+					(current_res_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 					(Em.atk_attr.PROJ_ARMOR_ACTIVE in defender_attr and Em.hit.ENTITY_PATH in hit_data):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
@@ -6816,7 +6816,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# passive armor
 	if !is_hitstunned_or_sequenced() and !is_blocking():
 		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_WEAKARMOR):
-			if current_guard_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
+			if current_res_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
 		
@@ -6824,7 +6824,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 			hit_data[Em.hit.SUPERARMORED] = true
 		elif has_trait(Em.trait.PASSIVE_WEAKARMOR):
-			if current_guard_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
+			if current_res_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
 				var can_armor := false
 				match new_state:
 					Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
@@ -6878,7 +6878,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
-#							hit_data[Em.hit.GUARD_DRAIN] = true
+#							hit_data[Em.hit.RES_DRAIN] = true
 					
 				Em.atk_type.SUPER:
 					if hit_data[Em.hit.CROSSED_UP]:
@@ -6891,7 +6891,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
-#							hit_data[Em.hit.GUARD_DRAIN] = true
+#							hit_data[Em.hit.RES_DRAIN] = true
 					elif hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED):
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 					elif !hit_data[Em.hit.CROSSED_UP]:
@@ -6985,21 +6985,21 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.PUNISH_HIT] and Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.CRUSH] = true
 			
-	# GUARD SWELL ---------------------------------------------------------------------------------
+	# RES SWELL ---------------------------------------------------------------------------------
 					
 #	if Globals.survival_level == null:	
 	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data) or Em.hit.FOLLOW_UP in hit_data or \
 			Em.hit.PROJ_ON_HITSTOP in hit_data:
-		pass # multi-hit moves not the first hit and autochain follow-ups do not proc Guard Swell
+		pass # multi-hit moves not the first hit and autochain follow-ups do not proc RES Swell
 	else:
-		if GG_swell_flag == false: # start GG swell if not started yet and hit with most attacks
-			GG_swell_flag = true
+		if RES_swell_flag == false: # start RES swell if not started yet and hit with most attacks
+			RES_swell_flag = true
 			first_hit_flag = true
 			
 #			if current_ex_gauge == MAX_EX_GAUGE: # cannot hold on to full meter, WIP TESTING
 #				change_ex_gauge(-10000)
 				
-		else: # hit after GG swell started, turn off first_hit_flag to start gaining GG
+		else: # hit after RES swell started, turn off first_hit_flag to start gaining RES
 			first_hit_flag = false
 	
 	# ZEROTH REACTION (before damage) ---------------------------------------------------------------------------------
@@ -7009,8 +7009,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Globals.assists == 1 and Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		if hit_data[Em.hit.ATKER].is_hitstunned():
 			assist_rescue_protect = true
-			current_guard_gauge = GUARD_GAUGE_CEIL
-			Globals.Game.guard_gauge_update(self) # max out GG if hit by assist rescue
+			current_res_gauge = RES_GAUGE_CEIL
+			Globals.Game.res_gauge_update(self) # max out RES if hit by assist rescue
 			wall_slammed = Em.wall_slam.HAS_SLAMMED # also cannot wall slam afterwards
 		if assist_rescue_protect:
 			hit_data[Em.hit.PUNISH_HIT] = false
@@ -7033,7 +7033,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if Em.hit.CANCELLED in hit_data:
 		return
 	
-	# DAMAGE AND GUARD DRAIN/GAIN CALCULATION ------------------------------------------------------------------
+	# DAMAGE AND RES DRAIN/GAIN CALCULATION ------------------------------------------------------------------
 	
 	# attack level
 	var adjusted_atk_level: int = 1
@@ -7047,12 +7047,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		adjusted_atk_level = adjusted_atk_level(hit_data)
 		hit_data[Em.hit.ADJUSTED_ATK_LVL] = adjusted_atk_level
 		
-		change_guard_gauge(calculate_guard_gauge_change(hit_data)) # do GG calculation
+		change_res_gauge(calculate_res_gauge_change(hit_data)) # do RES calculation
 		if can_stun(hit_data):
 			hit_data[Em.hit.STUN] = true
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 			hit_data.erase(Em.hit.SUPERARMORED)
-		elif get_guard_gauge_percent_below() == 0:
+		elif get_res_gauge_percent_below() == 0:
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 			hit_data.erase(Em.hit.SUPERARMORED)
 		
@@ -7139,7 +7139,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			attacker.reset_jumps()
 			attacker.change_ex_gauge(FMath.percent(attacker.get("BURSTCOUNTER_EX_COST"), 50), true)
 			# Burst Counter grants attacker Positive Flow
-			if attacker.current_guard_gauge < 0:
+			if attacker.current_res_gauge < 0:
 #				attacker.add_status_effect(Em.status_effect.POS_FLOW, null)
 				attacker.status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 				
@@ -7150,8 +7150,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #		elif hit_data[Em.hit.MOVE_DATA].burst == "BurstExtend":
 #			if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED:
 #				attacker.reset_jumps()
-#				current_guard_gauge = 0
-#				Globals.Game.guard_gauge_update(self)
+#				current_res_gauge = 0
+#				Globals.Game.res_gauge_update(self)
 #				hit_data[Em.hit.CRUSH] = true
 				
 		
@@ -7161,7 +7161,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# for moves that automatically chain into more moves, will not cause lethal or break hits, will have fixed_hitstop and no KB boost
 
 	# gain POS_FLOW on parry
-	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.PARRIED and current_guard_gauge < 0:
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.PARRIED and current_res_gauge < 0:
 		status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
@@ -7226,7 +7226,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					play_audio("block3", {"vol" : -15})
 				elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
 						(Em.atk_attr.REPEL_ON_BLOCK in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !Em.hit.MULTIHIT in hit_data):
-#					 or (Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
+#					 or (Em.hit.RES_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
 					modulate_play("weakblock_flash")
 					play_audio("block3", {"vol" : -15})
 				else:
@@ -7614,7 +7614,7 @@ func can_lethal(hit_data) -> bool: # only strong hits can Guardbreak and Lethal 
 	# at 150% damage, any non-strong hits with high enough knockback will lethal, and any attack can Guardbreak on unblock/Base Block
 	
 func can_stun(hit_data) -> bool:
-	if get_guard_gauge_percent_below() > 1:
+	if get_res_gauge_percent_below() > 1:
 		return false # setting to 0.01 instead of 0 allow multi-hit moves to cause Stun on the last attack
 	if query_status_effect(Em.status_effect.STUN_RECOVER):
 		return false
@@ -7684,12 +7684,12 @@ func calculate_damage(hit_data) -> int:
 		if hit_data[Em.hit.PUNISH_HIT] or Em.hit.PUNISH_HIT in delayed_hit_effect:
 			scaled_damage = FMath.percent(scaled_damage, PUNISH_DMG_MOD)
 
-	if current_guard_gauge > 0: # damage is reduced by defender's Guard Gauge when it is > 100%
+	if current_res_gauge > 0: # damage is reduced by defender's RES Gauge when it is > 100%
 		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
-			var weight: int = FMath.percent(get_guard_gauge_percent_above(), 50) # EX and Supers are scaled less
-			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), weight)
+			var weight: int = FMath.percent(get_res_gauge_percent_above(), 50) # EX and Supers are scaled less
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_RES), weight)
 		else:
-			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_RES), get_res_gauge_percent_above())
 
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.BLOCKED:
@@ -7714,10 +7714,10 @@ func calculate_damage(hit_data) -> int:
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
 	
 
-func calculate_guard_gauge_change(hit_data) -> int:
+func calculate_res_gauge_change(hit_data) -> int:
 	
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
-		return 0 # assist rescue no Guard Drain
+		return 0 # assist rescue no RES drain
 	
 	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstEscape":
 		return 0
@@ -7725,10 +7725,10 @@ func calculate_guard_gauge_change(hit_data) -> int:
 	if Em.hit.PROJ_ON_HITSTOP in hit_data:
 		return 0
 	
-	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER]: # no Guard Drain for Supers
+	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER]: # no RES drain for Supers
 		return 0
 	
-	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data): # for multi-hit, only first hit affect GG
+	if (hit_data[Em.hit.MOVE_DATA][Em.move.HITCOUNT] > 1 and !Em.hit.FIRST_HIT in hit_data): # for multi-hit, only first hit affect RES
 		return 0
 		
 	if Em.hit.FOLLOW_UP in hit_data:
@@ -7736,51 +7736,51 @@ func calculate_guard_gauge_change(hit_data) -> int:
 		if hit_data[Em.hit.ATKER_OR_ENTITY] != null and (("chain_combo" in hit_data[Em.hit.ATKER_OR_ENTITY] and \
 				hit_data[Em.hit.ATKER].chain_combo == Em.chain_combo.WHIFF) or \
 				("autochain_landed" in hit_data[Em.hit.ATKER_OR_ENTITY] and !hit_data[Em.hit.ATKER_OR_ENTITY].autochain_landed)):
-			# for autochain, followups only affect GG if first hit whiffs
+			# for autochain, followups only affect RES if first hit whiffs
 			pass
 		else: return 0
 	
-	if is_hitstunned() and $HitStunTimer.is_running() and GG_swell_flag and !first_hit_flag: # if Guard Swell is active, no Guard Drain
+	if is_hitstunned() and $HitStunTimer.is_running() and RES_swell_flag and !first_hit_flag: # if RES Swell is active, no RES drain
 		return 0
 	
-##	var guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+##	var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 #	if $SBlockTimer.is_running():
 #		return 0
 
-	var guard_drain : int
+	var RES_DRAIN : int
 	
 	if !hit_data[Em.hit.SEMI_DISJOINT]:
-		guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+		RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 	else:
-		guard_drain = -ATK_LEVEL_TO_GDRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
+		RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
 		
-	if Em.hit.GUARDCRASH in hit_data: # halves GDrain on Guardcrash
-		guard_drain = FMath.percent(guard_drain, 50)
+	if Em.hit.GUARDCRASH in hit_data: # halves RES_Drain on Guardcrash
+		RES_DRAIN = FMath.percent(RES_DRAIN, 50)
 	
 	match hit_data[Em.hit.BLOCK_STATE]:
 		Em.block_state.PARRIED:
 			return 0
 		
-		Em.block_state.BLOCKED: # no Guard Drain on blocking normals
+		Em.block_state.BLOCKED: # no RES drain on blocking normals
 #			if Em.hit.NPC_PATH in hit_data:
 #				return 0
-#			if Em.hit.GUARD_DRAIN in hit_data:
-#				guard_drain = FMath.percent(guard_drain, get_stat("SPECIAL_GDRAIN_MOD")) # increase guard drain when blocking heavy/special/ex
+#			if Em.hit.RES_DRAIN in hit_data:
+#				RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("SPECIAL_RES_DRAIN_MOD")) # increase RES drain when blocking heavy/special/ex
 #				if Em.hit.ANTI_AIRED in hit_data:
-#					guard_drain = FMath.percent(guard_drain, 150) # increase guard drain if hitting an airblocking opponent with an anti-air
+#					RES_DRAIN = FMath.percent(RES_DRAIN, 150) # increase RES drain if hitting an airblocking opponent with an anti-air
 #			else:
-			if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain GG
+			if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain RES
 				return 0
-			elif Em.hit.SDASH_ARMORED in hit_data: # super dashing through projectiles drain GG
-				guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD)
+			elif Em.hit.SDASH_ARMORED in hit_data: # super dashing through projectiles drain RES
+				RES_DRAIN = FMath.percent(RES_DRAIN, SDASH_ARMOR_RES_DRAIN_MOD)
 				if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
-					guard_drain = FMath.percent(guard_drain, SDASH_ARMOR_GDRAIN_MOD2) # super dashing through level 2 projectiles drain more
+					RES_DRAIN = FMath.percent(RES_DRAIN, SDASH_ARMOR_RES_DRAIN_MOD2) # super dashing through level 2 projectiles drain more
 				
 		Em.block_state.UNBLOCKED:
-			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_GUARD_DRAIN):
-				guard_drain = FMath.percent(guard_drain, 10)
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_RES_DRAIN):
+				RES_DRAIN = FMath.percent(RES_DRAIN, 10)
 
-	return guard_drain # Guard Drain on 1st hit of the combo depends on Attack Level
+	return RES_DRAIN # RES drain on 1st hit of the combo depends on Attack Level
 
 	
 	
@@ -7830,12 +7830,12 @@ func calculate_knockback_strength(hit_data) -> int:
 #			Em.block_state.PARRY:
 #				knockback_strength = 0 # no KB for strongblock and parry
 
-	if !hit_data[Em.hit.WEAK_HIT]:  # no GG KB boost for multi-hit attacks (weak hits) till the last hit
-		if current_guard_gauge > 0: # knockback is increased by defender's Guard Gauge when it is > 100%
-			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, get_stat("KB_BOOST_AT_MAX_GG")), \
-				get_guard_gauge_percent_above())
+	if !hit_data[Em.hit.WEAK_HIT]:  # no RES KB boost for multi-hit attacks (weak hits) till the last hit
+		if current_res_gauge > 0: # knockback is increased by defender's RES Gauge when it is > 100%
+			knockback_strength = FMath.f_lerp(knockback_strength, FMath.percent(knockback_strength, get_stat("KB_BOOST_AT_MAX_RES")), \
+				get_res_gauge_percent_above())
 				
-		if get_guard_gauge_percent_above() == 100: # all attacks will Launch at 100% GG
+		if get_res_gauge_percent_above() == 100: # all attacks will Launch at 100% RES
 			knockback_strength = int(max(knockback_strength, LAUNCH_THRESHOLD))
 	
 	if Globals.survival_level != null and !hit_data[Em.hit.WEAK_HIT]: # all attacks will Launch during Survival Mode
@@ -7978,7 +7978,7 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	return atk_level
 	
 	
-func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's Guard Gauge
+func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level and defender's RES Gauge
 	
 #	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect: # assist rescue
 #		if hit_data[Em.hit.SEMI_DISJOINT]: return 0 
@@ -8012,7 +8012,7 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 		scaled_hitstun = int(max(scaled_hitstun, 0))
 		
 	if hit_data[Em.hit.LETHAL_HIT]:
-		# increased hitstun on a lethal hit and no reduction from high Guard Gauge
+		# increased hitstun on a lethal hit and no reduction from high RES Gauge
 		scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
 		if get_damage_percent() > 1.0:
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
@@ -8020,13 +8020,13 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 #		if hit_data[Em.hit.PUNISH_HIT]: # punish hits have higher hitstun in addition to +1 atk_lvl
 #			scaled_hitstun = FMath.percent(scaled_hitstun, PUNISH_HITSTUN_MOD)
 			
-		if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
+		if current_res_gauge > 0: # hitstun is reduced by defender's RES Gauge when it is > 100%
 #				if hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
-			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
-				get_guard_gauge_percent_above())
+			scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, get_stat("HITSTUN_REDUCTION_AT_MAX_RES")), \
+				get_res_gauge_percent_above())
 #			else:
-#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_GG), \
-#					get_guard_gauge_percent_above())
+#				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, L_HITSTUN_REDUCTION_AT_MAX_RES), \
+#					get_res_gauge_percent_above())
 
 	return FMath.round_and_descale(scaled_hitstun)
 
@@ -8247,7 +8247,7 @@ func generate_blockspark(hit_data):
 				blockspark = "Superarmorspark"
 			elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
 					(Em.atk_attr.REPEL_ON_BLOCK in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !Em.hit.MULTIHIT in hit_data):
-#					or (Em.hit.GUARD_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
+#					or (Em.hit.RES_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
 				blockspark = "WBlockspark2"
 			else:
 				blockspark = "WBlockspark"
@@ -8330,7 +8330,7 @@ func landed_a_sequence(hit_data):
 	defender.animate("aSeqFlinchAFreeze") # first pose to set defender's state
 #	UniqChar.start_sequence_step()
 	
-	if current_guard_gauge < 0: # gain positive flow
+	if current_res_gauge < 0: # gain positive flow
 #		add_status_effect(Em.status_effect.POS_FLOW, null)
 		status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 		
@@ -8353,12 +8353,12 @@ func take_seq_damage(base_damage: int, atk_type := Em.atk_type.SPECIAL) -> bool:
 	var scaled_damage: int = base_damage * FMath.S
 	if scaled_damage == 0: return false
 	
-	if current_guard_gauge > 0: # damage is reduced by Guard Gauge when it is > 100%
+	if current_res_gauge > 0: # damage is reduced by RES Gauge when it is > 100%
 		if atk_type in [Em.atk_type.EX, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
-			var weight: int = FMath.percent(get_guard_gauge_percent_above(), 50) # EX and Supers are scaled less
-			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), weight)
+			var weight: int = FMath.percent(get_res_gauge_percent_above(), 50) # EX and Supers are scaled less
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_RES), weight)
 		else:
-			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_GG), get_guard_gauge_percent_above())
+			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_RES), get_res_gauge_percent_above())
 		
 	var seq_user = get_seq_partner()
 	if Globals.survival_level != null and seq_user != null:
@@ -8431,7 +8431,7 @@ func sequence_launch():
 #		Em.move.SEQ_LAUNCH : { # for final hit of sequence
 #			Em.move.DMG : 0,
 #			Em.move.SEQ_HITSTOP : 0,
-#			"guard_gain" : 3500,
+#			"RES_gain" : 3500,
 #			Em.move.KB : 700 * FMath.S,
 #			Em.move.KB_ANGLE : -82,
 #			Em.move.ATK_LVL : 6,
@@ -8452,19 +8452,19 @@ func sequence_launch():
 			hitstop = seq_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop
 		
-#	if GG_swell_flag == false: # start GG swell if not started yet and hit with non-multihit/non-autochain move
-#		GG_swell_flag = true
+#	if RES_swell_flag == false: # start RES swell if not started yet and hit with non-multihit/non-autochain move
+#		RES_swell_flag = true
 #		first_hit_flag = true
-#	else: # hit after GG swell started, turn off first_hit_flag to gaining GG
+#	else: # hit after RES swell started, turn off first_hit_flag to gaining RES
 #		first_hit_flag = false
 	
 	$BurstLockTimer.time = BurstLockTimer_TIME
 	DI_seal = false
 	
-	# GUARD DRAIN ON FIRST HIT
-	if !Em.move.SEQ_WEAK in seq_data and !(GG_swell_flag and !first_hit_flag):
-		var guard_drain = -ATK_LEVEL_TO_GDRAIN[seq_data[Em.move.ATK_LVL] - 1]
-		change_guard_gauge(guard_drain)
+	# RES DRAIN ON FIRST HIT
+	if !Em.move.SEQ_WEAK in seq_data and !(RES_swell_flag and !first_hit_flag):
+		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[seq_data[Em.move.ATK_LVL] - 1]
+		change_res_gauge(RES_DRAIN)
 		
 	# HITSTUN
 	var hitstun: int
@@ -8476,9 +8476,9 @@ func sequence_launch():
 			scaled_hitstun = FMath.percent(scaled_hitstun, LETHAL_HITSTUN_MOD)
 			scaled_hitstun = FMath.percent(scaled_hitstun, get_damage_percent())
 		else:
-			if current_guard_gauge > 0: # hitstun is reduced by defender's Guard Gauge when it is > 100%
-				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, get_stat("HITSTUN_REDUCTION_AT_MAX_GG")), \
-					get_guard_gauge_percent_above())
+			if current_res_gauge > 0: # hitstun is reduced by defender's RES Gauge when it is > 100%
+				scaled_hitstun = FMath.f_lerp(scaled_hitstun, FMath.percent(scaled_hitstun, get_stat("HITSTUN_REDUCTION_AT_MAX_RES")), \
+					get_res_gauge_percent_above())
 		hitstun = FMath.round_and_descale(scaled_hitstun)
 	$HitStunTimer.time = hitstun
 	launchstun_rotate = 0 # used to calculation sprite rotation during launched state
@@ -8500,9 +8500,9 @@ func sequence_launch():
 	else:
 		lethal_flag = false
 		
-	if current_guard_gauge > 0: # knockback is increased by Guard Gauge when it is > 100%
-		launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, get_stat("KB_BOOST_AT_MAX_GG")), \
-			get_guard_gauge_percent_above())
+	if current_res_gauge > 0: # knockback is increased by RES Gauge when it is > 100%
+		launch_power = FMath.f_lerp(launch_power, FMath.percent(launch_power, get_stat("KB_BOOST_AT_MAX_RES")), \
+			get_res_gauge_percent_above())
 		
 	# LAUNCH ANGLE
 	var launch_angle: int
@@ -8623,7 +8623,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Launch")
 			
 		"BlockStartup":
-			change_guard_gauge(-get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+			change_res_gauge(-get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
@@ -8636,7 +8636,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"BlockCRec":
 			animate("Idle")
 		"aBlockStartup":
-			change_guard_gauge(-get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+			change_res_gauge(-get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW)
@@ -8738,7 +8738,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 						
 		var atk_attr = query_atk_attr(move_name)
 		if Em.atk_attr.WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.SUPERARMOR_STARTUP in atk_attr or \
-				(current_guard_gauge >= 0 and (Em.atk_attr.P_WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.P_SUPERARMOR_STARTUP in atk_attr)):
+				(current_res_gauge >= 0 and (Em.atk_attr.P_WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.P_SUPERARMOR_STARTUP in atk_attr)):
 			modulate_play("armor_flash")
 						
 	else:
@@ -8915,12 +8915,12 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			if Globals.survival_level != null:
 				block_enhance()
 			
-#		"BlockRec", "BlockCRec": # refund GG cost if blocked an attack
+#		"BlockRec", "BlockCRec": # refund RES cost if blocked an attack
 #			if success_block != Em.success_block.NONE:
-#				change_guard_gauge(get_stat("GRD_BLOCK_GG_COST") * INIT_BLOCK_MUL)
+#				change_res_gauge(get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 #		"aBlockRec", "aBlockCRec":
 #			if success_block != Em.success_block.NONE:
-#				change_guard_gauge(get_stat("AIR_BLOCK_GG_COST") * INIT_BLOCK_MUL)]
+#				change_res_gauge(get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)]
 			
 		"DodgeTransit":
 			aerial_memory = []
@@ -8986,7 +8986,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #				$EXSealTimer.stop()
 #				change_ex_gauge(MAX_EX_GAUGE)
 #				reset_jumps()
-#				if current_guard_gauge < 0: # gain positive flow
+#				if current_res_gauge < 0: # gain positive flow
 #					status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
 #				change_burst_token(Em.burst.CONSUMED)
 			play_audio("blast1", {"vol" : -18,})
@@ -9209,7 +9209,7 @@ func save_state():
 		"DI_seal" : DI_seal,
 		"last_dir": last_dir,
 		"first_hit_flag" : first_hit_flag,
-		"GG_swell_flag" : GG_swell_flag,
+		"RES_swell_flag" : RES_swell_flag,
 		"lethal_flag" : lethal_flag,
 		"from_move_rec" : from_move_rec,
 		"slowed" : slowed,
@@ -9226,7 +9226,7 @@ func save_state():
 		"sprite_texture_ref" : sprite_texture_ref,
 		
 		"current_damage_value" : current_damage_value,
-		"current_guard_gauge" : current_guard_gauge,
+		"current_res_gauge" : current_res_gauge,
 		"current_ex_gauge" : current_ex_gauge,
 		"current_ult_gauge" : current_ult_gauge,
 #		"current_ex_lock" : current_ex_lock,
@@ -9324,7 +9324,7 @@ func load_state(state_data, command_rewind := false):
 	DI_seal = state_data.DI_seal
 	last_dir = state_data.last_dir
 	first_hit_flag = state_data.first_hit_flag
-	GG_swell_flag = state_data.GG_swell_flag
+	RES_swell_flag = state_data.RES_swell_flag
 	lethal_flag = state_data.lethal_flag
 	from_move_rec = state_data.from_move_rec
 	slowed = state_data.slowed
@@ -9345,7 +9345,7 @@ func load_state(state_data, command_rewind := false):
 	sprite_texture_ref = state_data.sprite_texture_ref
 	
 	current_damage_value = state_data.current_damage_value
-	current_guard_gauge = state_data.current_guard_gauge
+	current_res_gauge = state_data.current_res_gauge
 	current_ex_gauge = state_data.current_ex_gauge
 	current_ult_gauge = state_data.current_ult_gauge
 #	current_ex_lock = state_data.current_ex_lock
@@ -9354,7 +9354,7 @@ func load_state(state_data, command_rewind := false):
 	prism_count = state_data.prism_count
 #	install_time = state_data.install_time
 	Globals.Game.damage_update(self)
-	Globals.Game.guard_gauge_update(self)
+	Globals.Game.res_gauge_update(self)
 	Globals.Game.ex_gauge_update(self)
 	Globals.Game.ult_gauge_update(self)
 	Globals.Game.stock_points_update(self)

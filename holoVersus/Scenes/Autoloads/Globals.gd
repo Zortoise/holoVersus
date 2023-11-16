@@ -58,9 +58,9 @@ var replay_profiles := ["", ""] # names of players when watching replay
 
 var training_mode := false # flag
 var training_settings := {
-	"gganchor" : 0,
+	"res_anchor" : 0,
 	"regen" : 1,
-	"input_viewer" : 0,
+#	"input_viewer" : 0,
 	"hitbox_viewer" : 0,
 	"frame_viewer" : 0,
 }
@@ -86,7 +86,7 @@ onready var INPUTS = [
 		dash = ["P1_dash", Em.button.P1_DASH],
 		aux = ["P1_aux", Em.button.P1_AUX],
 		block = ["P1_block", Em.button.P1_BLOCK],
-		special = ["P1_special", Em.button.P1_SPECIAL],
+		modifier = ["P1_modifier", Em.button.P1_MODIFIER],
 		unique = ["P1_unique", Em.button.P1_UNIQUE],
 		pause = ["P1_pause", Em.button.P1_PAUSE],
 		rs_up = ["P1_rs_up", Em.button.P1_RS_UP],
@@ -105,7 +105,7 @@ onready var INPUTS = [
 		dash = ["P2_dash", Em.button.P2_DASH],
 		aux = ["P2_aux", Em.button.P2_AUX],
 		block = ["P2_block", Em.button.P2_BLOCK],
-		special = ["P2_special", Em.button.P2_SPECIAL],
+		modifier = ["P2_modifier", Em.button.P2_MODIFIER],
 		unique = ["P2_unique", Em.button.P2_UNIQUE],
 		pause = ["P2_pause", Em.button.P2_PAUSE],
 		rs_up = ["P2_rs_up", Em.button.P2_RS_UP],

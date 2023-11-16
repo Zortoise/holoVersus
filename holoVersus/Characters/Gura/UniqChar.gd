@@ -293,7 +293,7 @@ func simulate():
 					if !Character.button_light in Character.input_state.pressed:
 						Character.animate("SP1[c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 				"SP1[c2]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						if Animator.time == 1:
@@ -301,13 +301,13 @@ func simulate():
 						else:
 							Character.animate("SP1[c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 							
 				"SP1[u][c1]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						Character.animate("SP1[u][c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 				"SP1[u][c2]Startup":
 					if !Character.button_light in Character.input_state.pressed:
 						if Animator.time == 1:
@@ -315,7 +315,7 @@ func simulate():
 						else:
 							Character.animate("SP1[u][c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 							
 			
 		Em.char_state.AIR_ATK_STARTUP:
@@ -335,7 +335,7 @@ func simulate():
 					if !Character.button_light in Character.input_state.pressed or Character.grounded:
 						Character.animate("aSP1[c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 				"aSP1[c2]Startup":
 					if Character.grounded:
 						Character.animate("aSP1[c2]bStartup")
@@ -345,13 +345,13 @@ func simulate():
 						else:
 							Character.animate("aSP1[c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 							
 				"aSP1[d][c1]Startup":
 					if !Character.button_light in Character.input_state.pressed or Character.grounded:
 						Character.animate("aSP1[d][c1]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 				"aSP1[d][c2]Startup":
 					if Character.grounded:
 						Character.animate("aSP1[d][c2]bStartup")
@@ -361,7 +361,7 @@ func simulate():
 						else:
 							Character.animate("aSP1[d][c2]bStartup")
 					elif Character.button_fierce in Character.input_state.just_pressed:
-						Character.cancel_action(Character.button_special)
+						Character.cancel_action(Character.button_modifier)
 					
 
 	# DASH DANCING --------------------------------------------------------------------------------------------------
@@ -383,8 +383,8 @@ func simulate():
 
 func capture_combinations():
 	
-	Character.combination(Character.button_special, Character.button_dash, "Sp.Dash")
-	Character.ex_combination(Character.button_special, Character.button_dash, "ExSp.Dash")
+	Character.combination(Character.button_modifier, Character.button_dash, "Sp.Dash")
+	Character.ex_combination(Character.button_modifier, Character.button_dash, "ExSp.Dash")
 	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
@@ -392,23 +392,23 @@ func capture_combinations():
 	Character.combination(Character.button_down, Character.button_fierce, "dF")
 	Character.combination(Character.button_light, Character.button_fierce, "H")
 	
-	Character.combination(Character.button_special, Character.button_light, "Sp.L")
-	Character.ex_combination(Character.button_special, Character.button_light, "ExSp.L")
+	Character.combination(Character.button_modifier, Character.button_light, "Sp.L")
+	Character.ex_combination(Character.button_modifier, Character.button_light, "ExSp.L")
 	
-#	Character.combination_trio(Character.button_special, Character.button_down, Character.button_light, "Sp.dL")
+#	Character.combination_trio(Character.button_modifier, Character.button_down, Character.button_light, "Sp.dL")
 	
-	Character.combination(Character.button_special, Character.button_fierce, "Sp.F")
-	Character.ex_combination(Character.button_special, Character.button_fierce, "ExSp.F")
+	Character.combination(Character.button_modifier, Character.button_fierce, "Sp.F")
+	Character.ex_combination(Character.button_modifier, Character.button_fierce, "ExSp.F")
 	
-	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
-	Character.ex_combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
+	Character.combination_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.ex_combination_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "ExSp.uF")
 	
-	Character.combination_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
-	Character.ex_combination_trio(Character.button_special, Character.button_down, Character.button_fierce, "ExSp.dF")
+	Character.combination_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "Sp.dF")
+	Character.ex_combination_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "ExSp.dF")
 	
-	Character.ex_combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
+	Character.ex_combination_trio(Character.button_modifier, Character.button_light, Character.button_fierce, "ExSp.H")
 	
-#	Character.doubletap_combination(Character.button_special, Character.button_fierce, "SpSp.F")
+#	Character.doubletap_combination(Character.button_modifier, Character.button_fierce, "SpSp.F")
 
 func capture_unique_combinations():
 	Character.combination(Character.button_unique, Character.button_dash, "U.Dash")
@@ -421,17 +421,17 @@ func rebuffer_actions(): # for when there are air and ground versions, or up/dow
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
-	Character.rebuffer(Character.button_special, Character.button_dash, "Sp.Dash")
-	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
-	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
-	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
-	Character.rebuffer_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
+	Character.rebuffer(Character.button_modifier, Character.button_dash, "Sp.Dash")
+	Character.rebuffer(Character.button_modifier, Character.button_light, "Sp.L")
+	Character.rebuffer(Character.button_modifier, Character.button_fierce, "Sp.F")
+	Character.rebuffer_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.rebuffer_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "Sp.dF")
 	
 func rebuffer_EX(): # only rebuffer EX moves on release of up/down
-	Character.ex_rebuffer(Character.button_special, Character.button_light, "ExSp.L")
-	Character.ex_rebuffer(Character.button_special, Character.button_fierce, "ExSp.F")
-#	Character.ex_rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "ExSp.uF")
-#	Character.ex_rebuffer_trio(Character.button_special, Character.button_light, Character.button_fierce, "ExSp.H")
+	Character.ex_rebuffer(Character.button_modifier, Character.button_light, "ExSp.L")
+	Character.ex_rebuffer(Character.button_modifier, Character.button_fierce, "ExSp.F")
+#	Character.ex_rebuffer_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "ExSp.uF")
+#	Character.ex_rebuffer_trio(Character.button_modifier, Character.button_light, Character.button_fierce, "ExSp.H")
 	
 func capture_instant_actions():
 #	if !Character.button_down in Character.input_state.pressed or !Character.grounded:

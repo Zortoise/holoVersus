@@ -81,7 +81,7 @@ var launch_starting_rot := 0.0 # starting rotation when being launched, current 
 var launchstun_rotate := 0 # used to set rotation when being launched, use to count up during hitstun
 var unique_data = {} # data unique for the character, stored as a dictionary
 
-var autochain_landed := false # set to true after any autochain hit, no more Guard Drain if true
+var autochain_landed := false # set to true after any autochain hit, no more RES drain if true
 
 var seq_partner_ID = null # not always target_ID during Survival Mode
 
@@ -995,7 +995,7 @@ func is_hitcount_last_hit(in_ID, move_data):
 	else: return false
 	
 	
-func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Guard Gauge
+func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect RES Gauge
 	var recorded_hitcount = get_hitcount(in_ID)
 	if recorded_hitcount == 0: return true
 	else: return false
@@ -1099,7 +1099,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 	increment_hitcount(defender_ID2) # for measuring hitcount of attacks
 	
 	if Em.atk_attr.AUTOCHAIN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-		autochain_landed = true # no more Guard Drain
+		autochain_landed = true # no more RES drain
 
 	# ATTACKER HITSTOP ----------------------------------------------------------------------------------------------
 		# hitstop is only set into HitStopTimer at end of frame

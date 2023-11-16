@@ -341,7 +341,7 @@ func simulate():
 
 func capture_combinations():
 	
-	Character.combination(Character.button_special, Character.button_dash, "Sp.Dash")
+	Character.combination(Character.button_modifier, Character.button_dash, "Sp.Dash")
 	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
@@ -349,15 +349,15 @@ func capture_combinations():
 	Character.combination(Character.button_down, Character.button_fierce, "dF")
 	Character.combination(Character.button_light, Character.button_fierce, "H")
 	
-	Character.combination(Character.button_special, Character.button_light, "Sp.L")
+	Character.combination(Character.button_modifier, Character.button_light, "Sp.L")
 	
-	Character.combination(Character.button_special, Character.button_fierce, "Sp.F")
+	Character.combination(Character.button_modifier, Character.button_fierce, "Sp.F")
 	
-	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.combination_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "Sp.uF")
 	
-	Character.combination_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.dF")
+	Character.combination_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "Sp.dF")
 	
-	Character.combination_trio(Character.button_special, Character.button_light, Character.button_fierce, "Sp.H")
+	Character.combination_trio(Character.button_modifier, Character.button_light, Character.button_fierce, "Sp.H")
 
 
 func capture_unique_combinations():
@@ -370,11 +370,11 @@ func rebuffer_actions(): # for when there are air and ground versions
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
-	Character.rebuffer(Character.button_special, Character.button_dash, "Sp.Dash")
-	Character.rebuffer(Character.button_special, Character.button_light, "Sp.L")
-	Character.rebuffer(Character.button_special, Character.button_fierce, "Sp.F")
-	Character.rebuffer_trio(Character.button_special, Character.button_up, Character.button_fierce, "Sp.uF")
-	Character.rebuffer_trio(Character.button_special, Character.button_down, Character.button_fierce, "Sp.dF")
+	Character.rebuffer(Character.button_modifier, Character.button_dash, "Sp.Dash")
+	Character.rebuffer(Character.button_modifier, Character.button_light, "Sp.L")
+	Character.rebuffer(Character.button_modifier, Character.button_fierce, "Sp.F")
+	Character.rebuffer_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.rebuffer_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "Sp.dF")
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
 

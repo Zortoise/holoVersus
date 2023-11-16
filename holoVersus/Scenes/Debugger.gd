@@ -49,7 +49,7 @@ func set_physics_logs(timestamp: int, players):
 #		damage_logs[timestamp][player.player_ID] = {}
 #		damage_logs[timestamp][player.player_ID][Em.move.DMG] = player.current_damage_value
 #		gg_logs[timestamp][player.player_ID] = {}
-#		gg_logs[timestamp][player.player_ID]["gg"] = player.current_guard_gauge
+#		gg_logs[timestamp][player.player_ID]["gg"] = player.current_res_gauge
 #		mm_logs[timestamp][player.player_ID] = {}
 #		mm_logs[timestamp][player.player_ID]["mm"] = player.repeat_memory.duplicate(true)
 		

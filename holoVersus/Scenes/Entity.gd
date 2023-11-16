@@ -845,7 +845,7 @@ func is_hitcount_last_hit(in_ID, in_move_data):
 	else: return false
 	
 	
-func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect Guard Gauge
+func is_hitcount_first_hit(in_ID): # for multi-hit moves, only 1st hit affect RES Gauge
 	var recorded_hitcount = get_hitcount(in_ID)
 	if recorded_hitcount == 0: return true
 	else: return false

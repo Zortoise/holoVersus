@@ -6,11 +6,11 @@ enum effect_ref {
 		STOCK, HP, COMBO_LEVEL, LANDED_EX_REGEN, PASSIVE_EX_REGEN, HITSTUN_EX_REGEN
 		SPEED, FRICTION, JUMP_SPEED, GRAVITY_MOD, MAX_AIR_JUMP, MAX_AIR_DASH, MAX_AIR_DODGE, MAX_SUPER_DASH, 
 		GRD_DASH_SPEED, AIR_DASH_SPEED, SDASH_SPEED, DODGE_SPEED,
-		GUARD_DRAIN_MOD,
+		RES_DRAIN_MOD,
 		GRD_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
 		HEAVY_DMG_MOD, SPECIAL_DMG_MOD, PROJ_DMG_MOD, SUPER_DMG_MOD, ASSIST_DMG_MOD
 		PRISM_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
-		LESS_GUARD_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
+		LESS_RES_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
 		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_WEAKARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, NO_HEIGHT_LIMIT
@@ -98,9 +98,9 @@ const DESCRIBE = {
 		"suffix" :"Dodge Speed",
 	},
 	
-	effect_ref.GUARD_DRAIN_MOD : {
+	effect_ref.RES_DRAIN_MOD : {
 		"type" : type.PERCENT,
-		"suffix" :"Guard Drain",
+		"suffix" :"RES drain",
 	},
 	
 	effect_ref.GRD_NORMAL_DMG_MOD : {
@@ -158,9 +158,9 @@ const DESCRIBE = {
 		"suffix" :"Hitstop on Foe",
 	},
 	
-	effect_ref.LESS_GUARD_DRAIN : {
+	effect_ref.LESS_RES_DRAIN : {
 		"type" : type.QUIRK,
-		"suffix" :"Less GG Loss When Atked",
+		"suffix" :"Less RES Loss When Atked",
 	},
 	effect_ref.NO_CROSSUP : {
 		"type" : type.QUIRK,
@@ -250,7 +250,7 @@ const DESCRIBE = {
 	
 	effect_ref.NO_BLOCK_COST : {
 		"type" : type.QUIRK,
-		"suffix" :"Blocking cost no GG",
+		"suffix" :"Blocking cost no RES",
 	},
 	effect_ref.NO_CHIP_DMG : {
 		"type" : type.QUIRK,
@@ -258,7 +258,7 @@ const DESCRIBE = {
 	},
 	effect_ref.NO_DODGE_COST : {
 		"type" : type.QUIRK,
-		"suffix" :"Dodging cost no GG",
+		"suffix" :"Dodging cost no RES",
 	},
 #	effect_ref.PROXIMITY_PARRY : {
 #		"type" : type.QUIRK,
@@ -270,7 +270,7 @@ const DESCRIBE = {
 	},
 	effect_ref.PASSIVE_WEAKARMOR: {
 		"type" : type.QUIRK,
-		"suffix" :"Weakarmor at Full GG",
+		"suffix" :"Weakarmor at Full RES",
 	},
 	effect_ref.BLOCK_CANCEL: {
 		"type" : type.QUIRK,
@@ -495,7 +495,7 @@ const DATABASE = {
 		effect_ref.AIR_DASH_SPEED : 40,
 		effect_ref.GRD_DASH_SPEED : 40,
 		effect_ref.SPECIAL_DMG_MOD : 60,
-		"quirks" : [effect_ref.LESS_GUARD_DRAIN],
+		"quirks" : [effect_ref.LESS_RES_DRAIN],
 	},
 	card_ref.SHION : {
 		"name" : "Shion",
@@ -594,7 +594,7 @@ const DATABASE = {
 		"price" : 100,
 		effect_ref.SPECIAL_DMG_MOD : 60,
 		effect_ref.PROJ_DMG_MOD: 60,
-		effect_ref.GUARD_DRAIN_MOD: 60,
+		effect_ref.RES_DRAIN_MOD: 60,
 	},
 	card_ref.KOBO : {
 		"name" : "Kobo",
@@ -683,7 +683,7 @@ const DATABASE = {
 		"name" : "Anya",
 		"price" : 100,
 		effect_ref.LIGHT_DMG_MOD : 50,
-		effect_ref.GUARD_DRAIN_MOD : 50,
+		effect_ref.RES_DRAIN_MOD : 50,
 		"quirks" : [effect_ref.KERIS_PROJ]
 	},
 	card_ref.COCO : {
@@ -741,7 +741,7 @@ const DATABASE = {
 		effect_ref.STOCK: 1,
 		effect_ref.HP : 25,
 		effect_ref.GRD_NORMAL_DMG_MOD : 25,
-		"quirks": [effect_ref.NO_BLOCK_COST, effect_ref.LESS_GUARD_DRAIN],
+		"quirks": [effect_ref.NO_BLOCK_COST, effect_ref.LESS_RES_DRAIN],
 	},
 	card_ref.BAELZ : {
 		"name" : "Baelz",
@@ -828,7 +828,7 @@ const DATABASE = {
 		"name" : "Chloe",
 		"price" : 100,
 		effect_ref.LIGHT_DMG_MOD : 50,
-		effect_ref.GUARD_DRAIN_MOD : 30,
+		effect_ref.RES_DRAIN_MOD : 30,
 		"quirks" : [effect_ref.CAN_REPEAT, effect_ref.NO_DODGE_COST],
 	},
 	card_ref.KOYORI : {
@@ -850,7 +850,7 @@ const DATABASE = {
 	card_ref.ALOE : {
 		"name" : "Aloe",
 		"price" : 100,
-		effect_ref.GUARD_DRAIN_MOD : 50,
+		effect_ref.RES_DRAIN_MOD : 50,
 		effect_ref.SPECIAL_DMG_MOD : 50,
 		"quirks": [effect_ref.ENFEEBLING_ATK]
 	},
@@ -900,7 +900,7 @@ const DATABASE = {
 		effect_ref.JUMP_SPEED : 20,
 		effect_ref.FIERCE_DMG_MOD : 50,
 		effect_ref.LIGHT_DMG_MOD : 50,
-		"quirks" : [effect_ref.LESS_GUARD_DRAIN]
+		"quirks" : [effect_ref.LESS_RES_DRAIN]
 	},
 	card_ref.NENE : {
 		"name" : "Nene",

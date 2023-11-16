@@ -93,7 +93,7 @@ func _ready():
 	$ControlsListL/Left.load_button("Left", Settings.button_to_string(input_map.P1_left))
 	$ControlsListL/Right.load_button("Right", Settings.button_to_string(input_map.P1_right))
 	$ControlsListL/Jump.load_button("Jump", Settings.button_to_string(input_map.P1_jump))
-	$ControlsListL/Special.load_button("Special", Settings.button_to_string(input_map.P1_special))
+	$ControlsListL/Modifier.load_button("Modifier", Settings.button_to_string(input_map.P1_modifier))
 	$ControlsListL/Unique.load_button("Unique", Settings.button_to_string(input_map.P1_unique))
 	$ControlsListL/Pause.load_button("Pause", Settings.button_to_string(input_map.P1_pause))
 	
@@ -329,7 +329,7 @@ func load_player_input():
 	$ControlsListL/Left.map(Settings.button_to_string(input_map["P" + player_index + "_left"]))
 	$ControlsListL/Right.map(Settings.button_to_string(input_map["P" + player_index + "_right"]))
 	$ControlsListL/Jump.map(Settings.button_to_string(input_map["P" + player_index + "_jump"]))
-	$ControlsListL/Special.map(Settings.button_to_string(input_map["P" + player_index + "_special"]))
+	$ControlsListL/Modifier.map(Settings.button_to_string(input_map["P" + player_index + "_modifier"]))
 	$ControlsListL/Unique.map(Settings.button_to_string(input_map["P" + player_index + "_unique"]))
 	$ControlsListL/Pause.map(Settings.button_to_string(input_map["P" + player_index + "_pause"]))
 	

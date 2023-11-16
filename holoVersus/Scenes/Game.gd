@@ -188,9 +188,9 @@ func setup():
 		viewport.get_node("ReplayControls").queue_free()
 		
 	if !Globals.training_mode:
-		if !Globals.watching_replay:
-			for player in Globals.player_count:
-				HUD.get_node("P" + str(player + 1) + "_HUDRect/Inputs").queue_free()
+#		if !Globals.watching_replay:
+#			for player in Globals.player_count:
+#				HUD.get_node("P" + str(player + 1) + "_HUDRect/Inputs").queue_free()
 		frame_viewer.queue_free()
 		frame_viewer = null
 			
@@ -500,7 +500,7 @@ func _physics_process(_delta):
 			$PolygonDrawer.hide()
 			
 	if Globals.training_mode:
-		set_input_indicator()
+#		set_input_indicator()
 		if Globals.training_settings.hitbox_viewer == 1:
 			$PolygonDrawer.show()
 		else:
@@ -559,7 +559,7 @@ func _physics_process(_delta):
 		if !$ReplayControl.freeze_frame:
 			for x in play_speed:
 				simulate(false)
-		set_input_indicator()
+#		set_input_indicator()
 
 	elif !Netplay.is_netplay(): # normal
 		for x in play_speed:
@@ -2073,45 +2073,45 @@ func is_stage_paused():
 
 # HUD ELEMENTS  --------------------------------------------------------------------------------------------------
 
-func set_input_indicator():
-		
-	for player_ID in Globals.player_count:
-		var player = get_player_node(player_ID)
-		var indicator = HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Inputs")
-		if (Globals.watching_replay and $ReplayControl.input_indicators) or \
-				(Globals.training_mode and Globals.training_settings.input_viewer == 1):
-			indicator.show()
-			for input in indicator.get_children():
-				if input.name != "InputFrame":
-					input.hide()
-			for input in player.input_state.pressed:
-				match input:
-					player.button_up:
-						indicator.get_node("InputUp").show()
-					player.button_down:
-						indicator.get_node("InputDown").show()
-					player.button_left:
-						indicator.get_node("InputLeft").show()
-					player.button_right:
-						indicator.get_node("InputRight").show()
-					player.button_unique:
-						indicator.get_node("InputUnique").show()
-					player.button_special:
-						indicator.get_node("InputSpecial").show()
-					player.button_jump:
-						indicator.get_node("InputJump").show()
-					player.button_light:
-						indicator.get_node("InputLight").show()
-					player.button_fierce:
-						indicator.get_node("InputFierce").show()
-					player.button_dash:
-						indicator.get_node("InputDash").show()
-					player.button_aux:
-						indicator.get_node("InputAux").show()
-					player.button_block:
-						indicator.get_node("InputBlock").show()	
-		else:
-			indicator.hide()
+#func set_input_indicator():
+#
+#	for player_ID in Globals.player_count:
+#		var player = get_player_node(player_ID)
+#		var indicator = HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Inputs")
+#		if (Globals.watching_replay and $ReplayControl.input_indicators) or \
+#				(Globals.training_mode and Globals.training_settings.input_viewer == 1):
+#			indicator.show()
+#			for input in indicator.get_children():
+#				if input.name != "InputFrame":
+#					input.hide()
+#			for input in player.input_state.pressed:
+#				match input:
+#					player.button_up:
+#						indicator.get_node("InputUp").show()
+#					player.button_down:
+#						indicator.get_node("InputDown").show()
+#					player.button_left:
+#						indicator.get_node("InputLeft").show()
+#					player.button_right:
+#						indicator.get_node("InputRight").show()
+#					player.button_unique:
+#						indicator.get_node("InputUnique").show()
+#					player.button_modifier:
+#						indicator.get_node("InputSpecial").show()
+#					player.button_jump:
+#						indicator.get_node("InputJump").show()
+#					player.button_light:
+#						indicator.get_node("InputLight").show()
+#					player.button_fierce:
+#						indicator.get_node("InputFierce").show()
+#					player.button_dash:
+#						indicator.get_node("InputDash").show()
+#					player.button_aux:
+#						indicator.get_node("InputAux").show()
+#					player.button_block:
+#						indicator.get_node("InputBlock").show()	
+#		else:
+#			indicator.hide()
 			
 
 #func damage_limit_update(character):
@@ -2161,20 +2161,20 @@ func ult_gauge_update(character):
 #		install_timer.hide()
 		
 				
-func guard_gauge_update(character):
+func res_gauge_update(character):
 	
-	var gg_indicator1 = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge1")
-	var gg_indicator2 = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/GuardGauge2")
+	var gg_indicator1 = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/RESGauge1")
+	var gg_indicator2 = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/RESGauge2")
 	
-	var guard_gauge_percent: int
-	if character.current_guard_gauge <= 0:
-		guard_gauge_percent = character.get_guard_gauge_percent_below()
-		gg_indicator1.value = guard_gauge_percent
+	var res_gauge_percent: int
+	if character.current_res_gauge <= 0:
+		res_gauge_percent = character.get_res_gauge_percent_below()
+		gg_indicator1.value = res_gauge_percent
 		gg_indicator2.value = 0
 	else:
-		guard_gauge_percent = character.get_guard_gauge_percent_above()
+		res_gauge_percent = character.get_res_gauge_percent_above()
 		gg_indicator1.value = 100
-		gg_indicator2.value = guard_gauge_percent
+		gg_indicator2.value = res_gauge_percent
 		
 	
 func ex_gauge_update(character):
@@ -2368,7 +2368,7 @@ func assist_update(character):
 					assist_icon.modulate = Color(1,1,1)
 		else:
 			if character.is_hitstunned() and (Globals.survival_level != null or \
-					character.get_node("BurstLockTimer").is_running() or character.current_guard_gauge <= 0):
+					character.get_node("BurstLockTimer").is_running() or character.current_res_gauge <= 0):
 				assist_text.text = "X"
 				assist_text.get_node("AnimationPlayer").play("cooldown")
 				if assist_icon.material == null:
