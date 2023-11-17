@@ -680,48 +680,48 @@ func determine_char_and_stage():
 		Globals.stage_ref = opponent_payload.stage
 		
 	if opponent == "P2":
-		Globals.P1_char_ref = my_payload.character
-		Globals.P1_palette = my_payload.palette
+		Globals.P1_char_ref[0] = my_payload.character
+		Globals.P1_palette[0] = my_payload.palette
 		Globals.P1_assist = my_payload.assist
-		Globals.P2_char_ref = opponent_payload.character
-		Globals.P2_palette = opponent_payload.palette
+		Globals.P2_char_ref[0] = opponent_payload.character
+		Globals.P2_palette[0] = opponent_payload.palette
 		Globals.P2_assist = opponent_payload.assist
 	else:
-		Globals.P1_char_ref = opponent_payload.character
-		Globals.P1_palette = opponent_payload.palette
+		Globals.P1_char_ref[0] = opponent_payload.character
+		Globals.P1_palette[0] = opponent_payload.palette
 		Globals.P1_assist = opponent_payload.assist
-		Globals.P2_char_ref = my_payload.character
-		Globals.P2_palette = my_payload.palette
+		Globals.P2_char_ref[0] = my_payload.character
+		Globals.P2_palette[0] = my_payload.palette
 		Globals.P2_assist = my_payload.assist
 		
 	# if both players picked the same character with the same palette, a random player will shift a palette
-	if Globals.P1_char_ref != "Random" and Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
+	if Globals.P1_char_ref[0] != "Random" and Globals.P1_char_ref[0] == Globals.P2_char_ref[0] and Globals.P1_palette[0] == Globals.P2_palette[0]:
 		if Globals.random.randi_range(0, 1) == 0:
-			Globals.P1_palette = wrapi(Globals.P1_palette + 1, 1, character_data[Globals.P1_char_ref]["palettes"].size() + 2)
+			Globals.P1_palette[0] = wrapi(Globals.P1_palette[0] + 1, 1, character_data[Globals.P1_char_ref[0]]["palettes"].size() + 2)
 		else:
-			Globals.P2_palette = wrapi(Globals.P2_palette + 1, 1, character_data[Globals.P2_char_ref]["palettes"].size() + 2)
+			Globals.P2_palette[0] = wrapi(Globals.P2_palette[0] + 1, 1, character_data[Globals.P2_char_ref[0]]["palettes"].size() + 2)
 
 	# handling random
-	if Globals.P1_char_ref == "Random":
+	if Globals.P1_char_ref[0] == "Random":
 		var character_array = char_grid.values()
 		character_array.erase("Random")
 		character_array.shuffle()
-		Globals.P1_char_ref = character_array[0]
+		Globals.P1_char_ref[0] = character_array[0]
 		# random palette
-		Globals.P1_palette = Globals.random.randi_range(1, character_data[Globals.P1_char_ref]["palettes"].size() + 1)
+		Globals.P1_palette[0] = Globals.random.randi_range(1, character_data[Globals.P1_char_ref[0]]["palettes"].size() + 1)
 		# if same character and palette, shift to next palette
-		if Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
-			Globals.P1_palette = wrapi(Globals.P1_palette + 1, 1, character_data[Globals.P1_char_ref]["palettes"].size() + 2)
-	if Globals.P2_char_ref == "Random":
+		if Globals.P1_char_ref[0] == Globals.P2_char_ref[0] and Globals.P1_palette[0] == Globals.P2_palette[0]:
+			Globals.P1_palette[0] = wrapi(Globals.P1_palette[0] + 1, 1, character_data[Globals.P1_char_ref[0]]["palettes"].size() + 2)
+	if Globals.P2_char_ref[0] == "Random":
 		var character_array = char_grid.values()
 		character_array.erase("Random")
 		character_array.shuffle()
-		Globals.P2_char_ref = character_array[0]
+		Globals.P2_char_ref[0] = character_array[0]
 		# random palette
-		Globals.P2_palette = Globals.random.randi_range(1, character_data[Globals.P2_char_ref]["palettes"].size() + 1)
+		Globals.P2_palette[0] = Globals.random.randi_range(1, character_data[Globals.P2_char_ref[0]]["palettes"].size() + 1)
 		# if same character and palette, shift to next palette
-		if Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
-			Globals.P2_palette = wrapi(Globals.P2_palette + 1, 1, character_data[Globals.P2_char_ref]["palettes"].size() + 2)
+		if Globals.P1_char_ref[0] == Globals.P2_char_ref[0] and Globals.P1_palette[0] == Globals.P2_palette[0]:
+			Globals.P2_palette[0] = wrapi(Globals.P2_palette[0] + 1, 1, character_data[Globals.P2_char_ref[0]]["palettes"].size() + 2)
 #
 	if Globals.stage_ref == "Random":
 		var new_stage_array = stage_data.keys()
@@ -744,19 +744,19 @@ func determine_char_and_stage():
 		Globals.P1_assist = ""
 		Globals.P2_assist = ""
 		
-#	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_input_style, \
-#			Globals.P2_char_ref, Globals.P2_palette, Globals.P2_input_style)
-	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref, Globals.P1_palette, Globals.P1_assist, \
-			Globals.P2_char_ref, Globals.P2_palette, Globals.P2_assist)
+#	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref[0], Globals.P1_palette[0], Globals.P1_input_style, \
+#			Globals.P2_char_ref[0], Globals.P2_palette[0], Globals.P2_input_style)
+	rpc("guest_receive_picks", Globals.stage_ref, Globals.P1_char_ref[0], Globals.P1_palette[0], Globals.P1_assist, \
+			Globals.P2_char_ref[0], Globals.P2_palette[0], Globals.P2_assist)
 
 		
 puppet func guest_receive_picks(stage_ref, P1_char_ref, P1_palette, P1_assist, P2_char_ref, P2_palette, P2_assist):
 	Globals.stage_ref = stage_ref
-	Globals.P1_char_ref = P1_char_ref
-	Globals.P1_palette = P1_palette
+	Globals.P1_char_ref[0] = P1_char_ref
+	Globals.P1_palette[0] = P1_palette
 	Globals.P1_assist = P1_assist
-	Globals.P2_char_ref = P2_char_ref
-	Globals.P2_palette = P2_palette
+	Globals.P2_char_ref[0] = P2_char_ref
+	Globals.P2_palette[0] = P2_palette
 	Globals.P2_assist = P2_assist
 	
 	yield(get_tree().create_timer(0.5 - Netplay.ping/2.0), "timeout") # wait a short while before revealing
@@ -795,9 +795,9 @@ func start_battle():
 	if opponent_payload.character != "Random":
 		var char_name
 		if opponent == "P1":
-			char_name = Globals.P1_char_ref
+			char_name = Globals.P1_char_ref[0]
 		else:
-			char_name = Globals.P2_char_ref
+			char_name = Globals.P2_char_ref[0]
 		get_node(opponent + "_FullArt").texture = character_data[char_name]["art"]
 		if get_node(opponent + "_Sprite").get_child_count() > 0:
 			get_node(opponent + "_Sprite").get_child(0).free()
@@ -814,20 +814,20 @@ func start_battle():
 		
 	# re-set palettes
 	if $P1_Sprite.get_child_count() > 0:
-		if Globals.P1_palette == 1:
+		if Globals.P1_palette[0] == 1:
 			$P1_Sprite.get_child(0).material = null
 		else:
 			$P1_Sprite.get_child(0).material = ShaderMaterial.new()
 			$P1_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
-			$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[Globals.P1_char_ref]["palettes"][str(Globals.P1_palette)])
+			$P1_Sprite.get_child(0).material.set_shader_param("swap", character_data[Globals.P1_char_ref[0]]["palettes"][str(Globals.P1_palette[0])])
 
 	if $P2_Sprite.get_child_count() > 0:
-		if Globals.P2_palette == 1:
+		if Globals.P2_palette[0] == 1:
 			$P2_Sprite.get_child(0).material = null
 		else:
 			$P2_Sprite.get_child(0).material = ShaderMaterial.new()
 			$P2_Sprite.get_child(0).material.shader = Loader.loaded_palette_shader
-			$P2_Sprite.get_child(0).material.set_shader_param("swap", character_data[Globals.P2_char_ref]["palettes"][str(Globals.P2_palette)])
+			$P2_Sprite.get_child(0).material.set_shader_param("swap", character_data[Globals.P2_char_ref[0]]["palettes"][str(Globals.P2_palette[0])])
 
 	
 #	if opponent == "P1":

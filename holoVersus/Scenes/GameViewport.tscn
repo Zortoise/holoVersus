@@ -1,4 +1,4 @@
-[gd_scene load_steps=167 format=2]
+[gd_scene load_steps=170 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://Assets/UI/res_gauge2.png" type="Texture" id=8]
 [ext_resource path="res://Assets/UI/EX_gauge.png" type="Texture" id=9]
 [ext_resource path="res://Assets/UI/res_gauge1.png" type="Texture" id=10]
+[ext_resource path="res://Assets/UI/assist_back.png" type="Texture" id=11]
 [ext_resource path="res://Assets/UI/gauges_frame.png" type="Texture" id=12]
 [ext_resource path="res://Assets/Fonts/BLKCHCRY.TTF" type="DynamicFontData" id=13]
 [ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=14]
@@ -21,6 +22,7 @@
 [ext_resource path="res://Assets/UI/timeframe.png" type="Texture" id=20]
 [ext_resource path="res://Assets/UI/kronii_hands.png" type="Texture" id=21]
 [ext_resource path="res://Assets/Fonts/roboto.black.ttf" type="DynamicFontData" id=22]
+[ext_resource path="res://Assets/UI/assist_frame.png" type="Texture" id=24]
 [ext_resource path="res://Scenes/Menus/Buttons/ButtonTypeC4.tscn" type="PackedScene" id=36]
 [ext_resource path="res://Scenes/Shaders/Monochrome.gdshader" type="Shader" id=37]
 [ext_resource path="res://Assets/UI/stock.png" type="Texture" id=38]
@@ -305,6 +307,13 @@ tracks/1/keys = {
 
 [sub_resource type="ShaderMaterial" id=106]
 shader = ExtResource( 37 )
+
+[sub_resource type="DynamicFont" id=203]
+size = 40
+outline_size = 4
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 14 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 60
@@ -3407,6 +3416,50 @@ texture = ExtResource( 56 )
 [node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
 texture = ExtResource( 55 )
 
+[node name="Teammate1" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
+position = Vector2( 272, -33 )
+
+[node name="PortraitBackSmall" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+modulate = Color( 0, 0, 0, 1 )
+texture = ExtResource( 11 )
+
+[node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+
+[node name="PortraitFrameSmall" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+texture = ExtResource( 24 )
+
+[node name="Cooldown" type="Label" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+margin_left = 46.0
+margin_top = -18.0
+margin_right = 214.0
+margin_bottom = 23.0
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+custom_fonts/font = SubResource( 203 )
+text = "88"
+valign = 2
+
+[node name="Teammate2" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
+position = Vector2( 272, 34 )
+
+[node name="PortraitBackSmall" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+modulate = Color( 0, 0, 0, 1 )
+texture = ExtResource( 11 )
+
+[node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+
+[node name="PortraitFrameSmall" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+texture = ExtResource( 24 )
+
+[node name="Cooldown" type="Label" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+margin_left = 46.0
+margin_top = -18.0
+margin_right = 214.0
+margin_bottom = 23.0
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+custom_fonts/font = SubResource( 203 )
+text = "88"
+valign = 2
+
 [node name="DamageNode" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
 position = Vector2( 53, -10 )
 
@@ -3472,10 +3525,11 @@ custom_fonts/font = SubResource( 150 )
 text = "8888"
 
 [node name="UltimateGauge" type="TextureProgress" parent="HUD/P1_HUDRect/Portrait"]
-margin_left = -97.0
-margin_top = -10.0
-margin_right = -20.0
-margin_bottom = 67.0
+margin_left = 233.0
+margin_top = 824.0
+margin_right = 310.0
+margin_bottom = 901.0
+rect_scale = Vector2( 0.75, 0.75 )
 max_value = 1000.0
 value = 50.0
 texture_under = ExtResource( 44 )
@@ -3530,18 +3584,20 @@ anims/level3 = SubResource( 73 )
 
 [node name="RESGauge1" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
 margin_left = -79.0
-margin_top = 10.0
+margin_top = 11.0
 margin_right = 132.0
-margin_bottom = 28.0
+margin_bottom = 29.0
+rect_scale = Vector2( 1, 0.9 )
 step = 0.1
 value = 100.0
 texture_progress = ExtResource( 10 )
 
 [node name="RESGauge2" type="TextureProgress" parent="HUD/P1_HUDRect/GaugesUnder"]
 margin_left = -79.0
-margin_top = 10.0
+margin_top = 11.0
 margin_right = 132.0
-margin_bottom = 28.0
+margin_bottom = 29.0
+rect_scale = Vector2( 1, 0.9 )
 step = 0.1
 value = 50.0
 texture_progress = ExtResource( 8 )
@@ -3560,7 +3616,6 @@ position = Vector2( -107, 19 )
 texture = ExtResource( 5 )
 
 [node name="Unique" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
-visible = false
 position = Vector2( 0, -78 )
 
 [node name="Assist" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
@@ -3613,6 +3668,50 @@ texture = ExtResource( 56 )
 [node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
 texture = ExtResource( 55 )
 
+[node name="Teammate1" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( 272, -33 )
+
+[node name="PortraitBackSmall" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+modulate = Color( 0, 0, 0, 1 )
+texture = ExtResource( 11 )
+
+[node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+
+[node name="PortraitFrameSmall" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+texture = ExtResource( 24 )
+
+[node name="Cooldown" type="Label" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+margin_left = 46.0
+margin_top = -18.0
+margin_right = 214.0
+margin_bottom = 23.0
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+custom_fonts/font = SubResource( 203 )
+text = "88"
+valign = 2
+
+[node name="Teammate2" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( 272, 34 )
+
+[node name="PortraitBackSmall" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+modulate = Color( 0, 0, 0, 1 )
+texture = ExtResource( 11 )
+
+[node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+
+[node name="PortraitFrameSmall" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+texture = ExtResource( 24 )
+
+[node name="Cooldown" type="Label" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+margin_left = 46.0
+margin_top = -18.0
+margin_right = 214.0
+margin_bottom = 23.0
+custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
+custom_fonts/font = SubResource( 203 )
+text = "88"
+valign = 2
+
 [node name="DamageNode" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
 position = Vector2( 53, -10 )
 
@@ -3662,10 +3761,11 @@ align = 1
 valign = 1
 
 [node name="UltimateGauge" type="TextureProgress" parent="HUD/P2_HUDRect/Portrait"]
-margin_left = -97.0
-margin_top = -10.0
-margin_right = -20.0
-margin_bottom = 67.0
+margin_left = 233.0
+margin_top = 824.0
+margin_right = 310.0
+margin_bottom = 901.0
+rect_scale = Vector2( 0.75, 0.75 )
 max_value = 1000.0
 value = 50.0
 texture_under = ExtResource( 44 )
@@ -3736,18 +3836,20 @@ anims/level3 = SubResource( 182 )
 
 [node name="RESGauge1" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
 margin_left = -79.0
-margin_top = 10.0
+margin_top = 11.0
 margin_right = 132.0
-margin_bottom = 28.0
+margin_bottom = 29.0
+rect_min_size = Vector2( 0, 0.9 )
 step = 0.1
 value = 100.0
 texture_progress = ExtResource( 10 )
 
 [node name="RESGauge2" type="TextureProgress" parent="HUD/P2_HUDRect/GaugesUnder"]
 margin_left = -79.0
-margin_top = 10.0
+margin_top = 11.0
 margin_right = 132.0
-margin_bottom = 28.0
+margin_bottom = 29.0
+rect_min_size = Vector2( 0, 0.9 )
 step = 0.1
 value = 50.0
 texture_progress = ExtResource( 8 )

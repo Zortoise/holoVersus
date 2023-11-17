@@ -17,9 +17,7 @@ func init(_aux_data: Dictionary):
 
 func simulate():
 	if Animator.to_play_anim == "Spawn" and Globals.Game.get_player_node(Entity.master_ID).is_hitstunned_or_sequenced():
-		Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", Entity.position, {"facing":Entity.facing, "grounded":true}, \
-				Entity.palette_ref, Entity.master_ref)
-		Entity.free = true # cancel spawning if master got hit
+		kill() # cancel spawning if master got hit
 		
 	elif Animator.current_anim == "Kill" and Animator.time == 5:
 		var spawn_point = Animator.query_point("entityspawn")
@@ -29,6 +27,11 @@ func simulate():
 				{"facing":Entity.facing, "grounded":true}, Entity.palette_ref, Entity.master_ref)
 		Entity.play_audio("water6", {"vol" : -20})
 		Entity.free = true
+	
+func kill():
+	Globals.Game.spawn_SFX("SmallSplash", "SmallSplash", Entity.position, {"facing":Entity.facing, "grounded":true}, \
+			Entity.palette_ref, Entity.master_ref)
+	Entity.free = true
 	
 func _on_SpritePlayer_anim_finished(anim_name):
 	match anim_name:

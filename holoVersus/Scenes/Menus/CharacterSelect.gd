@@ -901,11 +901,11 @@ func start_battle():
 		Globals.stage_ref = $P2_StageSelect/StageList.get_child(3).stage_name
 #	Globals.stage_ref = selected_stage
 
-	Globals.P1_char_ref = char_grid[P1_picker_pos]
-	Globals.P1_palette = P1_palette_picked
+	Globals.P1_char_ref[0] = char_grid[P1_picker_pos]
+	Globals.P1_palette[0] = P1_palette_picked
 
-	Globals.P2_char_ref = char_grid[P2_picker_pos]
-	Globals.P2_palette = P2_palette_picked
+	Globals.P2_char_ref[0] = char_grid[P2_picker_pos]
+	Globals.P2_palette[0] = P2_palette_picked
 	
 	# saving last picked characters and stages
 	var last_picked = {
@@ -929,26 +929,26 @@ func start_battle():
 	
 	
 	# handling random
-	if Globals.P1_char_ref == "Random":
+	if Globals.P1_char_ref[0] == "Random":
 		var character_array = char_grid.values()
 		character_array.erase("Random")
 		character_array.shuffle()
-		Globals.P1_char_ref = character_array[0]
+		Globals.P1_char_ref[0] = character_array[0]
 		# random palette
-		Globals.P1_palette = Globals.random.randi_range(1, character_data[Globals.P1_char_ref]["palettes"].size() + 1)
+		Globals.P1_palette[0] = Globals.random.randi_range(1, character_data[Globals.P1_char_ref[0]]["palettes"].size() + 1)
 		# if same character and palette, shift to next palette
-		if Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
-			Globals.P1_palette = wrapi(Globals.P1_palette + 1, 1, character_data[Globals.P1_char_ref]["palettes"].size() + 2)
-	if Globals.P2_char_ref == "Random":
+		if Globals.P1_char_ref[0] == Globals.P2_char_ref[0] and Globals.P1_palette[0] == Globals.P2_palette[0]:
+			Globals.P1_palette[0] = wrapi(Globals.P1_palette[0] + 1, 1, character_data[Globals.P1_char_ref[0]]["palettes"].size() + 2)
+	if Globals.P2_char_ref[0] == "Random":
 		var character_array = char_grid.values()
 		character_array.erase("Random")
 		character_array.shuffle()
-		Globals.P2_char_ref = character_array[0]
+		Globals.P2_char_ref[0] = character_array[0]
 		# random palette
-		Globals.P2_palette = Globals.random.randi_range(1, character_data[Globals.P2_char_ref]["palettes"].size() + 1)
+		Globals.P2_palette[0] = Globals.random.randi_range(1, character_data[Globals.P2_char_ref[0]]["palettes"].size() + 1)
 		# if same character and palette, shift to next palette
-		if Globals.P1_char_ref == Globals.P2_char_ref and Globals.P1_palette == Globals.P2_palette:
-			Globals.P2_palette = wrapi(Globals.P2_palette + 1, 1, character_data[Globals.P2_char_ref]["palettes"].size() + 2)
+		if Globals.P1_char_ref[0] == Globals.P2_char_ref[0] and Globals.P1_palette[0] == Globals.P2_palette[0]:
+			Globals.P2_palette[0] = wrapi(Globals.P2_palette[0] + 1, 1, character_data[Globals.P2_char_ref[0]]["palettes"].size() + 2)
 		
 	if Globals.stage_ref == "Random":
 		var new_stage_array = stage_data.keys()

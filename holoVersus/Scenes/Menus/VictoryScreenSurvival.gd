@@ -9,11 +9,11 @@ func _ready():
 	
 
 	# load the winner
-	$P1_FullArt.texture = ResourceLoader.load("res://Characters/" + Globals.P1_char_ref + "/UI/full_art.png")
+	$P1_FullArt.texture = ResourceLoader.load("res://Characters/" + Globals.P1_char_ref[0] + "/UI/full_art.png")
 	$Background/Triangle.modulate = Color(0.73, 0.19, 0.27)
 	
 	if Globals.player_count == 2:
-		$P2_FullArt.texture = ResourceLoader.load("res://Characters/" + Globals.P2_char_ref + "/UI/full_art.png")
+		$P2_FullArt.texture = ResourceLoader.load("res://Characters/" + Globals.P2_char_ref[0] + "/UI/full_art.png")
 		$Background/Triangle2.modulate = Color(0.22, 0.48, 0.82)
 	else:
 		$P2_FullArt.hide()

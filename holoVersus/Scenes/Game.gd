@@ -7,7 +7,7 @@ signal playback_started
 signal game_set
 signal time_over
 
-const RNG_MAX = 1000000000000
+const RNG_MAX = 1000000000
 
 #const CAMERA_MARGIN = 55 # camera limit distance from blast zone
 const MARGIN_TO_TILT_KILLBLAST = 100
@@ -24,14 +24,16 @@ const ASSIST_CD_PENALTY = 150 # increased cooldown if assist is used during hits
 const ASSIST_RESCUE_OFFSET = 120 # directional offset if assist is used during hitstun
 const ASSIST_FEVER_CD_REDUCE = 70 # reduce CD during assist fever
 
-onready var stage_ref = Globals.stage_ref
-onready var P1_char_ref = Globals.P1_char_ref
-onready var P1_palette = Globals.P1_palette
-onready var P1_assist = Globals.P1_assist
-#onready var P1_input_style = Globals.P1_input_style
-onready var P2_char_ref = Globals.P2_char_ref
-onready var P2_palette = Globals.P2_palette
-onready var P2_assist = Globals.P2_assist
+#onready var stage_ref = Globals.stage_ref
+#onready var P1_char_ref = Globals.P1_char_ref
+#onready var P1_palette = Globals.P1_palette
+#onready var P1_assist = Globals.P1_assist
+#onready var P1_teammates = Globals.P1_teammates
+#
+#onready var P2_char_ref = Globals.P2_char_ref
+#onready var P2_palette = Globals.P2_palette
+#onready var P2_assist = Globals.P2_assist
+#onready var P2_teammates = Globals.P2_teammates
 
 #onready var P2_input_style = Globals.P2_input_style
 onready var starting_stock_pts = Globals.starting_stock_pts
@@ -165,10 +167,14 @@ func _ready():
 	
 func setup():
 
-	if !Netplay.is_netplay() and !Globals.watching_replay: # for netgame, rng seed is generated at init() of NetgameSetup
-		orig_rng_seed = Globals.random.randi_range(1, RNG_MAX - 1)
-		current_rng_seed = orig_rng_seed
-		Globals.orig_rng_seed = orig_rng_seed
+	if !Netplay.is_netplay(): # for netgame, rng seed is generated at init() of NetgameSetup
+		if !Globals.watching_replay:
+			orig_rng_seed = Globals.random.randi_range(1, RNG_MAX - 1)
+			current_rng_seed = orig_rng_seed
+			Globals.orig_rng_seed = orig_rng_seed
+		else:
+			orig_rng_seed = Globals.orig_rng_seed
+			current_rng_seed = orig_rng_seed
 		
 	matchtime = Globals.time_limit * 60
 	
@@ -218,7 +224,7 @@ func setup():
 #	var test_stage = $Stage.get_child(0) # test stage node should be directly under this node
 #	test_stage.free()
 
-	stage = load("res://Stages/" + stage_ref + "/UniqStage.tscn").instance()
+	stage = load("res://Stages/" + Globals.stage_ref + "/UniqStage.tscn").instance()
 	$Stage.add_child(stage)
 	stage.init()
 
@@ -235,6 +241,11 @@ func setup():
 	if Globals.survival_level == null and Globals.assists > 1:
 		load_items()
 	
+	# WIP
+	for player in Globals.player_count:
+		HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Teammate1").queue_free()
+		HUD.get_node("P" + str(player + 1) + "_HUDRect/Portrait/Teammate2").queue_free()
+	
 ## LOAD ASSISTS --------------------------------------------------------------------------------------------------
 #
 #	LoadAssist.load_assist("GuraA") # test
@@ -244,16 +255,16 @@ func setup():
 	
 	if Globals.survival_level == null or Globals.player_count > 1:
 		# add players, players added later overlap players added eariler
-		var P2_character
+#		var P2_character
 	#	if P2_input_style == 0:
-		P2_character = load("res://Characters/" + P2_char_ref + "/UniqChar.tscn").instance()
+#		P2_character = load("res://Characters/" + P2_char_ref + "/UniqChar.tscn").instance()
 	#	else:
 	#		P2_character = load("res://Characters/" + P2_char_ref + "/" + P2_char_ref + "C.tscn").instance()
 		var P2 = Loader.loaded_character_scene.instance() # main character node, not unique character node
 		$Players.add_child(P2)
-		if P2_assist != "":
-			LoadAssist.load_assist(P2_assist)
-		P2.init(1, P2_char_ref, P2_character, P2_position, P2_facing, P2_palette, P2_assist)
+#		if P2_assist != "":
+#			LoadAssist.load_assist(P2_assist)
+		P2.init(1, P2_position, P2_facing)
 		if frame_viewer != null:
 			frame_viewer.P2_node = P2
 		
@@ -262,18 +273,23 @@ func setup():
 	else:
 		HUD.get_node("P2_HUDRect").hide()
 	
-	var P1_character
-#	if P1_input_style == 0:
-	P1_character = load("res://Characters/" + P1_char_ref + "/UniqChar.tscn").instance()
+#	var P1_character
+##	if P1_input_style == 0:
+#	P1_character = load("res://Characters/" + P1_char_ref + "/UniqChar.tscn").instance()
 #	else:
 #		P1_character = load("res://Characters/" + P1_char_ref + "/" + P1_char_ref + "C.tscn").instance()
 	var P1 = Loader.loaded_character_scene.instance()
 	$Players.add_child(P1)
-	if P1_assist != "":
-		LoadAssist.load_assist(P1_assist)
-	P1.init(0, P1_char_ref, P1_character, P1_position, P1_facing, P1_palette, P1_assist)
+#	if P1_assist != "":
+#		LoadAssist.load_assist(P1_assist)
+	P1.init(0, P1_position, P1_facing)
 	if frame_viewer != null:
 		frame_viewer.P1_node = P1
+		
+#	var P1b = Loader.loaded_character_scene.instance() # tag characters, WIP TESTING
+#	$InactivePlayers.add_child(P1b)
+#	P1b.init(0, P1_position, P1_facing, 1)
+	
 	
 	if Netplay.is_netplay():
 		you_label = load("res://Scenes/YouLabel.tscn").instance()
@@ -311,9 +327,9 @@ func setup():
 
 		var sets := []
 		sets.append("Stages/" + Globals.stage_ref)
-		sets.append("Characters/" + Globals.P1_char_ref)
-		if !("Characters/" + Globals.P2_char_ref) in sets:
-			sets.append("Characters/" + Globals.P2_char_ref)
+		sets.append("Characters/" + Globals.P1_char_ref[0])
+		if !("Characters/" + Globals.P2_char_ref[0]) in sets:
+			sets.append("Characters/" + Globals.P2_char_ref[0])
 		
 		sets.shuffle()
 			
@@ -621,9 +637,9 @@ func _physics_process(_delta):
 						damage_value_of_winner = player.current_damage_value		
 			match winner_ID:
 				0:
-					Globals.winner = [winner_ID, Globals.P1_char_ref, get_player_node(winner_ID).UniqChar.NAME]
+					Globals.winner = [winner_ID, Globals.P1_char_ref[0], get_player_node(winner_ID).UniqChar.NAME]
 				1:
-					Globals.winner = [winner_ID, Globals.P2_char_ref, get_player_node(winner_ID).UniqChar.NAME]
+					Globals.winner = [winner_ID, Globals.P2_char_ref[0], get_player_node(winner_ID).UniqChar.NAME]
 			
 	camera()
 	
@@ -861,6 +877,12 @@ func simulate(rendering = true):
 
 	# activate player's physics
 
+	for effect in $PassiveEffects.get_children():
+		if effect.free:
+			effect.free()
+		else:
+			effect.simulate()
+
 	for field in $Fields.get_children():
 		if field.free:
 			field.free()
@@ -1053,6 +1075,7 @@ func save_state(timestamp):
 		"pickups_data" : [],
 		"damage_numbers_data" : [],
 		"fields_data" : [],
+		"passive_effects_data" : [],
 #		"audio_data" : [],
 		"stage_data" : {},
 		"screenfreeze" : null,
@@ -1117,6 +1140,9 @@ func save_state(timestamp):
 		
 	for number in $DamageNumbers.get_children():
 		game_state.damage_numbers_data.append(number.save_state())
+		
+	for effect in $PassiveEffects.get_children():
+		game_state.passive_effects_data.append(effect.save_state())
 
 #	for AudioManager in $AudioPlayers.get_children():
 #		game_state.audio_data.append(AudioManager.save_state())
@@ -1186,7 +1212,7 @@ func load_state(game_state, loading_autosave = true):
 #			get_player_node(load_player_id).load_state(loaded_game_state.player_data[load_player_id])
 			
 			# first, get the point character in $InactivePlayers and move them to active players and load them
-			var point_char = get_player_node_inactive(load_player_id, loaded_game_state.player_data[load_player_id].name)
+			var point_char = get_player_node_inactive(load_player_id, loaded_game_state.player_data[load_player_id].char_ref)
 			$InactivePlayers.remove_child(point_char)
 			$Players.add_child(point_char)
 			point_char.load_state(loaded_game_state.player_data[load_player_id])
@@ -1194,7 +1220,7 @@ func load_state(game_state, loading_autosave = true):
 			# find their teammates in $InactivePlayers and load them
 			if "teammates" in loaded_game_state.player_data[load_player_id]:
 				for teammate_dict in loaded_game_state.player_data[load_player_id].teammates:
-					var teammate_node = get_player_node_inactive(load_player_id, teammate_dict.name)
+					var teammate_node = get_player_node_inactive(load_player_id, teammate_dict.char_ref)
 					teammate_node.load_state(teammate_dict)
 			
 			
@@ -1229,6 +1255,8 @@ func load_state(game_state, loading_autosave = true):
 		field.free()
 	for number in $DamageNumbers.get_children():
 		number.free()
+	for effect in $PassiveEffects.get_children():
+		effect.free()
 #	for AudioManager in $AudioPlayers.get_children():
 #		AudioManager.kill()
 		
@@ -1288,6 +1316,11 @@ func load_state(game_state, loading_autosave = true):
 		var new_number = Loader.loaded_dmg_num_scene.instance()
 		$DamageNumbers.add_child(new_number)
 		new_number.load_state(state_data)
+		
+	for state_data in loaded_game_state.passive_effects_data:
+		var new_effect = Loader.loaded_passive_effect_scene.instance()
+		$PassiveEffects.add_child(new_effect)
+		new_effect.load_state(state_data)
 		
 #	for state_data in loaded_game_state.audio_data:
 #		var new_audio = Globals.loaded_audio_scene.instance()
@@ -2196,6 +2229,10 @@ func ult_gauge_update(character):
 #		install_timer.value = int((character.get_node("InstallTimer").time * 100) / character.install_time)
 #	else:
 #		install_timer.hide()
+
+func team_cooldown_update(_character):
+	# WIP
+	pass
 		
 				
 func res_gauge_update(character):
@@ -2343,9 +2380,9 @@ func stock_points_update(character):
 			
 			match character.player_ID:
 				0:
-					Globals.winner = [1, Globals.P2_char_ref, get_player_node(1).UniqChar.NAME]
+					Globals.winner = [1, Globals.P2_char_ref[0], get_player_node(1).UniqChar.NAME]
 				1:
-					Globals.winner = [0, Globals.P1_char_ref, get_player_node(0).UniqChar.NAME]
+					Globals.winner = [0, Globals.P1_char_ref[0], get_player_node(0).UniqChar.NAME]
 				
 				
 func assist_update(character):
@@ -2437,6 +2474,7 @@ func prism_update(character):
 		
 				
 func set_uniqueHUD(player_ID, uniqueHUD):
+	HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Unique").show()
 	HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Unique").add_child(uniqueHUD)
 				
 				
@@ -2445,7 +2483,7 @@ func get_player_node(player_ID):
 	
 	if player_ID >= 0:
 		for player in get_tree().get_nodes_in_group("PlayerNodes"):
-			if player.player_ID == player_ID:
+			if player.state != Em.char_state.INACTIVE and player.player_ID == player_ID:
 				return player
 	else:
 		for player in get_tree().get_nodes_in_group("MobNodes"):
@@ -2453,10 +2491,13 @@ func get_player_node(player_ID):
 				return player
 	return null
 	
-func get_player_node_inactive(player_ID: int, character_name: String):
+	
+func get_player_node_inactive(player_ID: int, char_ref: String):
 	for player in $InactivePlayers.get_children():
-		if player.player_ID == player_ID and player.UniqChar.NAME == character_name:
+		if player.player_ID == player_ID and player.UniqChar.CHAR_REF == char_ref:
 			return player
+	return null
+	
 	
 func get_NPC_node(NPC_ID):
 	if NPC_ID == null: return null

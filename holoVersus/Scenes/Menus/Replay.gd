@@ -5,12 +5,12 @@ export var version := Globals.VERSION
 export var datetime := ""
 
 export var stage_ref := "Grid"
-export var P1_char_ref := "Gura"
-export var P1_palette := 1
+export var P1_char_ref := ["Gura", "Ina"]
+export var P1_palette := [1, 1]
 export var P1_assist := ""
 #export var P1_input_style := 0
-export var P2_char_ref := "Gura"
-export var P2_palette := 2
+export var P2_char_ref := ["Ina", "Gura"]
+export var P2_palette := [2, 2]
 export var P2_assist := ""
 #export var P2_input_style := 0
 export var starting_stock_pts := 9

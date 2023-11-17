@@ -3,6 +3,7 @@ extends Node2D
 # CHARACTER DATA --------------------------------------------------------------------------------------------------
 
 const NAME = "Ina'nis"
+const CHAR_REF = "Ina"
 const ORDER = 0
 
 # character movement stats, use to overwrite

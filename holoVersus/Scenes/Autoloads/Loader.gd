@@ -19,6 +19,7 @@ onready var loaded_res_gauge = ResourceLoader.load("res://Assets/UI/res_gauge1.p
 onready var loaded_res_gauge_pos = load("res://Assets/UI/res_gauge_pos.tres")
 onready var loaded_dmg_num_scene = load("res://Scenes/DamageNumber.tscn")
 onready var loaded_pickup_scene := load("res://Scenes/PickUp.tscn")
+onready var loaded_passive_effect_scene := load("res://Scenes/PassiveEffect.tscn")
 
 onready var loaded_ui_audio_scene := load("res://Scenes/Menus/UIAudio.tscn")
 
@@ -138,6 +139,12 @@ var entity_data = {
 #		"frame_data" : load("res://Characters/Gura/Entities/FrameData/TridentProj.tres"),
 #		"spritesheet" : ResourceLoader.load("res://Characters/Gura/Entities/Spritesheets/TridentProjSprite.png")
 #	},
+}
+
+var effect_data = {
+#	"test_effect": {
+#		"scene" : load("___.tscn")
+#	}
 }
 
 var item_data = {

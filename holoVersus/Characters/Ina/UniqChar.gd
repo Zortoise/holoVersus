@@ -1367,7 +1367,7 @@ func vortex():
 			
 			var repeated := false
 			for array in node.repeat_memory:
-				if array[0] == Character.player_ID and array[1] == "H":
+				if array[0] == Character.player_ID and array[1] == "H" and array[2] == CHAR_REF:
 					repeated = true # no suction if already used once
 					break
 			if repeated: break

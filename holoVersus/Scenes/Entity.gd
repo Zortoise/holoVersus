@@ -242,10 +242,10 @@ func simulate2(): # only ran if not in hitstop
 					velocity.y = orig_vel_y
 				else:
 					UniqEntity.collision(results[0], orig_vel_x, orig_vel_y)
-		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS and UniqEntity.has_method("ledge_stop"):
+		if Em.entity_trait.GROUNDED in UniqEntity.TRAITS:
 			if !is_on_ground(): # spawned in the air, kill it
 				UniqEntity.kill()
-			elif results[2]: # reached a ledge
+			elif results[2] and UniqEntity.has_method("ledge_stop"): # reached a ledge
 				if $NoCollideTimer.is_running(): # if go off ledge during 1st frame of hitstop, will return to position before moving
 					position = orig_pos
 					set_true_position()

@@ -252,6 +252,7 @@ onready var current_ult_gauge: int = 0
 #onready var burst_token = Em.burst.AVAILABLE
 var stock_points_left: int
 var prism_count := 0
+var team_cooldowns := {} # example: {"Gura" : 600, "Ina" : 0}, in frames
 
 var hitcount_record = [] # record number of hits for current attack for each player, cannot do anymore hits if maxed out
 var ignore_list = [] # some moves has ignore_time, after hitting will ignore that player for a number of frames, used for multi-hit specials
@@ -331,7 +332,7 @@ var test_num := 0
 # SETUP CHARACTER --------------------------------------------------------------------------------------------------
 
 # this is run after adding this node to the tree
-func init(in_player_ID, in_char_ref, in_character, start_position, start_facing, in_palette_number, in_assist := ""):
+func init(in_player_ID, start_position, start_facing, team_number := 0):
 	add_to_group("PlayerNodes")
 	
 	set_player_id(in_player_ID)
@@ -339,11 +340,18 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	# remove test character node and add the real character node
 #	var test_character = get_child(0) # test character node should be directly under this node
 #	test_character.free()
-	
-	UniqChar = in_character
+	var char_ref = Globals.get("P" + str(player_ID + 1) + "_char_ref")[team_number]
+#	match team_number:
+#		0:
+#			char_ref = Globals.get("P" + str(player_ID + 1) + "_char_ref")[0]
+#		1:
+#			char_ref = Globals.get("P" + str(player_ID + 1) + "_char_ref")[1]
+#		2:
+#			char_ref = Globals.get("P" + str(player_ID + 1) + "_char_ref")[2]
+	UniqChar = load("res://Characters/" + char_ref + "/UniqChar.tscn").instance()
 	add_child(UniqChar)
 	move_child(UniqChar, 0)
-	directory_name = "res://Characters/" + in_char_ref + "/"
+	directory_name = "res://Characters/" + char_ref + "/"
 	
 	# setup load_data
 	if !UniqChar.NAME in Loader.char_data:
@@ -393,7 +401,15 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	if facing != start_facing:
 		face(start_facing)
 		
-	palette_number = in_palette_number
+	palette_number = Globals.get("P" + str(player_ID + 1) + "_palette")[team_number]
+#	match team_number:
+#		0:
+#			palette_number = Globals.get("P" + str(player_ID + 1) + "_palette")
+#		1:
+#			palette_number = Globals.get("P" + str(player_ID + 1) + "_palette")
+#		2:
+#			palette_number = Globals.get("P" + str(player_ID + 1) + "_palette")
+			
 	if palette_number > 1:
 #		loaded_palette = ResourceLoader.load(directory_name + "Palettes/" + str(palette_number) + ".png")
 		Loader.add_loaded(Loader.char_data[UniqChar.NAME]["palettes"], palette_number, \
@@ -403,16 +419,6 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	sfx_under.hide()
 	sfx_over.hide()
 	
-	var new_portrait = load("res://Characters/" + Globals.get("P" + str(player_ID + 1) + "_char_ref") + "/PortraitGame.tscn").instance()
-	Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait/CharPortrait").add_child(new_portrait)
-
-	if palette_number <= 1:
-		new_portrait.get_node("Base").material = null
-	else:
-		new_portrait.get_node("Base").material = ShaderMaterial.new()
-		new_portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
-		new_portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
-		
 #	if palette_number in UniqChar.PALETTE_TO_PORTRAIT:
 #		Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait").self_modulate = \
 #			UniqChar.PALETTE_TO_PORTRAIT[palette_number]
@@ -431,16 +437,18 @@ func init(in_player_ID, in_char_ref, in_character, start_position, start_facing,
 	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
 	
 	# load assist
-	if Globals.assists == 1 and in_assist != "":
-		assist = in_assist
+	if Globals.assists == 1 and Globals.get("P" + str(player_ID + 1) + "_assist") != "":
+		assist = Globals.get("P" + str(player_ID + 1) + "_assist")
+		LoadAssist.load_assist(assist)
 		var assist_icon = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistNode/AssistChar")
 		assist_icon.texture = Loader.NPC_data[assist].icon
 		
 	# for non-point characters, add them to InactivePlayers and init() them
-	if get_parent() == Globals.Game.get_node("InactivePlayers"):
+	if team_number != 0:
 		state = Em.char_state.INACTIVE
 		new_state = Em.char_state.INACTIVE
 	else:
+		portrait()
 	
 		yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
 	#	Globals.Game.damage_limit_update(self)
@@ -512,6 +520,22 @@ func setup_boxes(ref_rect): # set up detection boxes
 	$WallJumpRightDBox.rect_position.y = ref_rect.rect_position.y
 	$WallJumpRightDBox.rect_size.y = ref_rect.rect_size.y
 
+
+func portrait():
+	var to_remove = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait/CharPortrait").get_children()
+	for x in to_remove:
+		x.free()
+	
+	var new_portrait = load("res://Characters/" + UniqChar.CHAR_REF + "/PortraitGame.tscn").instance()
+	Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait/CharPortrait").add_child(new_portrait)
+
+	if palette_number <= 1:
+		new_portrait.get_node("Base").material = null
+	else:
+		new_portrait.get_node("Base").material = ShaderMaterial.new()
+		new_portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
+		new_portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
+		
 
 # change palette and reset monochrome
 func palette():
@@ -754,7 +778,7 @@ func simulate(new_input_state = {"pressed" : [], "just_pressed" : [], "just_rele
 	input_state = new_input_state # so that I can use it in other functions
 			
 	if Globals.editor:
-		if Input.is_action_just_pressed("sound_test") and test:
+		if Input.is_action_just_pressed("sound_test") and test and state != Em.char_state.INACTIVE:
 #		modulate_play("red_burst")
 #
 ##		var test_pt = Detection.ground_finder(position, facing, Vector2(100, 50), Vector2(100, 100))
@@ -833,7 +857,14 @@ func simulate(new_input_state = {"pressed" : [], "just_pressed" : [], "just_rele
 #			Globals.Game.superfreeze(get_path())
 #			Globals.Game.set_screenstop()
 
-			Globals.Game.spawn_assist_card()
+#			Globals.Game.spawn_assist_card()
+
+#			if UniqChar.CHAR_REF == Globals.get("P" + str(player_ID + 1) + "_char_ref")[0]:
+#				tag(Globals.get("P" + str(player_ID + 1) + "_char_ref")[1])
+#
+#			elif UniqChar.CHAR_REF == Globals.get("P" + str(player_ID + 1) + "_char_ref")[1]:
+#				tag(Globals.get("P" + str(player_ID + 1) + "_char_ref")[0])
+				
 			
 			pass
 	
@@ -9183,28 +9214,35 @@ func hide_SfxUnder():
 
 # TAGGING IN/OUT --------------------------------------------------------------------------------------------------
 
-func tag(teammate_name: String):
-	var teammate_node = Globals.Game.get_player_node_inactive(player_ID, teammate_name)
+func tag(teammate_char_ref: String):
+	var teammate_node = Globals.Game.get_player_node_inactive(player_ID, teammate_char_ref)
 	var data_to_pass = switch_to_inactive()
 	teammate_node.switch_to_active(data_to_pass)
 
 
 func switch_to_inactive() -> Dictionary:
+	$HitStopTimer.stop()
 	state = Em.char_state.INACTIVE
 	new_state = Em.char_state.INACTIVE
 	
 	var data_to_pass = {
 		"input_buffer" : input_buffer,
 		"facing" : facing,
-		"position" : position,
+		"feet_position" : get_feet_pos(),
 		"velocity_x" : velocity.x,
 		"velocity_y" : velocity.y,
+		"target_ID" : target_ID,
+		
+		"test" : test,
 		
 		"current_damage_value" : current_damage_value,
 		"current_res_gauge" : current_res_gauge,
 		"current_ex_gauge" : current_ex_gauge,
 		"current_ult_gauge" : current_ult_gauge,
+		"team_cooldowns" : team_cooldowns.duplicate(),
 	}
+	
+	team_cooldowns = {}
 	
 	Globals.Game.get_node("Players").remove_child(self)
 	Globals.Game.get_node("InactivePlayers").add_child(self)
@@ -9219,16 +9257,22 @@ func switch_to_active(data_to_pass: Dictionary):
 	
 	input_buffer = data_to_pass.input_buffer
 	
-	position = data_to_pass.position
+	position = get_pos_from_feet(data_to_pass.feet_position)
 	set_true_position()
 	face(data_to_pass.facing)
 	velocity.x = data_to_pass.velocity_x
 	velocity.y = data_to_pass.velocity_y
+	target_ID = data_to_pass.target_ID
+	
+	test = data_to_pass.test
 	
 	Globals.Game.damage_update(self)
 	current_res_gauge = data_to_pass.current_res_gauge
 	current_ex_gauge = data_to_pass.current_ex_gauge
 	current_ult_gauge = data_to_pass.current_ult_gauge
+	
+	team_cooldowns = data_to_pass.team_cooldowns # WIP
+	Globals.Game.team_cooldown_update(self)
 	
 	if is_on_ground(get_soft_dbox(get_collision_box())):
 		state = Em.char_state.GRD_STANDBY
@@ -9239,6 +9283,8 @@ func switch_to_active(data_to_pass: Dictionary):
 		
 	reset_jumps()
 	
+	portrait()
+	
 	if Globals.Game.frame_viewer != null:
 		Globals.Game.frame_viewer.set("P" + str(player_ID + 1) + "_node", self)
 	
@@ -9248,7 +9294,7 @@ func switch_to_active(data_to_pass: Dictionary):
 
 func save_state():
 	var state_data = {
-		"name" : UniqChar.NAME,
+		"char_ref" : UniqChar.CHAR_REF,
 		
 		"position" : position,
 		"air_jump" : air_jump,
@@ -9355,6 +9401,9 @@ func save_state():
 	else:
 		state_data["FDITimer_time"] = $FDITimer.time
 		
+		if state != Em.char_state.INACTIVE:
+			state_data["team_cooldowns"] = team_cooldowns
+		
 	if Globals.survival_level != null or Globals.assists > 1:
 		state_data["assist_items"] = assist_items
 	elif Globals.assists == 1:
@@ -9431,20 +9480,27 @@ func load_state(state_data, command_rewind := false):
 	stock_points_left = state_data.stock_points_left
 	prism_count = state_data.prism_count
 #	install_time = state_data.install_time
-	Globals.Game.damage_update(self)
-	Globals.Game.res_gauge_update(self)
-	Globals.Game.ex_gauge_update(self)
-	Globals.Game.ult_gauge_update(self)
-	Globals.Game.stock_points_update(self)
-#	Globals.Game.burst_update(self)
-	
-	if Globals.survival_level != null:
-		Globals.Game.prism_update(self)
-	else:
+
+	if state != Em.char_state.INACTIVE:
+		Globals.Game.damage_update(self)
+		Globals.Game.res_gauge_update(self)
+		Globals.Game.ex_gauge_update(self)
+		Globals.Game.ult_gauge_update(self)
+		Globals.Game.stock_points_update(self)
+	#	Globals.Game.burst_update(self)
+		
+		if Globals.survival_level != null:
+			Globals.Game.prism_update(self)
+		else:
+			team_cooldowns = state_data.team_cooldowns
+			Globals.Game.team_cooldown_update(self)
+		
+	if Globals.survival_level == null:
 		$FDITimer.time = state_data.FDITimer_time
 	
 	unique_data = state_data.unique_data
-	if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
+	if state != Em.char_state.INACTIVE:
+		if UniqChar.has_method("update_uniqueHUD"): UniqChar.update_uniqueHUD()
 	repeat_memory = state_data.repeat_memory
 	aerial_memory = state_data.aerial_memory
 	aerial_sp_memory = state_data.aerial_sp_memory
@@ -9485,17 +9541,19 @@ func load_state(state_data, command_rewind := false):
 #	$InstallTimer.time = state_data.InstallTimer_time
 #	Globals.Game.install_update(self)
 	
-	if Globals.survival_level != null or Globals.assists > 1:
-		assist_items = state_data.assist_items
-		Globals.Game.assist_update(self)
-	elif Globals.assists == 1:
-		assist_active = state_data.assist_active
-		$AssistCDTimer.time = state_data.AssistCDTimer_time
-		Globals.Game.assist_update(self)
+	if state != Em.char_state.INACTIVE:
+		if Globals.survival_level != null or Globals.assists > 1:
+			assist_items = state_data.assist_items
+			Globals.Game.assist_update(self)
+		elif Globals.assists == 1:
+			assist_active = state_data.assist_active
+			$AssistCDTimer.time = state_data.AssistCDTimer_time
+			Globals.Game.assist_update(self)
+			
+		portrait()
 	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = state_data.TrainingRegenTimer_time
-
 
 	
 #--------------------------------------------------------------------------------------------------

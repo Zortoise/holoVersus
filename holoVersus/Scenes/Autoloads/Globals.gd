@@ -29,14 +29,15 @@ var debug_mode2 := false
 # match settings, changed when starting a game
 var player_count = 2
 var stage_ref = "Grid"
-var P1_char_ref = "Gura"
-var P1_palette = 1
+
+var P1_char_ref = ["Gura", "Ina"]
+var P1_palette = [1 , 1]
 var P1_assist = "GuraA"
-#var P1_input_style = 0
-var P2_char_ref = "Gura"
-var P2_palette = 2
+
+var P2_char_ref = ["Ina", "Gura"]
+var P2_palette = [2 , 2]
 var P2_assist = "InaA"
-#var P2_input_style = 0
+
 var starting_stock_pts = 3
 var time_limit = 445
 var assists = 1
