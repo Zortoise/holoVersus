@@ -51,7 +51,7 @@ const AC_BurstLockTimer_TIME = 15 # number of frames you cannot use Burst Escape
 #const PosFlowSealTimer_TIME = 30 # min number of frames to seal Postive Flow for after setting pos_flow_seal = true
 const TrainingRegenTimer_TIME = 50 # number of frames before RES/Damage Value start regening
 const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of pixels away horizontally to count as a cross-up
-const CORNER_PUSHBACK = 200 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
+#const CORNER_PUSHBACK = 200 * FMath.S # attacker is pushed back when attacking at the corner towards the corner
 #const CORNER_RES_DRAIN_MOD = 150 # blocker take extra RES drain when blocking at the corners
 #const DODGE_SEMI_IFRAMES = 10 # frames of semi-invuln while dodging
 
@@ -72,7 +72,8 @@ const KB_BOOST_AT_MAX_RES = 400 # max increase of knockback when defender's RES 
 const POS_FLOW_REGEN = 140 #  # exact RES gain per frame during Positive Flow
 const ATK_LEVEL_TO_F_HITSTUN = [15, 20, 25, 30, 35, 40, 45, 50]
 const ATK_LEVEL_TO_L_HITSTUN = [25, 30, 35, 40, 45, 50, 55, 60]
-const ATK_LEVEL_TO_RES_DRAIN = [0, 1500, 2250, 3000, 3750, 4500, 5250, 6000]
+#const ATK_LEVEL_TO_RES_DRAIN = [0, 1500, 2250, 3000, 3750, 4500, 5250, 6000]
+const ATK_LEVEL_TO_RES_DRAIN = [0, 600, 1600, 2800, 4000, 5000, 5600, 5600]
 const MULTIHIT_HITSTUN = 15 # if you failed to connect all hits
 
 const HITSTUN_GRAV_MOD = 65  # gravity multiplier during hitstun
@@ -170,6 +171,8 @@ onready var sfx_over = $Sprites/SfxOver # clean code
 var UniqChar # unique character node
 var directory_name
 var palette_number
+var portrait # node instance
+var small_portrait
 #var spritesheet = { # filled up at initialization via set_up_spritesheet()
 ##	"Base" : load("res://Characters/___/Spritesheets/Base.png") # example
 #	}
@@ -443,14 +446,16 @@ func init(in_player_ID, start_position, start_facing, team_number := 0):
 		var assist_icon = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/Assist/AssistNode/AssistChar")
 		assist_icon.texture = Loader.NPC_data[assist].icon
 		
+	init_portrait()
+	
 	# for non-point characters, add them to InactivePlayers and init() them
 	if team_number != 0:
 		state = Em.char_state.INACTIVE
 		new_state = Em.char_state.INACTIVE
 	else:
-		portrait()
 	
 		yield(get_tree(),"idle_frame") # wait after GameViewport finished setup
+		Globals.Game.portrait_update(self)
 	#	Globals.Game.damage_limit_update(self)
 		Globals.Game.damage_update(self)
 		Globals.Game.res_gauge_update(self)
@@ -521,21 +526,24 @@ func setup_boxes(ref_rect): # set up detection boxes
 	$WallJumpRightDBox.rect_size.y = ref_rect.rect_size.y
 
 
-func portrait():
-	var to_remove = Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait/CharPortrait").get_children()
-	for x in to_remove:
-		x.free()
-	
-	var new_portrait = load("res://Characters/" + UniqChar.CHAR_REF + "/PortraitGame.tscn").instance()
-	Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/Portrait/CharPortrait").add_child(new_portrait)
+func init_portrait():
+	portrait = load("res://Characters/" + UniqChar.CHAR_REF + "/PortraitGame.tscn").instance()
 
 	if palette_number <= 1:
-		new_portrait.get_node("Base").material = null
+		portrait.get_node("Base").material = null
 	else:
-		new_portrait.get_node("Base").material = ShaderMaterial.new()
-		new_portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
-		new_portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
+		portrait.get_node("Base").material = ShaderMaterial.new()
+		portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
+		portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
 		
+	small_portrait = load("res://Characters/" + UniqChar.CHAR_REF + "/PortraitGameSmall.tscn").instance()
+
+	if palette_number <= 1:
+		small_portrait.get_node("Base").material = null
+	else:
+		small_portrait.get_node("Base").material = ShaderMaterial.new()
+		small_portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
+		small_portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
 
 # change palette and reset monochrome
 func palette():
@@ -2243,6 +2251,18 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 					
 				if posmod(Globals.Game.frametime, ASSIST_PASSIVE_REGEN) == 0:
 					$AssistCDTimer.simulate()
+					
+		# tag cooldown even during hitstop
+		if Globals.survival_level != null and team_cooldowns.size() > 0:
+			if Globals.training_mode:
+				team_cooldowns = {}
+			else:
+				for teammate in team_cooldowns.keys():
+					team_cooldowns.teammate -= 1
+					if team_cooldowns.teammate <= 0:
+						team_cooldowns.erase(teammate)
+			Globals.Game.team_cooldown_update(self)
+			
 		
 		if Globals.survival_level != null and enhance_cooldowns.size() > 0:
 			enhance_cooldown()
@@ -4103,6 +4123,9 @@ func respawn():
 #	Globals.Game.ex_gauge_update(self)
 #	Globals.Game.ult_gauge_update(self)
 	Globals.Game.stock_points_update(self)
+	
+	team_cooldowns = {}
+	Globals.Game.team_cooldown_update(self)
 	
 	$Sprites.show()
 	animate("Idle")
@@ -6522,18 +6545,18 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						velocity.rotate(pushback_dir)
 							
 				# if attacking at the corner unblocked, pushback depending on defender's RES Gauge
-				elif Em.hit.CORNERED in hit_data:
-					var pushback_strength: int = CORNER_PUSHBACK
-					if defender.current_res_gauge > 0:
-						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
-								defender.get_res_gauge_percent_above())
-					match Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.TWO, facing):
-						Em.compass.E:
-							if defender.position.x < Globals.Game.left_corner:
-								velocity.x += pushback_strength
-						Em.compass.W:
-							if defender.position.x > Globals.Game.right_corner:
-								velocity.x -= pushback_strength
+#				elif Em.hit.CORNERED in hit_data:
+#					var pushback_strength: int = CORNER_PUSHBACK
+#					if defender.current_res_gauge > 0:
+#						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
+#								defender.get_res_gauge_percent_above())
+#					match Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.TWO, facing):
+#						Em.compass.E:
+#							if defender.position.x < Globals.Game.left_corner:
+#								velocity.x += pushback_strength
+#						Em.compass.W:
+#							if defender.position.x > Globals.Game.right_corner:
+#								velocity.x -= pushback_strength
 								
 			Em.block_state.BLOCKED, Em.block_state.PARRIED:
 				
@@ -6690,13 +6713,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or Em.hit.NON_STRONG_PROJ in hit_data:
 		hit_data[Em.hit.WEAKARMORABLE] = true
 		
-	match dir_to_attacker:
-		1:
-			if position.x < Globals.Game.left_corner:
-				hit_data[Em.hit.CORNERED] = true
-		-1:
-			if position.x > Globals.Game.right_corner:
-				hit_data[Em.hit.CORNERED] = true
+#	match dir_to_attacker:
+#		1:
+#			if position.x < Globals.Game.left_corner:
+#				hit_data[Em.hit.CORNERED] = true
+#		-1:
+#			if position.x > Globals.Game.right_corner:
+#				hit_data[Em.hit.CORNERED] = true
 		
 	# some multi-hit moves only hit once every few frames, done via an ignore list on the attacker/entity
 	if Em.hit.MULTIHIT in hit_data:
@@ -7730,8 +7753,8 @@ func calculate_damage(hit_data) -> int:
 			scaled_damage = FMath.percent(scaled_damage, PUNISH_DMG_MOD)
 
 	if current_res_gauge > 0: # damage is reduced by defender's RES Gauge when it is > 100%
-		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.EX, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
-			var weight: int = FMath.percent(get_res_gauge_percent_above(), 50) # EX and Supers are scaled less
+		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
+			var weight: int = FMath.percent(get_res_gauge_percent_above(), 50) # Supers are scaled less
 			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_RES), weight)
 		else:
 			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_RES), get_res_gauge_percent_above())
@@ -7755,6 +7778,9 @@ func calculate_damage(hit_data) -> int:
 			
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
 		scaled_damage = FMath.percent(scaled_damage, 50) # assist rescue halves damage
+		
+		
+	scaled_damage = FMath.percent(scaled_damage, get_stat("VULNERABILITY_MOD"))
 
 	return int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum 1 damage
 	
@@ -8399,7 +8425,7 @@ func take_seq_damage(base_damage: int, atk_type := Em.atk_type.SPECIAL) -> bool:
 	if scaled_damage == 0: return false
 	
 	if current_res_gauge > 0: # damage is reduced by RES Gauge when it is > 100%
-		if atk_type in [Em.atk_type.EX, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
+		if atk_type in [Em.atk_type.SUPER, Em.atk_type.SUPER_ENTITY]:
 			var weight: int = FMath.percent(get_res_gauge_percent_above(), 50) # EX and Supers are scaled less
 			scaled_damage = FMath.f_lerp(scaled_damage, FMath.percent(scaled_damage, DMG_REDUCTION_AT_MAX_RES), weight)
 		else:
@@ -8411,6 +8437,8 @@ func take_seq_damage(base_damage: int, atk_type := Em.atk_type.SPECIAL) -> bool:
 		if mod != null:
 			scaled_damage = FMath.percent(scaled_damage, mod)
 		
+	scaled_damage = FMath.percent(scaled_damage, get_stat("VULNERABILITY_MOD"))
+	
 	var damage: int = int(max(FMath.round_and_descale(scaled_damage), 1)) # minimum damage is 1
 	
 	take_damage(damage)
@@ -9283,7 +9311,7 @@ func switch_to_active(data_to_pass: Dictionary):
 		
 	reset_jumps()
 	
-	portrait()
+	Globals.Game.portrait_update(self)
 	
 	if Globals.Game.frame_viewer != null:
 		Globals.Game.frame_viewer.set("P" + str(player_ID + 1) + "_node", self)
@@ -9550,7 +9578,7 @@ func load_state(state_data, command_rewind := false):
 			$AssistCDTimer.time = state_data.AssistCDTimer_time
 			Globals.Game.assist_update(self)
 			
-		portrait()
+		Globals.Game.portrait_update(self)
 	
 	if Globals.training_mode:
 		$TrainingRegenTimer.time = state_data.TrainingRegenTimer_time

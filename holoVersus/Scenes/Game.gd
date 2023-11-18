@@ -2230,9 +2230,63 @@ func ult_gauge_update(character):
 #	else:
 #		install_timer.hide()
 
-func team_cooldown_update(_character):
-	# WIP
-	pass
+
+func portrait_update(character):
+	var point_char_portrait = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/CharPortrait")
+#	var teammate1_portrait = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Teammate1/CharPortrait")
+#	var teammate2_portrait = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Teammate2/CharPortrait")
+	
+	for x in point_char_portrait.get_children():
+		point_char_portrait.remove_child(x)
+#	for x in teammate1_portrait.get_children():
+#		teammate1_portrait.remove_child(x)
+#	for x in teammate2_portrait.get_children():
+#		teammate2_portrait.remove_child(x)
+	
+#	var count := 1
+	
+	var characters = Globals.get("P" + str(character.player_ID + 1) + "_char_ref")
+	
+	# TESTING, for now
+	characters = [Globals.get("P" + str(character.player_ID + 1) + "_char_ref")[0]]
+	
+	for char_ref in characters:
+		if char_ref == character.UniqChar.CHAR_REF:
+			point_char_portrait.add_child(character.portrait)
+#		else:
+#			match count:
+#				1:
+#					teammate1_portrait.add_child(get_player_node_inactive(character.player_ID, char_ref).small_portrait)
+#					count += 1
+#				2:
+#					teammate2_portrait.add_child(get_player_node_inactive(character.player_ID, char_ref).small_portrait)
+		
+
+	
+func team_cooldown_update(character):
+	return
+# warning-ignore:unreachable_code
+
+	var teammate1_cooldown = HUD.get_node("P" + str(character.player_ID + 1) + "HUDRect/Portrait/Teammate1/Cooldown")
+	teammate1_cooldown.text = ""
+	var teammate2_cooldown = HUD.get_node("P" + str(character.player_ID + 1) + "HUDRect/Portrait/Teammate2/Cooldown")
+	teammate2_cooldown.text = ""
+	
+	var teammates = Globals.get("P" + str(character.player_ID + 1) + "_char_ref").duplicate()
+	teammates.erase(character.UniqChar.CHAR_REF)
+	
+	var count := 1
+	
+	for teammate in teammates:
+		if teammate in character.team_cooldowns.keys():
+			match count:
+				1:
+					teammate1_cooldown.text = str(int(character.team_cooldowns.teammate / 60))
+					count += 1
+				2:
+					teammate2_cooldown.text = str(int(character.team_cooldowns.teammate / 60))
+
+
 		
 				
 func res_gauge_update(character):

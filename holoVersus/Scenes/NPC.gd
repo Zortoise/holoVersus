@@ -3073,18 +3073,18 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						velocity.rotate(pushback_dir)
 							
 				# if attacking at the corner unblocked, pushback depending on defender's RES Gauge
-				elif Em.hit.CORNERED in hit_data:
-					var pushback_strength: int = CORNER_PUSHBACK
-					if defender.current_res_gauge > 0:
-						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
-								defender.get_res_gauge_percent_above())
-					match Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.TWO, facing):
-						Em.compass.E:
-							if defender.position.x < Globals.Game.left_corner:
-								velocity.x += pushback_strength
-						Em.compass.W:
-							if defender.position.x > Globals.Game.right_corner:
-								velocity.x -= pushback_strength
+#				elif Em.hit.CORNERED in hit_data:
+#					var pushback_strength: int = CORNER_PUSHBACK
+#					if defender.current_res_gauge > 0:
+#						pushback_strength = FMath.f_lerp(CORNER_PUSHBACK, FMath.percent(CORNER_PUSHBACK, 400), \
+#								defender.get_res_gauge_percent_above())
+#					match Globals.split_angle(hit_data[Em.hit.ANGLE_TO_ATKER], Em.angle_split.TWO, facing):
+#						Em.compass.E:
+#							if defender.position.x < Globals.Game.left_corner:
+#								velocity.x += pushback_strength
+#						Em.compass.W:
+#							if defender.position.x > Globals.Game.right_corner:
+#								velocity.x -= pushback_strength
 								
 			Em.block_state.BLOCKED, Em.block_state.PARRIED:
 				

@@ -52,7 +52,8 @@ const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD
 #const HITSTUN_REDUCTION_AT_MAX_RES = 70 # max reduction in hitstun when defender's RES Gauge is at 200%, heavy characters have lower
 #const KB_BOOST_AT_MAX_RES = 400 # max increase of knockback when defender's RES Gauge is at 200%, light characters have higher
 
-const DAMAGE_VALUE_LIMIT = 1100
+const DAMAGE_VALUE_LIMIT = 1000
+const VULNERABILITY_MOD = 110 # multiply most taken damage
 
 const RES_REGEN_AMOUNT = 15 # exact RES regened per frame when RES < 100%
 const GRD_BLOCK_RES_COST = 17 # exact RES loss per frame when blocking on ground
