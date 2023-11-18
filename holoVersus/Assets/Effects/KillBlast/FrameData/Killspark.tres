@@ -1,0 +1,53 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Killspark": {
+"duration": 30,
+"hframes": 6,
+"loop": false,
+"spritesheet": "KillsparkSprite",
+"timestamps": {
+0: {
+"frame": 0
+},
+2: {
+"frame": 1
+},
+4: {
+"frame": 2
+},
+6: {
+"frame": 3
+},
+8: {
+"frame": 4
+},
+10: {
+"frame": 5
+},
+12: {
+"frame": 6
+},
+15: {
+"frame": 7
+},
+18: {
+"frame": 8
+},
+21: {
+"frame": 9
+},
+24: {
+"frame": 10
+},
+27: {
+"frame": 11
+}
+},
+"vframes": 2
+}
+}

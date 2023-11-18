@@ -1770,7 +1770,6 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 					{"facing":Character.facing, "rot":PI/2}, Character.palette_ref, Character.mob_ref)
 			Character.play_audio("water14", {})
 		"SP6[ex]SeqE":  # you hit ground
-			Partner.sequence_hit(0)
 			Character.velocity.set_vector(0, 0)
 			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
@@ -1781,6 +1780,7 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 			Globals.Game.set_screenshake()
 			Character.play_audio("impact41", {"vol":-15, "bus":"LowPass"})
 			Character.play_audio("rock3", {})
+			Partner.sequence_hit(0)
 			
 							
 func end_sequence_step(trigger = null): # this is ran at the end of certain sequence_step, or to end a trigger sequence_step

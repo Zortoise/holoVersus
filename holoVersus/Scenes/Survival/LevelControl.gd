@@ -111,7 +111,7 @@ func init():
 		else:
 			Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
 			starting_prism = FMath.percent(UniqLevel.STARTING_PRISM, 50)
-	Globals.Game.stage_ref = UniqLevel.STAGE
+	Globals.stage_ref = UniqLevel.STAGE
 	
 #	load_music()
 	if !BGM.has_custom:

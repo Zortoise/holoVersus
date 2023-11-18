@@ -2926,6 +2926,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if hit_data[Em.hit.LETHAL_HIT]:
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
 			modulate_play("stun_flash")
 			if !$HitStunTimer.is_running(): # death from chip damage
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs as well
@@ -3413,6 +3414,10 @@ func calculate_knockback_strength(hit_data) -> int:
 
 	if "MOB_WEIGHT_KB_MOD" in UniqChar: # mobs can have different weights
 		knockback_strength = FMath.percent(knockback_strength, get_stat("MOB_WEIGHT_KB_MOD"))
+		
+	# moves with SS_LAUNCH always launch when sweetspotted
+	if guardbroken and hit_data[Em.hit.SWEETSPOTTED] and Em.atk_attr.SS_LAUNCH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		knockback_strength = int(max(knockback_strength, LAUNCH_THRESHOLD))
 	
 	return knockback_strength
 	
@@ -3819,6 +3824,7 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 			seq_user.hitstop = hitstop
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
 		else:
 			hitstop = seq_hit_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop
@@ -3863,6 +3869,7 @@ func sequence_launch():
 			hitstop = LETHAL_HITSTOP
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
 		else:
 			hitstop = seq_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop

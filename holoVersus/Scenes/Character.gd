@@ -873,7 +873,6 @@ func simulate(new_input_state = {"pressed" : [], "just_pressed" : [], "just_rele
 #			elif UniqChar.CHAR_REF == Globals.get("P" + str(player_ID + 1) + "_char_ref")[1]:
 #				tag(Globals.get("P" + str(player_ID + 1) + "_char_ref")[0])
 				
-			
 			pass
 	
 		
@@ -6479,6 +6478,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 #						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
 #							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 #								active_cancel = true
+						if hit_data[Em.hit.KB] >= LAUNCH_THRESHOLD and \
+								!Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+							active_cancel = true
 						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.HEAVY:
@@ -7249,6 +7251,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Globals.Game.set_screenshake()
 			modulate_play("lethal_flash")
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
 #		if Globals.survival_level != null:
 ##			add_status_effect(Em.status_effect.SURVIVAL_GRACE, null)
 #			status_effect_to_add.append([Em.status_effect.SURVIVAL_GRACE, null])
@@ -7412,12 +7415,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if UniqChar.has_method("being_hit2"):	
 		UniqChar.being_hit2(hit_data) # reaction, can change hit_data from there
 	
-	# ---------------------------------------------------------------------------------------------------
-	
-	if !hit_data[Em.hit.LETHAL_HIT]: # put this after cosmetic hit effects and hitstop
-		lethal_flag = false
-	else:
-		lethal_flag = true
 	
 	# HITSPARK ---------------------------------------------------------------------------------------------------
 	
@@ -7426,7 +7423,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	else:
 		generate_blockspark(hit_data)
 		
-	if hit_data[Em.hit.STUN]: # stunspark is on top of regular hitspark
+	if hit_data[Em.hit.LETHAL_HIT] and!lethal_flag:
+#		if attacker.player_ID == 1:
+#			Globals.Game.spawn_SFX("Killspark", "Killspark", hit_data[Em.hit.HIT_CENTER], aux_data, "blue")
+#		else:
+		Globals.Game.spawn_SFX("Killspark", "Killspark", hit_data[Em.hit.HIT_CENTER], {"v_mirror":Globals.Game.rng_bool(), \
+				"ignore_freeze":true})
+	elif hit_data[Em.hit.STUN]: # stunspark is on top of regular hitspark
 		Globals.Game.spawn_SFX("Stunspark", "Stunspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
 				"v_mirror":Globals.Game.rng_bool()})
 	elif hit_data[Em.hit.CRUSH]:
@@ -7437,6 +7440,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				"v_mirror":Globals.Game.rng_bool()})	
 	
 	# ---------------------------------------------------------------------------------------------------
+	
+	if !hit_data[Em.hit.LETHAL_HIT]: # put this after cosmetic hit effects and hitstop
+		lethal_flag = false
+	else:
+		lethal_flag = true	
 			
 #	var knockback_unit_vec := Vector2(1, 0).rotated(knockback_dir)
 
@@ -7881,9 +7889,6 @@ func calculate_knockback_strength(hit_data) -> int:
 			
 	if Em.hit.AUTOCHAIN in hit_data:
 		return knockback_strength
-		
-#	if hit_data[Em.hit.SWEETSPOTTED]:
-#		knockback_strength = FMath.percent(knockback_strength, SWEETSPOT_KB_MOD)
 	
 	if hit_data[Em.hit.STUN]:
 		knockback_strength += LAUNCH_THRESHOLD # increased knockback on a Break hit
@@ -7912,6 +7917,10 @@ func calculate_knockback_strength(hit_data) -> int:
 	if Globals.survival_level != null and !hit_data[Em.hit.WEAK_HIT]: # all attacks will Launch during Survival Mode
 		var min_KB = FMath.percent(LAUNCH_THRESHOLD, 150)
 		knockback_strength = int(max(knockback_strength, min_KB))
+		
+	# moves with SS_LAUNCH always launch when sweetspotted
+	if hit_data[Em.hit.SWEETSPOTTED] and Em.atk_attr.SS_LAUNCH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		knockback_strength = int(max(knockback_strength, LAUNCH_THRESHOLD))
 		
 	
 	return knockback_strength
@@ -8476,6 +8485,9 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 			Globals.Game.set_screenshake()
 			modulate_play("lethal_flash")
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
+			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"v_mirror":Globals.Game.rng_bool(), \
+					"ignore_freeze":true})
 		else:
 			hitstop = seq_hit_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop
@@ -8521,6 +8533,9 @@ func sequence_launch():
 			Globals.Game.set_screenshake()
 			modulate_play("lethal_flash")
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
+			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
+			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"v_mirror":Globals.Game.rng_bool(), \
+					"ignore_freeze":true})
 		else:
 			hitstop = seq_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop

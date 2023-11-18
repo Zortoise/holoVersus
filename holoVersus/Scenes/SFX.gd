@@ -64,6 +64,8 @@ func init(in_anim: String, in_sfx_ref: String, in_position: Vector2, aux_data: D
 			sticky_offset = in_position - Globals.Game.get_player_node(sticky_ID).position
 	if "field" in aux_data:
 		field = true
+	if "ignore_freeze" in aux_data:
+		ignore_freeze = true
 		
 	if palette_ref != null:
 		palette()

@@ -34,6 +34,8 @@ const NPC_BLOCK_KB_STR = 300 * FMath.S # knockback strength is fixed
 const NPC_HITSTOP = 10 # fixed hitstop, for NPC defender only, attacker take no hitstop
 const NPC_BLOCK_HITSTOP = 5
 
+const LAUNCH_THRESHOLD = 450 * FMath.S
+
 const BLOCK_ATKER_PUSHBACK = 450 * FMath.S # how much the attacker is pushed away when blocked, fixed
 const BLOCK_KNOCKBACK_MOD = 200 # % of knockback defender experience when blocked
 const PARRY_ATKER_PUSHBACK = 600 * FMath.S # how much the attacker is pushed away when parried, fixed
@@ -3031,6 +3033,9 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 #						if hit_data[Em.hit.SWEETSPOTTED] or hit_data[Em.hit.PUNISH_HIT]: # for sweetspotted/punish Normals, allow jump/dash cancel on active
 #							if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 #								active_cancel = true
+						if hit_data[Em.hit.KB] >= LAUNCH_THRESHOLD and \
+								!Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+							active_cancel = true
 						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.HEAVY:
