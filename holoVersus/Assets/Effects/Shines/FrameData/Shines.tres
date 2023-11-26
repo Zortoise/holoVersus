@@ -12,34 +12,34 @@ frame_data = {
 "spritesheet": "ShinesSprite",
 "timestamps": {
 0: {
-"frame": 7
+"frame": 16
 },
 2: {
-"frame": 8
+"frame": 17
 },
 4: {
-"frame": 9
+"frame": 18
 },
 6: {
-"frame": 10
+"frame": 19
 },
 8: {
-"frame": 11
+"frame": 20
 },
 10: {
-"frame": 12
+"frame": 21
 },
 12: {
-"frame": 13
+"frame": 22
 },
 14: {
-"frame": 14
+"frame": 23
 },
 16: {
-"frame": 15
+"frame": 24
 }
 },
-"vframes": 3
+"vframes": 5
 },
 "Reset": {
 "duration": 15,
@@ -69,6 +69,42 @@ frame_data = {
 "frame": 6
 }
 },
-"vframes": 3
+"vframes": 5
+},
+"SmallFlash": {
+"duration": 18,
+"hframes": 6,
+"loop": false,
+"spritesheet": "ShinesSprite",
+"timestamps": {
+0: {
+"frame": 7
+},
+2: {
+"frame": 8
+},
+4: {
+"frame": 9
+},
+6: {
+"frame": 10
+},
+8: {
+"frame": 11
+},
+10: {
+"frame": 12
+},
+12: {
+"frame": 13
+},
+14: {
+"frame": 14
+},
+16: {
+"frame": 15
+}
+},
+"vframes": 5
 }
 }

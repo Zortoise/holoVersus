@@ -463,50 +463,81 @@ var modulate_animations = {
 			},
 		}
 	},
-	"EX_flash" : {
+	"EX_flash" :{
 		"priority" : priority.FLASH,
-		"duration": 4,
+		"duration": 13,
 		"loop" : false,
-		"followup" : "EX_flash2",
 		"timestamps" : {
-			0 : # this is the timestamp of the key
+			0 :
 			{
-				"modulate" : Color(4.0, 4.0, 4.0),
+				"modulate" : Color(3.0, 3.0, 3.0),
 			},
-		}
-	},
-	"EX_flash2" : {
-		"priority" : priority.ACTION,
-		"duration": 18,
-		"loop" : true,
-		"afterimage_trail" : 0,
-		"timestamps" : {
-			0 : # this is the timestamp of the key
+#			3 :
+#			{
+#				"modulate" : Color(3.0, 3.0, 3.0),
+#			},
+			5 :
 			{
-				"modulate" : Color(1.2, 0.8, 0.8), # red
+				"modulate" : Color(2.0, 2.0, 2.0),
 			},
-			3 :
+			7 :
 			{
-				"modulate" : Color(1.2, 1.2, 0.8), # yellow
-			},
-			6 :
-			{
-				"modulate" : Color(0.8, 1.2, 0.8), # green
+				"modulate" : Color(1.75, 1.75, 1.75),
 			},
 			9 :
 			{
-				"modulate" : Color(0.8, 1.2, 1.2), # cyan
+				"modulate" : Color(1.5, 1.5, 1.5),
 			},
-			12 :
+			11 :
 			{
-				"modulate" : Color(0.8, 0.8, 1.2), # blue
-			},
-			15 :
-			{
-				"modulate" : Color(1.2, 0.8, 1.2), # purple
+				"modulate" : Color(1.25, 1.25, 1.25),
 			},
 		}
 	},
+#	"EX_flash" : {
+#		"priority" : priority.FLASH,
+#		"duration": 4,
+#		"loop" : false,
+#		"followup" : "EX_flash2",
+#		"timestamps" : {
+#			0 : # this is the timestamp of the key
+#			{
+#				"modulate" : Color(4.0, 4.0, 4.0),
+#			},
+#		}
+#	},
+#	"EX_flash2" : {
+#		"priority" : priority.ACTION,
+#		"duration": 18,
+#		"loop" : true,
+#		"afterimage_trail" : 0,
+#		"timestamps" : {
+#			0 : # this is the timestamp of the key
+#			{
+#				"modulate" : Color(1.2, 0.8, 0.8), # red
+#			},
+#			3 :
+#			{
+#				"modulate" : Color(1.2, 1.2, 0.8), # yellow
+#			},
+#			6 :
+#			{
+#				"modulate" : Color(0.8, 1.2, 0.8), # green
+#			},
+#			9 :
+#			{
+#				"modulate" : Color(0.8, 1.2, 1.2), # cyan
+#			},
+#			12 :
+#			{
+#				"modulate" : Color(0.8, 0.8, 1.2), # blue
+#			},
+#			15 :
+#			{
+#				"modulate" : Color(1.2, 0.8, 1.2), # purple
+#			},
+#		}
+#	},
 	"blue_reset" : {
 		"priority" : priority.ACTION,
 		"duration": 24,
@@ -697,7 +728,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"stun" : {
+	"stun_yellow" : {
 		"priority" : priority.STUN,
 		"duration": 12,
 		"loop" : true,
@@ -716,7 +747,7 @@ var modulate_animations = {
 			},
 		},
 	},
-	"crush" : {
+	"stun_red" : {
 		"priority" : priority.STUN,
 		"duration": 12,
 		"loop" : true,

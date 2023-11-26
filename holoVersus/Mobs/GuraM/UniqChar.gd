@@ -1558,7 +1558,8 @@ func unique_flash():
 	match Character.new_state:
 		Em.char_state.GRD_ATK_ACTIVE:
 			if Animator.query_to_play(["SP9Active"]):
-				if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S:
+				if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S and \
+						Character.is_on_ground():
 					Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
 							{"facing":-Character.facing, "grounded":true}, Character.palette_ref, Character.mob_ref)
 			
@@ -2217,27 +2218,27 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"Dash":
 			Character.velocity.x = FMath.percent(500 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD"))
 			Character.anim_friction_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing, "grounded":true})
 		"aDash":
 			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD")), 0)
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 			Character.air_dashed = true
 		"aDashD":
 			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD")), 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 			Character.air_dashed = true
 		"aDashU":
 			Character.velocity.set_vector(FMath.percent(400 * FMath.S * Character.facing, Character.get_stat("SPEED_MOD")), 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})
 			Character.air_dashed = true
 		

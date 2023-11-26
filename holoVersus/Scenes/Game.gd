@@ -901,11 +901,11 @@ func simulate(rendering = true):
 		else:
 			inactive_player.simulate()
 			
-	for npc in $NPCs.get_children():
-		if "free" in npc and npc.free:
-			npc.free() # remove freed NPCs
-		else:
-			npc.simulate()
+#	for npc in $NPCs.get_children():
+#		if "free" in npc and npc.free:
+#			npc.free() # remove freed NPCs
+#		else:
+#			npc.simulate()
 			
 	for assist in $Assists.get_children():
 		if "free" in assist and assist.free:
@@ -947,8 +947,8 @@ func simulate(rendering = true):
 		
 	# no simulate_after for inactive characters
 		
-	for npc in $NPCs.get_children():
-		npc.simulate_after()
+#	for npc in $NPCs.get_children():
+#		npc.simulate_after()
 			
 	for assist in $Assists.get_children():
 		assist.simulate_after()
@@ -1064,7 +1064,7 @@ func save_state(timestamp):
 			},
 		"current_rng_seed" : null,
 		"player_data" : {},
-		"npc_data" : [],
+#		"npc_data" : [],
 		"assist_data" : [],
 		"afterimage_data" : [],
 		"entities_back_data" : [],
@@ -1108,8 +1108,8 @@ func save_state(timestamp):
 		else:
 			print("Error: Player ID " + str(inactive_player.player_ID) + " not found in game_state.player_data when loading teammates.")
 		
-	for npc in $NPCs.get_children():
-		game_state.npc_data.append(npc.save_state())
+#	for npc in $NPCs.get_children():
+#		game_state.npc_data.append(npc.save_state())
 		
 	for assist in $Assists.get_children():
 		game_state.assist_data.append(assist.save_state())
@@ -1233,8 +1233,8 @@ func load_state(game_state, loading_autosave = true):
 #		player.load_state(loaded_game_state.player_data[player.player_ID])
 	
 	# remove children
-	for npc in $NPCs.get_children():
-		npc.free()
+#	for npc in $NPCs.get_children():
+#		npc.free()
 	for assist in $Assists.get_children():
 		assist.free()
 	for afterimage in $Afterimages.get_children():
@@ -1262,10 +1262,10 @@ func load_state(game_state, loading_autosave = true):
 		
 		
 	# re-add children
-	for state_data in loaded_game_state.npc_data:
-		var new_npc = Loader.loaded_NPC_scene.instance()
-		$NPCs.add_child(new_npc)
-		new_npc.load_state(state_data)
+#	for state_data in loaded_game_state.npc_data:
+#		var new_npc = Loader.loaded_NPC_scene.instance()
+#		$NPCs.add_child(new_npc)
+#		new_npc.load_state(state_data)
 		
 	for state_data in loaded_game_state.assist_data:
 		var new_assist = Loader.loaded_assist_scene.instance()
@@ -1528,8 +1528,8 @@ func detect_hit():
 				
 			mob_hitboxes.append(hitbox)
 			
-	var NPCs = $NPCs.get_children()
-	NPCs.append_array($Assists.get_children())
+	var NPCs = $Assists.get_children()
+#	NPCs.append_array($Assists.get_children())
 	
 	for npc in NPCs:
 		var polygons_queried = npc.query_polygons()
@@ -2217,13 +2217,21 @@ func damage_update(character, damage: int = 0):
 				
 func ult_gauge_update(character):
 	
-	var gauge = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/UltimateGauge")
+#	var gauge = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/UltimateGauge")
+	var gauge = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/GaugesUnder/ULTGauge")
 	gauge.value = int((character.current_ult_gauge * 1000) / character.MAX_ULT_GAUGE)
 	
-	if character.current_ult_gauge > 0:
-		gauge.show()
+	if gauge.value >= 1000:
+		gauge.self_modulate.a = 0.7
+		gauge.get_node("ULTLabel").show()
 	else:
-		gauge.hide()
+		gauge.self_modulate.a = 1
+		gauge.get_node("ULTLabel").hide()
+	
+#	if character.current_ult_gauge > 0:
+#		gauge.show()
+#	else:
+#		gauge.hide()
 #	if character.install_time != null and character.get_node("InstallTimer").is_running():
 #		install_timer.show()
 #		install_timer.value = int((character.get_node("InstallTimer").time * 100) / character.install_time)
@@ -2555,9 +2563,9 @@ func get_player_node_inactive(player_ID: int, char_ref: String):
 	
 func get_NPC_node(NPC_ID):
 	if NPC_ID == null: return null
-	for npc in $NPCs.get_children():
-		if npc.NPC_ID == NPC_ID:
-			return npc
+#	for npc in $NPCs.get_children():
+#		if npc.NPC_ID == NPC_ID:
+#			return npc
 	for npc in $Assists.get_children():
 		if npc.NPC_ID == NPC_ID:
 			return npc
@@ -2706,11 +2714,11 @@ func rng_array(array: Array):
 			
 # SPAWN STUFF --------------------------------------------------------------------------------------------------
 
-func spawn_NPC(master_ID: int, NPC_ref: String, out_position, start_facing, palette_ref = null):
-	var npc = Loader.loaded_NPC_scene.instance()
-	$NPCs.add_child(npc)
-	npc.init(master_ID, NPC_ref, out_position, start_facing, palette_ref)
-	return npc
+#func spawn_NPC(master_ID: int, NPC_ref: String, out_position, start_facing, palette_ref = null):
+#	var npc = Loader.loaded_NPC_scene.instance()
+#	$NPCs.add_child(npc)
+#	npc.init(master_ID, NPC_ref, out_position, start_facing, palette_ref)
+#	return npc
 	
 	
 func smart_selection(master_ID: int):

@@ -71,6 +71,9 @@ const PARRYING_EX_REGEN_MOD = 600 # increase EX Regen when parrying attack
 #const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
 #const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 
+const ULT_GEN = 0
+#const ULT_GEN = 2000 # amount of Ulimate Gauge gain per frame
+
 const TRANSIT_SDASH = ["BlinkTransit", "EBlinkTransit"] # unique dash transits that you can quick cancel into SDash
 const TRANSIT_DODGE = ["BlinkTransit"] # unique dash transits that you can quick cancel into Dodge
 

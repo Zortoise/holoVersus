@@ -17,7 +17,7 @@ enum knockback_type {FIXED, RADIAL, MIRRORED, VELOCITY}
 enum chain_combo {RESET, NO_CHAIN, WHIFF, NORMAL, HEAVY, SPECIAL, BLOCKED, PARRIED, SUPER}
 enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, SUPER}
 enum js_cancel_target {ALL, NONE, SPECIALS}
-enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL, NOT_FROM_MOVE_REC
+enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, P_SUPERARMOR_STARTUP, P_SUPERARMOR_ACTIVE, 
 		PROJ_ARMOR_ACTIVE, WEAKARMOR_STARTUP, WEAKARMOR_ACTIVE, P_WEAKARMOR_STARTUP, P_WEAKARMOR_ACTIVE
@@ -37,7 +37,7 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # LEDGE_DROP = if move during attack will fall off ledges
 # NO_TURN = prevent turning during startup
 # NO_QUICK_CANCEL = prevent quick canceling during startup
-# NOT_FROM_MOVE_REC = cannot do from cancellable recovery
+# //	NOT_FROM_MOVE_REC = cannot do from cancellable recovery
 # SEMI_INVUL_STARTUP = startup is invulnerable to anything but EX Moves/Supers
 # UNBLOCKABLE = certain attacks that are not physical specials are unblockable
 # SCREEN_SHAKE = cause screen to shake on hit
@@ -96,7 +96,7 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # CROSSUP_PROTECTION = iframes/armor/anti-air will work on cross-up
 # SS_LAUNCH = on sweetspot, knockback is set to at least launch threshold
 
-enum status_effect {LETHAL, STUN, STUN_RECOVER, CRUSH, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED, INVERT_DIR
+enum status_effect {LETHAL, STUN, STUN_RECOVER, RESPAWN_GRACE, POS_FLOW, POISON, CHILL, IGNITE, ENFEEBLE, SLOWED, INVERT_DIR
 		NO_CROSSUP, SCANNED}
 # STUN_RECOVER = get this when you got stunned, remove when out of hitstun and recovery some RES Gauge
 

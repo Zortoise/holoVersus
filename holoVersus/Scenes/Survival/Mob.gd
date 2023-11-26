@@ -18,7 +18,7 @@ const AERIAL_STRAFE_MOD = 50 # reduction of air strafe speed and limit during ae
 const PLAYER_PUSH_SLOWDOWN = 95 # how much characters are slowed when they push against each other
 
 const MIN_HITSTOP = 5
-const MAX_HITSTOP = 13
+const MAX_HITSTOP = 10
 const REPEAT_DMG_MOD = 30 # damage modifier on double_repeat
 const PARTIAL_REPEAT_DMG_MOD = 80
 const HITSTUN_REDUCTION_AT_MAX_RES = 50 # reduction in hitstun when defender's RES Gauge is at 100%
@@ -140,7 +140,7 @@ var velocity_limiter = { # as % of speed, some animations limit max velocity in 
 	"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null
 	}
 
-var afterimage_timer := 0 # for use by unique character node
+#var afterimage_timer := 0 # for use by unique character node
 var monochrome := false
 
 var sprite_texture_ref = { # used for afterimages
@@ -1870,8 +1870,7 @@ func process_afterimage_trail():# process afterimage trail
 func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime: int = 10, \
 		afterimage_shader = Em.afterimage_shader.MASTER): # one afterimage every 3 frames
 			
-	if afterimage_timer <= 0:
-		afterimage_timer = 2
+	if posmod(Globals.Game.frametime, 3) == 0:
 
 # warning-ignore:unassigned_variable
 		var main_color_modulate: Color
@@ -1897,8 +1896,8 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.6, lifetime
 			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, mob_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
-	else:
-		afterimage_timer -= 1
+#	else:
+#		afterimage_timer -= 1
 		
 		
 func afterimage_cancel(starting_modulate_a = 0.5, lifetime: int = 12): # no need color_modulate for now
@@ -1935,7 +1934,7 @@ func launch_trail():
 			Globals.Game.spawn_SFX("DragRocks", "DustClouds", get_feet_pos(), {"back":true, "facing":Globals.Game.rng_facing(), "grounded":true})
 		
 func death_anim():
-	modulate_play("crush")
+	modulate_play("stun_red")
 	if Animator.time > 9:
 		if posmod(Globals.Game.frametime, 5) == 0:
 			play_audio("kill2", {"vol": -5, "bus": "LowPass"})
@@ -2050,7 +2049,7 @@ func query_status_effect_aux(effect):
 	
 func process_status_effects_visual(): # called during hitstop as well
 	for status_effect in status_effects:
-		continue_visual_effect_of_status(status_effect[0])
+		continue_visual_effect_of_status(status_effect)
 
 func process_status_effects_timer(): # reduce lifetime and remove expired status effects (at end of frame)
 #	var effect_to_erase = []
@@ -2072,8 +2071,15 @@ func new_status_effect(effect): # run on frame the status effect is inflicted/st
 		Em.status_effect.LETHAL:
 			Globals.Game.lethalfreeze(get_path())
 		
-func continue_visual_effect_of_status(effect): # run every frame, will not add visual effect if there is already one of higher priority
-	match effect:
+func continue_visual_effect_of_status(status_effect: Array): # run every frame, will not add visual effect if there is already one of higher priority
+	match status_effect[0]:
+		Em.status_effect.STUN:
+#			{"mod_anim" : "stun_yellow", "particle" : ["Sparkle", "yellow"]}
+			modulate_play(status_effect[2].mod_anim)
+			if "particle" in status_effect[2]:
+				particle(status_effect[2].particle[0], "Particles", status_effect[2].particle[1], 4, 1, 25)
+			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
+			sprite_shake()
 		Em.status_effect.POISON:
 			modulate_play("poison")
 			particle("Mote", "Particles", "purple", 4, 1, 25)
@@ -2094,7 +2100,7 @@ func continue_visual_effect_of_status(effect): # run every frame, will not add v
 #			sprite_shake()
 #		Em.status_effect.CRUSH:
 #			if !$ModulatePlayer.playing or !$ModulatePlayer.query(["crush", "stun_flash"]):
-#				modulate_play("crush")
+#				modulate_play("stun_red")
 #			particle("Sparkle", "Particles", "red", 4, 1, 25)
 #			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
 #			sprite_shake()
@@ -2502,7 +2508,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		attacker.target_ID = player_ID # attacker target defender
 		target_ID = attacker.player_ID # target opponent who last attacked you
 	
-	remove_status_effect(Em.status_effect.CRUSH)
+	remove_status_effect(Em.status_effect.STUN)
 	
 	# if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
 	# also no RES drain and RES Swell
@@ -2927,6 +2933,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
+			Globals.Game.spawn_SFX("Killspark", "Killspark", hit_data[Em.hit.HIT_CENTER], {"facing":Globals.Game.rng_facing(), \
+					"v_mirror":Globals.Game.rng_bool()})
 			modulate_play("stun_flash")
 			if !$HitStunTimer.is_running(): # death from chip damage
 				play_audio("rock2", {"vol" : -10}) # do these here for hitgrabs as well
@@ -3605,7 +3613,7 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 		return WEAK_HIT_HITSTOP
 	
 # warning-ignore:integer_division
-	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 90) # scaled, +1 frame of hitstop for each 100 scaled knockback
+	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 100) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
 	if hit_data[Em.hit.SEMI_DISJOINT]: # on semi-disjoint hits, lowest hitstop
 		return MIN_HITSTOP
@@ -3615,7 +3623,7 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 		hitstop_temp = FMath.percent(hitstop_temp, SWEETSPOT_HITSTOP_MOD)
 		
 	hitstop_temp = FMath.round_and_descale(hitstop_temp) # descale it
-	hitstop_temp = int(clamp(hitstop_temp, MIN_HITSTOP, MAX_HITSTOP)) # max hitstop is 13, min hitstop is 5
+	hitstop_temp = int(clamp(hitstop_temp, MIN_HITSTOP, MAX_HITSTOP)) # max hitstop is 10, min hitstop is 5
 			
 #	print(hitstop_temp)
 	return hitstop_temp
@@ -3825,6 +3833,8 @@ func sequence_hit(hit_key: int): # most auto sequences deal damage during the se
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
+			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
+					"v_mirror":Globals.Game.rng_bool()})
 		else:
 			hitstop = seq_hit_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop
@@ -3870,6 +3880,8 @@ func sequence_launch():
 			Globals.Game.set_screenshake()
 			play_audio("lethal1", {"vol" : -5, "bus" : "Reverb"})
 			play_audio("impact44", {"vol" : -5, "bus" : "Reverb"})
+			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
+					"v_mirror":Globals.Game.rng_bool()})
 		else:
 			hitstop = seq_data[Em.move.SEQ_HITSTOP]
 			seq_user.hitstop = hitstop
@@ -3996,8 +4008,6 @@ func _on_SpritePlayer_anim_finished(anim_name):
 						
 			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, mob_ref, null, \
 					1.0, 20, Em.afterimage_shader.WHITE)
-			Globals.Game.spawn_SFX("Killspark", "Killspark", position, {"facing":Globals.Game.rng_facing(), \
-					"v_mirror":Globals.Game.rng_bool()})
 			play_audio("kill2", {})
 			free = true
 		
@@ -4213,7 +4223,7 @@ func save_state():
 		"anim_gravity_mod" : anim_gravity_mod,
 		"anim_friction_mod" : anim_friction_mod,
 		"velocity_limiter" : velocity_limiter,
-		"afterimage_timer" : afterimage_timer,
+#		"afterimage_timer" : afterimage_timer,
 		"launch_starting_rot" : launch_starting_rot,
 		"launchstun_rotate" : launchstun_rotate,
 		"target_ID" : target_ID,
@@ -4298,7 +4308,7 @@ func load_state(state_data):
 	anim_gravity_mod = state_data.anim_gravity_mod
 	anim_friction_mod = state_data.anim_friction_mod
 	velocity_limiter = state_data.velocity_limiter
-	afterimage_timer = state_data.afterimage_timer
+#	afterimage_timer = state_data.afterimage_timer
 	launch_starting_rot = state_data.launch_starting_rot
 	launchstun_rotate = state_data.launchstun_rotate
 	target_ID = state_data.target_ID

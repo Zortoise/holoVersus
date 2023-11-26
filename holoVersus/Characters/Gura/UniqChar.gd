@@ -445,7 +445,7 @@ func process_instant_actions():
 #	Character.unique_data.nibbler_cancel = max(Character.unique_data.nibbler_cancel - 1, 0)
 	# nibbler_cancel is a timer, if 0 will not cancel, cannot use bool since it is set during detect_hit() and need to last 2 turns
 	
-	if !Character.get_node("RespawnTimer").is_running() and !Character.get_node("HitStunTimer").is_running():
+	if !Character.get_node("RespawnTimer").is_running() and !Character.is_hitstunned_or_sequenced():
 				
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
@@ -766,10 +766,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 			if new_state == Em.char_state.AIR_C_REC and !Character.grounded: continue
 			
 			if Character.grounded and attack_ref in STARTERS:
-				if new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_C_REC] and \
-						!Animator.query_to_play(["SoftLanding"]) and \
-						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
-					continue # certain moves cannot be performed during cancellable recovery
+#				if new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_C_REC] and \
+#						!Animator.query_to_play(["SoftLanding"]) and \
+#						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
+#					continue # certain moves cannot be performed during cancellable recovery
 				if !Character.test_dash_attack(attack_ref):
 					continue # if dash attacking, cannot use attacks already used in the chain
 				if Character.is_ex_valid(attack_ref):
@@ -791,9 +791,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if (air_atk_ref) in STARTERS and Character.test_aerial_memory(air_atk_ref):
-					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
-							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(air_atk_ref):
-						continue # certain moves cannot be performed during cancellable recovery
+#					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
+#							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(air_atk_ref):
+#						continue # certain moves cannot be performed during cancellable recovery
 					if !Character.test_dash_attack(air_atk_ref):
 						continue # if dash attacking, cannot use attacks already used in the chain
 					if Character.is_ex_valid(air_atk_ref):
@@ -959,9 +959,9 @@ func afterimage_trail():# process afterimage trail
 		Em.char_state.AIR_C_REC:
 			if Animator.query_to_play(["DodgeCRec"]):
 				Character.afterimage_trail()
-		Em.char_state.SEQ_USER:
-			if Animator.query_to_play(["SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD"]):
-				Character.afterimage_trail()
+#		Em.char_state.SEQ_USER:
+#			if Animator.query_to_play(["SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD"]):
+#				Character.afterimage_trail()
 		Em.char_state.AIR_ATK_ACTIVE:
 			if Animator.query_to_play(["aSP9cActive"]):
 				Character.afterimage_trail()
@@ -974,9 +974,9 @@ func afterimage_trail():# process afterimage trail
 func unique_flash():
 	match Character.new_state:
 		Em.char_state.AIR_REC:
-			if Animator.query_to_play(["SDash"]):
-				if Character.grounded and posmod(Globals.Game.frametime, 5) == 0: # drag rocks on ground
-					Globals.Game.spawn_SFX("DragRocks", "DustClouds", Character.get_feet_pos(), {"facing":Globals.Game.rng_facing()})
+			if Character.grounded and Animator.query_to_play(["SDash"]):
+				if posmod(Globals.Game.frametime, 5) == 0 and Character.is_on_ground(): # drag rocks on ground
+					Globals.Game.spawn_SFX("DragRocks", "DustClouds", Character.get_feet_pos(), {"facing":Globals.Game.rng_facing(), "grounded":true})
 		Em.char_state.GRD_ATK_STARTUP:
 			if Animator.query_to_play(["SP1[c2]Startup", "SP1[u][c2]Startup"]):
 				Character.get_node("ModulatePlayer").play("darken")
@@ -988,10 +988,11 @@ func unique_flash():
 				if Animator.time <= 10:
 					Character.particle("WaterSparkle", "WaterSparkle", Character.palette_number, 4, 2, 25, false, true)
 		Em.char_state.GRD_ATK_ACTIVE:
-			if Animator.query_to_play(["SP9Active"]):
-				if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S:
+			if Character.grounded and Animator.query_to_play(["SP9Active"]):
+				if Animator.time != 0 and posmod(Animator.time, 2) == 0 and abs(Character.velocity.x) >= 800 * FMath.S and \
+						Character.is_on_ground():
 					Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
-							{"facing":-Character.facing}, Character.palette_number, NAME)
+							{"facing":-Character.facing, "grounded":true}, Character.palette_number, NAME)
 
 			
 # GET DATA --------------------------------------------------------------------------------------------------
@@ -1311,9 +1312,9 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 		"SP6[ex]SeqE":  # you hit ground
 			Character.velocity.set_vector(0, 0)
 			Partner.move_sequence_player_by(Vector2(0, Character.get_feet_pos().y - Partner.get_feet_pos().y)) # move opponent down to your level
-			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "rot":PI/2}, \
 					Character.get_default_hitspark_palette())
 			Globals.Game.set_screenshake()
@@ -1323,8 +1324,8 @@ func start_sequence_step(): # this is ran at the start of every sequence_step
 		"aSP6[ex]SeqE":  # parther hit the ground but not you
 			Character.velocity.set_vector(0, 0)
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Partner.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
-			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing})
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
+			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Partner.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			Globals.Game.spawn_SFX("HitsparkD", "HitsparkD", Partner.get_feet_pos(), {"facing":Character.facing, "rot":PI/2}, \
 					Character.get_default_hitspark_palette())
 			Globals.Game.set_screenshake()
@@ -2087,12 +2088,12 @@ func _on_SpritePlayer_anim_started(anim_name):
 #				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 			Character.velocity.x = speed_target
 			Character.anim_friction_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "GroundDashDust", "DustClouds", Character.get_feet_pos(), \
 				{"facing":Character.facing})
 		"Dash[h]":
 			Character.anim_friction_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 		"aDash":
 			Character.lose_one_air_dash()
 			Character.aerial_memory = []
@@ -2101,7 +2102,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 #				speed_target = FMath.percent(speed_target, get_stat("AWAY_SPEED_MOD"))
 			Character.velocity.set_vector(speed_target, 0)
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing})
 		"aDashD":
 			Character.lose_one_air_dash()
@@ -2112,7 +2113,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.set_vector(speed_target, 0)
 			Character.velocity.rotate(26 * Character.facing)
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":PI/7})
 		"aDashU":
 			Character.lose_one_air_dash()
@@ -2123,7 +2124,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.set_vector(speed_target, 0)
 			Character.velocity.rotate(-26 * Character.facing)
 			Character.anim_gravity_mod = 0
-			Character.afterimage_timer = 1 # sync afterimage trail
+#			Character.afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", Character.position, {"facing":Character.facing, "rot":-PI/7})
 			
 		"L1Startup":
@@ -2235,39 +2236,39 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", Animator.query_point("entityspawn"), {"charge_lvl" : 1}, \
 					Character.palette_number, NAME)
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c2]Active":
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 2}, Character.palette_number, NAME).entity_ID
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[c3]Active":
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 3}, Character.palette_number, NAME).entity_ID
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[ex]Active":
 			Character.velocity.x += Character.facing * FMath.percent(Character.get_stat("SPEED"), 50)
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 4}, Character.palette_number, NAME).entity_ID
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			
 		"SP1[u][c1]Active": # spawn projectile at EntitySpawn
 			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 1, "alt_aim" : true}, Character.palette_number, NAME)
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c2]Active":
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 2, "alt_aim" : true}, Character.palette_number, NAME).entity_ID
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][c3]Active":
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 3, "alt_aim" : true}, Character.palette_number, NAME).entity_ID
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"SP1[u][ex]Active":
 			Character.unique_data.last_trident = Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
 					Animator.query_point("entityspawn"), {"charge_lvl" : 4, "alt_aim" : true}, Character.palette_number, NAME).entity_ID
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 			
 		"aSP1[c1]Active":
 			Globals.Game.spawn_entity(Character.player_ID, "TridentProj", \
@@ -2377,7 +2378,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.anim_gravity_mod = 0
 			Character.anim_friction_mod = 0
 			if Character.grounded:
-				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+				Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP5b[ex]Active":
 #			Character.velocity.x = FMath.percent(Character.velocity.x, 50)
 			Character.anim_gravity_mod = 0
@@ -2438,7 +2439,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP8Active":
 			Character.velocity.set_vector(0, 0)
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
 		"SP8bActive":
 			Character.velocity.set_vector(0, 0)
 			var target = Globals.Game.get_entity_node(Character.unique_data.groundfin_target)
@@ -2449,7 +2450,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 					Character.set_true_position()
 				target.UniqEntity.kill()
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Character.get_feet_pos(), \
-					{"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
 			Character.play_audio("water6", {"vol" : -18})
 			Character.play_audio("water4", {"vol" : -15})
 			
@@ -2459,7 +2460,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Character.velocity.x = 800 * FMath.S * Character.facing
 			Character.anim_friction_mod = 0
 			Globals.Game.spawn_SFX("WaterBurst", "WaterBurst", Character.get_feet_pos(), \
-					{"facing":-Character.facing}, Character.palette_number, NAME)
+					{"facing":-Character.facing, "grounded":true}, Character.palette_number, NAME)
 		"SP9Rec":
 			Character.anim_friction_mod = 150
 		"SP9aStartup":
@@ -2473,10 +2474,10 @@ func _on_SpritePlayer_anim_started(anim_name):
 			Globals.Game.spawn_SFX("WaterJet", "WaterJet", Animator.query_point("sfxspawn"), {"facing":Character.facing}, \
 					Character.palette_number, NAME)
 		"SP9bActive":
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP9cActive":
 			Character.velocity.y = -1000 * FMath.S
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Character.get_feet_pos(), {"facing":Character.facing, "grounded":true})
 		"aSP9c[r]Active":
 			Character.anim_gravity_mod = 50
 		"aSP9c[r]bActive":
@@ -2484,16 +2485,16 @@ func _on_SpritePlayer_anim_started(anim_name):
 		"SP9c[r]Rec":
 			Globals.Game.spawn_SFX("BounceDust", "DustClouds", Character.get_feet_pos(), {"grounded":true})
 			Globals.Game.spawn_SFX("BigSplash", "BigSplash", Animator.query_point("sfxspawn"), \
-					{"facing":Globals.Game.rng_facing()}, Character.palette_number, NAME)
+					{"facing":Globals.Game.rng_facing(), "grounded":true}, Character.palette_number, NAME)
 			Character.play_audio("water7", {"vol" : -12})
 		"SP9dActive":
 			Globals.Game.spawn_entity(Character.player_ID, "WaterDrive", Animator.query_point("entityspawn"), {}, \
 					Character.palette_number, NAME)
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing, "grounded":true})
 		"SP9d[u]Active":
 			Globals.Game.spawn_entity(Character.player_ID, "WaterDrive", Animator.query_point("entityspawn"), {"alt_aim": true}, \
 					Character.palette_number, NAME)
-			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing})
+			Globals.Game.spawn_SFX("SpecialDust", "DustClouds", Animator.query_point("sfxspawn"), {"facing":Character.facing, "grounded":true})
 			
 	start_audio(anim_name)
 

@@ -65,7 +65,7 @@ var anim_friction_mod := 100 # set to percent during certain special states, lik
 var velocity_limiter = { # as % of speed, some animations limit max velocity in a certain direction, if null means no limit
 	"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null
 	}
-var afterimage_timer := 0 # for use by unique character node
+#var afterimage_timer := 0 # for use by unique character node
 var monochrome := false
 
 var sprite_texture_ref = { # used for afterimages, each contain spritesheet_filename, a string ref to the spritesheet in loaded data
@@ -784,8 +784,7 @@ func process_afterimage_trail():# process afterimage trail
 func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime: int = 10, \
 		afterimage_shader = Em.afterimage_shader.MASTER): # one afterimage every 3 frames
 			
-	if afterimage_timer <= 0:
-		afterimage_timer = 2
+	if posmod(Globals.Game.frametime, 3) == 0:
 
 # warning-ignore:unassigned_variable
 		var main_color_modulate: Color
@@ -809,8 +808,8 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 			Globals.Game.spawn_afterimage(NPC_ID, Em.afterimage_type.NPC, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_ref, NPC_ref, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
-	else:
-		afterimage_timer -= 1
+#	else:
+#		afterimage_timer -= 1
 		
 		
 func afterimage_cancel(starting_modulate_a = 0.4, lifetime: int = 12): # no need color_modulate for now
@@ -1794,7 +1793,7 @@ func save_state():
 		"anim_gravity_mod" : anim_gravity_mod,
 		"anim_friction_mod" : anim_friction_mod,
 		"velocity_limiter" : velocity_limiter,
-		"afterimage_timer" : afterimage_timer,
+#		"afterimage_timer" : afterimage_timer,
 		"launch_starting_rot" : launch_starting_rot,
 		"launchstun_rotate" : launchstun_rotate,
 		"seq_partner_ID" : seq_partner_ID,
@@ -1847,7 +1846,7 @@ func load_state(state_data):
 	anim_gravity_mod = state_data.anim_gravity_mod
 	anim_friction_mod = state_data.anim_friction_mod
 	velocity_limiter = state_data.velocity_limiter
-	afterimage_timer = state_data.afterimage_timer
+#	afterimage_timer = state_data.afterimage_timer
 	launch_starting_rot = state_data.launch_starting_rot
 	launchstun_rotate = state_data.launchstun_rotate
 	seq_partner_ID = state_data.seq_partner_ID

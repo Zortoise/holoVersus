@@ -22,8 +22,6 @@ visible = false
 
 [node name="Assists" type="Node2D" parent="."]
 
-[node name="NPCs" type="Node2D" parent="."]
-
 [node name="InactivePlayers" type="Node2D" parent="."]
 visible = false
 

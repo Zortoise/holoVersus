@@ -56,7 +56,7 @@ const CROSS_UP_MIN_DIST = 10 # characters must be at least a certain number of p
 #const DODGE_SEMI_IFRAMES = 10 # frames of semi-invuln while dodging
 
 const MIN_HITSTOP = 5
-const MAX_HITSTOP = 13
+const MAX_HITSTOP = 10
 const REPEAT_DMG_MOD = 30 # damage modifier on double_repeat
 const PARTIAL_REPEAT_DMG_MOD = 80
 const DMG_VAL_KB_LIMIT = 300 # max damage percent before knockback stop increasing
@@ -172,7 +172,7 @@ var UniqChar # unique character node
 var directory_name
 var palette_number
 var portrait # node instance
-var small_portrait
+#var small_portrait
 #var spritesheet = { # filled up at initialization via set_up_spritesheet()
 ##	"Base" : load("res://Characters/___/Spritesheets/Base.png") # example
 #	}
@@ -236,7 +236,7 @@ var velocity_limiter = { # as % of speed, some animations limit max velocity in 
 	"x" : null, "up" : null, "down" : null, "x_slow" : null, "y_slow" : null
 	}
 var input_buffer = []
-var afterimage_timer := 0 # for use by unique character node
+#var afterimage_timer := 0 # for use by unique character node
 var monochrome := false
 
 var sprite_texture_ref = { # used for afterimages, each contain spritesheet_filename, a string ref to the spritesheet in loaded data
@@ -292,7 +292,7 @@ var last_dir := 0 # dir last frame
 var RES_swell_flag := false # set to true after 1st attack taken during a combo
 var first_hit_flag := false # will not swell RES during hitstun of 1st attack taken during combo
 var lethal_flag := false # flag the hitstun as a lethal hit, can only kill during lethal hitstun
-var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
+#var from_move_rec := false # to prevent QCing into NOT_FROM_MOVE_REC moves
 var enhance_cooldowns := {} # each key contain the cooldown
 var enhance_data := {} # like unique_data
 var slowed := 0
@@ -536,14 +536,14 @@ func init_portrait():
 		portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
 		portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
 		
-	small_portrait = load("res://Characters/" + UniqChar.CHAR_REF + "/PortraitGameSmall.tscn").instance()
+#	small_portrait = load("res://Characters/" + UniqChar.CHAR_REF + "/PortraitGameSmall.tscn").instance()
 
-	if palette_number <= 1:
-		small_portrait.get_node("Base").material = null
-	else:
-		small_portrait.get_node("Base").material = ShaderMaterial.new()
-		small_portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
-		small_portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
+#	if palette_number <= 1:
+#		small_portrait.get_node("Base").material = null
+#	else:
+#		small_portrait.get_node("Base").material = ShaderMaterial.new()
+#		small_portrait.get_node("Base").material.shader = Loader.loaded_palette_shader
+#		small_portrait.get_node("Base").material.set_shader_param("swap", Loader.char_data[UniqChar.NAME].palettes[palette_number])
 
 # change palette and reset monochrome
 func palette():
@@ -1191,17 +1191,17 @@ func simulate2(): # only ran if not in hitstop
 				change_ex_gauge(FMath.round_and_descale(ex_change))
 
 			# ultimate gain, WIP TESTING
-#			if current_ex_gauge == MAX_EX_GAUGE:
-#				var ult_gain = get_stat("ULT_GEN")
-#				if is_attacking():
-#					match chain_combo:
-#						Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL: # landed an attack on opponent
-#							pass # gain full ult_gain
-#						_:
-#							ult_gain = FMath.percent(ult_gain, stage_control_mod)
-#				else:
-#					ult_gain = FMath.percent(ult_gain, stage_control_mod)
-#				change_ult_gauge(ult_gain)
+			if current_ex_gauge == MAX_EX_GAUGE:
+				var ult_gain = get_stat("ULT_GEN")
+				if is_attacking():
+					match chain_combo:
+						Em.chain_combo.NORMAL, Em.chain_combo.HEAVY, Em.chain_combo.SPECIAL: # landed an attack on opponent
+							pass # gain full ult_gain
+						_:
+							ult_gain = FMath.percent(ult_gain, stage_control_mod)
+				else:
+					ult_gain = FMath.percent(ult_gain, stage_control_mod)
+				change_ult_gauge(ult_gain)
 				
 			
 	else: # training mode regen EX Gauge
@@ -1209,6 +1209,9 @@ func simulate2(): # only ran if not in hitstop
 			change_ex_gauge(600)
 		if Globals.training_settings.regen == 1 and !$TrainingRegenTimer.is_running() and current_damage_value > 0:
 			take_damage(-30) # regen damage
+		if current_ult_gauge < MAX_ULT_GAUGE:
+			change_ult_gauge(UniqChar.ULT_GEN * 100)
+		
 
 	# EX lock degen	
 #	if current_ex_lock > 0 and !$EXSealTimer.is_running() and !$InstallTimer.is_running():
@@ -4697,9 +4700,9 @@ func particle(anim: String, loaded_sfx_ref: String, palette, interval, number, r
 			
 func flashes():
 	# process ex flash
-	if is_attacking(): 	# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active/recovery
-		if get_move_name() in UniqChar.EX_FLASH_ANIM:
-			modulate_play("EX_flash2")
+#	if is_attacking(): 	# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active/recovery
+#		if get_move_name() in UniqChar.EX_FLASH_ANIM:
+#			modulate_play("EX_flash2")
 			
 	if is_blocking():
 		modulate_play("block")
@@ -4716,6 +4719,27 @@ func flashes():
 func process_afterimage_trail():# process afterimage trail
 	# Character.afterimage_trail() can accept 2 parameters, 1st is the starting modulate, 2nd is the lifetime
 	
+	if is_atk_startup() or is_atk_active() or new_state == Em.char_state.SEQ_USER:
+		# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active
+		if get_move_name() in UniqChar.EX_FLASH_ANIM:
+			var color = Color(0, 0, 0)
+# warning-ignore:integer_division
+			match int(posmod(Globals.Game.frametime, 18) / 3):
+				0:
+					color = Color(1.0, 0.5, 0.5) # red
+				1:
+					color = Color(1.0, 1.0, 0.5) # yellow
+				2:
+					color = Color(0.5, 1.0, 0.5) # green
+				3:
+					color = Color(0.5, 1.0, 1.0) # cyan
+				4:
+					color = Color(0.5, 0.5, 1.0) # blue
+				_:
+					color = Color(1.0, 0.5, 1.0) # purple
+			afterimage_trail(color, 0.7, 10, Em.afterimage_shader.WHITE)
+			return
+	
 	# afterimage trail for certain modulate animations with the key "afterimage_trail"
 	if NSAnims.modulate_animations.has($ModulatePlayer.current_anim) and \
 		NSAnims.modulate_animations[$ModulatePlayer.current_anim].has("afterimage_trail") and \
@@ -4731,8 +4755,8 @@ func process_afterimage_trail():# process afterimage trail
 func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime: int = 10, \
 		afterimage_shader = Em.afterimage_shader.MASTER): # one afterimage every 3 frames
 			
-	if afterimage_timer <= 0:
-		afterimage_timer = 2
+	if posmod(Globals.Game.frametime, 3) == 0:
+#		afterimage_timer = 2
 
 # warning-ignore:unassigned_variable
 		var main_color_modulate: Color
@@ -4758,8 +4782,8 @@ func afterimage_trail(color_modulate = null, starting_modulate_a = 0.5, lifetime
 			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sfx_over, sfx_over.get_path(), palette_number, UniqChar.NAME, \
 					main_color_modulate, starting_modulate_a, lifetime, afterimage_shader)
 					
-	else:
-		afterimage_timer -= 1
+#	else:
+#		afterimage_timer -= 1
 		
 		
 func afterimage_cancel(starting_modulate_a = 0.4, lifetime: int = 12): # no need color_modulate for now
@@ -4871,8 +4895,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 		return false
 		
 	var to_move_data = query_move_data(attack_ref)
-	if from_move_rec and Em.atk_attr.NOT_FROM_MOVE_REC in to_move_data[Em.move.ATK_ATTR]:
-		return false
+#	if from_move_rec and Em.atk_attr.NOT_FROM_MOVE_REC in to_move_data[Em.move.ATK_ATTR]:
+#		return false
 		
 	if Em.move.REKKA in from_move_data:
 		if Em.move.REKKA in to_move_data and from_move_data[Em.move.REKKA] == to_move_data[Em.move.REKKA]:
@@ -5098,7 +5122,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		if current_ex_gauge >= EX_MOVE_COST:
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
-			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {}, "pink")
+			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
 			modulate_play("EX_flash")
 			return true
 		else:
@@ -5109,7 +5133,7 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
 			change_ex_gauge(-EX_MOVE_COST)
 			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
-			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {}, "pink")
+			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
 			modulate_play("EX_flash")
 			return true
 		else:
@@ -5248,6 +5272,8 @@ func tech():
 	return false
 	
 func dodge_check(from_block_rec := false):
+#	if from_move_rec:
+#		return false
 	if !from_block_rec and current_res_gauge + RES_GAUGE_CEIL < get_stat("DODGE_RES_COST"):
 		return false
 	if !grounded and air_dodge <= 0:
@@ -5754,7 +5780,7 @@ func query_status_effect_aux(effect):
 	
 func process_status_effects_visual(): # called during hitstop as well
 	for status_effect in status_effects:
-		continue_visual_effect_of_status(status_effect[0])
+		continue_visual_effect_of_status(status_effect)
 
 func process_status_effects_timer(): # reduce lifetime and remove expired status effects (at end of frame)
 #	var effect_to_erase = []
@@ -5787,22 +5813,24 @@ func new_status_effect(effect): # run on frame the status effect is inflicted/st
 			Globals.Game.lethalfreeze(get_path())
 	
 		
-func continue_visual_effect_of_status(effect): # run every frame, will not add visual effect if there is already one of higher priority
-	match effect:
+func continue_visual_effect_of_status(status_effect: Array): # run every frame, will not add visual effect if there is already one of higher priority
+	match status_effect[0]:
 		Em.status_effect.LETHAL:
 			modulate_play("lethal")
 			set_monochrome()
 			sprite_shake()
 		Em.status_effect.STUN:
-			modulate_play("stun")
-			particle("Sparkle", "Particles", "yellow", 4, 1, 25)
+#			{"mod_anim" : "stun_yellow", "particle" : ["Sparkle", "yellow"]}
+			modulate_play(status_effect[2].mod_anim)
+			if "particle" in status_effect[2]:
+				particle(status_effect[2].particle[0], "Particles", status_effect[2].particle[1], 4, 1, 25)
 			set_monochrome() # you want to do shaders here instead of new_status_effect() since shaders can be changed
 			sprite_shake()
-		Em.status_effect.CRUSH:
-			modulate_play("crush")
-			particle("Sparkle", "Particles", "red", 4, 1, 25)
-			set_monochrome()
-			sprite_shake()
+#		Em.status_effect.CRUSH:
+#			modulate_play("stun_red")
+#			particle("Sparkle", "Particles", "red", 4, 1, 25)
+#			set_monochrome()
+#			sprite_shake()
 		Em.status_effect.RESPAWN_GRACE:
 			modulate_play("respawn_grace")
 		Em.status_effect.POISON:
@@ -5834,7 +5862,7 @@ func clear_visual_effect_of_status(effect): # must run this when removing status
 		Em.status_effect.LETHAL:
 			Globals.Game.lethalfreeze("unfreeze")
 			continue
-		Em.status_effect.LETHAL, Em.status_effect.STUN, Em.status_effect.CRUSH:
+		Em.status_effect.LETHAL, Em.status_effect.STUN:
 			sprite.position = Vector2.ZERO
 		Em.status_effect.POS_FLOW:
 			Globals.Game.HUD.get_node("P" + str(player_ID + 1) + "_HUDRect/GaugesUnder/RESGauge1").texture_progress = \
@@ -6664,7 +6692,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			target_ID = hit_data[Em.hit.ATKER_ID] # if not survival mode, target attacking opponent
 	
 	remove_status_effect(Em.status_effect.STUN)
-	remove_status_effect(Em.status_effect.CRUSH)
+#	remove_status_effect(Em.status_effect.CRUSH)
 	
 	# if a projectile hit a hitstopped opponent, it does not reduce hitstun and knockback, only increase
 	# also no RES drain and RES Swell
@@ -7258,7 +7286,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 
 	elif hit_data[Em.hit.STUN] and !query_status_effect(Em.status_effect.LETHAL):
 #		add_status_effect(Em.status_effect.STUN, 0)
-		status_effect_to_add.append([Em.status_effect.STUN, 0])
+		status_effect_to_add.append([Em.status_effect.STUN, 0, {"mod_anim" : "stun_yellow", "particle" : ["Sparkle", "yellow"]}])
 		status_effect_to_add.append([Em.status_effect.STUN_RECOVER, null])
 #		add_status_effect(Em.status_effect.STUN_RECOVER, null) # null means no duration
 		repeat_memory = [] # reset move memory for getting a Break
@@ -7268,7 +7296,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 	elif hit_data[Em.hit.CRUSH] and !query_status_effect(Em.status_effect.LETHAL):
 #		add_status_effect(Em.status_effect.CRUSH, 0)
-		status_effect_to_add.append([Em.status_effect.CRUSH, 0])
+		status_effect_to_add.append([Em.status_effect.STUN, 0, {"mod_anim" : "stun_red", "particle" : ["Sparkle", "red"]}])
 		modulate_play("stun_flash")
 		play_audio("rock2", {"vol" : -5})
 		
@@ -8192,7 +8220,7 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 		return WEAK_HIT_HITSTOP
 		
 # warning-ignore:integer_division
-	var hitstop_temp: int = 3 * FMath.S + int(knockback_strength / 90) # scaled, +1 frame of hitstop for each 100 scaled knockback
+	var hitstop_temp: int = 3 * FMath.S + int(knockback_strength / 100) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
 	if hit_data[Em.hit.SEMI_DISJOINT]: # on semi-disjoint hits, lowest hitstop
 		return MIN_HITSTOP
@@ -8205,7 +8233,7 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 			hitstop_temp = FMath.percent(hitstop_temp, PUNISH_HITSTOP_MOD)
 		
 	hitstop_temp = FMath.round_and_descale(hitstop_temp) # descale it
-	hitstop_temp = int(clamp(hitstop_temp, MIN_HITSTOP, MAX_HITSTOP)) # max hitstop is 13, min hitstop is 5
+	hitstop_temp = int(clamp(hitstop_temp, MIN_HITSTOP, MAX_HITSTOP)) # max hitstop is 10, min hitstop is 5
 			
 			
 #	print(hitstop_temp)
@@ -8783,10 +8811,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 	UniqChar._on_SpritePlayer_anim_finished(anim_name)
 
 	# do this at end of _on_SpritePlayer_anim_finished() as well
-	if new_state in [Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
-			Em.char_state.GRD_REC, Em.char_state.AIR_REC] and !Animator.query_to_play(["SoftLanding"]):
-		from_move_rec = true
-		
+#	if new_state in [Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
+#			Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC] and !Animator.query_to_play(["SoftLanding"]):
+#		from_move_rec = true
+#
 
 func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HERE!
 	
@@ -8795,11 +8823,11 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #		print(anim_name)
 #		print(Globals.char_state_to_string(state))
 	
-	if new_state in [Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
-			Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC] and !Animator.query_to_play(["SoftLanding"]):
-		from_move_rec = true
-	elif !is_atk_startup():
-		from_move_rec = false
+#	if new_state in [Em.char_state.GRD_C_REC, Em.char_state.AIR_C_REC, \
+#			Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC] and !Animator.query_to_play(["SoftLanding"]):
+#		from_move_rec = true
+#	elif !is_atk_startup():
+#		from_move_rec = false
 	
 	if is_atk_startup():
 		var move_name = anim_name.trim_suffix("Startup")
@@ -9035,7 +9063,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			anim_friction_mod = 0
 			velocity_limiter.x_slow = 12
 			velocity_limiter.y_slow = 12
-			afterimage_timer = 1 # sync afterimage trail
+#			afterimage_timer = 1 # sync afterimage trail
 #			Globals.Game.spawn_SFX( "AirDashDust", "DustClouds", position, {})
 			modulate_play("dodge_flash")
 			play_audio("bling1", {"vol" : -15, "bus": "PitchDown"})
@@ -9098,7 +9126,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #			velocity.y = FMath.percent(velocity.y, 150)
 			velocity_limiter.x_slow = 10
 			velocity_limiter.y_slow = 10
-			afterimage_timer = 1 # sync afterimage trail
+#			afterimage_timer = 1 # sync afterimage trail
 		"SDash":
 #			remove_status_effect(Em.status_effect.POS_FLOW)
 			sdash_points = Animator.animations[Animator.current_anim].duration # refresh sdash_points
@@ -9142,7 +9170,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			velocity.rotate(sdash_angle)
 			anim_gravity_mod = 0
 			anim_friction_mod = 0
-			afterimage_timer = 1 # sync afterimage trail
+#			afterimage_timer = 1 # sync afterimage trail
 			Globals.Game.spawn_SFX( "RingDust", "RingDust", position, {"rot":deg2rad(sdash_angle), "back":true})
 			rotate_sprite(sdash_angle)
 #		"SDash":
@@ -9309,7 +9337,8 @@ func switch_to_active(data_to_pass: Dictionary):
 	
 	test = data_to_pass.test
 	
-	Globals.Game.damage_update(self)
+#	Globals.Game.damage_update(self)
+	current_damage_value = data_to_pass.current_damage_value
 	current_res_gauge = data_to_pass.current_res_gauge
 	current_ex_gauge = data_to_pass.current_ex_gauge
 	current_ult_gauge = data_to_pass.current_ult_gauge
@@ -9358,7 +9387,7 @@ func save_state():
 		"anim_friction_mod" : anim_friction_mod,
 		"velocity_limiter" : velocity_limiter,
 		"input_buffer" : input_buffer,
-		"afterimage_timer" : afterimage_timer,
+#		"afterimage_timer" : afterimage_timer,
 		"launch_starting_rot" : launch_starting_rot,
 		"launchstun_rotate" : launchstun_rotate,
 		"chain_combo" : chain_combo,
@@ -9378,7 +9407,7 @@ func save_state():
 		"first_hit_flag" : first_hit_flag,
 		"RES_swell_flag" : RES_swell_flag,
 		"lethal_flag" : lethal_flag,
-		"from_move_rec" : from_move_rec,
+#		"from_move_rec" : from_move_rec,
 		"slowed" : slowed,
 		"spent_special" : spent_special,
 		"spent_unique" : spent_unique,
@@ -9476,7 +9505,7 @@ func load_state(state_data, command_rewind := false):
 	anim_friction_mod = state_data.anim_friction_mod
 	velocity_limiter = state_data.velocity_limiter
 	input_buffer = state_data.input_buffer
-	afterimage_timer = state_data.afterimage_timer
+#	afterimage_timer = state_data.afterimage_timer
 	launch_starting_rot = state_data.launch_starting_rot
 	launchstun_rotate = state_data.launchstun_rotate
 	chain_combo = state_data.chain_combo
@@ -9496,7 +9525,7 @@ func load_state(state_data, command_rewind := false):
 	first_hit_flag = state_data.first_hit_flag
 	RES_swell_flag = state_data.RES_swell_flag
 	lethal_flag = state_data.lethal_flag
-	from_move_rec = state_data.from_move_rec
+#	from_move_rec = state_data.from_move_rec
 	slowed = state_data.slowed
 	spent_special = state_data.spent_special
 	spent_unique = state_data.spent_unique

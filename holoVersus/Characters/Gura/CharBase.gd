@@ -69,7 +69,8 @@ const PARRYING_EX_REGEN_MOD = 600 # increase EX Regen when parrying attack
 #const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
 #const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
 
-const ULT_GEN = 1000 # amount of Ulimate Gauge gain per frame
+const ULT_GEN = 0
+#const ULT_GEN = 2000 # amount of Ulimate Gauge gain per frame
 
 const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH, Em.trait.GRD_DASH_JUMP]
 
@@ -111,7 +112,8 @@ const STARTERS = ["L1", "L2", "L3", "F1", "F2", "F3", "H", "aL1", "aL2", "aL3", 
 
 # list of movenames that will emit EX flash
 const EX_FLASH_ANIM = ["SP1[ex]", "aSP1[ex]", "SP1[b][ex]", "aSP1[b][ex]", "SP1[u][ex]", "aSP1[d][ex]", "aSP2[ex]", "SP3[ex]", "SP3b[ex]", \
-		"aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP5b[ex]", "aSP5b[ex]", "SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB"]
+		"aSP3[ex]", "aSP3b[ex]", "SP4[ex]", "SP5[ex]", "aSP5[ex]", "SP5b[ex]", "aSP5b[ex]", \
+		"SP6[ex]", "aSP6[ex]", "SP6[ex]SeqA", "SP6[ex]SeqB", "SP6[ex]SeqC", "SP6[ex]SeqD", "SP6[ex]SeqE", "aSP6[ex]SeqE"]
 #const EX_FLASH_ANIM = ["H", "Hb"]
 # const DIRECTORY_NAME = "res://Characters/Gura/"
 
@@ -591,7 +593,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_TYPE : Em.atk_type.EX,
 		Em.move.SEQ: "SP6[ex]SeqA",
 		Em.move.HITCOUNT : 1,
-		Em.move.ATK_ATTR : [Em.atk_attr.QUICK_GRAB, Em.atk_attr.CANNOT_CHAIN_INTO, Em.atk_attr.NOT_FROM_MOVE_REC]
+		Em.move.ATK_ATTR : [Em.atk_attr.QUICK_GRAB, Em.atk_attr.CANNOT_CHAIN_INTO]
 	},
 	
 	"SP6[ex]SeqE": {

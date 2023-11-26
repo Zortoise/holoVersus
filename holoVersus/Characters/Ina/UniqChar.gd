@@ -822,10 +822,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 			if new_state == Em.char_state.AIR_C_REC and !Character.grounded: continue
 			
 			if Character.grounded and attack_ref in STARTERS:
-				if new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_C_REC] and \
-						!Animator.query_to_play(["SoftLanding"]) and \
-						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
-					continue # certain moves cannot be performed during cancellable recovery
+#				if new_state in [Em.char_state.GRD_C_REC, Em.char_state.GRD_D_REC, Em.char_state.AIR_C_REC] and \
+#						!Animator.query_to_play(["SoftLanding"]) and \
+#						Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(attack_ref):
+#					continue # certain moves cannot be performed during cancellable recovery
 				if !Character.test_dash_attack(attack_ref):
 					continue # if dash attacking, cannot use attacks already used in the chain
 				if Character.is_ex_valid(attack_ref):
@@ -847,9 +847,9 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
 				if (air_atk_ref) in STARTERS and Character.test_aerial_memory(air_atk_ref):
-					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
-							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(air_atk_ref):
-						continue # certain moves cannot be performed during cancellable recovery
+#					if new_state in [Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC] and \
+#							Em.atk_attr.NOT_FROM_MOVE_REC in query_atk_attr(air_atk_ref):
+#						continue # certain moves cannot be performed during cancellable recovery
 					if !Character.test_dash_attack(air_atk_ref):
 						continue # if dash attacking, cannot use attacks already used in the chain
 					if Character.is_ex_valid(air_atk_ref):
@@ -1004,7 +1004,7 @@ func unique_flash():
 			if Animator.query_to_play(["aSP5bStartup", "aSP5b[h]Startup"]):
 				Character.get_node("ModulatePlayer").play("darken")
 		Em.char_state.AIR_ATK_ACTIVE:
-			if Animator.query_to_play(["aSP3Active", "aSP5Active", "aSP5[h]Active"]):
+			if Animator.query_to_play(["aSP3Active", "aSP5Active", "aSP5[h]Active", "aSP5[ex]Active"]):
 				Character.get_node("ModulatePlayer").play("darken")
 			
 # GET DATA --------------------------------------------------------------------------------------------------
@@ -2162,7 +2162,7 @@ func special_dust(): # cleaner code
 	if Character.grounded:
 		var pos = Character.get_feet_pos()
 		pos.x -= 5 * Character.facing
-		Globals.Game.spawn_SFX("SpecialDust", "DustClouds", pos, {"facing":Character.facing})
+		Globals.Game.spawn_SFX("SpecialDust", "DustClouds", pos, {"facing":Character.facing, "grounded":true})
 
 func stop_momentum(): # cleaner code
 	Character.velocity.set_vector(0, 0)

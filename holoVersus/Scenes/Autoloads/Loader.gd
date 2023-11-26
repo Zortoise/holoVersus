@@ -4,7 +4,7 @@ extends Node
 # preloading scenes will cause issues, do them on onready variables instead
 onready var loaded_audio_scene := load("res://Scenes/Audio/AudioManager.tscn")
 onready var loaded_character_scene := load("res://Scenes/Character.tscn")
-onready var loaded_NPC_scene := load("res://Scenes/NPC.tscn")
+#onready var loaded_NPC_scene := load("res://Scenes/NPC.tscn")
 onready var loaded_assist_scene := load("res://Scenes/Assist.tscn")
 onready var loaded_entity_scene := load("res://Scenes/Entity.tscn")
 onready var loaded_SFX_scene := load("res://Scenes/SFX.tscn")

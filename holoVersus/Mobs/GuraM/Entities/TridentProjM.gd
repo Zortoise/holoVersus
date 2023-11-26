@@ -15,7 +15,7 @@ const MOVE_DATABASE = {
 		Em.move.ROOT : "TridentProj",
 		Em.move.ATK_TYPE : Em.atk_type.ENTITY,
 		Em.move.HITCOUNT : 1,
-		Em.move.DMG : 70,
+		Em.move.DMG : 60,
 		Em.move.KB : 400 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,
