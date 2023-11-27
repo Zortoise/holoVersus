@@ -9,13 +9,15 @@ enum effect_ref {
 		RES_DRAIN_MOD,
 		GRD_NORMAL_DMG_MOD, AIR_NORMAL_DMG_MOD, LIGHT_DMG_MOD, FIERCE_DMG_MOD,
 		HEAVY_DMG_MOD, SPECIAL_DMG_MOD, PROJ_DMG_MOD, SUPER_DMG_MOD, ASSIST_DMG_MOD
-		PRISM_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP,
-		LESS_RES_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
+		PRISM_GAIN, LIFESTEAL_RATE, HITSTUN_TAKEN, EXTRA_HITSTOP, TIME, 
+		
+		NO_RES_DRAIN, NO_CROSSUP, CAN_REPEAT, FULL_DAMAGE, AUTO_PARRY_PROJ, REDUCE_BURST_COST, SPECIAL_CHAIN,
 		CAN_TRIP, REVENGE, DASH_IFRAME, SDASH_IFRAME, SUMMON_SHARK, HEAL_ON_KILL
 		EX_RAISE_DMG, POISON_ATK, CHILLING_ATK, IGNITION_ATK, ENFEEBLING_ATK, RESPAWN_POWER, WILDCARD
 		NO_BLOCK_COST, NO_CHIP_DMG, NO_DODGE_COST, BETTER_BLOCK, PASSIVE_WEAKARMOR, BLOCK_CANCEL, DODGE_CANCEL, AUTO_TECH, NO_HEIGHT_LIMIT
 		SUMMON_HORROR, PHOENIX_PROJ, PEACOCK_PROJ, RAIN_PROJ, SUMMON_TAKO, KERIS_PROJ, SCYTHE_PROJ, TIME_BUBBLE, VORTEX, REWIND, TBLOCK_PROJ
 		FLASK_PROJ, SUMMON_SSRB, SUMMON_NOUSAGI, FUWA_SLASH, MOCO_SLASH, RAVEN_PROJ, SUMMON_MOAI, SCISSORS
+		STOP_TIMER, MONEY_RAISE_DMG
 }
 
 const DESCRIBE = {
@@ -157,10 +159,14 @@ const DESCRIBE = {
 		"type" : type.LINEAR,
 		"suffix" :"Hitstop on Foe",
 	},
+	effect_ref.TIME : {
+		"type" : type.LINEAR,
+		"suffix" :"Time",
+	},
 	
-	effect_ref.LESS_RES_DRAIN : {
+	effect_ref.NO_RES_DRAIN : {
 		"type" : type.QUIRK,
-		"suffix" :"Less RES Loss When Atked",
+		"suffix" :"No RES Loss When Atked",
 	},
 	effect_ref.NO_CROSSUP : {
 		"type" : type.QUIRK,
@@ -365,6 +371,14 @@ const DESCRIBE = {
 		"type" : type.QUIRK,
 		"suffix" :"Call Scissors via Dodge",
 	},
+	effect_ref.STOP_TIMER: {
+		"type" : type.QUIRK,
+		"suffix" :"Stop Timer",
+	},
+	effect_ref.MONEY_RAISE_DMG : {
+		"type" : type.QUIRK,
+		"suffix" :"Prism Count Raises Dmg",	
+	},
 }
 
 const TRIP_CHANCE = 5
@@ -409,6 +423,7 @@ enum card_ref {
 	BAELZ, BAELZ_b, BAELZ_c, BAELZ_d, BAELZ_e, BAELZ_f, KAELA,
 	MEL, TOWA, LUNA, CHLOE, KOYORI, SUBARU, ALOE, AZKI, OKAYU, CHOCO, MOONA, IOFIFTEEN,
 	MATSURI, NENE, ZETA, REINE, RISU, LAPLUS, SANA, FUWAWA, MOCOCO, NERISSA, SHIORI, BIJOU
+	AO, RIRIKA, KANADE, RADEN, HAJIME
 }
 
 const LIST = [
@@ -421,7 +436,8 @@ const LIST = [
 	card_ref.MEL, card_ref.TOWA, card_ref.LUNA, card_ref.CHLOE, card_ref.KOYORI, card_ref.SUBARU, card_ref.ALOE,
 	card_ref.AZKI, card_ref.OKAYU, card_ref.CHOCO, card_ref.MOONA, card_ref.IOFIFTEEN, card_ref.MATSURI, card_ref.NENE,
 	card_ref.ZETA, card_ref.REINE, card_ref.RISU, card_ref.LAPLUS, card_ref.SANA, card_ref.FUWAWA, card_ref.MOCOCO,
-	card_ref.NERISSA, card_ref.SHIORI, card_ref.BIJOU
+	card_ref.NERISSA, card_ref.SHIORI, card_ref.BIJOU, card_ref.AO, card_ref.RIRIKA, card_ref.KANADE, card_ref.RADEN,
+	card_ref.HAJIME
 ]
 
 const DATABASE = {
@@ -495,7 +511,7 @@ const DATABASE = {
 		effect_ref.AIR_DASH_SPEED : 40,
 		effect_ref.GRD_DASH_SPEED : 40,
 		effect_ref.SPECIAL_DMG_MOD : 60,
-		"quirks" : [effect_ref.LESS_RES_DRAIN],
+		"quirks" : [effect_ref.NO_RES_DRAIN],
 	},
 	card_ref.SHION : {
 		"name" : "Shion",
@@ -565,8 +581,9 @@ const DATABASE = {
 	card_ref.AMELIA : {
 		"name" : "Amelia",
 		"price" : 100,
+		effect_ref.TIME : 90,
 		effect_ref.JUMP_SPEED : 30,
-		effect_ref.AIR_NORMAL_DMG_MOD : 50,
+		effect_ref.AIR_NORMAL_DMG_MOD : 30,
 		effect_ref.EXTRA_HITSTOP : 7,
 		"quirks" : [effect_ref.REWIND],
 	},
@@ -705,10 +722,10 @@ const DATABASE = {
 	card_ref.KRONII : {
 		"name" : "Kronii",
 		"price" : 100,
-		effect_ref.LIGHT_DMG_MOD : 50,
-		effect_ref.HEAVY_DMG_MOD : 50,
+		effect_ref.LIGHT_DMG_MOD : 30,
+		effect_ref.HEAVY_DMG_MOD : 30,
 		effect_ref.EXTRA_HITSTOP : 7,
-		"quirks" : [effect_ref.TIME_BUBBLE]
+		"quirks" : [effect_ref.TIME_BUBBLE, effect_ref.STOP_TIMER]
 	},
 	card_ref.MIKO : {
 		"name" : "Miko",
@@ -741,7 +758,7 @@ const DATABASE = {
 		effect_ref.STOCK: 1,
 		effect_ref.HP : 25,
 		effect_ref.GRD_NORMAL_DMG_MOD : 25,
-		"quirks": [effect_ref.NO_BLOCK_COST, effect_ref.LESS_RES_DRAIN],
+		"quirks": [effect_ref.NO_BLOCK_COST, effect_ref.NO_RES_DRAIN],
 	},
 	card_ref.BAELZ : {
 		"name" : "Baelz",
@@ -900,7 +917,7 @@ const DATABASE = {
 		effect_ref.JUMP_SPEED : 20,
 		effect_ref.FIERCE_DMG_MOD : 50,
 		effect_ref.LIGHT_DMG_MOD : 50,
-		"quirks" : [effect_ref.LESS_RES_DRAIN]
+		"quirks" : [effect_ref.NO_RES_DRAIN]
 	},
 	card_ref.NENE : {
 		"name" : "Nene",
@@ -915,6 +932,7 @@ const DATABASE = {
 		"name" : "Zeta",
 		"price" : 100,
 		effect_ref.LIGHT_DMG_MOD : 50,
+		effect_ref.TIME : 70,
 		"quirks" : [effect_ref.DASH_IFRAME, effect_ref.AUTO_PARRY_PROJ, effect_ref.NO_CROSSUP],
 	},
 	card_ref.REINE : {
@@ -987,5 +1005,42 @@ const DATABASE = {
 		effect_ref.GRAVITY_MOD : 15,
 		effect_ref.SPEED : -10,
 		"quirks" : [effect_ref.NO_BLOCK_COST, effect_ref.NO_CHIP_DMG, effect_ref.SUMMON_MOAI],
+	},
+	card_ref.AO : {
+		"name" : "Ao",
+		"price" : 100,
+		effect_ref.TIME : 60,
+		effect_ref.HP : 30,
+		"quirks" : [effect_ref.AUTO_PARRY_PROJ, effect_ref.BETTER_BLOCK, effect_ref.ENFEEBLING_ATK],
+	},
+	card_ref.RIRIKA : {
+		"name" : "Ririka",
+		"price" : 100,
+		"quirks" : [effect_ref.MONEY_RAISE_DMG],
+	},
+	card_ref.KANADE : {
+		"name" : "Kanade",
+		"price" : 100,
+		effect_ref.STOCK: 1,
+		effect_ref.HP : 30,
+		effect_ref.PRISM_GAIN : 1,
+		"quirks" : [effect_ref.NO_CHIP_DMG, effect_ref.AUTO_TECH],
+	},
+	card_ref.RADEN : {
+		"name" : "Raden",
+		"price" : 100,
+		effect_ref.GRAVITY_MOD : -20,
+		effect_ref.AIR_DASH_SPEED : 20,
+		effect_ref.PROJ_DMG_MOD : 30,
+		effect_ref.SPECIAL_DMG_MOD: 30,
+		effect_ref.PASSIVE_EX_REGEN: 5,
+	},
+	card_ref.HAJIME : {
+		"name" : "Hajime",
+		"price" : 100,
+		effect_ref.SPEED : 15,
+		effect_ref.GRD_DASH_SPEED : 20,
+		effect_ref.AIR_DASH_SPEED : 20,
+		effect_ref.COMBO_LEVEL : 3,
 	},
 }

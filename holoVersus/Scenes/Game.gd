@@ -77,7 +77,7 @@ var training_save_state # save state used for training mode
 
 # GameState, these are to be saved
 var frametime := 0
-var matchtime: int
+var matchtime := 300
 var current_rng_seed: int # changed after each random number generation
 var player_input_state = { # in int form
 		"pressed" : [],
@@ -135,10 +135,13 @@ func _ready():
 	viewport = get_node("../../..")
 	card_menu = get_node("../../../CardMenu")
 	
-	if Globals.player_count == 1:
-		HUD.get_node("P1_HUDRect").rect_position.x = 0
+#	if Globals.player_count == 1:
+#		HUD.get_node("P1_HUDRect").rect_position.x = 0
 	
 	if Globals.survival_level != null:
+		HUD.get_node("P1_HUDRect").rect_position.x = 0
+		HUD.get_node("P2_HUDRect").rect_position.x = 1440
+		
 		LevelControl = load("res://Scenes/Survival/LevelControl.tscn").instance()
 		add_child(LevelControl)
 		move_child(LevelControl, 0)
@@ -176,7 +179,8 @@ func setup():
 			orig_rng_seed = Globals.orig_rng_seed
 			current_rng_seed = orig_rng_seed
 		
-	matchtime = Globals.time_limit * 60
+	if Globals.survival_level == null:
+		matchtime = Globals.time_limit * 60
 	
 	if Globals.survival_level == null:
 		for player in Globals.player_count:
@@ -230,7 +234,7 @@ func setup():
 
 	set_camera_limit()
 	
-	if Globals.time_limit == 0: # no time limit
+	if Globals.survival_level == null and Globals.time_limit == 0: # no time limit
 		HUD.get_node("MatchTime").queue_free()
 		HUD.get_node("TimeFrame").queue_free()
 	else:
@@ -610,7 +614,7 @@ func _physics_process(_delta):
 # MATCH TIMER --------------------------------------------------------------------------------------------------
 
 
-	if Globals.time_limit != 0:
+	if Globals.survival_level != null or Globals.time_limit != 0:
 		var matchtime_floor = max(ceil(matchtime / 60.0), 0)
 		HUD.get_node("MatchTime").text = str(floor(matchtime_floor))
 
@@ -619,27 +623,28 @@ func _physics_process(_delta):
 		else:
 			HUD.get_node("MatchTime/AnimationPlayer").play("RESET")
 			
-		if matchtime == 0 and !game_set:
-			game_set = true
-			emit_signal("time_over")
-			
-			var max_stock_points_left = -1
-			var winner_ID
-			var damage_value_of_winner = 0
-			for player in $Players.get_children():
-				if player.stock_points_left > max_stock_points_left:
-					max_stock_points_left = player.stock_points_left
-					winner_ID = player.player_ID
-					damage_value_of_winner = player.current_damage_value
-				elif player.stock_points_left == max_stock_points_left: # there is a tie
-					if player.current_damage_value <= damage_value_of_winner: # whoever has less damage wins
+		if Globals.survival_level == null:
+			if matchtime == 0 and !game_set:
+				game_set = true
+				emit_signal("time_over")
+				
+				var max_stock_points_left = -1
+				var winner_ID
+				var damage_value_of_winner = 0
+				for player in $Players.get_children():
+					if player.stock_points_left > max_stock_points_left:
+						max_stock_points_left = player.stock_points_left
 						winner_ID = player.player_ID
-						damage_value_of_winner = player.current_damage_value		
-			match winner_ID:
-				0:
-					Globals.winner = [winner_ID, Globals.P1_char_ref[0], get_player_node(winner_ID).UniqChar.NAME]
-				1:
-					Globals.winner = [winner_ID, Globals.P2_char_ref[0], get_player_node(winner_ID).UniqChar.NAME]
+						damage_value_of_winner = player.current_damage_value
+					elif player.stock_points_left == max_stock_points_left: # there is a tie
+						if player.current_damage_value <= damage_value_of_winner: # whoever has less damage wins
+							winner_ID = player.player_ID
+							damage_value_of_winner = player.current_damage_value		
+				match winner_ID:
+					0:
+						Globals.winner = [winner_ID, Globals.P1_char_ref[0], get_player_node(winner_ID).UniqChar.NAME]
+					1:
+						Globals.winner = [winner_ID, Globals.P2_char_ref[0], get_player_node(winner_ID).UniqChar.NAME]
 			
 	camera()
 	
@@ -1000,18 +1005,21 @@ func simulate(rendering = true):
 	if Globals.static_stage == 0:
 		stage.simulate()
 		
+	var time_passed: int
+	if Globals.survival_level != null:
+		time_passed = Globals.survival_time
+	else:
+		time_passed = Globals.time_limit * 60 - Globals.Game.matchtime
+	
 	match Globals.assists:
 		2: # low
-			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
-					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 600) == 0:
+			if time_passed != 0 and posmod(time_passed, 600) == 0:
 				spawn_assist_card()
 		3: # medium
-			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
-					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 400) == 0:
+			if time_passed != 0 and posmod(time_passed, 400) == 0:
 				spawn_assist_card()
 		4: # high
-			if Globals.time_limit * 60 - Globals.Game.matchtime != 0 and \
-					posmod(Globals.time_limit * 60 - Globals.Game.matchtime, 200) == 0:
+			if time_passed != 0 and posmod(time_passed, 200) == 0:
 				spawn_assist_card()
 		
 	check_superfreeze() # only freeze after players/entites/sfx have simulated
@@ -1036,7 +1044,19 @@ func simulate(rendering = true):
 		progress_audio_queue()
 		
 	if !input_lock and !is_stage_paused():
-		matchtime -= 1 # match time only start counting down when "BEGIN!" vanishes
+		if Globals.survival_level == null:
+			matchtime -= 1 # match time only start counting down when "BEGIN!" vanishes
+		elif get_tree().get_nodes_in_group("MobNodes").size() != 0: # match time only count down when there are mobs
+			Globals.survival_time += 1
+			
+			var count_down := true
+			if Inventory.has_quirk(0, Cards.effect_ref.STOP_TIMER):
+				count_down = false
+			elif Globals.player_count > 1:
+				if Inventory.has_quirk(1, Cards.effect_ref.STOP_TIMER):
+					count_down = false
+			if count_down:
+				matchtime -= 1
 	
 	
 # SAVING/LOADING GAME STATE --------------------------------------------------------------------------------------------------
@@ -1152,6 +1172,7 @@ func save_state(timestamp):
 		
 	if Globals.survival_level != null:
 		game_state.level_data = LevelControl.save_state()
+		game_state.survival_time = Globals.survival_time
 
 #	ResourceSaver.save("res://Scenes/SavedData/GameState.tres", game_state)
 	if timestamp is int:
@@ -1194,6 +1215,7 @@ func load_state(game_state, loading_autosave = true):
 		
 	if Globals.survival_level != null:
 		LevelControl.load_state(game_state.level_data)
+		Globals.survival_time = game_state.survival_time
 
 	if Globals.static_stage == 0:
 		stage.load_state(loaded_game_state.stage_data)
@@ -2166,7 +2188,7 @@ func is_stage_paused():
 #						indicator.get_node("InputRight").show()
 #					player.button_unique:
 #						indicator.get_node("InputUnique").show()
-#					player.button_modifier:
+#					player.button_alter:
 #						indicator.get_node("InputSpecial").show()
 #					player.button_jump:
 #						indicator.get_node("InputJump").show()
@@ -2617,13 +2639,13 @@ func get_entity_node(entity_ID):
 # fade out HUD elements if there is a player behind them
 func HUD_fade():
 	#  adjust zoom for top and bottom detect boxes,
-	$TopHUDBoxP1.rect_size.x = get_viewport_rect().size.x / 6.0
+	$TopHUDBoxP1.rect_size.x = get_viewport_rect().size.x / 4.0
 	$TopHUDBoxP1.rect_size.y = get_viewport_rect().size.y / 8.75
 	$TopHUDBoxP1.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-	if Globals.player_count != 1:
-		$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 2.0
+	if Globals.survival_level == null:
+		$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 1.5
 	else:
-		$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 2.75
+		$TopHUDBoxP1.rect_position.x -= $TopHUDBoxP1.rect_size.x * 2.0
 	$TopHUDBoxP1.rect_position.y -= $TopHUDBoxP1.rect_size.y * 4
 	
 	if Detection.detect_bool([$TopHUDBoxP1], ["PlayerBoxes"]):
@@ -2631,13 +2653,13 @@ func HUD_fade():
 	else:
 		HUD.get_node("P1_HUDRect/Portrait").modulate.a = 1.0
 
-	$BottomHUDBoxP1.rect_size = get_viewport_rect().size / 6.0
+	$BottomHUDBoxP1.rect_size = get_viewport_rect().size / 4.0
 	$BottomHUDBoxP1.rect_size.y = get_viewport_rect().size.y / 8.75
 	$BottomHUDBoxP1.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-	if Globals.player_count != 1:
-		$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 2.0
+	if Globals.survival_level == null:
+		$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 1.5
 	else:
-		$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 2.75
+		$BottomHUDBoxP1.rect_position.x -= $BottomHUDBoxP1.rect_size.x * 2.0
 	$BottomHUDBoxP1.rect_position.y += $BottomHUDBoxP1.rect_size.y * 3
 	
 	if Detection.detect_bool([$BottomHUDBoxP1], ["PlayerBoxes"]):
@@ -2646,10 +2668,13 @@ func HUD_fade():
 		HUD.get_node("P1_HUDRect/GaugesUnder").modulate.a = 1.0
 	
 	if Globals.player_count > 1:
-		$TopHUDBoxP2.rect_size.x = get_viewport_rect().size.x / 6.0
+		$TopHUDBoxP2.rect_size.x = get_viewport_rect().size.x / 4.0
 		$TopHUDBoxP2.rect_size.y = get_viewport_rect().size.y / 8.75
 		$TopHUDBoxP2.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-		$TopHUDBoxP2.rect_position.x += $TopHUDBoxP2.rect_size.x * 1.0
+		if Globals.survival_level == null:
+			$TopHUDBoxP2.rect_position.x += $TopHUDBoxP2.rect_size.x * 0.5
+		else:
+			$TopHUDBoxP2.rect_position.x += $TopHUDBoxP2.rect_size.x * 1.0
 		$TopHUDBoxP2.rect_position.y -= $TopHUDBoxP2.rect_size.y * 4
 		
 		if Detection.detect_bool([$TopHUDBoxP2], ["PlayerBoxes"]):
@@ -2657,10 +2682,13 @@ func HUD_fade():
 		else:
 			HUD.get_node("P2_HUDRect/Portrait").modulate.a = 1.0
 
-		$BottomHUDBoxP2.rect_size = get_viewport_rect().size / 6.0
+		$BottomHUDBoxP2.rect_size = get_viewport_rect().size / 4.0
 		$BottomHUDBoxP2.rect_size.y = get_viewport_rect().size.y / 8.75
 		$BottomHUDBoxP2.rect_position = $CameraRef/Camera2D.get_camera_screen_center()
-		$BottomHUDBoxP2.rect_position.x += $BottomHUDBoxP2.rect_size.x * 1.0
+		if Globals.survival_level == null:
+			$BottomHUDBoxP2.rect_position.x += $BottomHUDBoxP2.rect_size.x * 0.5
+		else:
+			$BottomHUDBoxP2.rect_position.x += $BottomHUDBoxP2.rect_size.x * 1.0
 		$BottomHUDBoxP2.rect_position.y += $BottomHUDBoxP2.rect_size.y * 3	
 		
 		if Detection.detect_bool([$BottomHUDBoxP2], ["PlayerBoxes"]):
@@ -2668,7 +2696,7 @@ func HUD_fade():
 		else:
 			HUD.get_node("P2_HUDRect/GaugesUnder").modulate.a = 1.0
 		
-	if Globals.time_limit != 0:
+	if Globals.survival_level != null or Globals.time_limit != 0:
 		$TimeHUDBox.rect_size = get_viewport_rect().size / 15.0
 		$TimeHUDBox.rect_size.y = get_viewport_rect().size.y / 14.0
 		$TimeHUDBox.rect_position = $CameraRef/Camera2D.get_camera_screen_center()

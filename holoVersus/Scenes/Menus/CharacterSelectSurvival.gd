@@ -240,7 +240,7 @@ func load_buttoncheck():
 		grid.get_node("Dash").load_button("Dash", Settings.button_to_string(input_map["P" + player_index + "_dash"]))
 		grid.get_node("Aux").load_button("Aux", Settings.button_to_string(input_map["P" + player_index + "_aux"]))
 		grid.get_node("Block").load_button("Block", Settings.button_to_string(input_map["P" + player_index + "_block"]))
-		grid.get_node("Modifier").load_button("Mod", Settings.button_to_string(input_map["P" + player_index + "_modifier"]))
+		grid.get_node("Alter").load_button("Alter", Settings.button_to_string(input_map["P" + player_index + "_alter"]))
 		grid.get_node("Unique").load_button("Unique", Settings.button_to_string(input_map["P" + player_index + "_unique"]))
 
 		grid.get_node("TapJump2").text = TAP_JUMP_OPTIONS[input_map["P" + player_index + "_tapjump"]]
@@ -276,13 +276,13 @@ func _physics_process(_delta):
 	elif !Globals.pausing and $HoldToQuit/AnimationPlayer.is_playing():
 		$HoldToQuit/AnimationPlayer.play("RESET")
 		
-	if Input.is_action_pressed("P1_modifier"): # reveal/hide button check
+	if Input.is_action_pressed("P1_alter"): # reveal/hide button check
 		$P1_ButtonCheck.show()
 	else:
 		$P1_ButtonCheck.hide()
 		
 	if Globals.player_count == 2:
-		if Input.is_action_pressed("P2_modifier"):
+		if Input.is_action_pressed("P2_alter"):
 			$P2_ButtonCheck.show()
 		else:
 			$P2_ButtonCheck.hide()

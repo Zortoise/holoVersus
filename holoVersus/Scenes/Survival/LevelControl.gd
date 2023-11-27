@@ -113,6 +113,8 @@ func init():
 			starting_prism = FMath.percent(UniqLevel.STARTING_PRISM, 50)
 	Globals.stage_ref = UniqLevel.STAGE
 	
+	Globals.Game.matchtime = UniqLevel.INIT_TIME
+	
 #	load_music()
 	if !BGM.has_custom:
 		var chosen_music_dict = BGM.play_random_in_folder("Levels/" + Globals.survival_level, true)
@@ -376,6 +378,10 @@ func simulate():
 			Globals.Game.game_set = true
 			level_active = false
 			emit_signal("level_failed", wave_ID)
+		elif Globals.Game.matchtime == 0:
+			Globals.Game.game_set = true
+			level_active = false
+			emit_signal("level_failed", wave_ID, true)
 		
 	if level_active:
 		if wave_standby_timer > 0:
@@ -468,6 +474,12 @@ func next_wave():
 					quota = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
 				if !player in respawned_players and player.stock_points_left < quota:
 					player.change_stock_points(1)
+					
+			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[0]
+		elif Globals.difficulty == 1:
+			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[1]
+		else:
+			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[0]
 		
 	
 func all_waves_cleared():

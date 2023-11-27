@@ -172,12 +172,15 @@ func _on_level_cleared():
 	$HUD/Announcer2/Wave.text = "ALL WAVES"
 	$HUD/Announcer2/Cleared.text = "CLEARED!"
 	$HUD/Announcer2/AnimationPlayer.play("all_wave_cleared")
-	Globals.survival_time = Globals.Game.frametime
+#	Globals.survival_time = Globals.Game.frametime
 	play_audio("game_set", {"vol": -5})
 	BGM.fade()
 	
-func _on_level_failed(wave_ID):
-	$HUD/Announcer2/Survival.text = "DEFEATED"
+func _on_level_failed(wave_ID, time_over := false):
+	if !time_over:
+		$HUD/Announcer2/Survival.text = "DEFEATED"
+	else:
+		$HUD/Announcer2/Survival.text = "TIME OVER"
 	$HUD/Announcer2/Survival2.text = "SURVIVED TILL WAVE " + str(wave_ID)
 	$HUD/Announcer2/AnimationPlayer.play("defeated")
 	BGM.fade()

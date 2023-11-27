@@ -19,7 +19,7 @@ const TAP_MEMORY_DURATION = 20
 const MAX_EX_GAUGE = 30000
 const EX_LEVEL = 10000
 const BASE_EX_SEAL_TIME = 30 # min number of frames to seal EX Gain for after using it, some moves give more
-const EX_LOCK_DEGEN = 15 # amount of EX Lock lost per frame
+#const EX_LOCK_DEGEN = 15 # amount of EX Lock lost per frame
 
 const RES_GAUGE_FLOOR = -10000
 const RES_GAUGE_CEIL = 10000
@@ -307,6 +307,7 @@ var assist_active := false # true if assist is not active
 var assist_rescue_protect := false # set to true if hit by assist rescue till you recover, reduce damage and hitstun of assist moves
 var assist_fever := false # true if an assist land an unblocked hit on a hitstunned opponent, last till targeted opponent recovers
 var sdash_points := 0 # set to duration of sdash when you begin a sdash, reduce per frame base on angle, stop sdash when hit 0
+var res_seal := false # true after landing a Reinforce to prevent regening RES, false if targeted opponent is not in hitstun
 
 var assist_items := [] # up to 3
 
@@ -321,7 +322,7 @@ var button_fierce
 var button_dash
 var button_block
 var button_aux
-var button_modifier
+var button_alter
 var button_unique
 var button_pause
 var button_rs_up
@@ -482,7 +483,7 @@ func set_player_id(in_player_ID): # can use this to change player you are contro
 	button_dash = Globals.INPUTS[player_ID].dash[1]
 	button_block = Globals.INPUTS[player_ID].block[1]
 	button_aux = Globals.INPUTS[player_ID].aux[1]
-	button_modifier = Globals.INPUTS[player_ID].modifier[1]
+	button_alter = Globals.INPUTS[player_ID].alter[1]
 	button_unique = Globals.INPUTS[player_ID].unique[1]
 	button_pause = Globals.INPUTS[player_ID].pause[1]
 	button_rs_up = Globals.INPUTS[player_ID].rs_up[1]
@@ -742,7 +743,7 @@ func test2():
 			"\n" + Animator.current_anim + " > " + Animator.to_play_anim + "  time: " + str(Animator.time) + \
 			"\n" + str(velocity.y) + "  grounded: " + str(grounded) + \
 			"\nchain_memory: " + str(chain_memory) + " " + str(chain_combo) + "\n" + \
-			str(input_buffer) + "\n" + str(input_state) + " " + str(RES_swell_flag) + " " + str(first_hit_flag)
+			str(input_buffer) + "\n" + str(input_state) + " " + str(RES_swell_flag) + " " + str(Globals.survival_time)
 	else:
 		$TestNode2D/TestLabel.text = ""
 			
@@ -1011,6 +1012,9 @@ func simulate2(): # only ran if not in hitstop
 		delayed_hit_effect = []
 		assist_rescue_protect = false
 		
+	if res_seal and !get_target().is_hitstunned_or_sequenced():
+		res_seal = false
+		
 	if !new_state in [Em.char_state.SEQ_TARGET, Em.char_state.SEQ_USER]:
 		seq_partner_ID = null
 		
@@ -1059,7 +1063,7 @@ func simulate2(): # only ran if not in hitstop
 		Globals.Game.res_gauge_update(self)
 
 	# regen/degen RES
-	elif !is_hitstunned_or_sequenced():
+	elif !res_seal and !is_hitstunned_or_sequenced():
 		
 		if !Globals.training_mode or (player_ID == 1 and Globals.training_settings.res_anchor == 5):
 			if current_res_gauge < 0 and !is_blocking(): # regen RES when RES is under 100%
@@ -1275,7 +1279,7 @@ func simulate2(): # only ran if not in hitstop
 		if state == Em.char_state.LAUNCHED_HITSTUN and $HitStunTimer.is_running() and current_ex_gauge != 0 and current_res_gauge > 0:
 			if can_DI():
 				if !$FDITimer.is_running():
-					if button_modifier in input_state.pressed:
+					if button_alter in input_state.pressed:
 						$FDITimer.time = FDITimer_TIME
 #						modulate_play("unflinch_flash")
 						current_res_gauge = 1
@@ -1533,9 +1537,9 @@ func simulate2(): # only ran if not in hitstop
 			# FASTFALL --------------------------------------------------------------------------------------------------
 				# cannot fastfall right after jumping
 				
-	#		if Settings.dj_fastfall[player_ID] == 0 and (button_modifier in input_state.pressed or button_unique in input_state.pressed):
+	#		if Settings.dj_fastfall[player_ID] == 0 and (button_alter in input_state.pressed or button_unique in input_state.pressed):
 	#
-	#			# if normal fastfall, cannot fastfall when button_modifier/button_unique are held down
+	#			# if normal fastfall, cannot fastfall when button_alter/button_unique are held down
 	#			# this makes aerial EX move down-tilts not fastfall too easily
 	#
 	#			pass
@@ -1594,7 +1598,7 @@ func simulate2(): # only ran if not in hitstop
 #			input_buffer.append(["Burst", buffer_time()])
 			
 	if button_block in input_state.pressed and !button_aux in input_state.pressed and !button_jump in input_state.pressed and \
-			!button_modifier in input_state.pressed and !button_unique in input_state.pressed:
+			!button_alter in input_state.pressed and !button_unique in input_state.pressed:
 		if Globals.survival_level != null and Inventory.shop_open:
 			pass
 #		elif $ShorthopTimer.is_running():
@@ -2211,7 +2215,7 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 				$NoCollideTimer.simulate()
 #				$InstallTimer.simulate()
 				$SBlockTimer.simulate()
-				if Globals.survival_level == null and ($FDITimer.time != 1 or !button_modifier in input_state.pressed):
+				if Globals.survival_level == null and ($FDITimer.time != 1 or !button_alter in input_state.pressed):
 					$FDITimer.simulate()
 #				if super_ex_lock == null: # EX Seal from using meter normally, no gaining meter for rest of combo
 				if !get_target().is_hitstunned_or_sequenced():
@@ -2478,13 +2482,13 @@ func buffer_actions():
 	if button_block in input_state.just_pressed:
 		tap_memory.append([button_block, TAP_MEMORY_DURATION])
 		
-	if button_modifier in input_state.just_pressed:
-		tap_memory.append([button_modifier, TAP_MEMORY_DURATION])
+	if button_alter in input_state.just_pressed:
+		tap_memory.append([button_alter, TAP_MEMORY_DURATION])
 	if button_unique in input_state.just_pressed:
 		tap_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
-	if button_modifier in input_state.just_released:
-		release_memory.append([button_modifier, TAP_MEMORY_DURATION])
+	if button_alter in input_state.just_released:
+		release_memory.append([button_alter, TAP_MEMORY_DURATION])
 	if button_unique in input_state.just_released:
 		release_memory.append([button_unique, TAP_MEMORY_DURATION])
 		
@@ -2527,8 +2531,8 @@ func buffer_actions():
 		input_buffer.append(["SDash", buffer_time()])
 		
 	if spent_special:
-		if button_modifier in input_state.just_pressed or (!button_modifier in input_state.pressed and \
-				!is_button_released_in_last_X_frames(button_modifier, 7)):
+		if button_alter in input_state.just_pressed or (!button_alter in input_state.pressed and \
+				!is_button_released_in_last_X_frames(button_alter, 7)):
 			spent_special = false
 	if spent_unique:
 		if button_unique in input_state.just_pressed or (!button_unique in input_state.pressed and \
@@ -2558,7 +2562,7 @@ func capture_combinations():
 			
 #		combination(button_dash, button_aux, "Tech")
 		
-#	combination(button_block, button_modifier, "Burst") # place this here since button_modifier is never buffered
+#	combination(button_block, button_alter, "Burst") # place this here since button_alter is never buffered
 		
 	if !button_unique in input_state.pressed:
 		UniqChar.capture_combinations()
@@ -2613,7 +2617,7 @@ func ex_rebuffer(button_ex, button1, action, back = false):
 			
 #func spend_button(button):
 #	match button:
-#		button_modifier:
+#		button_alter:
 #			spent_special = true
 #		button_unique:
 #			spent_unique = true
@@ -2660,7 +2664,7 @@ func doubletap_combination_trio(button_ex, button1, button2, action, back = fals
 func ex_combination(button_ex, button1, action, back = false, instant = false):
 
 	match button_ex:
-		button_modifier:
+		button_alter:
 			if spent_special: return
 		button_unique:
 			if spent_unique: return
@@ -2693,7 +2697,7 @@ func ex_combination(button_ex, button1, action, back = false, instant = false):
 func ex_combination_trio(button_ex, button1, button2, action, back = false, instant = false):
 	
 	match button_ex:
-		button_modifier:
+		button_alter:
 			if spent_special: return
 		button_unique:
 			if spent_unique: return
@@ -2809,7 +2813,7 @@ func are_inputs_too_close():
 		var tap = tap_memory[-x-1]
 		if tap[1] < TAP_MEMORY_DURATION - 7:
 			break
-		if tap[0] in [button_modifier, button_unique]:
+		if tap[0] in [button_alter, button_unique]:
 			time_of_last_special_or_unique_tap = tap[1]
 		elif tap[0] in [button_light, button_fierce, button_aux, button_dash, button_block]:
 			time_of_last_attack_tap = tap[1]
@@ -2910,7 +2914,7 @@ func instant_action_tilt_combination(attack_button, neutral_action, down_tilt_ac
 func cancel_action(button_ex = null): # called from UniqChar for character-unique action cancelling
 	if button_ex != null:
 		match button_ex: # prevent special/unique from triggering EX moves
-			button_modifier:
+			button_alter:
 				spent_special = true
 			button_unique:
 				spent_unique = true
@@ -3271,6 +3275,7 @@ func process_input_buffer():
 							Em.char_state.GRD_D_REC, Em.char_state.AIR_D_REC:
 							
 						var flag := true
+						var afterimage := false
 						match new_state:
 							Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP:
 								if !Settings.input_assist[player_ID]:
@@ -3291,16 +3296,20 @@ func process_input_buffer():
 								if Animator.time < 2:
 									flag = false # cannot cancel from 1st frame of dash
 							Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
+								var move_name = get_move_name()
+								if is_reinforce(move_name): # can cancel from startup of reinforce moves
+									afterimage = true
+									continue
 								if !Settings.input_assist[player_ID]:
 									flag = false
 									continue
 								if Animator.time > 1 or Animator.time == 0: # can only cancel from attacks on the first frame
 									flag = false
 									continue
-								if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining/whiffing
+								if chain_combo != Em.chain_combo.RESET: # cannot cancel when chaining
 									flag = false
 									continue
-								if !is_normal_attack(get_move_name()): # only light/fierce can be cancelled
+								if !is_normal_attack(move_name): # only light/fierce can be cancelled
 									flag = false
 #						if new_state in [Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK]:
 #							if !Settings.input_assist[player_ID]:
@@ -3308,6 +3317,7 @@ func process_input_buffer():
 #							if !Animator.query_to_play(["BlockStartup", "aBlockStartup", "TBlockStartup", "aTBlockStartup"]):
 #								continue # can only cancel from block startup for GRD_BLOCK/AIR_BLOCK	
 						if flag and dodge_check():
+							if afterimage: afterimage_cancel()
 							animate("DodgeTransit")
 							has_acted[0] = true
 							keep = false
@@ -3565,10 +3575,10 @@ func get_stat(stat: String) -> int:
 		
 	if Globals.survival_level != null:
 		match stat:
-			"SPECIAL_RES_DRAIN_MOD":
-				to_return = FMath.percent(to_return, 150) # increased RES_Drain on specials during Survival
-				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
-					to_return = FMath.percent(to_return, 50)
+#			"SPECIAL_RES_DRAIN_MOD":
+#				to_return = FMath.percent(to_return, 150) # increased RES_Drain on specials during Survival
+#				if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
+#					to_return = FMath.percent(to_return, 50)
 			"DAMAGE_VALUE_LIMIT":
 #				var hp_mod_array = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100] 
 #				to_return = FMath.percent(to_return, hp_mod_array[Globals.Game.LevelControl.wave_ID - 1])
@@ -3680,6 +3690,11 @@ func mod_damage(move_name):
 	if Inventory.has_quirk(player_ID, Cards.effect_ref.EX_RAISE_DMG):
 		var weight = FMath.get_fraction_percent(current_ex_gauge, MAX_EX_GAUGE)
 		mod += FMath.f_lerp(0, 100, weight)
+		
+	if Inventory.has_quirk(player_ID, Cards.effect_ref.MONEY_RAISE_DMG):
+		var weight = FMath.get_fraction_percent(prism_count, 500)
+		weight = int(min(weight, 100))
+		mod += FMath.f_lerp(0, 200, weight)
 
 	
 	match UniqChar.MOVE_DATABASE[move_name][Em.move.ATK_TYPE]:
@@ -4751,7 +4766,7 @@ func process_afterimage_trail():# process afterimage trail
 		# RF Normals have red afterimage trail
 		elif new_state != Em.char_state.SEQ_USER and move_name in UniqChar.STARTERS and move_name in UniqChar.MOVE_DATABASE and \
 				UniqChar.MOVE_DATABASE[move_name][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE:
-			afterimage_trail(Color(1.0, 0.5, 0.5), 0.7, 10, Em.afterimage_shader.WHITE)
+			afterimage_trail(Color(1.0, 0.2, 0.2), 0.7, 10, Em.afterimage_shader.WHITE)
 			return
 	
 	# afterimage trail for certain modulate animations with the key "afterimage_trail"
@@ -4929,7 +4944,7 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 	
 	else: # cancelling from a non-ex non-super move
 		if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.EX: # cancelling into an ex move from non-ex move has wider window
-			# attack buttons must be pressed as well so tapping modifier + attack together too fast will not quick cancel into EX move
+			# attack buttons must be pressed as well so tapping alter + attack together too fast will not quick cancel into EX move
 			if (button_light in input_state.pressed or button_fierce in input_state.pressed or button_aux in input_state.pressed or \
 					button_dash in input_state.pressed or button_block in input_state.pressed):
 				if !are_inputs_too_close():
@@ -4944,8 +4959,8 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 			if !grounded and (button_up in input_state.just_released or button_down in input_state.just_released):
 				if Animator.time <= 5 and Animator.time != 0: # release up/down rebuffer has wider window if in the air
 					return true
-			elif (button_modifier in input_state.just_pressed or button_unique in input_state.just_pressed):
-				# cancelling into special moves via button_modifier/button_unique presses have wider window
+			elif (button_alter in input_state.just_pressed or button_unique in input_state.just_pressed):
+				# cancelling into special moves via button_alter/button_unique presses have wider window
 				if Animator.time <= 2 and Animator.time != 0:
 					return true
 			elif Animator.time <= 1 and Animator.time != 0:
@@ -6508,14 +6523,6 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 		return # defender is deleted
 	increment_hitcount(defender_ID2) # for measuring hitcount of attacks
 #	targeted_opponent_path = hit_data.defender_nodepath # target last attacked opponent
-	
-	match hit_data[Em.hit.BLOCK_STATE]: # gain Positive Flow if unblocked, RES is under 100%, atk_level > 1, or semi-disjoint hit
-		Em.block_state.UNBLOCKED:
-			if current_res_gauge < 0 and (Em.hit.NPC_DEFENDER_PATH in hit_data or \
-					((!hit_data[Em.hit.WEAK_HIT] and hit_data[Em.hit.ADJUSTED_ATK_LVL] > 1) or hit_data[Em.hit.SEMI_DISJOINT])):
-				status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
-
-			remove_status_effect_on_landing_hit()
 			
 	if Globals.survival_level != null and "status_effect_to_add" in defender: # special effects on hit from cards
 		if Inventory.has_quirk(player_ID, Cards.effect_ref.POISON_ATK):
@@ -6588,6 +6595,8 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						chain_combo = Em.chain_combo.NORMAL
 						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
+						res_seal = true
+						remove_status_effect(Em.status_effect.POS_FLOW)
 					Em.atk_type.SPECIAL, Em.atk_type.EX:
 						chain_combo = Em.chain_combo.SPECIAL
 					Em.atk_type.SUPER:
@@ -6623,6 +6632,14 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 #					Em.atk_type.SUPER:
 #						chain_combo = Em.chain_combo.SUPER
 					
+					
+	match hit_data[Em.hit.BLOCK_STATE]: # gain Positive Flow if unblocked, RES is under 100%, atk_level > 1, or semi-disjoint hit
+		Em.block_state.UNBLOCKED:
+			if !res_seal and current_res_gauge < 0 and (Em.hit.NPC_DEFENDER_PATH in hit_data or \
+					((!hit_data[Em.hit.WEAK_HIT] and hit_data[Em.hit.ADJUSTED_ATK_LVL] > 1) or hit_data[Em.hit.SEMI_DISJOINT])):
+				status_effect_to_add.append([Em.status_effect.POS_FLOW, null])
+
+			remove_status_effect_on_landing_hit()
 				
 	# PUSHBACK ----------------------------------------------------------------------------------------------
 		
@@ -6951,8 +6968,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if (Em.move.ATK_TYPE in hit_data[Em.hit.DEFENDER_MOVE_DATA] and \
 					hit_data[Em.hit.DEFENDER_MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
-				hit_data[Em.hit.SUPERARMORED] = true	
-			if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
+				hit_data[Em.hit.SUPERARMORED] = true
+				success_RF = true	
+			elif Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 					(current_res_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 					(current_res_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
@@ -6968,7 +6986,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 					hit_data[Em.hit.DEFENDER_MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
 				hit_data[Em.hit.SUPERARMORED] = true	
-			if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
+				success_RF = true
+			elif Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
 					(current_res_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_ACTIVE in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
 					(current_res_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
@@ -6989,7 +7008,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data[Em.hit.SDASH_ARMORED] = true
 			
 	# passive armor
-	if !is_hitstunned_or_sequenced() and !is_blocking():
+	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and !is_hitstunned_or_sequenced() and !is_blocking():
 		if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.PASSIVE_WEAKARMOR):
 			if current_res_gauge >= 0 and Em.hit.WEAKARMORABLE in hit_data:
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
@@ -7086,15 +7105,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 			hit_data[Em.hit.GUARDCRASH] = true
 			hit_data.erase(Em.hit.SUPERARMORED)
+			success_RF = false
 		elif Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !$SBlockTimer.is_running():
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 			hit_data[Em.hit.GUARDCRASH] = true
 			hit_data.erase(Em.hit.SUPERARMORED)
+			success_RF = false
 		elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.HEAVY:
 			if can_guardcrash(hit_data):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 				hit_data[Em.hit.GUARDCRASH] = true
 				hit_data.erase(Em.hit.SUPERARMORED)
+				success_RF = false
 				
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
 		hit_data[Em.hit.SWEETSPOTTED] = false # blocking will not cause sweetspot hits
@@ -7162,11 +7184,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				
 #	if Em.atk_attr.AUTO_CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 #		hit_data[Em.hit.CRUSH] = true
-	if hit_data[Em.hit.PUNISH_HIT] and Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-		hit_data[Em.hit.CRUSH] = true
-	elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE and "success_RF" in hit_data[Em.hit.ATKER] and \
-			hit_data[Em.hit.ATKER].success_RF: # Reinforced Normals cause CRUSH if success_RF == true
-		hit_data[Em.hit.CRUSH] = true
+	if !hit_data[Em.hit.SEMI_DISJOINT]:
+		if hit_data[Em.hit.PUNISH_HIT] and Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			hit_data[Em.hit.CRUSH] = true
+		elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE and "success_RF" in hit_data[Em.hit.ATKER] and \
+				hit_data[Em.hit.ATKER].success_RF: # Reinforced Normals cause CRUSH if success_RF == true
+			hit_data[Em.hit.GUARDCRASH] = true
+			hit_data[Em.hit.CRUSH] = true
 			
 	# RES SWELL ---------------------------------------------------------------------------------
 					
@@ -7742,10 +7766,6 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			_:
 				success_block = Em.success_block.NONE
 				$SBlockTimer.stop()
-				
-		if (Em.move.ATK_TYPE in hit_data[Em.hit.DEFENDER_MOVE_DATA] and \
-				hit_data[Em.hit.DEFENDER_MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE):
-			success_RF = true
 					
 					
 	if !no_impact_and_vel_change and !proj_on_hitstop_no_kb:
@@ -7923,7 +7943,8 @@ func calculate_res_gauge_change(hit_data) -> int:
 	if Em.atk_attr.ASSIST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and assist_rescue_protect:
 		return 0 # assist rescue no RES drain
 	
-	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstEscape":
+#	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.BURST] == "BurstEscape":
+	if Em.move.BURST in hit_data[Em.hit.MOVE_DATA]:
 		return 0
 	
 	if Em.hit.PROJ_ON_HITSTOP in hit_data:
@@ -7947,19 +7968,19 @@ func calculate_res_gauge_change(hit_data) -> int:
 	if is_hitstunned() and $HitStunTimer.is_running() and RES_swell_flag and !first_hit_flag: # if RES Swell is active, no RES drain
 		return 0
 	
-##	var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+##	var res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 #	if $SBlockTimer.is_running():
 #		return 0
 
-	var RES_DRAIN : int
+	var res_drain : int
 	
 	if !hit_data[Em.hit.SEMI_DISJOINT]:
-		RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+		res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 	else:
-		RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
+		res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
 		
 	if Em.hit.GUARDCRASH in hit_data: # halves RES_Drain on Guardcrash
-		RES_DRAIN = FMath.percent(RES_DRAIN, 50)
+		res_drain = FMath.percent(res_drain, 50)
 	
 	match hit_data[Em.hit.BLOCK_STATE]:
 		Em.block_state.PARRIED:
@@ -7969,22 +7990,29 @@ func calculate_res_gauge_change(hit_data) -> int:
 #			if Em.hit.NPC_PATH in hit_data:
 #				return 0
 #			if Em.hit.RES_DRAIN in hit_data:
-#				RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("SPECIAL_RES_DRAIN_MOD")) # increase RES drain when blocking heavy/special/ex
+#				res_drain = FMath.percent(res_drain, get_stat("SPECIAL_RES_DRAIN_MOD")) # increase RES drain when blocking heavy/special/ex
 #				if Em.hit.ANTI_AIRED in hit_data:
-#					RES_DRAIN = FMath.percent(RES_DRAIN, 150) # increase RES drain if hitting an airblocking opponent with an anti-air
+#					res_drain = FMath.percent(res_drain, 150) # increase RES drain if hitting an airblocking opponent with an anti-air
 #			else:
+			if Globals.survival_level != null:
+				if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX]:
+					if Inventory.has_quirk(player_ID, Cards.effect_ref.BETTER_BLOCK):
+						return 0
+					return FMath.percent(res_drain, get_stat("SPECIAL_RES_DRAIN_MOD"))
+				
 			if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain RES
 				return 0
 			elif Em.hit.SDASH_ARMORED in hit_data: # super dashing through projectiles drain RES
-				RES_DRAIN = FMath.percent(RES_DRAIN, SDASH_ARMOR_RES_DRAIN_MOD)
+				res_drain = FMath.percent(res_drain, SDASH_ARMOR_RES_DRAIN_MOD)
 				if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
-					RES_DRAIN = FMath.percent(RES_DRAIN, SDASH_ARMOR_RES_DRAIN_MOD2) # super dashing through level 2 projectiles drain more
+					res_drain = FMath.percent(res_drain, SDASH_ARMOR_RES_DRAIN_MOD2) # super dashing through level 2 projectiles drain more
 				
 		Em.block_state.UNBLOCKED:
-			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.LESS_RES_DRAIN):
-				RES_DRAIN = FMath.percent(RES_DRAIN, 10)
+			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_RES_DRAIN):
+				res_drain = 0
+#				res_drain = FMath.percent(res_drain, 10)
 
-	return RES_DRAIN # RES drain on 1st hit of the combo depends on Attack Level
+	return res_drain # RES drain on 1st hit of the combo depends on Attack Level
 
 	
 	
@@ -8679,8 +8707,8 @@ func sequence_launch():
 	
 	# RES DRAIN ON FIRST HIT
 	if !Em.move.SEQ_WEAK in seq_data and !(RES_swell_flag and !first_hit_flag):
-		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[seq_data[Em.move.ATK_LVL] - 1]
-		change_res_gauge(RES_DRAIN)
+		var res_drain = -ATK_LEVEL_TO_RES_DRAIN[seq_data[Em.move.ATK_LVL] - 1]
+		change_res_gauge(res_drain)
 		
 	# HITSTUN
 	var hitstun: int
@@ -8932,6 +8960,8 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 	if is_atk_startup():
 		var move_name = anim_name.trim_suffix("Startup")	
 		var atk_attr = query_atk_attr(move_name)
+		
+		if success_RF and move_name in UniqChar.STARTERS: success_RF = false # testing
 				
 		if dir != 0: # impulse
 			match state:
@@ -9527,6 +9557,7 @@ func save_state():
 		"assist_rescue_protect" : assist_rescue_protect,
 		"assist_fever" : assist_fever,
 		"sdash_points" : sdash_points,
+		"res_seal" : res_seal,
 		
 		"sprite_texture_ref" : sprite_texture_ref,
 		
@@ -9646,6 +9677,7 @@ func load_state(state_data, command_rewind := false):
 	assist_rescue_protect = state_data.assist_rescue_protect
 	assist_fever = state_data.assist_fever
 	sdash_points = state_data.sdash_points
+	res_seal = state_data.res_seal
 	
 	if Globals.survival_level != null and !command_rewind:
 		enhance_cooldowns = state_data.enhance_cooldowns

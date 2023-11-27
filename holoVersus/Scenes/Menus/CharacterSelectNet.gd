@@ -363,7 +363,7 @@ func load_buttoncheck():
 	grid.get_node("Dash").load_button("Dash", Settings.button_to_string(input_map["P1_dash"]))
 	grid.get_node("Aux").load_button("Aux", Settings.button_to_string(input_map["P1_aux"]))
 	grid.get_node("Block").load_button("Block", Settings.button_to_string(input_map["P1_block"]))
-	grid.get_node("Modifier").load_button("Mod", Settings.button_to_string(input_map["P1_modifier"]))
+	grid.get_node("Alter").load_button("Alter", Settings.button_to_string(input_map["P1_alter"]))
 	grid.get_node("Unique").load_button("Unique", Settings.button_to_string(input_map["P1_unique"]))
 
 	grid.get_node("TapJump2").text = TAP_JUMP_OPTIONS[input_map["P1_tapjump"]]
@@ -374,7 +374,7 @@ func load_buttoncheck():
 
 func _physics_process(_delta):	
 		
-	if Input.is_action_pressed("P1_modifier"): # reveal/hide button check
+	if Input.is_action_pressed("P1_alter"): # reveal/hide button check
 		my_buttoncheck.show()
 	else:
 		my_buttoncheck.hide()

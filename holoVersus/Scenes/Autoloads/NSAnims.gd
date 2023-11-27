@@ -532,11 +532,11 @@ var modulate_animations = {
 		"timestamps" : {
 			0 :
 			{
-				"modulate" : Color(1.0, 0.6, 0.3), # orange
+				"modulate" : Color(5.0, 0.7, 0.7),
 			},
 			2 :
 			{
-				"modulate" : Color(3.0, 0.5, 0.5),
+				"modulate" : Color(1.0, 0.6, 0.3), # orange
 			},
 			4 :
 			{

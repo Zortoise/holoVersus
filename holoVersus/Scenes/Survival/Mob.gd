@@ -3324,18 +3324,18 @@ func calculate_res_gauge_change(hit_data) -> int:
 #		return 0
 
 	if hit_data[Em.hit.SEMI_DISJOINT]:
-		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
-		RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
-		RES_DRAIN = FMath.percent(RES_DRAIN, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
-		return RES_DRAIN
+		var res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] - 1]
+		res_drain = FMath.percent(res_drain, get_stat("RES_DRAIN_MOD"))
+		res_drain = FMath.percent(res_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
+		return res_drain
 		
 #	if Em.hit.SUPERARMORED in hit_data or ($BlueArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves RES_Drain on armored
 	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running(): # halves RES_Drain on armored
-		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
-		RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
-		RES_DRAIN = FMath.percent(RES_DRAIN, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
-		RES_DRAIN = FMath.percent(RES_DRAIN, 50)
-		return RES_DRAIN
+		var res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+		res_drain = FMath.percent(res_drain, get_stat("RES_DRAIN_MOD"))
+		res_drain = FMath.percent(res_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
+		res_drain = FMath.percent(res_drain, 50)
+		return res_drain
 		
 #	if state in [Em.char_state.GRD_STANDBY, Em.char_state.AIR_STANDBY, 
 #			Em.char_state.GRD_STARTUP, Em.char_state.AIR_STARTUP, 
@@ -3344,24 +3344,24 @@ func calculate_res_gauge_change(hit_data) -> int:
 #		return 0
 
 	if Em.hit.RESISTED in hit_data:
-		var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
-		RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
-		RES_DRAIN = FMath.percent(RES_DRAIN, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
+		var res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+		res_drain = FMath.percent(res_drain, get_stat("RES_DRAIN_MOD"))
+		res_drain = FMath.percent(res_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
 		if Em.hit.ANTI_AIRED in hit_data:
-			RES_DRAIN = FMath.percent(RES_DRAIN, 150) # increase RES drain if hitting an airborne resisting mob with an anti-air
+			res_drain = FMath.percent(res_drain, 150) # increase RES drain if hitting an airborne resisting mob with an anti-air
 			
 		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
 				(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
-			RES_DRAIN = FMath.percent(RES_DRAIN, 150) # increase RES drain for special moves and strong projectiles
+			res_drain = FMath.percent(res_drain, 150) # increase RES drain for special moves and strong projectiles
 			
-		return RES_DRAIN
+		return res_drain
 		
 	return RES_GAUGE_FLOOR
 
-#	var RES_DRAIN = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
-#	RES_DRAIN = FMath.percent(RES_DRAIN, get_stat("RES_DRAIN_MOD"))
+#	var res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
+#	res_drain = FMath.percent(res_drain, get_stat("RES_DRAIN_MOD"))
 #
-#	return RES_DRAIN # RES drain on 1st hit of the combo depends on Attack Level
+#	return res_drain # RES drain on 1st hit of the combo depends on Attack Level
 	
 	
 func calculate_knockback_strength(hit_data) -> int:

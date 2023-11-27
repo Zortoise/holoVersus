@@ -1085,7 +1085,7 @@ margin_right = 408.0
 margin_bottom = 191.0
 focus_neighbour_right = NodePath("../../ControlsListR/Block")
 
-[node name="Modifier" parent="ControlsListL" instance=ExtResource( 9 )]
+[node name="Alter" parent="ControlsListL" instance=ExtResource( 9 )]
 margin_top = 195.0
 margin_right = 408.0
 margin_bottom = 230.0
@@ -1158,7 +1158,7 @@ custom_fonts/font = SubResource( 50 )
 margin_top = 216.0
 margin_right = 408.0
 margin_bottom = 251.0
-focus_neighbour_left = NodePath("../../ControlsListL/Modifier")
+focus_neighbour_left = NodePath("../../ControlsListL/Alter")
 
 [node name="RS_Down" parent="ControlsListR" instance=ExtResource( 9 )]
 margin_top = 255.0
@@ -1778,12 +1778,12 @@ margin_bottom = 191.0
 size_flags_horizontal = 3
 text = "Block"
 
-[node name="Modifier" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
+[node name="Alter" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_top = 195.0
 margin_right = 290.0
 margin_bottom = 230.0
 size_flags_horizontal = 3
-text = "Modifier"
+text = "Alter"
 
 [node name="RS_Up" parent="PopUpExtra/ExtraButtonActions" instance=ExtResource( 11 )]
 margin_left = 294.0

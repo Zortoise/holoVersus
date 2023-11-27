@@ -76,6 +76,12 @@ var card_art = {
 	Cards.card_ref.NERISSA : ResourceLoader.load("res://Cards/CardArt/Nerissa.png"),
 	Cards.card_ref.SHIORI : ResourceLoader.load("res://Cards/CardArt/Shiori.png"),
 	Cards.card_ref.BIJOU : ResourceLoader.load("res://Cards/CardArt/Bijou.png"),
+	
+	Cards.card_ref.AO : ResourceLoader.load("res://Cards/CardArt/Ao.png"),
+	Cards.card_ref.RIRIKA : ResourceLoader.load("res://Cards/CardArt/Ririka.png"),
+	Cards.card_ref.KANADE : ResourceLoader.load("res://Cards/CardArt/Kanade.png"),
+	Cards.card_ref.RADEN : ResourceLoader.load("res://Cards/CardArt/Raden.png"),
+	Cards.card_ref.HAJIME : ResourceLoader.load("res://Cards/CardArt/Hajime.png"),
 }
 
 var card_entity_data = {

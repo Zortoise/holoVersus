@@ -7,6 +7,9 @@ const STARTING_STOCKS = 5
 const STARTING_PRISM = 100
 const PRICE_SCALING = 10
 
+const INIT_TIME = 7200
+const TIME_PER_WAVE = [5400, 3200]
+
 const MOB_LIST = [
 	["GuraM", "Gura"],
 ]

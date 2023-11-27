@@ -516,7 +516,7 @@ func simulate():
 
 func capture_combinations():
 	
-	Character.combination(Character.button_modifier, Character.button_dash, "Float")
+	Character.combination(Character.button_alter, Character.button_dash, "Float")
 	
 	Character.combination(Character.button_up, Character.button_light, "uL")
 	Character.combination(Character.button_down, Character.button_light, "dL")
@@ -524,24 +524,24 @@ func capture_combinations():
 	Character.combination(Character.button_down, Character.button_fierce, "dF")
 	Character.combination(Character.button_light, Character.button_fierce, "H")
 	
-	Character.combination(Character.button_modifier, Character.button_light, "Sp.L")
-	Character.ex_combination(Character.button_modifier, Character.button_light, "ExSp.L")
+	Character.combination(Character.button_alter, Character.button_light, "Sp.L")
+	Character.ex_combination(Character.button_alter, Character.button_light, "ExSp.L")
 	
-#	Character.combination_trio(Character.button_modifier, Character.button_down, Character.button_light, "Sp.dL")
+#	Character.combination_trio(Character.button_alter, Character.button_down, Character.button_light, "Sp.dL")
 	
-	Character.combination(Character.button_modifier, Character.button_fierce, "Sp.F")
-	Character.ex_combination(Character.button_modifier, Character.button_fierce, "ExSp.F")
+	Character.combination(Character.button_alter, Character.button_fierce, "Sp.F")
+	Character.ex_combination(Character.button_alter, Character.button_fierce, "ExSp.F")
 	
-	Character.combination_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "Sp.uF")
-	Character.ex_combination_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "ExSp.uF")
+	Character.combination_trio(Character.button_alter, Character.button_up, Character.button_fierce, "Sp.uF")
+	Character.ex_combination_trio(Character.button_alter, Character.button_up, Character.button_fierce, "ExSp.uF")
 	
-#	Character.combination_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "Sp.dF")
-#	Character.ex_combination_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "ExSp.dF")
+#	Character.combination_trio(Character.button_alter, Character.button_down, Character.button_fierce, "Sp.dF")
+#	Character.ex_combination_trio(Character.button_alter, Character.button_down, Character.button_fierce, "ExSp.dF")
 	
-	Character.combination_trio(Character.button_modifier, Character.button_light, Character.button_fierce, "Sp.H")
-	Character.ex_combination_trio(Character.button_modifier, Character.button_light, Character.button_fierce, "ExSp.H")
+	Character.combination_trio(Character.button_alter, Character.button_light, Character.button_fierce, "Sp.H")
+	Character.ex_combination_trio(Character.button_alter, Character.button_light, Character.button_fierce, "ExSp.H")
 	
-#	Character.doubletap_combination(Character.button_modifier, Character.button_fierce, "SpSp.F")
+#	Character.doubletap_combination(Character.button_alter, Character.button_fierce, "SpSp.F")
 
 func capture_unique_combinations():
 	
@@ -560,16 +560,16 @@ func rebuffer_actions(): # for when there are air and ground versions, or up/dow
 	Character.rebuffer(Character.button_down, Character.button_fierce, "dF")
 	Character.rebuffer(Character.button_light, Character.button_fierce, "H")
 	
-#	Character.rebuffer(Character.button_modifier, Character.button_light, "Sp.L")
-#	Character.rebuffer_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "Sp.dL")
-	Character.rebuffer(Character.button_modifier, Character.button_fierce, "Sp.F")
-#	Character.rebuffer_trio(Character.button_modifier, Character.button_up, Character.button_fierce, "Sp.uF")
-#	Character.rebuffer_trio(Character.button_modifier, Character.button_down, Character.button_fierce, "Sp.dF")
-#	Character.rebuffer_trio(Character.button_modifier, Character.button_light, Character.button_fierce, "Sp.H")
+#	Character.rebuffer(Character.button_alter, Character.button_light, "Sp.L")
+#	Character.rebuffer_trio(Character.button_alter, Character.button_down, Character.button_fierce, "Sp.dL")
+	Character.rebuffer(Character.button_alter, Character.button_fierce, "Sp.F")
+#	Character.rebuffer_trio(Character.button_alter, Character.button_up, Character.button_fierce, "Sp.uF")
+#	Character.rebuffer_trio(Character.button_alter, Character.button_down, Character.button_fierce, "Sp.dF")
+#	Character.rebuffer_trio(Character.button_alter, Character.button_light, Character.button_fierce, "Sp.H")
 	
 func rebuffer_EX(): # only rebuffer EX moves on release of up/down
-#	Character.ex_rebuffer(Character.button_modifier, Character.button_light, "ExSp.L")
-	Character.ex_rebuffer(Character.button_modifier, Character.button_fierce, "ExSp.F")
+#	Character.ex_rebuffer(Character.button_alter, Character.button_light, "ExSp.L")
+	Character.ex_rebuffer(Character.button_alter, Character.button_fierce, "ExSp.F")
 	
 	
 func capture_instant_actions():

@@ -10,7 +10,7 @@ var show_hitbox := false
 
 var controls_panel # point to it in GameViewport
 
-const SHOW_CONTROLS = "P1_modifier"
+const SHOW_CONTROLS = "P1_alter"
 const SPEED_UP = "P1_up"
 const SPEED_DOWN = "P1_down"
 const NORMAL_SPEED = "P1_jump"
