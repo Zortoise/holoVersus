@@ -539,8 +539,10 @@ func atk_type_to_tier(atk_type):
 			return 1
 		Em.atk_type.EX:
 			return 2
+		Em.atk_type.REINFORCE:
+			return 3	
 		Em.atk_type.SUPER:
-			return 3
+			return 4
 		_: # just in case
 			return -1
 	

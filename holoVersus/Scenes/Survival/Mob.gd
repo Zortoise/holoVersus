@@ -2224,8 +2224,8 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 		return null
 
 
-func get_atk_strength(_move):
-	return 5
+#func get_atk_strength(_move):
+#	return 5
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------
 	
@@ -2962,7 +2962,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		play_audio("block3", {"vol" : -15})
 		
 	elif Em.hit.RESISTED in hit_data:
-		modulate_play("weakblock_flash")
+		modulate_play("block_flash")
 		play_audio("block3", {"vol" : -15})
 		hit_data[Em.hit.NO_HIT_SOUND_MOB] = true
 		

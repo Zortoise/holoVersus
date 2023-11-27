@@ -276,6 +276,7 @@ var aerial_sp_memory = [] # appended whenever an air normal attack is made, cann
 						  # reset on landing
 var success_block = Em.success_block.NONE # set to true after blocking an attack, allow block recovery to be cancellable, reset on block startup
 var success_dodge := false # set to true after iframing through an attack, turn later part of dodge cancellable, reset outside dodge
+var success_RF := false # set to true if armoring through an attack with Reinforce, set to false when starting any attack
 var target_ID = null # ID of the opponent, changes whenever you land a hit on an opponent or is attacked
 var seq_partner_ID = null # not always target_ID during Survival Mode
 var seq_partner_type = Em.seq_partner.CHAR # type of entity grabbing you
@@ -4703,6 +4704,12 @@ func flashes():
 #	if is_attacking(): 	# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active/recovery
 #		if get_move_name() in UniqChar.EX_FLASH_ANIM:
 #			modulate_play("EX_flash2")
+
+	if is_atk_startup():
+		var move_name = get_move_name()
+		if move_name in UniqChar.STARTERS and move_name in UniqChar.MOVE_DATABASE and \
+				UniqChar.MOVE_DATABASE[move_name][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE:
+			modulate_play("RF_shine")
 			
 	if is_blocking():
 		modulate_play("block")
@@ -4721,7 +4728,8 @@ func process_afterimage_trail():# process afterimage trail
 	
 	if is_atk_startup() or is_atk_active() or new_state == Em.char_state.SEQ_USER:
 		# if current movename in UniqChar.EX_FLASH_ANIM, will ex flash during startup/active
-		if get_move_name() in UniqChar.EX_FLASH_ANIM:
+		var move_name = get_move_name()
+		if move_name in UniqChar.EX_FLASH_ANIM:
 			var color = Color(0, 0, 0)
 # warning-ignore:integer_division
 			match int(posmod(Globals.Game.frametime, 18) / 3):
@@ -4738,6 +4746,12 @@ func process_afterimage_trail():# process afterimage trail
 				_:
 					color = Color(1.0, 0.5, 1.0) # purple
 			afterimage_trail(color, 0.7, 10, Em.afterimage_shader.WHITE)
+			return
+			
+		# RF Normals have red afterimage trail
+		elif new_state != Em.char_state.SEQ_USER and move_name in UniqChar.STARTERS and move_name in UniqChar.MOVE_DATABASE and \
+				UniqChar.MOVE_DATABASE[move_name][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE:
+			afterimage_trail(Color(1.0, 0.5, 0.5), 0.7, 10, Em.afterimage_shader.WHITE)
 			return
 	
 	# afterimage trail for certain modulate animations with the key "afterimage_trail"
@@ -4925,7 +4939,7 @@ func check_quick_cancel(attack_ref): # cannot quick cancel from EX/Supers
 			
 			if Globals.atk_type_to_tier(from_move_data[Em.move.ATK_TYPE]) > \
 					Globals.atk_type_to_tier(to_move_data[Em.move.ATK_TYPE]):
-				return false # for none-EX moves, cannot quick cancel into moves of lower tiers
+				return false # for non-EX moves, cannot quick cancel into moves of lower tiers
 			
 			if !grounded and (button_up in input_state.just_released or button_down in input_state.just_released):
 				if Animator.time <= 5 and Animator.time != 0: # release up/down rebuffer has wider window if in the air
@@ -5080,6 +5094,12 @@ func is_heavy(move_name):
 			return true
 	return false
 	
+func is_reinforce(move_name):
+	match query_move_data(move_name)[Em.move.ATK_TYPE]:
+		Em.atk_type.REINFORCE:
+			return true
+	return false
+	
 func is_non_EX_special_move(move_name):
 	match query_move_data(move_name)[Em.move.ATK_TYPE]:
 		Em.atk_type.SPECIAL:
@@ -5095,6 +5115,12 @@ func is_special_move(move_name):
 func is_ex_move(move_name):
 	match query_move_data(move_name)[Em.move.ATK_TYPE]:
 		Em.atk_type.EX:
+			return true
+	return false
+	
+func is_rf_move(move_name):
+	match query_move_data(move_name)[Em.move.ATK_TYPE]:
+		Em.atk_type.REINFORCE:
 			return true
 	return false
 	
@@ -5135,6 +5161,37 @@ func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition w
 			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
 			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
 			modulate_play("EX_flash")
+			return true
+		else:
+			return false
+			
+#			if move_name in UniqChar.MOVE_DATABASE:
+##					UniqChar.MOVE_DATABASE[move_name][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE:
+#				Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
+
+# called by unique character to check if there is a RF version and if it is valid
+func is_rf_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
+	if !attack_ref in UniqChar.STARTERS or !is_rf_move(attack_ref): return true # not RF move or starter, allowed to pass
+	
+	# has an RF Move, only pass if valid
+	if !quick_cancel: # not quick cancelling, must afford it
+		if current_res_gauge + RES_GAUGE_CEIL >= get_stat("REINFORCE_COST"):
+			change_res_gauge(-get_stat("REINFORCE_COST"))
+			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # RF chime
+			Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
+			success_RF = false
+			return true
+		else:
+			return false
+	else:
+		if is_rf_move(get_move_name()): # can quick cancel from 1 RF move to another, no cost and no chime if so
+			success_RF = false
+			return true
+		elif current_res_gauge + RES_GAUGE_CEIL >= get_stat("REINFORCE_COST"): # quick cancel from non-RF move to RF move, must afford the cost
+			change_res_gauge(-get_stat("REINFORCE_COST"))
+			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # RF chime
+			Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
+			success_RF = false
 			return true
 		else:
 			return false
@@ -5624,12 +5681,14 @@ func test_sdash_cancel():
 #			return false
 		
 	match move_data[Em.move.ATK_TYPE]:
-		Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY:
+		Em.atk_type.LIGHT, Em.atk_type.FIERCE, Em.atk_type.HEAVY, Em.atk_type.REINFORCE:
 			if !chain_combo in [Em.chain_combo.NORMAL, Em.chain_combo.HEAVY]:
 				return false # can only s_dash cancel on Normal/Heavy hit
 				
 			if !grounded and super_dash == 0: return false
 			if is_atk_active():
+				if move_data[Em.move.ATK_TYPE] == Em.atk_type.REINFORCE:
+					return false # cannot s_dash cancel Reinforce during active, only during recovery
 				if Em.atk_attr.LATE_CHAIN in move_data[Em.move.ATK_ATTR]:
 					return false
 				if !active_cancel:
@@ -6006,6 +6065,9 @@ func test_chain_combo(attack_ref): # attack_ref is the attack you want to chain 
 	var from_move_data = query_move_data(move_name)
 	var to_move_data = query_move_data(attack_ref)
 	
+	if from_move_data[Em.move.ATK_TYPE] == Em.atk_type.REINFORCE: return false # Reinforce cannot chain into attacks
+	if to_move_data[Em.move.ATK_TYPE] == Em.atk_type.REINFORCE: return false # cannot chain into Reinforce
+	
 	match from_move_data[Em.move.ATK_TYPE]:
 		Em.atk_type.LIGHT: # Light Normals can chain cancel on whiff
 			pass
@@ -6115,20 +6177,20 @@ func test_rekka(anim_name):
 	return false
 	
 	
-func get_atk_strength(move):
-	match query_move_data(move)[Em.move.ATK_TYPE]:
-		Em.atk_type.LIGHT:
-			return 0
-		Em.atk_type.FIERCE:
-			return 1
-		Em.atk_type.HEAVY:
-			return 2
-		Em.atk_type.SPECIAL:
-			return 3
-		Em.atk_type.EX:
-			return 4
-		Em.atk_type.SUPER:
-			return 5
+#func get_atk_strength(move):
+#	match query_move_data(move)[Em.move.ATK_TYPE]:
+#		Em.atk_type.LIGHT:
+#			return 0
+#		Em.atk_type.FIERCE:
+#			return 1
+#		Em.atk_type.HEAVY:
+#			return 2
+#		Em.atk_type.SPECIAL:
+#			return 3
+#		Em.atk_type.EX:
+#			return 4
+#		Em.atk_type.SUPER:
+#			return 5
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------
 	
@@ -6399,6 +6461,11 @@ func query_priority(in_move_name = null):
 				priority = Em.priority.gEX
 			else:
 				priority = Em.priority.aEX
+		Em.atk_type.REINFORCE:
+			if grounded:
+				priority = Em.priority.gRF
+			else:
+				priority = Em.priority.aRF
 		Em.atk_type.SUPER:
 			priority = Em.priority.SUPER
 				
@@ -6515,6 +6582,10 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 						chain_combo = Em.chain_combo.HEAVY
 						if !Em.atk_attr.NO_ACTIVE_CANCEL in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 							active_cancel = true
+						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
+							gain_one_air_jump()
+					Em.atk_type.REINFORCE: # no active_cancel
+						chain_combo = Em.chain_combo.NORMAL
 						if is_aerial() and !hit_data[Em.hit.REPEAT]:  # for unblocked aerial you regain 1 air jump
 							gain_one_air_jump()
 					Em.atk_type.SPECIAL, Em.atk_type.EX:
@@ -6788,9 +6859,11 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	elif Em.hit.LAST_HIT in hit_data and Em.hit.SWEETSPOTTED in delayed_hit_effect:
 		hit_data[Em.hit.SWEETSPOTTED] = true
 		
-	if is_attacking():	
-		hit_data[Em.hit.DEFENDER_ATTR] = query_atk_attr()
+	if is_attacking():
+		hit_data[Em.hit.DEFENDER_MOVE_DATA] = query_move_data()
+		hit_data[Em.hit.DEFENDER_ATTR] = hit_data[Em.hit.DEFENDER_MOVE_DATA][Em.move.ATK_ATTR]
 	else:
+		hit_data[Em.hit.DEFENDER_MOVE_DATA] = {}
 		hit_data[Em.hit.DEFENDER_ATTR] = []
 
 	
@@ -6875,6 +6948,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
 			if hit_data[Em.hit.CROSSED_UP]:
 				continue # armored moves only armor from front unless has BI_DIR_ARMOR
+			if (Em.move.ATK_TYPE in hit_data[Em.hit.DEFENDER_MOVE_DATA] and \
+					hit_data[Em.hit.DEFENDER_MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE):
+				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
+				hit_data[Em.hit.SUPERARMORED] = true	
 			if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 					(current_res_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
@@ -6887,6 +6964,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
 			if hit_data[Em.hit.CROSSED_UP]:
 				continue # armored moves only armor from front unless has BI_DIR_ARMOR
+			if (Em.move.ATK_TYPE in hit_data[Em.hit.DEFENDER_MOVE_DATA] and \
+					hit_data[Em.hit.DEFENDER_MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE):
+				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.PARRIED
+				hit_data[Em.hit.SUPERARMORED] = true	
 			if Em.atk_attr.SUPERARMOR_ACTIVE in defender_attr or \
 					(current_res_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_ACTIVE in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_ACTIVE in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
@@ -6967,7 +7048,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						else:
 							hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 
-				Em.atk_type.HEAVY, Em.atk_type.SPECIAL, Em.atk_type.EX:
+				Em.atk_type.HEAVY, Em.atk_type.REINFORCE, Em.atk_type.SPECIAL, Em.atk_type.EX:
 					if hit_data[Em.hit.CROSSED_UP]:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 					else:
@@ -7000,7 +7081,12 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 		
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
-		if Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !$SBlockTimer.is_running():
+		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE and "success_RF" in hit_data[Em.hit.ATKER] and \
+				hit_data[Em.hit.ATKER].success_RF: # Reinforced Normals are unblockable if success_RF == true
+			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
+			hit_data[Em.hit.GUARDCRASH] = true
+			hit_data.erase(Em.hit.SUPERARMORED)
+		elif Em.atk_attr.UNBLOCKABLE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !$SBlockTimer.is_running():
 			hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
 			hit_data[Em.hit.GUARDCRASH] = true
 			hit_data.erase(Em.hit.SUPERARMORED)
@@ -7077,6 +7163,9 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #	if Em.atk_attr.AUTO_CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 #		hit_data[Em.hit.CRUSH] = true
 	if hit_data[Em.hit.PUNISH_HIT] and Em.atk_attr.CRUSH in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		hit_data[Em.hit.CRUSH] = true
+	elif hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE and "success_RF" in hit_data[Em.hit.ATKER] and \
+			hit_data[Em.hit.ATKER].success_RF: # Reinforced Normals cause CRUSH if success_RF == true
 		hit_data[Em.hit.CRUSH] = true
 			
 	# RES SWELL ---------------------------------------------------------------------------------
@@ -7326,13 +7415,17 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				elif Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
 						(Em.atk_attr.REPEL_ON_BLOCK in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] and !Em.hit.MULTIHIT in hit_data):
 #					 or (Em.hit.RES_DRAIN in hit_data and !$SBlockTimer.is_running() and !Em.hit.NPC_PATH in hit_data):
-					modulate_play("weakblock_flash")
+					modulate_play("block_flash")
 					play_audio("block3", {"vol" : -15})
 				else:
-					modulate_play("weakblock_flash")
+					modulate_play("block_flash")
 					play_audio("block1", {"vol" : -10, "bus" : "LowPass"})
 			Em.block_state.PARRIED:
-				modulate_play("strongblock_flash")
+#				if Em.hit.SUPERARMORED in hit_data:
+#					modulate_play("armor_flash")
+#					play_audio("block3", {"vol" : -15})
+#				else:
+				modulate_play("parry_flash")
 				play_audio("bling2", {"vol" : -8, "bus" : "PitchDown"})
 
 
@@ -7649,6 +7742,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			_:
 				success_block = Em.success_block.NONE
 				$SBlockTimer.stop()
+				
+		if (Em.move.ATK_TYPE in hit_data[Em.hit.DEFENDER_MOVE_DATA] and \
+				hit_data[Em.hit.DEFENDER_MOVE_DATA][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE):
+			success_RF = true
 					
 					
 	if !no_impact_and_vel_change and !proj_on_hitstop_no_kb:
@@ -8360,6 +8457,9 @@ func generate_blockspark(hit_data):
 			else:
 				blockspark = "WBlockspark"
 		Em.block_state.PARRIED:
+#			if Em.hit.SUPERARMORED in hit_data:
+#				blockspark = "Superarmorspark"
+#			else:
 			blockspark = "SBlockspark"
 #		Em.block_state.PARRY:
 #			blockspark = "Parryspark"
@@ -8830,14 +8930,15 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 #		from_move_rec = false
 	
 	if is_atk_startup():
-		var move_name = anim_name.trim_suffix("Startup")
+		var move_name = anim_name.trim_suffix("Startup")	
+		var atk_attr = query_atk_attr(move_name)
 				
 		if dir != 0: # impulse
 			match state:
 				Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP:
 					if state == Em.char_state.AIR_ATK_STARTUP and (!grounded or check_fallthrough()): continue
 					
-					if !impulse_used and move_name in UniqChar.STARTERS and !Em.atk_attr.NO_IMPULSE in query_atk_attr(move_name):
+					if !impulse_used and move_name in UniqChar.STARTERS and !Em.atk_attr.NO_IMPULSE in atk_attr:
 						impulse_used = true
 						var impulse: int = dir * FMath.percent(get_stat("SPEED"), get_stat("IMPULSE_MOD"))
 #						if instant_dir != 0: # perfect impulse
@@ -8851,8 +8952,7 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 				Em.char_state.AIR_ATK_STARTUP:
 					if strafe_lock_dir == 0 and move_name in UniqChar.STARTERS:
 						strafe_lock_dir = dir
-						
-		var atk_attr = query_atk_attr(move_name)
+					
 		if Em.atk_attr.WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.SUPERARMOR_STARTUP in atk_attr or \
 				(current_res_gauge >= 0 and (Em.atk_attr.P_WEAKARMOR_STARTUP in atk_attr or Em.atk_attr.P_SUPERARMOR_STARTUP in atk_attr)):
 			modulate_play("armor_flash")
@@ -8877,34 +8977,42 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 		strafe_lock_dir = 0
 		
 		if is_atk_active():
-			var move_name = UniqChar.get_root(anim_name.trim_suffix("Active"))
 			
-			chain_memory.append(move_name) # add move to chain memory
+			var move_name = anim_name.trim_suffix("Active")
+			
+			# Reinforce flash effect
+			if move_name in UniqChar.STARTERS and move_name in UniqChar.MOVE_DATABASE and \
+					UniqChar.MOVE_DATABASE[move_name][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE:
+				modulate_play("RF_flash")
+		
+			var root_name = UniqChar.get_root(move_name)
+			
+			chain_memory.append(root_name) # add move to chain memory
 			
 			if !grounded: # add move to aerial memory
 #				if is_normal_attack(move_name) or is_heavy(move_name):
 #					aerial_memory.append(move_name)
 #				elif is_special_move(move_name):
 #					aerial_sp_memory.append(move_name)
-				aerial_memory.append(move_name)
-				if is_special_move(move_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(move_name):
-					aerial_sp_memory.append(move_name)
+				aerial_memory.append(root_name)
+				if is_special_move(root_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(root_name):
+					aerial_sp_memory.append(root_name)
 					
-			if Globals.survival_level != null and move_name in UniqChar.STARTERS:
+			if Globals.survival_level != null and root_name in UniqChar.STARTERS:
 				attack_enhance(query_move_data()[Em.move.ATK_TYPE])
 		
 		elif is_atk_recovery(): # for special case where the move hit on frame 1 and manually animate into recovery animation
-			var move_name = UniqChar.get_root(anim_name.trim_suffix("Rec"))
+			var root_name = UniqChar.get_root(anim_name.trim_suffix("Rec"))
 			
-			if !move_name in chain_memory:
-				chain_memory.append(move_name)
+			if !root_name in chain_memory:
+				chain_memory.append(root_name)
 				
 			if !grounded:
-				if !move_name in aerial_memory:
-					aerial_memory.append(move_name)
-				if !move_name in aerial_sp_memory:
-					if is_special_move(move_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(move_name):
-						aerial_sp_memory.append(move_name)
+				if !root_name in aerial_memory:
+					aerial_memory.append(root_name)
+				if !root_name in aerial_sp_memory:
+					if is_special_move(root_name) and !Em.atk_attr.AIR_REPEAT in query_atk_attr(root_name):
+						aerial_sp_memory.append(root_name)
 					
 #		else:
 #			perfect_chain = false # change to false if neither startup nor active
@@ -9395,6 +9503,7 @@ func save_state():
 		"active_cancel" : active_cancel,
 		"success_block" : success_block,
 		"success_dodge" : success_dodge,
+		"success_RF" : success_RF,
 		"target_ID" : target_ID,
 		"seq_partner_ID" : seq_partner_ID,
 		"seq_partner_type" : seq_partner_type,
@@ -9513,6 +9622,7 @@ func load_state(state_data, command_rewind := false):
 	active_cancel = state_data.active_cancel
 	success_block = state_data.success_block
 	success_dodge = state_data.success_dodge
+	success_RF = state_data.success_RF
 	target_ID = state_data.target_ID
 	seq_partner_ID = state_data.seq_partner_ID
 	seq_partner_type = state_data.seq_partner_type

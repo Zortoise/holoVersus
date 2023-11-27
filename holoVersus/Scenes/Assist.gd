@@ -959,8 +959,8 @@ func query_move_data_and_name(): # requested by main game node when doing hit de
 		return null
 		
 	
-func get_atk_strength(_move):
-	return 3 # same strength as non-EX Specials
+#func get_atk_strength(_move):
+#	return 3 # same strength as non-EX Specials
 
 	
 # HITCOUNT RECORD ------------------------------------------------------------------------------------------------

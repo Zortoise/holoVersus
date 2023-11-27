@@ -1,6 +1,6 @@
 extends Node2D
 
-
+const ID = "nibbler_spawn"
 const TRAITS = [Em.entity_trait.GROUNDED]
 
 # cleaner code

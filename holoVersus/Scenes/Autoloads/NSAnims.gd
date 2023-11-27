@@ -285,7 +285,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"strongblock_flash" :{
+	"parry_flash" :{
 		"priority" : priority.FLASH,
 		"duration": 10,
 		"loop" : false,
@@ -312,7 +312,7 @@ var modulate_animations = {
 			},
 		}
 	},
-	"weakblock_flash" :{
+	"block_flash" :{
 		"priority" : priority.FLASH,
 		"priority_lvl": 0,
 		"duration": 10,
@@ -491,6 +491,56 @@ var modulate_animations = {
 			11 :
 			{
 				"modulate" : Color(1.25, 1.25, 1.25),
+			},
+		}
+	},
+	"RF_flash" :{
+		"priority" : priority.FLASH,
+		"duration": 15,
+		"loop" : false,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(5.0, 1.5, 1.5),
+			},
+#			2 :
+#			{
+#				"modulate" : Color(0.2, 0.0, 0.0),
+#			},
+			4 :
+			{
+				"modulate" : Color(4.2, 1.4, 1.4),
+			},
+			7 :
+			{
+				"modulate" : Color(3.4, 1.3, 1.3),
+			},
+			10 :
+			{
+				"modulate" : Color(2.6, 1.2, 1.2),
+			},
+			13 :
+			{
+				"modulate" : Color(1.8, 1.1, 1.1),
+			},
+		}
+	},
+	"RF_shine" : {
+		"priority" : priority.ACTION,
+		"duration": 6,
+		"loop" : true,
+		"timestamps" : {
+			0 :
+			{
+				"modulate" : Color(1.0, 0.6, 0.3), # orange
+			},
+			2 :
+			{
+				"modulate" : Color(3.0, 0.5, 0.5),
+			},
+			4 :
+			{
+				"modulate" : Color(0.3, 0.0, 0.0)
 			},
 		}
 	},

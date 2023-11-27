@@ -437,7 +437,8 @@ func capture_instant_actions():
 #	if !Character.button_down in Character.input_state.pressed or !Character.grounded:
 	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
 #	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
-	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", null)
+#	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", null)
+	Character.combination(Character.button_unique, Character.button_light, "BitemarkTrigger", false, true)
 
 
 func process_instant_actions():
@@ -450,15 +451,15 @@ func process_instant_actions():
 		if "GroundFinTrigger" in Character.instant_actions:
 			Character.unique_data.groundfin_trigger = true # flag for triggering
 			
-		if "BitemarkTriggerD" in Character.instant_actions and Character.get_target() != Character:
-			if Character.unique_data.nibbler_count > 0:
-				var spawn_point = Character.get_target().position
-				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
-				if spawn_point != null:
-					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
-					Character.play_audio("water15", {})
-					Character.unique_data.nibbler_count -= 1
-					update_uniqueHUD()
+#		if "BitemarkTriggerD" in Character.instant_actions and Character.get_target() != Character:
+#			if Character.unique_data.nibbler_count > 0:
+#				var spawn_point = Character.get_target().position
+#				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
+#				if spawn_point != null:
+#					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
+#					Character.play_audio("water15", {})
+#					Character.unique_data.nibbler_count -= 1
+#					update_uniqueHUD()
 						
 #		if "BitemarkTriggerD" in Character.instant_actions and Character.get_target() != Character:
 #			if Character.unique_data.nibbler_count > 0:
@@ -475,12 +476,14 @@ func process_instant_actions():
 #				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
 #				spawn_point.x = round(spawn_point.x)
 #				spawn_point.y = round(spawn_point.y)
-				var spawn_point = FMath.find_center([Character.get_target().position, Character.position], Character.facing)
-				var spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 150), Vector2(10, 300), 1)
-				if spawn_point2 == null: # if no ground found below, check above a little
-					spawn_point2 = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
-				if spawn_point2 != null:
-					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point2, {}, Character.palette_number, NAME)
+				var target_pos = Character.get_target().position
+				var spawn_point = FMath.find_center([target_pos, Character.position], Character.facing)
+				spawn_point = FMath.find_center([target_pos, spawn_point], Character.facing)
+				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 315), Vector2(10, 650), 1)
+				if spawn_point == null: # if no ground found below, check above a little
+					spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
+				if spawn_point != null:
+					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
 					Character.play_audio("water15", {})
 					Character.unique_data.nibbler_count -= 1
 					update_uniqueHUD()
@@ -1486,11 +1489,24 @@ func get_ground_fins() -> Array:
 			ground_fin_array.append(entity)
 	return ground_fin_array
 
+
 func get_closest_ground_fin():
 	var target = Character.get_target()
 	if target == null: return null
 	
 	var ground_fin_array := get_ground_fins()
+	
+	# get nibbler spawns as well
+	var entity_array := []
+	if Globals.player_count > 2:
+		entity_array = get_tree().get_nodes_in_group("EntityNodes")
+	else:
+		entity_array = get_tree().get_nodes_in_group("P" + str(Character.player_ID + 1) + "EntityNodes")
+	for entity in entity_array:
+		if entity.master_ID == Character.player_ID and "ID" in entity.UniqEntity and entity.UniqEntity.ID == "nibbler_spawn":
+			if entity.Animator.to_play_anim == "Spawn":
+				ground_fin_array.append(entity)
+	
 	if ground_fin_array.size() > 0:
 		return FMath.get_closest(ground_fin_array, target.position).entity_ID
 	else:
