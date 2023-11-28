@@ -1339,15 +1339,51 @@ func loot_drop():
 		if prism_change > 0:
 			for x in prism_change:
 				loot_array.append("Prism")
+				
+	if Globals.difficulty == 0:
+		loot_array.append("Prism")
+		if Globals.Game.rng_bool():
+			loot_array.append("Prism")
 	
 	var angle_segment = int((LOOT_ANGLE_RANGE[1] - LOOT_ANGLE_RANGE[0]) / (loot_array.size() + 1))
 	var angle = LOOT_ANGLE_RANGE[0] + angle_segment
+	
+	var target_damage_percent = get_target().get_damage_percent()
+	var max_life_prisms := FMath.round_up_and_descale(int((target_damage_percent * FMath.S) / 20))
+	var max_time_prisms := 3
 	
 	for loot in loot_array:
 		var speed = Globals.Game.rng_range(LOOT_UNSCALED_SPEED_RANGE[0], LOOT_UNSCALED_SPEED_RANGE[1]) * FMath.S
 				
 #		var angle = LOOT_ANGLE_RANGE[0] + Globals.Game.rng_generate(LOOT_ANGLE_RANGE[1] - LOOT_ANGLE_RANGE[0])
-		Globals.Game.LevelControl.spawn_item(loot, position, {"vel_array" : [speed, angle]})
+		var aux = {"vel_array" : [speed, angle]}
+		
+		if Globals.Game.rng_bool(): # randomly decide to check for time first or life first
+			if max_time_prisms > 0 and Globals.Game.matchtime <= 120 * 60:
+				var chance := int((((120 * 60) - Globals.Game.matchtime) * 100) / (120 * 60))
+				if Globals.Game.rng_generate(100) < chance: # the lower the time, the higher the chance
+					aux.type = 2
+					max_time_prisms -= 1
+			if !"type" in aux:
+				if max_life_prisms > 0:
+					var chance = FMath.percent(target_damage_percent, 70)
+					if Globals.Game.rng_generate(100) < chance: # the higher the damage percent, the higher the chance
+						aux.type = 1
+						max_life_prisms -= 1	
+		else:
+			if max_life_prisms > 0:
+				var chance = FMath.percent(target_damage_percent, 70)
+				if Globals.Game.rng_generate(100) < chance:
+					aux.type = 1
+					max_life_prisms -= 1	
+			if !"type" in aux:
+				if max_time_prisms > 0 and Globals.Game.matchtime <= 120 * 60:
+					var chance := int((((120 * 60) - Globals.Game.matchtime) * 100) / (120 * 60))
+					if Globals.Game.rng_generate(100) < chance:
+						aux.type = 2
+						max_time_prisms -= 1
+			
+		Globals.Game.LevelControl.spawn_item(loot, position, aux)
 		angle += angle_segment
 		
 
@@ -4004,7 +4040,7 @@ func _on_SpritePlayer_anim_finished(anim_name):
 					var killer = Globals.Game.get_player_node(target_ID)
 					var healed = killer.take_damage(-FMath.percent(get_stat("DAMAGE_VALUE_LIMIT"), Cards.KILL_HEAL_PERCENT))
 					if healed != null and healed > 0:
-						Globals.Game.spawn_damage_number(healed, killer.position, Em.dmg_num_col.GREEN)
+						Globals.Game.spawn_damage_number(healed, killer.position, Em.dmg_num_col.GREEN, true)
 						
 			Globals.Game.spawn_afterimage(player_ID, Em.afterimage_type.CHAR, sprite_texture_ref.sprite, sprite.get_path(), palette_ref, mob_ref, null, \
 					1.0, 20, Em.afterimage_shader.WHITE)

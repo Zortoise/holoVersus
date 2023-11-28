@@ -479,6 +479,8 @@ func P1_buy():
 		Globals.Game.get_player_node(0).change_stock_points(Cards.DATABASE[to_add][Cards.effect_ref.STOCK])
 	if Cards.effect_ref.TIME in Cards.DATABASE[to_add]: # gain time
 		Globals.Game.matchtime += Cards.DATABASE[to_add][Cards.effect_ref.TIME] * 60
+	if Cards.effect_ref.HP in Cards.DATABASE[to_add]:
+		Globals.Game.damage_update(Globals.Game.get_player_node(0))
 
 	Inventory.pay_prism(0, P1_picker_pos[1])
 		
@@ -503,6 +505,8 @@ func P2_buy():
 		Globals.Game.get_player_node(1).change_stock_points(Cards.DATABASE[to_add][Cards.effect_ref.STOCK])
 	if Cards.effect_ref.TIME in Cards.DATABASE[to_add]: # gain time
 		Globals.Game.matchtime += Cards.DATABASE[to_add][Cards.effect_ref.TIME] * 60
+	if Cards.effect_ref.HP in Cards.DATABASE[to_add]:
+		Globals.Game.damage_update(Globals.Game.get_player_node(1))
 		
 	Inventory.pay_prism(1, P2_picker_pos[1])
 	

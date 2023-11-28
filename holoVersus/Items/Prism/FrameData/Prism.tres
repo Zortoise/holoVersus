@@ -30,7 +30,61 @@ frame_data = {
 "frame": 8
 }
 },
-"vframes": 3
+"vframes": 7
+},
+"LifeActive": {
+"duration": 28,
+"hframes": 6,
+"loop": true,
+"spritesheet": "PrismSprite",
+"timestamps": {
+0: {
+"frame": 15
+},
+6: {
+"frame": 16
+},
+11: {
+"frame": 17
+},
+15: {
+"frame": 18
+},
+19: {
+"frame": 19
+},
+23: {
+"frame": 20
+}
+},
+"vframes": 7
+},
+"LifePickup": {
+"duration": 12,
+"hframes": 6,
+"loop": false,
+"spritesheet": "PrismSprite",
+"timestamps": {
+0: {
+"frame": 9
+},
+2: {
+"frame": 21
+},
+4: {
+"frame": 22
+},
+6: {
+"frame": 23
+},
+8: {
+"frame": 24
+},
+10: {
+"frame": 25
+}
+},
+"vframes": 7
 },
 "Pickup": {
 "duration": 12,
@@ -57,7 +111,7 @@ frame_data = {
 "frame": 14
 }
 },
-"vframes": 3
+"vframes": 7
 },
 "Spawn": {
 "duration": 9,
@@ -75,6 +129,60 @@ frame_data = {
 "frame": 2
 }
 },
-"vframes": 3
+"vframes": 7
+},
+"TimeActive": {
+"duration": 28,
+"hframes": 6,
+"loop": true,
+"spritesheet": "PrismSprite",
+"timestamps": {
+0: {
+"frame": 26
+},
+6: {
+"frame": 27
+},
+11: {
+"frame": 28
+},
+15: {
+"frame": 29
+},
+19: {
+"frame": 30
+},
+23: {
+"frame": 31
+}
+},
+"vframes": 7
+},
+"TimePickup": {
+"duration": 12,
+"hframes": 6,
+"loop": false,
+"spritesheet": "PrismSprite",
+"timestamps": {
+0: {
+"frame": 9
+},
+2: {
+"frame": 32
+},
+4: {
+"frame": 33
+},
+6: {
+"frame": 34
+},
+8: {
+"frame": 35
+},
+10: {
+"frame": 36
+}
+},
+"vframes": 7
 }
 }

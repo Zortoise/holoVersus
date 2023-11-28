@@ -105,11 +105,14 @@ func init():
 		Globals.Game.starting_stock_pts = 1
 		starting_prism = 0
 	else:
+		var starting_stocks = UniqLevel.STARTING_STOCKS
+		if Globals.difficulty == 0:
+			starting_stocks = FMath.percent(starting_stocks, 150)
 		if Globals.player_count == 1:
-			Globals.Game.starting_stock_pts = UniqLevel.STARTING_STOCKS
+			Globals.Game.starting_stock_pts = starting_stocks
 			starting_prism = UniqLevel.STARTING_PRISM
 		else:
-			Globals.Game.starting_stock_pts = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
+			Globals.Game.starting_stock_pts = int(ceil(starting_stocks / 2.0))
 			starting_prism = FMath.percent(UniqLevel.STARTING_PRISM, 50)
 	Globals.stage_ref = UniqLevel.STAGE
 	
@@ -465,21 +468,21 @@ func next_wave():
 			wave_standby_timer = 210
 		emit_signal("wave_cleared")
 		
-		if Globals.difficulty == 0: # stock handout
-			for player in get_tree().get_nodes_in_group("PlayerNodes"):
-				var quota: int
-				if Globals.player_count == 1:
-					quota = UniqLevel.STARTING_STOCKS
-				else:
-					quota = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
-				if !player in respawned_players and player.stock_points_left < quota:
-					player.change_stock_points(1)
+#		if Globals.difficulty == 0: # stock handout
+#			for player in get_tree().get_nodes_in_group("PlayerNodes"):
+#				var quota: int
+#				if Globals.player_count == 1:
+#					quota = UniqLevel.STARTING_STOCKS
+#				else:
+#					quota = int(ceil(UniqLevel.STARTING_STOCKS / 2.0))
+#				if !player in respawned_players and player.stock_points_left < quota:
+#					player.change_stock_points(1)
 					
-			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[0]
-		elif Globals.difficulty == 1:
-			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[1]
-		else:
-			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[0]
+#			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[0]
+#		elif Globals.difficulty == 1:
+#			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[1]
+#		else:
+#			Globals.Game.matchtime += UniqLevel.TIME_PER_WAVE[0]
 		
 	
 func all_waves_cleared():

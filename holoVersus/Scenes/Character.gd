@@ -1023,13 +1023,13 @@ func simulate2(): # only ran if not in hitstop
 		if !target.get_node("HitStunTimer").is_running() or target.current_res_gauge >= RES_GAUGE_CEIL:
 			assist_fever = false
 		
-	if Globals.survival_level != null and Globals.difficulty != 3:
-		if Globals.Game.LevelControl.wave_standby_timer > 0:
-			if Globals.Game.LevelControl.wave_standby_timer == 1:
-				current_damage_value = 0
-				Globals.Game.damage_update(self)
-			else:
-				take_damage(-20) # heal between waves
+#	if Globals.survival_level != null and Globals.difficulty != 3:
+#		if Globals.Game.LevelControl.wave_standby_timer > 0:
+#			if Globals.Game.LevelControl.wave_standby_timer == 1:
+#				current_damage_value = 0
+#				Globals.Game.damage_update(self)
+#			else:
+#				take_damage(-20) # heal between waves
 		
 #		if !is_hitstunned() and query_status_effect(Em.status_effect.SURVIVAL_GRACE):
 #			remove_status_effect(Em.status_effect.SURVIVAL_GRACE)
@@ -6735,7 +6735,7 @@ func landed_a_hit(hit_data): # called by main game node when landing a hit
 				if heal > 0:
 					var healed = take_damage(-heal)
 					if healed != null and healed > 0:
-						Globals.Game.spawn_damage_number(healed, position, Em.dmg_num_col.GREEN)
+						Globals.Game.spawn_damage_number(healed, position, Em.dmg_num_col.GREEN, true)
 						
 			landed_enhance(hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE])
 	

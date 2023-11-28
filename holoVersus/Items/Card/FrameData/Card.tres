@@ -39,7 +39,7 @@ frame_data = {
 "frame": 15
 }
 },
-"vframes": 5
+"vframes": 4
 },
 "Marker": {
 "duration": 48,
@@ -84,10 +84,10 @@ frame_data = {
 "frame": 1
 }
 },
-"vframes": 5
+"vframes": 4
 },
 "Pickup": {
-"duration": 28,
+"duration": 6,
 "hframes": 6,
 "loop": false,
 "spritesheet": "CardSprite",
@@ -109,21 +109,9 @@ frame_data = {
 },
 5: {
 "frame": 21
-},
-6: {
-"frame": 22
-},
-16: {
-"frame": 23
-},
-20: {
-"frame": 24
-},
-24: {
-"frame": 25
 }
 },
-"vframes": 5
+"vframes": 4
 },
 "Spawn": {
 "duration": 6,
@@ -150,6 +138,6 @@ frame_data = {
 "frame": 7
 }
 },
-"vframes": 5
+"vframes": 4
 }
 }

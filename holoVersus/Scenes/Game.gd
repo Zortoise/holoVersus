@@ -1046,7 +1046,7 @@ func simulate(rendering = true):
 	if !input_lock and !is_stage_paused():
 		if Globals.survival_level == null:
 			matchtime -= 1 # match time only start counting down when "BEGIN!" vanishes
-		elif get_tree().get_nodes_in_group("MobNodes").size() != 0: # match time only count down when there are mobs
+		elif !game_set and get_tree().get_nodes_in_group("MobNodes").size() != 0: # match time only count down when there are mobs
 			Globals.survival_time += 1
 			
 			var count_down := true
@@ -2861,11 +2861,11 @@ func spawn_afterimage(master_ID: int, afterimage_type: int, spritesheet_ref: Str
 	return afterimage
 	
 	
-func spawn_damage_number(in_number: int, in_position: Vector2, in_color = null):
-	if Globals.damage_numbers:
+func spawn_damage_number(in_text, in_position: Vector2, in_color = null, text_mode := false):
+	if text_mode or Globals.damage_numbers:
 		var number = Loader.loaded_dmg_num_scene.instance()
 		$DamageNumbers.add_child(number)
-		number.init(in_number, in_position, in_color)
+		number.init(in_text, in_position, in_color)
 		
 	
 # aux_data contain "vol", "bus"

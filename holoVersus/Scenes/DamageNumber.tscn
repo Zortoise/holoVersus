@@ -13,13 +13,13 @@ font_data = ExtResource( 1 )
 script = ExtResource( 2 )
 
 [node name="Label" type="Label" parent="."]
-margin_left = -12.0
+margin_left = -64.0
 margin_top = -12.0
-margin_right = 228.0
+margin_right = 1216.0
 margin_bottom = 46.0
 grow_horizontal = 2
 rect_scale = Vector2( 0.1, 0.1 )
 custom_fonts/font = SubResource( 1 )
-text = "888"
+text = "ITEM GET"
 align = 1
 valign = 1

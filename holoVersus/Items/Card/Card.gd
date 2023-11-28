@@ -33,6 +33,8 @@ func picked_up(character):
 	
 	if character.has_method("get_random_item"):
 		character.get_random_item()
+		
+	Globals.Game.spawn_damage_number("ITEM GET", Entity.position, null, true)
 
 	
 func bounce_sound(_soften: bool = false):

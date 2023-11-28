@@ -57,9 +57,9 @@ func shifted(_shifted_node):
 func update_diff_explain():
 	match $SurvivalList/Difficulty.option_pointer:
 		0:
-			$DiffExplain.text = "Regain 1 Stock after each wave if Stock count is below starting amount."
+			$DiffExplain.text = ""
 		1:
-			$DiffExplain.text = "No Stock handouts and less time rewarded after each wave."
+			$DiffExplain.text = "Less starting Stocks. Less Prisms."
 		2:
 			$DiffExplain.text = "One Stock. No Cards.\nShow me what you got."
 		3:

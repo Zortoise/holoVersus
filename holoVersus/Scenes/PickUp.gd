@@ -23,6 +23,7 @@ var lifespan = null
 var stasis := false # if true, no movement and gravity
 var ground_bounce_limit := 2 # can only bounce once on ground
 var slowed := 0
+var unique_data = {} # data unique for the entity, stored as a dictionary
 
 
 func init(in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_lifespan = null, in_palette_ref = null):
@@ -40,6 +41,9 @@ func init(in_item_ref: String, in_position: Vector2, aux_data: Dictionary, in_li
 		velocity.rotate(aux_data.vel_array[1])
 	
 	load_entity()
+		
+	if "UNIQUE_DATA_REF" in UniqEntity:
+		unique_data = UniqEntity.UNIQUE_DATA_REF.duplicate(true)
 		
 	UniqEntity.init(aux_data)
 	
@@ -118,6 +122,7 @@ func load_entity():
 #			$Sprite.material = ShaderMaterial.new()
 #			$Sprite.material.shader = Loader.loaded_palette_shader
 #			$Sprite.material.set_shader_param("swap", get_node(creator_path).loaded_palette)
+	
 
 func simulate():
 	
@@ -194,7 +199,7 @@ func simulate():
 			position = true_position.convert_to_vec()
 		
 		
-		if UniqEntity.has_method("picked_up") and Animator.current_anim == "Active": # no pickup during spawn
+		if UniqEntity.has_method("picked_up") and Animator.current_anim.ends_with("Active"): # no pickup during spawn
 			pickup()
 	
 	
@@ -277,20 +282,25 @@ func on_offstage(): # what to do if entity leaves stage
 
 func _on_SpritePlayer_anim_finished(anim_name):
 	
-#	if anim_name.ends_with("Kill"):
-#		free = true # don't use queue_free!
+	if anim_name.ends_with("Pickup"):
+		free = true # don't use queue_free!
 		
-	match anim_name:
-		"Pickup":
-			free = true
+#	match anim_name:
+#		"Pickup":
+#			free = true
 			
 	UniqEntity._on_SpritePlayer_anim_finished(anim_name)
 	
 func _on_SpritePlayer_anim_started(anim_name):
-	match anim_name:
-		"Pickup":
-			velocity.set_vector(0, 0)
-			$Sprite.show()
+	
+	if anim_name.ends_with("Pickup"):
+		velocity.set_vector(0, 0)
+		$Sprite.show()
+	
+#	match anim_name:
+#		"Pickup":
+#			velocity.set_vector(0, 0)
+#			$Sprite.show()
 			
 	UniqEntity._on_SpritePlayer_anim_started(anim_name)
 	
@@ -325,6 +335,7 @@ func save_state():
 		"ground_bounce_limit" : ground_bounce_limit,
 		"stasis" : stasis,
 		"slowed" : slowed,
+		"unique_data" : unique_data,
 	}
 	return state_data
 
@@ -350,6 +361,7 @@ func load_state(state_data):
 	ground_bounce_limit = state_data.ground_bounce_limit
 	stasis = state_data.stasis
 	slowed = state_data.slowed
+	unique_data = state_data.unique_data
 
 		
 #--------------------------------------------------------------------------------------------------

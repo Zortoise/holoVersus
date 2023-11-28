@@ -7,14 +7,14 @@ const GRAY = Color(0.75, 0.75, 0.75)
 const GREEN = Color(0.65, 1.5, 0.65)
 
 var free := false
-var number := 0
+var text := ""
 var color = null
 
-func init(in_number: int, in_position: Vector2, in_color = null):
-	number = in_number
+func init(in_text, in_position: Vector2, in_color = null):
+	text = str(in_text)
 	position = in_position
 	color = in_color
-	$Label.text = str(number)
+	$Label.text = text
 	match color:
 		Em.dmg_num_col.RED:
 			$Label.modulate = RED
@@ -36,7 +36,7 @@ func save_state():
 	var state_data = {
 		"free" : free,
 		"position" : position,
-		"number" : number,
+		"text" : text,
 		"color" : color,
 		"height" : $Label.rect_position.y,
 	}
@@ -45,9 +45,9 @@ func save_state():
 func load_state(state_data):
 	free = state_data.free
 	position = state_data.position
-	number = state_data.number
+	text = state_data.text
 	color = state_data.color
-	$Label.text = str(number)
+	$Label.text = text
 	$Label.rect_position.y = state_data.height
 	match color:
 		Em.dmg_num_col.RED:
