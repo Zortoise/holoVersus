@@ -1847,15 +1847,15 @@ func defender_anti_airing(hitbox, attacker, _hurtbox, defender) -> bool:
 	if !defender.is_atk_startup() and !defender.is_atk_active(): # cheap checking to avoid query_move_data()
 		return false # defender not in startup/active, fail to anti-air
 	
-	if defender.is_atk_startup():
-		if defender.grounded:
-			flag = true # defender in grounded attack startup, no need ANTI_AIR attribute, proceed to tier testing
-		else:
-			return false # defender in non-grounded attack startup, fail to anti-air
+#	if defender.is_atk_startup():
+#		if defender.grounded:
+#			flag = true # defender in grounded attack startup, no need ANTI_AIR attribute, proceed to tier testing
+#		else:
+#			return false # defender in non-grounded attack startup, fail to anti-air
 		
 	var defender_move_data = defender.query_move_data()
 	
-	if defender.is_atk_active():
+	if defender.is_atk_startup() or defender.is_atk_active():
 		if Em.atk_attr.ANTI_AIR in defender_move_data[Em.move.ATK_ATTR]:
 			flag = true # defender in attack active frames with ANTI_AIR attribute, proceed to tier testing
 		else:

@@ -4182,18 +4182,6 @@ position = Vector2( 49, 86 )
 [node name="AssistNode3" parent="HUD/P2_HUDRect/GaugesUnder/AssistList" instance=ExtResource( 54 )]
 position = Vector2( 131, 86 )
 
-[node name="P3_HUDRect" type="ReferenceRect" parent="HUD"]
-visible = false
-margin_left = 960.0
-margin_right = 1440.0
-margin_bottom = 1080.0
-
-[node name="P4_HUDRect" type="ReferenceRect" parent="HUD"]
-visible = false
-margin_left = 1440.0
-margin_right = 1920.0
-margin_bottom = 1080.0
-
 [node name="FrameViewer" parent="HUD" instance=ExtResource( 6 )]
 visible = false
 position = Vector2( 48, 910 )

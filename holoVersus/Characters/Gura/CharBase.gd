@@ -72,7 +72,7 @@ const PARRYING_EX_REGEN_MOD = 600 # increase EX Regen when parrying attack
 const ULT_GEN = 0
 #const ULT_GEN = 2000 # amount of Ulimate Gauge gain per frame
 
-const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH, Em.trait.GRD_DASH_JUMP]
+const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "blue"

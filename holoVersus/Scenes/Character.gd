@@ -2974,8 +2974,10 @@ func process_input_buffer():
 									continue
 								elif UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
 									pass # some characters has certain jump cancellable d_rec
-								elif !has_trait(Em.trait.GRD_DASH_JUMP):
-									continue # some characters can jump while dashing
+								elif button_down in input_state.pressed:
+									continue # some special dash can be cancelled by down + jump
+#								elif !has_trait(Em.trait.GRD_DASH_JUMP):
+#									continue # some characters can jump while dashing
 									
 							elif new_state == Em.char_state.GRD_STARTUP:
 								if Animator.time > 1: # can only jump cancel first frame of dash startup
@@ -3029,8 +3031,10 @@ func process_input_buffer():
 									continue
 								if UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
 									pass # some characters has certain jump cancellable d_rec
-								elif !has_trait(Em.trait.AIR_DASH_JUMP):
-									continue # some characters can jump while dashing
+								elif button_down in input_state.pressed:
+									continue # some special dash can be cancelled by down + jump
+#								elif !has_trait(Em.trait.AIR_DASH_JUMP):
+#									continue # some characters can jump while dashing
 							
 #							if Settings.dj_fastfall[player_ID] == 1 and button_down in input_state.pressed:
 #								continue

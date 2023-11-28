@@ -102,11 +102,11 @@ enum status_effect {LETHAL, STUN, STUN_RECOVER, RESPAWN_GRACE, POS_FLOW, POISON,
 
 enum block_state {UNBLOCKED, PARRIED, BLOCKED}
 enum trait {AIR_CHAIN_DASH, VULN_GRD_DASH, VULN_AIR_DASH, PASSIVE_WEAKARMOR, D_REC_BLOCK
-		DASH_IMPULSE, PERMA_SUPERARMOR, NO_LAUNCH, GRD_DASH_JUMP, AIR_DASH_JUMP}
+		DASH_IMPULSE, PERMA_SUPERARMOR, NO_LAUNCH}
 # PASSIVE_WEAKARMOR = when RES is full, gain superarmor to Light/Fierce/non-strong projectiles
 # D_REC_BLOCK = can block out of dash recovery, for heavy characters only
 # DASH_IMPULSE = can impulse during D_REC, used for characters with certain unique dashes (like blinking)
-# GRD/AIR_DASH_JUMP = can jump while dashing
+# //	GRD/AIR_DASH_JUMP = can jump while dashing
 
 #enum reset_type {STARTUP_RESET, ACTIVE_RESET}
 # STARTUP_RESET = can only a_reset this Special during startup just like Normals
