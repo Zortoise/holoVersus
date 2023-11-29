@@ -334,14 +334,14 @@ func interactions(): # not active in survival_mode due to performance issues
 			var atk_attr = query_atk_attr()
 			var proj_level = get_proj_level()
 			
-			var easy_destructible := false # if true, all physical attacks can destroy this entity
+			var destructible := false # if true, all physical attacks can destroy this entity
 			if Em.atk_attr.DESTRUCTIBLE_ENTITY in atk_attr or proj_level == 1:
-				easy_destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
+				destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
 				
-			var indestructible := false
+#			var indestructible := false
 			var reflectable := true
-			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in atk_attr or proj_level == 3:
-				indestructible = true
+			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in atk_attr or proj_level == 2:
+				destructible = false
 				reflectable = false
 			if Em.atk_attr.NO_REFLECT_ENTITY in atk_attr or velocity.x == 0:
 				reflectable = false
@@ -369,9 +369,7 @@ func interactions(): # not active in survival_mode due to performance issues
 							sign(character.position.x - position.x) == sign(velocity.x): # can only reflect approaching projectiles
 						reflector_array_char.append(character)
 						
-					if !indestructible and Em.move.DMG in char_move_data and \
-							(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
-							Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
+					if destructible and Em.move.DMG in char_move_data:
 						destroyer_array.append(character)
 						
 			for npc in npc_array:
@@ -382,9 +380,7 @@ func interactions(): # not active in survival_mode due to performance issues
 							sign(npc.position.x - position.x) == sign(velocity.x): # can only reflect approaching projectiles
 						reflector_array_char.append(npc)
 
-					if !indestructible and Em.move.DMG in char_move_data and \
-							(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
-							Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
+					if destructible and Em.move.DMG in char_move_data:
 						destroyer_array.append(npc)
 					
 #			if Globals.survival_level == null:
@@ -408,7 +404,7 @@ func interactions(): # not active in survival_mode due to performance issues
 							sign(entity.position.x - position.x) == sign(velocity.x): # can only reflect approaching projectiles:
 						reflector_array_entity.append(entity)
 						
-					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity_atk_attr:
+					if destructible and Em.atk_attr.DESTROY_ENTITIES in entity_atk_attr:
 						destroyer_array.append(entity)
 					elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
 						clash_array.append(entity)

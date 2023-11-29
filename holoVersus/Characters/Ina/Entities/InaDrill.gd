@@ -24,7 +24,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_ANGLE : 0,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 #		Em.move.HITSPARK_PALETTE : "dark_purple",
-		Em.move.PROJ_LVL : 2,
+		Em.move.PROJ_LVL : 1,
 		Em.move.ATK_ATTR : [Em.atk_attr.CHIPPER, Em.atk_attr.INDESTRUCTIBLE_ENTITY, Em.atk_attr.NO_REFLECT_ENTITY, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "impact42", aux_data = {"vol" : -18} },
 	},
@@ -199,7 +199,7 @@ func query_move_data(move_name) -> Dictionary:
 	
 	if Entity.unique_data.ex:
 		move_data[Em.move.HITCOUNT] = 8
-		move_data[Em.move.PROJ_LVL] = 3
+		move_data[Em.move.PROJ_LVL] = 2
 
 	match orig_move_name:
 		"ESpawn", "EActive":

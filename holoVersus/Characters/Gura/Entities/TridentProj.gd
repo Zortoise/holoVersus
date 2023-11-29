@@ -38,7 +38,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,
 		Em.move.KB_ANGLE : -45,
-		Em.move.PROJ_LVL : 2,
+		Em.move.PROJ_LVL : 1,
 		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
@@ -51,7 +51,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
 		Em.move.KB_ANGLE : -45,
-		Em.move.PROJ_LVL : 3,
+		Em.move.PROJ_LVL : 2,
 		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
@@ -64,7 +64,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 4,
 		Em.move.KB_ANGLE : -45,
-		Em.move.PROJ_LVL : 3,
+		Em.move.PROJ_LVL : 2,
 		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],
 		Em.move.HIT_SOUND : { ref = "cut2", aux_data = {"vol" : -16} },
 	},
@@ -349,8 +349,8 @@ func query_move_data(move_name) -> Dictionary:
 		if Em.move.DMG in move_data:
 	#		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], 60)	
 			move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))
-		if move_name == "[c3]Active":
-			move_data[Em.move.PROJ_LVL] = 2
+#		if move_name == "[c3]Active":
+#			move_data[Em.move.PROJ_LVL] = 2
 	
 	return move_data
 	

@@ -237,13 +237,12 @@ func interactions():
 			
 			var to_destroy := false
 			
-			var easy_destructible := false # if true, all physical attacks can destroy this entity
+			var destructible := false # if true, all physical attacks can destroy this entity
 			if Em.atk_attr.DESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 1:
-				easy_destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
+				destructible = true # use DESTRUCTIBLE_ENTITY for harmless entities, proj_level 1 for projectiles
 				
-			var indestructible := false
-			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 3:
-				indestructible = true
+			if Em.atk_attr.INDESTRUCTIBLE_ENTITY in query_atk_attr() or get_proj_level() == 2:
+				destructible = false
 
 			var can_clash := false
 			if absorption_value != null and absorption_value > 0:
@@ -263,9 +262,7 @@ func interactions():
 #						velocity.x = -velocity.x
 #						return
 						
-					if !indestructible and Em.move.DMG in char_move_data and \
-							(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
-							Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
+					if destructible and Em.move.DMG in char_move_data:
 						destroyer_array.append(character)
 						
 				for npc in npc_array:
@@ -273,9 +270,7 @@ func interactions():
 							npc.slowed >= 0:
 						var char_move_data = npc.query_move_data()
 
-						if !indestructible and Em.move.DMG in char_move_data and \
-								(easy_destructible or !char_move_data[Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or \
-								Em.atk_attr.DESTROY_ENTITIES in char_move_data[Em.move.ATK_ATTR]):
+						if destructible and Em.move.DMG in char_move_data:
 							destroyer_array.append(npc)
 					
 			 # get entities that can destroy or clash with this entity
@@ -283,7 +278,7 @@ func interactions():
 			var clash_array := []
 			for entity in entity_array:
 				if !entity.free:
-					if !indestructible and Em.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr() and entity.slowed >= 0:
+					if destructible and Em.atk_attr.DESTROY_ENTITIES in entity.query_atk_attr() and entity.slowed >= 0:
 						destroyer_array.append(entity)
 					elif can_clash and entity.absorption_value != null and entity.absorption_value > 0:
 						clash_array.append(entity)

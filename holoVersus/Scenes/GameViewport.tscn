@@ -1,4 +1,4 @@
-[gd_scene load_steps=175 format=2]
+[gd_scene load_steps=176 format=2]
 
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Fonts/Quinquefive-0Wonv.ttf" type="DynamicFontData" id=2]
@@ -25,6 +25,7 @@
 [ext_resource path="res://Assets/UI/ULT_label.png" type="Texture" id=23]
 [ext_resource path="res://Assets/UI/portrait_frame_tag.png" type="Texture" id=24]
 [ext_resource path="res://Assets/UI/ULT_gauge.png" type="Texture" id=25]
+[ext_resource path="res://Assets/UI/char_name_frame.png" type="Texture" id=26]
 [ext_resource path="res://Scenes/Menus/Buttons/ButtonTypeC4.tscn" type="PackedScene" id=36]
 [ext_resource path="res://Scenes/Shaders/Monochrome.gdshader" type="Shader" id=37]
 [ext_resource path="res://Assets/UI/stock.png" type="Texture" id=38]
@@ -395,8 +396,9 @@ font_data = ExtResource( 3 )
 [sub_resource type="StyleBoxEmpty" id=48]
 
 [sub_resource type="DynamicFont" id=204]
-size = 26
-outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+size = 28
+outline_size = 3
+outline_color = Color( 0, 0, 0, 1 )
 use_filter = true
 extra_spacing_top = 4
 font_data = ExtResource( 14 )
@@ -3704,25 +3706,19 @@ autoplay = "RESET"
 anims/RESET = SubResource( 70 )
 anims/flashing = SubResource( 87 )
 
-[node name="CharName" type="ColorRect" parent="HUD/P1_HUDRect/Portrait"]
+[node name="CharName" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
 self_modulate = Color( 0, 0, 0, 1 )
-margin_left = -25.0
-margin_top = -58.0
-margin_right = 143.0
-margin_bottom = -10.0
 
-[node name="CharNameBack" type="ColorRect" parent="HUD/P1_HUDRect/Portrait/CharName"]
+[node name="CharNameBack" type="Sprite" parent="HUD/P1_HUDRect/Portrait/CharName"]
 modulate = Color( 0.584314, 0, 0, 1 )
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 160.0
-margin_bottom = 40.0
+position = Vector2( 61, -34 )
+texture = ExtResource( 26 )
 
 [node name="Text" type="Label" parent="HUD/P1_HUDRect/Portrait/CharName"]
-margin_left = 14.0
-margin_top = 7.0
-margin_right = 163.0
-margin_bottom = 43.0
+margin_left = -14.0
+margin_top = -52.0
+margin_right = 135.0
+margin_bottom = -16.0
 theme = SubResource( 205 )
 text = "FUWAMOCO"
 valign = 1
@@ -3998,27 +3994,21 @@ autoplay = "RESET"
 anims/RESET = SubResource( 88 )
 anims/flashing = SubResource( 89 )
 
-[node name="CharName" type="ColorRect" parent="HUD/P2_HUDRect/Portrait"]
+[node name="CharName" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
 self_modulate = Color( 0, 0, 0, 1 )
-margin_left = -25.0
-margin_top = -58.0
-margin_right = 143.0
-margin_bottom = -10.0
 
-[node name="CharNameBack" type="ColorRect" parent="HUD/P2_HUDRect/Portrait/CharName"]
+[node name="CharNameBack" type="Sprite" parent="HUD/P2_HUDRect/Portrait/CharName"]
 modulate = Color( 0, 0.211765, 0.65098, 1 )
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 160.0
-margin_bottom = 40.0
+position = Vector2( 61, -34 )
+texture = ExtResource( 26 )
 
 [node name="Text" type="Label" parent="HUD/P2_HUDRect/Portrait/CharName"]
-margin_left = 14.0
-margin_top = 7.0
-margin_right = 163.0
-margin_bottom = 43.0
+margin_left = -14.0
+margin_top = -52.0
+margin_right = 135.0
+margin_bottom = -16.0
 theme = SubResource( 205 )
-text = "Gura"
+text = "FUWAMOCO"
 valign = 1
 
 [node name="Stock" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]

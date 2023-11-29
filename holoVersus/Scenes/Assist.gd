@@ -1183,7 +1183,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	hit_data[Em.hit.DOUBLE_REPEAT] = false
 
 	
-	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] < 3:
+	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] < 2:
 		hit_data[Em.hit.NON_STRONG_PROJ] = true
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or Em.hit.NON_STRONG_PROJ in hit_data:
@@ -1213,8 +1213,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				if hit_data[Em.hit.CROSSED_UP]:
 					continue # armored moves only armor from front unless has BI_DIR_ARMOR
 				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
-						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
-						(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
+						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					

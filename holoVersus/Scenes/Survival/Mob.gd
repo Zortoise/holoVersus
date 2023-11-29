@@ -2589,7 +2589,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.LAST_HIT] = true
 			
 		
-	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] != 3:
+	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] < 2:
 		hit_data[Em.hit.NON_STRONG_PROJ] = true
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or Em.hit.NON_STRONG_PROJ in hit_data:
@@ -2736,18 +2736,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 			Em.char_state.AIR_REC:
 				 # air superdash has projectile superarmor against non-strong projectiles
-				if Animator.query_current(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
+				if Em.hit.NON_STRONG_PROJ in hit_data and Animator.query_to_play(["SDash"]):
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 			Em.char_state.GRD_D_REC:
-				if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
-						Animator.to_play_anim.begins_with("Dash"):
+				if Em.hit.NON_STRONG_PROJ in hit_data and Animator.to_play_anim.begins_with("Dash"):
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 			Em.char_state.AIR_D_REC:
-				if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
-						Animator.to_play_anim.begins_with("aDash"):
+				if Em.hit.NON_STRONG_PROJ in hit_data and Animator.to_play_anim.begins_with("aDash"):
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 		if !is_hitstunned_or_sequenced():
@@ -2883,7 +2881,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.LETHAL_HIT] = true
 			
 		elif !guardbroken: # gain some Blue Armor when resisting Proj Level 1 entities
-			if Em.hit.RESISTED in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+			if Em.hit.RESISTED in hit_data and Em.hit.NON_STRONG_PROJ in hit_data:
 				$BlueArmorTimer.time = 10
 			
 
@@ -3406,7 +3404,7 @@ func calculate_res_gauge_change(hit_data) -> int:
 #			res_drain = FMath.percent(res_drain, 150) # increase RES drain if hitting an airborne resisting mob with an anti-air
 			
 		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
-				(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):
+				(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 2):
 			res_drain = FMath.percent(res_drain, 150) # increase RES drain for special moves and strong projectiles
 			
 		return res_drain

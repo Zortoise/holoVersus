@@ -72,9 +72,9 @@ enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_
 # DASH_CANCEL_ON_HIT = can dash cancel during recovery on hit, for Specials since can already do it for Normals
 # NO_ACTIVE_CANCEL = for certain sweetspotted normals and heavies
 # VULN_LIMBS = take full damage from SDHits
-# DESTROY_ENTITIES = hitbox destroys entities, mostly for other entities
+# DESTROY_ENTITIES = hitbox destroys destructible entities and level 1 projectiles, for other entities only
 # DESTRUCTIBLE_ENTITY = this entity can be destroyed by opponent's non-projectile attacks
-# INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks with DESTROY_ENTITIES attribute
+# INDESTRUCTIBLE_ENTITY = this entity cannot be destroyed by attacks
 # HARMLESS_ENTITY = this entity has a hitbox but does not hit opponent (for clashing and being destroyed)
 # NO_REFLECT_ENTITY = this entity cannot be reflected
 # NO_TERMINAL_VEL_ACTIVE = no terminal velocity on active frames
@@ -128,7 +128,7 @@ enum hit {RECT, POLYGON, OWNER_ID, FACING, MOVE_NAME, MOVE_DATA, MOB, HURTBOX, S
 		CANCELLED, ENTITY_PATH, NPC_PATH, ATKER, ATKER_OR_ENTITY, DEFENDER, ANGLE_TO_ATKER, LETHAL_HIT, PUNISH_HIT, CRUSH, STUN, BLOCK_STATE
 		REPEAT, DOUBLE_REPEAT, ANTI_AIRED, PULL, SECONDARY_HIT, LAST_HIT, SINGLE_REPEAT, SOUR_HIT, GUARDCRASH
 		MULTIHIT, FIRST_HIT, AUTOCHAIN, FOLLOW_UP, NON_STRONG_PROJ, WEAKARMORABLE, WEAK_HIT, SUPERARMORED, HITSTOP, DEALT_DMG
-		ADJUSTED_ATK_LVL, KB, KB_ANGLE, SEMI_DISJOINT, SWEETSPOTTED, PULL, MOB_BREAK, RESISTED, SDASH_ARMORED, MOB_ARMORED, IGNORE_RESIST
+		ADJUSTED_ATK_LVL, KB, KB_ANGLE, SEMI_DISJOINT, SWEETSPOTTED, PULL, MOB_BREAK, RESISTED, MOB_ARMORED, IGNORE_RESIST
 		DEFENDER_MOVE_DATA, DEFENDER_ATTR, NPC_DEFENDER_PATH, PROJ_ON_HITSTOP, CROSSED_UP}
 #// RES_DRAIN, CORNERED
 

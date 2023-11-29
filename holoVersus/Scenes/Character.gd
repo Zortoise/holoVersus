@@ -113,8 +113,8 @@ const INIT_BLOCK_MUL = 80 # multiplier to RES cost of starting a block, not a mo
 
 const SPECIAL_RES_DRAIN_MOD = 50 # extra RES_Drain when blocking heavy/special/ex moves, for Survival Mode!
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
-const SDASH_ARMOR_RES_DRAIN_MOD = 125 # extra RES_Drain when SDashing through projectiles
-const SDASH_ARMOR_RES_DRAIN_MOD2 = 160 # extra RES_Drain when SDashing through level 2 projectiles
+#const SDASH_ARMOR_RES_DRAIN_MOD = 125 # extra RES_Drain when SDashing through projectiles
+#const SDASH_ARMOR_RES_DRAIN_MOD2 = 160 # extra RES_Drain when SDashing through level 2 projectiles
 
 const SBlockTimer_TIME = 30 # time after blocking an attack when you are immune to cross-ups and blocking will not cost RES
 
@@ -6865,7 +6865,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.LAST_HIT] = true # for triggering delayed_hit_effect
 	
 	
-	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] < 3:
+	if Em.hit.ENTITY_PATH in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] < 2:
 		hit_data[Em.hit.NON_STRONG_PROJ] = true
 		
 	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.LIGHT, Em.atk_type.FIERCE] or Em.hit.NON_STRONG_PROJ in hit_data:
@@ -7042,20 +7042,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #					hit_data[Em.hit.SDASH_ARMORED] = true
 		Em.char_state.AIR_REC:
 			 # air superdash has projectile superarmor against non-strong projectiles
-			if Animator.query_to_play(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
+			if Em.hit.NON_STRONG_PROJ in hit_data and Animator.query_to_play(["SDash"]):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
-				hit_data[Em.hit.SDASH_ARMORED] = true
+#				hit_data[Em.hit.SDASH_ARMORED] = true
 				
 		Em.char_state.GRD_D_REC:
-			if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
-					Animator.to_play_anim.begins_with("Dash"):
+			if Em.hit.NON_STRONG_PROJ in hit_data and Animator.to_play_anim.begins_with("Dash"):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
 				
 		Em.char_state.AIR_D_REC:
-			if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
-					Animator.to_play_anim.begins_with("aDash"):
+			if Em.hit.NON_STRONG_PROJ in hit_data and Animator.to_play_anim.begins_with("aDash"):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
 			
@@ -7135,7 +7133,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				Em.atk_type.ENTITY, Em.atk_type.EX_ENTITY, Em.atk_type.SUPER_ENTITY:
 #					if check_if_crossed_up(attacker_or_entity, hit_data[Em.hit.ANGLE_TO_ATKER]):
 #						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
-					if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 3:
+					if !Em.hit.NON_STRONG_PROJ in hit_data:
 						hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 #							hit_data[Em.hit.RES_DRAIN] = true
 					elif hit_data[Em.hit.ATKER].query_status_effect(Em.status_effect.SCANNED):
@@ -7313,7 +7311,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data.erase(Em.hit.SUPERARMORED)
 		elif get_res_gauge_percent_below() == 0:
 			if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED:
-				if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
+				if Em.hit.NON_STRONG_PROJ in hit_data:
 					pass # can armor through lvl 1 projectiles even with no RES Gauge
 				else:
 					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.UNBLOCKED
@@ -8052,13 +8050,13 @@ func calculate_res_gauge_change(hit_data) -> int:
 						return 0
 					return FMath.percent(res_drain, get_stat("SPECIAL_RES_DRAIN_MOD"))
 				
-			if !Em.hit.SUPERARMORED in hit_data: # superarmoring through attacks still drain RES
+			if !Em.hit.SUPERARMORED in hit_data: # blocking attacks without superarmor will not drain RES
 				return 0
-			elif Em.hit.SDASH_ARMORED in hit_data: # super dashing through projectiles drain RES
-				res_drain = FMath.percent(res_drain, SDASH_ARMOR_RES_DRAIN_MOD)
-				if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
-					res_drain = FMath.percent(res_drain, SDASH_ARMOR_RES_DRAIN_MOD2) # super dashing through level 2 projectiles drain more
-				
+#			elif Em.hit.ENTITY_PATH in hit_data: # armoring through projectiles drain more RES
+#				res_drain = FMath.percent(res_drain, PROJ_ARMOR_RES_DRAIN_MOD)
+#				if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
+#					res_drain = FMath.percent(res_drain, SDASH_ARMOR_RES_DRAIN_MOD2) # super dashing through level 2 projectiles drain more
+#
 		Em.block_state.UNBLOCKED:
 			if Globals.survival_level != null and Inventory.has_quirk(player_ID, Cards.effect_ref.NO_RES_DRAIN):
 				res_drain = 0

@@ -35,7 +35,7 @@ const MOVE_DATABASE = {
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,
 		Em.move.KB_ANGLE : -45,
-		Em.move.PROJ_LVL : 2,
+		Em.move.PROJ_LVL : 1,
 		Em.move.HITSPARK_TYPE: Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE: "blue",
 		Em.move.ATK_ATTR : [Em.atk_attr.DRAG_KB],

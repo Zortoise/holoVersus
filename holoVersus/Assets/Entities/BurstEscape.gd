@@ -27,7 +27,7 @@ const MOVE_DATABASE = {
 		Em.move.FIXED_HITSTUN : 32,
 		Em.move.HITSPARK_TYPE : Em.hitspark_type.HIT,
 		Em.move.HITSPARK_PALETTE : "blue",
-		Em.move.PROJ_LVL : 3,
+		Em.move.PROJ_LVL : 2,
 		Em.move.KB_ANGLE : 0,
 		Em.move.ATK_ATTR : [Em.atk_attr.SCREEN_SHAKE, Em.atk_attr.DESTROY_ENTITIES],
 		Em.move.HIT_SOUND : { ref = "blast2", aux_data = {"vol" : -9} },
