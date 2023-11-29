@@ -240,7 +240,9 @@ func setup():
 	else:
 		HUD.get_node("MatchTime").show()
 		HUD.get_node("TimeFrame").show()
-		
+		if Globals.difficulty > 1:
+			HUD.get_node("MatchTime").self_modulate.a = 0
+			HUD.get_node("TimeFrame").self_modulate.a = 0
 		
 	if Globals.survival_level == null and Globals.assists > 1:
 		load_items()
@@ -1049,14 +1051,15 @@ func simulate(rendering = true):
 		elif !game_set and get_tree().get_nodes_in_group("MobNodes").size() != 0: # match time only count down when there are mobs
 			Globals.survival_time += 1
 			
-			var count_down := true
-			if Inventory.has_quirk(0, Cards.effect_ref.STOP_TIMER):
-				count_down = false
-			elif Globals.player_count > 1:
-				if Inventory.has_quirk(1, Cards.effect_ref.STOP_TIMER):
+			if Globals.difficulty <= 1:
+				var count_down := true
+				if Inventory.has_quirk(0, Cards.effect_ref.STOP_TIMER):
 					count_down = false
-			if count_down:
-				matchtime -= 1
+				elif Globals.player_count > 1:
+					if Inventory.has_quirk(1, Cards.effect_ref.STOP_TIMER):
+						count_down = false
+				if count_down:
+					matchtime -= 1
 	
 	
 # SAVING/LOADING GAME STATE --------------------------------------------------------------------------------------------------
@@ -2262,6 +2265,8 @@ func ult_gauge_update(character):
 
 
 func portrait_update(character):
+	HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/CharName/Text").text = character.UniqChar.NAME
+	
 	var point_char_portrait = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/CharPortrait")
 #	var teammate1_portrait = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Teammate1/CharPortrait")
 #	var teammate2_portrait = HUD.get_node("P" + str(character.player_ID + 1) + "_HUDRect/Portrait/Teammate2/CharPortrait")

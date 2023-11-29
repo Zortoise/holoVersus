@@ -10,6 +10,7 @@
 [ext_resource path="res://Assets/UI/res_gauge2.png" type="Texture" id=8]
 [ext_resource path="res://Assets/UI/EX_gauge.png" type="Texture" id=9]
 [ext_resource path="res://Assets/UI/res_gauge1.png" type="Texture" id=10]
+[ext_resource path="res://Assets/UI/portrait_tag_back.png" type="Texture" id=11]
 [ext_resource path="res://Assets/UI/gauges_frame.png" type="Texture" id=12]
 [ext_resource path="res://Assets/Fonts/BLKCHCRY.TTF" type="DynamicFontData" id=13]
 [ext_resource path="res://Assets/Fonts/ApeMount-WyPM9.ttf" type="DynamicFontData" id=14]
@@ -22,6 +23,7 @@
 [ext_resource path="res://Assets/UI/kronii_hands.png" type="Texture" id=21]
 [ext_resource path="res://Assets/Fonts/roboto.black.ttf" type="DynamicFontData" id=22]
 [ext_resource path="res://Assets/UI/ULT_label.png" type="Texture" id=23]
+[ext_resource path="res://Assets/UI/portrait_frame_tag.png" type="Texture" id=24]
 [ext_resource path="res://Assets/UI/ULT_gauge.png" type="Texture" id=25]
 [ext_resource path="res://Scenes/Menus/Buttons/ButtonTypeC4.tscn" type="PackedScene" id=36]
 [ext_resource path="res://Scenes/Shaders/Monochrome.gdshader" type="Shader" id=37]
@@ -37,8 +39,6 @@
 [ext_resource path="res://Scenes/Survival/CardMenu.gd" type="Script" id=51]
 [ext_resource path="res://Scenes/Menus/P1DirInputs.gd" type="Script" id=52]
 [ext_resource path="res://Scenes/AssistNode.tscn" type="PackedScene" id=54]
-[ext_resource path="res://Assets/UI/portrait_frame.png" type="Texture" id=55]
-[ext_resource path="res://Assets/UI/portrait_game_back.png" type="Texture" id=56]
 
 [sub_resource type="Animation" id=5]
 length = 0.001
@@ -307,8 +307,8 @@ tracks/1/keys = {
 shader = ExtResource( 37 )
 
 [sub_resource type="DynamicFont" id=203]
-size = 40
-outline_size = 6
+size = 34
+outline_size = 3
 outline_color = Color( 0, 0, 0, 1 )
 use_filter = true
 font_data = ExtResource( 14 )
@@ -385,6 +385,37 @@ tracks/0/keys = {
 "values": [ Color( 0.8, 0, 0, 1 ), Color( 0.8, 0, 0, 1 ), Color( 1.2, 0.5, 0, 1 ), Color( 0.8, 0, 0, 1 ) ]
 }
 
+[sub_resource type="DynamicFont" id=51]
+size = 20
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+extra_spacing_top = 4
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxEmpty" id=48]
+
+[sub_resource type="DynamicFont" id=204]
+size = 26
+outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+use_filter = true
+extra_spacing_top = 4
+font_data = ExtResource( 14 )
+
+[sub_resource type="Theme" id=205]
+default_font = SubResource( 204 )
+Button/colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.8, 0.8, 0.8, 1 )
+Button/colors/font_color_hover = Color( 0.8, 0.8, 0.8, 1 )
+Button/colors/font_color_pressed = Color( 0.8, 0.8, 0.8, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 51 )
+Button/styles/disabled = null
+Button/styles/focus = SubResource( 48 )
+Button/styles/hover = null
+Button/styles/normal = null
+Button/styles/pressed = null
+
 [sub_resource type="DynamicFont" id=3]
 size = 36
 outline_size = 5
@@ -419,37 +450,6 @@ Button/constants/hseparation = 2
 Button/fonts/font = SubResource( 7 )
 Button/styles/disabled = null
 Button/styles/focus = SubResource( 96 )
-Button/styles/hover = null
-Button/styles/normal = null
-Button/styles/pressed = null
-
-[sub_resource type="DynamicFont" id=51]
-size = 20
-outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
-use_filter = true
-extra_spacing_top = 4
-font_data = ExtResource( 3 )
-
-[sub_resource type="StyleBoxEmpty" id=48]
-
-[sub_resource type="DynamicFont" id=204]
-size = 26
-outline_color = Color( 0.941176, 0.941176, 0.941176, 1 )
-use_filter = true
-extra_spacing_top = 4
-font_data = ExtResource( 14 )
-
-[sub_resource type="Theme" id=205]
-default_font = SubResource( 204 )
-Button/colors/font_color = Color( 0.8, 0.8, 0.8, 1 )
-Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
-Button/colors/font_color_focus = Color( 0.8, 0.8, 0.8, 1 )
-Button/colors/font_color_hover = Color( 0.8, 0.8, 0.8, 1 )
-Button/colors/font_color_pressed = Color( 0.8, 0.8, 0.8, 1 )
-Button/constants/hseparation = 2
-Button/fonts/font = SubResource( 51 )
-Button/styles/disabled = null
-Button/styles/focus = SubResource( 48 )
 Button/styles/hover = null
 Button/styles/normal = null
 Button/styles/pressed = null
@@ -3617,57 +3617,64 @@ margin_left = 240.0
 margin_right = 720.0
 margin_bottom = 1080.0
 
-[node name="Portrait" type="Sprite" parent="HUD/P1_HUDRect"]
+[node name="Portrait" type="Node2D" parent="HUD/P1_HUDRect"]
 self_modulate = Color( 0.701961, 0.501961, 0.909804, 1 )
 material = SubResource( 106 )
 position = Vector2( 153, 106 )
-texture = ExtResource( 56 )
+
+[node name="Back" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
+self_modulate = Color( 0.701961, 0.501961, 0.909804, 1 )
+material = SubResource( 106 )
+position = Vector2( -67, -1 )
+texture = ExtResource( 11 )
 
 [node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
+position = Vector2( -67, -1 )
 
 [node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
-texture = ExtResource( 55 )
+position = Vector2( -67, -1 )
+texture = ExtResource( 24 )
 
-[node name="Teammate1" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
-position = Vector2( 255, 0 )
+[node name="Teammate2" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
+position = Vector2( 246, -1 )
 
-[node name="PortraitBack" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+[node name="PortraitBack" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
 modulate = Color( 0, 0, 0, 1 )
-texture = ExtResource( 56 )
+texture = ExtResource( 11 )
 
-[node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+[node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
 
-[node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
-texture = ExtResource( 55 )
+[node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+texture = ExtResource( 24 )
 
-[node name="Cooldown" type="Label" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+[node name="Cooldown" type="Label" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
 margin_left = -40.0
-margin_top = 2.0
+margin_top = 10.0
 margin_right = 40.0
-margin_bottom = 66.0
+margin_bottom = 74.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 203 )
 text = "88"
 align = 1
 valign = 1
 
-[node name="Teammate2" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
-position = Vector2( 335, 0 )
+[node name="Teammate1" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
+position = Vector2( 186, -1 )
 
-[node name="PortraitBack" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+[node name="PortraitBack" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
 modulate = Color( 0, 0, 0, 1 )
-texture = ExtResource( 56 )
+texture = ExtResource( 11 )
 
-[node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+[node name="CharPortrait" type="Node2D" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
 
-[node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
-texture = ExtResource( 55 )
+[node name="PortraitFrame" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
+texture = ExtResource( 24 )
 
-[node name="Cooldown" type="Label" parent="HUD/P1_HUDRect/Portrait/Teammate2"]
+[node name="Cooldown" type="Label" parent="HUD/P1_HUDRect/Portrait/Teammate1"]
 margin_left = -40.0
-margin_top = 2.0
+margin_top = 10.0
 margin_right = 40.0
-margin_bottom = 66.0
+margin_bottom = 74.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 203 )
 text = "88"
@@ -3675,14 +3682,14 @@ align = 1
 valign = 1
 
 [node name="DamageNode" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
-position = Vector2( 53, -10 )
+position = Vector2( -22, -8 )
 
 [node name="DamageValue" type="Label" parent="HUD/P1_HUDRect/Portrait/DamageNode"]
 margin_right = 232.0
 margin_bottom = 72.0
 custom_colors/font_color = Color( 0.941176, 0.941176, 0.941176, 1 )
 custom_fonts/font = SubResource( 2 )
-text = "1888"
+text = "8888"
 valign = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HUD/P1_HUDRect/Portrait/DamageNode"]
@@ -3697,15 +3704,38 @@ autoplay = "RESET"
 anims/RESET = SubResource( 70 )
 anims/flashing = SubResource( 87 )
 
+[node name="CharName" type="ColorRect" parent="HUD/P1_HUDRect/Portrait"]
+self_modulate = Color( 0, 0, 0, 1 )
+margin_left = -25.0
+margin_top = -58.0
+margin_right = 143.0
+margin_bottom = -10.0
+
+[node name="CharNameBack" type="ColorRect" parent="HUD/P1_HUDRect/Portrait/CharName"]
+modulate = Color( 0.584314, 0, 0, 1 )
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 160.0
+margin_bottom = 40.0
+
+[node name="Text" type="Label" parent="HUD/P1_HUDRect/Portrait/CharName"]
+margin_left = 14.0
+margin_top = 7.0
+margin_right = 163.0
+margin_bottom = 43.0
+theme = SubResource( 205 )
+text = "FUWAMOCO"
+valign = 1
+
 [node name="Stock" type="Sprite" parent="HUD/P1_HUDRect/Portrait"]
-position = Vector2( 70, -36 )
+position = Vector2( 180, -34 )
 texture = ExtResource( 38 )
 
 [node name="StockPoints" type="Label" parent="HUD/P1_HUDRect/Portrait"]
-margin_left = 99.0
-margin_top = -60.0
-margin_right = 199.0
-margin_bottom = -13.0
+margin_left = 209.0
+margin_top = -58.0
+margin_right = 309.0
+margin_bottom = -11.0
 custom_colors/font_color = Color( 0.890196, 0.219608, 0.219608, 1 )
 custom_fonts/font = SubResource( 3 )
 text = "9"
@@ -3722,48 +3752,27 @@ text = "TestPlayer"
 align = 1
 valign = 1
 
-[node name="CharName" type="ColorRect" parent="HUD/P1_HUDRect/Portrait"]
-visible = false
-self_modulate = Color( 0, 0, 0, 1 )
-margin_left = 48.0
-margin_top = -54.0
-margin_right = 207.0
-margin_bottom = -14.0
-
-[node name="CharNameBack" type="ColorRect" parent="HUD/P1_HUDRect/Portrait/CharName"]
-modulate = Color( 0.584314, 0, 0, 1 )
-margin_left = 4.0
-margin_top = 4.0
-margin_right = 155.0
-margin_bottom = 36.0
-
-[node name="Test" type="Label" parent="HUD/P1_HUDRect/Portrait/CharName"]
-margin_left = 9.0
-margin_top = 3.0
-margin_right = 157.0
-margin_bottom = 39.0
-theme = SubResource( 205 )
-text = "Gura"
-valign = 1
-
 [node name="Prism" type="Node2D" parent="HUD/P1_HUDRect/Portrait"]
-position = Vector2( 0, 2 )
+position = Vector2( -67, 1 )
 
 [node name="Prism" type="Sprite" parent="HUD/P1_HUDRect/Portrait/Prism"]
-position = Vector2( -14, 85 )
+position = Vector2( -6, 85 )
 texture = ExtResource( 43 )
 
 [node name="Amount" type="Label" parent="HUD/P1_HUDRect/Portrait/Prism"]
-margin_left = 11.0
+margin_left = 19.0
 margin_top = 73.0
-margin_right = 268.0
+margin_right = 276.0
 margin_bottom = 101.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 150 )
 text = "8888"
 
-[node name="GaugesUnder" type="Sprite" parent="HUD/P1_HUDRect"]
+[node name="GaugesUnder" type="Node2D" parent="HUD/P1_HUDRect"]
 position = Vector2( 240, 966 )
+
+[node name="Back" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
+position = Vector2( -1, 0 )
 texture = ExtResource( 7 )
 
 [node name="EXGauges" type="Node2D" parent="HUD/P1_HUDRect/GaugesUnder"]
@@ -3903,56 +3912,63 @@ margin_left = 1200.0
 margin_right = 1680.0
 margin_bottom = 1080.0
 
-[node name="Portrait" type="Sprite" parent="HUD/P2_HUDRect"]
+[node name="Portrait" type="Node2D" parent="HUD/P2_HUDRect"]
 material = SubResource( 107 )
 position = Vector2( 153, 106 )
-texture = ExtResource( 56 )
+
+[node name="Back" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
+self_modulate = Color( 0.701961, 0.501961, 0.909804, 1 )
+material = SubResource( 106 )
+position = Vector2( -67, -1 )
+texture = ExtResource( 11 )
 
 [node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( -67, -1 )
 
 [node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
-texture = ExtResource( 55 )
+position = Vector2( -67, -1 )
+texture = ExtResource( 24 )
 
-[node name="Teammate1" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
-position = Vector2( 255, 0 )
+[node name="Teammate2" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( 246, -1 )
 
-[node name="PortraitBack" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+[node name="PortraitBack" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
 modulate = Color( 0, 0, 0, 1 )
-texture = ExtResource( 56 )
+texture = ExtResource( 11 )
 
-[node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+[node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
 
-[node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
-texture = ExtResource( 55 )
+[node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+texture = ExtResource( 24 )
 
-[node name="Cooldown" type="Label" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+[node name="Cooldown" type="Label" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
 margin_left = -40.0
-margin_top = 2.0
+margin_top = 10.0
 margin_right = 40.0
-margin_bottom = 66.0
+margin_bottom = 74.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 203 )
 text = "88"
 align = 1
 valign = 1
 
-[node name="Teammate2" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
-position = Vector2( 335, 0 )
+[node name="Teammate1" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
+position = Vector2( 186, -1 )
 
-[node name="PortraitBack" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+[node name="PortraitBack" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
 modulate = Color( 0, 0, 0, 1 )
-texture = ExtResource( 56 )
+texture = ExtResource( 11 )
 
-[node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+[node name="CharPortrait" type="Node2D" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
 
-[node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
-texture = ExtResource( 55 )
+[node name="PortraitFrame" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
+texture = ExtResource( 24 )
 
-[node name="Cooldown" type="Label" parent="HUD/P2_HUDRect/Portrait/Teammate2"]
+[node name="Cooldown" type="Label" parent="HUD/P2_HUDRect/Portrait/Teammate1"]
 margin_left = -40.0
-margin_top = 2.0
+margin_top = 10.0
 margin_right = 40.0
-margin_bottom = 66.0
+margin_bottom = 74.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 203 )
 text = "88"
@@ -3960,7 +3976,7 @@ align = 1
 valign = 1
 
 [node name="DamageNode" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
-position = Vector2( 53, -10 )
+position = Vector2( -22, -8 )
 
 [node name="DamageValue" type="Label" parent="HUD/P2_HUDRect/Portrait/DamageNode"]
 margin_right = 232.0
@@ -3982,15 +3998,38 @@ autoplay = "RESET"
 anims/RESET = SubResource( 88 )
 anims/flashing = SubResource( 89 )
 
+[node name="CharName" type="ColorRect" parent="HUD/P2_HUDRect/Portrait"]
+self_modulate = Color( 0, 0, 0, 1 )
+margin_left = -25.0
+margin_top = -58.0
+margin_right = 143.0
+margin_bottom = -10.0
+
+[node name="CharNameBack" type="ColorRect" parent="HUD/P2_HUDRect/Portrait/CharName"]
+modulate = Color( 0, 0.211765, 0.65098, 1 )
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 160.0
+margin_bottom = 40.0
+
+[node name="Text" type="Label" parent="HUD/P2_HUDRect/Portrait/CharName"]
+margin_left = 14.0
+margin_top = 7.0
+margin_right = 163.0
+margin_bottom = 43.0
+theme = SubResource( 205 )
+text = "Gura"
+valign = 1
+
 [node name="Stock" type="Sprite" parent="HUD/P2_HUDRect/Portrait"]
-position = Vector2( 70, -36 )
+position = Vector2( 180, -34 )
 texture = ExtResource( 38 )
 
 [node name="StockPoints" type="Label" parent="HUD/P2_HUDRect/Portrait"]
-margin_left = 99.0
-margin_top = -60.0
-margin_right = 199.0
-margin_bottom = -13.0
+margin_left = 209.0
+margin_top = -58.0
+margin_right = 309.0
+margin_bottom = -11.0
 custom_colors/font_color = Color( 0.219608, 0.513726, 0.890196, 1 )
 custom_fonts/font = SubResource( 3 )
 text = "9"
@@ -4007,48 +4046,27 @@ text = "TestPlayer"
 align = 1
 valign = 1
 
-[node name="CharName" type="ColorRect" parent="HUD/P2_HUDRect/Portrait"]
-visible = false
-self_modulate = Color( 0, 0, 0, 1 )
-margin_left = 48.0
-margin_top = -54.0
-margin_right = 207.0
-margin_bottom = -14.0
-
-[node name="CharNameBack" type="ColorRect" parent="HUD/P2_HUDRect/Portrait/CharName"]
-modulate = Color( 0, 0.211765, 0.65098, 1 )
-margin_left = 4.0
-margin_top = 4.0
-margin_right = 155.0
-margin_bottom = 36.0
-
-[node name="Test" type="Label" parent="HUD/P2_HUDRect/Portrait/CharName"]
-margin_left = 9.0
-margin_top = 3.0
-margin_right = 157.0
-margin_bottom = 39.0
-theme = SubResource( 205 )
-text = "Ina'nis"
-valign = 1
-
 [node name="Prism" type="Node2D" parent="HUD/P2_HUDRect/Portrait"]
-position = Vector2( 0, 2 )
+position = Vector2( -67, 1 )
 
 [node name="Prism" type="Sprite" parent="HUD/P2_HUDRect/Portrait/Prism"]
-position = Vector2( -14, 85 )
+position = Vector2( -6, 85 )
 texture = ExtResource( 43 )
 
 [node name="Amount" type="Label" parent="HUD/P2_HUDRect/Portrait/Prism"]
-margin_left = 11.0
+margin_left = 19.0
 margin_top = 73.0
-margin_right = 268.0
+margin_right = 276.0
 margin_bottom = 101.0
 custom_colors/font_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 custom_fonts/font = SubResource( 150 )
 text = "8888"
 
-[node name="GaugesUnder" type="Sprite" parent="HUD/P2_HUDRect"]
+[node name="GaugesUnder" type="Node2D" parent="HUD/P2_HUDRect"]
 position = Vector2( 240, 966 )
+
+[node name="Back" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
+position = Vector2( -1, 0 )
 texture = ExtResource( 7 )
 
 [node name="EXGauges" type="Node2D" parent="HUD/P2_HUDRect/GaugesUnder"]
@@ -4429,6 +4447,7 @@ anims/RESET = SubResource( 92 )
 anims/flashing = SubResource( 91 )
 
 [node name="CardMenu" type="Control" parent="."]
+visible = false
 modulate = Color( 1, 1, 1, 0 )
 script = ExtResource( 51 )
 
@@ -4488,9 +4507,9 @@ valign = 1
 
 [node name="Card" type="Label" parent="CardMenu"]
 margin_left = 720.0
-margin_top = 16.0
+margin_top = 24.0
 margin_right = 1128.0
-margin_bottom = 184.0
+margin_bottom = 192.0
 theme = SubResource( 162 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 text = "CARD"

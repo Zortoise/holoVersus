@@ -153,20 +153,20 @@ playing = true
 [node name="AnimatedSprite2" type="AnimatedSprite" parent="ParallaxBackground/ParallaxLayer2"]
 position = Vector2( 0, 195 )
 frames = SubResource( 2 )
-frame = 1
+frame = 4
 playing = true
 
 [node name="AnimatedSprite3" type="AnimatedSprite" parent="ParallaxBackground/ParallaxLayer2"]
 position = Vector2( 292, -14 )
 frames = SubResource( 4 )
-frame = 2
+frame = 15
 playing = true
 
 [node name="AnimatedSprite4" type="AnimatedSprite" parent="ParallaxBackground/ParallaxLayer2"]
 position = Vector2( -292, -14 )
 scale = Vector2( -1, 1 )
 frames = SubResource( 4 )
-frame = 1
+frame = 14
 playing = true
 
 [node name="MainPlatform" type="TextureRect" parent="."]
@@ -180,13 +180,11 @@ stretch_mode = 2
 [node name="AnimatedSprite" type="AnimatedSprite" parent="MainPlatform"]
 position = Vector2( 302, -19 )
 frames = SubResource( 3 )
-frame = 2
 playing = true
 
 [node name="AnimatedSprite2" type="AnimatedSprite" parent="MainPlatform"]
 position = Vector2( 466, -19 )
 frames = SubResource( 3 )
-frame = 2
 playing = true
 
 [node name="TextureRect" type="TextureRect" parent="MainPlatform"]

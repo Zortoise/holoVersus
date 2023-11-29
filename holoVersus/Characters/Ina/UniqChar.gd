@@ -758,25 +758,29 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 				
 		"ExSp.L":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "aSP1[ex]", has_acted)
+				if Character.can_afford_ex("aSP1[ex]"):
+					keep = !process_move(new_state, "aSP1[ex]", has_acted)
 				if keep:
 					keep = !process_move(new_state, "aSP1", has_acted)
 							
 		"ExSp.uF":
 			if !has_acted[0] and !has_drill():
-				keep = !process_move(new_state, "aSP4[ex]", has_acted)
+				if Character.can_afford_ex("aSP4[ex]"):
+					keep = !process_move(new_state, "aSP4[ex]", has_acted)
 				if keep:
 					keep = !process_move(new_state, "aSP4", has_acted)
 					
 		"ExSp.F":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "aSP5[ex]", has_acted)
+				if Character.can_afford_ex("aSP5[ex]"):
+					keep = !process_move(new_state, "aSP5[ex]", has_acted)
 				if keep:
 					keep = !process_move(new_state, "aSP5", has_acted)
 					
 		"ExSp.H":
 			if !has_acted[0]:
-				keep = !process_move(new_state, "SP2[ex]", has_acted)
+				if Character.can_afford_ex("SP2[ex]"):
+					keep = !process_move(new_state, "SP2[ex]", has_acted)
 				if keep:
 					keep = !process_move(new_state, "SP2", has_acted)
 
@@ -828,10 +832,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 #					continue # certain moves cannot be performed during cancellable recovery
 				if !Character.test_dash_attack(attack_ref):
 					continue # if dash attacking, cannot use attacks already used in the chain
-				if Character.is_ex_valid(attack_ref):
-					Character.animate(attack_ref + "Startup")
-					has_acted[0] = true
-					return true
+				Character.pre_move_effect(attack_ref)
+				Character.animate(attack_ref + "Startup")
+				has_acted[0] = true
+				return true
 					
 		Em.char_state.GRD_STARTUP: # grounded up-tilt can be done during ground jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
@@ -839,10 +843,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						Animator.query_to_play(["JumpTransit"]) and Character.test_qc_chain_combo(attack_ref) and \
 						Character.button_up in Character.input_state.pressed and !Character.button_jump in Character.input_state.pressed:
 						# the test_qc_chain_combo() is needed so you cannot up-tilt > jump cancel > up-tilt
-					if Character.is_ex_valid(attack_ref):
-						Character.animate(attack_ref + "Startup")
-						has_acted[0] = true
-						return true
+					Character.pre_move_effect(attack_ref)
+					Character.animate(attack_ref + "Startup")
+					has_acted[0] = true
+					return true
 					
 		Em.char_state.AIR_STANDBY, Em.char_state.AIR_C_REC, Em.char_state.AIR_D_REC:
 			if !Character.grounded: # must be currently not grounded even if next state is still considered an aerial state
@@ -852,10 +856,10 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 #						continue # certain moves cannot be performed during cancellable recovery
 					if !Character.test_dash_attack(air_atk_ref):
 						continue # if dash attacking, cannot use attacks already used in the chain
-					if Character.is_ex_valid(air_atk_ref):
-						Character.animate(air_atk_ref + "Startup")
-						has_acted[0] = true
-						return true
+					Character.pre_move_effect(air_atk_ref)
+					Character.animate(air_atk_ref + "Startup")
+					has_acted[0] = true
+					return true
 						
 		Em.char_state.AIR_STARTUP: # aerial up-tilt can be done during air jump transit if jump is not pressed
 			if Settings.input_assist[Character.player_ID]:
@@ -864,42 +868,41 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 						Animator.query_to_play(["aJumpTransit", "aJumpTransit2", "WallJumpTransit", "WallJumpTransit2"]) and \
 						Character.test_qc_chain_combo(air_atk_ref) and \
 						Character.button_up in Character.input_state.pressed and !Character.button_jump in Character.input_state.pressed:
-					if Character.is_ex_valid(air_atk_ref):
-						Character.animate(air_atk_ref + "Startup")
-						has_acted[0] = true
-						return true
+					Character.pre_move_effect(air_atk_ref)
+					Character.animate(air_atk_ref + "Startup")
+					has_acted[0] = true
+					return true
 						
 		Em.char_state.GRD_BLOCK: # for Specials using button_block
 			if Settings.input_assist[Character.player_ID]:
 				if Character.button_block in Character.input_state.pressed and \
 						Animator.query_to_play(["BlockStartup"]) and Animator.time == 1:
-					if Character.is_ex_valid(attack_ref):
-						Character.animate(attack_ref + "Startup")
-						has_acted[0] = true
-						return true
+					Character.pre_move_effect(attack_ref)
+					Character.animate(attack_ref + "Startup")
+					has_acted[0] = true
+					return true
 
 		Em.char_state.AIR_BLOCK: # for Specials using button_block
 			if Settings.input_assist[Character.player_ID]:
 				if Character.button_block in Character.input_state.pressed and \
 						Animator.query_to_play(["aBlockStartup"]) and Animator.time == 1:
 					if Character.test_aerial_memory(air_atk_ref):
-						if Character.is_ex_valid(air_atk_ref):
-							Character.animate(air_atk_ref + "Startup")
-							has_acted[0] = true
-							return true
+						Character.pre_move_effect(air_atk_ref)
+						Character.animate(air_atk_ref + "Startup")
+						has_acted[0] = true
+						return true
 				
 		# chain cancel
 		Em.char_state.GRD_ATK_REC, Em.char_state.GRD_ATK_ACTIVE:
 			if attack_ref in STARTERS:
 				if Character.test_chain_combo(attack_ref):
-					if Character.is_ex_valid(attack_ref):
+					Character.pre_move_effect(attack_ref)
 #						if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 #							Character.get_node("ModulatePlayer").play("unflinch_flash")
-#							Character.perfect_chain = true
-							
-						Character.animate(attack_ref + "Startup")
-						has_acted[0] = true
-						return true
+#							Character.perfect_chain = true		
+					Character.animate(attack_ref + "Startup")
+					has_acted[0] = true
+					return true
 			
 		# quick cancel
 		Em.char_state.GRD_ATK_STARTUP:
@@ -907,34 +910,34 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 				if Character.grounded and attack_ref in STARTERS:
 					if Character.check_quick_cancel(attack_ref): # must be within 1st frame, animation name must be in MOVE_DATABASE
 						if Character.test_qc_chain_combo(attack_ref):
-							if Character.is_ex_valid(attack_ref, true):
-								Character.animate(attack_ref + "Startup")
-								has_acted[0] = true
-								return true
+							Character.pre_move_effect(attack_ref, true)
+							Character.animate(attack_ref + "Startup")
+							has_acted[0] = true
+							return true
 					
 		# chain cancel
 		Em.char_state.AIR_ATK_REC, Em.char_state.AIR_ATK_ACTIVE:
 			if !Character.grounded:
 				if (air_atk_ref) in STARTERS and Character.test_aerial_memory(air_atk_ref):
 					if Character.test_chain_combo(air_atk_ref):
-						if Character.is_ex_valid(air_atk_ref):
+						Character.pre_move_effect(air_atk_ref)
 #							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 #								Character.get_node("ModulatePlayer").play("unflinch_flash")
 #								Character.perfect_chain = true
-							Character.animate(air_atk_ref + "Startup")
-							has_acted[0] = true
-							return true
+						Character.animate(air_atk_ref + "Startup")
+						has_acted[0] = true
+						return true
 							
 			else:
 				if attack_ref in STARTERS:
 					if Character.test_chain_combo(attack_ref): # grounded
-						if Character.is_ex_valid(attack_ref):
+						Character.pre_move_effect(attack_ref)
 #							if buffer_time == Settings.input_buffer_time[Character.player_ID] and Animator.time == 0:
 #								Character.get_node("ModulatePlayer").play("unflinch_flash")
 #								Character.perfect_chain = true
-							Character.animate(attack_ref + "Startup")
-							has_acted[0] = true
-							return true
+						Character.animate(attack_ref + "Startup")
+						has_acted[0] = true
+						return true
 							
 		# quick cancel
 		Em.char_state.AIR_ATK_STARTUP:
@@ -943,18 +946,18 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 					if (air_atk_ref) in STARTERS and Character.test_aerial_memory(air_atk_ref):
 						if Character.check_quick_cancel(air_atk_ref):
 							if Character.test_qc_chain_combo(air_atk_ref):
-								if Character.is_ex_valid(air_atk_ref, true):
-									Character.animate(air_atk_ref + "Startup")
-									has_acted[0] = true
-									return true
+								Character.pre_move_effect(air_atk_ref, true)
+								Character.animate(air_atk_ref + "Startup")
+								has_acted[0] = true
+								return true
 				else:
 					if attack_ref in STARTERS:
 						if Character.check_quick_cancel(attack_ref):
 							if Character.test_qc_chain_combo(attack_ref):
-								if Character.is_ex_valid(attack_ref, true):
-									Character.animate(attack_ref + "Startup")
-									has_acted[0] = true
-									return true
+								Character.pre_move_effect(attack_ref, true)
+								Character.animate(attack_ref + "Startup")
+								has_acted[0] = true
+								return true
 									
 	return false
 						

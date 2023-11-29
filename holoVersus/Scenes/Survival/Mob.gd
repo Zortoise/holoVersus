@@ -2720,8 +2720,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			Em.char_state.GRD_ATK_STARTUP, Em.char_state.AIR_ATK_STARTUP: # can sweetspot superarmor
 				var defender_attr = hit_data[Em.hit.DEFENDER_ATTR]
 				if Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
-						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
-						(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
+						(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
+#						(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 					hit_data[Em.hit.SUPERARMORED] = true
 					
@@ -2738,6 +2738,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				 # air superdash has projectile superarmor against non-strong projectiles
 				if Animator.query_current(["SDash"]) and Em.hit.NON_STRONG_PROJ in hit_data:
 #					hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
+					hit_data[Em.hit.SUPERARMORED] = true
+					
+			Em.char_state.GRD_D_REC:
+				if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
+						Animator.to_play_anim.begins_with("Dash"):
+					hit_data[Em.hit.SUPERARMORED] = true
+					
+			Em.char_state.AIR_D_REC:
+				if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
+						Animator.to_play_anim.begins_with("aDash"):
 					hit_data[Em.hit.SUPERARMORED] = true
 					
 		if !is_hitstunned_or_sequenced():
@@ -2848,8 +2858,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						"v_mirror":Globals.Game.rng_bool()})
 						
 			# gain some Blue Armor when resisting Proj Level 1 entities
-			elif Em.hit.RESISTED in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
-				$BlueArmorTimer.time = 10
+#			elif Em.hit.RESISTED in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+#				$BlueArmorTimer.time = 10
 				
 		
 		var damage = calculate_damage(hit_data)
@@ -2871,6 +2881,10 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		
 		if get_damage_percent() >= 100:
 			hit_data[Em.hit.LETHAL_HIT] = true
+			
+		elif !guardbroken: # gain some Blue Armor when resisting Proj Level 1 entities
+			if Em.hit.RESISTED in hit_data and Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1:
+				$BlueArmorTimer.time = 10
 			
 
 	# FIRST REACTION ---------------------------------------------------------------------------------
@@ -3324,6 +3338,8 @@ func calculate_damage(hit_data) -> int:
 			scaled_damage = FMath.percent(scaled_damage, SWEETSPOT_DMG_MOD)
 			
 	if !guardbroken: # resisted or or mobarmored or superarmored
+		if $BlueArmorTimer.is_running():
+			return 1
 		scaled_damage = FMath.percent(scaled_damage, get_stat("ARMOR_DMG_MOD"))
 		if Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 			scaled_damage += hit_data[Em.hit.MOVE_DATA][Em.move.DMG] * FMath.S
@@ -3356,6 +3372,9 @@ func calculate_res_gauge_change(hit_data) -> int:
 	if Em.hit.SINGLE_REPEAT in hit_data or hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 0
 		
+	if $BlueArmorTimer.is_running():
+		return 0
+		
 #	if Em.hit.SUPERARMORED in hit_data:
 #		return 0
 
@@ -3366,7 +3385,7 @@ func calculate_res_gauge_change(hit_data) -> int:
 		return res_drain
 		
 #	if Em.hit.SUPERARMORED in hit_data or ($BlueArmorTimer.is_running() and !"ignore_armor" in hit_data): # halves RES_Drain on armored
-	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running(): # halves RES_Drain on armored
+	if Em.hit.SUPERARMORED in hit_data: # halves RES_Drain on armored
 		var res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 		res_drain = FMath.percent(res_drain, get_stat("RES_DRAIN_MOD"))
 		res_drain = FMath.percent(res_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
@@ -3383,8 +3402,8 @@ func calculate_res_gauge_change(hit_data) -> int:
 		var res_drain = -ATK_LEVEL_TO_RES_DRAIN[hit_data[Em.hit.ADJUSTED_ATK_LVL] - 1]
 		res_drain = FMath.percent(res_drain, get_stat("RES_DRAIN_MOD"))
 		res_drain = FMath.percent(res_drain, Inventory.modifier(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.RES_DRAIN_MOD))
-		if Em.hit.ANTI_AIRED in hit_data:
-			res_drain = FMath.percent(res_drain, 150) # increase RES drain if hitting an airborne resisting mob with an anti-air
+#		if Em.hit.ANTI_AIRED in hit_data:
+#			res_drain = FMath.percent(res_drain, 150) # increase RES drain if hitting an airborne resisting mob with an anti-air
 			
 		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
 				(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] >= 3):

@@ -308,6 +308,8 @@ var assist_rescue_protect := false # set to true if hit by assist rescue till yo
 var assist_fever := false # true if an assist land an unblocked hit on a hitstunned opponent, last till targeted opponent recovers
 var sdash_points := 0 # set to duration of sdash when you begin a sdash, reduce per frame base on angle, stop sdash when hit 0
 var res_seal := false # true after landing a Reinforce to prevent regening RES, false if targeted opponent is not in hitstun
+var delayed_ex_cost := [] # entry 1 is the ex cost, entry 2 is the time left
+var delayed_res_cost := [] # entry 1 is the rf cost, entry 2 is the time left
 
 var assist_items := [] # up to 3
 
@@ -923,6 +925,18 @@ func simulate(new_input_state = {"pressed" : [], "just_pressed" : [], "just_rele
 		soft_grounded = true
 	else:
 		soft_grounded = false
+		
+	if delayed_ex_cost.size() > 0:
+		delayed_ex_cost[1] -= 1
+		if delayed_ex_cost[1] <= 0:
+			change_ex_gauge(-delayed_ex_cost[0])
+			delayed_ex_cost = []
+			
+	if delayed_res_cost.size() > 0:
+		delayed_res_cost[1] -= 1
+		if delayed_res_cost[1] <= 0:
+			change_res_gauge(-delayed_res_cost[0])
+			delayed_res_cost = []
 
 
 # FRAMESKIP DURING HITSTOP --------------------------------------------------------------------------------------------------
@@ -3589,22 +3603,22 @@ func get_stat(stat: String) -> int:
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.HP))
 #				to_return = 99999
-				to_return = int(max(to_return, 1))
+				to_return = int(clamp(to_return, 1, 9999))
 		
 			"SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.SPEED))
-				to_return = int(max(to_return, 10))
+				to_return = int(max(to_return, FMath.S))
 			"JUMP_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.JUMP_SPEED))
-				to_return = int(max(to_return, 10))
+				to_return = int(max(to_return, FMath.S))
 			"GRAVITY_MOD":
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GRAVITY_MOD))
 				to_return = int(max(to_return, 10))
 			"FRICTION":
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.FRICTION))
-				to_return = int(max(to_return, 10))
+				to_return = int(max(to_return, 1))
 				
 			"MAX_AIR_JUMP":
 #				if Globals.survival_level != null: to_return = int(max(to_return - 1, 1))
@@ -3626,15 +3640,15 @@ func get_stat(stat: String) -> int:
 			"GRD_DASH_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.GRD_DASH_SPEED))
-				to_return = int(max(to_return, 10))
+				to_return = int(max(to_return, FMath.S))
 			"AIR_DASH_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.AIR_DASH_SPEED))
-				to_return = int(max(to_return, 10))
+				to_return = int(max(to_return, FMath.S))
 			"SDASH_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.SDASH_SPEED))
-				to_return = int(max(to_return, 10))
+				to_return = int(max(to_return, FMath.S))
 #			"SDASH_TURN_RATE":
 #				if Globals.survival_level != null: to_return = int(max(to_return - 4, 1))
 #				to_return += Inventory.modifier(player_ID, Cards.effect_ref.SDASH_TURN_RATE)
@@ -3647,7 +3661,7 @@ func get_stat(stat: String) -> int:
 			"DODGE_SPEED":
 #				if Globals.survival_level != null: to_return = FMath.percent(to_return, 90)
 				to_return = FMath.percent(to_return, Inventory.modifier(player_ID, Cards.effect_ref.DODGE_SPEED))
-				to_return = int(max(to_return, 10))
+				to_return = int(max(to_return, FMath.S))
 	
 #			"RES_REGEN_AMOUNT":
 ##				if Globals.survival_level != null: to_return = FMath.percent(to_return, 60)
@@ -5035,6 +5049,8 @@ func check_ledge_stop(): # some animations prevent you from dropping off
 	else:
 		return false # not attacking
 	
+# STATE CHECK --------------------------------------------------------------------------------------------------
+	
 func is_blocking():
 	match new_state:
 		Em.char_state.GRD_BLOCK, Em.char_state.AIR_BLOCK:
@@ -5158,62 +5174,81 @@ func can_air_strafe(move_data):
 			return false # can strafe during some aerial non-normals
 	return true
 	
-# called by unique character to check if there is an EX version and if it is valid
-func is_ex_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
-	if !attack_ref in UniqChar.STARTERS or !is_ex_move(attack_ref): return true # not ex move or starter, allowed to pass
+# EX/REINFORCE/ULTIMATE EFFECTS --------------------------------------------------------------------------------------------------
 	
-	# has an EX Move, only pass if valid
-	if !quick_cancel: # not quick cancelling, must afford it
-		if current_ex_gauge >= EX_MOVE_COST:
-			change_ex_gauge(-EX_MOVE_COST)
-			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
-			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
-			modulate_play("EX_flash")
-			return true
-		else:
-			return false
+func can_afford_ex(attack_ref) -> bool:
+	var ex_cost = EX_MOVE_COST
+	if UniqChar.has_method("unique_ex_cost"):
+		ex_cost = UniqChar.unique_ex_cost(attack_ref)
+		if ex_cost == null: ex_cost = EX_MOVE_COST
+	if current_ex_gauge < ex_cost: return false
+	else: return true
+	
+func can_afford_rf(attack_ref) -> bool:
+	var res_cost = 0
+	if UniqChar.has_method("unique_rf_cost"):
+		res_cost = UniqChar.unique_rf_cost(attack_ref)
+		if res_cost == null: res_cost = get_stat("REINFORCE_COST")
 	else:
-		if is_ex_move(get_move_name()): # can quick cancel from 1 EX move to another, no cost and no chime if so
-			return true
-		elif current_ex_gauge >= EX_MOVE_COST: # quick cancel from non-ex move to EX move, must afford the cost
-			change_ex_gauge(-EX_MOVE_COST)
+		res_cost = get_stat("REINFORCE_COST")
+	if current_res_gauge + RES_GAUGE_CEIL < res_cost: return false
+	else: return true
+	
+	
+func pre_move_effect(attack_ref, quick_cancel = false): # called by unique character when an attack is successfully triggered
+	ex_effect(attack_ref, quick_cancel)
+	rf_effect(attack_ref, quick_cancel)
+	
+	
+# called by unique character to cause EX move sfx and create delayed_ex_cost if it's an EX move
+func ex_effect(attack_ref, quick_cancel = false):
+	if !attack_ref in UniqChar.STARTERS or !is_ex_move(attack_ref): return  # not ex move or starter, no effect
+	
+	var ex_cost = EX_MOVE_COST
+	if UniqChar.has_method("unique_ex_cost"):
+		ex_cost = UniqChar.unique_ex_cost(attack_ref)
+		if ex_cost == null: ex_cost = EX_MOVE_COST
+		
+	delayed_ex_cost = [ex_cost, 3]
+	
+	if !quick_cancel: # not quick cancelling, has sound effect and flash
+		play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
+		Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
+		modulate_play("EX_flash")
+	else:
+		if is_ex_move(get_move_name()): # can quick cancel from 1 EX move to another, no sound effect and flash
+			return
+		else: # quick cancel from non-ex move to EX move, has sound effect and flash
 			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # EX chime
 			Globals.Game.spawn_SFX("EXFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
 			modulate_play("EX_flash")
-			return true
-		else:
-			return false
-			
-#			if move_name in UniqChar.MOVE_DATABASE:
-##					UniqChar.MOVE_DATABASE[move_name][Em.move.ATK_TYPE] == Em.atk_type.REINFORCE:
-#				Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
 
-# called by unique character to check if there is a RF version and if it is valid
-func is_rf_valid(attack_ref, quick_cancel = false): # don't put this condition with any other conditions!
-	if !attack_ref in UniqChar.STARTERS or !is_rf_move(attack_ref): return true # not RF move or starter, allowed to pass
+
+# called by unique character to cause RF move sfx and create delayed_res_cost if it's an RF move
+func rf_effect(attack_ref, quick_cancel = false):
+	if !attack_ref in UniqChar.STARTERS or !is_rf_move(attack_ref): return # not rf move or starter, no effect
 	
-	# has an RF Move, only pass if valid
-	if !quick_cancel: # not quick cancelling, must afford it
-		if current_res_gauge + RES_GAUGE_CEIL >= get_stat("REINFORCE_COST"):
-			change_res_gauge(-get_stat("REINFORCE_COST"))
-			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # RF chime
-			Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
-			success_RF = false
-			return true
-		else:
-			return false
+	var res_cost = 0
+	if UniqChar.has_method("unique_rf_cost"):
+		res_cost = UniqChar.unique_rf_cost(attack_ref)
+		if res_cost == null: res_cost = get_stat("REINFORCE_COST")
 	else:
-		if is_rf_move(get_move_name()): # can quick cancel from 1 RF move to another, no cost and no chime if so
-			success_RF = false
-			return true
-		elif current_res_gauge + RES_GAUGE_CEIL >= get_stat("REINFORCE_COST"): # quick cancel from non-RF move to RF move, must afford the cost
-			change_res_gauge(-get_stat("REINFORCE_COST"))
+		res_cost = get_stat("REINFORCE_COST")
+		
+	delayed_res_cost = [res_cost, 3]
+	
+	if !quick_cancel: # not quick cancelling, has sound effect and flash
+		play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # RF chime
+		Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
+		success_RF = false
+	else:
+		if is_rf_move(get_move_name()): # can quick cancel from 1 RF move to another, no sound effect and flash
+			return
+		else: # quick cancel from non-rf move to RF move, has sound effect and flash
 			play_audio("bling7", {"vol" : -12, "bus" : "PitchUp2"}) # RF chime
 			Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {})
 			success_RF = false
-			return true
-		else:
-			return false
+			
 
 #func super_test():
 #	pass
@@ -5267,7 +5302,8 @@ func is_rf_valid(attack_ref, quick_cancel = false): # don't put this condition w
 #	install_time = in_time
 #	$InstallTimer.time = in_time
 	
-	
+#--------------------------------------------------------------------------------------------------
+
 func check_for_assist():
 	if state in [Em.char_state.DEAD, Em.char_state.SEQ_TARGET]:
 		return # cannot call assist if dead or being grabbed
@@ -6301,7 +6337,7 @@ func get_res_gauge_percent_true(): # from 0 to 100
 func take_damage(damage: int): # called by attacker
 	var orig_damage_value = current_damage_value
 	current_damage_value += damage
-	current_damage_value = int(clamp(current_damage_value, 0, get_stat("DAMAGE_VALUE_LIMIT") + 9999))
+	current_damage_value = int(clamp(current_damage_value, 0, get_stat("DAMAGE_VALUE_LIMIT") + 999))
 	# cannot go under zero (take_damage is also used for healing)
 	Globals.Game.damage_update(self, damage)
 	
@@ -6977,8 +7013,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			elif Em.atk_attr.SUPERARMOR_STARTUP in defender_attr or \
 					(current_res_gauge >= 0 and Em.atk_attr.P_SUPERARMOR_STARTUP in defender_attr) or \
 					(Em.atk_attr.WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
-					(current_res_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data) or \
-					(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
+					(current_res_gauge >= 0 and Em.atk_attr.P_WEAKARMOR_STARTUP in defender_attr and Em.hit.WEAKARMORABLE in hit_data):
+#					(Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
 				
@@ -7010,6 +7046,18 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
 				hit_data[Em.hit.SDASH_ARMORED] = true
+				
+		Em.char_state.GRD_D_REC:
+			if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
+					Animator.to_play_anim.begins_with("Dash"):
+				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
+				hit_data[Em.hit.SUPERARMORED] = true
+				
+		Em.char_state.AIR_D_REC:
+			if (Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] == 1) and \
+					Animator.to_play_anim.begins_with("aDash"):
+				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
+				hit_data[Em.hit.SUPERARMORED] = true
 			
 	# passive armor
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and !is_hitstunned_or_sequenced() and !is_blocking():
@@ -9585,6 +9633,8 @@ func save_state():
 		"tap_memory" : tap_memory,
 		"release_memory" : release_memory,
 		"instant_actions" : instant_actions,
+		"delayed_ex_cost" : delayed_ex_cost,
+		"delayed_res_cost" : delayed_res_cost,
 		
 		"sprite_scale" : sprite.scale,
 		"sprite_rotation" : sprite.rotation,
@@ -9730,6 +9780,8 @@ func load_state(state_data, command_rewind := false):
 	tap_memory = state_data.tap_memory
 	release_memory = state_data.release_memory
 	instant_actions = state_data.instant_actions
+	delayed_ex_cost = state_data.delayed_ex_cost
+	delayed_res_cost = state_data.delayed_res_cost
 		
 	sprite.scale = state_data.sprite_scale
 	sprite.rotation = state_data.sprite_rotation

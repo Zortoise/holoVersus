@@ -6,7 +6,7 @@ const ASSIST_NAME = "Gura"
 # replace palette_number with palette_ref
 # replace afterimage_type of CHAR with NPC
 # remove all EX Moves
-# remove all is_EX_valid()
+# remove all pre_move_effect()
 # Character.cancel_action() has no parameters
 # remove all move_child() in sequences
 # add "facing" : Character.facing to aux_data of all entities
