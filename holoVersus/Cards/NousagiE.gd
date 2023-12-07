@@ -7,7 +7,7 @@ const TERMINAL_DOWN_VELOCITY = 400 * FMath.S
 const AIR_RESISTANCE = 2
 const FALL_LIMIT = -200 * FMath.S
 
-const TRAITS = [Em.entity_trait.GROUNDED]
+const TRAITS = [Em.entity_trait.GROUNDED, Em.entity_trait.AIR_GROUND]
 
 # cleaner code
 onready var Entity = get_parent()

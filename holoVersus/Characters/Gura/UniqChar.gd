@@ -2223,6 +2223,7 @@ func _on_SpritePlayer_anim_started(anim_name):
 			
 		"aF3Startup":
 #			Character.velocity_limiter.x = 85
+			Character.velocity_limiter.x_slow = 20
 			Character.velocity_limiter.down = 0
 			Character.velocity_limiter.up = 100
 			Character.anim_gravity_mod = 0

@@ -23,7 +23,7 @@ const MOVE_DATABASE = {
 		Em.move.DMG : 60,
 		Em.move.KB : 400 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
-		Em.move.ATK_LVL : 3,
+		Em.move.ATK_LVL : 2,
 		Em.move.KB_ANGLE : -45,
 		Em.move.PROJ_LVL : 1,
 		Em.move.ATK_ATTR : [],

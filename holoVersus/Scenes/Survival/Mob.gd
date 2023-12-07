@@ -1432,6 +1432,11 @@ func bounce(against_ground: bool):
 						bounce_dust(Em.compass.E, slam_level)
 					else:
 						bounce_dust(Em.compass.W, slam_level)
+						
+					var target = get_target()
+					if target.has_method("got_a_wall_slam"):
+						target.got_a_wall_slam(slam_level)
+						
 					return
 			
 			if sign(velocity_previous_frame.x) > 0:
@@ -1475,6 +1480,11 @@ func bounce(against_ground: bool):
 						modulate_play("punish_flash")
 
 					bounce_dust(Em.compass.N, slam_level)
+					
+					var target = get_target()
+					if target.has_method("got_a_wall_slam"):
+						target.got_a_wall_slam(slam_level)
+					
 					return
 			
 			bounce_dust(Em.compass.N)
@@ -2682,21 +2692,26 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
 				repeat_memory.append([attacker.player_ID, root_move_name, attacker.UniqChar.NAME])
 	
-			if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
-				hit_data[Em.hit.SINGLE_REPEAT] = true
+	if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		hit_data[Em.hit.SINGLE_REPEAT] = true
+		
+		if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX]:
+			hit_data[Em.hit.DOUBLE_REPEAT] = true # specials and EX cannot repeat
 	
 	# WEAK HIT ----------------------------------------------------------------------------------------------
 	
 	# a Weak Hit is:
 	#		one with atk_level of 1
-	#		a move nerfed by Repeat Penalty
+	#		a move nerfed by double Repeat Penalty
+	#		a move with no hitstun
 	#		a move that only hits the SDHurtbox of the target
 	#		the non-final hit of a multi-hit move
 	#		a sourspotted hit
 	# Weak Hits cannot cause Lethal Hit, cannot cause Stun, cannot cause Sweetspotted Hits, cannot cause Punish Hits
 	
 	var weak_hit := false
-	if (Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1) or hit_data[Em.hit.DOUBLE_REPEAT] or \
+	if (Em.move.ATK_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] <= 1) or \
+		hit_data[Em.hit.DOUBLE_REPEAT] or Em.atk_attr.NO_HITSTUN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR] or \
 		hit_data[Em.hit.SEMI_DISJOINT] or Em.hit.MULTIHIT in hit_data or Em.hit.SOUR_HIT in hit_data:
 		weak_hit = true
 		hit_data[Em.hit.SWEETSPOTTED] = false
@@ -2865,13 +2880,13 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		hit_data[Em.hit.DEALT_DMG] = damage
 		if damage > 0:
 			if guardbroken:
-				if hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or Em.hit.SOUR_HIT in hit_data:
+				if Em.atk_attr.NO_HITSTUN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
-				elif adjusted_atk_level == 1:
-					if hit_data[Em.hit.SEMI_DISJOINT] and Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
-						Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
-					else:
-						 Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
+				elif hit_data[Em.hit.DOUBLE_REPEAT] or Em.hit.SINGLE_REPEAT in hit_data or Em.hit.SOUR_HIT in hit_data:
+					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER], Em.dmg_num_col.GRAY)
+#				elif hit_data[Em.hit.SEMI_DISJOINT]:
+##					if Em.atk_attr.VULN_LIMBS in hit_data[Em.hit.DEFENDER_ATTR]:
+#					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
 				else:
 					Globals.Game.spawn_damage_number(damage, hit_data[Em.hit.HIT_CENTER])
 			else:
@@ -2915,7 +2930,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	if !is_hitstunned():
 		learn()
 		
-	if adjusted_atk_level > 1 and guardbroken:
+	if !weak_hit and guardbroken:
 		remove_status_effect_on_taking_hit()
 	
 #	if Em.move.SEQ in hit_data[Em.hit.MOVE_DATA]: # hitgrabs and sweetgrabs will add sequence to move_data on sweetspot/non double repeat
@@ -3033,10 +3048,14 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	# HITSTUN -------------------------------------------------------------------------------------------
 	
 	if guardbroken:
-		if adjusted_atk_level <= 1 and $HitStunTimer.is_running():
-			# for atk level 1 hits on hitstunned opponent, no change to hitstun
+#		if adjusted_atk_level <= 1 and $HitStunTimer.is_running():
+#			# for atk level 1 hits on hitstunned opponent, no change to hitstun
+#			pass
+##			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
+#		if hit_data[Em.hit.DOUBLE_REPEAT]:
+#			$HitStunTimer.stop()
+		if Em.atk_attr.NO_HITSTUN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 			pass
-#			$HitStunTimer.time = $HitStunTimer.time + calculate_hitstun(hit_data)
 		else:
 			var hitstun = calculate_hitstun(hit_data)
 			if $HitStunTimer.time > hitstun and Em.hit.PROJ_ON_HITSTOP in hit_data:
@@ -3117,10 +3136,28 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			
 #	var knockback_unit_vec := Vector2(1, 0).rotated(knockback_dir)
 
-	var no_impact_and_vel_change := false
+#	var no_impact_and_vel_change := false
 	
 	if Em.hit.SUPERARMORED in hit_data and !hit_data[Em.hit.LETHAL_HIT]:
-		if grounded:
+#		if grounded:
+		var knock_dir := 0
+		var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.FOUR, hit_data[Em.hit.ATK_FACING])
+		match segment:
+			Em.compass.E:
+				knock_dir = 1
+			Em.compass.W:
+				knock_dir = -1
+		if knock_dir != 0:
+			move_amount(Vector2(knock_dir * 7, 0), true)
+			set_true_position()
+		check_death(hit_data)
+		return
+
+	if Em.atk_attr.NO_HITSTUN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		if $HitStunTimer.is_running():
+			return
+		else:
+#			if grounded:
 			var knock_dir := 0
 			var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.FOUR, hit_data[Em.hit.ATK_FACING])
 			match segment:
@@ -3131,8 +3168,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if knock_dir != 0:
 				move_amount(Vector2(knock_dir * 7, 0), true)
 				set_true_position()
-		check_death(hit_data)
-		return
+			check_death(hit_data)
+			return
 
 	if guardbroken:
 		
@@ -3140,72 +3177,72 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			hit_data[Em.hit.KB] = vel_length # so that will not go from Launched to Flinch animation when projectile hit a hitstopped player
 			
 		# if knockback_strength is high enough, get launched, else get flinched
-		if Em.hit.MULTIHIT in hit_data or has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD or adjusted_atk_level <= 1:
+		if Em.hit.MULTIHIT in hit_data or has_trait(Em.trait.NO_LAUNCH) or hit_data[Em.hit.KB] < LAUNCH_THRESHOLD:
 
-			var no_impact := false
-			
-			if adjusted_atk_level <= 1: # for attack level 1 attacks
-				
-				if $HitStunTimer.is_running(): # for hitstunned defender
-					if state == Em.char_state.LAUNCHED_HITSTUN:
-						no_impact_and_vel_change = true
-						# if defender is hit by atk level 1 attack while in launched state, no impact/velocity change (just added hitstun)
-						# if they are flinched, will enter new flinch animation with added hitstun and has velocity change
+#			var no_impact := false
+#
+#			if adjusted_atk_level <= 1: # for attack level 1 attacks
+#
+#				if $HitStunTimer.is_running(): # for hitstunned defender
+#					if state == Em.char_state.LAUNCHED_HITSTUN:
+#						no_impact_and_vel_change = true
+#						# if defender is hit by atk level 1 attack while in launched state, no impact/velocity change (and no hitstun)
+#						# if they are flinched, will enter new flinch animation with added hitstun and has velocity change
+#
+#				# for atk level 1 attack on non-passive state, just push them back, no turn
+#				# if is in passive state, will enter impact animation but 0 hitstun
+#				elif !state in [Em.char_state.GRD_STANDBY, Em.char_state.GRD_REC, \
+#					Em.char_state.GRD_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
+#					Em.char_state.AIR_C_REC]:
+#
+#					if hit_data[Em.hit.SEMI_DISJOINT] and !Em.hit.ENTITY_PATH in hit_data:
+#						pass # semi-disjoint melee hits still have impact even if atk level is 1
+#					else:
+#						no_impact = true
 						
-				# for atk level 1 attack on non-passive state, just push them back, no turn
-				# if is in passive state, will enter impact animation but 0 hitstun
-				elif !state in [Em.char_state.GRD_STANDBY, Em.char_state.GRD_REC, \
-					Em.char_state.GRD_C_REC, Em.char_state.AIR_STANDBY, Em.char_state.AIR_REC, \
-					Em.char_state.AIR_C_REC]:
-						
-					if hit_data[Em.hit.SEMI_DISJOINT] and !Em.hit.ENTITY_PATH in hit_data:
-						pass # semi-disjoint melee hits still have impact even if atk level is 1
-					else:
-						no_impact = true
-						
-			if !no_impact and !no_impact_and_vel_change:
-				var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.TWO, -dir_to_attacker)
-				if !Em.hit.PULL in hit_data:
-					match segment:
-						Em.compass.E:
-							face(-1) # face other way
-						Em.compass.W:
-							face(1)
-				else:
-					face(dir_to_attacker)
+#			if !no_impact and !no_impact_and_vel_change:
+			var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.TWO, -dir_to_attacker)
+			if !Em.hit.PULL in hit_data:
+				match segment:
+					Em.compass.E:
+						face(-1) # face other way
+					Em.compass.W:
+						face(1)
+			else:
+				face(dir_to_attacker)
 #					match segment:
 #						Em.compass.E:
 #							face(1)
 #						Em.compass.W:
 #							face(-1)
 
-				var alternate_flag := false # alternate hitstun for multi-hit flinch during hitstop
-				if state == Em.char_state.AIR_FLINCH_HITSTUN:
-					if Animator.query_current(["aFlinchAStop"]):
-						animate("aFlinchBStop")
-						alternate_flag = true
-					elif Animator.query_current(["aFlinchBStop"]):
-						animate("aFlinchAStop")
-						alternate_flag = true
-				elif state == Em.char_state.GRD_FLINCH_HITSTUN:
-					if Animator.query_current(["FlinchAStop"]):
-						animate("FlinchBStop")
-						alternate_flag = true
-					elif Animator.query_current(["FlinchBStop"]):
+			var alternate_flag := false # alternate hitstun for multi-hit flinch during hitstop
+			if state == Em.char_state.AIR_FLINCH_HITSTUN:
+				if Animator.query_current(["aFlinchAStop"]):
+					animate("aFlinchBStop")
+					alternate_flag = true
+				elif Animator.query_current(["aFlinchBStop"]):
+					animate("aFlinchAStop")
+					alternate_flag = true
+			elif state == Em.char_state.GRD_FLINCH_HITSTUN:
+				if Animator.query_current(["FlinchAStop"]):
+					animate("FlinchBStop")
+					alternate_flag = true
+				elif Animator.query_current(["FlinchBStop"]):
+					animate("FlinchAStop")
+					alternate_flag = true
+			
+			if !alternate_flag:
+				if hit_data[Em.hit.HIT_CENTER].y >= position.y: # A/B depending on height hit
+					if grounded:
 						animate("FlinchAStop")
-						alternate_flag = true
-				
-				if !alternate_flag:
-					if hit_data[Em.hit.HIT_CENTER].y >= position.y: # A/B depending on height hit
-						if grounded:
-							animate("FlinchAStop")
-						else:
-							animate("aFlinchAStop")
 					else:
-						if grounded:
-							animate("FlinchBStop")
-						else:
-							animate("aFlinchBStop")
+						animate("aFlinchAStop")
+				else:
+					if grounded:
+						animate("FlinchBStop")
+					else:
+						animate("aFlinchBStop")
 					
 		else: # launch
 			
@@ -3252,8 +3289,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 									
 	else: # not guardbroken
 		if Em.hit.RESISTED in hit_data and !hit_data[Em.hit.DOUBLE_REPEAT] and \
-				!Em.hit.SINGLE_REPEAT in hit_data and \
-				hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] > 1:
+				!Em.hit.SINGLE_REPEAT in hit_data:
 			
 			var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.TWO, -dir_to_attacker)
 			if !Em.hit.PULL in hit_data:
@@ -3281,18 +3317,21 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				else:
 					animate("aResistB")
 					
-		else:
-			hit_data[Em.hit.MOB_ARMORED] = true # for attacker knockback
-			if (is_atk_startup() or is_atk_active()) and is_special_move(get_move_name()):
-				no_impact_and_vel_change = true # no KB if mob is doing a special move
+		else: # blue armored
+			check_death(hit_data)
+			return
+			
+#			hit_data[Em.hit.MOB_ARMORED] = true # for attacker knockback
+#			if (is_atk_startup() or is_atk_active()) and is_special_move(get_move_name()):
+#				no_impact_and_vel_change = true # no KB if mob is doing a special move
 					
 					
-	if !no_impact_and_vel_change and !proj_on_hitstop_no_kb:
-		velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
-		velocity.rotate(hit_data[Em.hit.KB_ANGLE])
-		
-		if !guardbroken and grounded and !hit_data[Em.hit.LETHAL_HIT]:
-			velocity.y = 0 # set to horizontal pushback on non-guardbroken grounded defender
+#	if !no_impact_and_vel_change and !proj_on_hitstop_no_kb:
+	velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
+	velocity.rotate(hit_data[Em.hit.KB_ANGLE])
+	
+	if !guardbroken and grounded and !hit_data[Em.hit.LETHAL_HIT]:
+		velocity.y = 0 # set to horizontal pushback on non-guardbroken grounded defender
 			
 	check_death(hit_data)
 			
@@ -3419,7 +3458,7 @@ func calculate_res_gauge_change(hit_data) -> int:
 	
 func calculate_knockback_strength(hit_data) -> int:
 	
-	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] == 1: # not adjusted, for weak projectiles
+	if Em.atk_attr.NO_HITSTUN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # for weak projectiles
 		return 0
 	
 	if $BlueArmorTimer.is_running():
@@ -3555,8 +3594,8 @@ func calculate_knockback_dir(hit_data) -> int:
 			knockback_dir = posmod(knockback_dir, 360)
 #			else: print("Error: No KBOrigin found for knockback_type.RADIAL")
 			
-	# for weak hit/non-guardbroken and grounded mob, if the hit is towards left/right instead of up/down, level it
-	if grounded and (!guardbroken or hit_data[Em.hit.WEAK_HIT] or hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1):
+	# for non-guardbroken and grounded mob, if the hit is towards left/right instead of up/down, level it
+	if grounded and !guardbroken:
 		var segment = Globals.split_angle(knockback_dir, Em.angle_split.FOUR, hit_data[Em.hit.ATK_FACING])
 		match segment:
 			Em.compass.E:
@@ -3575,18 +3614,20 @@ func adjusted_atk_level(hit_data) -> int: # mostly for hitstun
 	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 1 # double repeat is forced attack level 1
 		
+	if Em.atk_attr.NO_HITSTUN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+		return 1
+		
 	var atk_level: int = hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL]
 	
 	if hit_data[Em.hit.SEMI_DISJOINT]: # semi-disjoint hits limit hitstun
-		atk_level -= 1 # atk lvl 2 become weak hit
+		atk_level -= 1
 		atk_level = int(clamp(atk_level, 1, 2))
 	elif Em.hit.SINGLE_REPEAT in hit_data or Em.hit.SOUR_HIT in hit_data:
 		atk_level -= 1
-		atk_level = int(clamp(atk_level, 1, 8))
 	elif hit_data[Em.hit.SWEETSPOTTED] and !Em.atk_attr.NO_SS_ATK_LVL_BOOST in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # sweetspotted give more hitstun
 		atk_level += 1
-		atk_level = int(clamp(atk_level, 1, 8))
 		
+	atk_level = int(clamp(atk_level, 1, 8))
 	return atk_level
 	
 	
@@ -3597,8 +3638,8 @@ func calculate_hitstun(hit_data) -> int: # hitstun determined by attack level an
 		if Em.move.FIXED_HITSTUN in hit_data[Em.hit.MOVE_DATA] and !hit_data[Em.hit.DOUBLE_REPEAT]:
 			return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_HITSTUN]
 			
-		if hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1 and !is_hitstunned():
-			return 0 # weak hit on opponent not in hitstun
+#		if hit_data[Em.hit.ADJUSTED_ATK_LVL] <= 1 and !is_hitstunned():
+#			return 0 # weak hit on opponent not in hitstun
 		
 	if hit_data[Em.hit.DOUBLE_REPEAT]:
 		return 0
@@ -3638,7 +3679,7 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 #	if $BlueArmorTimer.is_running():
 #		return 0
 		
-	if hit_data[Em.hit.MOVE_DATA][Em.move.ATK_LVL] == 1: # for weak projectiles
+	if Em.atk_attr.NO_HITSTUN in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]: # for weak projectiles
 		return 0
 		
 	if Em.hit.SUPERARMORED in hit_data or $BlueArmorTimer.is_running():
@@ -3668,8 +3709,8 @@ func calculate_hitstop(hit_data, knockback_strength: int) -> int: # hitstop dete
 # warning-ignore:integer_division
 	var hitstop_temp: int = 2 * FMath.S + int(knockback_strength / 100) # scaled, +1 frame of hitstop for each 100 scaled knockback
 	
-	if hit_data[Em.hit.SEMI_DISJOINT]: # on semi-disjoint hits, lowest hitstop
-		return MIN_HITSTOP
+#	if hit_data[Em.hit.SEMI_DISJOINT]: # on semi-disjoint hits, lowest hitstop
+#		return MIN_HITSTOP
 	if hit_data[Em.hit.SWEETSPOTTED]: # sweetspotted hits has 30% more hitstop
 		if Em.move.FIXED_SS_HITSTOP in hit_data[Em.hit.MOVE_DATA]:
 			return hit_data[Em.hit.MOVE_DATA][Em.move.FIXED_SS_HITSTOP] # for Normal hitpulls

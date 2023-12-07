@@ -59,7 +59,7 @@ const VULNERABILITY_MOD = 100
 const RES_REGEN_AMOUNT = 20 # exact RES regened per frame when RES < 100%
 const GRD_BLOCK_RES_COST = 15 # exact RES loss per frame when blocking on ground
 const AIR_BLOCK_RES_COST = 20 # exact RES loss per frame when blocking in air
-const CHIP_DMG_MOD = 50 # % of damage taken as chip damage when blocking
+const CHIP_DMG_MOD = 40 # % of damage taken as chip damage when blocking
 
 # fixed?
 const BASE_EX_REGEN = 20

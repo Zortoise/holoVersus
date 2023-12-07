@@ -130,10 +130,12 @@ func query_move_data(move_name) -> Dictionary:
 		move_data[Em.move.ATK_TYPE] = Em.atk_type.EX_ENTITY
 #		move_data[Em.move.PROJ_LVL] = 1
 		move_data[Em.move.DMG] = 50
+		move_data[Em.move.ATK_LVL] = 3
 		
 	if Entity.unique_data.enhanced:
 		move_data[Em.move.PROJ_LVL] = 2
 		move_data[Em.move.DMG] += 10
+		move_data[Em.move.ATK_LVL] += 1
 	
 	if Globals.survival_level != null and Em.move.DMG in move_data:
 		move_data[Em.move.DMG] = FMath.percent(move_data[Em.move.DMG], Inventory.modifier(Entity.master_ID, Cards.effect_ref.PROJ_DMG_MOD))

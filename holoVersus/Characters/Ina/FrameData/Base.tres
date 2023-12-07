@@ -623,7 +623,7 @@ frame_data = {
 "vframes": 21
 },
 "FastFallTransit": {
-"duration": 3,
+"duration": 2,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1705,7 +1705,7 @@ frame_data = {
 "vframes": 21
 },
 "aJumpTransit": {
-"duration": 3,
+"duration": 2,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
