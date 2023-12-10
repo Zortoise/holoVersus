@@ -93,6 +93,8 @@ const PALETTE_TO_HITSPARK_PALETTE = {
 	1: "dark_purple",
 	2: "pink",
 	3: "purple",
+	4: "dark_pink",
+	5: "dark_purple",
 }
 
 const UNIQUE_DATA_REF = {

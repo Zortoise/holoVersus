@@ -2674,7 +2674,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 		if !Inventory.has_quirk(hit_data[Em.hit.ATKER_ID], Cards.effect_ref.CAN_REPEAT):
 		
 			for array in repeat_memory:
-				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name and array[2] == attacker.UniqChar.NAME:
+				if array[0] == hit_data[Em.hit.ATKER_ID] and array[1] == root_move_name and array[2] == attacker.UniqChar.CHAR_REF:
 					if !hit_data[Em.hit.REPEAT]:
 						hit_data[Em.hit.REPEAT] = true # found a repeat
 	#						if (hit_data[Em.hit.MOVE_DATA][Em.move.ATK_TYPE] in [Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER] or \
@@ -2690,7 +2690,7 @@ func being_hit(hit_data): # called by main game node when taking a hit
 						
 			# add to repeat memory
 			if !double_repeat and !Em.hit.MULTIHIT in hit_data: # for multi-hit move, only the last hit add to repeat_memory
-				repeat_memory.append([attacker.player_ID, root_move_name, attacker.UniqChar.NAME])
+				repeat_memory.append([attacker.player_ID, root_move_name, attacker.UniqChar.CHAR_REF])
 	
 	if hit_data[Em.hit.REPEAT] and !Em.atk_attr.CAN_REPEAT_ONCE in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 		hit_data[Em.hit.SINGLE_REPEAT] = true
@@ -3252,7 +3252,8 @@ func being_hit(hit_data): # called by main game node when taking a hit
 				else:
 					wall_slammed = Em.wall_slam.CANNOT_SLAM
 			
-			hit_data[Em.hit.KB] += LAUNCH_BOOST
+			if !proj_on_hitstop_no_kb:
+				hit_data[Em.hit.KB] += LAUNCH_BOOST
 			var segment = Globals.split_angle(hit_data[Em.hit.KB_ANGLE], Em.angle_split.EIGHT, dir_to_attacker)
 			match segment:
 				Em.compass.N:

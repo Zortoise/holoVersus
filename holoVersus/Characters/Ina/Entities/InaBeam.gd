@@ -49,7 +49,7 @@ const MOVE_DATABASE = {
 		Em.move.ATK_TYPE : Em.atk_type.EX_ENTITY,
 		Em.move.HITCOUNT : 1,
 		Em.move.DMG : 30,
-		Em.move.KB : 700 * FMath.S,
+		Em.move.KB : 800 * FMath.S,
 		Em.move.KB_TYPE: Em.knockback_type.FIXED,
 		Em.move.ATK_LVL : 3,
 		Em.move.FIXED_HITSTOP : 7,
