@@ -1216,7 +1216,7 @@ func get_stat(stat):
 	
 	if stat in self:
 		to_return = get(stat)
-	elif stat in UniqChar:
+	else:
 		to_return = UniqChar.get_stat(stat)
 		
 	if stat == "SPEED": to_return = FMath.percent(to_return, get_stat("SPEED_MOD"))
@@ -1390,6 +1390,14 @@ func loot_drop():
 # BOUNCE --------------------------------------------------------------------------------------------------	
 
 func bounce(against_ground: bool):
+	
+	if against_ground:
+		velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
+		if abs(velocity_previous_frame.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
+			bounce_dust(Em.compass.S)
+			play_audio("rock3", {"vol" : -10,})
+		return
+	
 	var soft_dbox = get_soft_dbox(get_collision_box())
 # warning-ignore:narrowing_conversion
 	if is_against_wall(sign(velocity_previous_frame.x), soft_dbox):
@@ -1490,12 +1498,6 @@ func bounce(against_ground: bool):
 			bounce_dust(Em.compass.N)
 			play_audio("rock3", {"vol" : -10,})
 			
-				
-	elif against_ground:
-		velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
-		if abs(velocity_previous_frame.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
-			bounce_dust(Em.compass.S)
-			play_audio("rock3", {"vol" : -10,})
 			
 			
 func wall_slam(vel) -> int:
@@ -3330,6 +3332,15 @@ func being_hit(hit_data): # called by main game node when taking a hit
 #	if !no_impact_and_vel_change and !proj_on_hitstop_no_kb:
 	velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
 	velocity.rotate(hit_data[Em.hit.KB_ANGLE])
+	
+	# for downward flinch hitstun, bounce back up
+	if new_state == Em.char_state.GRD_FLINCH_HITSTUN and velocity.y > 0:
+		if Animator.query_to_play(["FlinchAStop"]):
+			animate("aFlinchAStop")
+		else:
+			animate("aFlinchBStop")
+		velocity.y = -FMath.percent(velocity.y, 75)
+		Globals.Game.spawn_SFX("BounceDust", "DustClouds", get_feet_pos(), {"grounded":true})
 	
 	if !guardbroken and grounded and !hit_data[Em.hit.LETHAL_HIT]:
 		velocity.y = 0 # set to horizontal pushback on non-guardbroken grounded defender

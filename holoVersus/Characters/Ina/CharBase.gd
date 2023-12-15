@@ -6,88 +6,29 @@ const NAME = "Ina'nis"
 const CHAR_REF = "Ina"
 const ORDER = 0
 
+const CLASS1 = Em.class1.BALANCED
+const CLASS2 = Em.class2.AERIAL
+
 # character movement stats, use to overwrite
 const SPEED = 280 * FMath.S # ground speed
-const AIR_STRAFE_SPEED_MOD = 16 # percent of ground speed
-const AIR_STRAFE_LIMIT_MOD = 700 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 700 * FMath.S
-const VAR_JUMP_TIME = 20 # frames after jumping where holding jump will reduce gravity
-const VAR_JUMP_SLOW_POINT = 5 # frames where JUMP_SLOW starts
-const DIR_JUMP_HEIGHT_MOD = 85 # % of JUMP_SPEED when jumping while holding left/right
-const HORIZ_JUMP_BOOST_MOD = 20 # % of SPEED to gain when jumping with left/right held
-const HORIZ_JUMP_SPEED_MOD = 150 # % of velocity.x to gain when jumping with left/right held
-const AIR_HORIZ_JUMP_SPEED_MOD = 125
-const HIGH_JUMP_SLOW = 10 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump held
-const SHORT_JUMP_SLOW = 20 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump unheld
-const AIR_JUMP_HEIGHT_MOD = 70 # percentage of JUMP_SPEED, reduce height of air jumps
-const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
-const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
-const WALL_AIR_JUMP_VERT_MOD = 70 # percentage of JUMP_SPEED when wall jumping
-const GRAVITY_MOD = 90 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 600 # affect terminal velocity downward
-const FASTFALL_MOD = 115 # fastfall speed, mod of terminal velocity
-const FRICTION = 7 # between 0 and 100
-const ACCELERATION = 5 # between 0 and 100
-const AIR_RESISTANCE = 3 # between 0 and 100
-const FALL_GRAV_MOD = 40 # reduced gravity when going down
 const EYE_LEVEL = 12 # number of pixels EX Flash appears above position
 
 const MAX_AIR_JUMP = 2
 const MAX_AIR_DASH = 1
-const MAX_AIR_DODGE = 1
-const MAX_SUPER_DASH = 1
+
 const GRD_DASH_SPEED = 120 * FMath.S # distance
 const AIR_DASH_SPEED = 120 * FMath.S # distance
-const SDASH_SPEED = 385 * FMath.S # super dash
-const SDASH_TURN_RATE = 6 # exact navigate speed when sdashing
-
-# fixed?
-const DODGE_RES_COST = 3000
-const DODGE_SPEED = 1000 * FMath.S
-
-# fixed?
-const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
-const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
-
-# fixed?
-#const HITSTUN_REDUCTION_AT_MAX_RES = 70 # max reduction in hitstun when defender's RES Gauge is at 200%, heavy characters have lower?
-#const KB_BOOST_AT_MAX_RES = 400 # max increase of knockback when defender's RES Gauge is at 200%, light characters have higher?
-
-const DAMAGE_VALUE_LIMIT = 1000
-const VULNERABILITY_MOD = 100
-
-const RES_REGEN_AMOUNT = 20 # exact RES regened per frame when RES < 100%
-const GRD_BLOCK_RES_COST = 15 # exact RES loss per frame when blocking on ground
-const AIR_BLOCK_RES_COST = 20 # exact RES loss per frame when blocking in air
-const CHIP_DMG_MOD = 40 # % of damage taken as chip damage when blocking
-
-# fixed?
-const BASE_EX_REGEN = 20
-const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
-const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
-const BLOCKED_EX_REGEN_MOD = 200 # increase EX Regen when doing a blocked attack
-const BLOCKING_EX_REGEN_MOD = 200 # increase EX Regen when blocking attack
-const PARRYING_EX_REGEN_MOD = 600 # increase EX Regen when parrying attack
-#const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
-#const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
-
-const ULT_GEN = 0
-#const ULT_GEN = 2000 # amount of Ulimate Gauge gain per frame
 
 const TRANSIT_SDASH = ["BlinkTransit", "EBlinkTransit"] # unique dash transits that you can quick cancel into SDash
 const TRANSIT_DODGE = ["BlinkTransit"] # unique dash transits that you can quick cancel into Dodge
 
-const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
+const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH, Em.trait.DASH_IMPULSE]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "dark_purple"
 const SDHitspark_COLOR = "dark_purple"
 
-#const PALETTE_TO_PORTRAIT = {
-#	1: Color(0.70, 0.60, 0.95),
-#	2: Color(0.86, 0.75, 0.67),
-#	3: Color(0.97, 0.78, 1.00),
-#}
 
 const PALETTE_TO_HITSPARK_PALETTE = {
 	1: "dark_purple",

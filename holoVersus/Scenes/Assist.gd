@@ -492,6 +492,14 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 # BOUNCE --------------------------------------------------------------------------------------------------	
 
 func bounce(against_ground: bool):
+	
+	if against_ground:
+		velocity.y = -FMath.percent(velocity_previous_frame.y, 50) # shorter bounce if techable
+		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
+			bounce_dust(Em.compass.S)
+			play_audio("rock3", {"vol" : -10,})
+		return
+	
 	var soft_dbox = get_soft_dbox(get_collision_box())
 # warning-ignore:narrowing_conversion
 	if is_against_wall(sign(velocity_previous_frame.x), soft_dbox):
@@ -512,12 +520,6 @@ func bounce(against_ground: bool):
 			bounce_dust(Em.compass.N)
 			play_audio("rock3", {"vol" : -10,})
 				
-				
-	elif against_ground:
-		velocity.y = -FMath.percent(velocity_previous_frame.y, 50) # shorter bounce if techable
-		if abs(velocity.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
-			bounce_dust(Em.compass.S)
-			play_audio("rock3", {"vol" : -10,})
 			
 		
 # TRUE POSITION --------------------------------------------------------------------------------------------------	
@@ -598,7 +600,7 @@ func get_stat(stat: String) -> int:
 	
 	if stat in self:
 		to_return = get(stat)
-	elif stat in UniqNPC:
+	else:
 		to_return = UniqNPC.get_stat(stat)
 				
 	return to_return

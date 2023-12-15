@@ -247,8 +247,12 @@ func unique_flash():
 # GET DATA --------------------------------------------------------------------------------------------------
 
 func get_stat(stat: String): # later can have effects that changes stats
-	var to_return = get(stat)
-
+	var to_return
+	if stat in self:
+		to_return = get(stat)
+	else:
+		to_return = StandardStats.retrieve(stat, CLASS1, CLASS2)
+	
 	return to_return
 	
 	

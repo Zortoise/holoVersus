@@ -46,6 +46,7 @@ Cards="*res://Scenes/Survival/Cards.gd"
 Inventory="*res://Scenes/Survival/Inventory.gd"
 Loader="*res://Scenes/Autoloads/Loader.gd"
 LoadAssist="*res://Scenes/Autoloads/LoadAssist.gd"
+StandardStats="*res://Scenes/Autoloads/StandardStats.gd"
 
 [display]
 

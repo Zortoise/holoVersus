@@ -7,84 +7,22 @@ const NAME = "Gura"
 const CHAR_REF = "Gura"
 const ORDER = 1
 
+const CLASS1 = Em.class1.SWIFT
+const CLASS2 = Em.class2.BALANCED
+
 # character movement stats, use to overwrite
 const SPEED = 330 * FMath.S # ground speed
-#const AWAY_SPEED_MOD = 75 # % of ground speed when moving away from opponent, may not have this const
-const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
-const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
 const JUMP_SPEED = 900 * FMath.S
-const VAR_JUMP_TIME = 10 # frames after jumping where holding jump will reduce gravity
-const VAR_JUMP_SLOW_POINT = 5 # frames where JUMP_SLOW starts
-#const JUMP_HORIZONTAL_SPEED = 110 * FMath.S
-const DIR_JUMP_HEIGHT_MOD = 85 # % of JUMP_SPEED when jumping while holding left/right
-const HORIZ_JUMP_BOOST_MOD = 20 # % of SPEED to gain when jumping with left/right held
-const HORIZ_JUMP_SPEED_MOD = 150 # % of velocity.x to gain when jumping with left/right held
-const AIR_HORIZ_JUMP_SPEED_MOD = 125
-const HIGH_JUMP_SLOW = 10 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump held
-const SHORT_JUMP_SLOW = 20 # slow down velocity.y to PEAK_DAMPER_LIMIT when jumping with up/jump unheld
-const AIR_JUMP_HEIGHT_MOD = 90 # percentage of JUMP_SPEED, reduce height of air jumps
-const REVERSE_AIR_JUMP_MOD = 70 # percentage of SPEED when air jumping backwards
-const WALL_AIR_JUMP_HORIZ_MOD = 150 # percentage of SPEED when wall jumping
-const WALL_AIR_JUMP_VERT_MOD = 100 # percentage of JUMP_SPEED when wall jumping
-const GRAVITY_MOD = 100 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 800 # affect terminal velocity downward
-const FASTFALL_MOD = 100 # fastfall speed, mod of terminal velocity
-const FRICTION = 15 # between 0 and 100
-const ACCELERATION = 20 # between 0 and 100
-const AIR_RESISTANCE = 3 # between 0 and 100
-const FALL_GRAV_MOD = 100 # reduced gravity when going down
 const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 
 const MAX_AIR_JUMP = 1
 const MAX_AIR_DASH = 2
-const MAX_AIR_DODGE = 1
-const MAX_SUPER_DASH = 1
-const GRD_DASH_SPEED = 500 * FMath.S # duration in animation data
-const AIR_DASH_SPEED = 400 * FMath.S # duration in animation data
-const SDASH_SPEED = 450 * FMath.S # super dash
-const SDASH_TURN_RATE = 5 # exact navigate speed when sdashing
-const DODGE_RES_COST = 3000
-const DODGE_SPEED = 1000 * FMath.S
-
-const IMPULSE_MOD = 150 # multiply by SPEED to get impulse velocity
-const WAVE_DASH_SPEED_MOD = 110 # affect speed of wavelanding, multiplied by GRD_DASH_SPEED
-
-#const HITSTUN_REDUCTION_AT_MAX_RES = 70 # max reduction in hitstun when defender's RES Gauge is at 200%, heavy characters have lower
-#const KB_BOOST_AT_MAX_RES = 400 # max increase of knockback when defender's RES Gauge is at 200%, light characters have higher
-
-const DAMAGE_VALUE_LIMIT = 1000
-const VULNERABILITY_MOD = 110 # multiply most taken damage
-
-const RES_REGEN_AMOUNT = 15 # exact RES regened per frame when RES < 100%
-const GRD_BLOCK_RES_COST = 17 # exact RES loss per frame when blocking on ground
-const AIR_BLOCK_RES_COST = 25 # exact RES loss per frame when blocking in air
-const CHIP_DMG_MOD = 50 # % of damage taken as chip damage when blocking
-
-const BASE_EX_REGEN = 20
-const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
-const LANDED_EX_REGEN_MOD = 600 # increase EX Regen when doing an unblocked attack
-const BLOCKED_EX_REGEN_MOD = 200 # increase EX Regen when doing a blocked attack
-const BLOCKING_EX_REGEN_MOD = 200 # increase EX Regen when blocking attack
-const PARRYING_EX_REGEN_MOD = 600 # increase EX Regen when parrying attack
-#const ATTACK_EX_REGEN_MOD = 200 # increase EX Regen when doing a physical attack, even on whiff
-#const NON_ATTACK_EX_REGEN_MOD = 50 # reduce EX Regen when using a non-attack like projectile
-
-const ULT_GEN = 0
-#const ULT_GEN = 2000 # amount of Ulimate Gauge gain per frame
 
 const TRAITS = [Em.trait.VULN_GRD_DASH, Em.trait.VULN_AIR_DASH]
 
 const DEFAULT_HITSPARK_TYPE = Em.hitspark_type.HIT
 const DEFAULT_HITSPARK_PALETTE = "blue"
 const SDHitspark_COLOR = "blue"
-
-#const PALETTE_TO_PORTRAIT = {
-#	1: Color(0.75, 0.93, 1.25),
-#	2: Color(1.20, 0.70, 0.70),
-#	3: Color(0.75, 0.90, 0.70),
-#	4: Color(1.00, 1.00, 1.10),
-#	5: Color(0.50, 0.90, 1.00),
-#}
 
 const PALETTE_TO_HITSPARK_PALETTE = {
 	3: "green",

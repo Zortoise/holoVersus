@@ -31,16 +31,11 @@ var uniqueHUD
 
 const NAME = "Gura"
 
+const CLASS1 = Em.class1.SWIFT
+const CLASS2 = Em.class2.BALANCED
+
 # Character movement stats, use to overwrite
 const SPEED = 330 * FMath.S # ground speed
-const AIR_STRAFE_SPEED_MOD = 10 # percent of ground speed
-const AIR_STRAFE_LIMIT_MOD = 800 # speed limit of air strafing, limit depends on calculated air strafe speed
-const GRAVITY_MOD = 100 # make sure variable's a float
-const TERMINAL_VELOCITY_MOD = 800 # affect terminal velocity downward
-const FRICTION = 15 # between 0.0 and 1.0
-const ACCELERATION = 15 # between 0.0 and 1.0
-const AIR_RESISTANCE = 3 # between 0.0 and 1.0
-const FALL_GRAV_MOD = 100 # reduced gravity when going down
 const EYE_LEVEL = 9 # number of pixels EX Flash appears above position
 
 const KB_BOOST_AT_MAX_RES = 200 # max increase of knockback when Character's RES Gauge is at 100%, light Characters have higher
@@ -1344,8 +1339,11 @@ func filter(atk_range: int):
 
 
 func get_stat(stat: String): # later can have effects that changes stats
-	
-	var to_return = get(stat)
+	var to_return
+	if stat in self:
+		to_return = get(stat)
+	else:
+		to_return = StandardStats.retrieve(stat, CLASS1, CLASS2)
 	
 	return to_return
 	

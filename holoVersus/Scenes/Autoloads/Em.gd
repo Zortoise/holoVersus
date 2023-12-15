@@ -2,6 +2,10 @@ extends Node
 
 # holds all cross-nodes enumerations
 
+enum class_type {class1, class2}
+enum class1 {TANK, BALANCED, SWIFT}
+enum class2 {GROUNDED, BALANCED, AERIAL}
+
 enum detect {SOLID, CSOLID, PASS_SIDE, SOFT, SEMISOLIDWALLS, BLASTWALLS, BLASTCEILING, PLAYERS, MOBS}
 enum char_state {DEAD, GRD_STANDBY, AIR_STANDBY, GRD_STARTUP, GRD_ACTIVE, GRD_REC,
 		GRD_C_REC, GRD_D_REC, AIR_STARTUP, AIR_ACTIVE, AIR_REC, AIR_C_REC, AIR_D_REC, GRD_FLINCH_HITSTUN,

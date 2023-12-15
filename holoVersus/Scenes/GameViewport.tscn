@@ -3768,6 +3768,7 @@ text = "8888"
 position = Vector2( 240, 966 )
 
 [node name="Back" type="Sprite" parent="HUD/P1_HUDRect/GaugesUnder"]
+modulate = Color( 0.87451, 0.87451, 0.87451, 1 )
 position = Vector2( -1, 0 )
 texture = ExtResource( 7 )
 
@@ -4056,6 +4057,7 @@ text = "8888"
 position = Vector2( 240, 966 )
 
 [node name="Back" type="Sprite" parent="HUD/P2_HUDRect/GaugesUnder"]
+modulate = Color( 0.87451, 0.87451, 0.87451, 1 )
 position = Vector2( -1, 0 )
 texture = ExtResource( 7 )
 

@@ -5,8 +5,9 @@
 [resource]
 script = ExtResource( 1 )
 data = {
-"name": "holoVersus - Gura's Theme",
-"artist": "Zortoise",
-"loop_end": 164.57,
-"vol": -7
+"name": "Gawr-Gura-Reflect-Remix",
+"artist": "Original Kyle",
+"loop_start": 17.888,
+"loop_end": 184.845,
+"vol": -6
 }

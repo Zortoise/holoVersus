@@ -303,6 +303,7 @@ var wall_slammed = Em.wall_slam.CANNOT_SLAM
 var delayed_hit_effect := [] # store things like Em.hit.SWEETSPOTTED and Em.hit.PUNISH_HIT for autochain and multi-hit moves
 var gravity_frame_mod := 100 # modify gravity this frame
 var js_cancel_target = Em.js_cancel_target.ALL # set to certain enums when jump cancelling, decide which moves can be quick canceled from jumpsquat
+var js_dash_cancellable := true # set to false when jump cancelling dash, cannot cancel jumpsquat into another dash
 var assist_active := false # true if assist is not active
 var assist_rescue_protect := false # set to true if hit by assist rescue till you recover, reduce damage and hitstun of assist moves
 var assist_fever := false # true if an assist land an unblocked hit on a hitstunned opponent, last till targeted opponent recovers
@@ -998,6 +999,17 @@ func simulate2(): # only ran if not in hitstop
 					js_cancel_target = Em.js_cancel_target.ALL
 			_:
 				js_cancel_target = Em.js_cancel_target.ALL
+				
+	if !js_dash_cancellable:
+		match state:
+			Em.char_state.GRD_STARTUP:
+				if !Animator.query_current(["JumpTransit"]):
+					js_dash_cancellable = true
+			Em.char_state.AIR_STARTUP:
+				if !Animator.query_current(["aJumpTransit"]):
+					js_dash_cancellable = true
+			_:
+				js_dash_cancellable = true
 		
 #	if is_on_ground($SoftPlatformDBox):
 #		grounded = true
@@ -1229,7 +1241,7 @@ func simulate2(): # only ran if not in hitstop
 		if Globals.training_settings.regen == 1 and !$TrainingRegenTimer.is_running() and current_damage_value > 0:
 			take_damage(-30) # regen damage
 		if current_ult_gauge < MAX_ULT_GAUGE:
-			change_ult_gauge(UniqChar.ULT_GEN * 100)
+			change_ult_gauge(get_stat("ULT_GEN") * 100)
 		
 
 	# EX lock degen	
@@ -2175,7 +2187,6 @@ func simulate2(): # only ran if not in hitstop
 				elif new_state == Em.char_state.LAUNCHED_HITSTUN:
 					bounce(results[0])
 			
-			
 	# get overlapping characters, all grounded overlapping characters above you get sent to the back
 	var overlapping = Detection.detect_return([$PlayerCollisionBox], ["Players"])
 	if overlapping.size() > 0:
@@ -2304,6 +2315,17 @@ func simulate_after(): # called by game scene after hit detection to finish up t
 # BOUNCE --------------------------------------------------------------------------------------------------	
 
 func bounce(against_ground: bool):
+	
+	if against_ground:
+		if $HitStunTimer.is_running():
+			velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
+		else:
+			velocity.y = -FMath.percent(velocity_previous_frame.y, 50) # shorter bounce if techable
+		if abs(velocity_previous_frame.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
+			bounce_dust(Em.compass.S)
+			play_audio("rock3", {"vol" : -10,})
+		return
+	
 	var soft_dbox = get_soft_dbox(get_collision_box())
 # warning-ignore:narrowing_conversion
 	if is_against_wall(sign(velocity_previous_frame.x), soft_dbox):
@@ -2431,15 +2453,6 @@ func bounce(against_ground: bool):
 			bounce_dust(Em.compass.N)
 			play_audio("rock3", {"vol" : -10,})
 				
-				
-	elif against_ground:
-		if $HitStunTimer.is_running():
-			velocity.y = -FMath.percent(velocity_previous_frame.y, 90)
-		else:
-			velocity.y = -FMath.percent(velocity_previous_frame.y, 50) # shorter bounce if techable
-		if abs(velocity_previous_frame.y) > WALL_SLAM_THRESHOLD: # release bounce dust if fast enough towards ground
-			bounce_dust(Em.compass.S)
-			play_audio("rock3", {"vol" : -10,})
 			
 			
 func wall_slam(vel) -> int:
@@ -3014,6 +3027,7 @@ func process_input_buffer():
 									continue # some special dash can be cancelled by down + jump
 #								elif !has_trait(Em.trait.GRD_DASH_JUMP):
 #									continue # some characters can jump while dashing
+								js_dash_cancellable = false
 									
 							elif new_state == Em.char_state.GRD_STARTUP:
 								if Animator.time > 1: # can only jump cancel first frame of dash startup
@@ -3071,6 +3085,7 @@ func process_input_buffer():
 									continue # some special dash can be cancelled by down + jump
 #								elif !has_trait(Em.trait.AIR_DASH_JUMP):
 #									continue # some characters can jump while dashing
+								js_dash_cancellable = false
 							
 #							if Settings.dj_fastfall[player_ID] == 1 and button_down in input_state.pressed:
 #								continue
@@ -3610,7 +3625,7 @@ func get_stat(stat: String) -> int:
 	
 	if stat in self:
 		to_return = get(stat)
-	elif stat in UniqChar:
+	else:
 		to_return = UniqChar.get_stat(stat)
 		
 	if Globals.survival_level != null:
@@ -4115,11 +4130,12 @@ func on_kill():
 #				if opponent.burst_token == Em.burst.EXHAUSTED:
 #					opponent.change_burst_token(Em.burst.AVAILABLE) # your targeted opponent gain burst token if exhausted
 				
-				if opponent.current_damage_value > opponent.UniqChar.DAMAGE_VALUE_LIMIT: # heal off any negative HP
-					opponent.current_damage_value = opponent.UniqChar.DAMAGE_VALUE_LIMIT
+				var opp_dmg_val_limit = opponent.get_stat("DAMAGE_VALUE_LIMIT")
+				if opponent.current_damage_value > opp_dmg_val_limit: # heal off any negative HP on opponent
+					opponent.current_damage_value = opp_dmg_val_limit
 				
-				if current_damage_value > UniqChar.DAMAGE_VALUE_LIMIT: # targeted opponent heals Damage Value equal to double overkill damage
-					opponent.take_damage(-FMath.percent(current_damage_value - UniqChar.DAMAGE_VALUE_LIMIT, 200))
+				if current_damage_value > get_stat("DAMAGE_VALUE_LIMIT"): # targeted opponent heals Damage Value equal to double overkill damage
+					opponent.take_damage(-FMath.percent(current_damage_value - get_stat("DAMAGE_VALUE_LIMIT"), 200))
 					
 				Globals.Game.damage_update(opponent)
 
@@ -7872,6 +7888,16 @@ func being_hit(hit_data): # called by main game node when taking a hit
 	velocity.set_vector(hit_data[Em.hit.KB], 0)  # reset momentum
 	velocity.rotate(hit_data[Em.hit.KB_ANGLE])
 	
+	# for downward flinch hitstun, bounce back up
+	if new_state == Em.char_state.GRD_FLINCH_HITSTUN and velocity.y > 0:
+		if Animator.query_to_play(["FlinchAStop"]):
+			animate("aFlinchAStop")
+		else:
+			animate("aFlinchBStop")
+		velocity.y = -FMath.percent(velocity.y, 75)
+		Globals.Game.spawn_SFX("BounceDust", "DustClouds", get_feet_pos(), {"grounded":true})
+			
+	
 	if hit_data[Em.hit.BLOCK_STATE] != Em.block_state.UNBLOCKED and grounded:
 		velocity.y = 0 # set to horizontal pushback on blocking defender
 		
@@ -9654,6 +9680,7 @@ func save_state():
 		"delayed_hit_effect" : delayed_hit_effect,
 		"gravity_frame_mod" : gravity_frame_mod,
 		"js_cancel_target" : js_cancel_target,
+		"js_dash_cancellable" : js_dash_cancellable,
 		"assist_rescue_protect" : assist_rescue_protect,
 		"assist_fever" : assist_fever,
 		"sdash_points" : sdash_points,
@@ -9776,6 +9803,7 @@ func load_state(state_data, command_rewind := false):
 	delayed_hit_effect = state_data.delayed_hit_effect
 	gravity_frame_mod = state_data.gravity_frame_mod
 	js_cancel_target = state_data.js_cancel_target
+	js_dash_cancellable = state_data.js_dash_cancellable
 	assist_rescue_protect = state_data.assist_rescue_protect
 	assist_fever = state_data.assist_fever
 	sdash_points = state_data.sdash_points
