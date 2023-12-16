@@ -111,7 +111,7 @@ const RESIST_ATKER_PUSHBACK = 300 * FMath.S # how much the attacker is pushed aw
 
 const INIT_BLOCK_MUL = 80 # multiplier to RES cost of starting a block, not a mod!
 
-const SPECIAL_RES_DRAIN_MOD = 50 # extra RES_Drain when blocking heavy/special/ex moves, for Survival Mode!
+const SPECIAL_RES_DRAIN_MOD = 50 # RES_Drain when blocking heavy/special/ex moves, for Survival Mode!
 #const SPECIAL_BLOCK_KNOCKBACK_MOD = 200 # extra KB when blocking heavy/special/ex/super moves
 #const SDASH_ARMOR_RES_DRAIN_MOD = 125 # extra RES_Drain when SDashing through projectiles
 #const SDASH_ARMOR_RES_DRAIN_MOD2 = 160 # extra RES_Drain when SDashing through level 2 projectiles
@@ -7087,17 +7087,20 @@ func being_hit(hit_data): # called by main game node when taking a hit
 			if Em.hit.NON_STRONG_PROJ in hit_data and Animator.query_to_play(["SDash"]):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
+				hit_data[Em.hit.DASHED_THROUGH_PROJ] = true
 #				hit_data[Em.hit.SDASH_ARMORED] = true
 				
 		Em.char_state.GRD_D_REC:
 			if Em.hit.NON_STRONG_PROJ in hit_data and Animator.to_play_anim.begins_with("Dash"):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
+				hit_data[Em.hit.DASHED_THROUGH_PROJ] = true
 				
 		Em.char_state.AIR_D_REC:
 			if Em.hit.NON_STRONG_PROJ in hit_data and Animator.to_play_anim.begins_with("aDash"):
 				hit_data[Em.hit.BLOCK_STATE] = Em.block_state.BLOCKED
 				hit_data[Em.hit.SUPERARMORED] = true
+				hit_data[Em.hit.DASHED_THROUGH_PROJ] = true
 			
 	# passive armor
 	if hit_data[Em.hit.BLOCK_STATE] == Em.block_state.UNBLOCKED and !is_hitstunned_or_sequenced() and !is_blocking():
@@ -8045,7 +8048,7 @@ func calculate_damage(hit_data) -> int:
 #				scaled_damage = FMath.percent(scaled_damage, SUPERARMOR_CHIP_DMG_MOD)
 #			else:
 			scaled_damage = FMath.percent(scaled_damage, get_stat("CHIP_DMG_MOD"))
-			if Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
+			if get_res_gauge_percent_below() == 0 or Em.atk_attr.CHIPPER in hit_data[Em.hit.MOVE_DATA][Em.move.ATK_ATTR]:
 				scaled_damage += hit_data[Em.hit.MOVE_DATA][Em.move.DMG] * FMath.S
 		else:
 			return 0
@@ -8128,8 +8131,8 @@ func calculate_res_gauge_change(hit_data) -> int:
 				
 			if !Em.hit.SUPERARMORED in hit_data: # blocking attacks without superarmor will not drain RES
 				return 0
-#			elif Em.hit.ENTITY_PATH in hit_data: # armoring through projectiles drain more RES
-#				res_drain = FMath.percent(res_drain, PROJ_ARMOR_RES_DRAIN_MOD)
+			elif Em.hit.DASHED_THROUGH_PROJ in hit_data: # armoring through projectiles drain more RES
+				res_drain = FMath.percent(res_drain, get_stat("PROJ_ARMOR_RES_DRAIN_MOD"))
 #				if Em.move.PROJ_LVL in hit_data[Em.hit.MOVE_DATA] and hit_data[Em.hit.MOVE_DATA][Em.move.PROJ_LVL] > 1:
 #					res_drain = FMath.percent(res_drain, SDASH_ARMOR_RES_DRAIN_MOD2) # super dashing through level 2 projectiles drain more
 #

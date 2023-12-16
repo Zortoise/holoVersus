@@ -438,7 +438,7 @@ func capture_instant_actions():
 	Character.combination(Character.button_unique, Character.button_fierce, "GroundFinTrigger", false, true)
 #	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", "BitemarkTriggerU")
 #	Character.instant_action_tilt_combination(Character.button_light, "BitemarkTrigger", "BitemarkTriggerD", null)
-	Character.combination(Character.button_unique, Character.button_light, "BitemarkTrigger", false, true)
+#	Character.combination(Character.button_unique, Character.button_light, "BitemarkTrigger", false, true)
 
 
 func process_instant_actions():
@@ -471,22 +471,22 @@ func process_instant_actions():
 #					Character.unique_data.nibbler_count -= 1
 #					update_uniqueHUD()
 						
-		if "BitemarkTrigger" in Character.instant_actions and Character.get_target() != Character:
-			if Character.unique_data.nibbler_count > 0:
-#				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
-#				spawn_point.x = round(spawn_point.x)
-#				spawn_point.y = round(spawn_point.y)
-				var target_pos = Character.get_target().position
-				var spawn_point = FMath.find_center([target_pos, Character.position], Character.facing)
-				spawn_point = FMath.find_center([target_pos, spawn_point], Character.facing)
-				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 315), Vector2(10, 650), 1)
-				if spawn_point == null: # if no ground found below, check above a little
-					spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
-				if spawn_point != null:
-					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
-					Character.play_audio("water15", {})
-					Character.unique_data.nibbler_count -= 1
-					update_uniqueHUD()
+#		if "BitemarkTrigger" in Character.instant_actions and Character.get_target() != Character:
+#			if Character.unique_data.nibbler_count > 0:
+##				var spawn_point = (get_node(Character.targeted_opponent_path).position + Character.position) * 0.5
+##				spawn_point.x = round(spawn_point.x)
+##				spawn_point.y = round(spawn_point.y)
+#				var target_pos = Character.get_target().position
+#				var spawn_point = FMath.find_center([target_pos, Character.position], Character.facing)
+#				spawn_point = FMath.find_center([target_pos, spawn_point], Character.facing)
+#				spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 315), Vector2(10, 650), 1)
+#				if spawn_point == null: # if no ground found below, check above a little
+#					spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
+#				if spawn_point != null:
+#					Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
+#					Character.play_audio("water15", {})
+#					Character.unique_data.nibbler_count -= 1
+#					update_uniqueHUD()
 
 
 # INPUT BUFFER --------------------------------------------------------------------------------------------------
@@ -918,22 +918,18 @@ func process_move(new_state, attack_ref: String, has_acted: Array): # return tru
 func update_uniqueHUD():
 	match Character.unique_data.nibbler_count:
 		0:
-			uniqueHUD.get_node("Back").hide()
 			uniqueHUD.get_node("Bitemark1").hide()
 			uniqueHUD.get_node("Bitemark2").hide()
 			uniqueHUD.get_node("Bitemark3").hide()
 		1:
-			uniqueHUD.get_node("Back").show()
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").hide()
 			uniqueHUD.get_node("Bitemark3").hide()
 		2:
-			uniqueHUD.get_node("Back").show()
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").show()
 			uniqueHUD.get_node("Bitemark3").hide()
 		3:
-			uniqueHUD.get_node("Back").show()
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").show()
 			uniqueHUD.get_node("Bitemark3").show()
@@ -1523,6 +1519,22 @@ func get_closest_ground_fin():
 	else:
 		return null
 		
+		
+func spawn_nibbler():
+	var target = Character.get_target()
+	if target == Character: return
+	
+	var spawn_point = FMath.find_center([target.position, Character.position], Character.facing)
+	spawn_point = FMath.find_center([target.position, spawn_point], Character.facing)
+	spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 315), Vector2(10, 650), 1)
+	if spawn_point == null: # if no ground found below, check above a little
+		spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)
+	if spawn_point != null:
+		Globals.Game.spawn_entity(Character.player_ID, "NibblerSpawn", spawn_point, {}, Character.palette_number, NAME)
+		Character.play_audio("water15", {})
+		Character.unique_data.nibbler_count -= 1
+		update_uniqueHUD()
+		
 			
 func test_nostos(): # to determine if move is usable
 	if Character.unique_data.last_trident == null: return false
@@ -2101,6 +2113,11 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			
 
 func _on_SpritePlayer_anim_started(anim_name):
+
+	if Character.is_atk_startup() and Character.unique_data.nibbler_count > 0:
+		var move_name = anim_name.trim_suffix("Startup")
+		if move_name in STARTERS:
+			spawn_nibbler()
 
 	match anim_name:
 		"Run":

@@ -49,6 +49,7 @@ const RES_REGEN_AMOUNT = [Em.class_type.class1, 25, 20, 15] # exact RES regened 
 const GRD_BLOCK_RES_COST = [Em.class_type.class1, 13, 15, 17] # exact RES loss per frame when blocking on ground
 const AIR_BLOCK_RES_COST = [Em.class_type.class1, 18, 20, 25] # exact RES loss per frame when blocking in air
 const CHIP_DMG_MOD = [Em.class_type.class1, 20, 40, 50] # % of damage taken as chip damage when blocking
+const PROJ_ARMOR_RES_DRAIN_MOD = [Em.class_type.class1, 300, 400, 500] # RES_Drain when armoring through projectiles
 
 const BASE_EX_REGEN = 20
 const HITSTUN_EX_REGEN_MOD = 200  # increase EX Regen during hitstun
