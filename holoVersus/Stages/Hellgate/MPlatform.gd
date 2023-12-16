@@ -18,23 +18,35 @@ func movement_pattern():
 	
 	var target_pos := FVector.new()
 	
+	var height_diff := 30
+	if posmod(Globals.Game.orig_rng_seed, 4) < 2:
+		height_diff *= -1
+		
 	match segment:
 		0:
 			target_pos.x = FMath.f_lerp_m($Waypoints/A.position.x * FMath.S, $Waypoints/B.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_out_lerp_m(0, -height_diff * FMath.S, sub_time)
 		1:
 			target_pos.x = FMath.ease_out_lerp_m($Waypoints/B.position.x * FMath.S, $Waypoints/C.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_in_lerp_m(-height_diff * FMath.S, 0, sub_time)
 		2:
 			target_pos.x = FMath.ease_in_lerp_m($Waypoints/C.position.x * FMath.S, $Waypoints/B.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_out_lerp_m(0, height_diff * FMath.S, sub_time)
 		3:
 			target_pos.x = FMath.f_lerp_m($Waypoints/B.position.x * FMath.S, $Waypoints/A.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_in_lerp_m(height_diff * FMath.S, 0, sub_time)
 		4:
 			target_pos.x = FMath.f_lerp_m($Waypoints/A.position.x * FMath.S, $Waypoints/D.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_out_lerp_m(0, -height_diff * FMath.S, sub_time)
 		5:
 			target_pos.x = FMath.ease_out_lerp_m($Waypoints/D.position.x * FMath.S, $Waypoints/E.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_in_lerp_m(-height_diff * FMath.S, 0, sub_time)
 		6:
 			target_pos.x = FMath.ease_in_lerp_m($Waypoints/E.position.x * FMath.S, $Waypoints/D.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_out_lerp_m(0, height_diff * FMath.S, sub_time)
 		7:
 			target_pos.x = FMath.f_lerp_m($Waypoints/D.position.x * FMath.S, $Waypoints/A.position.x * FMath.S, sub_time)
+			target_pos.y = FMath.ease_in_lerp_m(height_diff * FMath.S, 0, sub_time)
 			
 	if posmod(Globals.Game.orig_rng_seed, 2) != 0:
 		target_pos.x *= -1 # flip 50% of time

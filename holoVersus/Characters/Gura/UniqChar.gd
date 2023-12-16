@@ -921,18 +921,51 @@ func update_uniqueHUD():
 			uniqueHUD.get_node("Bitemark1").hide()
 			uniqueHUD.get_node("Bitemark2").hide()
 			uniqueHUD.get_node("Bitemark3").hide()
+			uniqueHUD.get_node("Bitemark4").hide()
+			uniqueHUD.get_node("Bitemark5").hide()
+			uniqueHUD.get_node("Bitemark6").hide()
 		1:
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").hide()
 			uniqueHUD.get_node("Bitemark3").hide()
+			uniqueHUD.get_node("Bitemark4").hide()
+			uniqueHUD.get_node("Bitemark5").hide()
+			uniqueHUD.get_node("Bitemark6").hide()
 		2:
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").show()
 			uniqueHUD.get_node("Bitemark3").hide()
+			uniqueHUD.get_node("Bitemark4").hide()
+			uniqueHUD.get_node("Bitemark5").hide()
+			uniqueHUD.get_node("Bitemark6").hide()
 		3:
 			uniqueHUD.get_node("Bitemark1").show()
 			uniqueHUD.get_node("Bitemark2").show()
 			uniqueHUD.get_node("Bitemark3").show()
+			uniqueHUD.get_node("Bitemark4").hide()
+			uniqueHUD.get_node("Bitemark5").hide()
+			uniqueHUD.get_node("Bitemark6").hide()
+		4:
+			uniqueHUD.get_node("Bitemark1").show()
+			uniqueHUD.get_node("Bitemark2").show()
+			uniqueHUD.get_node("Bitemark3").show()
+			uniqueHUD.get_node("Bitemark4").show()
+			uniqueHUD.get_node("Bitemark5").hide()
+			uniqueHUD.get_node("Bitemark6").hide()
+		5:
+			uniqueHUD.get_node("Bitemark1").show()
+			uniqueHUD.get_node("Bitemark2").show()
+			uniqueHUD.get_node("Bitemark3").show()
+			uniqueHUD.get_node("Bitemark4").show()
+			uniqueHUD.get_node("Bitemark5").show()
+			uniqueHUD.get_node("Bitemark6").hide()
+		6:
+			uniqueHUD.get_node("Bitemark1").show()
+			uniqueHUD.get_node("Bitemark2").show()
+			uniqueHUD.get_node("Bitemark3").show()
+			uniqueHUD.get_node("Bitemark4").show()
+			uniqueHUD.get_node("Bitemark5").show()
+			uniqueHUD.get_node("Bitemark6").show()
 			
 						
 #func consume_one_air_dash(): # different characters can have different types of air_dash consumption
@@ -1195,15 +1228,15 @@ func landed_a_hit(hit_data): # reaction, can change hit_data from here
 			
 		"aSP5", "aSP5[h]":
 			if hit_data[Em.hit.SWEETSPOTTED]:
-				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 6)
 			else:
-				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 1, 3)
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 1, 6)
 			update_uniqueHUD()
 		"aSP5b[ex]":
 			if hit_data[Em.hit.SWEETSPOTTED]:
-				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 3, 3)
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 3, 6)
 			else:
-				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 3)
+				Character.unique_data.nibbler_count = min(Character.unique_data.nibbler_count + 2, 6)
 			update_uniqueHUD()
 			
 
@@ -1474,6 +1507,12 @@ func unique_chaining_rules(move_name, attack_ref):
 						return true
 				
 	return false
+	
+	
+func wall_slammed(_slam_level):
+	Character.unique_data.nibbler_count = 0
+	update_uniqueHUD()
+	
 	
 #func get_trident_array(): # return array of all spinnable tridents
 #	var trident_array := []
@@ -2111,13 +2150,12 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"SP9dActive", "SP9d[u]Active":
 			Character.animate("SP9dRec")
 			
+	if Character.is_atk_active() and Character.unique_data.nibbler_count > 0:
+		if anim_name.ends_with("Startup"):
+			spawn_nibbler()
+			
 
 func _on_SpritePlayer_anim_started(anim_name):
-
-	if Character.is_atk_startup() and Character.unique_data.nibbler_count > 0:
-		var move_name = anim_name.trim_suffix("Startup")
-		if move_name in STARTERS:
-			spawn_nibbler()
 
 	match anim_name:
 		"Run":
