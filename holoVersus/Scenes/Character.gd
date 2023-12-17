@@ -3021,8 +3021,8 @@ func process_input_buffer():
 							if new_state == Em.char_state.GRD_D_REC:
 								if Animator.time == 0: # cannot jump cancel first frame of dash, must be moving
 									continue
-								elif UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
-									pass # some characters has certain jump cancellable d_rec
+								elif UniqChar.has_method("check_jc_d_rec") and !UniqChar.check_jc_d_rec(buffered_input[0]):
+									continue # some characters has certain non-jump cancellable d_rec
 								elif button_down in input_state.pressed:
 									continue # some special dash can be cancelled by down + jump
 #								elif !has_trait(Em.trait.GRD_DASH_JUMP):
@@ -3079,8 +3079,8 @@ func process_input_buffer():
 							if new_state == Em.char_state.AIR_D_REC:
 								if Animator.time == 0: # cannot jump cancel first frame of dash, must be moving
 									continue
-								if UniqChar.has_method("check_jc_d_rec") and UniqChar.check_jc_d_rec():
-									pass # some characters has certain jump cancellable d_rec
+								if UniqChar.has_method("check_jc_d_rec") and !UniqChar.check_jc_d_rec(buffered_input[0]):
+									continue # some characters has certain non-jump cancellable d_rec
 								elif button_down in input_state.pressed:
 									continue # some special dash can be cancelled by down + jump
 #								elif !has_trait(Em.trait.AIR_DASH_JUMP):

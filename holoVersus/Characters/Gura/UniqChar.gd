@@ -1563,8 +1563,15 @@ func spawn_nibbler():
 	var target = Character.get_target()
 	if target == Character: return
 	
-	var spawn_point = FMath.find_center([target.position, Character.position], Character.facing)
-	spawn_point = FMath.find_center([target.position, spawn_point], Character.facing)
+#	var spawn_point = FMath.find_center([target.position, Character.position], Character.facing)
+#	spawn_point = FMath.find_center([target.position, spawn_point], Character.facing)
+	var spawn_point = target.position
+	if Character.position.x == target.position.x:
+		spawn_point.x += Character.facing * 112
+	else:
+		spawn_point.x -= sign(Character.position.x - target.position.x) * 112
+	spawn_point.x = clamp(spawn_point.x, Globals.Game.left_corner, Globals.Game.right_corner)
+	
 	spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, 315), Vector2(10, 650), 1)
 	if spawn_point == null: # if no ground found below, check above a little
 		spawn_point = Detection.ground_finder(spawn_point, Character.facing, Vector2(0, -50), Vector2(10, 100), -1)

@@ -196,13 +196,16 @@ func state_detect(anim): # for unique animations, continued from state_detect() 
 		
 	print("Error: " + anim + " not found.")
 	
-func check_jc_d_rec(): # some D_REC can be jump cancelled
-	match Character.new_state:
-		Em.char_state.AIR_D_REC:
-			if Animator.query_to_play(["aBlinkRec", "aEBlinkRec"]):
-				return true
-				
-	return false
+	
+func check_jc_d_rec(button): # float cannot be jump cancelled with up
+	
+	if button == Character.button_up:
+		match Character.new_state:
+			Em.char_state.AIR_D_REC:
+				if Animator.query_to_play(["Float", "FFloatTransit", "FFloat", "FloatBrake", "FloatRec"]):
+					return false
+	return true
+		
 		
 func check_collidable():  # some characters have move that can pass through other characters
 	match Character.new_state:
