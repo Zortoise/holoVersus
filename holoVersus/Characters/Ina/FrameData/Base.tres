@@ -411,7 +411,7 @@ frame_data = {
 "timestamps": {
 0: {
 "frame": 16,
-"hurtbox": [ Vector2( -8, -10 ), Vector2( -13, -10 ), Vector2( -13, 21 ), Vector2( 5, 21 ), Vector2( 5, 15 ), Vector2( 11, 15 ), Vector2( 11, -15 ), Vector2( -8, -15 ) ]
+"hurtbox": [  ]
 },
 8: {
 "frame": 44,
@@ -421,7 +421,7 @@ frame_data = {
 "vframes": 21
 },
 "DodgeRec": {
-"duration": 16,
+"duration": 20,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -430,7 +430,7 @@ frame_data = {
 "frame": 16,
 "hurtbox": [ Vector2( -8, -10 ), Vector2( -13, -10 ), Vector2( -13, 21 ), Vector2( 5, 21 ), Vector2( 5, 15 ), Vector2( 11, 15 ), Vector2( 11, -15 ), Vector2( -8, -15 ) ]
 },
-8: {
+10: {
 "frame": 44,
 "hurtbox": [ Vector2( -13, 25 ), Vector2( 3, 25 ), Vector2( 3, 18 ), Vector2( 10, 18 ), Vector2( 10, -21 ), Vector2( -13, -21 ) ]
 }
@@ -938,7 +938,7 @@ frame_data = {
 "vframes": 21
 },
 "JumpTransit": {
-"duration": 3,
+"duration": 4,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",
@@ -1705,7 +1705,7 @@ frame_data = {
 "vframes": 21
 },
 "aJumpTransit": {
-"duration": 2,
+"duration": 3,
 "hframes": 6,
 "loop": false,
 "spritesheet": "BaseSprite",

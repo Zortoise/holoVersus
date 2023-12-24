@@ -302,8 +302,8 @@ var spent_unique := false # used a move that requires Unique to be held, releasi
 var wall_slammed = Em.wall_slam.CANNOT_SLAM
 var delayed_hit_effect := [] # store things like Em.hit.SWEETSPOTTED and Em.hit.PUNISH_HIT for autochain and multi-hit moves
 var gravity_frame_mod := 100 # modify gravity this frame
-var js_cancel_target = Em.js_cancel_target.ALL # set to certain enums when jump cancelling, decide which moves can be quick canceled from jumpsquat
-var js_dash_cancellable := true # set to false when jump cancelling dash, cannot cancel jumpsquat into another dash
+#var js_cancel_target = Em.js_cancel_target.ALL # set to certain enums when jump cancelling, decide which moves can be quick canceled from jumpsquat
+#var js_dash_cancellable := true # set to false when jump cancelling dash, cannot cancel jumpsquat into another dash
 var assist_active := false # true if assist is not active
 var assist_rescue_protect := false # set to true if hit by assist rescue till you recover, reduce damage and hitstun of assist moves
 var assist_fever := false # true if an assist land an unblocked hit on a hitstunned opponent, last till targeted opponent recovers
@@ -311,6 +311,7 @@ var sdash_points := 0 # set to duration of sdash when you begin a sdash, reduce 
 var res_seal := false # true after landing a Reinforce to prevent regening RES, false if targeted opponent is not in hitstun
 var delayed_ex_cost := [] # entry 1 is the ex cost, entry 2 is the time left
 var delayed_res_cost := [] # entry 1 is the rf cost, entry 2 is the time left
+var qc_rule := [] # can doing some cancels store the QC rule for 3 frames, entry 1 is the ex cost, entry 2 is the time left
 
 var assist_items := [] # up to 3
 
@@ -989,27 +990,32 @@ func simulate2(): # only ran if not in hitstop
 	if grounded:
 		reset_jumps()
 		
-	if js_cancel_target != Em.js_cancel_target.ALL:
-		match state: # do not use new_state!
-			Em.char_state.GRD_STARTUP:
-				if !Animator.query_current(["JumpTransit"]):
-					js_cancel_target = Em.js_cancel_target.ALL
-			Em.char_state.AIR_STARTUP:
-				if !Animator.query_current(["aJumpTransit"]):
-					js_cancel_target = Em.js_cancel_target.ALL
-			_:
-				js_cancel_target = Em.js_cancel_target.ALL
-				
-	if !js_dash_cancellable:
-		match state:
-			Em.char_state.GRD_STARTUP:
-				if !Animator.query_current(["JumpTransit"]):
-					js_dash_cancellable = true
-			Em.char_state.AIR_STARTUP:
-				if !Animator.query_current(["aJumpTransit"]):
-					js_dash_cancellable = true
-			_:
-				js_dash_cancellable = true
+	if qc_rule.size() > 0:
+		qc_rule[1] -= 1
+		if qc_rule[1] <= 0:
+			qc_rule = []
+		
+#	if js_cancel_target != Em.js_cancel_target.ALL:
+#		match state: # do not use new_state!
+#			Em.char_state.GRD_STARTUP:
+#				if !Animator.query_current(["JumpTransit"]):
+#					js_cancel_target = Em.js_cancel_target.ALL
+#			Em.char_state.AIR_STARTUP:
+#				if !Animator.query_current(["aJumpTransit"]):
+#					js_cancel_target = Em.js_cancel_target.ALL
+#			_:
+#				js_cancel_target = Em.js_cancel_target.ALL
+#
+#	if !js_dash_cancellable:
+#		match state:
+#			Em.char_state.GRD_STARTUP:
+#				if !Animator.query_current(["JumpTransit"]):
+#					js_dash_cancellable = true
+#			Em.char_state.AIR_STARTUP:
+#				if !Animator.query_current(["aJumpTransit"]):
+#					js_dash_cancellable = true
+#			_:
+#				js_dash_cancellable = true
 		
 #	if is_on_ground($SoftPlatformDBox):
 #		grounded = true
@@ -1999,7 +2005,7 @@ func simulate2(): # only ran if not in hitstop
 					change_res_gauge(get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 #			elif !success_block:
 #			if !$SBlockTimer.is_running():
-			change_res_gauge(-get_stat("GRD_BLOCK_RES_COST"))
+			change_res_gauge(-get_stat("GRD_BLOCK_RES_COST"), true)
 			if current_res_gauge <= RES_GAUGE_FLOOR:
 				animate("BlockRec")
 				if success_block != Em.success_block.NONE: # refund cost
@@ -2019,7 +2025,7 @@ func simulate2(): # only ran if not in hitstop
 					change_res_gauge(get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 #			elif !success_block:
 #			if !$SBlockTimer.is_running():
-			change_res_gauge(-get_stat("AIR_BLOCK_RES_COST"))
+			change_res_gauge(-get_stat("AIR_BLOCK_RES_COST"), true)
 			if current_res_gauge <= RES_GAUGE_FLOOR:
 				animate("aBlockRec")
 				if success_block != Em.success_block.NONE: # refund cost
@@ -3027,7 +3033,11 @@ func process_input_buffer():
 									continue # some special dash can be cancelled by down + jump
 #								elif !has_trait(Em.trait.GRD_DASH_JUMP):
 #									continue # some characters can jump while dashing
-								js_dash_cancellable = false
+								qc_rule = [Em.qc_rule.FROM_DASH, 5]
+							
+							elif new_state == Em.char_state.GRD_C_REC:
+								if Animator.query_to_play(["DashBrake", "WaveDashBrake"]):
+									qc_rule = [Em.qc_rule.FROM_DASH, 5]
 									
 							elif new_state == Em.char_state.GRD_STARTUP:
 								if Animator.time > 1: # can only jump cancel first frame of dash startup
@@ -3085,7 +3095,11 @@ func process_input_buffer():
 									continue # some special dash can be cancelled by down + jump
 #								elif !has_trait(Em.trait.AIR_DASH_JUMP):
 #									continue # some characters can jump while dashing
-								js_dash_cancellable = false
+								qc_rule = [Em.qc_rule.FROM_DASH, 5]
+							
+							elif new_state == Em.char_state.AIR_C_REC:
+								if Animator.query_to_play(["aDashBrake"]):
+									qc_rule = [Em.qc_rule.FROM_DASH, 5]
 							
 #							if Settings.dj_fastfall[player_ID] == 1 and button_down in input_state.pressed:
 #								continue
@@ -5440,11 +5454,14 @@ func dodge_check(from_block_rec := false):
 	return true
 	
 func perfect_dodge(): # called from Game.gd
-	if new_state == Em.char_state.AIR_REC and Animator.query_to_play(["DodgeTransit", "Dodge"]):
+	if !success_dodge and new_state == Em.char_state.AIR_REC and Animator.query_to_play(["DodgeTransit", "Dodge"]):
+		
+		Globals.Game.spawn_SFX("SmallFlash", "Shines", position - Vector2(0, get_stat("EYE_LEVEL")), {}, "white")
+		
 		success_dodge = true
 		
-	if UniqChar.has_method("perfect_dodge"):
-		UniqChar.perfect_dodge()
+		if UniqChar.has_method("perfect_dodge"):
+			UniqChar.perfect_dodge()
 #		if Globals.survival_level != null:
 #			p_dodge_enhance()
 	
@@ -5570,19 +5587,33 @@ func burst_escape_check() -> bool: # check if have resources to do it, then take
 #	afterimage_cancel()
 #	return true
 
-# when jump cancelling, only certain attacks can be chained from it
-func test_jumpsquat_cancel(attack_ref: String):
-	match js_cancel_target:
-		Em.js_cancel_target.ALL:
-			return true
-		Em.js_cancel_target.NONE:
+# when jump cancelling, only certain attacks can be chained from the jumpsquat
+func test_jumpsquat_cancel(attack_ref: String) -> bool:
+	if qc_rule.size() == 0: return true
+	match qc_rule[0]:
+		Em.qc_rule.NONE: # for jump cancelling on whiff, cannot cancel jumpsquat into any attack
 			return false
-		Em.js_cancel_target.SPECIALS:
+		Em.qc_rule.SPECIALS: # for jump cancelling after a Heavy, can only cancel jumpsquat into Specials/EX
 			var move_data = query_move_data(attack_ref)
 			match move_data[Em.move.ATK_TYPE]:
 				Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER:
 					return true
+		_:
+			return true
+			
 	return false
+			
+#	match js_cancel_target:
+#		Em.js_cancel_target.ALL:
+#			return true
+#		Em.js_cancel_target.NONE:
+#			return false
+#		Em.js_cancel_target.SPECIALS:
+#			var move_data = query_move_data(attack_ref)
+#			match move_data[Em.move.ATK_TYPE]:
+#				Em.atk_type.SPECIAL, Em.atk_type.EX, Em.atk_type.SUPER:
+#					return true
+#	return false
 			
 	
 func test_jump_cancel(): # during recovery
@@ -5600,16 +5631,19 @@ func test_jump_cancel(): # during recovery
 			if !Em.atk_attr.JUMP_CANCEL_ON_WHIFF in atk_attr:
 				return false # some rare Specials can jump cancel on whiff
 			else:
-				js_cancel_target = Em.js_cancel_target.NONE
+				qc_rule = [Em.qc_rule.NONE, 5]
+#				js_cancel_target = Em.js_cancel_target.NONE
 		Em.chain_combo.NORMAL: # can only jump cancel on Normal/Heavy hit
-			js_cancel_target = Em.js_cancel_target.ALL
+			pass
 		Em.chain_combo.HEAVY:
-			js_cancel_target = Em.js_cancel_target.SPECIALS
+#			js_cancel_target = Em.js_cancel_target.SPECIALS
+			qc_rule = [Em.qc_rule.SPECIALS, 5]
 		_:
 			if !Em.atk_attr.JUMP_CANCEL_ON_HIT in atk_attr:
 				return false # some rare Specials can jump cancel on hit
 			else:
-				js_cancel_target = Em.js_cancel_target.NONE
+				qc_rule = [Em.qc_rule.NONE, 5]
+#				js_cancel_target = Em.js_cancel_target.NONE
 	
 	afterimage_cancel()
 	return true
@@ -5627,11 +5661,14 @@ func test_jump_cancel_active():
 	if active_cancel or Em.atk_attr.JUMP_CANCEL_ACTIVE in atk_attr:
 		match chain_combo:
 			Em.chain_combo.NORMAL:
-				js_cancel_target = Em.js_cancel_target.ALL
+				pass
+#				js_cancel_target = Em.js_cancel_target.ALL
 			Em.chain_combo.HEAVY:
-				js_cancel_target = Em.js_cancel_target.SPECIALS
+				qc_rule = [Em.qc_rule.SPECIALS, 5]
+#				js_cancel_target = Em.js_cancel_target.SPECIALS
 			_:
-				js_cancel_target = Em.js_cancel_target.NONE
+				qc_rule = [Em.qc_rule.NONE, 5]
+#				js_cancel_target = Em.js_cancel_target.NONE
 				
 		afterimage_cancel()
 		return true
@@ -6382,10 +6419,16 @@ func take_damage(damage: int): # called by attacker
 	if damage < 0: # for healing
 		return orig_damage_value - current_damage_value
 	
-func change_res_gauge(res_gauge_change: int): # called by attacker
+func change_res_gauge(res_gauge_change: int, keep_flow := false): # called by attacker
 	current_res_gauge += res_gauge_change
 	current_res_gauge = int(clamp(current_res_gauge, RES_GAUGE_FLOOR, RES_GAUGE_CEIL))
 	Globals.Game.res_gauge_update(self)
+	
+	if res_gauge_change < 0: # any usage of EX gauge seals it
+		res_seal = true
+		if !keep_flow:
+			remove_status_effect(Em.status_effect.POS_FLOW)
+		
 	
 func reset_res_gauge():
 	current_res_gauge = 0
@@ -8996,7 +9039,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 			animate("Launch")
 			
 		"BlockStartup":
-			change_res_gauge(-get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
+			if success_block == Em.success_block.PARRIED and $SBlockTimer.is_running():
+				change_res_gauge(-get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL, true)
+			else:
+				change_res_gauge(-get_stat("GRD_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW) # don't use status_effect_to_remove for this as this take place later
@@ -9009,7 +9055,10 @@ func _on_SpritePlayer_anim_finished(anim_name):
 		"BlockCRec":
 			animate("Idle")
 		"aBlockStartup":
-			change_res_gauge(-get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)
+			if success_block == Em.success_block.PARRIED and $SBlockTimer.is_running():
+				change_res_gauge(-get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL, true)
+			else:
+				change_res_gauge(-get_stat("AIR_BLOCK_RES_COST") * INIT_BLOCK_MUL)
 			play_audio("bling4", {"vol" : -10, "bus" : "PitchUp2"})
 #			if Globals.survival_level == null:
 #			remove_status_effect(Em.status_effect.POS_FLOW)
@@ -9313,6 +9362,8 @@ func _on_SpritePlayer_anim_started(anim_name): # DO NOT START ANY ANIMATIONS HER
 			velocity_limiter.x_slow = 10
 			velocity_limiter.y_slow = 10
 		"Dodge":
+			Globals.Game.spawn_entity(player_ID, "DodgeEcho", position, {})
+			
 			face_opponent()
 			var tech_angle: int
 			
@@ -9682,8 +9733,8 @@ func save_state():
 		"wall_slammed" : wall_slammed,
 		"delayed_hit_effect" : delayed_hit_effect,
 		"gravity_frame_mod" : gravity_frame_mod,
-		"js_cancel_target" : js_cancel_target,
-		"js_dash_cancellable" : js_dash_cancellable,
+#		"js_cancel_target" : js_cancel_target,
+#		"js_dash_cancellable" : js_dash_cancellable,
 		"assist_rescue_protect" : assist_rescue_protect,
 		"assist_fever" : assist_fever,
 		"sdash_points" : sdash_points,
@@ -9713,6 +9764,7 @@ func save_state():
 		"instant_actions" : instant_actions,
 		"delayed_ex_cost" : delayed_ex_cost,
 		"delayed_res_cost" : delayed_res_cost,
+		"qc_rule" : qc_rule,
 		
 		"sprite_scale" : sprite.scale,
 		"sprite_rotation" : sprite.rotation,
@@ -9805,8 +9857,8 @@ func load_state(state_data, command_rewind := false):
 	wall_slammed = state_data.wall_slammed
 	delayed_hit_effect = state_data.delayed_hit_effect
 	gravity_frame_mod = state_data.gravity_frame_mod
-	js_cancel_target = state_data.js_cancel_target
-	js_dash_cancellable = state_data.js_dash_cancellable
+#	js_cancel_target = state_data.js_cancel_target
+#	js_dash_cancellable = state_data.js_dash_cancellable
 	assist_rescue_protect = state_data.assist_rescue_protect
 	assist_fever = state_data.assist_fever
 	sdash_points = state_data.sdash_points
@@ -9861,6 +9913,7 @@ func load_state(state_data, command_rewind := false):
 	instant_actions = state_data.instant_actions
 	delayed_ex_cost = state_data.delayed_ex_cost
 	delayed_res_cost = state_data.delayed_res_cost
+	qc_rule = state_data.qc_rule
 		
 	sprite.scale = state_data.sprite_scale
 	sprite.rotation = state_data.sprite_rotation

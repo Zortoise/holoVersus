@@ -1,0 +1,21 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/AnimCreator/FrameData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+frame_data = {
+"Kill": {
+"duration": 6,
+"hframes": 1,
+"loop": false,
+"spritesheet": "DodgeEchoSprite",
+"timestamps": {
+0: {
+"expolygona": [ Vector2( -20, 20 ), Vector2( 20, 20 ), Vector2( 20, -20 ), Vector2( -20, -20 ) ],
+"frame": 0
+}
+},
+"vframes": 1
+}
+}

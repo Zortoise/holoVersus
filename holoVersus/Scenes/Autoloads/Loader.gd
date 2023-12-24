@@ -45,6 +45,11 @@ onready var common_entity_data = {
 		"frame_data" : load("res://Assets/Entities/FrameData/AssistSpawner.tres"),
 		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/AssistSpawnerSprite.png")
 	},
+	"DodgeEcho" : {
+		"scene" : load("res://Assets/Entities/DodgeEcho.tscn"),
+		"frame_data" : load("res://Assets/Entities/FrameData/DodgeEcho.tres"),
+		"spritesheet" : ResourceLoader.load("res://Assets/Entities/Spritesheets/DodgeEchoSprite.png")
+	},
 }
 
 var common_sfx = {}

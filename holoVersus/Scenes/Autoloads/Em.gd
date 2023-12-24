@@ -20,7 +20,12 @@ enum hitspark_type {NONE, CUSTOM, HIT, SLASH}
 enum knockback_type {FIXED, RADIAL, MIRRORED, VELOCITY}
 enum chain_combo {RESET, NO_CHAIN, WHIFF, NORMAL, HEAVY, SPECIAL, BLOCKED, PARRIED, SUPER}
 enum priority {aL, gL, aF, gF, aH, gH, aSp, gSp, aEX, gEX, aRF, gRF, SUPER}
-enum js_cancel_target {ALL, NONE, SPECIALS}
+#enum js_cancel_target {ALL, NONE, SPECIALS}
+enum qc_rule {NONE, SPECIALS, FROM_DASH, NO_MOVEMENT_OPTION}
+# NONE = cannot QC into anything, for actions that can be jump/dash cancelled on whiff
+# SPECIALS = can QC into Specials/EX only, for jump cancelling after a Heavy
+# FROM_DASH = cannot QC into another dash or into Reinforce, for jumping during a dash
+# NO_MOVEMENT_OPTION = cannot QC into dodge or super dash, for attack cancelling out of Basic Tag
 enum atk_attr {ASSIST, NO_CHAIN, ANTI_AIR, AUTOCHAIN, FOLLOW_UP, LEDGE_DROP, NO_TURN, NO_QUICK_CANCEL
 		NO_REC_CANCEL, SEMI_INVUL_STARTUP, UNBLOCKABLE, SCREEN_SHAKE, NO_IMPULSE
 		SUPERARMOR_STARTUP, SUPERARMOR_ACTIVE, P_SUPERARMOR_STARTUP, P_SUPERARMOR_ACTIVE, 

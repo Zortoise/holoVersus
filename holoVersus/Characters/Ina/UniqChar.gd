@@ -606,8 +606,8 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 						keep = false
 						
 					Em.char_state.GRD_STARTUP: # cancel start of ground jump into blink, used for up-blinks
-						if !Character.js_dash_cancellable:
-							continue
+						if Character.qc_rule.size() > 0 and Character.qc_rule[0] == Em.qc_rule.FROM_DASH:
+							continue # a jumpsquat done during dashes cannot be cancelled into dash
 						if Animator.query(["JumpTransit"]):
 							Character.animate("BlinkTransit")
 							keep = false
@@ -625,8 +625,8 @@ func process_buffered_input(new_state, buffered_input, _input_to_add, has_acted:
 							keep = false
 							
 					Em.char_state.AIR_STARTUP: # cancel start of air jump into blink, used for up-blinks
-						if !Character.js_dash_cancellable:
-							continue
+						if Character.qc_rule.size() > 0 and Character.qc_rule[0] == Em.qc_rule.FROM_DASH:
+							continue # a jumpsquat done during dashes cannot be cancelled into dash
 						if Animator.query_to_play(["aJumpTransit", "WallJumpTransit", "aJumpTransit2", "WallJumpTransit2"]):
 							if Character.check_enough_air_dashes():
 								Character.animate("BlinkTransit")
