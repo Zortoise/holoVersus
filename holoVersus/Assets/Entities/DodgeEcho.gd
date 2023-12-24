@@ -45,7 +45,7 @@ func simulate():
 			if my_rect.intersects(their_rect):
 				var intersect_polygons = Geometry.intersect_polygons_2d(their_hitbox, my_hitbox)
 				if intersect_polygons.size() > 0: # detected intersection
-					attacked()
+					attacked(character)
 					return
 					
 	var entity_array := []
@@ -70,10 +70,16 @@ func simulate():
 					attacked()
 					return
 					
-func attacked():
+					
+func attacked(attacker = null):
 	var master_node = Globals.Game.get_player_node(Entity.master_ID)
 	if master_node.has_method("perfect_dodge"): master_node.perfect_dodge()
+	
+	if attacker != null and "chain_combo" in attacker: # prevent chaining on iframed attack
+		attacker.chain_combo = Em.chain_combo.NO_CHAIN
+		
 	Entity.free = true
+	
 	
 func _on_SpritePlayer_anim_finished(_anim_name):
 	pass
